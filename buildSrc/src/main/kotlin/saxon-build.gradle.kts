@@ -62,29 +62,29 @@ tasks.register(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       if (!root.exists() && root.isDirectory()) {
         root.mkdirs()
       }
-      for (report in JavaRunner.reports) {
-        // Translate from the output path to the archive path..bleh.
-        var pos = report.indexOf("/java/")
-        var path = report.substring(pos+6)
-        val edition = if (path.startsWith("pe/")) {
-          "pej"
-        } else if (path.startsWith("he/")) {
-          "hej"
-        } else {
-          "eej"
-        }
-        pos = report.indexOf("/build/test-results/")
-        path = report.substring(pos+20)
-        
-        val outputDir = File(root, "${edition}/${version}/$path")
-        outputDir.mkdirs()
 
+      val dateStamp = extension.dateStamp.get()
+
+      var javaRoot = "${layout.buildDirectory.get()}"
+      var pos = javaRoot.indexOf("/java/")
+      javaRoot = javaRoot.substring(0, pos+6)
+
+      val relativePath = mapOf(
+          "eej" to "build/test-results/",
+          "hej" to "he/build/test-results/",
+          "pej" to "pe/build/test-results/"
+      )
+
+      for (edition in listOf("hej", "pej", "eej")) {
+        val testroot = "${javaRoot}${relativePath[edition]}"
+        val copyroot = "${archive}${edition}/${version}/"
         project.copy {
-          into(outputDir)
-          from(report)
+          into(copyroot)
+          from(testroot) {
+            include("**/${dateStamp}/**")
+          }
         }
       }
-      println("Wrote ${JavaRunner.reports.size} reports to ${archive}")
     }
   }
 }
