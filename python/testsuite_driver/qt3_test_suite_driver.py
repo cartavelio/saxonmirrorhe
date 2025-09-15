@@ -1004,7 +1004,7 @@ def main(argv):
             elif opt in ("-l", "--lang"):
                 host_lang = arg
                 spec = process_spec(arg)
-                test_report = PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version)
+                test_report = PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version[10:14])
 
     '''dir = os.getcwd()'''
     if spec is None:
