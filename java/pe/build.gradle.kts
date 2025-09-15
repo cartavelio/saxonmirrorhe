@@ -166,11 +166,10 @@ testSuites {
 }
 
 val downloadRelease = tasks.named<Zip>("downloadRelease") {
-  into(archiveBaseName) {
-    into("notices") {
-      from(layout.projectDirectory.dir("../../src/docs/notices"))
-      include("ICU-J.txt")
-    }
+  from(downloadSqlJar)
+  into("notices") {
+    from(layout.projectDirectory.dir("../../src/main/notices"))
+    include("ICU-J.txt")
   }
 }
 

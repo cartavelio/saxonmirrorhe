@@ -588,25 +588,26 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
     val releaseDocsRoot = extension.sourceRoot.dir("../../src/main")
 
     archiveBaseName = extension.edition.map { edition ->
-        val version = extension.version.get().split(".").take(2).joinToString("-")
-        "Saxon${edition.uppercase()}${version}J"
+        val parts = extension.version.get().split('.')
+        val usefulParts = if (parts.last() == "0") parts.dropLast(1) else parts
+        "Saxon${edition.uppercase()}${usefulParts.joinToString(".")}J"
     }
+
     destinationDirectory = layout.buildDirectory.dir("releases")
-    into(archiveBaseName) {
-        from(editionDownloadJarTask)
-        from(testdriverJarTask)
-        into("lib") {
-            from(downloadReleaseBundled.getIncoming().files)
-        }
-        into("doc") {
-          from(releaseDocsRoot.map { it.dir("zipdoc") }) {
-            include("**/*")
-          }
-        }
-        into("notices") {
-            from(releaseDocsRoot.map { it.dir("notices") })
-            include("JAMESCLARK.txt", "JLINE2.txt", "LICENSE.txt")
-        }
+    
+    from(editionDownloadJarTask)
+    from(testdriverJarTask)
+    into("lib") {
+      from(downloadReleaseBundled.getIncoming().files)
+    }
+    into("doc") {
+      from(releaseDocsRoot.map { it.dir("zipdoc") }) {
+        include("**/*")
+      }
+    }
+    into("notices") {
+      from(releaseDocsRoot.map { it.dir("notices") })
+      include("JAMESCLARK.txt", "JLINE2.txt", "LICENSE.txt")
     }
 }
 
