@@ -58,6 +58,9 @@ sealed interface TargetHost {
   val isX86_64: Boolean get() = false
   val isArm64: Boolean get() = false
 
+  operator fun component1() = name
+  operator fun component2() = architecture
+
   sealed class Windows(override val architecture: String) : TargetHost {
     override val name = "windows"
     override val isWindows = true
