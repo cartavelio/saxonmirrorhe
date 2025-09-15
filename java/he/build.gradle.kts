@@ -97,6 +97,15 @@ tasks.named<Jar>("editionMavenJar") {
   exclude("net/sf/saxon/option")
 }
 
+tasks.register<Zip>("source-code-release") {
+  dependsOn("compileEditionTestJava")
+  archiveBaseName = "saxon${saxonBuild.publishVersion.get().replace('.', '-')}source"
+  destinationDirectory = layout.buildDirectory.dir("source-code-release")
+  from(layout.buildDirectory.dir("src/main/java"))
+  from(layout.buildDirectory.dir("src/main/resources"))
+}
+
+
 // In principle, this should be in the samples-plugin...
 tasks.register<Copy>("copy_java_sample_sources") {
     into(layout.buildDirectory.dir("samples/src/java/main"))
