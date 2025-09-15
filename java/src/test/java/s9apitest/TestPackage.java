@@ -291,6 +291,7 @@ public class TestPackage {
             Processor processor1 = new Processor(true);
             XsltCompiler compiler = processor1.newXsltCompiler();
             compiler.setTargetEdition("HE");
+            compiler.setJustInTimeCompilation(false);
             // Choose a stylesheet that Saxon-EE will optimize
             XsltExecutable top = compiler.compile(
                     new StreamSource(new File(configTest.getXMarkDir() + "q8.xsl")));
