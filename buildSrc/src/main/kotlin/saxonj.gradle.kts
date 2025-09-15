@@ -109,6 +109,8 @@ dependencies {
 
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
+    downloadReleaseBundled("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+
     editionCompileAndTestOnly("xom:xom:1.3.5")
     editionCompileAndTestOnly("org.jdom:jdom:1.1.3")
     editionCompileAndTestOnly("org.jdom:jdom2:2.0.6.1")
@@ -116,7 +118,6 @@ dependencies {
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-dom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-impl:1.2.15")
-    editionCompileAndTestOnly("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 //    downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
     downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
     compileOnly("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
