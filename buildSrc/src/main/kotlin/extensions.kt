@@ -47,6 +47,18 @@ interface SaxonBuildExtension {
         throw GradleException("Unexpected release: ${name}")
     }
 
+    // "Platform neutral URI"
+    fun puri(path: String): String {
+      if (systemOsName.get() == "windows") {
+        var fixed = path.replace("\\", "/")
+        if (!fixed.startsWith("/") && fixed.length > 1 && fixed[1] == ':') {
+          return "file:/${fixed}"
+        }
+        return fixed
+      }
+      return path
+    }
+
     fun findGraalBin(edition: String): String? {
         val graalVersion = project.get().findProperty("graalVersion").toString()
         var home = System.getenv("GRAALVM_${edition.uppercase()}_HOME")

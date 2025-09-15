@@ -43,7 +43,7 @@ class SaxonCSPlugin : Plugin<Project> {
                                      (if (System.getProperty("os.arch") == "aarch64") "arm64" else "x64")}")
     extension.platform.convention(if (OperatingSystem.current().isMacOsX())
                                     "osx" else if (OperatingSystem.current().isWindows())
-                                      "windows" else "linux")
+                                      "win" else "linux")
   }
 }
 
@@ -61,7 +61,7 @@ abstract class DotNetImplementation: DefaultTask() {
     configuration.convention("${project.findProperty("csharpBuild") ?: "Debug"}")
     platform.convention(if (OperatingSystem.current().isMacOsX())
                         "osx" else if (OperatingSystem.current().isWindows())
-                          "windows" else "linux")
+                          "win" else "linux")
     arch.convention(if (System.getProperty("os.arch") == "aarch64") "arm64" else "x64")
   }
 }
@@ -247,11 +247,8 @@ abstract class DotNetMakeApp: DotNetImplementation() {
     }
 
     val arch = this.arch.get()
-
     val platform = this.platform.get()
     val configuration = this.configuration.get()
-    val csrid = "${platform}-${arch}"
-    val csver = saxonBuild.version.get()
 
     project.exec {
       workingDir = project.layout.buildDirectory.file("${arch}/SaxonCS").get().asFile
