@@ -28,10 +28,10 @@ import javax.inject.Inject
 
 class CloudFormationStackDetails(val region: Property<String>, val stackName: Property<String>) {
   val signingInputsQueueUrl: String
-    get() = stackOutputValue("CodeSigningInputsQueueUrl")
+    get() = stackOutputValue("LinuxCodeSigningInputsQueueUrl")
 
   val signingOutputsQueueUrl: String
-    get() = stackOutputValue("CodeSigningOutputsQueueUrl")
+    get() = stackOutputValue("LinuxCodeSigningOutputsQueueUrl")
 
   val signingInputsBucket: String
     get() = stackOutputValue("CodeSigningInputsBucketName")
@@ -148,6 +148,8 @@ abstract class UnsignedArtifactUploadTask
 
   @TaskAction
   fun upload() {
+    logger.info("Uploading job $generatedJobId")
+    logger.info("Uploading files to $jobKeyPrefix")
     val directoryUpload = transferManager.uploadDirectory { builder ->
       builder.source(Paths.get(inputDir.get().asFile.absolutePath))
       .s3Prefix(jobKeyPrefix)
