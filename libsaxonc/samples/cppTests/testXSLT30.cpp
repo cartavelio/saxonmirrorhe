@@ -285,7 +285,7 @@ void testPackageExport(SaxonProcessor *processor, Xslt30Processor *trans,
   try {
     cout << "Test: testPackageExport:" << endl;
     char cwd[FILENAME_MAX];
-    getcwd(cwd, 0);
+    GetCurrentDir(cwd, sizeof(cwd));
     trans->compileFromFileAndSave(CppTestUtils::concat(2, dataDir->c_str(), "/override-base-f-001.xsl").c_str(),
                                   CppTestUtils::concat(2, cwd, "/sandpit/test-package-001.pack").c_str());
 

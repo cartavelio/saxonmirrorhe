@@ -110,7 +110,28 @@ val debugStage = tasks.register<Exec>("debug_staging_install") {
     args("--install", layout.buildDirectory.get().asFile.toString(), "--config", "Debug", "--prefix", debugStagingPath.get().asFile.toString())
 }
 
+val ctestWorkingDir = layout.buildDirectory.dir("ctest-working-dir")
+val mkCtestWorkingDir = tasks.register("mk_ctest_working_dir") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    outputs.dir(ctestWorkingDir)
+
+    doLast {
+        project.mkdir(ctestWorkingDir)
+    }
+}
+
+val cleanCtestWorkingDir = tasks.register("ctest_working_dir") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    inputs.dir(mkCtestWorkingDir.map { ctestWorkingDir.get() })
+
+    doLast {
+        project.delete(ctestWorkingDir)
+        project.mkdir(ctestWorkingDir)
+    }
+}
+
 val test = tasks.register<Exec>("test") {
+    inputs.dir(ctestWorkingDir)
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Run the tests defined in CMakeLists with CTest"
     dependsOn(build)
