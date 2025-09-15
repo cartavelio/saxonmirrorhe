@@ -399,10 +399,6 @@ tasks.register<JavaExec>("pe_run_test") {
   mainClass = "net.sf.saxon.Transform"
 }
 
-tasks.register("all_test_suites") {
-  // Just somewhere to hang dependencies
-}
-
 testSuites.configure("expath", "XP31")
 testSuites.configure("expath", "XQ31")
 
