@@ -1744,10 +1744,10 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/trace-external-functions</uri>
         <editions>HE PE EE</editions>
-        <platforms>J</platforms>
+        <platforms>J CS</platforms>
         <configfile>global/@traceExternalFunctions</configfile>
         <configfiledesc>
-            <p>Provides diagnostics when external functions are dynamically loaded.</p>
+            <p>Provides diagnostics when functions are loaded.</p>
         </configfiledesc>
         <commandline for="TQ">-TJ</commandline>
         <desc>
