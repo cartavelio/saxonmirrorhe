@@ -240,7 +240,7 @@ public class LicenseTests {
             XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
             XdmValue result = xpe.load().evaluate();
             assertEquals(3.33333, ((XdmAtomicValue) result).getDoubleValue());
-            assertEquals("V012311", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+            assertEquals("V013652", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
         } catch (SaxonApiException e) {
             fail();
         }
@@ -258,7 +258,7 @@ public class LicenseTests {
             XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
             XdmValue result = xpe.load().evaluate();
             assertEquals(3.33333, ((XdmAtomicValue) result).getDoubleValue());
-            assertEquals("V012311", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+            assertEquals("V013652", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
         } catch (SaxonApiException e) {
             fail();
         }
@@ -275,7 +275,7 @@ public class LicenseTests {
             XPathExecutable xpe = xpc.compile("saxon:decimal-divide(10.0, 3.0, 5)");
             XdmValue result = xpe.load().evaluate();
             assertEquals(3.33333, ((XdmAtomicValue) result).getDoubleValue());
-            assertEquals("V012311", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
+            assertEquals("V013652", processor.getUnderlyingConfiguration().getLicenseFeature("Serial"));
         } catch (SaxonApiException e) {
             fail();
         }
