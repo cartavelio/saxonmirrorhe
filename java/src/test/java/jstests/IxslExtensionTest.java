@@ -13,8 +13,8 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class IxslExtensionTest {
 
-    @Ignore("needs Nashorn")
+    @Disabled("needs Nashorn")
     public void testIxslEval() {
         try {
             Processor p = new Processor(true);

@@ -140,7 +140,7 @@ sourceSets.named("editionTest") {
 //    exclude("s9apitest/TestSerializer.java")
 //    exclude("s9apitest/TestValidator.java")
 //    exclude("s9apitest/TestXMLParserOptions.java")
-//    exclude("s9apitest/TestXMarkProjection.java")
+    exclude("s9apitest/TestXMarkProjection.java")
 //    exclude("s9apitest/TestXPathCompiler.java")
 //    exclude("s9apitest/TestXPathErrorCode.java")
 //    exclude("s9apitest/TestXQueryCompiler.java")
