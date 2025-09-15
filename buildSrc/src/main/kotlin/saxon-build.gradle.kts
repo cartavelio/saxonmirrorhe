@@ -1,5 +1,6 @@
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.ExecutableFinder
+import com.saxonica.build.TargetHost
 import com.saxonica.build.java.testsuite.JavaRunner
 import java.text.SimpleDateFormat
 import java.util.Date

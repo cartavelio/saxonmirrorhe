@@ -1,5 +1,6 @@
 package com.saxonica.build.cpp
 
+import com.saxonica.build.TargetHost
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
