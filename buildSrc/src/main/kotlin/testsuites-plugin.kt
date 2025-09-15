@@ -103,31 +103,45 @@ abstract class TestSuitesExtension
                     @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
                     taskName: String) {
     val plugin = this
+
+    // This is annoying. We have to copy the suite because
+    // the sandpit is writable...
+    val actualSuiteDir = if (suite == "expath") {
+      layout.buildDirectory.dir("suite/expath/${taskName}")
+    } else {
+      suiteDir(suite)
+    }
+
     val thisSuite = tasks.register<JavaRunner>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       this.edition = plugin.edition
       this.suite = suite
       this.language = language
-      this.suiteDir = suiteDir(suite)
+      this.suiteDir = actualSuiteDir
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
     }
 
     if (suite == "expath") {
-      // This is annoying. We have to copy the suite because the sandpit is writable
       val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
         group = "Internal"
         description = "Copy the expath test suite"
-        into(layout.buildDirectory.dir("suite/expath"))
-        from(submodulesDir.dir("expath/tests/qt3"))
+        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
+        from(submodulesDir.dir("expath/tests/qt3")) {
+          exclude("archive/sandpit2/**")
+        }
       }
+
       val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
         group = "Internal"
         description = "Copy the expath test suite sandpit" 
         dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/archive/sandpit"))
-        from(submodulesDir.dir("extra/data/sandpit"))
+        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
+        // sandpit2!?
+        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
+          include("**")
+        }
       }
       thisSuite.configure {
         dependsOn(copySandpit)
@@ -231,6 +245,8 @@ abstract class TestSuitesExtension
     val thisSuite = tasks.register<Exec>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
 
+      println("REGISTERING ${taskName}")
+
       dependsOn(build)
       workingDir = directory.get().asFile
       commandLine = testargs
@@ -247,14 +263,14 @@ abstract class TestSuitesExtension
       val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
         group = "Internal"
         description = "Copy the expath test suite"
-        into(layout.buildDirectory.dir("suite/expath"))
+        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
         from(submodulesDir.dir("expath/tests/qt3"))
       }
       val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
         group = "Internal"
         description = "Copy the expath test suite sandpit"
         dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/archive/sandpit"))
+        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
         from(submodulesDir.dir("extra/data/sandpit"))
       }
       thisSuite.configure {
