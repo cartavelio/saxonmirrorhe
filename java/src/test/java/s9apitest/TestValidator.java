@@ -1903,7 +1903,7 @@ public class TestValidator {
                     @Override
                     public void run() {
                         try {
-                            manager.load(new File(configTest.getDataDir() + "../bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
+                            manager.load(new File(configTest.getDataDir() + "../../../java/src/test/bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
                         } catch (Throwable ex) {
                             System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
                             ex.printStackTrace();
