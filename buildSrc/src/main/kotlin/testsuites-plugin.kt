@@ -275,6 +275,18 @@ abstract class TestSuitesExtension
         from(submodulesDir.dir("expath/tests/qt3")) {
           exclude("archive/sandpit2/**")
         }
+
+        doLast {
+          // Also, make sure that the file "test.bin" exists
+          // or some tests will fail.
+          project.copy {
+            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
+            from(submodulesDir.dir("expath/tests/qt3")) {
+              include("catalog.xml")
+            }
+            rename { "test.bin" }
+          }
+        }
       }
 
       val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {

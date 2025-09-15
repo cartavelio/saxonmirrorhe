@@ -121,7 +121,11 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       }
     }
 
-    println(listOf(testargs))
+    //testargs.add("-s:expath-file")
+    //testargs.add("-t:EXPath-file-exists-001")
+    //testargs.add("-debug")
+
+    //println(listOf(testargs))
 
     ex.exec {
       if (!showOutput) {
@@ -129,6 +133,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
         standardOutput = stdOutput
         errorOutput = errOutput
       }
+
+      workingDir = suiteDir.get().asFile
 
       commandLine = testargs
     }
