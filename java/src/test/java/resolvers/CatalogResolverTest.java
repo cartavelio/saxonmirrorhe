@@ -2,6 +2,7 @@ package resolvers;
 
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.s9api.*;
@@ -15,6 +16,7 @@ import javax.xml.transform.sax.SAXSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,7 +32,7 @@ public class CatalogResolverTest {
         DocumentBuilder builder = processor.newDocumentBuilder();
         builder.setDTDValidation(true);
         try {
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/input.xml"));
             fail();
         } catch (SaxonApiException ex) {
             assert(ex.getMessage().contains("I/O error"));
@@ -47,7 +49,7 @@ public class CatalogResolverTest {
         DocumentBuilder builder = processor.newDocumentBuilder();
         builder.setDTDValidation(true);
         try {
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/ok.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/ok.xml"));
         } catch (Exception ex) {
             fail();
         }
@@ -56,11 +58,11 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverParse() {
         Processor processor = new Processor(false);
-        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles(Testdata.pathString("resolvers/catalog.xml"));
         try {
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/input.xml"));
             Assertions.assertNotNull(doc);
         } catch (Exception ex) {
             fail();
@@ -70,18 +72,18 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles(Testdata.pathString("resolvers/catalog.xml"));
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
-            Source xsl = new SAXSource(new InputSource(new FileInputStream(new File("src/test/testdata/resolvers/style.xsl"))));
+            Source xsl = new SAXSource(new InputSource(new FileInputStream(Testdata.file("resolvers/style.xsl"))));
             XsltExecutable exec = compiler.compile(xsl);
 
             Xslt30Transformer transformer = exec.load30();
 
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/input.xml"));
 
             transformer.setGlobalContextItem(doc);
 
@@ -98,18 +100,18 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverStylesheetUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles(Testdata.pathString("resolvers/catalog.xml"));
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
-            Source xsl = new SAXSource(new InputSource(new FileInputStream(new File("src/test/testdata/resolvers/stylesheet.xsl"))));
+            Source xsl = new SAXSource(new InputSource(new FileInputStream(Testdata.file("resolvers/stylesheet.xsl"))));
             XsltExecutable exec = compiler.compile(xsl);
 
             Xslt30Transformer transformer = exec.load30();
 
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/input.xml"));
 
             transformer.setGlobalContextItem(doc);
 
@@ -126,18 +128,18 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverUnparsedTextUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles(Testdata.pathString("resolvers/catalog.xml"));
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
-            Source xsl = new SAXSource(new InputSource(new FileInputStream(new File("src/test/testdata/resolvers/stylesheet.xsl"))));
+            Source xsl = new SAXSource(new InputSource(new FileInputStream(Testdata.file("resolvers/stylesheet.xsl"))));
             XsltExecutable exec = compiler.compile(xsl);
 
             Xslt30Transformer transformer = exec.load30();
 
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(false);
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/unparsed.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/unparsed.xml"));
 
             transformer.setGlobalContextItem(doc);
 
@@ -155,18 +157,18 @@ public class CatalogResolverTest {
     @Test
     public void xmlResolverModuleUriResolver() {
         Processor processor = new Processor(false);
-        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles(Testdata.pathString("resolvers/catalog.xml"));
         try {
             XQueryCompiler compiler = processor.newXQueryCompiler();
 
-            File xqy = new File("src/test/testdata/resolvers/module.xqy");
+            File xqy = Testdata.file("resolvers/module.xqy");
             XQueryExecutable exec = compiler.compile(xqy);
 
             XQueryEvaluator eval = exec.load();
 
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(false);
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/unparsed.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/unparsed.xml"));
 
             eval.setContextItem(doc);
 
@@ -218,19 +220,20 @@ public class CatalogResolverTest {
 
     private void resolveWith(String xslFile) {
         Processor processor = new Processor(false);
-        processor.setCatalogFiles("src/test/testdata/resolvers/catalog.xml");
+        processor.setCatalogFiles(Testdata.pathString("resolvers/catalog.xml"));
         try {
             XsltCompiler compiler = processor.newXsltCompiler();
 
-            String fn = "src/test/testdata/resolvers/" + xslFile;
-            Source xsl = new SAXSource(new InputSource(Files.newInputStream(new File(fn).toPath())));
+//            String fn = "src/test/testdata/resolvers/" + xslFile;
+            Path fn = Testdata.path("resolvers").resolve(xslFile);
+            Source xsl = new SAXSource(new InputSource(Files.newInputStream(fn)));
             XsltExecutable exec = compiler.compile(xsl);
 
             Xslt30Transformer transformer = exec.load30();
 
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setDTDValidation(true);
-            XdmNode doc = builder.build(new File("src/test/testdata/resolvers/input.xml"));
+            XdmNode doc = builder.build(Testdata.file("resolvers/input.xml"));
 
             transformer.setGlobalContextItem(doc);
 
