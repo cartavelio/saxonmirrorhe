@@ -1009,7 +1009,7 @@ public class TestIntegratedFunctions {
 
             @Override
             public XdmValue call(XdmValue[] xdmValues) throws SaxonApiException {
-                return xdmValues[0].isEmpty() ? XdmEmptySequence.getInstance() : new XdmAtomicValue(Math.sqrt(((XdmAtomicValue) xdmValues[0]).getDoubleValue()));
+                return xdmValues[0].isEmptySequence() ? XdmEmptySequence.getInstance() : new XdmAtomicValue(Math.sqrt(((XdmAtomicValue) xdmValues[0]).getDoubleValue()));
             }
         });
 
