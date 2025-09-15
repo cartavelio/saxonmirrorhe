@@ -198,28 +198,26 @@ samples.transform("Bible_1", "../bible/nt/nt.xml", "bible.xsl",
                   listOf("dir=${layout.buildDirectory.file("sample_results/biblehtml").get()}"),
                   layout.buildDirectory.file("sample_results/biblehtml/index.html").get().asFile)
 
-samples.bookSample("transform", "html", "Transform_1",
-                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl"))
+// ============================================================
 
-samples.bookSample("transform", "html", "Transform_2",
-                   listOf("-s:data/books.xml", "-xsl:styles/books.xsl", "top-author=Thomas Hardy"))
+val run_with_config = tasks.register<JavaExec>("run_with_config") {
+  doFirst {
+    mkdir(layout.buildDirectory.file("sample_results"))
+  }
 
-samples.bookSample("transform", "txt", "Transform_3",
-                   listOf("-s:data/books.xml", "-xsl:styles/books-csv.xsl"))
-
-samples.bookSample("query", "html", "Query_1",
-                   listOf("-s:data/books.xml", "-q:query/books.xq"))
-
-samples.bookSample("query", "html", "Query_2",
-                   listOf("-s:data/books.xml", "-qs:saxon:line-number((//*)[last()])", "-l:on"))
-
-samples.bookSample("validate", "xml", "Validate_1",
-                   listOf("-s:data/books.xml", "-xsd:data/books.xsd"))
-
-samples.bookSample("validate", "xml", "Validate_2",
-                   listOf("-s:data/books-invalid.xml", "-xsd:data/books.xsd", "-quit:off"))
+  classpath = (files(sourceSets["edition"].output)
+               + configurations.named("samplesConfiguration").get())
+  mainClass = "net.sf.saxon.Transform"
+  args("-config:${layout.projectDirectory.file("../samples/src/config/config.xml")}",
+       "-s:${layout.projectDirectory.file("../samples/src/data/books.xml")}",
+       "-xsl:${layout.projectDirectory.file("../samples/src/styles/books.xsl")}",
+       "-o:${layout.buildDirectory.file("sample_results/books_with_config.html").get()}",
+       "--traceListenerOutputFile:${layout.buildDirectory.file("sample_results/traceOutput_config.log").get()}")
+}
+tasks.named("all_samples").get().dependsOn(run_with_config)
 
 // ============================================================
+
 
 samples.sampleClass("JAXPExamples", listOf("all"), "he.JAXPExamples")
 samples.sampleClass("ApplyXPathJAXP_saxon",
