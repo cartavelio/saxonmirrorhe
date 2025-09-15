@@ -312,11 +312,15 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                          + error.getErrorCodeQName().getLocalPart()
                          + "'>" + error.getMessage() + "</error>");
         while (stack.size() > (int) checkpoint) {
+            int size = stack.size();
             Object o = stack.peek();
-            if (o instanceof Item) {
-                endCurrentItem((Item) o);
-            } else if (o instanceof Traceable) {
+            if (o instanceof Traceable) {
                 leave((Traceable) o);
+            } else if (o instanceof Item) {
+                endCurrentItem((Item) o);
+            }
+            if (stack.size() == size) {
+                stack.pop();
             }
         }
         out.info(AbstractTraceListener.spaces(indent) + "<catch/>");
