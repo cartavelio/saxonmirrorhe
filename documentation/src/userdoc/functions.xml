@@ -2576,7 +2576,7 @@
         <p>If the native regex engine is used, then the flags preceding the semicolon 
           are interpreted as follows:</p>
         <ul>
-          <li class="javaonly"><p>For Java: </p></li>
+          <li class="javaonly"><p>For Java: </p>
               <ul>
                 <li><code>'d': Pattern.UNIX_LINES</code></li>
                 <li><code>'m': Pattern.MULTILINE</code></li>
@@ -2587,8 +2587,8 @@
                 <li><code>'q': Pattern.LITERAL</code></li>
                 <li><code>'c': Pattern.CANON_EQ</code></li>
               </ul>
-          
-          <li class="csonly"><p>For .NET: </p></li>
+          </li>
+          <li class="csonly"><p>For .NET: </p>
               <ul>
                 <li><code>'d': RegexOptions.Multiline</code></li>
                 <li><code>'m': RegexOptions.Multiline</code></li>
