@@ -108,7 +108,7 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
                     "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
                     "-D", extension.package_name.map { "SAXON_PACKAGE_NAME:STRING=${it}" }.get(),
                     "-D", extension.package_file_name.map { "SAXON_PACKAGE_FILE_NAME:STRING=${it}" }.get(),
-                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.name}" }.get(),
+                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.platform}" }.get(),
                     "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
                     "-D", coreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
                 )

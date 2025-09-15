@@ -2,6 +2,8 @@ package com.saxonica.build.python
 
 import SaxonBuildExtension
 import SaxonCPythonExtension
+import com.saxonica.build.Architectures
+import com.saxonica.build.Platforms
 import com.saxonica.build.PyprojectToml
 import com.saxonica.build.TargetHost
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -23,6 +25,7 @@ import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
+import kotlin.collections.forEach
 
 /**
  * Task for outputting the current machine's GLibc symbols version
@@ -129,6 +132,24 @@ abstract class WheelCompatibilityTags @Inject constructor(private val ex: ExecOp
     }
 }
 
+class WheelFilename(val edition: String, val version: String, val pythonTag: String, val abiTag: String, val platform: String, val architecture: String) {
+    companion object {
+        fun fromWheelSuffix(edition: String, version: String, suffix: String): WheelFilename {
+            val chunks = suffix.split("-")
+            val (pythonTag, abiTag, platformArch) = chunks
+            val architectureSeparatorIndex = platformArch.lastIndexOf('_')
+            val platform = platformArch.take(architectureSeparatorIndex)
+            val architecture = platformArch.substring(architectureSeparatorIndex + 1)
+
+            return WheelFilename(edition, version, pythonTag, abiTag, platform, architecture)
+        }
+    }
+
+    override fun toString(): String {
+        return "saxonc${edition}-${version}-${pythonTag}-${abiTag}-${platform}_${architecture}.whl"
+    }
+}
+
 /**
  * Task for building a wheel and fixing it up with repairwheel
  */
@@ -177,8 +198,8 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
     abstract val macosxDeploymentTarget: Property<String>
 
     @Internal
-    val wheelFilename: Provider<String> = productEdition.map { prod ->
-        "saxonc${prod}-${productVersion.get()}-${wheelSuffix.get()}.whl"
+    val wheelFilename: Provider<String> = productEdition.map { edition ->
+        WheelFilename.fromWheelSuffix(edition, productVersion.get(), wheelSuffix.get()).toString()
     }
 
     @OutputFile
@@ -434,5 +455,52 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
         }
 
         return repairWheel
+    }
+}
+
+class PythonReleaseWheels(val version: String, val manylinuxTarget: String, val macosMinVersionArm64: String, val macosMinVersionX86_64: String,  val releasePythons: List<String>) {
+    fun macosVersionTag(version: String): String {
+        val parts = version.split('.')
+        val (major, minor) = if (parts.size == 2) parts[0] to parts[1] else parts[0] to "0"
+        return "${major}_${minor}"
+    }
+
+    fun macos_platform(architecture: Architectures): String {
+        val version = when (architecture) {
+            Architectures.ARM64 -> macosVersionTag(macosMinVersionArm64)
+            Architectures.X86_64 -> macosVersionTag(macosMinVersionX86_64)
+        }
+        return "macosx_${version}"
+    }
+
+    val editions = arrayOf("he", "ee", "pe")
+
+    fun artifacts(): List<String> {
+        val result = mutableListOf<String>()
+        editions.forEach { edition ->
+            releasePythons.forEach { py ->
+                val pythonTag = "cp${py.replace(".", "")}"
+                val abiTag = pythonTag
+                TargetHost.platforms.forEach { (platform, hosts) ->
+                    hosts.forEach { host ->
+                        val architecture = when(host) {
+                            is TargetHost.Linux.Arm64 -> "aarch64"
+                            is TargetHost.Linux.X86_64 -> host.architecture
+                            is TargetHost.MacOS.Arm64 -> host.architecture
+                            is TargetHost.MacOS.X86_64 -> host.architecture
+                            is TargetHost.Windows.Arm64 -> host.architecture
+                            is TargetHost.Windows.X86_64 -> "amd64"
+                        }
+                        val platform = when(platform) {
+                            Platforms.WINDOWS -> "win"
+                            Platforms.MACOS -> macos_platform(host.architectureConst)
+                            Platforms.LINUX -> manylinuxTarget
+                        }
+                        result.add(WheelFilename(edition, version, pythonTag, abiTag, platform, architecture).toString())
+                    }
+                }
+            }
+        }
+        return result
     }
 }

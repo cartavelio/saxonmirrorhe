@@ -48,6 +48,9 @@ class CloudFormationStackDetails(val region: Property<String>, val stackName: Pr
   val stackDetails: Stack
     get() = fetchStackDetails()
 
+  val releaseArtifactStagingBucket: String
+    get() = stackOutputValue("ReleaseArtifactStagingBucketName")
+
   private fun fetchStackDetails(): Stack {
     println("Fetching stack details...")
     val cfClient = CloudFormationClient.builder()

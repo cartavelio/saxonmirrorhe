@@ -1,7 +1,16 @@
+import com.saxonica.build.AwsReleaseStagingResources
+import com.saxonica.build.AwsSigningResources
+import com.saxonica.build.CheckStagedReleaseArtifactsPresent
 import com.saxonica.build.python.PyenvExe
 import com.saxonica.build.python.PyenvPythonVersion
 import org.gradle.internal.os.OperatingSystem
 import com.saxonica.build.GatherReleaseArtifacts
+import com.saxonica.build.UnsignedArtifactUploadTask
+import com.saxonica.build.UploadReleaseArtifactsToStagingBucket
+import com.saxonica.build.python.PythonReleaseWheels
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.register
+import kotlin.collections.joinToString
 
 plugins {
   base
@@ -84,4 +93,38 @@ val gather = tasks.register<GatherReleaseArtifacts>("gather_release_artifacts") 
   artifacts.from(heReleaseWheels)
   artifacts.from(peReleaseWheels)
   artifacts.from(eeReleaseWheels)
+}
+
+val macosx_min_version_aarch64: String by project
+val macosx_min_version_x86_64: String by project
+val manylinuxTarget: String by project
+
+val expectedReleaseArtifacts = tasks.register("expected_release_artifacts") {
+  doLast {
+    val wheels = PythonReleaseWheels(saxonBuild.version.get(), manylinuxTarget, macosx_min_version_aarch64, macosx_min_version_x86_64, extension.releaseVersions.get())
+    println(wheels.artifacts().joinToString("\n"))
+  }
+}
+
+val stagingResources = tasks.register<AwsReleaseStagingResources>("staging_resources") {
+  region = "eu-west-2"
+  stackName = "SaxonicaCiCdStack"
+}
+
+val upload = tasks.register<UploadReleaseArtifactsToStagingBucket>("build_and_stage_release_artifacts") {
+  bucket = stagingResources.map { it.releaseArtifactsStagingBucket.get() }
+  region = stagingResources.map { it.region.get() }
+
+  artifacts.from(heReleaseWheels)
+  artifacts.from(peReleaseWheels)
+  artifacts.from(eeReleaseWheels)
+}
+
+val checkReleaseArtifactsStaged = tasks.register<CheckStagedReleaseArtifactsPresent>("check_release_artifacts_staged") {
+  bucket = stagingResources.map { it.releaseArtifactsStagingBucket.get() }
+  region = stagingResources.map { it.region.get() }
+
+  expectedArtifacts = saxonBuild.version.map { version ->
+    PythonReleaseWheels(version, manylinuxTarget, macosx_min_version_aarch64, macosx_min_version_x86_64, extension.releaseVersions.get()).artifacts()
+  }
 }
