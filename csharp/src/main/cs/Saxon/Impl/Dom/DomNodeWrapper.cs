@@ -442,7 +442,7 @@ namespace Saxon.Impl.Dom {
                             } else if (attName[5] == ':') {
                                 nsMap = nsMap.bind(attName.Substring(6), NamespaceUri.of(att.Value));
                             }
-                        } else if (attName.Contains(':')) {
+                        } else if (attName.Contains(":")) {
                             namespacedAtt = true;
                         }
                     }
@@ -461,7 +461,7 @@ namespace Saxon.Impl.Dom {
                     if (namespacedAtt) {
                         foreach (XmlAttribute att in atts) {
                             string attName = att.Name;
-                            if (attName.Contains(':') && !attName.StartsWith("xmlns:")) {
+                            if (attName.Contains(":") && !attName.StartsWith("xmlns:")) {
                                 string prefix = att.Prefix;
                                 string uri = att.NamespaceURI;
                                 if (nsMap.getNamespaceUri(prefix) != NamespaceUri.of(uri)) {

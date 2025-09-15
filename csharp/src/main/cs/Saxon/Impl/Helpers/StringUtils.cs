@@ -8,7 +8,7 @@ namespace Saxon.Impl.Helpers {
 
         public static readonly System.Text.Encoding LATIN_1 = System.Text.Encoding.GetEncoding("iso-8859-1");
 
-        public const char BOM = (char) 0xfeff; 
+        public static string BOM = "" + (char) 0xfeff; 
         
         public static void stringToCharArray(string str, int begin, int end, char[] buff, int dest) {
             str.CopyTo(begin, buff, dest, end - begin);

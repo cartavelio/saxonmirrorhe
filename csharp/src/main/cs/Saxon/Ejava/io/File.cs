@@ -298,7 +298,7 @@ namespace Saxon.Ejava.io {
         public static SysUri CurrentDirectoryUri() {
             string dir = Environment.CurrentDirectory;
             dir = dir.Replace('\\', '/');
-            if (!dir.EndsWith('/')) {
+            if (!dir.EndsWith("/")) {
                 dir = dir + "/";
             }
 
