@@ -11,9 +11,11 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
-abstract class PythonVenv: DefaultTask() {
+abstract class PythonVenv @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:Internal
     abstract val pythonEnv: Property<SaxonCPythonExtension>
 
@@ -80,12 +82,12 @@ abstract class PythonVenv: DefaultTask() {
     fun execute() {
         logger.info("Creating Python Venv for ${branch.get()}: ${venvName.get()}")
 
-        project.exec {
+        ex.exec {
             executable(pyenvPythonExe.get())
             args("-m", "venv", venvPath.get())
         }
 
-        project.exec {
+        ex.exec {
             executable(pipExe.get().asFile.toString())
             args("install", "--require-virtualenv", *platformWheelFixupRequirements(), *buildSystemBootstrapRequirements())
         }
@@ -97,7 +99,7 @@ abstract class PythonVenv: DefaultTask() {
  * Note that the lack of outputs for this task means it will always run, which it needs to in order
  * to verify the state of installed packages.
  */
-abstract class PipInstall: DefaultTask() {
+abstract class PipInstall @Inject constructor(private val ex: ExecOperations): DefaultTask() {
     @get:InputFile
     abstract val pipExe: RegularFileProperty
 
@@ -110,7 +112,7 @@ abstract class PipInstall: DefaultTask() {
         if (installedRequirements(requirementsFile).startsWith(requirementsFile.asFile.readText())) {
             logger.info("Packages already installed")
         } else {
-            project.exec {
+            ex.exec {
                 executable(pipExe.get())
                 args("install", "--require-virtualenv", "--requirement", requirementsFile)
             }
@@ -119,7 +121,7 @@ abstract class PipInstall: DefaultTask() {
 
     fun installedRequirements(requirementsFile: RegularFile): String  {
         return ByteArrayOutputStream().use { stdout ->
-            project.exec {
+            ex.exec {
                 executable(pipExe.get())
                 args("freeze", "--require-virtualenv", "--local", "--requirement", requirementsFile)
             }

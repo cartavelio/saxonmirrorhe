@@ -10,7 +10,7 @@ import org.gradle.api.tasks.*
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
-abstract class CMakePackageBuilder @Inject constructor(val ex: ExecOperations) : DefaultTask() {
+abstract class CMakePackageBuilder @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
   private val targetHost = TargetHost.current()
 
   @get:Internal
