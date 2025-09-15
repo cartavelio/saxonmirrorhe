@@ -101,14 +101,19 @@ val validate_ee_config = tasks.register<JavaExec>("validate_ee_config") {
 
   inputs.files(create_config_xsd)
   inputs.files(layout.projectDirectory.file("src/config/config.xml"))
-  outputs.files(layout.buildDirectory.file("ee_validated.xml"))
+  outputs.files(layout.buildDirectory.file("ee_validated"))
 
   classpath = configurations.named("samplesBuild").get()
   mainClass = "com.saxonica.Validate"
 
   args("-s:${layout.projectDirectory.file("src/config/config.xml")}",
-       "-xsd:${create_config_xsd.get().outputs.files.singleFile}",
-       "-report:${layout.buildDirectory.file("ee_validated.xml").get()}")
+       "-xsd:${create_config_xsd.get().outputs.files.singleFile}")
+
+  doLast {
+    val stream = PrintStream(FileOutputStream(layout.buildDirectory.file("ee_validated").get().asFile))
+    stream.println("validated")
+    stream.close()
+  }
 }
 
 val validate_he_config = tasks.register<JavaExec>("validate_he_config") {
@@ -117,43 +122,20 @@ val validate_he_config = tasks.register<JavaExec>("validate_he_config") {
 
   inputs.files(create_config_xsd)
   inputs.files(layout.projectDirectory.file("src/config/config-HE.xml"))
-  outputs.files(layout.buildDirectory.file("he_validated.xml"))
+  outputs.files(layout.buildDirectory.file("he_validated"))
 
   classpath = configurations.named("samplesBuild").get()
   mainClass = "com.saxonica.Validate"
 
   args("-s:${layout.projectDirectory.file("src/config/config-HE.xml")}",
-       "-xsd:${create_config_xsd.get().outputs.files.singleFile}",
-       "-report:${layout.buildDirectory.file("he_validated.xml").get()}")
-}
+       "-xsd:${create_config_xsd.get().outputs.files.singleFile}")
 
-/*
-val run_with_config_xsd = tasks.register<JavaExec>("run_with_config_xsd") {
-  group = "Internal"
-  inputs.files(layout.projectDirectory.file("src/config/saxon-attributes.xsd"))
-  inputs.files(layout.projectDirectory.file("src/config/config-raw.xsd"))
-  inputs.files(copy_feature_keys)
-  outputs.files(layout.buildDirectory.file("config/config.xsd"))
-
-  doFirst {
-    copy {
-      into(layout.buildDirectory.file("config").get())
-      from(layout.projectDirectory.file("src/config")) {
-        include("saxon-attributes.xsd")
-      }
-    }
+  doLast {
+    val stream = PrintStream(FileOutputStream(layout.buildDirectory.file("he_validated").get().asFile))
+    stream.println("validated")
+    stream.close()
   }
-
-  classpath = configurations.named("samplesBuild").get()
-  mainClass = "com.saxonica.Transform"
-  args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToSchema.xsl").get()}",
-       "-o:${layout.buildDirectory.file("config/config.xsd").get()}",
-       "-it:main",
-       "FeatureKeys=${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml").get()}",
-       "AdditionalFeatures=${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml").get()}",
-       "ConfigSchema=file://${layout.projectDirectory.file("src/config/config-raw.xsd")}")
 }
-*/
 
 val setup_sample_sources = tasks.register<Copy>("setup_samples") {
   group = "Internal"

@@ -11,20 +11,17 @@ import org.gradle.api.Project
 import org.gradle.api.file.*
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
-import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
 abstract class SamplesExtension
   @Inject constructor(private val layout: ProjectLayout,
-                      private val tasks: TaskContainer,
-                      private val ex: ExecOperations) {
+                      private val tasks: TaskContainer) {
 
   abstract val runclasspath: Property<FileCollection>
   abstract val debugclasspath: Property<FileCollection>
@@ -84,102 +81,52 @@ abstract class SamplesExtension
     javaValidate(sample, input, schema, args, name)
   }
 
-  fun sampleClass(sample: String, args: List<String>, className: String? = null) {
-    val t = tasks.register<JavaExec>("sample_class_${sample}") {
-      dependsOn("compile_sample_run_classes")
+  fun bookSample(type: String, outputFormat: String, sample: String, args: List<String>) {
+    val outputfile = layout.buildDirectory.file("sample_results/${sample}.${outputFormat}")
+    val reportfile = layout.buildDirectory.file("sample_results/${sample}.xml")
+
+    val t = tasks.register<JavaExec>("run_books_${sample}") {
+      description = "Run the cmd books sample: ${sample}"
       inputs.files(copy_sample_sources.get().outputs)
-      outputs.file(layout.buildDirectory.file("sample_results/${sample}.txt"))
+      inputs.files(layout.buildDirectory.file("samples/resources"))
 
-      val stdOutput = ByteArrayOutputStream()
-      val errOutput = ByteArrayOutputStream()
-      
-      standardOutput = stdOutput
-      errorOutput = errOutput
-
-      mainClass = className ?: "${edition.get()}.${sample}"
-      classpath = runclasspath.get() + run_classes.get().outputs.files
       workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
-      args(args)
-
-      doLast {
-        if (stdOutput.size() > 0) {
-          val outfile = layout.buildDirectory.file("sample_results/${sample}.txt").get().asFile
-          println("==> ${outfile}")
-          var outputStream = PrintStream(outfile)
-          var lines = stdOutput.toString("utf-8")
-          outputStream.print(lines)
-          outputStream.close()
-        }
-        if (errOutput.size() > 0) {
-          val outfile = layout.buildDirectory.file("sample_results/${sample}.err").get().asFile
-          println("==> ${outfile}")
-          var outputStream = PrintStream(outfile)
-          var lines = errOutput.toString("utf-8")
-          outputStream.print(lines)
-          outputStream.close()
-        }
+      classpath = runclasspath.get()
+      
+      mainClass = when (type) {
+        "transform" -> "net.sf.saxon.Transform"
+        "query" -> "net.sf.saxon.Query"
+        "validate" -> "com.saxonica.Validate"
+        else -> throw IllegalArgumentException("Bad type: ${type}")
       }
-    }
 
-    val t2 = tasks.register<Exec>("check_sample_class_${sample}") {
-      dependsOn(t)
-
-      val script = if (edition.get() == "ee") {
-        layout.projectDirectory.file("../tools/sample-check.py")
+      val testArgs = mutableListOf<String>()
+      testArgs.addAll(args)
+      if (type == "validate") {
+        testArgs.add("-report:${reportfile.get()}")
+        outputs.file(reportfile)
       } else {
-        layout.projectDirectory.file("../../tools/sample-check.py")
+        testArgs.add("-o:${outputfile.get()}")
+        outputs.file(outputfile)
       }
-
-      commandLine = listOf("python", "${script}", "--edition", "${edition.get()}",
-                           "--sample", sample,
-                           "${layout.buildDirectory.file("sample_results/${sample}.txt").get()}")
+      
+      args(testArgs)
     }
-
-    t.get().finalizedBy(t2)
+    run_cmd_books_sample_tests.get().dependsOn(t)
     all_samples.get().dependsOn(t)
-  }
 
-  fun csSample(sample: String, input: String?, stylesheet: String,
-               args: List<String> = emptyList(), output: File? = null) {
-
-    tasks.register("cs_sample_${sample}") {
-      dependsOn(copy_sample_sources)
-      dependsOn("dotnetPublish")
-
-      val saxonCS = project.extensions.findByType(SaxonCSExtension::class.java)!!
-      val saxonBuild = project.extensions.findByType(SaxonBuildExtension::class.java)!!
-
-      val arch = saxonCS.arch.get()
-      val rel = saxonCS.release.get()
-      val netver = "net${saxonBuild.dotnetversion.get()}"
-      val target = "${saxonCS.platform.get()}-${arch}"
-      val exec = "${arch}/SaxonCS/bin/${rel}/${netver}/${target}/SaxonCS"
-
-      val cmdArgs = mutableListOf<String>()
-
-      cmdArgs.add("${layout.buildDirectory.file(exec).get()}")
-      cmdArgs.add("transform")
-
-      input?.let {
-        cmdArgs.add("-s:${layout.buildDirectory.file("samples/resources/data/${it}").get()}")
-        inputs.files(layout.buildDirectory.file("samples/resources/data/${it}"))
+    if (type == "validate") {
+      val t2 = tasks.register<JavaExec>("validate_books_${sample}_report") {
+        dependsOn(t)
+        description = "Validate the ${sample} validation report against validation-reports.xsd"
+        inputs.files(t.get().outputs.getFiles().getSingleFile())
+        workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
+        classpath = runclasspath.get()
+        mainClass = "com.saxonica.Validate"
+        args("-s:${t.get().outputs.getFiles().getSingleFile()}",
+             "-xsd:schemas/validation-reports.xsd")
       }
-      cmdArgs.add("-xsl:${layout.buildDirectory.file("samples/resources/styles/${stylesheet}").get()}")
-      cmdArgs.add("-o:file:${layout.buildDirectory.file("sample_results/${sample}.html").get()}")
-      cmdArgs.addAll(args)
-
-      doFirst {
-        project.mkdir(layout.buildDirectory.file("sample_results/playhtml"))
-        println(cmdArgs)
-
-      }
-
-      doLast {
-        ex.exec {
-          workingDir = layout.buildDirectory.file("samples/resources").get().asFile
-          commandLine(cmdArgs)
-        }
-      }
+      t.get().finalizedBy(t2)
     }
   }
 
@@ -187,12 +134,20 @@ abstract class SamplesExtension
   
   fun javaTransform(sample: String, input: String?, stylesheet: String,
                     args: List<String>, taskName: String, output: File?) {
+
+    //println("Task: ${taskName}")
+
     val t = tasks.register<JavaExec>(taskName) {
       inputs.files(copy_sample_sources.get().outputs)
+
+      println("INPUTS: ${layout.buildDirectory.file("samples/resources/styles/${stylesheet}").get()}")
+
       if (output == null) {
         outputs.files(layout.buildDirectory.file("sample_results/${sample}.html"))
+        println("OUTPUTS: ${layout.buildDirectory.file("sample_results/${sample}.html").get()}")
       } else {
         outputs.file(output)
+        println("OUTPUTS: ${output}")
       }
 
       classpath = runclasspath.get()
@@ -264,22 +219,9 @@ abstract class SamplesExtension
       args(xformArgs)
     }
 
-    val t2 = tasks.register<JavaExec>("validate_${taskName}") {
-      dependsOn(t)
-      description = "Validate the ${sample} validation report against validation-reports.xsd"
-      inputs.files(t.get().outputs.getFiles().getSingleFile())
-      workingDir = layout.buildDirectory.dir("samples/resources").get().asFile
-      classpath = runclasspath.get()
-      mainClass = "com.saxonica.Validate"
-      args("-s:${t.get().outputs.getFiles().getSingleFile()}",
-           "-xsd:schemas/validation-reports.xsd")
-    }
-
-    t.get().finalizedBy(t2)
-    all_samples.get().dependsOn(t)
+      all_samples.get().dependsOn(t)
   }
 
-/*
   fun javaTest(sample: String, classFile: String, sampleClass: String,
                input: String, args: List<String>) {
     val tver = "run"
@@ -328,7 +270,6 @@ abstract class SamplesExtension
       }
     }
   }
-*/
 }
 
 class SamplesPlugin : Plugin<Project> {

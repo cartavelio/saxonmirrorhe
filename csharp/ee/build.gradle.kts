@@ -23,7 +23,7 @@ configure<SaxonCSExtension> {
 }
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
-val csFeatureKeysBucket by configurations.dependencyScope("csFeatureKeysBucket")
+val csharpFeatureKeysBucket by configurations.dependencyScope("csharpFeatureKeysBucket")
 val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val transpilerRuntime by configurations.dependencyScope("transpilerRuntime")
 val javaEeRuntime by configurations.dependencyScope("javaEeRuntime")
@@ -40,10 +40,10 @@ val preprocessorClasspath by configurations.resolvable("preprocessorClasspath") 
 
 dependencies {
   javaSourcesBucket(files(layout.projectDirectory.files("../../java/src/main/java")))
-  csFeatureKeysBucket(project(mapOf("path" to ":csharp:keys",
-                                    "configuration" to "featureKeys")))
-  javaFeatureKeysBucket(project(mapOf("path" to ":java:keys",
-                                      "configuration" to "featureKeys")))
+  csharpFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                    "configuration" to "csharpFeatureKeys")))
+  javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
+                                      "configuration" to "javaFeatureKeys")))
 
   transpilerRuntime(project(":csharp:transpiler", "runtimeElements"))
   transpilerRuntime("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
@@ -66,8 +66,8 @@ val javaSources = configurations.resolvable("javaSources") {
   extendsFrom(javaSourcesBucket)
 }
 
-val csFeatureKeysSources = configurations.resolvable("csFeatureKeysSources") {
-  extendsFrom(csFeatureKeysBucket)
+val csharpFeatureKeysSources = configurations.resolvable("csharpFeatureKeysSources") {
+  extendsFrom(csharpFeatureKeysBucket)
 }
 
 val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
@@ -441,7 +441,7 @@ for (buildArch in architectures) {
     inputs.files(preprocessCS)
     inputs.files(generateCode)
     inputs.files(copyResources)
-    inputs.files(csFeatureKeysSources)
+    inputs.files(csharpFeatureKeysSources)
     outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS"))
   }
   build_task { dependsOn(build) }
@@ -600,7 +600,7 @@ val docParse = tasks.register<JavaExec>("docParse") {
   dependsOn("dotnetBuild")
 
   inputs.files(layout.projectDirectory.dir("../src/main/cs/Saxon/Api"))
-  inputs.files(csFeatureKeysSources)
+  inputs.files(csharpFeatureKeysSources)
   inputs.file(layout.projectDirectory.file("../tools/parsecs.xsl"))
   outputs.file(layout.buildDirectory.file("dotnetdoc/names.xml"))
 
