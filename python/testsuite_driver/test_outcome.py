@@ -166,7 +166,6 @@ class PyTestOutcome:
                     print('result-doc base_urii=', base_urii)
                     print('result-doc keys=', list(self.result_documents.keys()))
                     print('result-doc uri=', list(self.result_documents.keys()))
-                    print('result-doc result = ', self.result_documents['file:/Users/ond1/work/development/git/XSLT30/xslt30-test/results/multresult1.out'])
                 try:
                     print("Check assert-result-document")
                     print("uri=" + uri)
@@ -176,6 +175,9 @@ class PyTestOutcome:
                         doc = self.result_documents[uri]
                     else:
                         uri = uri.replace("file:///", "file:/")
+                        if uri not in self.result_documents:
+                            print("Check assert-result-document cp0")
+                            return False
                         doc = self.result_documents[uri]
                     doc = self.result_documents[uri]
                     ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, None, assert_xpc, catalog_xpc, assert_set)
