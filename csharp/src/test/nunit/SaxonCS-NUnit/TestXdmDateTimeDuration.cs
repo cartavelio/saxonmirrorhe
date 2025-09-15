@@ -14,7 +14,7 @@ namespace SaxonCS_NUnit {
             try {
                 DateTime now1 = DateTime.Now;
                 XdmAtomicValue now2 = new (now1);
-                ClassicAssert.AreEqual(now1.ToString("yyyy-MM-ddTHH:mm:ss"), now2.StringValue.Substring(0, 19);
+                ClassicAssert.AreEqual(now1.ToString("yyyy-MM-ddTHH:mm:ss"), now2.StringValue.Substring(0, 19));
             }
             catch (Exception e) {
                 Assert.Fail(e.Message);
