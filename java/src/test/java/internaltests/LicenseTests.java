@@ -7,6 +7,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.LicenseException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -365,11 +367,13 @@ public class LicenseTests {
         public void withLinkToBadLicenseFile() throws SaxonApiException, IOException {
             System.err.println("configFilePath: " + configFilePath);
             corruptLicenseFile();
-            Processor processor = new Processor(new StreamSource(configFilePath.toFile()));
-            assertNotNull(processor);
-//            assertRaise
-            assertFalse(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
+            Processor processor = null;
+            try {
+                processor = new Processor(new StreamSource(configFilePath.toFile()));
+                fail();
+            } catch (Exception ex) {
+                Assertions.assertTrue(ex.getMessage().contains("Failed to process license"));
+            }
         }
     }
 }
-
