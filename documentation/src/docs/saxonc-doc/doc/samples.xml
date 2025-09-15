@@ -86,7 +86,7 @@
         <a href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34">testXPath.c</a></p>
 
       <aside>
-        <p>To build SaxonC on C, the following files are required:
+        <p>For older releases Saxon 12.0 – 12.5, to build SaxonC on C, the following files are required:
             <code>SaxonCGlue.c</code>, <code>SaxonCProcessor.c</code> and
             <code>SaxonCXPath.c</code>. Firstly, <code>cd samples/cTests</code>
           then compile the sample test code by running the build script
@@ -98,14 +98,6 @@
         <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c
           ../SaxonCProcessor.c ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl
           -lc</kbd>
-
-        <p>The C samples are available here: <a
-            href="https://gist.github.com/ond1/b7c6e43638620e981639fefe6b7d5015"
-            >testXSLT.c</a>, <a
-            href="https://gist.github.com/ond1/6b0bc58e2846223fce5b84dd82e1c14d"
-            >testXQuery.c</a> and <a
-            href="https://gist.github.com/ond1/7aaa9311c12eaad0fbf2aec1f42b6f34"
-            >testXPath.c</a></p>
 
         <p>To run the executables from the command line, use a command such
           as:</p>
@@ -168,7 +160,7 @@
 
 
     <aside>
-      <p>To build SaxonC on C++, the following files are required:
+      <p>For older releases Saxon 12.0 – 12.5, to build SaxonC on C++, the following files are required:
           <code>SaxonCGlue.c</code>, <code>SaxonCXPath.c</code>,
           <code>XdmValue.cpp</code>, <code>XdmItem.cpp</code>,
           <code>XdmNode.cpp</code>, <code>XdmAtomicValue.cpp</code>,
@@ -177,18 +169,10 @@
           <code>Xslt30Processor.cpp</code>, <code>XsltExecutable.cpp</code>,
           <code>XQueryProcessor.cpp</code>, <code>XPathProcessor.cpp</code> and
           <code>SchemaValidator.cpp</code>. To compile the samples in C++
-        execute the <a
-          href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"
-          target="_blank"><code>build64-[PLATFORM].sh</code></a> file in the
+        execute the <code>build64-[PLATFORM].sh</code> file in the
           <code>samples/cppTests</code> directory for Linux and Mac OS, or the
-          <a
-          href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/cppTests"
-            ><code>buildCPPSaxon[EDITION].bat</code></a> file for Windows. These
-        build files build the test harness executables, using a command similar
-        to the following:</p>
-
-
-
+          <code>buildCPPSaxon[EDITION].bat</code> file for Windows. These
+        build files build the test harness executables.</p>
 
       <p>The executables created for Linux and Mac OS can be run from the
         command line using the following commands:</p>
@@ -206,6 +190,7 @@
       <kbd>testXPath.exe</kbd>
       <kbd>testValidator.exe</kbd>
     </aside>
+
     <h3 class="subtitle">Example code</h3>
 
     <p>C++ Example 1: XSLT 3.0 transformation supplying the value for a
@@ -359,7 +344,7 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
          XSLT, XQuery, XPath and Schema Validation (namely: <code>xsltExamples.php</code>,
             <code>xslt30Examples.php</code>, <code>xqueryExamples.php</code>,
             <code>xpathExamples.php</code>, and <code>validatorExamples.php</code>) and associated
-         files, as well as PHP unit tests for XSLT, XQuery, XPath and XQuery (<code>SaxonCPHPTests.php</code>). These files
+        files, as well as PHP unit tests for XSLT, XQuery, XPath and Schema Validation (<code>SaxonCPHPTests.php</code>). These files
          contain many useful examples which will help get you started. The unit tests run under
          PHPUnit for PHP 8.X which can be downloaded and installed separately in the same directory
          as the unit tests.</p>
@@ -371,6 +356,10 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
       <p>And to run a single unit test:</p>
       <kbd>./phpunit --filter testPipeline SaxonCPHPTests.php</kbd>
      
+     <aside>
+       <p>Note that for older releases Saxon 12.0 – 12.5, the samples directory is
+         <code>samples/php</code>, and the PHP unit tests file is <code>xslt30_PHPUnit.php</code>.</p>
+     </aside>
      
 
       <h3 class="subtitle">Example code</h3>
