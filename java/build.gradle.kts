@@ -1,4 +1,5 @@
 import com.saxonica.build.java.PomGenerator
+import com.saxonica.build.GatherReleaseArtifacts
 
 plugins {
   id("saxon-build")
@@ -40,7 +41,44 @@ val javaSampleSources = configurations.resolvable("javaSampleSources") {
   extendsFrom(javaSampleSourcesBucket)
 }
 
+val heReleaseZipsBucket by configurations.dependencyScope("heReleaseZipsBucket")
+val heReleaseZips by configurations.resolvable("heReleaseZips") {
+  extendsFrom(heReleaseZipsBucket)
+}
+
+val heReleaseMavenBucket by configurations.dependencyScope("heReleaseMavenBucket")
+val heReleaseMaven by configurations.resolvable("heReleaseMaven") {
+  extendsFrom(heReleaseMavenBucket)
+}
+
+val peReleaseZipsBucket by configurations.dependencyScope("peReleaseZipsBucket")
+val peReleaseZips by configurations.resolvable("peReleaseZips") {
+  extendsFrom(peReleaseZipsBucket)
+}
+
+val peReleaseMavenBucket by configurations.dependencyScope("peReleaseMavenBucket")
+val peReleaseMaven by configurations.resolvable("peReleaseMaven") {
+  extendsFrom(peReleaseMavenBucket)
+}
+
+val eeReleaseZipsBucket by configurations.dependencyScope("eeReleaseZipsBucket")
+val eeReleaseZips by configurations.resolvable("eeReleaseZips") {
+  extendsFrom(eeReleaseZipsBucket)
+}
+
+val eeReleaseMavenBucket by configurations.dependencyScope("eeReleaseMavenBucket")
+val eeReleaseMaven by configurations.resolvable("eeReleaseMaven") {
+  extendsFrom(eeReleaseMavenBucket)
+}
+
 dependencies {
+  heReleaseZipsBucket(project(path = ":java:he", configuration = "releaseZips"))
+  heReleaseMavenBucket(project(path = ":java:he", configuration = "releaseMaven"))
+  peReleaseZipsBucket(project(path = ":java:pe", configuration = "releaseZips"))
+  peReleaseMavenBucket(project(path = ":java:pe", configuration = "releaseMaven"))
+  eeReleaseZipsBucket(project(path = ":java", configuration = "releaseZips"))
+  eeReleaseMavenBucket(project(path = ":java", configuration = "releaseMaven"))
+
   sampleSourcesBucket(project(mapOf("path" to ":samples",
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
@@ -159,6 +197,15 @@ val xqjSourceMavenJarArtifact by configurations.consumable("xqjSourceMavenJarArt
 xqjDownloadJarArtifact.outgoing.artifact(downloadXqjJar)
 xqjMavenJarArtifact.outgoing.artifact(mavenXqjJar) { builtBy(mavenXqjJar) }
 xqjSourceMavenJarArtifact.outgoing.artifact(mavenXqjSourceJar) { builtBy(mavenXqjSourceJar) }
+
+tasks.register<GatherReleaseArtifacts>("gather_release_artifacts") {
+  artifacts.from(heReleaseZips)
+  artifacts.from(heReleaseMaven)
+  artifacts.from(peReleaseZips)
+  artifacts.from(peReleaseMaven)
+  artifacts.from(eeReleaseZips)
+  artifacts.from(eeReleaseMaven)
+}
 
 // In principle, this should be in the samples-plugin...
 tasks.register<Copy>("copy_java_sample_sources") {

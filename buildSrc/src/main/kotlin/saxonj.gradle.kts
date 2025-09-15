@@ -57,12 +57,15 @@ val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
 val configXsdBucket by configurations.dependencyScope("configXsdBucket")
-val releaseArtifacts by configurations.consumable("releaseArtifacts")
+//val releaseArtifacts by configurations.consumable("releaseArtifacts")
 val sourceArtifacts by configurations.consumable("sourceArtifacts")
 val resources by configurations.consumable("resources")
 val filteredSourcesDir by configurations.consumable("filteredSourcesDir")
 val xmldocletArtifacts by configurations.consumable("xmldocletArtifacts")
 val javadocArtifacts by configurations.consumable("javadocArtifacts")
+
+val releaseZips by configurations.consumable("releaseZips")
+val releaseMaven by configurations.consumable("releaseMaven")
 
 val preprocessor by configurations.creating {
     extendsFrom(configurations["runtimeOnly"])
@@ -676,8 +679,15 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
     }
 }
 
-tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
+val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(downloadRelease)
+}
+
+val stageMaven = tasks.register<Zip>("stageMaven") {
+    dependsOn("publish")
+    archiveBaseName = "Saxon${extension.edition.get().uppercase()}-maven"
+    destinationDirectory = layout.buildDirectory.dir("mavenrelease")
+    from(layout.buildDirectory.dir("maven-o-matic"))
 }
 
 val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
@@ -685,6 +695,9 @@ val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
   into(layout.buildDirectory.dir("featureKeys"))
   from(featureKeysSources)
 }
+
+releaseZips.outgoing.artifact(downloadRelease) { builtBy(downloadRelease) }
+releaseMaven.outgoing.artifact(stageMaven) { builtBy(stageMaven)}
 
 /* FIXME: this requires access to EE for validation even when HE/PE are being built
 for (features in listOf("all", "current")) {
