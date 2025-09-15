@@ -197,9 +197,9 @@ public final class IsLastExpression extends Expression {
     @Override
     public String toString() {
         if (condition) {
-            return "position() eq last()";
+            return "isLast()";
         } else {
-            return "position() ne last()";
+            return "isNotLast()";
         }
     }
 
