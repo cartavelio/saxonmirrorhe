@@ -617,7 +617,7 @@ namespace SaxonCS_NUnit {
                 c.SetDecimalFormatProperty("decimal-separator", "~");
                 c.SetDecimalFormatProperty( "grouping-separator", "|");
                 c.SetDecimalFormatProperty( "exponent-separator", "E");
-                XPathExecutable e = c.Compile("format-number(123.4, '0|000~0E0')");
+                XPathExecutable e = c.Compile("format-number(123.4, '0|000~0E0'");
                 XPathSelector s = e.Load();
                 String result = s.EvaluateSingle().StringValue;
                 Assert.That(result.Equals("1|234~0E-1"));
