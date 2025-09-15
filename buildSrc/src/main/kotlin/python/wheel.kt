@@ -52,7 +52,9 @@ abstract class WheelCompatibilityTags : DefaultTask() {
     }
 
     @Internal
-    val wheelSuffix: Provider<String> = platform.map { generateWheelSuffix(it) }
+    val wheelSuffix: Provider<String> = platform.map {
+        generateWheelSuffix(it)
+    }
 
     @Internal
     val repairedWheelSuffix: Provider<String> = manylinuxTarget.map { manylinux ->
@@ -63,7 +65,7 @@ abstract class WheelCompatibilityTags : DefaultTask() {
 
     fun generateWheelSuffix(platform: String): String {
         return execString(pythonExe.get(),
-            listOf("-c", "import os; from setuptools.command.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"),
+            listOf("-c", "import os; from packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"),
             mapOf("PLATFORM_TAG" to platform))
     }
 
