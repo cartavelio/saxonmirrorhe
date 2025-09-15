@@ -18,6 +18,10 @@ saxonj {
   sourceRoot = layout.projectDirectory.dir("../src")
 }
 
+val saxonBuild = the<SaxonBuildExtension>()
+
+val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
+
 val xqjDownloadJarBucket by configurations.dependencyScope("xqjDownloadJarBucket")
 val xqjDownloadJar by configurations.resolvable("xqjDownloadJar") {
   extendsFrom(xqjDownloadJarBucket)
@@ -187,11 +191,20 @@ testSuites.configure("qt3", "XQ31")
 testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30extra", "XT30")
 
-val downloadRelease = tasks.named<Zip>("downloadRelease") {
+tasks.named<Sync>("signingDownloadJars") {
+  into(layout.buildDirectory.dir("signing/download"))
   from(xqjDownloadJar)
 }
 
-val saxonBuild = the<SaxonBuildExtension>()
+val downloadRelease = tasks.named<Zip>("downloadRelease") {
+  if (signedReleaseArtifacts) {
+    val name = "signed-download/saxon-he"
+    val vers = saxonBuild.publishVersion.get()
+    from(tasks.named("downloadSignedDownloadJars").map {layout.buildDirectory.file("${name}-xqj-${vers}.jar") })
+  } else {
+    from(xqjDownloadJar)  
+  }
+}
 
 val pseudoXqjMavenJar = tasks.register("pseudoXqjMavenJar") {
   inputs.file(xqjMavenJar)
@@ -202,7 +215,18 @@ val pseudoXqjSourceMavenJar = tasks.register("pseudoXqjSourceMavenJar") {
   inputs.file(xqjSourceMavenJar)
   outputs.file(xqjSourceMavenJar)
 }
+
+tasks.named<Sync>("signingMavenJars") {
+  into(layout.buildDirectory.dir("signing/mavendownload"))
+  from(pseudoXqjMavenJar)
+  from(pseudoXqjSourceMavenJar)
+}
+
+val signTask = tasks.named("downloadSignedMavenJars")
 val mavenArtifactId = "Saxon-HE"
+val mavenVersion = saxonBuild.publishVersion.get()
+val signRootName = "signed-maven/${mavenArtifactId}-${mavenVersion}"
+
 val mavenPom = PomGenerator() {
   name = mavenArtifactId
   license {
@@ -223,21 +247,29 @@ publishing {
     create<MavenPublication>("maven") {
       groupId = "net.sf.saxon"
       artifactId = mavenArtifactId
-      version = saxonBuild.version.get()
+      version = mavenVersion
 
       pom(mavenPom.generate())
 
-      artifact(tasks.named<Jar>("editionMavenJar"))
-      artifact(tasks.named<Jar>("javadocMavenJar"))
-      artifact(tasks.named<Jar>("editionSourceMavenJar"))
-      artifact(pseudoXqjMavenJar) {
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}.jar") })
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-javadoc.jar") }) {
+        classifier = "javadoc"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sources.jar") }) {
+        classifier = "sources"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-xqj.jar") }) {
         classifier = "xqj"
       }
-      artifact(pseudoXqjSourceMavenJar) {
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-xqj-sources.jar") }) {
         classifier = "xqj-sources"
       }
-      artifact(tasks.named<Jar>("testDriversMavenJar"))
-      artifact(tasks.named<Jar>("testDriversSourceMavenJar"))
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
+        classifier = "test"
+      }
+      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
+        classifier = "test-sources"
+      }
     }
   }
   repositories {
