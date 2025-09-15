@@ -4,6 +4,7 @@ plugins {
     id("saxon-build")
     id("com.saxonica.build.managebranches")
     id("saxonc-python")
+    id("saxonc-testsuites")
 }
 
 saxoncPython {
