@@ -145,10 +145,11 @@ abstract class SamplesExtension
       dependsOn("dotnetPublish")
 
       val saxonCS = project.extensions.findByType(SaxonCSExtension::class.java)!!
+      val saxonBuild = project.extensions.findByType(SaxonBuildExtension::class.java)!!
 
       val arch = saxonCS.arch.get()
       val rel = saxonCS.release.get()
-      val netver = "net6.0"
+      val netver = "net${saxonBuild.dotnetversion.get()}"
       val target = "${saxonCS.platform.get()}-${arch}"
       val exec = "${arch}/SaxonCS/bin/${rel}/${netver}/${target}/SaxonCS"
 
@@ -162,7 +163,7 @@ abstract class SamplesExtension
         inputs.files(layout.buildDirectory.file("samples/resources/data/${it}"))
       }
       cmdArgs.add("-xsl:${layout.buildDirectory.file("samples/resources/styles/${stylesheet}").get()}")
-      cmdArgs.add("-o:file:/${layout.buildDirectory.file("sample_results/${sample}.html").get()}")
+      cmdArgs.add("-o:file:${layout.buildDirectory.file("sample_results/${sample}.html").get()}")
       cmdArgs.addAll(args)
 
       doFirst {
