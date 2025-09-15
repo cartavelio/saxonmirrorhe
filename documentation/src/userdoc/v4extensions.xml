@@ -1569,19 +1569,31 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
          <p>The new <a class="bodylink code" href="/xsl-elements/array"
             >xsl:array</a> instruction can be used to
             create an array. The contents of the array are formed from the sequence returned by the contained sequence constructor.</p>
-         
-         <p>The implementation has changed in Saxon 12.6 to reflect the current (April 2025) draft specification, which has
-         changed substantially since earlier versions.</p>
+
+         <p>There are two forms of the instruction.</p>
 
          <ul>
-            <li><p>The <code>composite</code> and <code>use</code> attributes are dropped.</p></li>
-            <li><p>If the <code>select</code> attribute or sequence constructor selects a sequence 
-               of nodes or atomic items, the result is an array of nodes or atomic items.</p></li>
-            <li><p>If the <code>select</code> attribute or sequence constructor selects a sequence
-               of <i>value records</i> (also known as <i>parcels</i>), which will be the case if they are constructed
-            using the <code>xsl:array-member</code> instruction, then the result is an array
-            containing the values in those value records.</p></li>
+            <li>
+               <p>To create a simple array in which every member is a singleton item, use <code>&lt;xsl:array composite="no"></code>
+            (this is the default so the attribute can be omitted). Every item delivered by the sequence constructor then becomes
+            an individual member of the array.</p>
+            </li>
+            <li>
+               <p>To create an array in which some members might be non-singleton sequences, use <code>&lt;xsl:array composite="yes"></code>.
+            In this case every item delivered by the sequence constructor must be a <i>parcel</i>. A parcel is an item of type
+            <code>record(value, *)</code>, that is, a map containing an entry whose key is the string "value", and whose corresponding
+            value is an arbitrary sequence. This sequence is used as the value of the array member.</p>
+               <p>It's often convenient to construct a parcel using the <a class="bodylink code"
+                     href="/xsl-elements/array-member"
+                     >xsl:array-member</a> instruction, but that's
+            not the only way to do it. You could also do it, for example, by calling <code>fn:parcel()</code>. Or you could decompose
+            an existing array into parcels using the function <code>array:members</code>, and use some of
+                  those parcels to form the new array.</p>
+            </li>
          </ul>
+         
+         <p><i>Note: the implementation of <code>xsl:array</code> and <code>xsl:array-member</code> in Saxon 12.x reflects 
+         an earlier draft of the XSLT 4.0 specification. The current (April 2025) draft has moved on from this.</i></p>
       </section>
       
       <section id="enclosing-modes" title="Enclosing modes">
