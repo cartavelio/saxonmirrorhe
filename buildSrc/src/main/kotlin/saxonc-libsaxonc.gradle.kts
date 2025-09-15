@@ -245,12 +245,13 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
 }
 
 val packagedZip = packagedDir.map { it.file("${extension.package_file_name.get()}.zip") }
-val releaseZipWindowsTask = tasks.register<Zip>("release_zip_windows_zip") {
+val releaseZipWindowsTask = tasks.register<Zip>("release_zip_windows") {
     from(releaseFolderTask.map { it.destinationDir })
-    into(packagedZip)
+    destinationDirectory = packagedDir
+    archiveBaseName = extension.package_file_name
 }
 
-val releaseZipUnicesTask = tasks.register<Exec>("package") {
+val releaseZipUnicesTask = tasks.register<Exec>("release_zip") {
     group = LifecycleTasks.RELEASE_GROUP
     description = "generate the libsaxon download .zip package"
 
