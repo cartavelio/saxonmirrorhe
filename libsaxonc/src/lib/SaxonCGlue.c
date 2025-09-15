@@ -47,7 +47,7 @@ graal_isolatethread_t* get_or_attach_thread(sxnc_environment *env) {
        return NULL;
      }
      if (getenv("SAXONC_DEBUG_FLAG")) {
-       fprintf(stdout, "graal_attach_thread pointer %p\n", (void *)sthread);
+       fprintf(stdout, "graal_attach_thread pointer %p\n", (void *)thread);
        fflush(stdout);
      }
    }
