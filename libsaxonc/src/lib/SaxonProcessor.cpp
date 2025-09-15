@@ -528,6 +528,8 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
 
     } else {
       value = new XdmValue(results, true);
+      j_handles_destroy(thread, (void *)results);
+      results = SXN_UNSET;
     }
 
     return value;

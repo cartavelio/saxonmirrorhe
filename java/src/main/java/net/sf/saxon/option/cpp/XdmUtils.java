@@ -106,6 +106,10 @@ public class XdmUtils {
         XdmNode node = SaxonCAPI.objectHandles.get(value);
         XdmNode parent = node.getParent();
 
+        if(parent == null) {
+            return SaxonCAPI.STATUS_FAIL;
+        }
+
         ObjectHandle objectHandle = SaxonCAPI.createHandle(parent);
         return objectHandle.rawValue();
     }
