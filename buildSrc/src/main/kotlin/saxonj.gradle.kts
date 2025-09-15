@@ -38,10 +38,18 @@ extension.jarManifestClasspath.convention(defaultJarManifestClasspath)
 extension.jarManifestClasspathDefaults.convention(defaultJarManifestClasspath)
 extension.version = findProperty("saxonVersion") as String
 
-
 // Create the custom source sets before any dependencies need to be set
 val editionSourceSet = sourceSets.create("edition")
 val editionTestSourceSet = sourceSets.create("editionTest")
+
+// Prevent transitive dependencies from pulling in the wrong (or multiple) versions of things
+configurations.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == "org.xmlresolver") {
+      useVersion(project.findProperty("xmlresolverVersion").toString())
+    }
+  }
+}
 
 // TODO: Exclude xml-apis as a transitive dependency
 
