@@ -633,6 +633,11 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
+  if (argumentValuesRef > 0) {
+    j_handles_destroy(thread,(void *)argumentValuesRef);
+    argumentValuesRef = SXN_UNSET;
+  }
+
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
