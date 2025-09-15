@@ -23,6 +23,8 @@ from libc.string cimport memcpy
 
 from cython import Py_ssize_t
 
+__version__ = "@VERSION@"
+
 ctypedef fused xdm_hierarchy:
     saxoncClasses.XdmValue
     saxoncClasses.XdmItem
@@ -3910,8 +3912,7 @@ cdef class PySchemaValidator:
     def validation_report(self):
         """
         validation_report(self)
-        Get the validation report. This is switched on using the 'report-node' property name
-         in the set_property() method: set_property('report-node', true).
+        Get the validation report
         Returns:
             PyXdmNode: The Validation report result from the Schema validator
         Raises:
