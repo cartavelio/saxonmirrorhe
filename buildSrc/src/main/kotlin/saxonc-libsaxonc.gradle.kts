@@ -59,8 +59,8 @@ val generator = tasks.register("cmake_generate") {
             executable = "cmake"
             args("-G", generatorName, "-B", layout.buildDirectory.get().asFile.toString(),
                 "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
-                "-D", extension.edition.map { "SAXON_PACKAGE_NAME:STRING=SaxonC${it.uppercase()}" }.get(),
-                "-D", extension.edition.map { "SAXON_PACKAGE_FILE_NAME:STRING=SaxonC${it.uppercase()}" }.get(),
+                "-D", extension.package_name.map { "SAXON_PACKAGE_NAME:STRING=${it}" }.get(),
+                "-D", extension.package_file_name.map { "SAXON_PACKAGE_FILE_NAME:STRING=${it}" }.get(),
                 "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.name}" }.get(),
                 "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
                 "-D", saxonCCoreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()

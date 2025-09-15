@@ -110,9 +110,6 @@ find_package(SaxonCCore${SAXON_EDITION} ${SaxonC_VERSION} EXACT REQUIRED)
 
 target_link_libraries(${saxonc} PUBLIC SaxonC${SAXON_EDITION}::saxonc-core-${SaxonC_EDITION})
 
-add_executable(Gizmo ../src/bin/Gizmo.c)
-target_link_libraries(Gizmo PRIVATE ${saxonc})
-
 add_executable(Transform ../src/bin/Transform.c)
 target_link_libraries(Transform PRIVATE ${saxonc})
 
@@ -176,7 +173,7 @@ install(TARGETS ${saxonc}
         FILE_SET export_header
 )
 
-install(TARGETS Gizmo Transform Query)
+install(TARGETS Transform Query)
 
 install(EXPORT "SaxonC${SAXON_EDITION}"
         DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
