@@ -5,6 +5,7 @@ import com.saxonica.build.PyprojectToml
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
@@ -13,6 +14,7 @@ import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
+import javax.annotation.Nullable
 import javax.inject.Inject
 
 abstract class PythonVenv @Inject constructor(private val ex: ExecOperations): DefaultTask() {
@@ -128,4 +130,84 @@ abstract class PipInstall @Inject constructor(private val ex: ExecOperations): D
             stdout.toString()
         }
     }
+}
+
+/**
+ * Task for executing arbitrary python scripts using the Venv python
+ */
+abstract class PythonExec @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+    private val arguments = ListArgs()
+    private var environment = MapArgs()
+
+    @get:InputFile
+    abstract val python: RegularFileProperty
+
+    @get:Internal
+    abstract val workingDir: DirectoryProperty
+
+    fun hasWorkingDir(): Boolean {
+        return workingDir.isPresent()
+    }
+
+    @Nullable
+    @Optional
+    @Input
+    fun getArgs(): List<String> {
+        return arguments.get()
+    }
+
+    fun args(vararg args: Any): PythonExec {
+        arguments.add(*args)
+        return this
+    }
+
+    fun args(args: Iterable<Any>): PythonExec {
+        arguments.add(args)
+        return this;
+    }
+
+    fun setArgs(args: Iterable<Any>): PythonExec {
+        arguments.set(args)
+        return this;
+    }
+
+    fun environment(vararg environmentVariables: Pair<String, Any>): PythonExec {
+        environmentVariables.forEach { (name, value) -> environment(name, value) }
+        return this
+    }
+
+    fun environment(name: String, value: Any): PythonExec {
+        environment.put(name to value)
+        return this
+    }
+
+    fun environment(environmentVariables: Map<String, Any>): PythonExec {
+        environment.put(environmentVariables)
+        return this
+    }
+
+    fun hasEnvironment(): Boolean {
+        return !this.environment.isEmpty()
+    }
+
+    fun resolvedEnvironment(): Map<String, String> {
+        return environment.get()
+    }
+
+    @TaskAction
+    fun execute() {
+        val runner = this
+        ex.exec {
+            if (runner.hasWorkingDir()) {
+                workingDir(runner.workingDir.get())
+            }
+            executable(runner.python.get())
+            args(runner.getArgs())
+
+            if (runner.hasEnvironment()) {
+                environment(runner.resolvedEnvironment())
+            }
+        }
+    }
+
 }
