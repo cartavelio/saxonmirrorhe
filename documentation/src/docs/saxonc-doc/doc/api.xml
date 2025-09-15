@@ -2300,9 +2300,9 @@
                <td>
                   <span class="signature">getValidationReport()</span>
                   <div class="fcomment">Get the validation report produced after validating the
-                     source document. The reporting feature is switched on by setting the 'report'
-                     property on the SchemaValidator: e.g. <code>validator.setProperty('report',
-                        'true')</code>. Returns the report as an <a class="bodylink code"
+                     source document. The reporting feature is switched on by setting the 'report-node'
+                     property on the SchemaValidator: e.g. <code>validator.setProperty('report-node',
+                        'true')</code> For more details see: See full list of properties: <a href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration/schema">Schema validator configuration</a>. Returns the report as an <a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a>.</div>
                </td>
             </tr>
@@ -2322,7 +2322,7 @@
                </td>
                <td>
                   <span class="signature">setProperty(string $name, string $value)</span>
-                  <div class="fcomment">Set properties for this SchemaValidator.</div>
+                  <div class="fcomment">Set properties for this SchemaValidator. See full list of properties: <a href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration/schema">Schema validator configuration</a></div>
                </td>
             </tr>
             <tr>
