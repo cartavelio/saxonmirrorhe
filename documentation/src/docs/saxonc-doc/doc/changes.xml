@@ -319,6 +319,10 @@
             <li>For details on what these packaging changes mean for installing and running SaxonC,
                see the updates in the <a href="/starting">Getting started</a> section.</li>
          </ul>
+         <p>From SaxonC 12.8, source code for SaxonC-HE is available as a download in the <a
+            href="https://github.com/Saxonica/Saxon-HE/releases" target="_blank">Saxon-HE GitHub
+            repository</a>. (For SaxonC 12.5 and earlier, the SaxonC-HE source code was provided in
+            the release download.)</p>
       </category>
    </release>
 
