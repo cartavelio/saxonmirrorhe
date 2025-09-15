@@ -25,8 +25,8 @@ public class ProcessorDataAccumulator {
     private List values;
 
     public ProcessorDataAccumulator(){
-        paramNames = new ArrayList<String>();
-        values = new ArrayList();
+        paramNames = Collections.synchronizedList(new ArrayList<String>());
+        values = Collections.synchronizedList(new ArrayList());
     }
 
     public ProcessorDataAccumulator(int cap){

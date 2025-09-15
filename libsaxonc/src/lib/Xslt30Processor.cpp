@@ -236,7 +236,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
                                                 const char *filename) {
   proc->attachCurrentThread();
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   long status = j_compileFromXdmNodeAndSave(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT,
       (void *)node->getUnderlyingValue(), (char *)cwdXT.c_str(),
@@ -251,12 +251,12 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
 void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
                                                const char *filename,
                                                const char *encoding) {
-  proc->attachCurrentThread();
+  SaxonProcessor::attachCurrentThread();
   if (encoding != nullptr) {
     setProperty("!input-encoding", encoding);
   }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   long status = j_compileFromStringAndSave(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheetStr, (char *)filename,
@@ -292,7 +292,7 @@ void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
     throw SaxonApiException("Output filename is null");
   }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
   long status = j_compileFromFileAndSave(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)xslFilename, (char *)filename,
@@ -318,7 +318,7 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, addition);
 
   if (importPackageValue > SXN_UNSET) {
 
@@ -357,7 +357,7 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, addition);
 
   if (importPackageValue > SXN_UNSET) {
 
@@ -397,7 +397,7 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, addition);
 
   if (importPackageValue > SXN_UNSET) {
 
@@ -432,7 +432,7 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, addition);
 
   if (importPackageValue > SXN_UNSET) {
 
@@ -474,7 +474,7 @@ XdmValue *Xslt30Processor::transformFileToValue(const char *sourcefile,
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, addition);
 
   if (importPackageValue > SXN_UNSET) {
 
@@ -522,7 +522,7 @@ void Xslt30Processor::transformFileToFile(const char *source,
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, addition);
 
   if (importPackageValue > SXN_UNSET) {
 
@@ -568,7 +568,7 @@ const char *Xslt30Processor::transformFileToString(const char *source,
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties, addition);
 
   if (importPackageValue > SXN_UNSET) {
 
