@@ -66,15 +66,9 @@ public class DirectResourceResolver implements ResourceResolver {
             // This path is used by the unparsed-text resolver when no encoding is supplied;
             // it returns (where possible) a TypedStreamSource containing the binary input
             // stream, together with the content type from the HTTP headers.
-            final String uri;
             try {
-                if (request.baseUri == null) {
-                    uri = request.uri;
-                } else {
-                    uri = new URI(request.baseUri).resolve(request.uri).toString();
-                }
-                return ResourceLoader.typedStreamSource(config, uri);
-            } catch (IOException | URISyntaxException e) {
+                return ResourceLoader.typedStreamSource(config, request.uri);
+            } catch (IOException e) {
                 throw new XPathException("Cannot read " + request.uri, e);
             }
         }

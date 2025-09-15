@@ -43,14 +43,12 @@ DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
 DocumentBuilder::~DocumentBuilder() {
   SaxonProcessor::attachCurrentThread();
   if (docBuilderObject != -1) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject);
     docBuilderObject = -1;
   }
   cwdDB.erase();
   baseURI.erase();
   exceptionClear();
   // delete contextItem;
-
 }
 
 void DocumentBuilder::setLineNumbering(bool option) {

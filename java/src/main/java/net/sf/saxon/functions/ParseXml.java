@@ -88,7 +88,7 @@ public class ParseXml extends SystemFunction implements Callable {
             Configuration config = controller.getConfiguration();
 
             String inputXml = inputArg.getStringValue();
-            if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
+            if (inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
                 inputXml = inputXml.substring(1);
             }
             StringReader sr = new StringReader(inputXml);

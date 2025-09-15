@@ -3,16 +3,6 @@ cmake_minimum_required(VERSION 3.27)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
-if(NOT CMAKE_DEBUG_POSTFIX)
-    if(APPLE)
-        set(CMAKE_DEBUG_POSTFIX _debug)
-    else()
-        set(CMAKE_DEBUG_POSTFIX d)
-    endif()
-endif()
-
-# Always use `lib` instead of sometimes `lib64`
-set(SAXON_CMAKE_INSTALL_LIBDIR "lib")
 
 set(saxonc_core "saxonc-core-${SaxonCCore_EDITION}")
 string(TOUPPER ${SaxonCCore_EDITION} SAXON_EDITION)
@@ -39,7 +29,7 @@ include(CMakePackageConfigHelpers)
 
 configure_package_config_file(../cmake/SaxonCCoreConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}Config.cmake
-        INSTALL_DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
+        INSTALL_DESTINATION lib/cmake/SaxonCCore${SAXON_EDITION}
 )
 
 write_basic_package_version_file(
@@ -50,15 +40,14 @@ write_basic_package_version_file(
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}ConfigVersion.cmake
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
 )
 
 install(TARGETS ${saxonc_core}
         EXPORT "SaxonCCore${SAXON_EDITION}"
-        LIBRARY DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
         FILE_SET HEADERS
 )
 install(EXPORT "SaxonCCore${SAXON_EDITION}"
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}
         NAMESPACE "SaxonC${SAXON_EDITION}::"
 )

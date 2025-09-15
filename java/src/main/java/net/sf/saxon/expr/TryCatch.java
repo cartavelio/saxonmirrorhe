@@ -355,7 +355,7 @@ public class TryCatch extends Expression {
                 } catch (XPathException err) {
                     if (err.isGlobalError()) {
                         err.setIsGlobalError(false);
-                    } else if (!(err instanceof XPathException.StackOverflow)) {
+                    } else {
                         StructuredQName code = err.getErrorCodeQName();
                         if (code == null) {
                             code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
@@ -421,7 +421,7 @@ public class TryCatch extends Expression {
                 } catch (XPathException err) {
                     if (err.isGlobalError()) {
                         err.setIsGlobalError(false);
-                    } else if (!(err instanceof XPathException.StackOverflow)) {
+                    } else {
                         StructuredQName code = err.getErrorCodeQName();
                         if (code == null) {
                             code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
@@ -462,7 +462,7 @@ public class TryCatch extends Expression {
                 } catch (XPathException err) {
                     if (err.isGlobalError()) {
                         err.setIsGlobalError(false);
-                    } else if (!(err instanceof XPathException.StackOverflow)) {
+                    } else {
                         StructuredQName code = err.getErrorCodeQName();
                         if (code == null) {
                             code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");

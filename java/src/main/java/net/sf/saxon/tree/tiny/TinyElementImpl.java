@@ -45,7 +45,8 @@ public class TinyElementImpl extends TinyParentNodeImpl {
      */
 
     public TinyElementImpl(TinyTree tree, int nodeNr) {
-        super(tree, nodeNr);
+        this.tree = tree;
+        this.nodeNr = nodeNr;
     }
 
     /**

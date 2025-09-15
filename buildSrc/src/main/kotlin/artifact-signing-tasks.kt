@@ -28,22 +28,16 @@ import javax.inject.Inject
 
 class CloudFormationStackDetails(val region: Property<String>, val stackName: Property<String>) {
   val signingInputsQueueUrl: String
-    get() = stackOutputValue("LinuxCodeSigningInputsQueueUrl")
+    get() = stackOutputValue("CodeSigningInputsQueueUrl")
 
   val signingOutputsQueueUrl: String
-    get() = stackOutputValue("LinuxCodeSigningOutputsQueueUrl")
-
-  val windowsSigningInputsQueueUrl: String
-    get() = stackOutputValue("WindowsCodeSigningInputsQueueUrl")
-
-  val windowsSigningOutputsQueueUrl: String
-    get() = stackOutputValue("WindowsCodeSigningOutputsQueueUrl")
+    get() = stackOutputValue("CodeSigningOutputsQueueUrl")
 
   val signingInputsBucket: String
     get() = stackOutputValue("CodeSigningInputsBucketName")
 
   val signingOutputsBucket: String
-    get() = stackOutputValue("CodeSigningOutputsBucketName")
+    get() = stackOutputValue("CodeSigningInputsBucketName")
 
   val stackDetails: Stack
     get() = fetchStackDetails()
@@ -78,16 +72,10 @@ abstract class AwsSigningResources: DefaultTask() {
   abstract val codeSigningInputsQueueUrl: Property<String>
 
   @get:Internal
-  abstract val windowsCodeSigningInputsQueueUrl: Property<String>
-
-  @get:Internal
   abstract val codeSigningInputsBucket: Property<String>
 
   @get:Internal
   abstract val codeSigningOutputsQueueUrl: Property<String>
-
-  @get:Internal
-  abstract val windowsCodeSigningOutputsQueueUrl: Property<String>
 
   @get:Internal
   abstract val codeSigningOutputsBucket: Property<String>
@@ -96,10 +84,8 @@ abstract class AwsSigningResources: DefaultTask() {
   fun execute() {
     val details = CloudFormationStackDetails(region, stackName)
     codeSigningInputsQueueUrl.set(details.signingInputsQueueUrl)
-    windowsCodeSigningInputsQueueUrl.set(details.windowsSigningInputsQueueUrl)
     codeSigningInputsBucket.set(details.signingInputsBucket)
     codeSigningOutputsQueueUrl.set(details.signingOutputsQueueUrl)
-    windowsCodeSigningOutputsQueueUrl.set(details.windowsSigningOutputsQueueUrl)
     codeSigningOutputsBucket.set(details.signingOutputsBucket)
   }
 }
@@ -162,8 +148,6 @@ abstract class UnsignedArtifactUploadTask
 
   @TaskAction
   fun upload() {
-    logger.info("Uploading job $generatedJobId")
-    logger.info("Uploading files to $jobKeyPrefix")
     val directoryUpload = transferManager.uploadDirectory { builder ->
       builder.source(Paths.get(inputDir.get().asFile.absolutePath))
       .s3Prefix(jobKeyPrefix)

@@ -8,8 +8,6 @@ import org.xmlresolver.utils.URIUtils;
 import javax.xml.transform.sax.SAXSource;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,43 +36,36 @@ public class ClasspathUriTest {
     }
 
     @Test
-    public void testClasspathReferences() throws SaxonApiException {
-        Processor processor = new Processor(false);
+    public void testClasspathReferences() {
+        try {
+            Processor processor = new Processor(false);
+            InputStream stream = ClassLoader.getSystemResourceAsStream("classpath-testing/doc.xml");
+            assertNotNull(stream);
+            InputSource source = new InputSource(stream);
+            source.setSystemId("classpath:classpath-testing/doc.xml");
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode document = builder.build(new SAXSource(source));
+            assertNotNull(document);
 
-        System.err.println(ClassLoader.class.getName());
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        System.err.println(cl.getClass().getName());
-//        cl.getParent().
-//        URL[] urls = ((URLClassLoader)cl).getURLs();
-//
-//        for(URL url: urls){
-//            System.err.println(url.getFile());
-//        }
+            stream = ClassLoader.getSystemResourceAsStream("classpath-testing/style.xsl");
+            assertNotNull(stream);
+            source = new InputSource(stream);
+            source.setSystemId("classpath:classpath-testing/doc.xml");
 
-        InputStream stream = ClassLoader.getSystemResourceAsStream("classpath-testing/doc.xml");
-        assertNotNull(stream, "ClassLoader.getSystemResourceAsStream returned null");
-        InputSource source = new InputSource(stream);
-        source.setSystemId("classpath:classpath-testing/doc.xml");
-        DocumentBuilder builder = processor.newDocumentBuilder();
-        XdmNode document = builder.build(new SAXSource(source));
-        assertNotNull(document);
+            XsltCompiler compiler = processor.newXsltCompiler();
+            compiler.setSchemaAware(false);
+            XsltExecutable exec = compiler.compile(new SAXSource(source));
 
-        stream = ClassLoader.getSystemResourceAsStream("classpath-testing/style.xsl");
-        assertNotNull(stream);
-        source = new InputSource(stream);
-        source.setSystemId("classpath:classpath-testing/doc.xml");
+            XsltTransformer transformer = exec.load();
+            transformer.setInitialContextNode(document);
+            XdmDestination destination = new XdmDestination();
+            transformer.setDestination(destination);
+            transformer.transform();
 
-        XsltCompiler compiler = processor.newXsltCompiler();
-        compiler.setSchemaAware(false);
-        XsltExecutable exec = compiler.compile(new SAXSource(source));
-
-        XsltTransformer transformer = exec.load();
-        transformer.setInitialContextNode(document);
-        XdmDestination destination = new XdmDestination();
-        transformer.setDestination(destination);
-        transformer.transform();
-
-        XdmNode result = destination.getXdmNode();
-        assertNotNull(result);
+            XdmNode result = destination.getXdmNode();
+            assertNotNull(result);
+        } catch (Exception ex) {
+            fail();
+        }
     }
 }

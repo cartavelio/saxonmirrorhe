@@ -23,8 +23,6 @@ from libc.string cimport memcpy
 
 from cython import Py_ssize_t
 
-__version__ = "@VERSION@"
-
 ctypedef fused xdm_hierarchy:
     saxoncClasses.XdmValue
     saxoncClasses.XdmItem
@@ -70,7 +68,7 @@ def create_xdm_dict(proc, mmap):
     Returns:
         dict: Dictionary of (PyXdmAtomicValue, PyXdmValue) pairs
     Example:
-        from saxonc@edition@ import *
+        from saxonc@@edition@@ import *
         with PySaxonProcessor(license=False) as saxonproc:
             mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
                     "c":saxonproc.make_integer_value(3)}
@@ -180,7 +178,7 @@ cdef class PySaxonProcessor:
     """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
     This class is itself the context that needs to be managed (i.e. allocation & release)
     Example:
-        from saxonc@edition@ import *
+        from saxonc@@edition@@ import *
         with PySaxonProcessor(license=False) as proc:
             print("Test SaxonC on Python")
             print(proc.version)
@@ -713,13 +711,9 @@ cdef class PySaxonProcessor:
         """
         if encoding is None:
             encoding = sys.getdefaultencoding()
-        if value is None:
-            return None
-        py_value_string = value.encode(encoding) if value is not None else None
-        cdef char * c_str_ = py_value_string if value is not None else ""
         py_valueType_string = value_type.encode(encoding) if value_type is not None else None
         cdef char * c_valueType_string = py_valueType_string if value_type is not None else ""
-        cdef saxoncClasses.XdmAtomicValue * atomic_value_ptr = self.thisptr.makeAtomicValue(c_valueType_string, c_str_)
+        cdef saxoncClasses.XdmAtomicValue * atomic_value_ptr = self.thisptr.makeAtomicValue(c_valueType_string, value)
         if atomic_value_ptr == NULL:
             del atomic_value_ptr
             return None
@@ -3209,17 +3203,6 @@ cdef class PyXQueryProcessor:
         py_base_string = base_uri.encode('UTF-8') if base_uri is not None else None
         c_baseuri = py_base_string if base_uri is not None else ""
         self.thisxqptr.setQueryBaseURI(c_baseuri)
-     @property
-     def base_uri(self):
-        """
-        base_uri()
-        Property to get the static base URI of the query
-        Returns:
-            the static base URI
-        """
-        cdef const char* c_string = self.thisxqptr.getQueryBaseURI()
-        py_string_i = make_py_str(c_string)
-        return py_string_i
 
      @property
      def cwd(self):
@@ -3916,8 +3899,7 @@ cdef class PySchemaValidator:
     def validation_report(self):
         """
         validation_report(self)
-        Get the validation report. This is switched on using the 'report-node' property name
-         in the set_property() method: set_property('report-node', true).
+        Get the validation report
         Returns:
             PyXdmNode: The Validation report result from the Schema validator
         Raises:

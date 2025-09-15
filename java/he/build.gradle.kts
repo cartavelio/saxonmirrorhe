@@ -1,12 +1,9 @@
-import com.saxonica.build.java.PomGenerator
+import com.saxonica.build.TestSuitesExtension
 
 plugins {
   id("saxon-build")
   id("com.saxonica.build.testsuites")
-  id("com.saxonica.build.samples")
   id("saxonj")
-  id("maven-publish")
-  id("signing")
 }
 
 saxonj {
@@ -16,188 +13,15 @@ saxonj {
   )
   manifestMainClass = "net.sf.saxon.Transform"
   sourceRoot = layout.projectDirectory.dir("../src")
-  testDataDir = layout.projectDirectory.dir("../../src/test/testdata")
 }
-
-val saxonBuild = the<SaxonBuildExtension>()
-
-sourceSets.named("editionTest") {
-  java {
-    // Exclude everything that won't build in HE...
-    exclude("xqjtck/**")
-    exclude("com/saxonica/functions/extfn/LastModifiedTest.java")
-    exclude("commands/AntTests.java")
-    exclude("commands/QueryTests.java")
-    exclude("commands/Saxon3483.java")
-    exclude("commands/TransformTests.java")
-    exclude("commands/ValidateTests.java")
-    exclude("failing/AntTests.java")
-    exclude("failing/FailingTests.java")
-    exclude("internaltests/ActivateSaxon.java")
-    exclude("internaltests/AlphaCodeTypeTest.java")
-    exclude("internaltests/GizmoCommandTests.java")
-    exclude("internaltests/GizmoCompleterTests.java")
-    exclude("internaltests/IncludeImportJarUri.java")
-    exclude("internaltests/LFUCacheTest.java")
-    exclude("internaltests/LicenseTests.java")
-    exclude("internaltests/NumberingTests.java")
-    exclude("internaltests/RedirectTests.java")
-    exclude("internaltests/ResourceTests.java")
-    exclude("internaltests/SignatureTest.java")
-    exclude("internaltests/TinyTreeTest.java")
-    exclude("internaltests/UnionIteratorTest.java")
-    exclude("iss5701/Test5701.java")
-    exclude("jaxptest/AllowedProtocolsTest.java")
-    exclude("jaxptest/BinarySerializationTest.java")
-    exclude("jaxptest/ConfigTest.java")
-    exclude("jaxptest/DOMTest.java")
-    exclude("jaxptest/DefaultAttributeProblemTest.java")
-    exclude("jaxptest/DocumentBuilderImplTest.java")
-    exclude("jaxptest/EventSourceTest.java")
-    exclude("jaxptest/ExtensionTest.java")
-    exclude("jaxptest/JaxpPlusXqjTest.java")
-    exclude("jaxptest/MemoryTest.java")
-    exclude("jaxptest/MultithreadedExtensionTest.java")
-    exclude("jaxptest/OracleDOMTest.java")
-    exclude("jaxptest/ParserTest.java")
-    exclude("jaxptest/SAXTest.java")
-    exclude("jaxptest/SchemaTests.java")
-    exclude("jaxptest/SerializerTests.java")
-    exclude("jaxptest/StylesheetCopyLineNumbersTest.java")
-    exclude("jaxptest/TemplatesHandlerTest.java")
-    exclude("jaxptest/TestIdentityTransformer.java")
-    exclude("jaxptest/ThreadTest.java")
-    exclude("jaxptest/TransformCallingQueryTest.java")
-    exclude("jaxptest/TransformChainTest.java")
-    exclude("jaxptest/TransformMessageTest.java")
-    exclude("jaxptest/TransformTest.java")
-    exclude("jaxptest/TransformWithValidation.java")
-    exclude("jaxptest/TraxTest.java")
-    exclude("jaxptest/URIResolverTest.java")
-    exclude("jaxptest/ValidationTest.java")
-    exclude("jaxptest/ValidatorHandlerTest.java")
-    exclude("jstests/IxslExtensionTest.java")
-    exclude("modeltests/AxiomTreeTests.java")
-    exclude("modeltests/DOM4JTreeTests.java")
-    exclude("modeltests/DOMTreeTests.java")
-    exclude("modeltests/JDOM2TreeTests.java")
-    exclude("modeltests/LinkedTreeTests.java")
-    exclude("modeltests/ObjectModelTests.java")
-    exclude("modeltests/TinyTreeTests.java")
-    exclude("modeltests/XOMTreeTests.java")
-    exclude("nativetests/ConfigDeadlockTest.java")
-    exclude("nativetests/ConfigurationTest.java")
-    exclude("nativetests/FnSchemaTest.java")
-    exclude("nativetests/ImportFunctionTest.java")
-    exclude("nativetests/ProjectionTests.java")
-    exclude("nativetests/SubtypingTests.java")
-    exclude("nativetests/TestXQueryDOM.java")
-    exclude("nativetests/TestXQueryNative.java")
-    exclude("nativetests/TestXQueryUpdate.java")
-    exclude("nativetests/ThreadedKeyTest.java")
-    exclude("nativetests/ValidationTest.java")
-    exclude("net/sf/saxon/option/cpp/**")
-    exclude("performance/ArrayPerformance.java")
-    exclude("performance/Fernandes.java")
-    exclude("performance/PerformanceTestCase.java")
-    exclude("performance/Playground.java")
-    exclude("performance/QueryGroupingPerformance.java")
-    exclude("performance/SimonSoftTest.java")
-    exclude("performance/SimonSoftTest2.java")
-    exclude("performance/TreeModelPerformance.java")
-    exclude("performance/TreeModelPerformanceDescendantAxis.java")
-    exclude("performance/XPathPerformance.java")
-    exclude("pulltests/PullTest.java")
-    exclude("pulltests/StaxBridgeTest.java")
-    exclude("regextests/testRegex.java")
-    exclude("resolvers/CatalogResolverTest.java")
-    exclude("resolvers/CommandTests.java")
-    exclude("resolvers/ResolverConfigurationTest.java")
-    exclude("resolvers/SchemaURIResolverTest.java")
-    exclude("s9apitest/SumanGantaTest.java")
-    exclude("s9apitest/TestCanonicalSerializer.java")
-    exclude("s9apitest/TestChecksums.java")
-    exclude("s9apitest/TestCollections.java")
-    exclude("s9apitest/TestDocumentBuilder.java")
-    exclude("s9apitest/TestErrorListener.java")
-    exclude("s9apitest/TestFunctionLibrary.java")
-    exclude("s9apitest/TestIntegratedFunctions.java")
-    exclude("s9apitest/TestModuleURIResolver.java")
-    exclude("s9apitest/TestPackage.java")
-    exclude("s9apitest/TestPipeline.java")
-    exclude("s9apitest/TestQueryToTransform.java")
-    exclude("s9apitest/TestReflexion.java")
-    exclude("s9apitest/TestSaxonParam.java")
-    exclude("s9apitest/TestSchemaProcessing.java")
-    exclude("s9apitest/TestSchematron.java")
-    exclude("s9apitest/TestSerializer.java")
-    exclude("s9apitest/TestValidator.java")
-    exclude("s9apitest/TestXMLParserOptions.java")
-    exclude("s9apitest/TestXMarkProjection.java")
-    exclude("s9apitest/TestXPathCompiler.java")
-    exclude("s9apitest/TestXPathErrorCode.java")
-    exclude("s9apitest/TestXQueryCompiler.java")
-    exclude("s9apitest/TestXQueryEvaluator.java")
-    exclude("s9apitest/TestXQueryStreaming.java")
-    exclude("s9apitest/TestXQueryThreads.java")
-    exclude("s9apitest/TestXQueryToSaxDestination.java")
-    exclude("s9apitest/TestXQueryUpdate.java")
-    exclude("s9apitest/TestXdmFunction.java")
-    exclude("s9apitest/TestXslt30Streaming.java")
-    exclude("s9apitest/TestXslt30Transformer.java")
-    exclude("s9apitest/TestXslt30TransformerDebug.java")
-    exclude("s9apitest/TestXsltCompiler.java")
-    exclude("s9apitest/TestXsltIn10Mode.java")
-    exclude("s9apitest/TestXsltTracing.java")
-    exclude("s9apitest/TestXsltTransformer.java")
-    exclude("s9apitest/ThreadCountTest.java")
-    exclude("s9apitest/XQueryStreamingTest.java")
-    exclude("xqjtests/RennauBugs.java")
-    exclude("xqjtests/RennauChainedQueries.java")
-    exclude("xqjtests/TestSaxonDuration.java")
-    exclude("xqjtests/TestTreeWalker.java")
-    exclude("xqjtests/TestXQueryUsingXQJ.java")
-    exclude("bugs/Bug6547.java")
-  }
-}
-
-val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 val xqjDownloadJarBucket by configurations.dependencyScope("xqjDownloadJarBucket")
 val xqjDownloadJar by configurations.resolvable("xqjDownloadJar") {
   extendsFrom(xqjDownloadJarBucket)
 }
-val xqjMavenJarBucket by configurations.dependencyScope("xqjMavenJarBucket")
-val xqjMavenJar by configurations.resolvable("xqjMavenJar") {
-  extendsFrom(xqjMavenJarBucket)
-}
-val xqjSourceMavenJarBucket by configurations.dependencyScope("xqjSourceMavenJarBucket")
-val xqjSourceMavenJar by configurations.resolvable("xqjSourceMavenJar") {
-  extendsFrom(xqjSourceMavenJarBucket)
-}
-
-val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
-  extendsFrom(configurations["testImplementation"])
-}
-
-val sampleSourcesBucket by configurations.dependencyScope("sampleSourcesBucket")
-val sampleSources = configurations.resolvable("sampleSources") {
-  extendsFrom(sampleSourcesBucket)
-}
-
-val javaSampleSourcesBucket by configurations.dependencyScope("javaSampleSourcesBucket")
-val javaSampleSources = configurations.resolvable("javaSampleSources") {
-  extendsFrom(javaSampleSourcesBucket)
-}
 
 dependencies {
-  sampleSourcesBucket(project(mapOf("path" to ":samples",
-                                    "configuration" to "sampleSources")))
-  javaSampleSourcesBucket(project(mapOf("path" to ":samples",
-                                        "configuration" to "javaSampleSources")))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
-  xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
-  xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
 }
 
 tasks.named("compileJava") {
@@ -238,96 +62,8 @@ tasks.named<Jar>("editionMavenJar") {
   exclude("net/sf/saxon/option")
 }
 
-tasks.register<Zip>("source-code-release") {
-  dependsOn("compileEditionTestJava")
-  archiveBaseName = "saxon${saxonBuild.publishVersion.get().replace('.', '-')}source"
-  destinationDirectory = layout.buildDirectory.dir("source-code-release")
-  from(layout.buildDirectory.dir("src/main/java"))
-  from(layout.buildDirectory.dir("src/main/resources"))
-}
-
-
-// In principle, this should be in the samples-plugin...
-tasks.register<Copy>("copy_java_sample_sources") {
-    into(layout.buildDirectory.dir("samples/src/java/main"))
-    from(javaSampleSources) {
-      exclude("ee/**")
-    }
-}
-
-samples {
-  runclasspath = (files(sourceSets["edition"].output)
-                  + configurations.named("samplesConfiguration").get())
-  debugclasspath = (files(layout.buildDirectory.dir("classes/java/main"))
-                    + files(layout.buildDirectory.dir("build/resources/main"))
-                    + configurations.named("samplesConfiguration").get())
-
-  sources = sampleSources
-  product = "java"
-  edition = "he"
-}
-
-samples.transform("Books_Transform_1", "books.xml", "books.xsl", listOf())
-samples.transform("Books_Transform_2", "books.xml", "books.xsl", 
-                  listOf("top-author=Thomas Hardy"))
-
-samples.transform("Books_Transform_3", "books.xml", "books-csv.xsl")
-
-samples.query("Books_Query_1", "books.xml", "books.xq")
-
-samples.transform("Tour_Transform_1", null, "tour.xsl", listOf("-it:main"))
-samples.transform("Tour_Transform_2", null, "tour.xsl", listOf("-it:main", "start=a6"))
-samples.transform("Tour_Transform_3", null, "tour.xsl", listOf("-it:main", "start=g2"))
-
-samples.query("Tour_Query_1", null, "tour.xq", listOf("start=e5"))
-samples.query("Tour_Query_2", null, "tour.xq", listOf("start=d2", "end=42"))
-samples.query("Tour_Query_3", null, "tour.xq", listOf("end=61"))
-
-samples.transform("Shakespeare_1", "othello.xml", "play.xsl",
-                  listOf("dir=file:///${layout.buildDirectory.file("sample_results/playhtml").get()}"),
-                  layout.buildDirectory.file("sample_results/playhtml/play.html").get().asFile)
-
-samples.transform("Bible_1", "../bible/nt/nt.xml", "bible.xsl",
-                  listOf("dir=${layout.buildDirectory.file("sample_results/biblehtml").get()}"),
-                  layout.buildDirectory.file("sample_results/biblehtml/index.html").get().asFile)
-
-// ============================================================
-
-samples.sampleClass("JAXPExamples", listOf("all"))
-samples.sampleClass("ApplyXPathJAXP_saxon",
-                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "saxon"),
-                    "he.ApplyXPathJAXP")
-samples.sampleClass("ApplyXPathJAXP_dom",
-                    listOf("data/books.xml", "/BOOKLIST/BOOKS/ITEM[@CAT='MMP']/TITLE", "dom"),
-                    "he.ApplyXPathJAXP")
-samples.sampleClass("ExampleContentHandler", listOf("data/books.xml"), "he.ExampleContentHandler")
-//samples.sampleClass("S9APIExamplesOM_he", listOf("all"), "he.S9APIExamplesOM") // requires setup
-samples.sampleClass("S9APIExamples_he", listOf("nonschema"), "he.S9APIExamples")
-
-// ============================================================
-
-val run_with_config = tasks.register<JavaExec>("run_with_config-HE") {
-  doFirst {
-    mkdir(layout.buildDirectory.file("sample_results"))
-  }
-
-  classpath = (files(sourceSets["edition"].output)
-               + configurations.named("samplesConfiguration").get())
-  mainClass = "net.sf.saxon.Transform"
-  args("-config:${layout.projectDirectory.file("../../samples/src/config/config-HE.xml")}",
-       "-s:${layout.projectDirectory.file("../../samples/src/data/books.xml")}",
-       "-xsl:${layout.projectDirectory.file("../../samples/src/styles/books.xsl")}",
-       "-o:${layout.buildDirectory.file("sample_results/books_with_config-HE.html").get()}",
-       "--traceListenerOutputFile:${layout.buildDirectory.file("sample_results/traceOutput_config.log").get()}")
-}
-tasks.named("all_samples").get().dependsOn(run_with_config)
-
-// ============================================================
-
 val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
-val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(configurations.testDrivers)
-    .from(compile_testdrivers)
+val testSuitesClasspath = files(sourceSets["edition"].java.classesDirectory).from(configurations.testDrivers).from(compile_testdrivers)
 testSuites {
   product = "java"
   edition = "he"
@@ -341,117 +77,8 @@ testSuites.configure("qt3", "XQ31")
 testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30extra", "XT30")
 
-tasks.named<Sync>("signingDownloadJars") {
-  into(layout.buildDirectory.dir("signing/download"))
-  from(xqjDownloadJar)
-}
-
 val downloadRelease = tasks.named<Zip>("downloadRelease") {
-  if (signedReleaseArtifacts) {
-    val name = "signed-download/saxon-he"
-    val vers = saxonBuild.publishVersion.get()
-    from(tasks.named("downloadSignedDownloadJars").map {layout.buildDirectory.file("${name}-xqj-${vers}.jar") })
-  } else {
-    from(xqjDownloadJar)  
-  }
-}
-
-val pseudoXqjMavenJar = tasks.register("pseudoXqjMavenJar") {
-  inputs.file(xqjMavenJar)
-  outputs.file(xqjMavenJar)
-}
-
-val pseudoXqjSourceMavenJar = tasks.register("pseudoXqjSourceMavenJar") {
-  inputs.file(xqjSourceMavenJar)
-  outputs.file(xqjSourceMavenJar)
-}
-
-tasks.named<Sync>("signingMavenJars") {
-  into(layout.buildDirectory.dir("signing/mavendownload"))
-  from(pseudoXqjMavenJar)
-  from(pseudoXqjSourceMavenJar)
-}
-
-val signTask = tasks.named("downloadSignedMavenJars")
-val mavenArtifactId = "Saxon-HE"
-val mavenVersion = saxonBuild.publishVersion.get()
-val signRootName = "signed-maven/${mavenArtifactId}-${mavenVersion}"
-
-val mavenPom = PomGenerator() {
-  name = mavenArtifactId
-  license {
-    name = "Mozilla Public License Version 2.0"
-    url = "http://www.mozilla.org/MPL/2.0/"
-    distribution = "repo"
-  }
-  scm  {
-    url = "https://saxonica.plan.io/projects/saxonmirrorhe/repository"
-    connection = "scm:git:https://saxonica.plan.io/projects/saxonmirrorhe/repository"
-    developerConnection = "scm:git:https://saxonica.plan.io/projects/saxonmirrorhe/repository"
-  }
-  dependencies = configurations.editionImplementation.get().allDependencies
-}
-
-val mavenOMaticDir = layout.buildDirectory.dir("maven-o-matic")
-
-publishing {
-  publications {
-    create<MavenPublication>("maven") {
-      groupId = "net.sf.saxon"
-      artifactId = mavenArtifactId
-      version = mavenVersion
-
-      pom(mavenPom.generate())
-
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}.jar") })
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-javadoc.jar") }) {
-        classifier = "javadoc"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sources.jar") }) {
-        classifier = "sources"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-xqj.jar") }) {
-        classifier = "xqj"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-xqj-sources.jar") }) {
-        classifier = "xqj-sources"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test.jar") }) {
-        classifier = "test"
-      }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-test-sources.jar") }) {
-        classifier = "test-sources"
-      }
-    }
-  }
-  repositories {
-    maven {
-      name = "maven-o-matic"
-      url = uri(mavenOMaticDir.get())
-    }
-/*
-    maven {
-      name = "sonatype"
-      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-      credentials {
-        username = project.findProperty("sonatypeUsername")?.toString() ?: "NOUSER"
-        password = project.findProperty("sonatypePassword")?.toString() ?: "NOPASS"
-      }
-    }
-*/
-  }
-}
-
-signing {
-  sign(publishing.publications)
-}
-
-val heMavenPubTask = tasks.named("publishMavenPublicationToMaven-o-maticRepository")
-
-tasks.register<Zip>("sonatype_bundle") {
-  dependsOn(heMavenPubTask)
-  archiveFileName = "he_sonatype_bundle.zip"
-  from(mavenOMaticDir) {
-    exclude("com")
+  into(archiveBaseName) {
+    from(xqjDownloadJar)
   }
 }

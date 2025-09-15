@@ -678,7 +678,7 @@
    <xsl:template match="*[@RESOLVED_TYPE = 'java.lang.Math']" priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'random#0':          '(new System.Random()).NextDouble()',
-         'round#1':           '(long)Saxon.Impl.Helpers.Utils.roundDouble(%args%)',
+         'round#1':           '(long)System.Math.Round(%args%, System.MidpointRounding.AwayFromZero)',
          'ceil#1':            'System.Math.Ceiling(%args%)',
          '*':                 'System.Math.%Name%(%args%)' 
          })"/>

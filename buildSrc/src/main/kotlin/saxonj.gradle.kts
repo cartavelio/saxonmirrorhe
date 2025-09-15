@@ -3,8 +3,6 @@ import com.saxonica.build.java.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.*
-import org.gradle.process.ExecOperations
-import javax.inject.Inject
 
 plugins {
     id("java-library")
@@ -26,11 +24,6 @@ configure<TestSuitesExtension> {
     edition = extension.edition
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 val defaultJarManifestClasspath = listOf(
     "lib/xmlresolver-${findProperty("xmlresolverVersion")}.jar", "lib/xmlresolver.jar",
     "lib/xmlresolver-${findProperty("xmlresolverVersion")}-data.jar", "lib/xmlresolverdata-data.jar",
@@ -40,34 +33,21 @@ extension.jarManifestClasspath.convention(defaultJarManifestClasspath)
 extension.jarManifestClasspathDefaults.convention(defaultJarManifestClasspath)
 extension.version = findProperty("saxonVersion") as String
 
+
 // Create the custom source sets before any dependencies need to be set
 val editionSourceSet = sourceSets.create("edition")
 val editionTestSourceSet = sourceSets.create("editionTest")
 
-// Prevent transitive dependencies from pulling in the wrong (or multiple) versions of things
-configurations.all {
-  resolutionStrategy.eachDependency {
-    if (requested.group == "org.xmlresolver") {
-      useVersion(project.findProperty("xmlresolverVersion").toString())
-    }
-  }
-}
-
 // TODO: Exclude xml-apis as a transitive dependency
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
-val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
-val configXsdBucket by configurations.dependencyScope("configXsdBucket")
-//val releaseArtifacts by configurations.consumable("releaseArtifacts")
+val releaseArtifacts by configurations.consumable("releaseArtifacts")
 val sourceArtifacts by configurations.consumable("sourceArtifacts")
 val resources by configurations.consumable("resources")
 val filteredSourcesDir by configurations.consumable("filteredSourcesDir")
 val xmldocletArtifacts by configurations.consumable("xmldocletArtifacts")
 val javadocArtifacts by configurations.consumable("javadocArtifacts")
-
-val releaseZips by configurations.consumable("releaseZips")
-val releaseMaven by configurations.consumable("releaseMaven")
 
 val preprocessor by configurations.creating {
     extendsFrom(configurations["runtimeOnly"])
@@ -118,28 +98,17 @@ configurations.configureEach {
 val javaMainSourceRoot = extension.sourceRoot.map { it.dir("main/java") }
 val javaMainResourcesRoot = extension.sourceRoot.map { it.dir("main/resources") }
 val javaTestSourceRoot = extension.sourceRoot.map { it.dir("test/java") }
-val javaTestResourceRoot = extension.sourceRoot.map { it.dir("test/resources") }
 val libTidyPath = extension.sourceRoot.map { it.file("../lib/Tidy.jar") }
 dependencies {
     javaSourcesBucket(files(javaMainSourceRoot))
-    javaFeatureKeysBucket(project(mapOf("path" to ":featurekeys",
-                                        "configuration" to "javaFeatureKeys")))
-    featureKeysBucket(project(mapOf("path" to ":featurekeys",
-                                    "configuration" to "featureKeysSources")))
-    configXsdBucket(project(mapOf("path" to ":samples",
-                                  "configuration" to "configXsd")))
+    featureKeysBucket(project(mapOf("path" to ":java:keys",
+        "configuration" to "featureKeys")))
 
     xmldoclet("com.saxonica:xmldoclet:${findProperty("xmldocletVersion")}")
     xmldoclet(editionSourceSet.output)
 
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
-    downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
-
-    implementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
-    implementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
-    implementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
-
     editionCompileAndTestOnly("xom:xom:1.3.5")
     editionCompileAndTestOnly("org.jdom:jdom:1.1.3")
     editionCompileAndTestOnly("org.jdom:jdom2:2.0.6.1")
@@ -147,7 +116,11 @@ dependencies {
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-dom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-impl:1.2.15")
-
+    editionCompileAndTestOnly("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+//    downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
+    downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
+    compileOnly("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
+    compileOnly("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
     compileOnly("org.graalvm.sdk:graal-sdk:${findProperty("graalSdkVersion")}")
     compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
     compileOnly(libTidyPath.map { files(it.asFile) })
@@ -160,7 +133,6 @@ dependencies {
     testImplementation("org.apache.ant:ant:1.10.9")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("com.sparkjava:spark-core:2.9.4")
-    testImplementation("${findProperty("sqlDriverGroup")}:${findProperty("sqlDriverName")}:${findProperty("sqlDriverVersion")}")
     testImplementation(files(saxonBuild.saxonLicenseDir.get()))
 
     preprocessor("com.igormaznitsa:jcp:7.0.4")
@@ -175,14 +147,8 @@ val javaSources = configurations.resolvable("javaSources") {
 val unprocessedJavaSources = configurations.consumable("unprocessedJavaSources") {
     extendsFrom(javaSourcesBucket)
 }
-val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources") {
-    extendsFrom(javaFeatureKeysBucket)
-}
 val featureKeysSources = configurations.resolvable("featureKeysSources") {
     extendsFrom(featureKeysBucket)
-}
-val configXsd = configurations.resolvable("configXsd") {
-  extendsFrom(configXsdBucket)
 }
 
 // from() is set in the edition build.gradle.kts
@@ -194,7 +160,7 @@ val filteredSources = tasks.register<Sync>("filteredSources") {
 val bundledFilteredSources = tasks.register<Sync>("bundleFilteredSources") {
     into(layout.buildDirectory.dir("tmp/bundled-filtered-sources"))
     from(filteredSources)
-    from(javaFeatureKeysSources)
+    from(featureKeysSources)
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
@@ -209,20 +175,6 @@ val preprocessJava = tasks.register<PreprocessSourcesTask>("preprocessJava") {
     }
 
     output = layout.buildDirectory.dir("src/main/java")
-
-    doLast {
-        saxonBuild.patchReleaseInfo(
-            layout.buildDirectory.file("src/main/java/net/sf/saxon/Version.java").get().asFile,
-            "${findProperty("saxonVersion")!!}",
-            "${findProperty("saxonMajorReleaseDate")!!}")
-        val verifier = layout.buildDirectory.file("src/main/java/com/saxonica/config/JavaVerifier.java").get().asFile
-        val dsaPublicKey = findProperty("dsaPublicKey")?.toString()
-        val ed25519PublicKey = findProperty("ed25519PublicKey")?.toString()
-        if (verifier.exists()) {
-            saxonBuild.patchKey(verifier, "dsa", dsaPublicKey)
-            saxonBuild.patchKey(verifier, "ed25519", ed25519PublicKey)
-        }
-    }
 }
 
 sourceArtifacts.outgoing.artifact(preprocessJava)
@@ -250,20 +202,151 @@ sourceSets.named("editionTest") {
     java {
         setSrcDirs(listOf(javaTestSourceRoot))
 
+        // TODO: this really needs to be per-edition.
+        // For now, exclude everything that won't build in HE. :-(
+        exclude("xqjtck/**")
+        exclude("com/saxonica/functions/extfn/LastModifiedTest.java")
+        exclude("commands/AntTests.java")
+        exclude("commands/QueryTests.java")
+        exclude("commands/Saxon3483.java")
+        exclude("commands/TransformTests.java")
+        exclude("commands/ValidateTests.java")
+        exclude("failing/AntTests.java")
+        exclude("failing/FailingTests.java")
+        exclude("internaltests/ActivateSaxon.java")
+        exclude("internaltests/AlphaCodeTypeTest.java")
+        exclude("internaltests/GizmoCommandTests.java")
+        exclude("internaltests/GizmoCompleterTests.java")
+        exclude("internaltests/IncludeImportJarUri.java")
+        exclude("internaltests/LFUCacheTest.java")
+        exclude("internaltests/LicenseTests.java")
+        exclude("internaltests/NumberingTests.java")
+        exclude("internaltests/RedirectTests.java")
+        exclude("internaltests/ResourceTests.java")
+        exclude("internaltests/SignatureTest.java")
+        exclude("internaltests/TinyTreeTest.java")
+        exclude("internaltests/UnionIteratorTest.java")
+        exclude("iss5701/Test5701.java")
+        exclude("jaxptest/AllowedProtocolsTest.java")
+        exclude("jaxptest/BinarySerializationTest.java")
+        exclude("jaxptest/ConfigTest.java")
+        exclude("jaxptest/DOMTest.java")
+        exclude("jaxptest/DefaultAttributeProblemTest.java")
+        exclude("jaxptest/DocumentBuilderImplTest.java")
+        exclude("jaxptest/EventSourceTest.java")
+        exclude("jaxptest/ExtensionTest.java")
+        exclude("jaxptest/JaxpPlusXqjTest.java")
+        exclude("jaxptest/MemoryTest.java")
+        exclude("jaxptest/MultithreadedExtensionTest.java")
+        exclude("jaxptest/OracleDOMTest.java")
+        exclude("jaxptest/ParserTest.java")
+        exclude("jaxptest/SAXTest.java")
+        exclude("jaxptest/SchemaTests.java")
+        exclude("jaxptest/SerializerTests.java")
+        exclude("jaxptest/StylesheetCopyLineNumbersTest.java")
+        exclude("jaxptest/TemplatesHandlerTest.java")
+        exclude("jaxptest/TestIdentityTransformer.java")
+        exclude("jaxptest/ThreadTest.java")
+        exclude("jaxptest/TransformCallingQueryTest.java")
+        exclude("jaxptest/TransformChainTest.java")
+        exclude("jaxptest/TransformMessageTest.java")
+        exclude("jaxptest/TransformTest.java")
+        exclude("jaxptest/TransformWithValidation.java")
+        exclude("jaxptest/TraxTest.java")
+        exclude("jaxptest/URIResolverTest.java")
+        exclude("jaxptest/ValidationTest.java")
+        exclude("jaxptest/ValidatorHandlerTest.java")
+        exclude("jstests/IxslExtensionTest.java")
+        exclude("modeltests/AxiomTreeTests.java")
+        exclude("modeltests/DOM4JTreeTests.java")
+        exclude("modeltests/DOMTreeTests.java")
+        exclude("modeltests/JDOM2TreeTests.java")
+        exclude("modeltests/LinkedTreeTests.java")
+        exclude("modeltests/ObjectModelTests.java")
+        exclude("modeltests/TinyTreeTests.java")
+        exclude("modeltests/XOMTreeTests.java")
+        exclude("nativetests/ConfigDeadlockTest.java")
+        exclude("nativetests/ConfigurationTest.java")
+        exclude("nativetests/FnSchemaTest.java")
+        exclude("nativetests/ImportFunctionTest.java")
+        exclude("nativetests/ProjectionTests.java")
+        exclude("nativetests/SubtypingTests.java")
+        exclude("nativetests/TestXQueryDOM.java")
+        exclude("nativetests/TestXQueryNative.java")
+        exclude("nativetests/TestXQueryUpdate.java")
+        exclude("nativetests/ThreadedKeyTest.java")
+        exclude("nativetests/ValidationTest.java")
+        exclude("net/sf/saxon/option/cpp/**")
+        exclude("performance/ArrayPerformance.java")
+        exclude("performance/Fernandes.java")
+        exclude("performance/PerformanceTestCase.java")
+        exclude("performance/Playground.java")
+        exclude("performance/QueryGroupingPerformance.java")
+        exclude("performance/SimonSoftTest.java")
+        exclude("performance/SimonSoftTest2.java")
+        exclude("performance/TreeModelPerformance.java")
+        exclude("performance/TreeModelPerformanceDescendantAxis.java")
+        exclude("performance/XPathPerformance.java")
+        exclude("pulltests/PullTest.java")
+        exclude("pulltests/StaxBridgeTest.java")
+        exclude("regextests/testRegex.java")
+        exclude("resolvers/CatalogResolverTest.java")
+        exclude("resolvers/CommandTests.java")
+        exclude("resolvers/ResolverConfigurationTest.java")
+        exclude("resolvers/SchemaURIResolverTest.java")
+        exclude("s9apitest/SumanGantaTest.java")
+        exclude("s9apitest/TestCanonicalSerializer.java")
+        exclude("s9apitest/TestChecksums.java")
+        exclude("s9apitest/TestCollections.java")
+        exclude("s9apitest/TestDocumentBuilder.java")
+        exclude("s9apitest/TestErrorListener.java")
+        exclude("s9apitest/TestFunctionLibrary.java")
+        exclude("s9apitest/TestIntegratedFunctions.java")
+        exclude("s9apitest/TestModuleURIResolver.java")
+        exclude("s9apitest/TestPackage.java")
+        exclude("s9apitest/TestPipeline.java")
+        exclude("s9apitest/TestQueryToTransform.java")
+        exclude("s9apitest/TestReflexion.java")
+        exclude("s9apitest/TestSaxonParam.java")
+        exclude("s9apitest/TestSchemaProcessing.java")
+        exclude("s9apitest/TestSchematron.java")
+        exclude("s9apitest/TestSerializer.java")
+        exclude("s9apitest/TestValidator.java")
+        exclude("s9apitest/TestXMLParserOptions.java")
+        exclude("s9apitest/TestXMarkProjection.java")
+        exclude("s9apitest/TestXPathCompiler.java")
+        exclude("s9apitest/TestXPathErrorCode.java")
+        exclude("s9apitest/TestXQueryCompiler.java")
+        exclude("s9apitest/TestXQueryEvaluator.java")
+        exclude("s9apitest/TestXQueryStreaming.java")
+        exclude("s9apitest/TestXQueryThreads.java")
+        exclude("s9apitest/TestXQueryToSaxDestination.java")
+        exclude("s9apitest/TestXQueryUpdate.java")
+        exclude("s9apitest/TestXdmFunction.java")
+        exclude("s9apitest/TestXslt30Streaming.java")
+        exclude("s9apitest/TestXslt30Transformer.java")
+        exclude("s9apitest/TestXslt30TransformerDebug.java")
+        exclude("s9apitest/TestXsltCompiler.java")
+        exclude("s9apitest/TestXsltIn10Mode.java")
+        exclude("s9apitest/TestXsltTracing.java")
+        exclude("s9apitest/TestXsltTransformer.java")
+        exclude("s9apitest/ThreadCountTest.java")
+        exclude("s9apitest/XQueryStreamingTest.java")
+        exclude("xqjtests/RennauBugs.java")
+        exclude("xqjtests/RennauChainedQueries.java")
+        exclude("xqjtests/TestSaxonDuration.java")
+        exclude("xqjtests/TestTreeWalker.java")
+        exclude("xqjtests/TestXQueryUsingXQJ.java")
+
         compileClasspath += editionSourceSet.output
         runtimeClasspath += editionSourceSet.output
     }
-    resources {
-        setSrcDirs(listOf(javaTestResourceRoot))
-    }
 }
-
-val processEditionTestResources = tasks.named<ProcessResources>("processEditionTestResources")
 
 sourceSets {
     main {
         java {
-            srcDir(javaFeatureKeysSources)
+            srcDir(featureKeysSources)
         }
     }
 }
@@ -282,37 +365,22 @@ tasks.named<JavaCompile>("compileEditionTestJava") {
     classpath += editionSourceSet.output
 }
 
-tasks.named<Test>("test") {
-    environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
-}
-
 val test = tasks.register<Test>("editionTest") {
-    useJUnitPlatform {
-      excludeTags("performance", "mikeonly")
-    }
-
+    useJUnitPlatform()
     description = "Runs JUnit tests."
     group = "verification"
-    environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
-
-    val resourceJars = processEditionTestResources.map {
-      files(it.destinationDir).asFileTree.filter { f ->
-        f.extension == "jar"
-      }
-    }
+    environment("SAXON_TEST_DATA", extension.sourceRoot.map { it.dir("../src/test/testdata") })
 
     testClassesDirs = editionTestSourceSet.output.classesDirs
-    classpath = files(resourceJars, editionTestSourceSet.runtimeClasspath)
+    classpath = editionTestSourceSet.runtimeClasspath
 }
 
 tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
     dependsOn(test)
 }
 
-open class DefaultWithExec @Inject constructor(@Internal val execOperations: ExecOperations): DefaultTask()
-
 // This is not a <Javadoc> task because the Gradle task is so lame
-val editionJavadoc = tasks.register<DefaultWithExec>("editionJavadoc") {
+val editionJavadoc = tasks.register("editionJavadoc") {
     group =  LifecycleTasks.DOCUMENTATION_GROUP
   dependsOn(editionSourceSet.output)
 
@@ -364,7 +432,7 @@ val editionJavadoc = tasks.register<DefaultWithExec>("editionJavadoc") {
   }
 
   doLast {
-    execOperations.exec {
+    exec {
       commandLine(command)
     }
   }
@@ -398,13 +466,8 @@ val (editionDownloadJarTask, editionMavenJarTask) = extension.editionJarTasks(pr
     common {
         inputs.property("inclusions", extension.editionJarInclusions)
         inputs.property("exclusions", extension.editionJarExclusions)
+        from(compile)
         from(jarMetaInf)
-        from(compile) {
-          exclude("previous-compilation-data.bin")
-        }
-        from(project.rootProject.layout.projectDirectory.dir("java/src/main/resources")) {
-          include("net/sf/saxon/data/**")
-        }
 
         exclude(extension.editionJarExclusions.get())
         include(extension.editionJarInclusions.get())
@@ -424,6 +487,19 @@ val (editionDownloadJarTask, editionMavenJarTask) = extension.editionJarTasks(pr
 tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(editionDownloadJarTask, editionMavenJarTask)
 }
+
+//val testJarManifest = tasks.register<ManifestComparer>("testJarManifest") {
+//    jar = editionJar.map { it.outputs.files.singleFile }
+//    goldJarManifest = extension.edition.map { edition -> layout.projectDirectory.file("gold-jar-manifests/saxon-${edition}.list") }
+//    releaseBuild = saxonBuild.releaseBuild
+//    expectSignedJar = jarSigner.canSignJars
+//    newFilesLog = layout.buildDirectory.file("new-files.log")
+//    missingFilesLog = layout.buildDirectory.file("missing-files.log")
+//}
+//
+//editionJar {
+//    finalizedBy(testJarManifest)
+//}
 
 val compileTestDrivers = tasks.register<JavaCompile>("compileTestDrivers") {
     destinationDirectory = layout.buildDirectory.dir("testdriver/classes")
@@ -465,25 +541,11 @@ val (_, javadocMavenJarTask) = jarTaskBuilder("javadoc") {
     }
 }
 
-val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
-
 val signingDownloadJars = tasks.register<Sync>("signingDownloadJars") {
     duplicatesStrategy = DuplicatesStrategy.WARN
     into(layout.buildDirectory.dir("signing/download"))
     from(editionDownloadJarTask)
     from(testdriverJarTask)
-}
-
-val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
-    duplicatesStrategy = DuplicatesStrategy.WARN
-    into(layout.buildDirectory.dir("signing/mavendownload"))
-    from(tasks.named<Jar>("editionMavenJar"))
-    from(tasks.named<Jar>("javadocMavenJar"))
-    if (extension.edition.get().uppercase() == "HE") {
-      from(tasks.named<Jar>("editionSourceMavenJar"))
-    }
-    from(tasks.named<Jar>("testDriversMavenJar"))
-    from(tasks.named<Jar>("testDriversSourceMavenJar"))
 }
 
 val signingResources = tasks.register<AwsSigningResources>("signingResources") {
@@ -500,15 +562,6 @@ val uploadUnsignedDownloadJars = tasks.register<UnsignedArtifactUploadTask>("upl
     jobFileDir = layout.buildDirectory.dir("uploadUnsignedDownloadJars")
 }
 
-val uploadUnsignedMavenJars = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedMavenJars") {
-    inputDir = signingMavenJars.map { it.destinationDir }
-    bucket = signingResources.map { it.codeSigningInputsBucket.get() }
-    queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
-    region = signingResources.map { it.region.get() }
-    baseKeyPrefix = "inputs"
-    jobFileDir = layout.buildDirectory.dir("uploadMavenDownloadJars")
-}
-
 val downloadSignedDownloadJars = tasks.register<SignedArtifactDownloadTask>("downloadSignedDownloadJars") {
     outputDir = layout.buildDirectory.dir("signed-download")
     bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
@@ -517,71 +570,38 @@ val downloadSignedDownloadJars = tasks.register<SignedArtifactDownloadTask>("dow
     jobFile = uploadUnsignedDownloadJars.map { it.jobFile.get() }
 }
 
-val downloadSignedMavenJars = if (signedReleaseArtifacts) {
-  tasks.register<SignedArtifactDownloadTask>("downloadSignedMavenJars") {
-    outputDir = layout.buildDirectory.dir("signed-maven")
-    bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
-    queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
-    region = signingResources.map { it.region.get() }
-    jobFile = uploadUnsignedMavenJars.map { it.jobFile.get() }
-  }
-} else {
-  tasks.register<Copy>("downloadSignedMavenJars") {
-    dependsOn(signingMavenJars)
-    into(layout.buildDirectory.dir("signed-maven"))
-    from(layout.buildDirectory.dir("signing/mavendownload"))
-  }
-}
-
 val downloadRelease = tasks.register<Zip>("downloadRelease") {
     group = LifecycleTasks.RELEASE_GROUP
-    val releaseDocsRoot = extension.sourceRoot.dir("../../src/main")
+    val releaseDocsRoot = extension.sourceRoot.dir("../../src/docs")
+
     archiveBaseName = extension.edition.map { edition ->
-        "Saxon${edition.uppercase()}${saxonBuild.publishVersion.get().replace(".", "-")}J"
+        val version = extension.version.get().split(".").take(2).joinToString("-")
+        "Saxon${edition.uppercase()}${version}"
     }
-
     destinationDirectory = layout.buildDirectory.dir("releases")
-
-    if (signedReleaseArtifacts) {
-      val name = "signed-download/saxon-${extension.edition.get()}"
-      val vers = saxonBuild.publishVersion.get()
-      from(downloadSignedDownloadJars.map { layout.buildDirectory.file("${name}-${vers}.jar") })
-      from(downloadSignedDownloadJars.map { layout.buildDirectory.file("${name}-test-${vers}.jar") })
-    } else {
-      from(editionDownloadJarTask)
-      from(testdriverJarTask)
-    }
-
-    into("lib") {
-      from(downloadReleaseBundled.getIncoming().files)
-    }
-    into("doc") {
-      from(releaseDocsRoot.map { it.dir("zipdoc") }) {
-        include("**/*")
-      }
-    }
-    into("notices") {
-      from(releaseDocsRoot.map { it.dir("notices") })
-      include("JAMESCLARK.txt", "JLINE2.txt", "LICENSE.txt")
+    into(archiveBaseName) {
+        from(editionDownloadJarTask)
+        from(testdriverJarTask)
+        into("libs") {
+            from(downloadReleaseBundled.getIncoming().files)
+        }
+        from(releaseDocsRoot) {
+            include("doc/**/*")
+        }
+        into("notices") {
+            from(releaseDocsRoot.map { it.dir("notices") })
+            include("JAMESCLARK.txt", "JLINE2.txt", "LICENSE.txt")
+        }
     }
 }
 
-val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
+tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(downloadRelease)
 }
-
-val stageMaven = tasks.register<Zip>("stageMaven") {
-    dependsOn("publish")
-    archiveBaseName = "Saxon${extension.edition.get().uppercase()}-maven"
-    destinationDirectory = layout.buildDirectory.dir("mavenrelease")
-    from(layout.buildDirectory.dir("maven-o-matic"))
-}
-
-val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
-  group = "Internal"
-  into(layout.buildDirectory.dir("featureKeys"))
-  from(featureKeysSources)
-}
-
-releaseZips.outgoing.artifact(downloadRelease) { builtBy(downloadRelease) }
-releaseMaven.outgoing.artifact(stageMaven) { builtBy(stageMaven)}
+//val artifacts = tasks.register<Copy>("release") {
+//    into(layout.buildDirectory.dir("releases"))
+//    from(tasks.named("jar"))
+//    from(tasks.named("jarTestDrivers"))
+//}
+//
+//releaseArtifacts.outgoing.artifact(artifacts)

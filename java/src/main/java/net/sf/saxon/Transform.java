@@ -103,11 +103,11 @@ public class Transform {
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified configuration file");
         //#if CSHARP==false
-//        options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
-//                                    "Use specified collection URI resolver class");
+        options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "Use specified collection URI resolver class");
         //#endif
-//        options.addRecognizedOption("diag", CommandLineOptions.TYPE_FILENAME,
-//                                    "Display runtime diagnostics");
+        options.addRecognizedOption("diag", CommandLineOptions.TYPE_FILENAME,
+                                    "Display runtime diagnostics");
         options.addRecognizedOption("dtd", CommandLineOptions.TYPE_ENUMERATION,
                                     "Validate using DTD");
         options.setPermittedValues("dtd", new String[]{"on", "off", "recover"}, "on");
@@ -1410,7 +1410,7 @@ public class Transform {
                     Reader jsonReader = new BufferedReader(
                             new InputStreamReader(new FileInputStream(jsonSource), StandardCharsets.UTF_8));
                     XdmValue jsonTree = Query.parseJson(processor, jsonReader);
-                    if (!jsonTree.isEmptySequence()) {
+                    if (!jsonTree.isEmpty()) {
                         transformer.setGlobalContextItem(jsonContextItem = jsonTree.itemAt(0));
                     }
                 } catch (IOException e) {

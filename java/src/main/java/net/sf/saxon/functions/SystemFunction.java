@@ -17,7 +17,9 @@ import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
@@ -399,8 +401,7 @@ public abstract class SystemFunction extends AbstractFunction {
         if ((details.properties & BuiltInFunctionSet.AS_ARG0) != 0) {
             return args[0].getItemType();
         } else if ((details.properties & BuiltInFunctionSet.AS_PRIM_ARG0) != 0) {
-            PlainType atomized = args[0].getItemType().getAtomizedItemType();
-            return atomized.equals(BuiltInAtomicType.UNTYPED_ATOMIC) ? BuiltInAtomicType.DOUBLE : atomized;
+            return args[0].getItemType().getPrimitiveItemType();
         } else {
             return details.itemType;
         }

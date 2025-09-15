@@ -20,12 +20,12 @@ using namespace std;
  * Test1:
  */
 void testxQuery1(SaxonProcessor *processor, XQueryProcessor *queryProc,
-                 const std::string *const dataDir,
                  sResultCount *sresult) {
   cout << endl << "Test testXQuery1:" << endl;
   queryProc->clearParameters();
   queryProc->clearProperties();
-  queryProc->setProperty("s", CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
+  queryProc->setProperty("s", "../data/cat.xml");
+
   queryProc->setProperty("qs", "<out>{count(/out/person)}</out>");
 
   const char *result = nullptr;
@@ -77,7 +77,7 @@ void testxQueryToString_OnEmptySequence(XQueryProcessor *queryProc,
   const char *result = nullptr;
   try {
     result = queryProc->runQueryToString();
-    if (result[0] == '\0') {
+    if (result == nullptr) {
       sresult->success++;
     } else {
     cout << "Result :" << result << endl;
@@ -321,7 +321,7 @@ void testReusability(SaxonProcessor *processor, sResultCount *sresult) {
 }
 
 // Test requirement of license file - Test should fail
-void testXQueryLineNumberError(const char *cwd, const string * const dataDir, sResultCount *sresult) {
+void testXQueryLineNumberError(const char *cwd, sResultCount *sresult) {
   cout << endl << "Test testXQueryLineNumberError:" << endl;
   SaxonProcessor *processor = new SaxonProcessor(false);
   XQueryProcessor *queryProc = processor->newXQueryProcessor();
@@ -338,8 +338,7 @@ void testXQueryLineNumberError(const char *cwd, const string * const dataDir, sR
   if (cwd != nullptr) {
     queryProc->setcwd(cwd);
   }
-  string xmlFile = CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml");
-  queryProc->setProperty("s", xmlFile.c_str());
+  queryProc->setProperty("s", "../data/cat.xml");
 
   queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
   const char *result = nullptr;
@@ -364,7 +363,7 @@ void testXQueryLineNumberError(const char *cwd, const string * const dataDir, sR
 }
 
 // Test requirement of license file - Test should succeed
-void testXQueryLineNumber(const char *cwd, const std::string * const dataDir, sResultCount *sresult) {
+void testXQueryLineNumber(const char *cwd, sResultCount *sresult) {
   SaxonProcessor *processor = new SaxonProcessor(true);
   processor->setcwd(cwd);
   processor->setConfigurationProperty("l", "on");
@@ -378,8 +377,8 @@ void testXQueryLineNumber(const char *cwd, const std::string * const dataDir, sR
   // queryProc->setProperty("s", "data/cat.xml");
   queryProc->declareNamespace("saxon", "http://saxon.sf.net/");
 
-  string qs = string { "saxon:line-number(doc('" } + *dataDir + string { "/cat.xml')/out/person[1])" };
-  queryProc->setProperty("qs", qs.c_str()); /// out/person[1]
+  queryProc->setProperty("qs", "saxon:line-number(doc('data/cat.xml')/out/"
+                               "person[1])"); /// out/person[1]
   try {
     const char *result = queryProc->runQueryToString();
     cout << "Result :" << result << endl;
@@ -402,7 +401,11 @@ void testXQueryLineNumber(const char *cwd, const std::string * const dataDir, sR
 }
 
 int main(int argc, char *argv[]) {
-  const string dataDir = argc > 1 ? string(argv[1]) : string();
+
+  const char *cwd = nullptr;
+  if (argc > 1) {
+    cwd = argv[1];
+  }
 
   SaxonProcessor *processor = new SaxonProcessor(false);
 
@@ -410,10 +413,14 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  char buff[FILENAME_MAX]; // create string buffer to hold path
-  GetCurrentDir(buff, FILENAME_MAX);
-  processor->setcwd(buff);
-  const char *cwd = (const char *)buff;
+  if (cwd != nullptr) {
+    processor->setcwd(cwd);
+  } else {
+    char buff[FILENAME_MAX]; // create string buffer to hold path
+    GetCurrentDir(buff, FILENAME_MAX);
+    processor->setcwd(buff);
+    cwd = (const char *)buff;
+  }
 
   cout << "CWD = " << cwd << endl;
 
@@ -421,7 +428,7 @@ int main(int argc, char *argv[]) {
 
   sResultCount *sresult = new sResultCount();
 
-  testxQuery1(processor, query, &dataDir, sresult);
+  testxQuery1(processor, query, sresult);
 
   cout << endl
        << "============================================================="
@@ -452,12 +459,12 @@ int main(int argc, char *argv[]) {
        << "============================================================="
        << endl
        << endl;
-  testXQueryLineNumberError(cwd, &dataDir, sresult);
+  testXQueryLineNumberError(cwd, sresult);
   cout << endl
        << "============================================================="
        << endl
        << endl;
-  testXQueryLineNumber(cwd, &dataDir, sresult);
+  testXQueryLineNumber(cwd, sresult);
 
   cout << endl
        << "============================================================="

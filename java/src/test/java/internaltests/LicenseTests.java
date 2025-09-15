@@ -4,23 +4,25 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.LicenseException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A number of tests to ensure that certain constructs require a valid license,
@@ -319,56 +321,45 @@ public class LicenseTests {
         }
     }
 
-    @Nested
-    class ReadingEEConfigFile {
+    @Test
+    public void TestReadConfigFileWithLinkToLicenseFile() {
         // Copy the license file from the standard location to a new location in the build directory,
         // and then pick it up by reference from a configuration file. This test doesn't rule out the
         // possibility that we're ignoring the configuration file and loading the license from the usual
         // location. To eliminate that possibility, we do the same again, corrupting the license and
         // checking that loading now fails.
-
-        Path configFilePath;
-        Path licenseFilePath;
-
-        @BeforeEach
-        void copyConfigAndLicense(@TempDir Path tempDir) throws IOException {
-            Path existingLicenseFilePath = Paths.get(System.getenv("SAXON_LICENSE_DIR")).resolve("saxon-license.lic");
-            licenseFilePath = tempDir.resolve("copied-license.text"); //Paths.get(newLicenseLocation + "/copied-license.text");
-            Path configFileFixturePath = Testdata.path("config-with-link-to-license-file.config");
-            configFilePath = tempDir.resolve("config-with-link-to-license-file.config");
-            Files.copy(existingLicenseFilePath, licenseFilePath, StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(configFileFixturePath, configFilePath, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        private void corruptLicenseFile() throws IOException {
-            List<String> content = Files.readAllLines(licenseFilePath);
+        try {
+            // First phase - should work
+            String existingLicenseFileLocation = System.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic";
+            String newLicenseLocation = new ConfigTest().getDataDir().replace("src/test/testdata", "build/license");
+            Path newLicensePath = Paths.get(newLicenseLocation + "/copied-license.text");
+            Files.createDirectories(Paths.get(newLicenseLocation));
+            Files.copy(Paths.get(existingLicenseFileLocation), newLicensePath, StandardCopyOption.REPLACE_EXISTING);
+            Processor processor = new Processor(new StreamSource(new File(
+                    new ConfigTest().getDataDir() + "config-with-link-to-license-file.config")));
+            assertNotNull(processor);
+            assertTrue(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
+            // Second phase - should fail
+            List<String> content = Files.readAllLines(newLicensePath);
             for (int i=0; i<content.size(); i++) {
                 if (content.get(i).startsWith("Signature=")) {
                     content.set(i, "Signature=FFFFFFFF");
                 }
-                else if (content.get(i).startsWith("Signature2024=")) {
-                    content.set(i, "Signature2024=FFFFFFFF");
-                }
             }
-            Files.write(licenseFilePath, content);
-        }
-
-        @Test
-        public void withLinkToGoodLicenseFile() throws SaxonApiException {
-            System.err.println("configFilePath: " + configFilePath);
-            Processor processor = new Processor(new StreamSource(configFilePath.toFile()));
-            assertNotNull(processor);
-            assertTrue(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
-        }
-
-        @Test
-        public void withLinkToBadLicenseFile() throws SaxonApiException, IOException {
-            System.err.println("configFilePath: " + configFilePath);
-            corruptLicenseFile();
-            Processor processor = new Processor(new StreamSource(configFilePath.toFile()));
-            assertNotNull(processor);
-//            assertRaise
-            assertFalse(processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION));
+            Files.write(newLicensePath, content);
+            try {
+                Processor proc2 = new Processor(new StreamSource(new File(
+                        new ConfigTest().getDataDir() + "config-with-link-to-license-file.config")));
+                assertNotNull(proc2);
+                processor.getUnderlyingConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION);
+                fail("Invalid license not detected");
+            } catch (SaxonApiException e) {
+                assertTrue(e.getMessage().contains("Failed to process license"));
+                assertTrue(e.getMessage().contains("build/license/copied-license.text"));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail(ex);
         }
     }
 }

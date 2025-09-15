@@ -63,9 +63,7 @@ class JarTaskBuilder(val extension: SaxonJExtension, val project: Project, val t
     buildArchiveBaseName(edition.map { edition -> edition.uppercase() }.get())
   }
   private val commonBaseConfiguration: Jar.() -> Unit = {
-    val parts = extension.version.get().split('.')
-    val usefulParts = if (parts.last() == "0") parts.dropLast(1) else parts
-    archiveVersion = usefulParts.joinToString(".")
+    archiveVersion = extension.version
   }
   private val mavenBaseConfiguration: Jar.() -> Unit = {
     archiveBaseName = mavenArchiveBaseName

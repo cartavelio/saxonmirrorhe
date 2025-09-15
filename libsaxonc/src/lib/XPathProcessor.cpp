@@ -82,7 +82,6 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
 }
 
 XPathProcessor::~XPathProcessor() {
-    SaxonProcessor::attachCurrentThread();
     clearProperties();
     clearParameters();
     if (xp_baseURI != nullptr) {

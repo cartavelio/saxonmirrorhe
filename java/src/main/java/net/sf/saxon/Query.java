@@ -123,8 +123,8 @@ public class Query {
         //#endif
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified configuration file");
-//        options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
-//                                    "Use specified collection URI resolver class");
+        options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "Use specified collection URI resolver class");
         options.addRecognizedOption("dtd", CommandLineOptions.TYPE_ENUMERATION,
                                     "Validate using DTD");
         options.setPermittedValues("dtd", new String[]{"on", "off", "recover"}, "on");
@@ -194,6 +194,8 @@ public class Query {
         options.addRecognizedOption("TJ", CommandLineOptions.TYPE_BOOLEAN,
                                     "Debug binding and execution of extension functions");
         options.setPermittedValues("TJ", new String[]{"on", "off"}, "on");
+        options.addRecognizedOption("tree", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
+                                    "Use specified tree model for source documents");
         options.addRecognizedOption("Tlevel", CommandLineOptions.TYPE_STRING,
                                     "Level of detail for trace listener output");
         options.setPermittedValues("Tlevel", new String[]{"none", "low", "normal", "high"}, "normal");
@@ -207,8 +209,6 @@ public class Query {
         //#endif
         options.addRecognizedOption("traceout", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "File for output of trace() messages");
-        options.addRecognizedOption("tree", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
-                                    "Use specified tree model for source documents");
         options.setPermittedValues("tree", new String[]{"linked", "tiny", "tinyc"}, null);
         options.addRecognizedOption("u", CommandLineOptions.TYPE_BOOLEAN,
                                     "Interpret filename arguments as URIs");
@@ -427,7 +427,7 @@ public class Query {
                     Reader jsonReader = new BufferedReader(
                                     new InputStreamReader(new FileInputStream(sourceJsonFileName), StandardCharsets.UTF_8));
                     XdmValue jsonTree = parseJson(processor, jsonReader);
-                    if (!jsonTree.isEmptySequence()) {
+                    if (!jsonTree.isEmpty()) {
                         evaluator.setContextItem(jsonTree.itemAt(0));
                     }
                 } catch (IOException e) {

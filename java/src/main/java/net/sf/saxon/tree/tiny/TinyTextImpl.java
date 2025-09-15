@@ -30,7 +30,8 @@ public final class TinyTextImpl extends TinyNodeImpl {
      */
 
     public TinyTextImpl(TinyTree tree, int nodeNr) {
-        super(tree, nodeNr);
+        this.tree = tree;
+        this.nodeNr = nodeNr;
     }
 
     /**
