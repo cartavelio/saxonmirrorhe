@@ -64,6 +64,12 @@ public interface Platform {
     String getPlatformVersion();
 
     /**
+     * Ask whether we are on Windows
+     */
+
+    boolean isWindows();
+
+    /**
      * Get a suffix letter to add to the Saxon version number to identify the platform
      *
      * @return "J" for Java, "N" for .NET, "CS" for SaxonCS
