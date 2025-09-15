@@ -99,7 +99,7 @@ extension.releaseVersions.get().forEach { v ->
         venvTask = venv
         buildDir = layout.buildDirectory.dir("${v}_release")
         platformTagTask = releaseWheelPlatformTagTask
-        saxoncCoreDir = libsaxoncReleaseArtifactsDir.elements
+        libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
     }
 
     releaseWheels {
@@ -113,13 +113,6 @@ val venv = tasks.register<PythonVenv>("venv") {
     pythonEnv = extension
     branch = manageBranches.currentBranch
     pyenvPythonExe = devPythonExe.elements.map { project.file(it.single().asFile.readText()) }
-//    extension.version.map { v ->
-//        println("VERSIONS!")
-//        println(v)
-//        println(pythonVersions)
-//        println(pythonVersions[v])
-//        devPythonExe.elements.map { project.file(it.single().asFile.readText()) }.get()
-//    }
     buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
 }
 
@@ -153,7 +146,7 @@ val repairDevWheel = wheelTasksBuilder {
     venvTask = venv
     buildDir = layout.buildDirectory
     platformTagTask = devWheelPlatformTagTask
-    saxoncCoreDir = libsaxoncReleaseArtifactsDir.elements
+    libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
 }
 
 val repairDevDebugWheel = wheelTasksBuilder {
@@ -162,7 +155,7 @@ val repairDevDebugWheel = wheelTasksBuilder {
     venvTask = debugVenv
     buildDir = layout.buildDirectory
     platformTagTask = wheelDebugPlatformTagTask
-    saxoncCoreDir = libsaxoncDebugArtifactsDir.elements
+    libsaxoncDir = libsaxoncDebugArtifactsDir.elements
 }
 
 val installDevWheel = tasks.register<InstallLocalWheel>("install_wheel") {

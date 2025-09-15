@@ -103,7 +103,7 @@ abstract class BuildWheel : DefaultTask() {
     }
 
     @get:InputDirectory
-    abstract val saxoncCoreDir: DirectoryProperty
+    abstract val libsaxoncDir: DirectoryProperty
 
     @get:Internal
     abstract val outputDir: DirectoryProperty
@@ -153,7 +153,7 @@ abstract class BuildWheel : DefaultTask() {
                 environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
             }
 
-            environment("SAXONC_CORE_PATH", saxoncCoreDir.get())
+            environment("LIBSAXONC_PATH", libsaxoncDir.get())
             environment("SAXONC_BUILD_EDITION", productEdition.get())
             environment("SAXONC_BUILD_VERSION", productVersion.get())
             args("-m", "build", "--wheel", "--outdir", outputDir.get().asFile.toString())
@@ -314,11 +314,11 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
         set(value) {
             platformTagTaskVal = value
         }
-    private var saxoncCoreDirVal: Provider<Set<FileSystemLocation>>?  = null
-    var saxoncCoreDir: Provider<Set<FileSystemLocation>>
-        get() = saxoncCoreDirVal!!
+    private var libsaxoncDirVal: Provider<Set<FileSystemLocation>>?  = null
+    var libsaxoncDir: Provider<Set<FileSystemLocation>>
+        get() = libsaxoncDirVal!!
         set(value) {
-            saxoncCoreDirVal = value
+            libsaxoncDirVal = value
         }
 
     var prefix: String? = null
@@ -334,12 +334,12 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
             wheelSuffix = platformTagTask.flatMap { it.wheelSuffix }
             macosxDeploymentTarget = platformTagTask.flatMap { it.macosxDeploymentTarget }
             sourceDir = builder.sourceDir
-            this.saxoncCoreDir = project.layout.dir(builder.saxoncCoreDir.map { it.first().asFile })
+            libsaxoncDir = project.layout.dir(builder.libsaxoncDir.map { it.first().asFile })
             outputDir = builder.buildDir.dir("wheel")
         }
 
         val libLocations: Provider<List<String>> = saxonBuild.systemOsName.map { os -> if (os == "windows") listOf("lib", "bin") else listOf("lib") }
-        val libDirs = saxoncCoreDir.map { dirs ->
+        val libDirs = libsaxoncDir.map { dirs ->
             val dirPath = dirs.first().asFile.toString()
             libLocations.map { dirnames ->
                 dirnames.map { dirname ->
