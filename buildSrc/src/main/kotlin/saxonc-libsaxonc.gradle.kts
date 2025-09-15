@@ -4,6 +4,7 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.*
 import java.nio.file.Files
+import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     base
@@ -241,6 +242,13 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
     }
     into("samples") {
         from(layout.projectDirectory.dir("../samples"))
+    }
+    from(layout.projectDirectory.dir("../")) {
+        include("README.md")
+        filter<ReplaceTokens>("tokens" to mapOf(
+            "EDITION" to extension.edition.map { it.uppercase() }.get(),
+            "VERSION" to saxonBuild.version.get(),
+        ))
     }
 }
 
