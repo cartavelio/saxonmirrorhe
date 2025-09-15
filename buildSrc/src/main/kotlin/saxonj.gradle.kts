@@ -286,7 +286,7 @@ tasks.named<Test>("test") {
 
 val test = tasks.register<Test>("editionTest") {
     useJUnitPlatform {
-      excludeTags("performance")
+      excludeTags("performance", "mikeonly")
     }
 
     description = "Runs JUnit tests."
