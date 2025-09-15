@@ -138,6 +138,22 @@ public class XSLCatch extends StyleElement {
                         Type.ELEMENT,
                         localname);
                 result.add(nt);
+            } else if (s.startsWith("Q{")) {
+                int brace = s.indexOf('}');
+                if (brace < 0) {
+                    compileErrorInAttribute("No closing '}' in EQName", "XTSE0010", "errors");
+                } else if (brace == s.length() - 1) {
+                    compileErrorInAttribute("Missing local part in EQName", "XTSE0010", "errors");
+                } else {
+                    NamespaceUri uri = NamespaceUri.of(s.substring(2, brace));
+                    String local = s.substring(brace + 1);
+                    if (local.equals("*")) {
+                        nt = new NamespaceTest(getNamePool(), Type.ELEMENT, uri);
+                    } else {
+                        nt = new NameTest(Type.ELEMENT, uri, local, getNamePool());
+                    }
+                    result.add(nt);
+                }
             } else {
                 String prefix;
                 String localName;
