@@ -116,6 +116,9 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
         }
         int len = results.length;
         long[] resultRefs = Arrays.stream(results).mapToLong(i -> {
+            if( i == null){
+                return SaxonCAPI.STATUS_FAIL;
+            }
             ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
             return objectHandle.rawValue();
         }).toArray();
@@ -131,7 +134,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
         XdmNode[] resultDocArr = new XdmNode[results.size()];
         Collection<XdmDestination> resultDocCollection = results.values();
         int i = 0;
-        if (resultDocCollection.size() == 0) {
+        if (resultDocCollection.isEmpty()) {
             if (SaxonCAPI.debug) {
                 System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument is empty");
             }
@@ -142,7 +145,12 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
             i++;
         }
         if (SaxonCAPI.debug) {
-            System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument.length" + resultDocArr.length);
+            System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument.length =" + resultDocArr.length);
+            if (resultDocArr[0] != null) {
+                System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument class =" + resultDocArr[0].getClass().getName());
+            } else {
+                System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument null getXdmNode found");
+            }
         }
         return resultDocArr;
     }
@@ -152,7 +160,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
         XdmValue[] resultsArr = new XdmValue[rawResults.size()];
         Collection<RawDestination> resultDocCollection = rawResults.values();
         int i = 0;
-        if (resultDocCollection.size() == 0) {
+        if (resultDocCollection.isEmpty()) {
             if (SaxonCAPI.debug) {
                 System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument is empty");
             }
@@ -186,7 +194,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
 
         }
 
-        if (resultDocCollection.size() == 0) {
+        if (resultDocCollection.isEmpty()) {
             if (SaxonCAPI.debug) {
                 System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocumentURIs is empty");
             }
