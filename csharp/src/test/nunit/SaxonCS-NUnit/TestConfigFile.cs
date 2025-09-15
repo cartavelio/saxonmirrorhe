@@ -56,9 +56,19 @@ namespace SaxonCS_NUnit {
                     Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR") + "/saxon-license.lic";
                 DirectoryInfo newLicenseDir = new DirectoryInfo(TestHelper.RepoPath("build/license"));
                 newLicenseDir.Create();
+
+                // Make sure the configuration file is in there too...so that we don't
+                // have to work out the correct relative location from the DATA_DIR
+                string configLocation = Path.Combine(ConfigTest.DATA_DIR,
+                                                     "config-with-link-to-license-file.config");
+                string newConfigLocation = Path.Combine(newLicenseDir.FullName,
+                                                        "config-with-link-to-license-file.config");
+                File.Copy(configLocation, newConfigLocation, true);
+
                 string newLicenseLocation = Path.Combine(newLicenseDir.FullName, "copied-license.text");
                 File.Copy(existingLicenseFileLocation, newLicenseLocation, true);
-                Uri address = new Uri(ConfigTest.DataDirUri, "config-with-link-to-license-file.config");
+                Uri address = new Uri("file://" + newLicenseDir.FullName
+                                      + "/" + "config-with-link-to-license-file.config");
                 Stream configFile = new WebClient().OpenRead(address);
                 Processor processor = new(configFile, address);
                 ClassicAssert.NotNull(processor);
@@ -67,7 +77,9 @@ namespace SaxonCS_NUnit {
                 
                 // Phase 2: the same, except the license file is corrupted so we should get a failure
                 string content = File.ReadAllText(existingLicenseFileLocation);
-                content = content.Replace("Signature=", "Signature=FFFF");
+                content = content
+                    .Replace("Signature=", "Signature=FFFF")
+                    .Replace("Signature2024=", "Signature2024=FFFF");
                 File.WriteAllText(newLicenseLocation, content);
 
                 try {
@@ -77,7 +89,7 @@ namespace SaxonCS_NUnit {
                 }
                 catch (Exception e) {
                     Assert.That(e.Message.Contains("Failed to process license"));
-                    Assert.That(e.Message.Contains("build/license/copied-license.text"));
+                    Assert.That(e.Message.Contains("copied-license.text"));
                 }
                 
             }
