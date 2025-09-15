@@ -580,11 +580,11 @@ val downloadSignedDownloadJars = tasks.register<SignedArtifactDownloadTask>("dow
 
 val downloadRelease = tasks.register<Zip>("downloadRelease") {
     group = LifecycleTasks.RELEASE_GROUP
-    val releaseDocsRoot = extension.sourceRoot.dir("../../src/docs")
+    val releaseDocsRoot = extension.sourceRoot.dir("../../src/main")
 
     archiveBaseName = extension.edition.map { edition ->
         val version = extension.version.get().split(".").take(2).joinToString("-")
-        "Saxon${edition.uppercase()}${version}"
+        "Saxon${edition.uppercase()}${version}J"
     }
     destinationDirectory = layout.buildDirectory.dir("releases")
     into(archiveBaseName) {
@@ -593,8 +593,10 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
         into("lib") {
             from(downloadReleaseBundled.getIncoming().files)
         }
-        from(releaseDocsRoot) {
-            include("doc/**/*")
+        into("doc") {
+          from(releaseDocsRoot.map { it.dir("zipdoc") }) {
+            include("**/*")
+          }
         }
         into("notices") {
             from(releaseDocsRoot.map { it.dir("notices") })
