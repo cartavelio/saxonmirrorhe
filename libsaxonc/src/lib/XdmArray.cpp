@@ -3,10 +3,11 @@
 #include "saxonc/XdmMap.h"
 
 XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(0) {
-  int64_t processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread);
-  value = j_makeXdmArray(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t processorDataRef = createProcessorData(thread);
+  value = j_makeXdmArray(thread, (void *)processorDataRef);
 
-  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+  j_handles_destroy(thread, (void *)processorDataRef);
 
 }
 
@@ -25,8 +26,8 @@ int XdmArray::arrayLength() {
     return 0;
   }
   if (arrayLen == -1) {
-    arrayLen = j_xdmArray_arrayLength(SaxonProcessor::sxn_environ->thread,
-                                      (void *)value);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    arrayLen = j_xdmArray_arrayLength(thread,(void *)value);
   }
   return arrayLen;
 }
@@ -48,6 +49,7 @@ const char *XdmArray::toString(const char *encoding) {
     return nullptr;
   }
   allocFn fn = operator new;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   const char *str = j_xdmArray_toString(SaxonProcessor::sxn_environ->thread,
                                         (void *)fn, (void *)value);
   if(str == nullptr) {
@@ -66,8 +68,9 @@ XdmArray *XdmArray::put(int n, XdmValue *valuei) {
   if (n < 0) {
     throw SaxonApiException("XdmArray::put: Negative number supplied for the arguments");
   }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result =
-      j_xdmArray_put(SaxonProcessor::sxn_environ->thread, (void *)value, n,
+      j_xdmArray_put(thread, (void *)value, n,
                      (void *)valuei->getUnderlyingValue());
   if(result == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -77,8 +80,9 @@ XdmArray *XdmArray::put(int n, XdmValue *valuei) {
 }
 
 XdmArray *XdmArray::addMember(XdmValue *valuei) {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result =
-      j_xdmArray_addMember(SaxonProcessor::sxn_environ->thread, (void *)value,
+      j_xdmArray_addMember(thread, (void *)value,
                            (void *)valuei->getUnderlyingValue());
   if(result == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -88,8 +92,9 @@ XdmArray *XdmArray::addMember(XdmValue *valuei) {
 }
 
 XdmArray *XdmArray::concat(XdmArray *valuei) {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result =
-      j_xdmArray_concat(SaxonProcessor::sxn_environ->thread, (void *)value,
+      j_xdmArray_concat(thread, (void *)value,
                         (void *)valuei->getUnderlyingValue());
   if(result == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -104,9 +109,9 @@ std::list<XdmValue *> XdmArray::asList() {
   if (sizex == 0) {
     return arr;
   }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   allocFn fn = operator new;
-  long long *results = j_convertXdmArrayToArrayObject(
-      SaxonProcessor::sxn_environ->thread, (void *)value, (void *)fn);
+  long long *results = j_convertXdmArrayToArrayObject(thread, (void *)value, (void *)fn);
 
   if (results) {
 
@@ -114,7 +119,7 @@ std::list<XdmValue *> XdmArray::asList() {
 
     for (int p = 0; p < sizex; ++p) {
 
-      int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
+      int typeRef = j_getXdmObjectType(thread,
                                        (void *)results[p]);
       XdmItem *xdmItem = nullptr;
       if (typeRef == -2) {
@@ -148,8 +153,7 @@ std::list<XdmValue *> XdmArray::asList() {
       } else if (typeRef == 6) {
         // Empty Sequence detected.
         // TODO Maybe we should create an EmptySequence object
-        j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                          (void *)results[p]);
+        j_handles_destroy(thread,(void *)results[p]);
 
       } else {
         tempValue = new XdmValue(results[p], true);
@@ -171,8 +175,8 @@ XdmValue **XdmArray::values() {
     return arr;
   }
   allocFn fn = operator new;
-  long long *results = j_convertXdmArrayToArrayObject(
-      SaxonProcessor::sxn_environ->thread, (void *)value, (void *)fn);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  long long *results = j_convertXdmArrayToArrayObject(thread, (void *)value, (void *)fn);
 
   if (results == nullptr) {
     return nullptr;
@@ -183,8 +187,7 @@ XdmValue **XdmArray::values() {
 
   for (int p = 0; p < sizex; ++p) {
 
-    int typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,
-                                     (void *)results[p]);
+    int typeRef = j_getXdmObjectType(thread,(void *)results[p]);
     XdmItem *xdmItem = nullptr;
     if (typeRef == -2) {
       // exception = new SaxonApiException();
@@ -226,8 +229,7 @@ XdmValue **XdmArray::values() {
       // TODO Maybe we should create an EmptySequence object
       std::cerr << "XdmArray.values() failed - EmptySequence not handled"
                 << std::endl;
-      j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                        (void *)results[p]);
+      j_handles_destroy(thread,(void *)results[p]);
 
     } else {
       tempValue = new XdmValue((int64_t)results[p], true);

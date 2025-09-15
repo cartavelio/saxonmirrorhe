@@ -37,7 +37,8 @@ const char *XdmAtomicValue::getPrimitiveTypeName() {
     return valType.c_str();
   }
   allocFn fn = operator new;
-  char *result = j_getPrimitiveTypeName(SaxonProcessor::sxn_environ->thread,
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  char *result = j_getPrimitiveTypeName(thread,
                                         (void *)fn, (void *)value);
 
   if (result != nullptr) {
@@ -50,8 +51,9 @@ const char *XdmAtomicValue::getPrimitiveTypeName() {
 }
 
 bool XdmAtomicValue::getBooleanValue() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   char result =
-      j_getBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)value);
+      j_getBooleanValue(thread, (void *)value);
 
   if((int)result == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -60,16 +62,18 @@ bool XdmAtomicValue::getBooleanValue() {
 }
 
 int XdmAtomicValue::getHashCode() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int result =
-      j_getHashCode(SaxonProcessor::sxn_environ->thread, (void *)value);
+      j_getHashCode(thread, (void *)value);
   return result;
 }
 
 double XdmAtomicValue::getDoubleValue() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   double result =
-      j_getDoubleValue(SaxonProcessor::sxn_environ->thread, (void *)value);
+      j_getDoubleValue(thread, (void *)value);
   if(result == -0.9999999) {
-    char cresult = j_checkForException(SaxonProcessor::sxn_environ->thread);
+    char cresult = j_checkForException(thread);
     if(cresult != 0) {
       throw SaxonApiException();
     }
@@ -78,10 +82,11 @@ double XdmAtomicValue::getDoubleValue() {
 }
 
 long XdmAtomicValue::getLongValue() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   long result =
-        j_getLongValue(SaxonProcessor::sxn_environ->thread, (void *)value);
+        j_getLongValue(thread, (void *)value);
   if(result == -9999999) {
-    char cresult = j_checkForException(SaxonProcessor::sxn_environ->thread);
+    char cresult = j_checkForException(thread);
     if(cresult != 0) {
       throw SaxonApiException();
     }

@@ -8,8 +8,8 @@ DocumentBuilder::DocumentBuilder() {
   exception = nullptr;
   schemaValidator = nullptr;
   proc = new SaxonProcessor(false);
-  docBuilderObject = createDocumentBuilder(SaxonProcessor::sxn_environ->thread,
-                                           (void *)proc->procRef);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  docBuilderObject = createDocumentBuilder(thread,(void *)proc->procRef);
   lineNumbering = false;
   dtdVal = false;
 }
@@ -41,9 +41,9 @@ DocumentBuilder::DocumentBuilder(const DocumentBuilder &other) {
 }
 
 DocumentBuilder::~DocumentBuilder() {
-  SaxonProcessor::attachCurrentThread();
   if (docBuilderObject != -1) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    j_handles_destroy(thread, (void *)docBuilderObject);
     docBuilderObject = -1;
   }
   cwdDB.erase();
@@ -55,8 +55,8 @@ DocumentBuilder::~DocumentBuilder() {
 
 void DocumentBuilder::setLineNumbering(bool option) {
   lineNumbering = option;
-  int64_t status = j_db_setLineNumbering(SaxonProcessor::sxn_environ->thread,
-                                         (void *)docBuilderObject, (int)option);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t status = j_db_setLineNumbering(thread,(void *)docBuilderObject, (int)option);
   if (status == -2) {
     throw SaxonApiException();
   }
@@ -74,8 +74,8 @@ SchemaValidator *DocumentBuilder::getSchemaValidator() {
 
 void DocumentBuilder::setDTDValidation(bool option) {
   dtdVal = option;
-  int64_t status = j_db_setDTDValidation(SaxonProcessor::sxn_environ->thread,
-                                         (void *)docBuilderObject, (int)option);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t status = j_db_setDTDValidation(thread, (void *)docBuilderObject, (int)option);
   if (status == -2) {
     throw SaxonApiException();
   }
@@ -88,9 +88,8 @@ void DocumentBuilder::setBaseUri(const char *uri) {
     baseURI.erase();
   }
   baseURI = std::string(uri);
-
-  int64_t status = j_db_setBaseURI(SaxonProcessor::sxn_environ->thread,
-                                   (void *)docBuilderObject, (char *)uri);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t status = j_db_setBaseURI(thread, (void *)docBuilderObject, (char *)uri);
   if (status == -2) {
     throw SaxonApiException();
   }
@@ -100,8 +99,8 @@ const char *DocumentBuilder::getBaseUri() { return baseURI.c_str(); }
 
 XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
                                              const char *encoding) {
-  int64_t result = j_main_parseXmlString(
-      SaxonProcessor::sxn_environ->thread,
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t result = j_main_parseXmlString(thread,
       (baseURI.empty() ? (char *)nullptr : (char *)baseURI.c_str()),
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValidator != nullptr
@@ -119,8 +118,8 @@ XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
 }
 
 XdmNode *DocumentBuilder::parseXmlFromFile(const char *filename) {
-  int64_t result = j_main_parseXmlFile(
-      SaxonProcessor::sxn_environ->thread, (char *)cwdDB.c_str(),
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t result = j_main_parseXmlFile(thread, (char *)cwdDB.c_str(),
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValidator != nullptr
            ? (void *)schemaValidator->getUnderlyingValidator()
@@ -136,8 +135,8 @@ XdmNode *DocumentBuilder::parseXmlFromFile(const char *filename) {
 }
 
 XdmNode *DocumentBuilder::parseXmlFromUri(const char *uri) {
-  int64_t result = j_main_parseXmlFile(
-      SaxonProcessor::sxn_environ->thread, (char *)cwdDB.c_str(),
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t result = j_main_parseXmlFile(thread, (char *)cwdDB.c_str(),
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValidator != nullptr
            ? (void *)schemaValidator->getUnderlyingValidator()
@@ -154,8 +153,8 @@ XdmNode *DocumentBuilder::parseXmlFromUri(const char *uri) {
 }
 
 void DocumentBuilder::exceptionClear() {
-
-  j_clearException(SaxonProcessor::sxn_environ->thread);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  j_clearException(thread);
 }
 
 const char *DocumentBuilder::getErrorCode() { return nullptr; }

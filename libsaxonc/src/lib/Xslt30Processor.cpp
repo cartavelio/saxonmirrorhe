@@ -25,7 +25,7 @@ Xslt30Processor::Xslt30Processor() {
 }
 
 Xslt30Processor::Xslt30Processor(SaxonProcessor *p, std::string curr) {
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   proc = p;
   if (proc == nullptr) {
 
@@ -34,7 +34,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *p, std::string curr) {
   jitCompilation = false;
   importPackageValue = SXN_UNSET;
   exception = nullptr;
-  cppXT = createXslt30WithProcessor(SaxonProcessor::sxn_environ->thread,
+  cppXT = createXslt30WithProcessor(thread,
                                     (void *)proc->procRef);
 
 #ifdef DEBUG
@@ -58,25 +58,26 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *p, std::string curr) {
 }
 
 Xslt30Processor::~Xslt30Processor() {
-  SaxonProcessor::attachCurrentThread();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   clearParameters();
   clearProperties();
   if (cppXT != SXN_UNSET) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXT);
+    j_handles_destroy(thread, (void *)cppXT);
     cppXT = SXN_UNSET;
   }
   cwdXT.erase();
   exceptionClear();
   if (importPackageValue != SXN_UNSET) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)importPackageValue);
     importPackageValue = SXN_UNSET;
   }
 }
 
 Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   proc = other.proc;
-  cppXT = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppXT);
+  cppXT = j_copy_handles(thread, (void *)other.cppXT);
   if(cppXT == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -251,7 +252,6 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
 void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
                                                const char *filename,
                                                const char *encoding) {
-  SaxonProcessor::attachCurrentThread();
   if (encoding != nullptr) {
     setProperty("!input-encoding", encoding);
   }graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
