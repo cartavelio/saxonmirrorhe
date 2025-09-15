@@ -6,6 +6,11 @@ set(SaxonC_EDITION "pe" CACHE STRING "Saxon edition")
 
 include("../cmake/libsaxonc.cmake")
 
+add_executable(tests test/test_processor.cpp)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(tests PRIVATE  ${saxonc})
+catch_discover_tests(tests)
+
 if(PROJECT_IS_TOP_LEVEL)
     # include(CPack) will happen inside the following call
     add_subdirectory(packaging)
