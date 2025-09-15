@@ -272,6 +272,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     @Override
     public LocalParam copy(RebindingMap rebindings) {
         LocalParam p2 = new LocalParam();
+        ExpressionTool.copyLocationInfo(this, p2);
         p2.setLocation(getLocation());
         if (conversionOp != null) {
             assert getConversion() != null;
