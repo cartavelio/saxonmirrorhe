@@ -9,6 +9,9 @@
 
 #include "saxonc/SaxonCProcessor.h"
 
+int cap = 10;
+
+
 int exists(const char *fname) {
   FILE *file;
   if ((file = fopen(fname, "r"))) {
@@ -23,13 +26,57 @@ void path_join(char* result, const char* segment1, const char* segment2) {
   snprintf(result, path_len, "%s%s", segment1, segment2);
 }
 
+void test_xinclude(sxnc_environment *environi, sxnc_processor *processor, char *cwd, const char * const data_dir){
+  sxnc_parameter *parameters;
+  int parLen = 0, parCap;
+  parCap = cap;
+  sxnc_property *properties;
+  int propLen = 0;
+
+  setCatalog(environi, processor, cwd, "catalog.xml");
+  setConfigurationProperty(environi, processor, "http://saxon.sf.net/feature/xinclude-aware", "on");
+
+  char sample1_xml_file[FILENAME_MAX];
+  path_join(sample1_xml_file, data_dir, "/sample1.xml");
+
+  char identity_xsl_file[FILENAME_MAX];
+  path_join(identity_xsl_file, data_dir, "/identity.xsl");
+
+    const char* result =
+        xsltApplyStylesheet(environi, processor, cwd, sample1_xml_file,
+            "../data/identity.xsl", 0, properties, 0, 1);
+
+    xsltSaveResultToFile(environi, processor, cwd, sample1_xml_file,
+        identity_xsl_file, "xinclude-xslt-result.xml", 0, properties, 0, 1);
+
+    if (!result) {
+        printf("result is null \n");
+        const char* errorMessage = c_getErrorMessage(environi);
+        if (errorMessage) {
+            printf("Error message %s \n", errorMessage);
+        }
+    }
+    else {
+        printf("Test 1 Pass: %s", result);
+    }
+
+    if (exists("xinclude-xslt-result.xml")) {
+        printf("Test 2 - Pass: xinclude-xslt-result.xml exists \n");
+    }
+    else {
+        printf("Test 2 - Fail: xinclude-xslt-result.xml not found \n");
+    }
+
+
+}
+
 int main(int argc, char *argv[]) {
   const char * const data_dir = argc > 1 ? argv[1] : "";
 
   char cwd[FILENAME_MAX]; // create string buffer to hold path
   GetCurrentDir(cwd, FILENAME_MAX);
   printf("CWD = %s\n", cwd);
-  int cap = 10;
+
   sxnc_parameter *parameters;
   int parLen = 0, parCap;
   parCap = cap;
@@ -83,6 +130,8 @@ int main(int argc, char *argv[]) {
   } else {
     printf("Test 2 - Fail: outputFile.xml not found \n");
   }
+
+
 
   fflush(stdout);
 
