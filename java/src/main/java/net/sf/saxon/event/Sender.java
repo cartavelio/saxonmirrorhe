@@ -107,40 +107,6 @@ public abstract class Sender {
             originalAugmentedSource.close();
         }
 
-
-//
-//
-//        if (source instanceof NodeInfo) {
-//            NodeInfo ns = (NodeInfo) source;
-//            String baseURI = ns.getBaseURI();
-//            if (schemaValidation != Validation.PRESERVE) {
-//                next = config.getDocumentValidator(next, baseURI, options, null);
-//            }
-//
-//            int kind = ns.getNodeKind();
-//            if (kind != Type.DOCUMENT && kind != Type.ELEMENT) {
-//                throw new IllegalArgumentException("Sender can only handle document or element nodes");
-//            }
-//            next.setSystemId(baseURI);
-//            Loc loc = new Loc(systemId, -1, -1);
-//            sendDocumentInfo(ns, next, loc);
-//            return;
-//
-//
-//            next = makeValidator(next, source.getSystemId(), options);
-//
-//            // See if there is a registered SourceResolver that can handle it
-//            Source newSource = config.getSourceResolver().resolveSource(source, config);
-//            if (newSource instanceof StreamSource ||
-//                    newSource instanceof SAXSource ||
-//                    newSource instanceof NodeInfo ||
-//                    newSource instanceof PullSource ||
-//                    newSource instanceof AugmentedSource ||
-//                    newSource instanceof EventSource) {
-//                send(newSource, next, options);
-//                return;
-//            }
-
     }
 
 
