@@ -301,9 +301,6 @@ publishing {
       artifact(signTask.map { layout.buildDirectory.file("${signRootName}-javadoc.jar") }) {
         classifier = "javadoc"
       }
-      artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sources.jar") }) {
-        classifier = "sources"
-      }
       artifact(signTask.map { layout.buildDirectory.file("${signRootName}-sql.jar") }) {
         classifier = "sql"
       }
