@@ -7,8 +7,6 @@
 
 package net.sf.saxon.option.cpp;
 
-import com.saxonica.functions.extfn.cpp.CPPFunctionSet;
-import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
@@ -64,15 +62,6 @@ public class Xslt30Processor extends SaxonCAPI {
         if (debug) {
             System.err.println("Xslt30Processor constructor1(proc, l), Processor: " + System.identityHashCode(proc));
         }
-//#if EE==true || PE==true
-        if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            if (debug) {
-                System.err.println("Xslt30Processor1-1(l), Processor: function libraries added");
-            }
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
-        }
-//#endif
     }
 
 
@@ -99,16 +88,6 @@ public class Xslt30Processor extends SaxonCAPI {
         if (debug) {
             System.err.println("XsltProcessor3(l), Processor: " + System.identityHashCode(processor));
         }
-//#if EE==true || PE==true
-        if (config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            if (debug) {
-                System.err.println("XsltProcessor3-1(l), Processor: function libraries added");
-            }
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(PHPFunctionSet.getInstance());
-            config.getBuiltInExtensionLibraryList(31).addFunctionLibrary(CPPFunctionSet.getInstance());
-        }
-//#endif
-
     }
 
 
