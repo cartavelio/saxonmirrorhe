@@ -90,6 +90,7 @@ val buildDebug = tasks.register<Exec>("build_debug") {
 
 val releaseStagingPath = layout.buildDirectory.dir("staging/Release")
 val stage = tasks.register<Exec>("staging_install") {
+    group = LifecycleBasePlugin.BUILD_GROUP
     inputs.files(build)
     outputs.dir(releaseStagingPath)
 
@@ -100,6 +101,7 @@ val stage = tasks.register<Exec>("staging_install") {
 
 val debugStagingPath = layout.buildDirectory.dir("staging/Debug")
 val debugStage = tasks.register<Exec>("debug_staging_install") {
+    group = LifecycleBasePlugin.BUILD_GROUP
     inputs.files(buildDebug)
     outputs.dir(debugStagingPath)
 
