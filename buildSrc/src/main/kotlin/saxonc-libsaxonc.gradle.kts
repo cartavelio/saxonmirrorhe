@@ -311,7 +311,7 @@ val releaseZipUnicesTask = tasks.register<Exec>("release_zip") {
 }
 
 val exportHeaderTask = tasks.register("combined_export_header") {
-    val cmakeExportHeader = build.map { layout.buildDirectory.file("saxonc_export.h").get() }
+    val cmakeExportHeader = build.map { layout.buildDirectory.file("Release/saxonc_export.h").get() }
     val clangHeader = layout.projectDirectory.file("../saxonc_export_header/clang/saxonc_export.h")
     val msvcHeader = layout.projectDirectory.file("../saxonc_export_header/msvc/saxonc_export.h")
     inputs.file(cmakeExportHeader)

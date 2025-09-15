@@ -294,7 +294,7 @@ val packagePytestIniTask = tasks.register<PythonExec>("package_pytest_ini") {
     val script = layout.projectDirectory.file("../saxonc/generate_samples_pytest_ini.py")
     val pytest_ini = packagedSamplesDir.map { it.file("pytest.ini") }
     inputs.file(script)
-    inputs.file(layout.projectDirectory.file("../saxonc/pyproject.toml1"))
+    inputs.file(layout.projectDirectory.file("../saxonc/pyproject.toml"))
     outputs.file(pytest_ini)
     python = venv.map { it.pythonExe.get() }
     workingDir = layout.projectDirectory.dir("../saxonc")
