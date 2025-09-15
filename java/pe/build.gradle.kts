@@ -6,6 +6,7 @@ plugins {
   id("com.saxonica.build.samples")
   id("saxonj")
   id("maven-publish")
+  id("signing")
 }
 
 saxonj {
@@ -283,7 +284,11 @@ publishing {
   }
   repositories {
     maven {
-      url = layout.buildDirectory.dir("maven-o-matic").map { it.asFile.toURI() }.get()
+      url = uri(layout.buildDirectory.dir("maven-o-matic").get())
     }
   }
+}
+
+signing {
+  sign(publishing.publications)
 }

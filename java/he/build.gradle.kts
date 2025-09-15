@@ -6,6 +6,7 @@ plugins {
   id("com.saxonica.build.samples")
   id("saxonj")
   id("maven-publish")
+  id("signing")
 }
 
 saxonj {
@@ -243,7 +244,18 @@ publishing {
   }
   repositories {
     maven {
-      url = layout.buildDirectory.dir("maven-o-matic").map { it.asFile.toURI() }.get()
+      url = uri(layout.buildDirectory.dir("maven-o-matic").get())
+    }
+    maven {
+      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+      credentials {
+        username = project.findProperty("sonatypeUsername")?.toString() ?: "NOUSER"
+        password = project.findProperty("sonatypePassword")?.toString() ?: "NOPASS"
+      }
     }
   }
+}
+
+signing {
+  sign(publishing.publications)
 }
