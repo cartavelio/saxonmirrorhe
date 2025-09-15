@@ -45,15 +45,15 @@
          This generates platform specific machine code, which we
          interface with C/C++ using the Native Image C API.</p>
       
-      <p><b>Embedded systems</b>: It is also possible to build SaxonC for embedded systems, for
+      <!-- <p><b>Embedded systems</b>: It is also possible to build SaxonC for embedded systems, for
          example on a Linux/ARM System. If such a build is required please contact Saxonica to discuss
-         further: <a href="mailto:support@saxonica.com">support@saxonica.com</a>.</p>
+         further: <a href="mailto:support@saxonica.com">support@saxonica.com</a>.</p> -->
       
       <p>The PHP interface is in the form of a C/C++ PHP extension to SaxonC created using the Zend
          module API. Supports PHP8.</p>
       
       <p>The Python interface is in the form of a Cython module interfaced with the C/C++ SaxonC API.
-         Currently supports Python3.</p>
+         Supports Python3.</p>
       
       <p>We currently use the Xerces XML parser which is also compiled using GraalVM. There are currently no links to libxml.</p>
       

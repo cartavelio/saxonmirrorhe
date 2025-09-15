@@ -600,7 +600,7 @@ public:
    * Deprecated. Set a catalog file to be used in Saxon.
    * @param catalogFile - file name to the catalog
    * @throws SaxonApiException if there is a failure to set the catalog file
-   * @deprecated
+   * @deprecated - Use the setCatalogFiles() method
    */
   void setCatalog(const char *catalogFile);
 
