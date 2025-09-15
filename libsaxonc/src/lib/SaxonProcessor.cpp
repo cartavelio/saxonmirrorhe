@@ -369,8 +369,8 @@ bool SaxonProcessor::isLicensed() {
 
 
 const char * SaxonProcessor::getSaxonEdition() {
-    SaxonProcessor::attachCurrentThread();
-  return SAXONC_EDITION;
+  SaxonProcessor::attachCurrentThread();
+  return j_c_getSaxonEdition(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 }
 
 
