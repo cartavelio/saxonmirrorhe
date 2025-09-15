@@ -115,7 +115,8 @@ public class CharacterMapIndex implements Iterable<CharacterMap> {
             if (characterMaps.size() == 1) {
                 characterMapExpander.setCharacterMap(characterMaps.get(0));
             } else {
-                characterMapExpander.setCharacterMap(new CharacterMap(characterMaps));
+                StructuredQName name = new StructuredQName("saxon", "http://saxon.sf.net/", "combined-character-map");
+                characterMapExpander.setCharacterMap(new CharacterMap(characterMaps, name));
             }
         }
         return characterMapExpander;
