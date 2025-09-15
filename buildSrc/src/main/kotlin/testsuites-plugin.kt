@@ -131,7 +131,6 @@ abstract class TestSuitesExtension
         description = "Copy the expath test suite"
         inputs.files(submodulesDir.dir("expath/tests/qt3"))
         outputs.dir(layout.buildDirectory.dir("suite/expath/${taskName}"))
-
         doLast {
           project.copy {
             into(layout.buildDirectory.dir("suite/expath/${taskName}"))
@@ -145,7 +144,7 @@ abstract class TestSuitesExtension
           // Also, make sure that the file "test.bin" exists
           // or some tests will fail.
           project.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}/sandpit"))
+            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
             from(submodulesDir.dir("expath/tests/qt3")) {
               include("catalog.xml")
             }
