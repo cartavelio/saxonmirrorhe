@@ -2,14 +2,9 @@
 
 #include "saxonc/XdmMap.h"
 
-XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(0) {
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t processorDataRef = createProcessorData(thread);
-  value = j_makeXdmArray(thread, (void *)processorDataRef);
+XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(0) {}
 
-  j_handles_destroy(thread, (void *)processorDataRef);
-
-}
+XdmArray::XdmArray(bool): XdmFunctionItem(), arrayLen(0) {}
 
 XdmArray::XdmArray(const XdmArray &d) : XdmFunctionItem(d) {
   arrayLen = d.arrayLen;
@@ -20,6 +15,7 @@ XdmArray::XdmArray(int64_t obj) : XdmFunctionItem(obj), arrayLen(-1) {}
 
 XdmArray::XdmArray(int64_t obj, int aLen)
     : XdmFunctionItem(obj), arrayLen(aLen) {}
+
 
 int XdmArray::arrayLength() {
   if (value == SXN_UNSET) {
@@ -41,15 +37,16 @@ XdmValue *XdmArray::get(int n) {
   if(result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
-  return getXdmValueSubClass(result);
+  return SaxonProcessor::makeXdmValueFromRef(result);
 }
 
 const char *XdmArray::toString(const char *encoding) {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (value == SXN_UNSET) {
-    return nullptr;
+    value = j_makeXdmArray(thread, (void *) NULL);
   }
   allocFn fn = operator new;
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
   const char *str = j_xdmArray_toString(SaxonProcessor::sxn_environ->thread,
                                         (void *)fn, (void *)value);
   if(str == nullptr) {
@@ -69,6 +66,10 @@ XdmArray *XdmArray::put(int n, XdmValue *valuei) {
     throw SaxonApiException("XdmArray::put: Negative number supplied for the arguments");
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  if (value == SXN_UNSET) {
+    value = j_makeXdmArray(thread, (void *) NULL);
+  }
+
   int64_t result =
       j_xdmArray_put(thread, (void *)value, n,
                      (void *)valuei->getUnderlyingValue());
@@ -81,6 +82,9 @@ XdmArray *XdmArray::put(int n, XdmValue *valuei) {
 
 XdmArray *XdmArray::addMember(XdmValue *valuei) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  if (value == SXN_UNSET) {
+    value = j_makeXdmArray(thread, (void *) NULL);
+  }
   int64_t result =
       j_xdmArray_addMember(thread, (void *)value,
                            (void *)valuei->getUnderlyingValue());
@@ -93,6 +97,9 @@ XdmArray *XdmArray::addMember(XdmValue *valuei) {
 
 XdmArray *XdmArray::concat(XdmArray *valuei) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  if (value == SXN_UNSET) {
+    value = j_makeXdmArray(thread, (void *) NULL);
+  }
   int64_t result =
       j_xdmArray_concat(thread, (void *)value,
                         (void *)valuei->getUnderlyingValue());
@@ -106,7 +113,7 @@ XdmArray *XdmArray::concat(XdmArray *valuei) {
 std::list<XdmValue *> XdmArray::asList() {
   std::list<XdmValue *> arr;
   int sizex = arrayLength();
-  if (sizex == 0) {
+  if (sizex == 0 || value == SXN_UNSET) {
     return arr;
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);

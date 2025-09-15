@@ -20,59 +20,6 @@ XdmFunctionItem::XdmFunctionItem(const XdmFunctionItem &aVal) : XdmItem(aVal) {
 XdmFunctionItem::XdmFunctionItem(int64_t obj)
     : XdmItem(obj), fname(nullptr), arity(-1) {}
 
-XdmValue *XdmFunctionItem::getXdmValueSubClass(int64_t results) {
-  if (results > 0) {
-    XdmValue *value = nullptr;
-    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-    int typeRef = j_getXdmObjectType(thread,
-                                     (void *)results);
-    XdmItem *xdmItem = nullptr;
-    if (typeRef == -2) {
-      // TODO handle exception = new SaxonApiException();
-      return nullptr;
-    }
-    if (typeRef == XDM_ATOMIC_VALUE) {
-      value = new XdmValue();
-      xdmItem = new XdmAtomicValue(results);
-      value->addXdmItem(xdmItem);
-
-    } else if (typeRef == XDM_NODE) {
-      value = new XdmValue();
-      xdmItem = new XdmNode(results);
-      value->addXdmItem(xdmItem);
-
-    } else if (typeRef == XDM_MAP) {
-      value = new XdmValue();
-      xdmItem = new XdmMap(results);
-      value->addXdmItem(xdmItem);
-
-    } else if (typeRef == XDM_ARRAY) {
-      value = new XdmValue();
-      xdmItem = new XdmArray(results);
-      value->addXdmItem(xdmItem);
-
-    } else if (typeRef == XDM_FUNCTION_ITEM) {
-      value = new XdmValue();
-      xdmItem = new XdmFunctionItem(results);
-      value->addXdmItem(xdmItem);
-    } else if (typeRef == XDM_EMPTY) {
-      // Empty Sequence detected.
-      // TODO Maybe we should create an EmptySequence object
-      j_handles_destroy(thread, (void *)results);
-      results = SXN_UNSET;
-      return nullptr;
-
-    } else {
-      value = new XdmValue(results, true);
-    }
-
-    return value;
-  } else if (results == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
-
-  return nullptr;
-}
 
 const char *XdmFunctionItem::getName() {
   if (fname == nullptr) {
@@ -151,5 +98,5 @@ XdmValue *XdmFunctionItem::call(SaxonProcessor *processor, XdmValue **arguments,
   if (results == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
-  return getXdmValueSubClass(results);
+  return SaxonProcessor::makeXdmValueFromRef(results);
 }

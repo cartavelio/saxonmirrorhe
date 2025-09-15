@@ -736,6 +736,10 @@ cdef extern from "saxonc/XdmMap.h":
     cdef cppclass XdmMap(XdmFunctionItem):
         int mapSize()
 
+        XdmMap()
+
+        XdmMap(bool)
+
         XdmValue * get(XdmAtomicValue* key)
 
         XdmValue * get(const char * key)
@@ -770,6 +774,10 @@ cdef extern from "saxonc/XdmMap.h":
 
 cdef extern from "saxonc/XdmArray.h":
     cdef cppclass XdmArray(XdmFunctionItem):
+
+        XdmArray()
+
+        XdmArray(bool)
 
         int arrayLength()
 

@@ -6,25 +6,27 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-XdmMap::XdmMap() : XdmFunctionItem() {
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t mapDataRef = j_create_mapData(thread);
-  value  = j_makeXdmMap(thread, (void *)mapDataRef);
-  j_handles_destroy(thread, (void *)mapDataRef);
-
-}
+XdmMap::XdmMap() : XdmFunctionItem() {}
 
 XdmMap::XdmMap(const XdmMap &d): XdmFunctionItem(d) {
 }
 
 XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) { }
 
+
+int64_t XdmMap::createEmptyUnderlyingXdmMap(graal_isolatethread_t *thread) {
+  int64_t value  = j_makeXdmMap(thread, (void *)nullptr);
+  return value;
+}
+
 const char *XdmMap::toString(const char *encoding) {
-  if (value == SXN_UNSET) {
-    return nullptr;
-  }
+
   allocFn fn = operator new;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  if (value == SXN_UNSET) {
+    value = XdmMap::createEmptyUnderlyingXdmMap(thread);
+  }
+
   const char *str = xdmMapToString(thread,
                                    (void *)fn, (void *)value, (char *)encoding);
 
@@ -55,13 +57,14 @@ XdmValue *XdmMap::get(XdmAtomicValue *key) {
     throw SaxonApiException();
   }
 
-  return getXdmValueSubClass(result);
+  return SaxonProcessor::makeXdmValueFromRef(result);
 }
 
 XdmValue *XdmMap::get(const char *key) {
   if (key == nullptr || value == SXN_UNSET) {
     return nullptr;
   }
+
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result = j_xdmMap_get_with_key_as_string(thread, (void *)value, (char *)key);
 
@@ -69,7 +72,7 @@ XdmValue *XdmMap::get(const char *key) {
     throw SaxonApiException();
   }
 
-  return getXdmValueSubClass(result);
+  return SaxonProcessor::makeXdmValueFromRef(result);
 }
 
 XdmValue *XdmMap::get(int key) {
@@ -82,7 +85,7 @@ XdmValue *XdmMap::get(int key) {
   if(result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
-  return getXdmValueSubClass(result);
+  return SaxonProcessor::makeXdmValueFromRef(result);
 }
 
 XdmValue *XdmMap::get(double key) {
@@ -95,7 +98,7 @@ XdmValue *XdmMap::get(double key) {
   if(result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
-  return getXdmValueSubClass(result);
+  return SaxonProcessor::makeXdmValueFromRef(result);
 }
 
 XdmValue *XdmMap::get(long key) {
@@ -108,7 +111,7 @@ XdmValue *XdmMap::get(long key) {
   if(result == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
-  return getXdmValueSubClass(result);
+  return SaxonProcessor::makeXdmValueFromRef(result);
 }
 
 // TODO test this method
@@ -118,6 +121,9 @@ XdmMap *XdmMap::put(XdmAtomicValue *key, XdmValue *valuei) {
     return nullptr;
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  if (value == SXN_UNSET) {
+    value = XdmMap::createEmptyUnderlyingXdmMap(thread);
+  }
   int64_t result = j_xdmMap_put(thread, (void *)value,
       (void *)key->getUnderlyingValue(), (void *)valuei->getUnderlyingValue());
 
@@ -133,6 +139,9 @@ XdmMap *XdmMap::remove(XdmAtomicValue *key) {
     return nullptr;
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  if (value == SXN_UNSET) {
+    value = XdmMap::createEmptyUnderlyingXdmMap(thread);
+  }
   int64_t result =
       j_xdmMap_remove(thread, (void *)value,
                       (void *)key->getUnderlyingValue());
@@ -197,7 +206,7 @@ bool XdmMap::isEmpty() {
 }
 
 bool XdmMap::containsKey(XdmAtomicValue *key) {
-  if(value == SXN_UNSET) {
+  if(key==nullptr && value == SXN_UNSET) {
     return false;
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
@@ -221,7 +230,7 @@ std::list<XdmValue *> XdmMap::valuesAsList() {
 
     XdmValue *tempValue = nullptr;
     for (int p = 0; p < sizex; ++p) {
-      tempValue = getXdmValueSubClass(results[p]);
+      tempValue = SaxonProcessor::makeXdmValueFromRef(results[p]);
       mylist.push_back(tempValue);
     }
     delete results;
@@ -246,7 +255,7 @@ XdmValue **XdmMap::values() {
   valuesi = new XdmValue *[size];
   XdmValue *tempValue = nullptr;
   for (int p = 0; p < size; ++p) {
-    tempValue = getXdmValueSubClass(results[p]);
+    tempValue = SaxonProcessor::makeXdmValueFromRef(results[p]);
     valuesi[p] = tempValue;
   }
   delete results;
