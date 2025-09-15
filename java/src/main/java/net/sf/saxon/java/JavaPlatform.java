@@ -484,7 +484,9 @@ public class JavaPlatform implements Platform {
                 useJava = true;
             }
             if (useJava) {
-                flags = flags.substring(0, semi);
+                if (semi >= 0) {
+                    flags = flags.substring(0, semi);
+                }
                 return new JavaRegularExpression(regex, flags);
             } else {
                 return new ARegularExpression(regex, flags, hostLanguage, warnings, config);

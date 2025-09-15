@@ -1,6 +1,7 @@
 package regextests;
 
 import jaxptest.ConfigTest;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntRangeSet;
@@ -139,6 +140,21 @@ public class testRegex {
             XPathCompiler c = p.newXPathCompiler();
             XdmItem result = c.evaluateSingle(
                     "replace('3/20/1986', '(?<mm>[0-9]+)/(?<dd>[0-9]+)/(?<yy>[0-9]+)', '${yy}/${mm}/${dd}\\$', ';j')", null);
+            Assertions.assertEquals("1986/3/20$", result.getStringValue());
+        } catch (SaxonApiException e) {
+            Assertions.fail(e);
+        }
+    }
+
+    @Test
+    public void testDefaultRegexEngine() {
+        // Saxon configuration option to prefer Java regex engine
+        try {
+            Processor p = new Processor(true);
+            p.setConfigurationProperty(Feature.DEFAULT_REGEX_ENGINE, "J");
+            XPathCompiler c = p.newXPathCompiler();
+            XdmItem result = c.evaluateSingle(
+                    "replace('3/20/1986', '(?<mm>[0-9]+)/(?<dd>[0-9]+)/(?<yy>[0-9]+)', '${yy}/${mm}/${dd}\\$')", null);
             Assertions.assertEquals("1986/3/20$", result.getStringValue());
         } catch (SaxonApiException e) {
             Assertions.fail(e);
