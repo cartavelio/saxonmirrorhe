@@ -537,7 +537,7 @@ int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
 int64_t SaxonProcessor::createParameterJArray(
     std::map<std::string, XdmValue *> parameters,
     std::map<std::string, std::string> properties, int additions) {
-
+  SaxonProcessor::attachCurrentThread();
   int size = (int) parameters.size() + properties.size() + additions;
 #ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -605,7 +605,7 @@ int64_t SaxonProcessor::createParameterJArray(
 
 int64_t SaxonProcessor::createParameterJArray2(
     std::map<std::string, XdmValue *> parameters) {
-
+  SaxonProcessor::attachCurrentThread();
   int size = (int) parameters.size();
   int64_t processorDataRef = createProcessorDataWithCapacity(
       SaxonProcessor::sxn_environ->thread, size);
