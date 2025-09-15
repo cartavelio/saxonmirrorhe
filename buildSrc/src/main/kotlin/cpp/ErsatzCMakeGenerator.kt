@@ -40,4 +40,3 @@ abstract class ErsatzCMakeGenerator @Inject constructor(private val ex: ExecOper
     }
   }
 }
-
