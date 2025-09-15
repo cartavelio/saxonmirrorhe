@@ -1,3 +1,4 @@
 plugins {
-    id("saxonc-php")
+    id("saxon-build")
+    id("com.saxonica.build.managebranches")
 }
