@@ -16,8 +16,8 @@ SchemaValidator::SchemaValidator() {
 
 SchemaValidator::SchemaValidator(SaxonProcessor *p, std::string curr) {
   proc = p;
-  cppV = createSchemaValidatorWithProcessor(SaxonProcessor::sxn_environ->thread,
-                                            (void *)p->procRef);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  cppV = createSchemaValidatorWithProcessor(thread,(void *)p->procRef);
   exception = nullptr;
 
   if (cppV < 0) {
@@ -38,7 +38,8 @@ SchemaValidator::SchemaValidator(const SchemaValidator &other) {
   exception = nullptr;
   lax = other.lax;
   cwdV = other.cwdV;
-  cppV = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppV);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  cppV = j_copy_handles(thread, (void *)other.cppV);
   if(cppV == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -69,9 +70,9 @@ SchemaValidator::SchemaValidator(const SchemaValidator &other) {
 SchemaValidator::~SchemaValidator() {
   clearProperties();
   clearParameters();
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (cppV > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppV);
+    j_handles_destroy(thread, (void *)cppV);
   }
 
   /*if(exception != nullptr) {
@@ -102,8 +103,9 @@ const char * SchemaValidator::getOutputFile() {
 void SchemaValidator::setLax(bool l) { lax = l; }
 
 XdmNode *SchemaValidator::getValidationReport() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result =
-      j_getValidationReport(SaxonProcessor::sxn_environ->thread, (void *)cppV);
+      j_getValidationReport(thread, (void *)cppV);
 
   if (result > 0) {
     XdmNode *node = new XdmNode(result);
@@ -123,17 +125,15 @@ void SchemaValidator::registerSchemaFromNode(XdmNode *node) {
   }
 
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
-
-  int64_t status = j_registerSchemaNode(
-      SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
+      SaxonProcessor::createParameterJArray(parameters, properties);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t status = j_registerSchemaNode(thread, (void *)proc->procRef,
       (void *)node->getUnderlyingValue(),
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
@@ -149,18 +149,17 @@ void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
   if (sourceFile == nullptr) {
     throw SaxonApiException("Error: sourceFile string cannot be empty or NULL");
   }
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties);
 
-  int64_t status = j_registerSchema(
-      SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
+  int64_t status = j_registerSchema(thread, (void *)proc->procRef,
       (char *)cwdV.c_str(), (char *)sourceFile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
+    j_handles_destroy(thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
@@ -177,9 +176,9 @@ void SchemaValidator::exportSchema(const char *fileName) {
         "Error: fileName string cannot be empty or nullptr");
     return;
   }
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t status =
-      j_exportSchema(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
+      j_exportSchema(thread, (void *)proc->procRef,
                      (char *)cwdV.c_str(), (char *)fileName);
   if (status == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -195,19 +194,18 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
         "Error:: Schema string cannot be empty or nullptr");
     return;
   }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties);
 
-  int64_t status = j_registerSchemaString(
-      SaxonProcessor::sxn_environ->thread, (void *)proc->procRef,
+  int64_t status = j_registerSchemaString(thread, (void *)proc->procRef,
       (char *)(systemID == nullptr ? cwdV.c_str() : systemID),
       (char *)sourceStr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
 
   if (processorDataRef > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   
@@ -225,17 +223,15 @@ void SchemaValidator::validate(const char *sourceFile) {
   if(!outputFile.empty()) {
     setProperty("o", outputFile.c_str());
   }
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
-  int64_t status = j_validate(
-      SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
+      SaxonProcessor::createParameterJArray(parameters, properties);
+  int64_t status = j_validate(thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile, (char *)nullptr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
@@ -250,17 +246,15 @@ XdmNode *SchemaValidator::validateToNode(const char *sourceFile) {
   if (lax) {
     setProperty("lax", "1");
   }
-
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(SaxonProcessor::sxn_environ,parameters, properties);
-  int64_t result = j_validateToNode(
-      SaxonProcessor::sxn_environ->thread, (void *)proc->procRef, (void *)cppV,
+      SaxonProcessor::createParameterJArray(parameters, properties);
+  int64_t result = j_validateToNode(thread, (void *)proc->procRef, (void *)cppV,
       (char *)cwdV.c_str(), (char *)sourceFile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
   if (processorDataRef > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread,
-                      (void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {

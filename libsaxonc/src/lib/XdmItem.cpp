@@ -9,7 +9,8 @@ XdmItem::XdmItem() : XdmValue() {
 }
 
 XdmItem::XdmItem(const XdmItem &other) : XdmValue(other) {
-  value = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.value);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  value = j_copy_handles(thread, (void *)other.value);
   if(value == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -54,15 +55,17 @@ int64_t XdmItem::getUnderlyingValue() {
 }
 
 const char *XdmItem::getStringValue(const char *encoding) {
+
   const char *stringValuei = nullptr;
 
   if (value < 0) {
     return nullptr;
   }
   allocFn fn = operator new;
-  stringValuei = getStringValueForXdmItem(SaxonProcessor::sxn_environ->thread,
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  stringValuei = getStringValueForXdmItem(thread,
                                           (void *)fn, (void *)value, (char *)encoding);
-  if(stringValuei == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+  if(stringValuei == nullptr && (bool)j_checkForException(thread)) {
     throw SaxonApiException();
   }
   return stringValuei;
@@ -70,12 +73,13 @@ const char *XdmItem::getStringValue(const char *encoding) {
 
 const char *XdmItem::toString(const char *encoding) {
   const char *itemToStringi = nullptr;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   // if (itemToString == nullptr) {
   allocFn fn = operator new;
-  itemToStringi = xdmItemToString(SaxonProcessor::sxn_environ->thread,
+  itemToStringi = xdmItemToString(thread,
                                   (void *)fn, (void *)value, (char *)encoding);
 
-  if(itemToStringi == nullptr && (bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+  if(itemToStringi == nullptr && (bool)j_checkForException(thread)) {
     throw SaxonApiException();
   }
   return itemToStringi;
@@ -85,7 +89,7 @@ const char *XdmItem::toString(const char *encoding) {
 XDM_TYPE XdmItem::getType() { return XDM_ITEM; }
 
 XdmItem::~XdmItem() {
-  SaxonProcessor::attachCurrentThread();
+  //SaxonProcessor::attachCurrentThread();
 
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmItem destructor called:" << refCount
@@ -94,7 +98,8 @@ XdmItem::~XdmItem() {
   }
 
   if (value > 0) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    j_handles_destroy(thread, (void *)value);
   }
   value = SXN_UNSET;
 
