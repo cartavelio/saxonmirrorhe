@@ -51,6 +51,9 @@ val generator = tasks.register("cmake_generate") {
                 "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
                 "-D", saxonCCoreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
             )
+            if (saxonBuild.macosx_min_version.isPresent) {
+                args("-D", "CMAKE_OSX_DEPLOYMENT_TARGET=${saxonBuild.macosx_min_version.get()}")
+            }
         }
     }
 }

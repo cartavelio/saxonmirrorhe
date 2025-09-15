@@ -116,6 +116,10 @@ abstract class GraalNativeImageTask(): DefaultTask() {
     @get:Optional
     abstract val debug: Property<Boolean>
 
+    @get:Input
+    @get:Optional
+    abstract val macosx_min_version: Property<String>
+
     @get:Internal
     abstract val outputDir: DirectoryProperty
 
@@ -196,6 +200,9 @@ abstract class GraalNativeImageTask(): DefaultTask() {
             "--enable-url-protocols=https",
             "--enable-url-protocols=http",
             "--shared")
+        if(macosx_min_version.isPresent) {
+            nativeArgs.add("-EMACOSX_DEPLOYMENT_TARGET=${macosx_min_version.get()}")
+        }
         if (debug.getOrElse(false)) {
             nativeArgs.add("-g")
             nativeArgs.add("-O0")

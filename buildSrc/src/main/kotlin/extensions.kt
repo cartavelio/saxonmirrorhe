@@ -31,6 +31,7 @@ interface SaxonBuildExtension {
     abstract val systemOsArch: Property<String>
     abstract val dotnet: Property<String>
     abstract val dotnetversion: Property<String>
+    abstract val macosx_min_version: Property<String>
 
     fun findJar(configuration: Configuration, jarname: String): String {
         val jar = configuration.getFiles()

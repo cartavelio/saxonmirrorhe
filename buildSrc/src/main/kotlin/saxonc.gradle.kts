@@ -8,6 +8,7 @@ import org.gradle.kotlin.dsl.*
 
 plugins {
     id("java-library")
+    id("saxon-build")
 }
 
 val extension = project.extensions.create<SaxonCCoreExtension>("saxonc")
@@ -19,7 +20,6 @@ repositories {
 }
 
 val saxonBuild = the<SaxonBuildExtension>()
-
 val graalRelease: String by project
 extension.project.set(project)
 extension.graal {
@@ -153,7 +153,6 @@ val testJarManifest = tasks.register<ManifestComparer>("testJarManifest") {
 
 tasks.jar {
     description = "Create the JAR used as input to native-image"
-    finalizedBy(testJarManifest)
     archiveBaseName = extension.edition.map { edition ->
         val ver = findProperty("saxonVersion")
         "saxon-${edition}c-${ver}"
@@ -194,6 +193,7 @@ val graalImage = tasks.register<GraalNativeImageTask>("release_graal_image") {
     libName = extension.edition.map { edition -> "saxonc-core-${edition}" }
     version = saxonBuild.version
     majorVersion = saxonBuild.majorVersion
+    macosx_min_version = saxonBuild.macosx_min_version
 }
 
 val debugGraalImage = tasks.register<GraalNativeImageTask>("debug_graal_image") {
@@ -205,6 +205,7 @@ val debugGraalImage = tasks.register<GraalNativeImageTask>("debug_graal_image") 
     libName = extension.edition.map { edition -> "saxonc-core-${edition}" }
     version = saxonBuild.version
     majorVersion = saxonBuild.majorVersion
+    macosx_min_version = saxonBuild.macosx_min_version
     debug = true
 }
 val ersatzPath = layout.buildDirectory.dir("ersatz")
