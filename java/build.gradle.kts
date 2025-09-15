@@ -1,8 +1,11 @@
+import com.saxonica.build.java.PomGenerator
+
 plugins {
   id("saxon-build")
   id("com.saxonica.build.testsuites")
   id("com.saxonica.build.samples")
   id("saxonj")
+  id("maven-publish")
 }
 
 saxonj {
@@ -127,9 +130,11 @@ val (_, mavenSqlSourceJar) = jarTaskBuilder("sqlSource") {
 }
 
 val xqjDownloadJarArtifact by configurations.consumable("xqjDownloadJarArtifact")
+val xqjMavenJarArtifact by configurations.consumable("xqjMavenJarArtifact")
 
 val (downloadXqjJar, mavenXqjJar) = jarTaskBuilder("xqj") {
   edition = "he"
+  jarClassifier = "xqj"
   common {
     from(editionCompileJava)
     include("com/saxonica/xqj/**/*.class")
@@ -147,8 +152,11 @@ val (_, mavenXqjSourceJar) = jarTaskBuilder("xqjSource") {
     }
   }
 }
+val xqjSourceMavenJarArtifact by configurations.consumable("xqjSourceMavenJarArtifact")
 
 xqjDownloadJarArtifact.outgoing.artifact(downloadXqjJar)
+xqjMavenJarArtifact.outgoing.artifact(mavenXqjJar) { builtBy(mavenXqjJar) }
+xqjSourceMavenJarArtifact.outgoing.artifact(mavenXqjSourceJar) { builtBy(mavenXqjSourceJar) }
 
 // In principle, this should be in the samples-plugin...
 tasks.register<Copy>("copy_java_sample_sources") {
@@ -336,4 +344,36 @@ val downloadRelease = tasks.named<Zip>("downloadRelease") {
 
 tasks.named("allJars") {
   finalizedBy("sqlDownloadJar")
+}
+
+val saxonBuild = the<SaxonBuildExtension>()
+val mavenArtifactId = "Saxon-EE"
+val mavenPom = PomGenerator() {
+  name = mavenArtifactId
+  license(PomGenerator.COMMERCIAL_LICENSE)
+  dependencies = configurations.editionImplementation.get().allDependencies
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("maven") {
+      groupId = "com.saxonica"
+      artifactId = mavenArtifactId
+      version = saxonBuild.version.get()
+
+      pom(mavenPom.generate())
+
+      artifact(tasks.named<Jar>("editionMavenJar"))
+      artifact(tasks.named<Jar>("javadocMavenJar"))
+      artifact(mavenSqlJar)
+      artifact(mavenSqlSourceJar)
+      artifact(tasks.named<Jar>("testDriversMavenJar"))
+      artifact(tasks.named<Jar>("testDriversSourceMavenJar"))
+    }
+  }
+  repositories {
+    maven {
+      url = layout.buildDirectory.dir("maven-o-matic").map { it.asFile.toURI() }.get()
+    }
+  }
 }
