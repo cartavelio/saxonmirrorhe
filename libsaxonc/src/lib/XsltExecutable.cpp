@@ -39,7 +39,7 @@ XsltExecutable::XsltExecutable(SaxonProcessor *proci, int64_t exRef,
 
 XsltExecutable::~XsltExecutable() {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  
+
   clearProperties();
   clearParameters();
   resources_dir.clear();
@@ -86,7 +86,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   selectionRef = other.selectionRef;
   rawResultsFlag = other.rawResultsFlag;
   exceptionFound = other.exceptionFound;
-  saxonMessageListenerRef = other.saxonMessageListenerRef;
+  saxonMessageListenerRef = j_copy_handles(thread, (void *)other.saxonMessageListenerRef);
   selectionStringFlag = other.selectionStringFlag;
   saxonResultDocRef = SXN_UNSET;
   std::map<std::string, XdmValue *>::const_iterator paramIter =
@@ -1126,7 +1126,6 @@ void XsltExecutable::clearXslMessages() {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
         j_clearXslMessages(thread,
                          (void *)saxonMessageListenerRef);
-    saxonMessageListenerRef = SXN_UNSET;
 
   }
 }
