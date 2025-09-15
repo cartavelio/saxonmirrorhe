@@ -8,6 +8,12 @@
 /**
  * <p>This package provides a number of classes supporting the general capability to wrap external
  * XML tree models as instances of the Saxon {@link net.sf.saxon.om.NodeInfo} interface, making them
- * amenable to XPath processing
+ * amenable to XPath processing.</p>
+ * <p>The {@link net.sf.saxon.tree.wrapper.SpaceStrippedNode} class provides a virtual tree in which whitespace text nodes
+ * in the underlying real tree are ignored.</p>
+ * <p>The {@link net.sf.saxon.tree.wrapper.TypeStrippedNode} class provides a virtual tree in which type annotations in the
+ * underlying real tree are ignored.</p>
+ * <p>The {@link net.sf.saxon.tree.wrapper.VirtualCopy} class provides a tree that is the same as the underlying tree in
+ * everything except node identity.</p>
  */
 package net.sf.saxon.tree.wrapper;
