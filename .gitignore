@@ -3,6 +3,7 @@ out/
 /*.iml
 .DS_Store
 .gradle/
+.kotlin/
 build/
 __pycache__
 src/test/testdata/sandpit/
