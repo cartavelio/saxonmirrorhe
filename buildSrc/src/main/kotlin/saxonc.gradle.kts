@@ -195,7 +195,7 @@ val graalImage = tasks.register<GraalNativeImageTask>("release_graal_image") {
     majorVersion = saxonBuild.majorVersion
     macosx_min_version = saxonBuild.macosx_min_version
     specifiedArgs = saxonBuild.targetHost.map {
-        if (it.isWindows && it.isX86_64) listOf("-march=x86-64-1") else listOf()
+        if (it.isWindows && it.isX86_64) listOf("-march=x86-64-v1") else listOf()
     }
 }
 
@@ -210,7 +210,7 @@ val debugGraalImage = tasks.register<GraalNativeImageTask>("debug_graal_image") 
     majorVersion = saxonBuild.majorVersion
     macosx_min_version = saxonBuild.macosx_min_version
     specifiedArgs = saxonBuild.targetHost.map {
-        if (it.isWindows && it.isX86_64) listOf("-march=x86-64-1") else listOf()
+        if (it.isWindows && it.isX86_64) listOf("-march=x86-64-v1") else listOf()
     }
     debug = true
 }
