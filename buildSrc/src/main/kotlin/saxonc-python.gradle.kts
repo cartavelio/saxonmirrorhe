@@ -1,5 +1,6 @@
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.python.*
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 
@@ -243,10 +244,12 @@ val packageTestdriverTask = tasks.register<Copy>("package_testdriver") {
 }
 val packageSamples = tasks.register<Copy>("package_samples_for_release") {
     dependsOn(packageSamplesTask, packagePytestsTask , packageTestdriverTask)
-    from(layout.projectDirectory.dir("../"))
     into(packagedSamplesDir)
-    include("README-samples.md")
-    rename { name -> "README.md" }
+    from(layout.projectDirectory.dir("../")) {
+        include("README-samples.md")
+        rename { name -> "README.md" }
+        filter<ReplaceTokens>("tokens" to mapOf("edition" to extension.edition.get()))
+    }
 }
 
 val packagedSamples by configurations.consumable("packagedSamples")
