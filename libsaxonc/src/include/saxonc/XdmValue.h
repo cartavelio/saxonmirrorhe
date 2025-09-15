@@ -54,7 +54,6 @@ public:
 
  virtual bool operator==(const XdmValue& other) const
  {
-  std::cerr<<"C++ XdmValue equals operator called !!!!"<<std::endl;
   return false;
   /*char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
   if((int)result == SXN_EXCEPTION) {
