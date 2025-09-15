@@ -209,12 +209,22 @@ val debugGraalImage = tasks.register<GraalNativeImageTask>("debug_graal_image") 
     debug = true
 }
 val ersatzPath = layout.buildDirectory.dir("ersatz")
+val EDITION = extension.edition.map { it.uppercase() }
+fun cmakeFilenameMapper(vararg suffixes: String): (String) -> Array<String> {
+    return { ED ->
+        suffixes.map { suffix -> "SaxonCCore${ED}${suffix}.cmake" }.toTypedArray()
+    }
+}
+val universalCMakeFileSuffixes = arrayOf("Config", "ConfigVersion")
+val universalCMakeFilenames = EDITION.map(cmakeFilenameMapper(*universalCMakeFileSuffixes))
 val generator = tasks.register("cmake_generate") {
     group = LifecycleBasePlugin.BUILD_GROUP
     description = "Generate build system for the ersatz CMake-driven library"
     inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
     inputs.files(layout.projectDirectory.dir("../cmake"))
     outputs.file(ersatzPath.map { it.file("CMakeCache.txt") })
+    outputs.file(ersatzPath.map { it.file("cmake_install.cmake") })
+    outputs.files(ersatzPath.map { it.files(universalCMakeFilenames) }) // We only want the Config and ConfigVersion files here
 
     doLast {
         val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
@@ -245,11 +255,10 @@ fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTas
     }
 
     val ersatzConfigPath = ersatzPath.map { it.dir("staging") }
-    val EDITION = extension.edition.map { it.uppercase() }
-    val cmakeFilenames = EDITION.map { ED -> listOf("", "-${config.lowercase()}", "Config", "ConfigVersion").map { suffix -> "SaxonCCore${ED}${suffix}.cmake" } }
+    val cmakeFilenames = EDITION.map(cmakeFilenameMapper(*universalCMakeFileSuffixes, "", "-${config.lowercase()}"))
     val generateCMakeConfigPackageFiles = tasks.register<Exec>("install_ersatz_${configTaskName}") {
         inputs.files(build)
-        outputs.files(ersatzConfigPath.map { conf -> conf.dir("lib/cmake/SaxonCCore${EDITION.get()}").files(*cmakeFilenames.get().toTypedArray()) })
+        outputs.files(ersatzConfigPath.map { conf -> conf.dir("lib/cmake/SaxonCCore${EDITION.get()}").files(*cmakeFilenames.get()) })
 
         workingDir = layout.projectDirectory.asFile
         executable = "cmake"

@@ -69,6 +69,8 @@ val build = tasks.register<Exec>("build_release") {
     inputs.files(generator)
     inputs.files(layout.projectDirectory.dir("../src"))
     inputs.files(layout.projectDirectory.dir("src"))
+    inputs.files(layout.projectDirectory.dir("../samples/cppTests"))
+    inputs.files(layout.projectDirectory.dir("../samples/cTests"))
     outputs.dir(layout.buildDirectory.dir("Release"))
 
     workingDir = layout.projectDirectory.asFile
@@ -135,6 +137,7 @@ val cleanCtestWorkingDir = tasks.register("ctest_working_dir") {
 
 val test = tasks.register<Exec>("test") {
     inputs.dir(cleanCtestWorkingDir.map { ctestWorkingDir.get() })
+    inputs.files(layout.projectDirectory.dir("../samples/data"))
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Run the tests defined in CMakeLists with CTest"
     dependsOn(build)
