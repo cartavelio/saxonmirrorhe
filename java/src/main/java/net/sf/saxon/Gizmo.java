@@ -137,7 +137,7 @@ public class Gizmo {
                    "schema {filename} -- load XSD 1.1 schema for use in validation",
                    this::schema);
         addCommand("set",
-                   "set {variable} {expression} -- set variable to value of expression",
+                   "set {variable} = {expression} -- set variable to value of expression",
                    this::set);
         addCommand("show",
                    "show {expression} -- display content of all selected nodes",
