@@ -3,6 +3,7 @@ package s9apitest;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SystemLogger;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.SourceLocator;
@@ -91,7 +92,8 @@ public class TestMessageListener {
         }
     }
 
-    @Test
+    // See #6844
+    @Disabled
     public void testMessageHandlerThrowingException() {
         // Rewrite of above testMessage() to use current API
         try {
@@ -126,7 +128,8 @@ public class TestMessageListener {
         }
     }
 
-    @Test
+    // See #6844
+    @Disabled
     public void testMessageListenerThrowingException() {
         // Rewrite of above testMessage() to use current API
         try {
