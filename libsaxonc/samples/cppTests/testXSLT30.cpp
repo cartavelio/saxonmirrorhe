@@ -2557,11 +2557,14 @@ void testCatalog(const char *cwd, SaxonProcessor *proc,
   proc->setcwd(cwd);
   XsltExecutable *executable = nullptr;
   Xslt30Processor *trans = nullptr;
-  const char **catalogFiles = nullptr;
+  vector<const char*> catalogFiles {};
   try {
-    catalogFiles = new const char *[1] { CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str() };
+    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str());
 
-    proc->setCatalogFiles(catalogFiles, 1);
+    // catalogFiles = new const char *[1] {};
+    // catalogFiles[0] = CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str();
+
+    proc->setCatalogFiles(catalogFiles.data(), 1);
 
     trans = proc->newXslt30Processor();
 
@@ -2588,8 +2591,8 @@ void testCatalog(const char *cwd, SaxonProcessor *proc,
     }
     trans = nullptr;
 
-    delete[] catalogFiles;
-    catalogFiles = nullptr;
+    // delete[] catalogFiles;
+    // catalogFiles = nullptr;
 
   } catch (SaxonApiException &e) {
     const char *message = e.getMessage();
@@ -2606,10 +2609,10 @@ void testCatalog(const char *cwd, SaxonProcessor *proc,
     if (trans != nullptr) {
       delete trans;
     }
-    if (catalogFiles != nullptr) {
-      delete[] catalogFiles;
-      catalogFiles = nullptr;
-    }
+    // if (catalogFiles != nullptr) {
+    //   delete[] catalogFiles;
+    //   catalogFiles = nullptr;
+    // }
   }
 }
 
@@ -2626,12 +2629,12 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
   XsltExecutable *executable = nullptr;
   XsltExecutable *executable2 = nullptr;
   Xslt30Processor *trans = nullptr;
-  const char **catalogFiles = nullptr;
+  vector<const char*> catalogFiles {};
   try {
-    catalogFiles =
-        new const char *[2] { CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/catalog2.xml").c_str() };
+    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog.xml").c_str());
+    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog2.xml").c_str());
 
-    proc->setCatalogFiles(catalogFiles, 2);
+    proc->setCatalogFiles(catalogFiles.data(), 2);
     proc->setcwd(cwd);
     trans = proc->newXslt30Processor();
 
@@ -2656,8 +2659,8 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
       sresult->failureList.push_back("testCatalog2-1");
     }
     delete executable2;
-    delete[] catalogFiles;
-    catalogFiles = nullptr;
+    // delete[] catalogFiles;
+    // catalogFiles = nullptr;
     if (trans != nullptr) {
       delete trans;
     }
@@ -2680,10 +2683,10 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc,
       delete trans;
     }
 
-    if (catalogFiles != nullptr) {
-      delete[] catalogFiles;
-      catalogFiles = nullptr;
-    }
+    // if (catalogFiles != nullptr) {
+    //   // delete[] catalogFiles;
+    //   // catalogFiles = nullptr;
+    // }
   }
 }
 
@@ -2699,11 +2702,11 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
   proc->setcwd(cwd);
   XsltExecutable *executable = nullptr;
   Xslt30Processor *trans = nullptr;
-  const char **catalogFiles = nullptr;
+  vector<const char*> catalogFiles {};
   try {
-    catalogFiles = new const char *[1] { CppTestUtils::concat(2, dataDir->c_str(), "/catalog-err.xml").c_str() };
+    catalogFiles.push_back(CppTestUtils::concat(2, dataDir->c_str(), "/catalog-err.xml").c_str());
 
-    proc->setCatalogFiles(catalogFiles, 1);
+    proc->setCatalogFiles(catalogFiles.data(), 1);
 
     trans = proc->newXslt30Processor();
 
@@ -2731,8 +2734,8 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
     }
     trans = nullptr;
 
-    delete[] catalogFiles;
-    catalogFiles = nullptr;
+    // delete[] catalogFiles;
+    // catalogFiles = nullptr;
 
   } catch (SaxonApiException &e) {
     const char *message = e.getMessage();
@@ -2749,10 +2752,10 @@ void testCatalogError(const char *cwd, SaxonProcessor *proc,
     if (trans != nullptr) {
       delete trans;
     }
-    if (catalogFiles != nullptr) {
-      delete[] catalogFiles;
-      catalogFiles = nullptr;
-    }
+    // if (catalogFiles != nullptr) {
+    //   delete[] catalogFiles;
+    //   catalogFiles = nullptr;
+    // }
   }
 }
 
