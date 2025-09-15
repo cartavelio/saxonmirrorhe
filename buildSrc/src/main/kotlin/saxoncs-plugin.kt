@@ -38,7 +38,7 @@ class SaxonCSPlugin : Plugin<Project> {
     extension.release.convention("${if (release == "prod") "production" else release}")
     */
 
-    extension.release.convention("Release")
+    extension.release.convention("${project.findProperty("csharpBuilds") ?: "Debug"}")
     extension.arch.convention(if (System.getProperty("os.arch") == "aarch64") "arm64" else "x64")
     extension.platform.convention(if (OperatingSystem.current().isMacOsX())
                                     "osx" else if (OperatingSystem.current().isWindows())
@@ -57,7 +57,7 @@ abstract class DotNetImplementation: DefaultTask() {
   abstract val configuration: Property<String>
 
   init {
-    configuration.convention("Release")
+    configuration.convention("${project.findProperty("csharpBuilds") ?: "Debug"}")
     platform.convention(if (OperatingSystem.current().isMacOsX())
                         "osx" else if (OperatingSystem.current().isWindows())
                           "windows" else "linux")
