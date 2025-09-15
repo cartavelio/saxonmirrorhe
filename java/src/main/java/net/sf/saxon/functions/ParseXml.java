@@ -17,6 +17,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
@@ -100,6 +101,8 @@ public class ParseXml extends SystemFunction implements Callable {
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
             ParseOptions options = config.getParseOptions();
+            options = options.withDTDValidationMode(Validation.SKIP);
+            options = options.withSchemaValidationMode(Validation.SKIP);
             PackageData pd = getRetainedStaticContext().getPackageData();
             if (pd instanceof StylesheetPackage) {
                 options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
@@ -190,6 +193,8 @@ public class ParseXml extends SystemFunction implements Callable {
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
             ParseOptions options = config.getParseOptions();
+            options = options.withDTDValidationMode(Validation.SKIP);
+            options = options.withSchemaValidationMode(Validation.SKIP);
             PackageData pd = getRetainedStaticContext().getPackageData();
             if (pd instanceof StylesheetPackage) {
                 options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
