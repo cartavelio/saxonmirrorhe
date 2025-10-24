@@ -73,6 +73,8 @@ EndGlobal
       <PropertyGroup>
         <LangVersion>9.0</LangVersion>
         <TargetFramework>{$framework}</TargetFramework>
+        <Version>{$saxonVersion}</Version>
+        <AssemblyVersion>{$saxonVersion}</AssemblyVersion>
         <Nullable>disable</Nullable>
         <OutputType>Exe</OutputType>
         <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
@@ -88,14 +90,10 @@ EndGlobal
         <RuntimeIdentifier>{$platform}-{$arch}</RuntimeIdentifier>
         <UseHardenedRuntime>true</UseHardenedRuntime>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-        <AssemblyName>SaxonCS</AssemblyName>
         <Authors>Saxonica Ltd.</Authors>
-        <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
-        latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Description>
         <PackageTags>XML,XSLT,Saxonica</PackageTags>
         <Copyright>Copyright © 2021-{year-from-date(current-date())} Saxonica, Ltd.</Copyright>
         <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
-        <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
         <PackageSummary>An XSLT 3.0 processor for .NET</PackageSummary>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -112,18 +110,6 @@ EndGlobal
         <Optimize>true</Optimize>
       </PropertyGroup>
 
-      <PropertyGroup>
-        <CFBundleName>SaxonCS</CFBundleName>
-        <CFBundleDisplayName>SaxonCS</CFBundleDisplayName>
-        <CFBundleIdentifier>com.saxonica.saxoncs</CFBundleIdentifier>
-        <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
-        <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
-        <CFBundleExecutable>SaxonCS</CFBundleExecutable>
-        <CFBundleIconFile>SaxonicaDisk.icns</CFBundleIconFile>
-        <NSPrincipalClass>NSApplication</NSPrincipalClass>
-        <NSHighResolutionCapable>true</NSHighResolutionCapable>
-        <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
-      </PropertyGroup>
 
       <ItemGroup>
         <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
@@ -168,6 +154,21 @@ EndGlobal
       <xsl:when test="$releaseBuild = 'TestDriver'">
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
+          <PropertyGroup>
+            <AssemblyName>SaxonCSTestDriver</AssemblyName>
+            <Description>QT3/4 test suite test driver.</Description>
+          </PropertyGroup>
+          <PropertyGroup>
+            <CFBundleName>SaxonCSTestDriver</CFBundleName>
+            <CFBundleDisplayName>SaxonCSTestDriver</CFBundleDisplayName>
+            <CFBundleIdentifier>com.saxonica.saxoncstestdriver</CFBundleIdentifier>
+            <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
+            <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
+            <CFBundleExecutable>SaxonCSTestDriver</CFBundleExecutable>
+            <NSPrincipalClass>NSApplication</NSPrincipalClass>
+            <NSHighResolutionCapable>true</NSHighResolutionCapable>
+            <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
+          </PropertyGroup>
           <ItemGroup>
             <Compile Include="..\..\..\..\src\test\testrunner\**"/>
             <Compile Remove="..\..\..\..\**\.DS_Store"/>
@@ -206,6 +207,24 @@ EndGlobal
       <xsl:otherwise>
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
+          <PropertyGroup>
+            <AssemblyName>SaxonCS</AssemblyName>
+            <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
+            latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Description>
+            <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
+          </PropertyGroup>
+          <PropertyGroup>
+            <CFBundleName>SaxonCS</CFBundleName>
+            <CFBundleDisplayName>SaxonCS</CFBundleDisplayName>
+            <CFBundleIdentifier>com.saxonica.saxoncs</CFBundleIdentifier>
+            <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
+            <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
+            <CFBundleExecutable>SaxonCS</CFBundleExecutable>
+            <CFBundleIconFile>SaxonicaDisk.icns</CFBundleIconFile>
+            <NSPrincipalClass>NSApplication</NSPrincipalClass>
+            <NSHighResolutionCapable>true</NSHighResolutionCapable>
+            <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
+          </PropertyGroup>
           <xsl:choose>
             <xsl:when test="exists($releaseBuild)">
               <ItemGroup>
@@ -233,6 +252,21 @@ EndGlobal
     <xsl:result-document href="{$templateName}TestDriver.csproj" method="xml" indent="yes">
       <Project Sdk="Microsoft.NET.Sdk">
         <Import Project="{$core.csproj}"/>
+        <PropertyGroup>
+          <AssemblyName>SaxonCSTestDriver</AssemblyName>
+          <Description>QT3/4 test suite test driver.</Description>
+        </PropertyGroup>
+        <PropertyGroup>
+          <CFBundleName>SaxonCSTestDriver</CFBundleName>
+          <CFBundleDisplayName>SaxonCSTestDriver</CFBundleDisplayName>
+          <CFBundleIdentifier>com.saxonica.saxoncstestdriver</CFBundleIdentifier>
+          <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
+          <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
+          <CFBundleExecutable>SaxonCSTestDriver</CFBundleExecutable>
+          <NSPrincipalClass>NSApplication</NSPrincipalClass>
+          <NSHighResolutionCapable>true</NSHighResolutionCapable>
+          <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
+        </PropertyGroup>
         <ItemGroup>
           <Compile Include="..\src\test\testrunner\**"/>
           <Compile Remove="..\**\.DS_Store"/>
