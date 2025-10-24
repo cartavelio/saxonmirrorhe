@@ -189,7 +189,7 @@ EndGlobal
             <IsTestProject>true</IsTestProject>
           </PropertyGroup>
           <ItemGroup>
-            <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+            <PackageReference Include="coverlet.collector" Version="6.0.4"/>
             <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
             <PackageReference Include="NUnit" Version="4.3.2"/>
             <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
