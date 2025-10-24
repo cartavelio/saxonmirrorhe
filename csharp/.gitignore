@@ -7,3 +7,4 @@ pe/bin
 pe/obj
 ee/bin
 ee/obj
+*.DotSettings.user

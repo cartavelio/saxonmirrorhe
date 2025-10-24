@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using Saxon.Ejava.net;
 using Sys = System;
@@ -101,7 +102,30 @@ namespace Saxon.Impl.Helpers {
             return false;
         }
 
+        public static string toAsciiString(Sys.Uri uri)
+        {
+            // Assume the string is already UTF-8 if it contains non-ASCII chars...
+            var bytes = Encoding.UTF8.GetBytes(uri.ToString());
+            var sb = new StringBuilder();
+            var index = 0;
+            while (index < bytes.Length)
+            {
+                var ch = bytes[index];
+                if (ch > '~' || ch < ' ')
+                {
+                    sb.Append("%");
+                    sb.Append(Sys.Convert.ToByte(ch).ToString("X2"));
+                }
+                else
+                {
+                    sb.Append((char) ch);
+                }
+                index++;
+            }
+
+            return sb.ToString();
+        }
     }
 }
 
-// Copyright (c) 2021 - 2023 Saxonica Limited
+// Copyright (c) 2021 - 2025 Saxonica Limited

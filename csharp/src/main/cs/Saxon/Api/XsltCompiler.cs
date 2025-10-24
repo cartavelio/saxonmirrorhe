@@ -277,7 +277,7 @@ namespace Saxon.Api {
         /// error stream. The exception that is returned from this method is merely a summary indicating the
         /// status, and is not useful for diagnosing the actual error.</exception> 
         public XsltExecutable Compile(Stream input, Uri baseUri) {
-            StreamSource ss = new (input, baseUri.OriginalString);
+            StreamSource ss = new (input, baseUri.AbsoluteUri);
             XsltExecutable executable = new(jXsltCompiler.compile(ss)) {
                 InternalProcessor = processor
             };
@@ -374,7 +374,7 @@ namespace Saxon.Api {
         /// for use in subsequent compilations then it must be explicitly imported.</returns>
 
         public XsltPackage CompilePackage(Stream input, Uri baseUri) {
-            StreamSource ss = new (input, baseUri.OriginalString);
+            StreamSource ss = new (input, baseUri.AbsoluteUri);
             return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
         }
 
@@ -747,7 +747,7 @@ namespace Saxon.Api {
             // object obj = XmlResolver.GetEntity(uri, media ?? "application/xml",
             //     Type.GetType("System.IO.Stream"));
             // if (obj is Stream stream) {
-            //     StreamSource ss = new (stream, uri.OriginalString);
+            //     StreamSource ss = new (stream, uri.OriginalString); // or ToString() or AbsoluteUri()?
             //     // See bug issue #2306
             //     XsltExecutable executable =
             //         new(jXsltCompiler.compile(jXsltCompiler.getAssociatedStylesheet(ss, media, null, null))) {
