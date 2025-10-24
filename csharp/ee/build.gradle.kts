@@ -1,5 +1,6 @@
 import com.saxonica.build.*
 import com.saxonica.build.java.JarFinder
+import java.util.UUID
 
 plugins {
   id("java-library")
@@ -413,22 +414,6 @@ val preprocessCS = tasks.register<Copy>("preprocessCS") {
   into(layout.buildDirectory.dir("cs"))
 }
 
-val copyResources = tasks.register("copyResources") {
-  doLast {
-    copy {
-      from(layout.projectDirectory.dir(".."))
-      into(layout.buildDirectory)
-      include("LICENSE.txt")
-      include("README.md")
-    }
-    copy {
-      from(layout.projectDirectory.dir("../../java/src/main/resources"))
-      into(layout.buildDirectory.dir("resources"))
-      exclude("**/.DS_Store")
-    }
-  }
-}
-
 // I'm trying to make this build practical to manage and yet flexible enough
 // to handle the complexity of CS builds. For CS, we build for x64 or arm64,
 // depending on the platform and architecture. In addition, for MacOS in a
@@ -440,6 +425,28 @@ val architectures = if (findProperty("buildArch") != null) {
   listOf("arm64", "x64")
 } else {
   listOf(saxonCS.arch.get())
+}
+
+
+val copyResources = tasks.register("copyResources") {
+  doLast {
+    copy {
+      // These are copied into build/{arch} so that ../ will be correct
+      // relative to either the build directory build/{arch}/SaxonCS or
+      // the csharp/{ee,pe,he} directories because (at least some?) relative
+      // paths in a csproj file are relative to the build location, not
+      // the csproj file. ¯\_(ツ)_/¯
+      from(layout.projectDirectory.dir(".."))
+      into(layout.buildDirectory.dir(architectures.first()))
+      include("LICENSE.txt")
+      include("README.md")
+    }
+    copy {
+      from(layout.projectDirectory.dir("../../java/src/main/resources"))
+      into(layout.buildDirectory.dir("resources"))
+      exclude("**/.DS_Store")
+    }
+  }
 }
 
 val configure_task = tasks.register("dotnetConfigure") {
@@ -781,6 +788,30 @@ tasks.register<Exec>("samples") {
                        "--edition", "ee",
                        "--platform", "csharp",
                        "--csexec", "build/${arch}/SaxonCS/bin/${rel}/net8.0/${plat}-${arch}/SaxonCS")
+}
+
+// ============================================================
+
+val templateName = project.findProperty("projectTemplateName") ?: "SaxonCS"
+
+tasks.register<JavaExec>("csproj-template") {
+  inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
+  outputs.file(layout.projectDirectory.file("${templateName}.csproj"))
+  outputs.file(layout.projectDirectory.file("${templateName}.sln"))
+  classpath = preprocessorClasspath
+  mainClass = "net.sf.saxon.Transform"
+  args("-it",
+       "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
+       "-o:${layout.projectDirectory.file("${templateName}.sln")}",
+       "platform=${saxonCS.platform.get()}",
+       "arch=${saxonCS.arch.get()}",
+       "edition=${saxonCS.edition.get()}",
+       "framework=net${saxonBuild.dotnetversion.get()}",
+       "saxonVersion=${findProperty("saxonVersion")!!}",
+       "uuid1=${UUID.randomUUID()}",
+       "uuid2=${UUID.randomUUID()}",
+       "uuid3=${UUID.randomUUID()}",
+       "uuid4=${UUID.randomUUID()}")
 }
 
 // ============================================================
