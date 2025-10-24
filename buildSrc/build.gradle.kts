@@ -1,5 +1,6 @@
 plugins {
   `kotlin-dsl`
+  kotlin("plugin.serialization") version "1.9.22"
 }
 
 repositories {
@@ -10,6 +11,7 @@ repositories {
 
 dependencies {
   implementation(libs.kotlin.gradle.plugin)
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
   implementation("cc.ekblad:4koma:1.2.0")
   implementation(platform("software.amazon.awssdk:bom:2.30.18"))
   implementation("software.amazon.awssdk:cloudformation")

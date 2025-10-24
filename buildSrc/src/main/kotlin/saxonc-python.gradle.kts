@@ -1,10 +1,7 @@
-import com.saxonica.build.Architectures
 import com.saxonica.build.LifecycleTasks
-import com.saxonica.build.Platforms
 import com.saxonica.build.TargetHost
 import com.saxonica.build.python.*
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 
 plugins {
@@ -16,11 +13,12 @@ val extension = project.extensions.create<SaxonCPythonExtension>("saxoncPython")
 val manageBranches = the<ManageBranchesExtension>()
 val saxonBuild = the<SaxonBuildExtension>()
 
-val systemOs = OperatingSystem.current()
-val unixish = systemOs.isMacOsX() || systemOs.isLinux()
+val targetHost = TargetHost.current()
+val unixish = targetHost.isMacOS || targetHost.isLinux
 val venvBaseDir = project.layout.buildDirectory.dir("pyvenv")
 val pythonVersion: String by project
-val pythonReleaseVersions: String by project
+val pythonVersionsJson = layout.projectDirectory.file("../python-versions.json")
+val pythonVersions = PythonVersions(pythonVersionsJson.asFile)
 val manylinuxTarget: String by project
 
 extension.pythonBinDirName.convention(if (unixish) "bin" else "scripts")
@@ -29,7 +27,7 @@ extension.venvBaseDir.convention(venvBaseDir)
 extension.venvBasePath.convention(venvBaseDir.map { it.asFile.toString() })
 extension.version.convention(pythonVersion)
 extension.manylinuxTarget.convention(manylinuxTarget)
-extension.releaseVersions = pythonReleaseVersions.split(",")
+extension.supportedPythonVersions = pythonVersions.supported
 
 val libsaxoncReleaseArtifactsBucket by configurations.dependencyScope("libsaxoncReleaseArtifactsBucket")
 val libsaxoncReleaseArtifactsDir by configurations.resolvable("libsaxoncReleaseArtifactsDir") {
@@ -86,35 +84,37 @@ val releaseWheels = tasks.register("release_wheels") {
 
 releaseWhl.outgoing.artifact(releaseWheels) { builtBy(releaseWheels) }
 
-val pythonVersions = mutableMapOf<String, String>()
-
 val wheelTasksBuilder = WheelTasksBuilder.create(project, extension, saxonBuild)
+val pyprojectToml = pythonSrcDir.map { it.file("pyproject.toml") }
 
-extension.releaseVersions.get().forEach { v ->
+val supportedPythonExes = mapOf<String, Provider<RegularFile>>(*extension.supportedPythonVersions.get().map { pythonVersion ->
+    val v = pythonVersion.version
     val pythonBucket by configurations.dependencyScope("python${v}Bucket")
     val pythonExe by configurations.resolvable("python${v}") {
         extendsFrom(pythonBucket)
     }
     dependencies {
-        pythonBucket(project(path=":python", configuration="python${v}"))
+        pythonBucket(project(path = ":python", configuration = "python${v}"))
     }
+    v to pythonExe.elements.map { layout.buildDirectory.file(it.single().asFile.readText()).get() }
+}.toTypedArray())
 
-    pythonVersions[v] = "python${v}"
-
+extension.supportedPythonVersions.get().forEach { pythonVersion ->
+    val v = pythonVersion.version
     val buildDirectory = layout.buildDirectory.dir(v)
 
     val venv = tasks.register<PythonVenv>("release_venv_${v}") {
         pythonEnv = extension
         branch = manageBranches.currentBranch
         suffix = "${v}-release"
-        pyenvPythonExe = pythonExe.elements.map { project.file(it.single().asFile.readText()) }
-        buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
+        pyenvPythonExe = supportedPythonExes.get(v)!!
+        buildSystemBootstrap = pyprojectToml
     }
 
     val releaseWheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_platform_tag_${v}") {
         this.pythonExe = venv.map { it.pythonExe.get() }
         manylinuxTarget = extension.manylinuxTarget
-        macosxDeploymentTarget = saxonBuild.macosx_min_version
+        macosxDeploymentTarget = pythonVersion.macOsMinVersion(targetHost)
     }
 
     val repairDevWheel = wheelTasksBuilder {
@@ -162,24 +162,25 @@ extension.releaseVersions.get().forEach { v ->
     }
 
     releaseWheels {
-        dependsOn(repairDevWheel)
+        if (pythonVersion.hasReleaseArtifact) dependsOn(repairDevWheel)
     }
 }
 
-val devPythonExe by configurations.named<ResolvableConfiguration>(pythonVersions[extension.version.get()]!!)
+val devPyRelease = extension.version.map { pythonVersions.findSupported(it) }
+val devPythonExe = supportedPythonExes.get(extension.version.get())!! // configurations.named<ResolvableConfiguration>(pythonVersions[extension.version.get()]!!)
 
 val venv = tasks.register<PythonVenv>("venv") {
+    pyenvPythonExe = devPythonExe
     pythonEnv = extension
     branch = manageBranches.currentBranch
-    pyenvPythonExe = devPythonExe.elements.map { project.file(it.single().asFile.readText()) }
-    buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
+    buildSystemBootstrap = pyprojectToml
 }
 
 val debugVenv = tasks.register<PythonVenv>("debug_venv") {
     pyenvPythonExe = devDebugPythonExe.elements.map { project.file(it.single().asFile.readText()) }
     pythonEnv = extension
     branch = manageBranches.currentBranch
-    buildSystemBootstrap = pythonSrcDir.map { it.file("pyproject.toml") }
+    buildSystemBootstrap = pyprojectToml
     suffix = "debug"
 }
 
@@ -193,13 +194,13 @@ val localDevManylinuxTargetTask = tasks.register<LocalManylinuxTargetTask>("loca
 val devWheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("dev_wheel_platform_tag") {
     pythonExe = venv.map { it.pythonExe.get() }
     manylinuxTarget = localDevManylinuxTargetTask.map { it.manylinuxTarget }
-    macosxDeploymentTarget = saxonBuild.macosx_min_version
+    macosxDeploymentTarget = devPyRelease.map { it.macOsMinVersion(targetHost) }
 }
 
 val devWheelDebugPlatformTagTask = tasks.register<WheelCompatibilityTags>("dev_wheel_debug_platform_tag") {
     pythonExe = debugVenv.map { it.pythonExe.get() }
     manylinuxTarget = localDevManylinuxTargetTask.map { it.manylinuxTarget }
-    macosxDeploymentTarget = saxonBuild.macosx_min_version
+    macosxDeploymentTarget = devPyRelease.map { it.macOsMinVersion(targetHost) }
 }
 
 val pipInstall = project.tasks.register<PipInstall>("pip_install") {

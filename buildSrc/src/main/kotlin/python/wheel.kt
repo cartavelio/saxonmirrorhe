@@ -458,18 +458,15 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
     }
 }
 
-class PythonReleaseWheels(val version: String, val manylinuxTarget: String, val macosMinVersionArm64: String, val macosMinVersionX86_64: String,  val releasePythons: List<String>) {
+class PythonReleaseWheels(val version: String, val manylinuxTarget: String,  val releasePythons: List<PythonVersion>) {
     fun macosVersionTag(version: String): String {
         val parts = version.split('.')
         val (major, minor) = if (parts.size == 2) parts[0] to parts[1] else parts[0] to "0"
         return "${major}_${minor}"
     }
 
-    fun macos_platform(architecture: Architectures): String {
-        val version = when (architecture) {
-            Architectures.ARM64 -> macosVersionTag(macosMinVersionArm64)
-            Architectures.X86_64 -> macosVersionTag(macosMinVersionX86_64)
-        }
+    fun macos_platform(python: PythonVersion, arch: Architectures): String {
+        val version = macosVersionTag(python.macOsMinVersion(arch))
         return "macosx_${version}"
     }
 
@@ -478,8 +475,8 @@ class PythonReleaseWheels(val version: String, val manylinuxTarget: String, val 
     fun artifacts(): List<String> {
         val result = mutableListOf<String>()
         editions.forEach { edition ->
-            releasePythons.forEach { py ->
-                val pythonTag = "cp${py.replace(".", "")}"
+            releasePythons.forEach { pyVersion ->
+                val pythonTag = "cp${pyVersion.version.replace(".", "")}"
                 val abiTag = pythonTag
                 TargetHost.platforms.forEach { (platform, hosts) ->
                     hosts.forEach { host ->
@@ -493,7 +490,7 @@ class PythonReleaseWheels(val version: String, val manylinuxTarget: String, val 
                         }
                         val platform = when(platform) {
                             Platforms.WINDOWS -> "win"
-                            Platforms.MACOS -> macos_platform(host.architectureConst)
+                            Platforms.MACOS -> macos_platform(pyVersion,host.architectureConst)
                             Platforms.LINUX -> manylinuxTarget
                         }
                         result.add(WheelFilename(edition, version, pythonTag, abiTag, platform, architecture).toString())
