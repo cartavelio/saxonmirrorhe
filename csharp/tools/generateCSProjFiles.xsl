@@ -264,7 +264,10 @@ EndGlobal
             <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
           </PropertyGroup>
           <PropertyGroup>
+            <!-- This is inconsistent with generating a .nuget package
+                 And didn't see to have much performance benefit
             <PublishAot>True</PublishAot>
+            -->
             <CFBundleName>SaxonCS</CFBundleName>
             <CFBundleDisplayName>SaxonCS</CFBundleDisplayName>
             <CFBundleIdentifier>com.saxonica.saxoncs</CFBundleIdentifier>
