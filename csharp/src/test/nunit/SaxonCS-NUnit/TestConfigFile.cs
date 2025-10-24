@@ -8,6 +8,7 @@ using System.Xml;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using Saxon.Api;
+using Saxon.Ejava.net;
 using Saxon.Hej;
 
 namespace SaxonCS_NUnit {
