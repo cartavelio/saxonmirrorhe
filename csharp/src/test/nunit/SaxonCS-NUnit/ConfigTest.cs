@@ -4,18 +4,17 @@ using System.IO;
 namespace SaxonCS_NUnit
 {
     public class ConfigTest {
-        
-        public static string repo = Environment.GetEnvironmentVariable("SAXONDEV_DIR_12") 
-                                    ?? Environment.GetEnvironmentVariable("SAXONDEV_DIR");
-        public static string extraTests = Environment.GetEnvironmentVariable("SAXON_EXTRA_TEST_SUITE_DIR");
-        
+        // Environment.CurrentDirectory = .../saxondev/csharp/src/test/nunit/bin/{rel}/net8.0/{arch}
+        public static string repo = Path.GetFullPath(
+            Path.Combine(Environment.CurrentDirectory, "../../../../../../../.."));
+        public static string extraTests = Path.GetFullPath(Path.Combine(repo, "submodules/extra"));
         
         public static string NUNIT_DATA_DIR = Path.Combine(repo, "csharp/src/test/nunit/testdata/");
 	public static string DATA_DIR = Path.Combine(repo, "src/test/testdata/");
         public static string SANDPIT_DIR = Path.Combine(DATA_DIR, "sandpit/");
         public static string XMARK_DIR = Path.Combine(extraTests, "data/xmark/");
         public static string RESOURCES_DIR = NUNIT_DATA_DIR;
-        public static string XSLT3TS_DIR =  Path.Combine(Environment.GetEnvironmentVariable("W3C_XSLT40_TEST_SUITE_DIR"), "tests");
+        public static string XSLT3TS_DIR =  Path.Combine(repo, "submodules/xslt40/tests");
 
         public static Uri RepoUri = new Uri(repo);
         public static Uri DataDirUri = new Uri(RepoUri, DATA_DIR);
