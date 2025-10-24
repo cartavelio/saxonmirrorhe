@@ -4,9 +4,9 @@ using System.IO;
 namespace SaxonCS_NUnit
 {
     public class ConfigTest {
-        // Environment.CurrentDirectory = .../saxondev/csharp/src/test/nunit/bin/{rel}/net8.0/{arch}
+        // These tests are run from .../saxondev/csharp/{he,ee,pe} and the relative path reflects that
         public static string repo = Path.GetFullPath(
-            Path.Combine(Environment.CurrentDirectory, "../../../../../../../.."));
+            Path.Combine(Environment.CurrentDirectory, "../../../../../.."));
         public static string extraTests = Path.GetFullPath(Path.Combine(repo, "submodules/extra"));
         
         public static string NUNIT_DATA_DIR = Path.Combine(repo, "csharp/src/test/nunit/testdata/");
