@@ -100,7 +100,8 @@ SaxonApiException::~SaxonApiException() throw() {
     systemId.clear();
   }
   if (!cppException) {
-    j_clearException(SaxonProcessor::sxn_environ->thread);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    j_clearException(thread);
   }
 }
 
