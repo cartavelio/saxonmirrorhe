@@ -117,9 +117,18 @@ EndGlobal
       </ItemGroup>
 
       <ItemGroup>
-        <EmbeddedResource Include="..\..\resources\**\*">
-          <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
-        </EmbeddedResource>
+        <xsl:choose>
+          <xsl:when test="exists($releaseBuild)">
+            <EmbeddedResource Include="..\..\resources\**\*">
+              <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
+            </EmbeddedResource>
+          </xsl:when>
+          <xsl:otherwise>
+            <EmbeddedResource Include="build\resources\**\*">
+              <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
+            </EmbeddedResource>
+          </xsl:otherwise>
+        </xsl:choose>
       </ItemGroup>
 
       <ItemGroup>
@@ -156,6 +165,7 @@ EndGlobal
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
           <PropertyGroup>
+            <StartupObject>TestDriver.Driver</StartupObject> 
             <AssemblyName>SaxonCSTestDriver</AssemblyName>
             <Description>QT3/4 test suite test driver.</Description>
           </PropertyGroup>
@@ -254,6 +264,7 @@ EndGlobal
       <Project Sdk="Microsoft.NET.Sdk">
         <Import Project="{$core.csproj}"/>
         <PropertyGroup>
+          <StartupObject>TestDriver.Driver</StartupObject> 
           <AssemblyName>SaxonCSTestDriver</AssemblyName>
           <Description>QT3/4 test suite test driver.</Description>
         </PropertyGroup>
