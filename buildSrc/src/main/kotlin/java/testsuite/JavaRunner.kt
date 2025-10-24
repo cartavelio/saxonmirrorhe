@@ -29,6 +29,8 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
   abstract val language: Property<String>
   @get:Input
   abstract val edition: Property<String>
+  @get:Input
+  abstract val showOutput: Property<Boolean>
   @get:InputDirectory
   abstract val suiteDir: DirectoryProperty
   @get:InputFile
@@ -92,59 +94,55 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
     val testclasspath = classpath
     val stdOutput = ByteArrayOutputStream()
     val errOutput = ByteArrayOutputStream()
-    var showOutput = true
+
+    val javaArgs = mutableListOf<String>()
+
+    // This makes the report name match what the regression report builder
+    // expects. Since I don't think any one else cares...
+    val reportName = if (name.startsWith("test_suite_")) {
+      "${edition.get()}j_${name.substring(11)}"
+    } else {
+      name
+    }
+
+    javaArgs.addAll(listOf(
+                        "${suiteDir.get()}",
+                        catalog,
+                        "-exceptions:${exceptionsFile.get()}",
+                        "-reportfilename:${reportName}",
+                        "-o:${reportDir.get()}",
+                        "-lang:${language.get()}"
+                    ))
+
+    options.get().forEach { (opt, arg) -> 
+              if (arg == "") {
+                javaArgs.add("-${opt}")
+              } else {
+                javaArgs.add("-${opt}:${arg}")
+              }
+            }
+
+    testOpts.forEach { (opt, arg) ->
+      javaArgs.add("-${opt}:${arg}")
+    }
+
+    println("JARG: ${javaArgs}")
 
     ex.javaexec {
       mainClass = driverClass
-      workingDir = project.file(suiteDir)
+      workingDir = suiteDir.asFile.get()
       classpath = testclasspath
 
-      for (task in project.gradle.taskGraph.getAllTasks()) {
-        // If the testsuites task(s) are in the graph, assume we're doing
-        // a longer run and we don't want to see all the detailed output
-        if (task.name == "testsuites") {
-          showOutput = false
-          break;
-        }
-      }
-
-      if (!showOutput) {
+      if (!showOutput.get()) {
         println("(buffering output)")
         standardOutput = stdOutput
         errorOutput = errOutput
       }
 
-      // This makes the report name match what the regression report builder
-      // expects. Since I don't think any one else cares...
-      val reportName = if (name.startsWith("test_suite_")) {
-        "${edition.get()}j_${name.substring(11)}"
-      } else {
-        name
-      }
-
-      args(
-        "${suiteDir.get()}",
-        catalog,
-        "-exceptions:${exceptionsFile.get()}",
-        "-reportfilename:${reportName}",
-        "-o:${reportDir.get()}",
-        "-lang:${language.get()}"
-      )
-
-      options.get().forEach { (opt, arg) -> 
-        if (arg == "") {
-          args("-${opt}")
-        } else {
-          args("-${opt}:${arg}")
-        }
-      }
-
-      testOpts.forEach { (opt, arg) ->
-        args("-${opt}:${arg}")
-      }
+      args(javaArgs)
     }
 
-    if (!showOutput) {
+    if (!showOutput.get()) {
       println("==> ${reportDir.get()}/stderr.txt")
       var outputStream = PrintStream(File("${reportDir.get()}/stderr.txt"))
       var lines = errOutput.toString("utf-8")
