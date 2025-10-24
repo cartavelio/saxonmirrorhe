@@ -40,16 +40,14 @@
   <xsl:variable name="pname"
                 select="($releaseBuild, 'SaxonCS')[1]"/>
 
-  <xsl:message>{$releaseBuild}: {$outputPath}: {$pname}</xsl:message>
-
-
-
   <xsl:text>Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{{{$uuid1}}}") = "{$pname}", "{$templateName}.csproj", "{{{$uuid2}}}"
 EndProject
 </xsl:text>
   <xsl:if test="$includeTestDriver">
-    <xsl:text>Project("{{{$uuid1}}}") = "TestDriver", "{$templateName}TestDriver.csproj", "{{{$uuid4}}}"
+    <xsl:text>Project("{{{$uuid1}}}") = "TestDriver", "{$templateName}TestDriver.csproj", "{{{$uuid3}}}"
+EndProject
+Project("{{{$uuid1}}}") = "NUnitTests", "NUnitTests.csproj", "{{{$uuid4}}}"
 EndProject
 </xsl:text>
   </xsl:if>
@@ -65,7 +63,11 @@ EndProject
                 {{{$uuid2}}}.Release|Any CPU.Build.0 = Release|Any CPU
 </xsl:text>
   <xsl:if test="$includeTestDriver">
-    <xsl:text>                {{{$uuid4}}}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    <xsl:text>                {{{$uuid3}}}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                {{{$uuid3}}}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                {{{$uuid3}}}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                {{{$uuid3}}}.Release|Any CPU.Build.0 = Release|Any CPU
+                {{{$uuid4}}}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
                 {{{$uuid4}}}.Debug|Any CPU.Build.0 = Debug|Any CPU
                 {{{$uuid4}}}.Release|Any CPU.ActiveCfg = Release|Any CPU
                 {{{$uuid4}}}.Release|Any CPU.Build.0 = Release|Any CPU
@@ -93,11 +95,11 @@ EndGlobal
         <Version>{$saxonVersion}</Version>
         <AssemblyVersion>{$saxonVersion}</AssemblyVersion>
         <Nullable>disable</Nullable>
-        <OutputType>Exe</OutputType>
         <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <IsTrimmable>true</IsTrimmable>
 
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>pdbonly</DebugType>
@@ -251,16 +253,18 @@ EndGlobal
         </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
-        <xsl:message>HERE</xsl:message>
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
           <PropertyGroup>
+            <StartupObject>Saxon.Cmd.Command</StartupObject>
+            <OutputType>Exe</OutputType>
             <AssemblyName>SaxonCS</AssemblyName>
             <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
             latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Description>
             <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
           </PropertyGroup>
           <PropertyGroup>
+            <PublishAot>True</PublishAot>
             <CFBundleName>SaxonCS</CFBundleName>
             <CFBundleDisplayName>SaxonCS</CFBundleDisplayName>
             <CFBundleIdentifier>com.saxonica.saxoncs</CFBundleIdentifier>
@@ -302,6 +306,12 @@ EndGlobal
         <xsl:with-param name="relative-hint-path" select="''"/>
       </xsl:call-template>
     </xsl:result-document>
+    <xsl:result-document href="NUnitTests.csproj" method="xml" indent="yes">
+      <xsl:call-template name="NUnitTests.csproj">
+        <xsl:with-param name="relative-src-path" select="'../'"/>
+        <xsl:with-param name="relative-hint-path" select="''"/>
+      </xsl:call-template>
+    </xsl:result-document>
   </xsl:if>
 </xsl:template>
 
@@ -313,6 +323,7 @@ EndGlobal
     <Import Project="{$core.csproj}"/>
     <PropertyGroup>
       <StartupObject>TestDriver.Driver</StartupObject> 
+      <OutputType>Exe</OutputType>
       <AssemblyName>TestDrivers</AssemblyName>
       <Description>QT3/4 test suite test driver.</Description>
     </PropertyGroup>
@@ -337,6 +348,46 @@ EndGlobal
       </Reference>
     </ItemGroup>
   </Project>
+</xsl:template>
+
+<xsl:template name="NUnitTests.csproj">
+  <xsl:param name="relative-src-path" as="xs:string" required="yes"/>
+  <xsl:param name="relative-hint-path" as="xs:string" required="yes"/>
+
+<Project Sdk="Microsoft.NET.Sdk">
+   <Import Project="core.csproj"/>
+   <PropertyGroup>
+      <LangVersion>10.0</LangVersion>
+      <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+      <Version>12.9.0</Version>
+      <AssemblyVersion>12.9.0</AssemblyVersion>
+      <Authors>Saxonica Ltd.</Authors>
+      <TargetFramework>net8.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+      <IsPackable>false</IsPackable>
+      <IsTestProject>true</IsTestProject>
+   </PropertyGroup>
+   <ItemGroup>
+     <Compile Include="{translate($relative-src-path, '/', '\')}src\test\nunit\SaxonCS-NUnit\**\*.cs"/>
+     <Compile Remove="{translate($relative-src-path, '/', '\')}src\test\nunit\SaxonCS-NUnit\**\.DS_Store"/>
+   </ItemGroup>
+   <ItemGroup>
+      <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+      <PackageReference Include="NUnit" Version="4.3.2"/>
+      <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
+      <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+   </ItemGroup>
+   <ItemGroup>
+      <Using Include="NUnit.Framework"/>
+   </ItemGroup>
+   <ItemGroup>
+      <ProjectReference Include="SaxonCS.csproj"/>
+   </ItemGroup>
+</Project>
+
+
 </xsl:template>
 
 </xsl:stylesheet>
