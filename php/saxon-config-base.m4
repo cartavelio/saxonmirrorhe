@@ -1,4 +1,3 @@
-SAXON_VERSION="12.9.0"
 
 PHP_ARG_WITH([saxon],
   [for saxon support],

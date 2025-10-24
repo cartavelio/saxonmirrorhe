@@ -278,6 +278,10 @@ interface SaxonCPythonExtension {
     val manylinuxTarget: Property<String>
 }
 
+interface SaxonCPhpExtension {
+    val edition: Property<String>
+}
+
 interface PyenvExtension {
     val devVersion: Property<String>
     val releaseVersions: ListProperty<String>
