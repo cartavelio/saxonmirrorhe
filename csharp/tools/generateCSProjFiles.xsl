@@ -10,6 +10,7 @@
 <xsl:param name="releaseBuild" as="xs:string?" select="()"/>
 <xsl:param name="nunitBuild" as="xs:string?" select="'false'"/>
 
+<xsl:param name="release" as="xs:string" required="yes"/>
 <xsl:param name="platform" as="xs:string" required="yes"/>
 <xsl:param name="arch" as="xs:string" required="yes"/>
 <xsl:param name="saxonVersion" as="xs:string" required="yes"/>
@@ -39,12 +40,16 @@
   <xsl:variable name="pname"
                 select="($releaseBuild, 'SaxonCS')[1]"/>
 
+  <xsl:message>{$releaseBuild}: {$outputPath}: {$pname}</xsl:message>
+
+
+
   <xsl:text>Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{{{$uuid1}}}") = "{$pname}", "{$templateName}.csproj", "{{{$uuid2}}}"
 EndProject
 </xsl:text>
   <xsl:if test="$includeTestDriver">
-    <xsl:text>Project("{{{$uuid3}}}") = "TestDriver", "{$templateName}TestDriver.csproj", "{{{$uuid4}}}"
+    <xsl:text>Project("{{{$uuid1}}}") = "TestDriver", "{$templateName}TestDriver.csproj", "{{{$uuid4}}}"
 EndProject
 </xsl:text>
   </xsl:if>
@@ -194,7 +199,7 @@ EndGlobal
           </ItemGroup>
           <ItemGroup>
             <Reference Include="SaxonCS">
-              <HintPath>../../../{$edition}/build/{$arch}/SaxonCS/bin/Debug/{$framework}/{$platform}-{$arch}/SaxonCS.dll</HintPath>
+              <HintPath>..\..\..\{$edition}\build\{$arch}\SaxonCS\bin\{$release}\{$framework}\{$platform}-{$arch}\SaxonCS.dll</HintPath>
             </Reference>
           </ItemGroup>
           <ItemGroup>
@@ -210,34 +215,10 @@ EndGlobal
         </Project>
       </xsl:when>
       <xsl:when test="$releaseBuild = 'TestDriver'">
-        <Project Sdk="Microsoft.NET.Sdk">
-          <Import Project="{$core.csproj}"/>
-          <PropertyGroup>
-            <StartupObject>TestDriver.Driver</StartupObject> 
-            <AssemblyName>SaxonCSTestDriver</AssemblyName>
-            <Description>QT3/4 test suite test driver.</Description>
-          </PropertyGroup>
-          <PropertyGroup>
-            <CFBundleName>SaxonCSTestDriver</CFBundleName>
-            <CFBundleDisplayName>SaxonCSTestDriver</CFBundleDisplayName>
-            <CFBundleIdentifier>com.saxonica.saxoncstestdriver</CFBundleIdentifier>
-            <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
-            <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
-            <CFBundleExecutable>SaxonCSTestDriver</CFBundleExecutable>
-            <NSPrincipalClass>NSApplication</NSPrincipalClass>
-            <NSHighResolutionCapable>true</NSHighResolutionCapable>
-            <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
-          </PropertyGroup>
-          <ItemGroup>
-            <Compile Include="..\..\..\..\src\test\testrunner\**"/>
-            <Compile Remove="..\..\..\..\**\.DS_Store"/>
-          </ItemGroup>
-          <ItemGroup>
-            <Reference Include="SaxonCS">
-              <HintPath>../SaxonCS/bin/Debug/{$framework}/{$platform}-{$arch}/SaxonCS.dll</HintPath>
-            </Reference>
-          </ItemGroup>
-        </Project>
+        <xsl:call-template name="TestDriver.csproj">
+          <xsl:with-param name="relative-src-path" select="'../../../../'"/>
+          <xsl:with-param name="relative-hint-path" select="'../SaxonCS/'"/>
+        </xsl:call-template>
       </xsl:when>
       <xsl:when test="$releaseBuild = 'NUnitTests'">
         <Project Sdk="Microsoft.NET.Sdk">
@@ -263,7 +244,14 @@ EndGlobal
           </ItemGroup>
         </Project>
       </xsl:when>
+      <xsl:when test="$releaseBuild = 'TestDrivers'">
+        <xsl:call-template name="TestDriver.csproj">
+          <xsl:with-param name="relative-src-path" select="'../../../../'"/>
+          <xsl:with-param name="relative-hint-path" select="'../SaxonCS/'"/>
+        </xsl:call-template>
+      </xsl:when>
       <xsl:otherwise>
+        <xsl:message>HERE</xsl:message>
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
           <PropertyGroup>
@@ -309,36 +297,46 @@ EndGlobal
 
   <xsl:if test="$includeTestDriver">
     <xsl:result-document href="{$templateName}TestDriver.csproj" method="xml" indent="yes">
-      <Project Sdk="Microsoft.NET.Sdk">
-        <Import Project="{$core.csproj}"/>
-        <PropertyGroup>
-          <StartupObject>TestDriver.Driver</StartupObject> 
-          <AssemblyName>SaxonCSTestDriver</AssemblyName>
-          <Description>QT3/4 test suite test driver.</Description>
-        </PropertyGroup>
-        <PropertyGroup>
-          <CFBundleName>SaxonCSTestDriver</CFBundleName>
-          <CFBundleDisplayName>SaxonCSTestDriver</CFBundleDisplayName>
-          <CFBundleIdentifier>com.saxonica.saxoncstestdriver</CFBundleIdentifier>
-          <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
-          <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
-          <CFBundleExecutable>SaxonCSTestDriver</CFBundleExecutable>
-          <NSPrincipalClass>NSApplication</NSPrincipalClass>
-          <NSHighResolutionCapable>true</NSHighResolutionCapable>
-          <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
-        </PropertyGroup>
-        <ItemGroup>
-          <Compile Include="..\src\test\testrunner\**"/>
-          <Compile Remove="..\**\.DS_Store"/>
-        </ItemGroup>
-        <ItemGroup>
-          <Reference Include="SaxonCS">
-            <HintPath>build/{$arch}/SaxonCS/bin/Debug/{$framework}/{$platform}-{$arch}/SaxonCS.dll</HintPath>
-          </Reference>
-        </ItemGroup>
-      </Project>
+      <xsl:call-template name="TestDriver.csproj">
+        <xsl:with-param name="relative-src-path" select="'../'"/>
+        <xsl:with-param name="relative-hint-path" select="''"/>
+      </xsl:call-template>
     </xsl:result-document>
   </xsl:if>
+</xsl:template>
+
+<xsl:template name="TestDriver.csproj">
+  <xsl:param name="relative-src-path" as="xs:string" required="yes"/>
+  <xsl:param name="relative-hint-path" as="xs:string" required="yes"/>
+
+  <Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="{$core.csproj}"/>
+    <PropertyGroup>
+      <StartupObject>TestDriver.Driver</StartupObject> 
+      <AssemblyName>TestDrivers</AssemblyName>
+      <Description>QT3/4 test suite test driver.</Description>
+    </PropertyGroup>
+    <PropertyGroup>
+      <CFBundleName>TestDrivers</CFBundleName>
+      <CFBundleDisplayName>TestDrivers</CFBundleDisplayName>
+      <CFBundleIdentifier>com.saxonica.saxoncstestdriver</CFBundleIdentifier>
+      <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
+      <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
+      <CFBundleExecutable>TestDrivers</CFBundleExecutable>
+      <NSPrincipalClass>NSApplication</NSPrincipalClass>
+      <NSHighResolutionCapable>true</NSHighResolutionCapable>
+      <NSRequiresAquaSystemAppearance>false</NSRequiresAquaSystemAppearance>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="{translate($relative-src-path, '/', '\')}src\test\testrunner\**"/>
+      <Compile Remove="{translate($relative-src-path, '/', '\')}**\.DS_Store"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Include="SaxonCS">
+        <HintPath>{translate($relative-hint-path, '/', '\')}bin\{$release}\{$framework}\{$platform}-{$arch}\SaxonCS.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+  </Project>
 </xsl:template>
 
 </xsl:stylesheet>
