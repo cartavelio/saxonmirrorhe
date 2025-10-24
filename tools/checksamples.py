@@ -302,3 +302,75 @@ def check_xmarkbenchmark(output):
 
     lines = check(expect, "n/a", lines)
 
+def contains_regex(output, relist):
+    for item in relist:
+        patn = re.compile(item)
+        if not patn.search(output):
+            raise RuntimeError(f"Did not find '{item}' in output")
+
+def check_books_query_1(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "<AUTHOR>Jasper Fforde</AUTHOR>",
+        "<AUTHOR>Thomas Hardy</AUTHOR>",
+        "<TITLE>Tess of the d'Urbervilles</TITLE>"
+    ])
+
+def check_books_query_2(output):
+    # An ad hoc test
+    contains_regex(output, [">88$"])
+
+def check_books_transform_1(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "<li>The Big Over Easy</li>",
+        "<li>The Eyre Affair</li>"
+    ])
+
+def check_books_transform_2(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "<h3>AUTHOR: Charlotte Brontë</h3>",
+        "TITLE: Wuthering Heights",
+        "CATEGORY: Paperback"
+    ])
+
+def check_books_transform_3(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "Title,Author,Category,Stock-Value",
+        "\"Pride and Prejudice\",\"Jane Austen\",\"MMP\(Mass-market Paperback\)\",\"1683.00\"",
+        "\"The Big Over Easy\",\"Jasper Fforde\",\"H\(Hard Cover\)\",\"1876.95\""
+    ])
+
+def check_tour_transform_1(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "white\">36</td>",
+        "xffff44\">19</td>",
+        "white\">30</td>"
+    ])
+
+def check_tour_transform_2(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "white\">61</td>",
+        "xffff44\">8</td>",
+        "white\">53</td>"
+    ])
+
+def check_tour_query_1(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "Knight's tour starting at e5",
+        ">6<",
+        ">58</td></tr>"
+    ])
+
+def check_tour_query_2(output):
+    # An ad hoc test
+    contains_regex(output, [
+        "Knight's tour starting at d2",
+        ">8<",
+        ">14</td></tr>"
+    ])

@@ -1,8 +1,10 @@
-<xsl:transform
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  version="2.0">
+<xsl:transform xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               version="2.0">
   
   <!-- This style sheet displays the books.xml file.  -->
+  <!-- Rewritten in 2025 to use xsl:key instead of id()
+       because the Microsoft parser doesn't report attribute
+       type information. -->
   
   <xsl:key name="authkey" match="ITEM" use="AUTHOR"/>
   <xsl:key name="codekey" match="CATEGORY" use="@CODE"/>
@@ -95,7 +97,7 @@
               <td width="100" valign="top"><xsl:number value="position()" format="i"/></td>
               <td>
                 TITLE: <xsl:value-of select="TITLE"/><br/>
-                CATEGORY: <xsl:value-of select="id(@CAT)/@DESC" />
+                CATEGORY: <xsl:value-of select="key('codekey', @CAT)/@DESC" />
                 (<xsl:value-of select="@CAT" />)
               </td>
             </tr>
@@ -109,9 +111,9 @@
   <xsl:template match="BOOKS" mode="by-category">
     <div>
       <xsl:for-each-group select="ITEM" group-by="@CAT">
-        <xsl:sort select="id(@CAT)/@DESC" order="ascending"/>
+        <xsl:sort select="key('codekey', @CAT)/@DESC" order="ascending"/>
         <xsl:sort select="TITLE" order="ascending"/>
-        <h3>CATEGORY: <xsl:value-of select="id(@CAT)/@DESC" /></h3>
+        <h3>CATEGORY: <xsl:value-of select="key('codekey', @CAT)/@DESC" /></h3>
         <ol>
           <xsl:for-each select="current-group()">
             <li>AUTHOR: <xsl:value-of select="AUTHOR"/><br/>
