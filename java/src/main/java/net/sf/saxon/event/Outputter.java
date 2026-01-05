@@ -329,9 +329,8 @@ public abstract class Outputter implements Receiver {
      */
 
      @Override
-     public void append(Item item, Location locationId, int properties) throws XPathException {
-         throw new UnsupportedOperationException();
-     }
+     abstract public void append(Item item, Location locationId, int properties) throws XPathException;
+
 
     /**
      * Append an arbitrary item (node, atomic value, or function) to the output.

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.event;
 
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
@@ -64,6 +65,20 @@ public class SinkOutputter extends Outputter {
     @Override
     public void comment(UnicodeString content, Location location, int properties) throws XPathException {
 
+    }
+
+    /**
+     * Append an arbitrary item (node, atomic value, or function) to the output. The default
+     * implementation throws {@code UnsupportedOperationException}.
+     *
+     * @param item       the item to be appended
+     * @param locationId the location of the calling instruction, for diagnostics
+     * @param properties if the item is an element node, this indicates whether its namespaces
+     *                   need to be copied. Values are {@link ReceiverOption#ALL_NAMESPACES}; the default (0) means
+     */
+    @Override
+    public void append(Item item, Location locationId, int properties) throws XPathException {
+        
     }
 }
 
