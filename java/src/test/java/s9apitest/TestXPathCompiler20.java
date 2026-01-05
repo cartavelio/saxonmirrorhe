@@ -54,6 +54,20 @@ public class TestXPathCompiler20 {
         }
     }
 
+    private void badDynamically(String expr, String errorCode) {
+        try {
+            XPathExecutable exec = compiler.compile(expr);
+            XPathSelector selector = exec.load();
+            selector.setContextItem(document);
+            selector.evaluate();
+            fail("unexpected success");
+        } catch (SaxonApiException e1) {
+            assertEquals(errorCode, e1.getErrorCode().getLocalName());
+            System.err.println(e1.getMessage());
+            // Failure was expected
+        }
+    }
+
     @Test
     public void testArith() {
         String result = good("2+2");
@@ -156,6 +170,24 @@ public class TestXPathCompiler20 {
     @Test
     public void testNoNonCapturingGroups() {
         bad("replace('(?:abc:)(def)', '$1', 'ghi'");
+    }
+
+    @Test
+    public void testBadRegex() {
+        // non-capturing parens not allowed in 2.0
+        badDynamically("matches('abc', '(?:abc:)(def)')", "FORX0002");
+    }
+
+    @Test
+    public void testBadRegex2() {
+        // non-capturing parens not allowed in 2.0
+        badDynamically("matches(.,'(?:^|,)8(?:,|$)')", "FORX0002");
+    }
+
+    @Test
+    public void testBadFlags() {
+        // invalid flags ghi
+        badDynamically("replace('abc', '[a-c]+', '$1', 'ghi')", "FORX0001");
     }
 
 
