@@ -3454,6 +3454,10 @@ public class XQueryParser extends XPathParser {
                 if (requiredType == null) {
                     grumble("Unknown schema type " + t.currentTokenValue, "XQST0104");
                 }
+                if (requiredType == Untyped.getInstance()) {
+                    mode = Validation.STRIP;
+                    requiredType = null;
+                }
                 foundCurly = true;
                 break;
             case Token.KEYWORD_CURLY:
