@@ -42,10 +42,12 @@
     </xsl:template>
 
     <xsl:variable name="s-titles" select="('Interface', 'Delegate', 'Class', 'Enum', 'Exception')" as="xs:string+"/>
-
+    
+    <!-- Note dotnetdoc uses interface, delegate, enum elements - but in javadoc these are all
+        represented by class element  -->
     <xsl:template match="document-node()" mode="summarise-pkg">
         <xsl:variable name="package" select="package"/>
-        <xsl:variable name="classes" select="$package/class"/>
+        <xsl:variable name="classes" select="$package/class | $package/class/class | $package/class/class/class"/>
         <xsl:for-each select="1 to 5">
             <xsl:variable name="i" select="." as="xs:integer"/>
             <xsl:variable name="f-classes"
