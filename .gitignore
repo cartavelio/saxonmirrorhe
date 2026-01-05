@@ -1,13 +1,22 @@
-out/
+# IDE artefacts and local settings
 .idea/
 /*.iml
 .DS_Store
+python/.pyenv/
+.project
+.settings/
+.classpath
+
+# Ephemeral artefacts
+out/
+build/
+bin/
+target/
 .gradle/
 .kotlin/
-build/
 __pycache__
 src/test/testdata/sandpit/
 src/test/testdata/temp/
 csharp/ee/bin/Debug/
 csharp/ee/obj/
-python/.pyenv/
+*.log
