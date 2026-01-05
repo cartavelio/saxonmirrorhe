@@ -497,6 +497,14 @@ public class TypeHierarchy {
                     } else if (t2 instanceof ErrorType) {
                         return DISJOINT;
                     } else {
+
+                        // Compare schema-element and schema-attribute tests (Saxon bug 6910)
+
+                        Optional<Affinity> schemaElementAffinity = schemaDeclarationAffinity(t1, t2);
+                        if (schemaElementAffinity.isPresent()) {
+                            return schemaElementAffinity.get();
+                        }
+
                         // first find the relationship between the node kinds allowed
                         Affinity nodeKindRelationship;
                         UType m1 = t1.getUType();
@@ -664,6 +672,20 @@ public class TypeHierarchy {
             return OVERLAPS;
         }
     }
+
+    /**
+     * Compare two item types if they are both schema-element or schema-attribute tests. This method is implemented
+     * in a subclass for Saxon-EE: without schema-awareness, schema-element tests do not arise.
+     *
+     * @param t1 the first item type
+     * @param t2 the second item type
+     * @return the relationship between the two, if one is a schema-element or schema-attribute test; otherwise
+     * Optional.empty().
+     */
+    protected Optional<Affinity> schemaDeclarationAffinity(ItemType t1, ItemType t2) {
+        return Optional.empty();
+    }
+
 
     private static void requireTrueItemType(ItemType t) {
         Objects.requireNonNull(t);
