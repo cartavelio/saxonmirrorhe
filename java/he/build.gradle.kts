@@ -24,7 +24,7 @@ sourceSets.named("editionTest") {
   java {
     // Exclude everything that won't build in HE...
     exclude("xqjtck/**")
-    exclude("com/saxonica/functions/extfn/LastModifiedTest.java")
+    exclude("com/saxonica/**/*.java")
     exclude("commands/AntTests.java")
     exclude("commands/QueryTests.java")
     exclude("commands/Saxon3483.java")
