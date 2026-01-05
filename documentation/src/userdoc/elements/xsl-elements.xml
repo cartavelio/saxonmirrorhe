@@ -1583,7 +1583,6 @@
                     9.6. The switch to disable the feature (required by the W3C specification) 
                 became available in Saxon 9.8. The <code>saxon:options</code> attribute became
                     available in Saxon 9.9.</p>
-                <p></p>
                 <p>If you are concerned about security implications of this feature, you can disable it
                     either statically or dynamically, by setting the configuration property 
                     <a class="feature" href="DISABLE_XSL_EVALUATE"/>.</p>
@@ -2080,7 +2079,7 @@
             <description>
                 <p>Used for conditional processing. It takes a mandatory <code>test</code>
                     attribute, whose value is a boolean expression. The contents of the
-                        <code>xsl:if</code> element are expanded only of the expression is true.</p>
+                        <code>xsl:if</code> element are expanded only if the expression is true.</p>
             </description>
             <attributes>
                 <attribute name="test" use="mandatory">The boolean expression to be tested. The full
