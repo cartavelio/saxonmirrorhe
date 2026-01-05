@@ -88,9 +88,16 @@ val makeCleanTask = tasks.register<Exec>("makeClean") {
   args("clean")
 }
 
-
-tasks.named("clean") {
-  dependsOn("cleanPhpize", "cleanConfigure", makeCleanTask)
+if (layout.projectDirectory.file("Makefile").asFile.exists()) {
+  tasks.named("clean") {
+    dependsOn("cleanPhpize", "cleanConfigure", makeCleanTask)
+  }
+} else {
+  tasks.named("clean") {
+    doLast {
+      println("Not attempting to clean ${layout.projectDirectory}; not configured?")
+    }
+  }
 }
 
 val releaseFolderTask = tasks.register<Copy>("release_folder") {
