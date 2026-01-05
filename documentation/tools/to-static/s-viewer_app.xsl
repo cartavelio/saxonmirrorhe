@@ -140,7 +140,7 @@ docs-count: <xsl:value-of select="count($section-docs/*)"/>
 
                 <head>
                     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-                    <title>Saxon documentation</title>
+                    <title>Saxon 12 Documentation</title>
                     <meta name="viewport"
                         content="width=768px, minimum-scale=1.0, maximum-scale=1.0"/>
                     <link href="{concat($css-path, 'viewer_app.css')}" rel="stylesheet" type="text/css"/>
@@ -164,8 +164,8 @@ docs-count: <xsl:value-of select="count($section-docs/*)"/>
                                 </li>
                                 <li id="trail2">
                                     <a
-                                        href="https://www.saxonica.com/documentation/documentation.xml"
-                                        >Saxon ▷</a>
+                                        href="https://www.saxonica.com/documentation12/documentation.xml"
+                                        >Saxon 12 ▷</a>
                                 </li>
                                 <!-- add other items here -->
                                 <xsl:sequence select="$html-blocks[name() = 'trail']/*"/>
@@ -203,7 +203,7 @@ docs-count: <xsl:value-of select="count($section-docs/*)"/>
 
                         <div id="footer">
                             <div id="info" class="footnote">
-                                <p>Saxon Developer Guide (Non-JavaScript Version)</p>
+                                <p>Saxon 12 Documentation (Non-JavaScript Version)</p>
                             </div>
                             <div>
                                 <a href="{$next-path}">
