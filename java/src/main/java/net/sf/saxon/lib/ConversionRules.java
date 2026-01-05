@@ -83,6 +83,119 @@ public class ConversionRules {
     }
 
     /**
+     * Get a converter from xs:string to a given built-in atomic type
+     */
+
+    public StringConverter getConverterFromString(BuiltInAtomicType target) {
+        switch (target.getFingerprint()) {
+            case StandardNames.XS_ANY_ATOMIC_TYPE:
+            case StandardNames.XS_STRING:
+                return StringConverter.StringToString.INSTANCE;
+
+            case StandardNames.XS_DECIMAL:
+                return StringConverter.StringToDecimal.INSTANCE;
+            case StandardNames.XS_DURATION:
+                return StringConverter.StringToDuration.INSTANCE;
+            case StandardNames.XS_G_MONTH:
+                return StringConverter.StringToGMonth.INSTANCE;
+            case StandardNames.XS_G_MONTH_DAY:
+                return StringConverter.StringToGMonthDay.INSTANCE;
+            case StandardNames.XS_G_DAY:
+                return StringConverter.StringToGDay.INSTANCE;
+            case StandardNames.XS_TIME:
+                return StringConverter.StringToTime.INSTANCE;
+            case StandardNames.XS_BOOLEAN:
+                return StringConverter.StringToBoolean.INSTANCE;
+            case StandardNames.XS_HEX_BINARY:
+                return StringConverter.StringToHexBinary.INSTANCE;
+            case StandardNames.XS_BASE64_BINARY:
+                return StringConverter.StringToBase64Binary.INSTANCE;
+
+            case StandardNames.XS_QNAME:
+                return new StringConverter.StringToQName(this);
+            case StandardNames.XS_NOTATION:
+                return new StringConverter.StringToNotation(this);
+            case StandardNames.XS_ANY_URI:
+                return new StringConverter.StringToAnyURI(this);
+            case StandardNames.XS_DOUBLE:
+                return stringToDouble;
+            case StandardNames.XS_FLOAT:
+                return new StringConverter.StringToFloat(this);
+
+            case StandardNames.XS_UNTYPED_ATOMIC:
+                return StringConverter.StringToUntypedAtomic.INSTANCE;
+
+            case StandardNames.XS_LANGUAGE:
+                return StringConverter.StringToLanguage.INSTANCE;
+            case StandardNames.XS_NORMALIZED_STRING:
+                return StringConverter.StringToNormalizedString.INSTANCE;
+            case StandardNames.XS_TOKEN:
+                return StringConverter.StringToToken.INSTANCE;
+            case StandardNames.XS_NCNAME:
+                return StringConverter.StringToNCName.TO_NCNAME;
+            case StandardNames.XS_NAME:
+                return StringConverter.StringToName.INSTANCE;
+            case StandardNames.XS_NMTOKEN:
+                return StringConverter.StringToNMTOKEN.INSTANCE;
+            case StandardNames.XS_ID:
+                return StringConverter.StringToNCName.TO_ID;
+            case StandardNames.XS_IDREF:
+                return StringConverter.StringToNCName.TO_IDREF;
+            case StandardNames.XS_ENTITY:
+                return StringConverter.StringToNCName.TO_ENTITY;
+
+            case StandardNames.XS_INTEGER:
+                return StringConverter.StringToInteger.INSTANCE;
+            case StandardNames.XS_NON_POSITIVE_INTEGER:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_NEGATIVE_INTEGER:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_LONG:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_INT:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_SHORT:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_BYTE:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_NON_NEGATIVE_INTEGER:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_POSITIVE_INTEGER:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_UNSIGNED_LONG:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_UNSIGNED_INT:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_UNSIGNED_SHORT:
+                return new StringConverter.StringToIntegerSubtype(target);
+            case StandardNames.XS_UNSIGNED_BYTE:
+                return new StringConverter.StringToIntegerSubtype(target);
+
+            case StandardNames.XS_DAY_TIME_DURATION:
+                return StringConverter.StringToDayTimeDuration.INSTANCE;
+            case StandardNames.XS_YEAR_MONTH_DURATION:
+                return StringConverter.StringToYearMonthDuration.INSTANCE;
+
+            case StandardNames.XS_G_YEAR:
+                return new StringConverter.StringToGYear(this);
+            case StandardNames.XS_G_YEAR_MONTH:
+                return new StringConverter.StringToGYearMonth(this);
+            case StandardNames.XS_DATE:
+                return new StringConverter.StringToDate(this);
+            case StandardNames.XS_DATE_TIME:
+                return new StringConverter.StringToDateTime(this);
+            case StandardNames.XS_DATE_TIME_STAMP:
+                return new StringConverter.StringToDateTimeStamp(this);
+
+            default:
+                throw new UnsupportedOperationException();
+
+
+        }
+    }
+
+
+    /**
      * Set the converter that will be used for converting strings to doubles and floats.
      *
      * @param converter the converter to be used. There are two converters in regular use:

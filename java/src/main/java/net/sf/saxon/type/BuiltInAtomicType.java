@@ -38,7 +38,6 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     private UType uType;
     private String alphaCode;
     private boolean ordered = false;
-    public StringConverter stringConverter; // may be null for types where conversion rules can vary
     private SequenceType _one;
     private SequenceType _oneOrMore;
     private SequenceType _zeroOrOne;
@@ -46,190 +45,353 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     private static final Map<String, BuiltInAtomicType> byAlphaCode = new HashMap<>(60);
 
-    public final static BuiltInAtomicType ANY_ATOMIC =
-            makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.getInstance(), "A", true);
+    /**
+     * Internal factory method to create a BuiltInAtomicType. There is one instance for each of the
+     * built-in atomic types
+     *
+     * @param fp      The name of the type
+     * @param baseFp  The base type from which this type is derived
+     * @param primFp  Identifies the primitive type (with integer, dayTimeDuration, and yearMonthDuration considered primitive)
+     * @param code    Alphabetic code chosen to enable ordering of types according to the type hierarchy
+     * @param ordered true if the type is ordered
+     */
+    /*@NotNull*/
+    private BuiltInAtomicType(int fp, int baseFp, int primFp, String code, boolean ordered) {
+        this.fingerprint = fp;
+        this.baseFingerprint = baseFp;
+        this.primitiveFingerprint = primFp;
+        this.uType = UType.fromTypeCode(primitiveFingerprint);
+        this.ordered = ordered;
+        this.alphaCode = code;
+
+        BuiltInType.register(fp, this);
+        byAlphaCode.put(code, this);
+    }
+
+
+    public final static BuiltInAtomicType ANY_ATOMIC
+            = new BuiltInAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE,
+                                    StandardNames.XS_ANY_SIMPLE_TYPE,
+                                    StandardNames.XS_ANY_ATOMIC_TYPE,
+                                    "A", true);
 
     public final static BuiltInAtomicType STRING =
-            makeAtomicType(StandardNames.XS_STRING, ANY_ATOMIC, "AS", true);
+            new BuiltInAtomicType(StandardNames.XS_STRING,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_STRING,
+                                  "AS", true);
 
     public final static BuiltInAtomicType BOOLEAN =
-            makeAtomicType(StandardNames.XS_BOOLEAN, ANY_ATOMIC, "AB", true);
+            new BuiltInAtomicType(StandardNames.XS_BOOLEAN,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_BOOLEAN,
+                                  "AB", true);
 
     public final static BuiltInAtomicType DURATION =
-            makeAtomicType(StandardNames.XS_DURATION, ANY_ATOMIC, "AR", false);
+            new BuiltInAtomicType(StandardNames.XS_DURATION,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_DURATION,
+                                  "AR", false);
 
     public final static BuiltInAtomicType DATE_TIME =
-            makeAtomicType(StandardNames.XS_DATE_TIME, ANY_ATOMIC, "AM", true);
+            new BuiltInAtomicType(StandardNames.XS_DATE_TIME,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_DATE_TIME,
+                                  "AM", true);
 
     public final static BuiltInAtomicType DATE =
-            makeAtomicType(StandardNames.XS_DATE, ANY_ATOMIC, "AA", true);
+            new BuiltInAtomicType(StandardNames.XS_DATE,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_DATE,
+                                  "AA", true);
 
     public final static BuiltInAtomicType TIME =
-            makeAtomicType(StandardNames.XS_TIME, ANY_ATOMIC, "AT", true);
+            new BuiltInAtomicType(StandardNames.XS_TIME,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_TIME,
+                                  "AT", true);
 
     public final static BuiltInAtomicType G_YEAR_MONTH =
-            makeAtomicType(StandardNames.XS_G_YEAR_MONTH, ANY_ATOMIC, "AH", false);
+            new BuiltInAtomicType(StandardNames.XS_G_YEAR_MONTH,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_G_YEAR_MONTH,
+                                  "AH", false);
 
     public final static BuiltInAtomicType G_MONTH =
-            makeAtomicType(StandardNames.XS_G_MONTH, ANY_ATOMIC, "AI", false);
+            new BuiltInAtomicType(StandardNames.XS_G_MONTH,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_G_MONTH,
+                                  "AI", false);
 
     public final static BuiltInAtomicType G_MONTH_DAY =
-            makeAtomicType(StandardNames.XS_G_MONTH_DAY, ANY_ATOMIC, "AJ", false);
+            new BuiltInAtomicType(StandardNames.XS_G_MONTH_DAY,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_G_MONTH_DAY,
+                                  "AJ", false);
 
     public final static BuiltInAtomicType G_YEAR =
-            makeAtomicType(StandardNames.XS_G_YEAR, ANY_ATOMIC, "AG", false);
+            new BuiltInAtomicType(StandardNames.XS_G_YEAR,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_G_YEAR,
+                                  "AG", false);
 
     public final static BuiltInAtomicType G_DAY =
-            makeAtomicType(StandardNames.XS_G_DAY, ANY_ATOMIC, "AK", false);
+            new BuiltInAtomicType(StandardNames.XS_G_DAY,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_G_DAY,
+                                  "AK", false);
 
     public final static BuiltInAtomicType HEX_BINARY =
-            makeAtomicType(StandardNames.XS_HEX_BINARY, ANY_ATOMIC, "AX", true);
+            new BuiltInAtomicType(StandardNames.XS_HEX_BINARY,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_HEX_BINARY,
+                                  "AX", true);
 
     public final static BuiltInAtomicType BASE64_BINARY =
-            makeAtomicType(StandardNames.XS_BASE64_BINARY, ANY_ATOMIC, "A2", true);
+            new BuiltInAtomicType(StandardNames.XS_BASE64_BINARY,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_BASE64_BINARY,
+                                  "A2", true);
 
     public final static BuiltInAtomicType ANY_URI =
-            makeAtomicType(StandardNames.XS_ANY_URI, ANY_ATOMIC, "AU", true);
+            new BuiltInAtomicType(StandardNames.XS_ANY_URI,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_ANY_URI,
+                                  "AU", true);
 
     public final static BuiltInAtomicType QNAME =
-            makeAtomicType(StandardNames.XS_QNAME, ANY_ATOMIC, "AQ", false);
+            new BuiltInAtomicType(StandardNames.XS_QNAME,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_QNAME,
+                                  "AQ", false);
 
     public final static BuiltInAtomicType NOTATION =
-            makeAtomicType(StandardNames.XS_NOTATION, ANY_ATOMIC, "AN", false);
+            new BuiltInAtomicType(StandardNames.XS_NOTATION,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_NOTATION,
+                                  "AN", false);
 
     public final static BuiltInAtomicType UNTYPED_ATOMIC =
-            makeAtomicType(StandardNames.XS_UNTYPED_ATOMIC, ANY_ATOMIC, "AZ", true);
+            new BuiltInAtomicType(StandardNames.XS_UNTYPED_ATOMIC,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_UNTYPED_ATOMIC,
+                                  "AZ", true);
 
     public final static BuiltInAtomicType DECIMAL =
-            makeAtomicType(StandardNames.XS_DECIMAL, ANY_ATOMIC, "AD", true);
+            new BuiltInAtomicType(StandardNames.XS_DECIMAL,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_DECIMAL,
+                                  "AD", true);
 
     public final static BuiltInAtomicType FLOAT =
-            makeAtomicType(StandardNames.XS_FLOAT, ANY_ATOMIC, "AF", true);
+            new BuiltInAtomicType(StandardNames.XS_FLOAT,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_FLOAT,
+                                  "AF", true);
 
     public final static BuiltInAtomicType DOUBLE =
-            makeAtomicType(StandardNames.XS_DOUBLE, ANY_ATOMIC, "AO", true);
+            new BuiltInAtomicType(StandardNames.XS_DOUBLE,
+                                  StandardNames.XS_ANY_ATOMIC_TYPE,
+                                  StandardNames.XS_DOUBLE,
+                                  "AO", true);
 
     public final static BuiltInAtomicType INTEGER =
-            makeAtomicType(StandardNames.XS_INTEGER, DECIMAL, "ADI", true);
+            new BuiltInAtomicType(StandardNames.XS_INTEGER,
+                                  StandardNames.XS_DECIMAL,
+                                  StandardNames.XS_INTEGER, // integer is deemed primitive
+                                  "ADI", true);
 
     public final static BuiltInAtomicType NON_POSITIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_NON_POSITIVE_INTEGER, INTEGER, "ADIN", true);
+            new BuiltInAtomicType(StandardNames.XS_NON_POSITIVE_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIN", true);
 
     public final static BuiltInAtomicType NEGATIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_NEGATIVE_INTEGER, NON_POSITIVE_INTEGER, "ADINN", true);
+            new BuiltInAtomicType(StandardNames.XS_NEGATIVE_INTEGER,
+                                  StandardNames.XS_NON_POSITIVE_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  "ADINN", true);
 
     public final static BuiltInAtomicType LONG =
-            makeAtomicType(StandardNames.XS_LONG, INTEGER, "ADIL", true);
+            new BuiltInAtomicType(StandardNames.XS_LONG,
+                                  StandardNames.XS_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIL", true);
 
     public final static BuiltInAtomicType INT =
-            makeAtomicType(StandardNames.XS_INT, LONG, "ADILI", true);
+            new BuiltInAtomicType(StandardNames.XS_INT,
+                                  StandardNames.XS_LONG,
+                                  StandardNames.XS_INTEGER,
+                                  "ADILI", true);
 
     public final static BuiltInAtomicType SHORT =
-            makeAtomicType(StandardNames.XS_SHORT, INT, "ADILIS", true);
+            new BuiltInAtomicType(StandardNames.XS_SHORT,
+                                  StandardNames.XS_INT,
+                                  StandardNames.XS_INTEGER,
+                                  "ADILIS", true);
 
     public final static BuiltInAtomicType BYTE =
-            makeAtomicType(StandardNames.XS_BYTE, SHORT, "ADILISB", true);
+            new BuiltInAtomicType(StandardNames.XS_BYTE,
+                                  StandardNames.XS_SHORT,
+                                  StandardNames.XS_INTEGER,
+                                  "ADILISB", true);
 
     public final static BuiltInAtomicType NON_NEGATIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_NON_NEGATIVE_INTEGER, INTEGER, "ADIP", true);
+            new BuiltInAtomicType(StandardNames.XS_NON_NEGATIVE_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIP", true);
 
     public final static BuiltInAtomicType POSITIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_POSITIVE_INTEGER, NON_NEGATIVE_INTEGER, "ADIPP", true);
+            new BuiltInAtomicType(StandardNames.XS_POSITIVE_INTEGER,
+                                  StandardNames.XS_NON_NEGATIVE_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIPP", true);
 
     public final static BuiltInAtomicType UNSIGNED_LONG =
-            makeAtomicType(StandardNames.XS_UNSIGNED_LONG, NON_NEGATIVE_INTEGER, "ADIPL", true);
+            new BuiltInAtomicType(StandardNames.XS_UNSIGNED_LONG,
+                                  StandardNames.XS_NON_NEGATIVE_INTEGER,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIPL", true);
 
     public final static BuiltInAtomicType UNSIGNED_INT =
-            makeAtomicType(StandardNames.XS_UNSIGNED_INT, UNSIGNED_LONG, "ADIPLI", true);
+            new BuiltInAtomicType(StandardNames.XS_UNSIGNED_INT,
+                                  StandardNames.XS_UNSIGNED_LONG,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIPLI", true);
 
     public final static BuiltInAtomicType UNSIGNED_SHORT =
-            makeAtomicType(StandardNames.XS_UNSIGNED_SHORT, UNSIGNED_INT, "ADIPLIS", true);
+            new BuiltInAtomicType(StandardNames.XS_UNSIGNED_SHORT,
+                                  StandardNames.XS_UNSIGNED_INT,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIPLIS", true);
 
     public final static BuiltInAtomicType UNSIGNED_BYTE =
-            makeAtomicType(StandardNames.XS_UNSIGNED_BYTE, UNSIGNED_SHORT, "ADIPLISB", true);
+            new BuiltInAtomicType(StandardNames.XS_UNSIGNED_BYTE,
+                                  StandardNames.XS_UNSIGNED_SHORT,
+                                  StandardNames.XS_INTEGER,
+                                  "ADIPLISB", true);
 
     public final static BuiltInAtomicType YEAR_MONTH_DURATION =
-            makeAtomicType(StandardNames.XS_YEAR_MONTH_DURATION, DURATION, "ARY", true);
+            new BuiltInAtomicType(StandardNames.XS_YEAR_MONTH_DURATION,
+                                  StandardNames.XS_DURATION,
+                                  StandardNames.XS_YEAR_MONTH_DURATION,
+                                  "ARY", true);
 
     public final static BuiltInAtomicType DAY_TIME_DURATION =
-            makeAtomicType(StandardNames.XS_DAY_TIME_DURATION, DURATION, "ARD", true);
+            new BuiltInAtomicType(StandardNames.XS_DAY_TIME_DURATION,
+                                  StandardNames.XS_DURATION,
+                                  StandardNames.XS_DAY_TIME_DURATION,
+                                  "ARD", true);
 
     public final static BuiltInAtomicType NORMALIZED_STRING =
-            makeAtomicType(StandardNames.XS_NORMALIZED_STRING, STRING, "ASN", true);
+            new BuiltInAtomicType(StandardNames.XS_NORMALIZED_STRING,
+                                  StandardNames.XS_STRING,
+                                  StandardNames.XS_STRING,
+                                  "ASN", true);
 
     public final static BuiltInAtomicType TOKEN =
-            makeAtomicType(StandardNames.XS_TOKEN, NORMALIZED_STRING, "ASNT", true);
+            new BuiltInAtomicType(StandardNames.XS_TOKEN,
+                                  StandardNames.XS_NORMALIZED_STRING,
+                                  StandardNames.XS_STRING,
+                                  "ASNT", true);
 
     public final static BuiltInAtomicType LANGUAGE =
-            makeAtomicType(StandardNames.XS_LANGUAGE, TOKEN, "ASNTL", true);
+            new BuiltInAtomicType(StandardNames.XS_LANGUAGE,
+                                  StandardNames.XS_TOKEN,
+                                  StandardNames.XS_STRING,
+                                  "ASNTL", true);
 
     public final static BuiltInAtomicType NAME =
-            makeAtomicType(StandardNames.XS_NAME, TOKEN, "ASNTN", true);
+            new BuiltInAtomicType(StandardNames.XS_NAME,
+                                  StandardNames.XS_TOKEN,
+                                  StandardNames.XS_STRING,
+                                  "ASNTN", true);
 
     public final static BuiltInAtomicType NMTOKEN =
-            makeAtomicType(StandardNames.XS_NMTOKEN, TOKEN, "ASNTK", true);
+            new BuiltInAtomicType(StandardNames.XS_NMTOKEN,
+                                  StandardNames.XS_TOKEN,
+                                  StandardNames.XS_STRING,
+                                  "ASNTK", true);
 
     public final static BuiltInAtomicType NCNAME =
-            makeAtomicType(StandardNames.XS_NCNAME, NAME, "ASNTNC", true);
+            new BuiltInAtomicType(StandardNames.XS_NCNAME,
+                                  StandardNames.XS_NAME,
+                                  StandardNames.XS_STRING,
+                                  "ASNTNC", true);
 
     public final static BuiltInAtomicType ID =
-            makeAtomicType(StandardNames.XS_ID, NCNAME, "ASNTNCI", true);
+            new BuiltInAtomicType(StandardNames.XS_ID,
+                                  StandardNames.XS_NCNAME,
+                                  StandardNames.XS_STRING,
+                                  "ASNTNCI", true);
 
     public final static BuiltInAtomicType IDREF =
-            makeAtomicType(StandardNames.XS_IDREF, NCNAME, "ASNTNCR", true);
+            new BuiltInAtomicType(StandardNames.XS_IDREF,
+                                  StandardNames.XS_NCNAME,
+                                  StandardNames.XS_STRING,
+                                  "ASNTNCR", true);
 
     public final static BuiltInAtomicType ENTITY =
-            makeAtomicType(StandardNames.XS_ENTITY, NCNAME, "ASNTNCE", true);
+            new BuiltInAtomicType(StandardNames.XS_ENTITY,
+                                  StandardNames.XS_NCNAME,
+                                  StandardNames.XS_STRING,
+                                  "ASNTNCE", true);
 
     public final static BuiltInAtomicType DATE_TIME_STAMP =
-            makeAtomicType(StandardNames.XS_DATE_TIME_STAMP, DATE_TIME, "AMP", true);
+            new BuiltInAtomicType(StandardNames.XS_DATE_TIME_STAMP,
+                                  StandardNames.XS_DATE_TIME,
+                                  StandardNames.XS_DATE_TIME,
+                                  "AMP", true);
 
-    static {
-        // See bug 2524
-        ANY_ATOMIC          .stringConverter = StringConverter.StringToString.INSTANCE;
-        STRING              .stringConverter = StringConverter.StringToString.INSTANCE;
-        LANGUAGE            .stringConverter = StringConverter.StringToLanguage.INSTANCE;
-        NORMALIZED_STRING   .stringConverter = StringConverter.StringToNormalizedString.INSTANCE;
-        TOKEN               .stringConverter = StringConverter.StringToToken.INSTANCE;
-        NCNAME              .stringConverter = StringConverter.StringToNCName.TO_NCNAME;
-        NAME                .stringConverter = StringConverter.StringToName.INSTANCE;
-        NMTOKEN             .stringConverter = StringConverter.StringToNMTOKEN.INSTANCE;
-        ID                  .stringConverter = StringConverter.StringToNCName.TO_ID;
-        IDREF               .stringConverter = StringConverter.StringToNCName.TO_IDREF;
-        ENTITY              .stringConverter = StringConverter.StringToNCName.TO_ENTITY;
-        DECIMAL             .stringConverter = StringConverter.StringToDecimal.INSTANCE;
-        INTEGER             .stringConverter = StringConverter.StringToInteger.INSTANCE;
-        DURATION            .stringConverter = StringConverter.StringToDuration.INSTANCE;
-        G_MONTH             .stringConverter = StringConverter.StringToGMonth.INSTANCE;
-        G_MONTH_DAY         .stringConverter = StringConverter.StringToGMonthDay.INSTANCE;
-        G_DAY               .stringConverter = StringConverter.StringToGDay.INSTANCE;
-        DAY_TIME_DURATION   .stringConverter = StringConverter.StringToDayTimeDuration.INSTANCE;
-        YEAR_MONTH_DURATION .stringConverter = StringConverter.StringToYearMonthDuration.INSTANCE;
-        TIME                .stringConverter = StringConverter.StringToTime.INSTANCE;
-        BOOLEAN             .stringConverter = StringConverter.StringToBoolean.INSTANCE;
-        HEX_BINARY          .stringConverter = StringConverter.StringToHexBinary.INSTANCE;
-        BASE64_BINARY       .stringConverter = StringConverter.StringToBase64Binary.INSTANCE;
-        UNTYPED_ATOMIC      .stringConverter = StringConverter.StringToUntypedAtomic.INSTANCE;
+//    static {
+//        // See bug 2524
+//        ANY_ATOMIC          .stringConverter = StringConverter.StringToString.INSTANCE;
+//        STRING              .stringConverter = StringConverter.StringToString.INSTANCE;
+//        LANGUAGE            .stringConverter = StringConverter.StringToLanguage.INSTANCE;
+//        NORMALIZED_STRING   .stringConverter = StringConverter.StringToNormalizedString.INSTANCE;
+//        TOKEN               .stringConverter = StringConverter.StringToToken.INSTANCE;
+//        NCNAME              .stringConverter = StringConverter.StringToNCName.TO_NCNAME;
+//        NAME                .stringConverter = StringConverter.StringToName.INSTANCE;
+//        NMTOKEN             .stringConverter = StringConverter.StringToNMTOKEN.INSTANCE;
+//        ID                  .stringConverter = StringConverter.StringToNCName.TO_ID;
+//        IDREF               .stringConverter = StringConverter.StringToNCName.TO_IDREF;
+//        ENTITY              .stringConverter = StringConverter.StringToNCName.TO_ENTITY;
+//        DECIMAL             .stringConverter = StringConverter.StringToDecimal.INSTANCE;
+//        INTEGER             .stringConverter = StringConverter.StringToInteger.INSTANCE;
+//        DURATION            .stringConverter = StringConverter.StringToDuration.INSTANCE;
+//        G_MONTH             .stringConverter = StringConverter.StringToGMonth.INSTANCE;
+//        G_MONTH_DAY         .stringConverter = StringConverter.StringToGMonthDay.INSTANCE;
+//        G_DAY               .stringConverter = StringConverter.StringToGDay.INSTANCE;
+//        DAY_TIME_DURATION   .stringConverter = StringConverter.StringToDayTimeDuration.INSTANCE;
+//        YEAR_MONTH_DURATION .stringConverter = StringConverter.StringToYearMonthDuration.INSTANCE;
+//        TIME                .stringConverter = StringConverter.StringToTime.INSTANCE;
+//        BOOLEAN             .stringConverter = StringConverter.StringToBoolean.INSTANCE;
+//        HEX_BINARY          .stringConverter = StringConverter.StringToHexBinary.INSTANCE;
+//        BASE64_BINARY       .stringConverter = StringConverter.StringToBase64Binary.INSTANCE;
+//        UNTYPED_ATOMIC      .stringConverter = StringConverter.StringToUntypedAtomic.INSTANCE;
+//
+//        NON_POSITIVE_INTEGER.stringConverter = new StringConverter.StringToIntegerSubtype(NON_POSITIVE_INTEGER);
+//        NEGATIVE_INTEGER    .stringConverter = new StringConverter.StringToIntegerSubtype(NEGATIVE_INTEGER);
+//        LONG                .stringConverter = new StringConverter.StringToIntegerSubtype(LONG);
+//        INT                 .stringConverter = new StringConverter.StringToIntegerSubtype(INT);
+//        SHORT               .stringConverter = new StringConverter.StringToIntegerSubtype(SHORT);
+//        BYTE                .stringConverter = new StringConverter.StringToIntegerSubtype(BYTE);
+//        NON_NEGATIVE_INTEGER.stringConverter = new StringConverter.StringToIntegerSubtype(NON_NEGATIVE_INTEGER);
+//        POSITIVE_INTEGER    .stringConverter = new StringConverter.StringToIntegerSubtype(POSITIVE_INTEGER);
+//        UNSIGNED_LONG       .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_LONG);
+//        UNSIGNED_INT        .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_INT);
+//        UNSIGNED_SHORT      .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_SHORT);
+//        UNSIGNED_BYTE       .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_BYTE);
+//
+//        // We were getting an IntelliJ warning here about potential class loading deadlock. See bug #2524. Have moved the
+//        // static initializers here, and removed the dependency on static initialization in StringConverter, which hopefully
+//        // solves the problem.
+//
+//        //NumericType.init();
+//    }
 
-        NON_POSITIVE_INTEGER.stringConverter = new StringConverter.StringToIntegerSubtype(NON_POSITIVE_INTEGER);
-        NEGATIVE_INTEGER    .stringConverter = new StringConverter.StringToIntegerSubtype(NEGATIVE_INTEGER);
-        LONG                .stringConverter = new StringConverter.StringToIntegerSubtype(LONG);
-        INT                 .stringConverter = new StringConverter.StringToIntegerSubtype(INT);
-        SHORT               .stringConverter = new StringConverter.StringToIntegerSubtype(SHORT);
-        BYTE                .stringConverter = new StringConverter.StringToIntegerSubtype(BYTE);
-        NON_NEGATIVE_INTEGER.stringConverter = new StringConverter.StringToIntegerSubtype(NON_NEGATIVE_INTEGER);
-        POSITIVE_INTEGER    .stringConverter = new StringConverter.StringToIntegerSubtype(POSITIVE_INTEGER);
-        UNSIGNED_LONG       .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_LONG);
-        UNSIGNED_INT        .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_INT);
-        UNSIGNED_SHORT      .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_SHORT);
-        UNSIGNED_BYTE       .stringConverter = new StringConverter.StringToIntegerSubtype(UNSIGNED_BYTE);
-
-        // We were getting an IntelliJ warning here about potential class loading deadlock. See bug #2524. Have moved the
-        // static initializers here, and removed the dependency on static initialization in StringConverter, which hopefully
-        // solves the problem.
-
-        //NumericType.init();
-    }
 
     public static BuiltInAtomicType fromAlphaCode(String code) {
         return byAlphaCode.get(code);
@@ -944,29 +1106,27 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
                 f == StandardNames.XS_ANY_ATOMIC_TYPE) {
             return null;
         }
-        StringConverter converter = stringConverter;
-        if (converter == null) {
-            converter = getStringConverter(rules);
-            if (isNamespaceSensitive()) {
-                if (nsResolver == null) {
-                    throw new UnsupportedOperationException("Cannot validate a QName without a namespace resolver");
-                }
-                converter = (StringConverter) converter.setNamespaceResolver(nsResolver);
-                ConversionResult result = converter.convertString(value);
-                if (result instanceof ValidationFailure) {
-                    return (ValidationFailure) result;
-                }
-                if (fingerprint == StandardNames.XS_NOTATION) {
-                    NotationValue nv = (NotationValue) result;
-                    // This check added in 9.3. The XSLT spec says that this check should not be performed during
-                    // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
-                    if (!rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName())) {
-                        return new ValidationFailure("Notation {" + nv.getNamespaceURI() + "}" +
-                                nv.getLocalName() + " is not declared in the schema");
-                    }
-                }
-                return null;
+        StringConverter converter = getStringConverter(rules);
+
+        if (isNamespaceSensitive()) {
+            if (nsResolver == null) {
+                throw new UnsupportedOperationException("Cannot validate a QName without a namespace resolver");
             }
+            converter = (StringConverter) converter.setNamespaceResolver(nsResolver);
+            ConversionResult result = converter.convertString(value);
+            if (result instanceof ValidationFailure) {
+                return (ValidationFailure) result;
+            }
+            if (fingerprint == StandardNames.XS_NOTATION) {
+                NotationValue nv = (NotationValue) result;
+                // This check added in 9.3. The XSLT spec says that this check should not be performed during
+                // validation. However, this appears to be based on an incorrect assumption: see spec bug 6952
+                if (!rules.isDeclaredNotation(nv.getNamespaceURI(), nv.getLocalName())) {
+                    return new ValidationFailure("Notation {" + nv.getNamespaceURI() + "}" +
+                            nv.getLocalName() + " is not declared in the schema");
+                }
+            }
+            return null;
         }
         return converter.validate(value);
     }
@@ -982,34 +1142,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     
     @Override
     public StringConverter getStringConverter(ConversionRules rules) {
-        if (stringConverter != null) {
-            return stringConverter;
-        }
-        switch (fingerprint) {
-            case StandardNames.XS_DOUBLE:
-            case StandardNames.XS_NUMERIC:
-                return rules.getStringToDoubleConverter();
-            case StandardNames.XS_FLOAT:
-                return new StringConverter.StringToFloat(rules);
-            case StandardNames.XS_DATE_TIME:
-                return new StringConverter.StringToDateTime(rules);
-            case StandardNames.XS_DATE_TIME_STAMP:
-                return new StringConverter.StringToDateTimeStamp(rules);
-            case StandardNames.XS_DATE:
-                return new StringConverter.StringToDate(rules);
-            case StandardNames.XS_G_YEAR:
-                return new StringConverter.StringToGYear(rules);
-            case StandardNames.XS_G_YEAR_MONTH:
-                return new StringConverter.StringToGYearMonth(rules);
-            case StandardNames.XS_ANY_URI:
-                return new StringConverter.StringToAnyURI(rules);
-            case StandardNames.XS_QNAME:
-                return new StringConverter.StringToQName(rules);
-            case StandardNames.XS_NOTATION:
-                return new StringConverter.StringToNotation(rules);
-            default:
-                throw new AssertionError("No string converter available for " + this);
-        }
+        return rules.getConverterFromString(this);
     }
 
     /**
@@ -1032,14 +1165,11 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         } else if (fingerprint == StandardNames.XS_UNTYPED_ATOMIC) {
             return StringValue.makeUntypedAtomic(stringValue);
         }
-        StringConverter converter = stringConverter;
-        if (converter == null) {
-            converter = getStringConverter(node.getConfiguration().getConversionRules());
-            if (isNamespaceSensitive()) {
-                NodeInfo container =
-                        node.getNodeKind() == Type.ELEMENT ? node : node.getParent();
-                converter = (StringConverter) converter.setNamespaceResolver(container.getAllNamespaces());
-            }
+        StringConverter converter = getStringConverter(node.getConfiguration().getConversionRules());
+        if (isNamespaceSensitive()) {
+            NodeInfo container =
+                    node.getNodeKind() == Type.ELEMENT ? node : node.getParent();
+            converter = (StringConverter) converter.setNamespaceResolver(container.getAllNamespaces());
         }
         return converter.convertString(stringValue).asAtomic();
     }
@@ -1175,7 +1305,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
             case StandardNames.XS_ID:
             case StandardNames.XS_IDREF:
             case StandardNames.XS_ENTITY:
-                return stringConverter.validate(primValue.getUnicodeStringValue());
+                return getStringConverter(rules).validate(primValue.getUnicodeStringValue());
             default:
                 throw new IllegalArgumentException();
         }
