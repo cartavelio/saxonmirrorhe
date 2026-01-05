@@ -42,7 +42,7 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
                 Configuration config = getRetainedStaticContext().getConfiguration();
                 UnicodeString re = ((StringLiteral) arguments[1]).getGroundedValue().getUnicodeStringValue();
                 String flags = ((StringLiteral) arguments[arguments.length - 1]).stringify();
-                String hostLang = "XP30";
+                String hostLang = "XP" + getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 if (config.getXsdVersion() == Configuration.XSD11) {
                     hostLang += "/XSD11";
                 }
