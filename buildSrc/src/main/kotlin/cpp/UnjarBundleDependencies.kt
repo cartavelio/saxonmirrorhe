@@ -5,6 +5,7 @@ import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -12,9 +13,11 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
 import java.io.File
+import javax.inject.Inject
 
-abstract class UnjarBundleDependencies: DefaultTask() {
+abstract class UnjarBundleDependencies @Inject constructor(private val archive: ArchiveOperations): DefaultTask() {
   @get:Internal
   abstract val classpath: Property<Configuration>
 
@@ -58,7 +61,7 @@ abstract class UnjarBundleDependencies: DefaultTask() {
   fun unjarThem() {
     jars.forEach { entry ->
       project.copy {
-        from(project.zipTree(entry.jar), entry.copySpec)
+        from(archive.zipTree(entry.jar), entry.copySpec)
         into(outputDir)
       }
     }

@@ -21,7 +21,8 @@ class AsInput<T>(var inputSerialization: String) : Serializable {
       return AsInput<T>(Json.Default.encodeToString(input))
     }
 
-    inline fun <reified T> from(property: Property<T>): AsInput<T> {
+    inline fun <reified T> from(property: Property<T & Any>): AsInput<T> {
+      @Suppress("UNCHECKED_CAST")
       return property.map { this.from(it) }.get() as AsInput<T>
     }
   }

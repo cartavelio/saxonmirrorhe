@@ -52,10 +52,10 @@ interface SaxonBuildExtension {
     abstract val dotnetversion: Property<String>
     abstract val macosx_min_version: Property<String>
 
-    val hyphenatedVersion: Provider<String?>
+    val hyphenatedVersion: Provider<String>
         get() = version.map { version -> version.replace('.', '-') }
 
-    val hyphenatedPublishVersion: Provider<String?>
+    val hyphenatedPublishVersion: Provider<String>
         get() = publishVersion.map { version -> version.replace('.', '-') }
 
     fun findJar(configuration: Configuration, jarname: String): String {
@@ -253,9 +253,9 @@ interface SaxonCCoreExtension {
     abstract val classpath: Property<Configuration>
 
     @Nested
-    abstract fun getGraal(): GraalNativeImagePathExtension?
+    abstract fun getGraal(): GraalNativeImagePathExtension
 
-    fun graal(action: Action<in GraalNativeImagePathExtension?>) {
+    fun graal(action: Action<in GraalNativeImagePathExtension>) {
         action.execute(getGraal())
     }
 
