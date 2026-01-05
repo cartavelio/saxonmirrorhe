@@ -29,6 +29,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         OptionsParameter op = new OptionsParameter();
         op.addAllowedOption("xquery-version", SequenceType.SINGLE_DECIMAL);
         op.addAllowedOption("location-hints", SequenceType.STRING_SEQUENCE);
+        op.addAllowedOption("content", SequenceType.OPTIONAL_STRING);
         op.addAllowedOption("context-item", SequenceType.OPTIONAL_ITEM);
         op.addAllowedOption("variables", SequenceType.makeSequenceType(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE), StaticProperty.EXACTLY_ONE)); // standard type?
         op.addAllowedOption("vendor-options", SequenceType.makeSequenceType(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE), StaticProperty.EXACTLY_ONE));
@@ -78,6 +80,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         Sequence locationHintsOption = null;
         Sequence variablesOption = null;
         Sequence contextItemOption = null;
+        Sequence contentOption = null;
         Sequence vendorOptionsOption = null;
         if (args.length == 2) {
             MapItem suppliedOptions = (MapItem) args[1].head();
@@ -93,6 +96,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             variablesOption = checkedOptions.get("variables");
             contextItemOption = checkedOptions.get("context-item");
             vendorOptionsOption = checkedOptions.get("vendor-options");
+            contentOption = checkedOptions.get("content");
 
         }
 
@@ -119,35 +123,45 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         }
 
-        // Set the vendor options (configuration features) -- at the moment none supported
-        /*if (vendorOptionsOption != null) {
-            MapItem vendorOptions = (MapItem) options.get(new StringValue("vendor-options")).head();
-        }*/
+        StreamSource[] streamSources = null;
 
         Configuration config = context.getConfiguration();
         StaticQueryContext staticQueryContext = config.newStaticQueryContext();
-        ModuleURIResolver moduleURIResolver = config.getModuleURIResolver();
-        if (moduleURIResolver == null) {
-            moduleURIResolver = new StandardModuleURIResolver(config);
-        }
-        staticQueryContext.setModuleURIResolver(moduleURIResolver);
-        String baseURI = getRetainedStaticContext().getStaticBaseUriString();
-        staticQueryContext.setBaseURI(baseURI);
-        StreamSource[] streamSources;
-        try {
-            String[] hints = locationHints.toArray(new String[0]);
-            streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.toString(), baseURI, hints);
-            if (streamSources == null) {
-                streamSources = new StandardModuleURIResolver(config).resolve(moduleUri.toString(), baseURI, hints);
-            }
-        } catch (XPathException e) {
-            e.maybeSetErrorCode("FOQM0002");
-            throw e;
-        }
-        if (streamSources.length == 0) {
-            throw new XPathException("No library module found with specified target namespace " + moduleUri, "FOQM0002");
+
+        String content = null;
+        if (contentOption != null) {
+            content = contentOption.head().getStringValue();
+            streamSources = new StreamSource[1];
+            streamSources[0] = new StreamSource(new StringReader(content), getStaticBaseUriString());
+            staticQueryContext.setBaseURI(getStaticBaseUriString());
         }
 
+
+        if (content == null) {
+
+
+            ModuleURIResolver moduleURIResolver = config.getModuleURIResolver();
+            if (moduleURIResolver == null) {
+                moduleURIResolver = new StandardModuleURIResolver(config);
+            }
+            staticQueryContext.setModuleURIResolver(moduleURIResolver);
+            String baseURI = getRetainedStaticContext().getStaticBaseUriString();
+            staticQueryContext.setBaseURI(baseURI);
+
+            try {
+                String[] hints = locationHints.toArray(new String[0]);
+                streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.toString(), baseURI, hints);
+                if (streamSources == null) {
+                    streamSources = new StandardModuleURIResolver(config).resolve(moduleUri.toString(), baseURI, hints);
+                }
+            } catch (XPathException e) {
+                e.maybeSetErrorCode("FOQM0002");
+                throw e;
+            }
+            if (streamSources.length == 0) {
+                throw new XPathException("No library module found with specified target namespace " + moduleUri, "FOQM0002");
+            }
+        }
 
         try {
             // Note: Location hints other than the first are ignored
