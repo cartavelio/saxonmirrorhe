@@ -35,6 +35,10 @@ namespace Saxon.Ejava.util {
             // TODO: require non-null?
             return new Optional<T>(value);
         }
+        
+        public static Optional<T> ofNullable(T value) {
+            return value == null ? new Optional<T>() : new Optional<T>(value);
+        }
 
         public override bool Equals(object other) {
             if (other is Optional<T> o) {
