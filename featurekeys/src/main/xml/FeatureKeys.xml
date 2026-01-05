@@ -1917,7 +1917,7 @@
         <platforms>J</platforms>
         <configfile>global/@unparsedTextURIResolver</configfile>
         <configfiledesc>
-            <p>The class name of the <code>UnparsedTextURIResolver</code> to be used for deferencing
+            <p>The class name of the <code>UnparsedTextURIResolver</code> to be used for dereferencing
                 URIs used in calls on <code>fn:unparsed-text()</code> and related functions.</p>
         </configfiledesc>
         <typedesc>Name of a class implementing the
@@ -1940,7 +1940,7 @@
         <getter class="net.sf.saxon.Configuration">getURIResolver</getter>
         <configfile>global/@uriResolver</configfile>
         <configfiledesc>
-            <p>The <code>URIResolver</code> to be used for deferencing URIs used in <a
+            <p>The <code>URIResolver</code> to be used for dereferencing URIs used in <a
                     class="bodylink code" href="/xsl-elements/include">xsl:include</a>, <a
                     class="bodylink code" href="/xsl-elements/import">xsl:import</a>, <a
                     class="bodylink code" href="/functions/fn/doc">doc()</a>, and <a
