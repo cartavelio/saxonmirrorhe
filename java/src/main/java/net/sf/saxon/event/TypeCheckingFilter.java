@@ -7,18 +7,12 @@
 
 package net.sf.saxon.event;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.CombinedNodeTest;
-import net.sf.saxon.pattern.ContentTypeTest;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceMethod;
@@ -49,6 +43,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
     // used to avoid repeated checking when a template creates large numbers of elements of the same type
     // The key is a (namecode, typecode) pair, packed into a single long
     private final TypeHierarchy typeHierarchy;
+    private boolean allowAnyNode = false;
 
     public TypeCheckingFilter(Outputter next) {
         super(next);
@@ -60,6 +55,8 @@ public class TypeCheckingFilter extends ProxyOutputter {
         this.cardinality = cardinality;
         this.roleDiagnostic = roleDiagnostic;
         this.locator = locator;
+        Affinity aff = typeHierarchy.relationship(type, NodeKindTest.ELEMENT);
+        allowAnyNode = aff == Affinity.SAME_TYPE || aff == Affinity.SUBSUMES;
     }
 
     /**
@@ -85,11 +82,13 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(location);
             }
-            ItemType type = new CombinedNodeTest(
-                    new NameTest(Type.ATTRIBUTE, attName, getConfiguration().getNamePool()),
-                    Token.INTERSECT,
-                    new ContentTypeTest(Type.ATTRIBUTE, typeCode, getConfiguration(), false));
-            checkItemType(type, nodeSupplier(Type.ATTRIBUTE, attName, typeCode, StringView.tidy(value)), location);
+            if (!allowAnyNode) {
+                Orphan node = new Orphan(getConfiguration());
+                node.setNodeKind(Type.ATTRIBUTE);
+                node.setNodeName(attName);
+                node.setTypeAnnotation(typeCode);
+                checkItem(node, location);
+            }
         }
         getNextOutputter().attribute(attName, typeCode, value, location, properties);
     }
@@ -188,29 +187,16 @@ public class TypeCheckingFilter extends ProxyOutputter {
     }
 
     private void checkElementStart(NodeName elemName, SchemaType elemType, Location location) throws XPathException {
-        Configuration config = getConfiguration();
-        NamePool namePool = config.getNamePool();
         if (level == 0) {
-            if (++count == 1) {
-                // don't bother with any caching on the first item, it will often be the only one
-                ItemType type = new CombinedNodeTest(
-                        new NameTest(Type.ELEMENT, elemName, namePool),
-                        Token.INTERSECT,
-                        new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
-            } else {
-                if (count == 2) {
-                    checkAllowsMany(location);
-                }
-                long key = (long) elemName.obtainFingerprint(namePool) << 32 | (long) elemType.getFingerprint();
-                if (!checkedElements.contains(key)) {
-                    ItemType type = new CombinedNodeTest(
-                            new NameTest(Type.ELEMENT, elemName, namePool),
-                            Token.INTERSECT,
-                            new ContentTypeTest(Type.ELEMENT, elemType, config, false));
-                    checkItemType(type, nodeSupplier(Type.ELEMENT, elemName, elemType, EmptyUnicodeString.getInstance()), location);
-                    checkedElements.add(key);
-                }
+            if (++count == 2) {
+                checkAllowsMany(location);
+            }
+            if (!allowAnyNode) {
+                Orphan node = new Orphan(getConfiguration());
+                node.setNodeKind(Type.ELEMENT);
+                node.setNodeName(elemName);
+                node.setTypeAnnotation(elemType);
+                checkItem(node, location);
             }
         }
         level++;
