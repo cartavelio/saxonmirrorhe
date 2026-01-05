@@ -588,7 +588,6 @@ val update_documentation = tasks.register("update_documentation") {
   outputs.dir(layout.buildDirectory.dir("userdoc/viewer_appJS"))
   dependsOn("copy_xml_documentation")
   dependsOn("copy_html_documentation")
-  dependsOn("copy_base_css")
 }
 val userdocViewerAppJS by configurations.consumable("userdocViewerAppJS")
 userdocViewerAppJS.outgoing.artifact(update_documentation) { builtBy(update_documentation) }
@@ -597,6 +596,7 @@ tasks.register<Copy>("copy_html_documentation") {
   group = "Internal"
   description = "Update HTML version of user documentation"
   dependsOn("userdoc_publish_html")
+  dependsOn("copy_base_css")
   into(layout.buildDirectory.dir("website/html/documentation${saxonMajorVersion}"))
   from(layout.buildDirectory.dir("userdoc/html"))
 }
@@ -604,7 +604,6 @@ tasks.register<Copy>("copy_html_documentation") {
 tasks.register<Copy>("copy_base_css") {
   group = "Internal"
   description = "Copy base CSS for HTML documentation"
-  dependsOn("gen_contents_ref")
   into(layout.buildDirectory.dir("website"))
   from(layout.projectDirectory.dir("src/viewer_appJS")) {
     include("saxon-base.css")
