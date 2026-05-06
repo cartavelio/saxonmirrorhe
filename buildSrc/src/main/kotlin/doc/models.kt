@@ -39,6 +39,7 @@ data class SaxonCReadme(
   val libsaxoncCore = "libsaxonc-core-${edition}"
   val SaxonCPackage = "SaxonC${EDITION}"
   val SaxonCCorePackage = "SaxonCCore${EDITION}"
+  val SaxonCTarget = "saxonc-${edition}"
   val installPrefix = when(host.platform) {
     "windows" -> "C:\\Program Files\\Saxonica"
     else -> "/opt/saxonica"
@@ -54,6 +55,7 @@ data class SaxonCReadme(
   }
   val SaxonCPackageBinPath = binariesPath(SaxonCPackage, "bin")
   val SaxonCPackageLibPath = binariesPath(SaxonCPackage, "lib")
+  val SaxonCCorePackageBinPath = binariesPath(SaxonCCorePackage, "bin")
   val SaxonCCorePackageLibPath = binariesPath(SaxonCCorePackage, "lib")
 }
 
