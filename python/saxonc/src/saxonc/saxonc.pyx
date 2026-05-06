@@ -61,6 +61,8 @@ class XdmNodeKind(IntEnum):
     SELF = 12
 
 class ProcRefCounter:
+    """:meta private:
+    """
     _proc_counter = 0
 
     def __cinit__(self):
