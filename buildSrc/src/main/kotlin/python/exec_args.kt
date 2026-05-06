@@ -12,6 +12,22 @@ interface ArgStringifier {
   }
 }
 
+class StringArg(private var argHolder: Any? = null) : ArgStringifier {
+  fun set(arg: String) {
+    argHolder = arg
+  }
+
+  fun set(argProvider: Provider<*>) {
+    argHolder = argProvider
+  }
+
+  fun get(): String {
+    return argHolder?.let { argToString(it) }.orEmpty()
+  }
+
+  val isPresent: Boolean get() = argHolder?.let { true } ?: false
+}
+
 class ListArgs(private val args: MutableList<Any> = mutableListOf()) : ArgStringifier {
   fun add(arg: String) {
     args.add(arg)
