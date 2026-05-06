@@ -200,7 +200,7 @@ public class HashTrieMap extends MapItem {
             }
         }
         ItemType requiredValueItemType = requiredValueType.getPrimaryType();
-        if (requiredValueItemType != BuiltInAtomicType.ANY_ATOMIC) {
+        if (requiredValueItemType != AnyItemType.getInstance()) {
             ItemType upperBoundValueType = valueUType.toItemType();
             Affinity rel = th.relationship(requiredValueItemType, upperBoundValueType);
             if (rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMES) {
