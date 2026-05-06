@@ -1,51 +1,88 @@
 
-PHP_ARG_WITH([saxon],
+PHP_ARG_WITH([saxonc],
   [for saxon support],
-  [AS_HELP_STRING([--with-saxon],
+  [AS_HELP_STRING([--with-saxonc],
     [Include saxon support])])
 
-if test "$PHP_SAXON" != "no"; then
-  dnl Write more examples of tests here...
+PHP_ARG_WITH([saxonc-core],
+  [for saxon support],
+  [AS_HELP_STRING([--with-saxonc-core],
+    [directory containing libsaxonc-core])])
 
-  dnl --with-saxon -> check with-path
-  SEARCH_PATH="/opt/saxonica /usr/local /usr" # If SaxonC has been installed
-  SEARCH_FOR="/include/saxonc/SaxonProcessor.h"
-  if test -r $PHP_SAXON/$SEARCH_FOR; then # path given as parameter
-    SAXON_DIR=$PHP_SAXON
-  else # search default path list
-    AC_MSG_CHECKING([for Saxon files in default path])
-    for i in $SEARCH_PATH ; do
-      if test -r $i/$SEARCH_FOR; then
-        SAXON_DIR=$i
-        AC_MSG_RESULT(found in $i)
-      fi
-    done
-  fi
-
-  if test -z "$SAXON_DIR"; then
-    AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Please reinstall the SaxonC distribution])
-  fi
-
-
-  SAXON_SHARED_LIB_SEARCH="libsaxonc-core libsaxonc"
+check_shared_lib() {
+  LIBNAME="$1"
+  SAXON_DIR="$2"
   if test "$SHLIB_SUFFIX_NAME" == "dylib" ; then
     SAXON_SHARED_LIB_SUFFIX="$SAXON_EDITION.$SAXON_VERSION.dylib"
   else
     SAXON_SHARED_LIB_SUFFIX="$SAXON_EDITION.so.$SAXON_VERSION"
   fi
-  AC_MSG_CHECKING([for Saxon shared libs files in default path])
-  for l in $SAXON_SHARED_LIB_SEARCH ; do
-    if test ! -f "$SAXON_DIR/lib/$l-$SAXON_SHARED_LIB_SUFFIX" ; then
-      AC_MSG_RESULT([$SAXON_DIR/lib/$l-$SAXON_SHARED_LIB_SUFFIX not found])
-      AC_MSG_ERROR([Please make sure you have installed the SaxonC $SAXON_VERSION distribution])
-    fi
-  done
+
+  FULL_LIBNAME="$LIBNAME-$SAXON_SHARED_LIB_SUFFIX"
+
+  AC_MSG_CHECKING([for Saxon shared lib $FULL_LIBNAME files in $SAXON_DIR/lib])
+
+  if test ! -f "$SAXON_DIR/lib/$FULL_LIBNAME" ; then
+    AC_MSG_RESULT([$SAXON_DIR/lib/$FULL_LIBNAME not found])
+    AC_MSG_ERROR([Please make sure you have installed the SaxonC $SAXON_VERSION distribution])
+  fi
+}
+
+if test "$PHP_SAXONC" != "no"; then
+  dnl Write more examples of tests here...
+
+  dnl --with-saxonc -> check with-path
+  SEARCH_PATH="/opt/saxonica /usr/local /usr" # If SaxonC has been installed
+  SEARCH_FOR="/include/saxonc/SaxonProcessor.h"
+  if test -r $PHP_SAXONC/$SEARCH_FOR; then # path given as parameter
+    SAXONC_DIR=$PHP_SAXONC
+    SAXONC_CORE_DIR=$PHP_SAXONC
+  else # search default path list
+    AC_MSG_CHECKING([for Saxon files in default path])
+    for i in $SEARCH_PATH ; do
+      if test -r $i/$SEARCH_FOR; then
+        SAXONC_DIR=$i
+        AC_MSG_RESULT(found in $i)
+      fi
+    done
+  fi
+
+  if test -z "$SAXONC_DIR"; then
+    AC_MSG_RESULT([$SAXONC_DIR not found])
+    AC_MSG_ERROR([Please reinstall the SaxonC distribution])
+  fi
+fi
+
+if test "$PHP_SAXONC_CORE" != "no"; then
+  dnl Write more examples of tests here...
+
+  dnl --with-saxonc-core -> check with-path
+  SEARCH_FOR="/include/saxonc-core-$SAXON_EDITION.h"
+  if test -r $PHP_SAXONC_CORE/$SEARCH_FOR; then # path given as parameter
+    SAXONC_CORE_DIR=$PHP_SAXONC_CORE
+  else # search default path list
+    AC_MSG_RESULT([$SAXONC_CORE_DIR not found])
+    AC_MSG_ERROR([Please reinstall the SaxonC distribution])
+  fi
+fi
+
+
+check_shared_lib "libsaxonc-core" "$SAXONC_CORE_DIR"
+check_shared_lib "libsaxonc" "$SAXONC_DIR"
+
+dnl Main PHP settings now we know where to look
+if test "$PHP_SAXONC" != "no"; then
   CXXFLAGS="-std=c++14"
   PHP_REQUIRE_CXX()
-  PHP_ADD_INCLUDE(["$SAXON_DIR/include"])
+  PHP_ADD_INCLUDE(["$SAXONC_DIR/include"])
+  if test "$SAXONC_CORE_DIR" != "$SAXONC_DIR"; then
+    PHP_ADD_INCLUDE(["$SAXONC_CORE_DIR/include"])
+    LDFLAGS="-L$SAXONC_CORE_DIR/lib -L$SAXONC_DIR/lib"
+  else
+    LDFLAGS="-L$SAXONC_DIR/lib"
+  fi
   PHP_SUBST(SAXON_SHARED_LIBADD)
-  PHP_SUBST(PHP_SAXONC_API)
+  PHP_SUBST(PHP_SAXON_API)
 
   dnl In case of no dependencies
   AC_DEFINE(HAVE_SAXON, 1, [ Have saxon support ])
