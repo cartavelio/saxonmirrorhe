@@ -35,6 +35,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static net.sf.saxon.lib.FeatureKeys.MULTIPLE_SCHEMA_IMPORTS;
+import static net.sf.saxon.lib.FeatureKeys.XPATH_VERSION_FOR_XSD;
+import static net.sf.saxon.lib.FeatureKeys.XPATH_VERSION_FOR_XSLT;
+import static net.sf.saxon.lib.FeatureKeys.XSD_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1114,6 +1118,49 @@ public class TestXsltCompiler {
             StringWriter out = new StringWriter();
             trans.callTemplate(null, proc2.newSerializer(out));
             assertTrue(out.toString().contains("<test:e xmlns:test=\"http://www.example.com/test\"/>"));
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testBug6976() {
+        try {
+            Processor proc = new Processor(true);
+
+            proc.setConfigurationProperty(MULTIPLE_SCHEMA_IMPORTS, true);
+            proc.setConfigurationProperty(XPATH_VERSION_FOR_XSD, 31);
+            proc.setConfigurationProperty(XPATH_VERSION_FOR_XSLT, 31);
+            proc.setConfigurationProperty(XSD_VERSION, "1.1");
+
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setSchemaAware(true);
+            String xsl1 = "<xsl:stylesheet exclude-result-prefixes=\"#all\" version=\"3.0\"\n"
+                    + "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
+                    + "  xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+                    + "<xsl:template match='/'>\n"
+                    + "  <xsl:sequence select='.'/>\n"
+                    + "</xsl:template>"
+                    + "</xsl:stylesheet>";
+
+            String xsd = "<xs:schema \n"
+                    + "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n"
+                    + "  <xs:element name=\"e\">\n"
+                    + "    <xs:complexType />\n"
+                    + "  </xs:element>\n"
+                    + "</xs:schema>";
+            SchemaManager sm = proc.getSchemaManager();
+            sm.load(new StreamSource(new StringReader(xsd)));
+            SchemaValidator validator = sm.newSchemaValidator();
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setSchemaValidator(validator);
+            XdmNode doc = builder.build(new StreamSource(new StringReader("<e/>")));
+
+            XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl1)));
+            assertTrue(exec.getUnderlyingCompiledStylesheet().isSchemaAware());
+            Xslt30Transformer trans = exec.load30();
+            XdmValue result = trans.applyTemplates(doc);
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());
