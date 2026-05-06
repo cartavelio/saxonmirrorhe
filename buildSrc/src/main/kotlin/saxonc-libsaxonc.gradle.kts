@@ -1,10 +1,13 @@
 import com.saxonica.build.LifecycleTasks
+import com.saxonica.build.cpp.CMakeCompatibleSourceFolder
+import com.saxonica.build.cpp.CMakeGeneratorTask
 import com.saxonica.build.cpp.DoxygenTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.*
 import java.nio.file.Files
 import org.apache.tools.ant.filters.ReplaceTokens
+import packagedDir
 import java.io.IOException
 
 plugins {
@@ -85,39 +88,91 @@ interface InjectedExecOps {
     @get:Inject val execOps: ExecOperations
 }
 
-private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, coreCMakePackageDir: ResolvableConfiguration): Pair<TaskProvider<Exec>, TaskProvider<Exec>> {
+//abstract class CMakeGeneratorTask  @Inject constructor(private val ex: ExecOperations) : DefaultTask() {
+//    @get:InputFiles
+//    abstract val cMakeFiles: ConfigurableFileCollection
+//
+//    @get:InputDirectory
+//    abstract val saxonCCoreCMakePackageDir: DirectoryProperty
+//
+//    @get:Input
+//    abstract val extraCMakeArgs: ListProperty<String>
+//
+//    @get:Internal
+//    abstract val buildDir: DirectoryProperty
+//
+//    @get:OutputFile
+//    val cMakeCache = buildDir.map { it.file("CMakeCache.txt") }
+//
+//    @get:OutputFile
+//    val saxonVersionCFile = buildDir.map { it.file("saxonc_version.c") }
+//
+//    @TaskAction
+//    fun generate() {
+//        val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
+//        ex.exec {
+//            workingDir = layout.projectDirectory.asFile
+//            executable = "cmake"
+//            args("-G", generatorName, "-B", buildDir.get().asFile.toString(),
+//            args(extraCMakeArgs)
+//            if (saxonBuild.macosx_min_version.isPresent) {
+//                args("-D", "CMAKE_OSX_DEPLOYMENT_TARGET=${saxonBuild.macosx_min_version.get()}")
+//            }
+//        }
+//    }
+//}
+
+private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, coreCMakePackageDir: ResolvableConfiguration): Triple<TaskProvider<CMakeGeneratorTask>, TaskProvider<Exec>, TaskProvider<Exec>> {
     val configTaskName = config.lowercase()
 
     val cmakeBuildDir = layout.buildDirectory.dir(config)
-
-    val generator = tasks.register("cmake_generate_${configTaskName}") {
-        group = LifecycleBasePlugin.BUILD_GROUP
-        inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
-        inputs.dir(layout.projectDirectory.dir("../cmake"))
-        inputs.dir(coreCMakePackageDir.elements.map { it.first().asFile })
-        outputs.file(cmakeBuildDir.map { it.file("CMakeCache.txt") })
-
-        val injected = project.objects.newInstance<InjectedExecOps>()
-
-        doLast {
-            val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
-            injected.execOps.exec {
-                workingDir = layout.projectDirectory.asFile
-                executable = "cmake"
-                args("-G", generatorName, "-B", cmakeBuildDir.get().asFile.toString(),
-                    "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
-                    "-D", extension.package_name.map { "SAXON_PACKAGE_NAME:STRING=${it}" }.get(),
-                    "-D", extension.package_file_name.map { "SAXON_PACKAGE_FILE_NAME:STRING=${it}" }.get(),
-                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.platform}" }.get(),
-                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
-                    "-D", coreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
-                )
-                if (saxonBuild.macosx_min_version.isPresent) {
-                    args("-D", "CMAKE_OSX_DEPLOYMENT_TARGET=${saxonBuild.macosx_min_version.get()}")
-                }
-            }
+    val saxonCCoreCMakePackageDir = coreCMakePackageDir.elements.map { it.first().asFile }
+    val generator = tasks.register<CMakeGeneratorTask>("cmake_generate_${configTaskName}") {
+        dependsOn(coreCMakePackageDir)
+        cMakeInputFiles.from(layout.projectDirectory.dir("../cmake").asFileTree)
+        version = saxonBuild.version
+        platformIsWindows = saxonBuild.targetHost.map { it.isWindows }
+        buildPath = cmakeBuildDir
+        cmakeFilenames = listOf("saxonc_version.c")
+        extraCMakeArgs = { ->
+            listOf(
+                "-D", extension.package_name.map { "SAXON_PACKAGE_NAME:STRING=${it}" }.get(),
+                "-D", extension.package_file_name.map { "SAXON_PACKAGE_FILE_NAME:STRING=${it}" }.get(),
+                "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.platform}" }.get(),
+                "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
+                "-D", "SaxonCCore_PackageDir:PATH=${saxonCCoreCMakePackageDir.get()}"
+            )
         }
     }
+
+//    val generator2 = tasks.register("cmake_generate_${configTaskName}") {
+//        group = LifecycleBasePlugin.BUILD_GROUP
+//        inputs.file(layout.projectDirectory.file("CMakeLists.txt"))
+//        inputs.dir(layout.projectDirectory.dir("../cmake"))
+//        inputs.dir(coreCMakePackageDir.elements.map { it.first().asFile })
+//        outputs.file(cmakeBuildDir.map { it.file("CMakeCache.txt") })
+//
+//        val injected = project.objects.newInstance<InjectedExecOps>()
+//
+//        doLast {
+//            val generatorName = if (saxonBuild.platform.get() == "windows") "Visual Studio 17 2022" else "Ninja Multi-Config"
+//            injected.execOps.exec {
+//                workingDir = layout.projectDirectory.asFile
+//                executable = "cmake"
+//                args("-G", generatorName, "-B", cmakeBuildDir.get().asFile.toString(),
+//                    "-D", saxonBuild.version.map { "SAXON_VERSION:STRING=${it}" }.get(),
+//                    "-D", extension.package_name.map { "SAXON_PACKAGE_NAME:STRING=${it}" }.get(),
+//                    "-D", extension.package_file_name.map { "SAXON_PACKAGE_FILE_NAME:STRING=${it}" }.get(),
+//                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_OS:STRING=${it.platform}" }.get(),
+//                    "-D", saxonBuild.targetHost.map { "SAXON_PACKAGE_ARCH:STRING=${it.architecture}" }.get(),
+//                    "-D", coreCMakePackageDir.elements.map { "SaxonCCore_PackageDir:PATH=${it.first().asFile}" }.get()
+//                )
+//                if (saxonBuild.macosx_min_version.isPresent) {
+//                    args("-D", "CMAKE_OSX_DEPLOYMENT_TARGET=${saxonBuild.macosx_min_version.get()}")
+//                }
+//            }
+//        }
+//    }
 
     val build = tasks.register<Exec>("build_${configTaskName}") {
         group = LifecycleBasePlugin.BUILD_GROUP
@@ -143,13 +198,13 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
         args("--install", cmakeBuildDir.get().asFile.toString(), "--config", config, "--prefix", stagingPath.get().asFile.toString())
     }
 
-    return Pair(build, stage)
+    return Triple(generator,build, stage)
 }
 
 val stagingPath = layout.buildDirectory.dir("staging/Release")
 val debugStagingPath = layout.buildDirectory.dir("staging/Debug")
-val (build, stage) = setupConfigTasks("Release", stagingPath, saxonCCoreReleaseCMakePackageDir)
-val (debugBuild, debugStage) = setupConfigTasks("Debug", debugStagingPath, saxonCCoreDebugCMakePackageDir)
+val (generator, build, stage) = setupConfigTasks("Release", stagingPath, saxonCCoreReleaseCMakePackageDir)
+val (debugGenerator, debugBuild, debugStage) = setupConfigTasks("Debug", debugStagingPath, saxonCCoreDebugCMakePackageDir)
 
 tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(build)
@@ -361,6 +416,85 @@ val exportHeaderTask = tasks.register("combined_export_header") {
     }
 }
 
+val sourceCMakeDistroFolderTask = tasks.register<CMakeCompatibleSourceFolder>("source_cmake_distro_folder") {
+    dependsOn(generator, saxonCCoreReleaseCMakePackageDir)
+
+    packageDirName = extension.package_file_name.map {
+        "${it}-cmake"
+    }
+    packageTmpDir = packagedDir
+    replaceTokens = mapOf(
+        "edition" to extension.edition.get(),
+        "EDITION" to extension.edition.map { it.uppercase() }.get(),
+        "VERSION" to saxonBuild.version.get(),
+    )
+
+    copyBlock.set({
+        into("lib") {
+            from(generator.map { it.outputFiles.get() }) {
+              include("saxonc_version.c")
+            }
+        }
+        from(notices) {
+            into("notices")
+        }
+        from(saxonCCoreReleaseCMakePackageDir.elements.map { it.first() }) {
+            into(extension.edition.map { "SaxonCCore${it.uppercase()}" })
+        }
+    })
+}
+
+val sourceCMakeDistroZipTask = tasks.register<Zip>("source_cmake_distro_zip") {
+    archiveBaseName = extension.package_name
+    archiveAppendix = "cmake"
+    archiveVersion = saxonBuild.hyphenatedVersion
+
+    into(sourceCMakeDistroFolderTask.map { it.outputDir.get().asFile.name })
+    from(sourceCMakeDistroFolderTask.map { it.outputDir.get() })
+}
+//val sourceCMakeDistroFolderTask = tasks.register<Copy>("source_cmake_distro_folder") {
+//    fun tokens(): Map<String, String> {
+//        return mapOf(
+//            "edition" to extension.edition.get(),
+//            "EDITION" to extension.edition.map { it.uppercase() }.get(),
+//            "VERSION" to saxonBuild.version.get(),
+//        )
+//    }
+//
+//    into(packagedDir.map { it.dir("tmp/${outputDirName.get()}") })
+//
+//    from(layout.projectDirectory.dir("../source-cmake-distro")) {
+//        include("CMakeLists.txt.in")
+//        rename { "CMakeLists.txt" }
+//        filter<ReplaceTokens>("tokens" to tokens())
+//    }
+//    from(layout.projectDirectory.dir("../cmake")) {
+//        into("cmake")
+//        include("libsaxonc.cmake")
+//    }
+//
+//    into("lib") {
+//        from(layout.projectDirectory.dir("../src/lib")) {
+//            exclude("*.c.in")
+//        }
+//        from(generator.map { it.outputFiles.get() }) {
+//            include("saxonc_version.c")
+//        }
+//    }
+//
+//    from(layout.projectDirectory.dir("../src/include")) {
+//        into("include")
+//    }
+//
+//    from(notices) {
+//        into("notices")
+//    }
+//
+//    from(layout.projectDirectory.dir("../")) {
+//        include("README.md")
+//        filter<ReplaceTokens>("tokens" to tokens())
+//    }
+//}
 
 val sourceZipTask = tasks.register<Zip>("source_release_zip") {
     archiveBaseName = extension.package_name

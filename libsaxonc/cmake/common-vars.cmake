@@ -1,0 +1,20 @@
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+if(NOT CMAKE_DEBUG_POSTFIX)
+    if(APPLE)
+        set(CMAKE_DEBUG_POSTFIX _debug)
+    elseif(WIN32)
+        # Do nothing for now
+    else()
+        set(CMAKE_DEBUG_POSTFIX d)
+    endif()
+endif()
+
+string(TOUPPER ${SaxonC_EDITION} SAXON_EDITION)
+set(SAXONC_SRC_DIR ../src)
+set(SAXONC_VERSION_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(SAXONC_EDITION_SRC_DIR src)
+# Always use `lib` instead of sometimes `lib64`
+set(SAXON_CMAKE_INSTALL_LIBDIR "lib")
+set(SAXONC_CORE_PACKAGE_DIR ${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION})
