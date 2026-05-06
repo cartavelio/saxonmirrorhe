@@ -205,8 +205,13 @@ public class SaxonCAPI {
     @CEntryPoint(name = "j_c_getSaxonEdition")
     public static CCharPointer getSaxonEdition(IsolateThread thread, ObjectHandle processorRef) {
         Processor processor = objectHandles.get(processorRef);
-        final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(processor.getSaxonEdition());
-        return holder.get();
+
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(processor.getSaxonEdition())){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
     }
 
     /**
@@ -727,8 +732,13 @@ public class SaxonCAPI {
             return WordFactory.nullPointer();
         }
         Processor processor = objectHandles.get(processorRef);
-        final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(processor.getUnderlyingConfiguration().getProductTitle());
-        return holder.get();
+
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(processor.getUnderlyingConfiguration().getProductTitle())){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
     }
 
 
@@ -1734,8 +1744,13 @@ public class SaxonCAPI {
             return WordFactory.nullPointer();
         }
         String typeName = new QName(sname.getPrefix(), sname.getNamespaceUri().toString(), sname.getLocalPart()).getClarkName();
-        final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(typeName);
-        return holder.get();
+
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(typeName)){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
 
     }
 
@@ -1750,8 +1765,13 @@ public class SaxonCAPI {
     @CEntryPoint(name = "j_getStringValue")
     public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef) {
         XdmValue value = objectHandles.get(xdmvalueRef);
-        final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(value.toString());
-        return holder.get();
+
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(value.toString())){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
     }
 
 
