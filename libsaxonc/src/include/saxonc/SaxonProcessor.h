@@ -700,7 +700,7 @@ public:
   /**
    * Internal method for diagnostics
    */
-  void createHeapDump(bool live);
+  static void createHeapDump(bool live);
 
 protected:
 
