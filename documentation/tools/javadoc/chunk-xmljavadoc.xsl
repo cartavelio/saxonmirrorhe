@@ -476,6 +476,7 @@ History
         <field>
             <xsl:apply-templates select="@*"/>
             <xsl:call-template name="type-attributes"/>
+            <xsl:apply-templates select="d:type/d:param|d:type/d:wildcard"/>
             <xsl:if test="d:purpose|d:description|d:since|d:see|d:deprecated">
                 <comment>
                     <xsl:apply-templates select="d:purpose"/>
