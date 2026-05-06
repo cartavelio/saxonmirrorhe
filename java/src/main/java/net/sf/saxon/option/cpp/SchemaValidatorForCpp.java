@@ -277,6 +277,10 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             systemId = pathHelper.cwdToBaseURI(cwd).toString();
         }
 
+        if (systemId != null && cwd != null) {
+            systemId = pathHelper.cwdToBaseURI(cwd).resolve(systemId).toString();
+        }
+
         StreamSource source = null;
         if (systemId != null) {
             source = new StreamSource(new StringReader(xsd), systemId);

@@ -24,12 +24,11 @@ const std::string path_sep = "/";
 using namespace std;
 using Catch::Matchers::ContainsSubstring;
 
-TEST_CASE( "Resolving a relative URI in a Schema registered from a string where CWD has" ) {
+SCENARIO( "SchemaValidator.registerSchemaFromString(): resolving relative URIs" ) {
     string srcfile = string(__FILE__);
     auto last_path_sep = srcfile.find_last_of(path_sep);
     auto base_wd = srcfile.substr(0, last_path_sep) + path_sep + "test_data";
     auto trailing_wd = base_wd + path_sep;
-
 
     std::ifstream is(trailing_wd + "root.xsd");
     std::stringstream buf;
@@ -38,20 +37,64 @@ TEST_CASE( "Resolving a relative URI in a Schema registered from a string where 
     auto *processor = new SaxonProcessor(true);
     SchemaValidator *validator = processor->newSchemaValidator();
 
-    SECTION("no trailing path separator") {
-        validator->setcwd(base_wd.c_str());
+    const auto instance_path = trailing_wd + "instance.xml";
 
-        validator->registerSchemaFromString(input.c_str());
-        auto expected = validator->validateToNode((trailing_wd + "instance.xml").c_str())->getStringValue();
-        REQUIRE_THAT( expected , ContainsSubstring("A result") );
+    GIVEN( "no SystemId supplied" ) {
+        WHEN("CWD has no trailing path separator") {
+            validator->setcwd(base_wd.c_str());
+
+            validator->registerSchemaFromString(input.c_str());
+
+            THEN( "relative URI in root.xsd is correctly resolved" ) {
+                REQUIRE_THAT( validator->validateToNode(instance_path.c_str())->getStringValue() , ContainsSubstring("A result") );
+            }
+        }
+
+        WHEN("CWD has a trailing path separator") {
+            validator->setcwd(trailing_wd.c_str());
+
+            validator->registerSchemaFromString(input.c_str());
+
+            THEN( "relative URI in root.xsd is correctly resolved" ) {
+                REQUIRE_THAT( validator->validateToNode(instance_path.c_str())->getStringValue() , ContainsSubstring("A result") );
+            }
+        }
     }
 
-    SECTION("a trailing path separator") {
-        validator->setcwd(trailing_wd.c_str());
+    GIVEN( "a relative SystemID is supplied") {
+        WHEN("CWD has no trailing path separator") {
+            validator->setcwd(base_wd.c_str());
 
-        validator->registerSchemaFromString(input.c_str());
-        auto expected = validator->validateToNode((trailing_wd + "instance.xml").c_str())->getStringValue();
-        REQUIRE_THAT( expected , ContainsSubstring("A result") );
+            validator->registerSchemaFromString(input.c_str(), "root.xsd");
+
+            THEN( "relative URI in root.xsd is correctly resolved" ) {
+                REQUIRE_THAT( validator->validateToNode(instance_path.c_str())->getStringValue() , ContainsSubstring("A result") );
+            }
+        }
+
+        WHEN("CWD has a trailing path separator") {
+            validator->setcwd(trailing_wd.c_str());
+
+            validator->registerSchemaFromString(input.c_str(), "root.xsd");
+
+            THEN( "relative URI in root.xsd is correctly resolved" ) {
+                REQUIRE_THAT( validator->validateToNode(instance_path.c_str())->getStringValue() , ContainsSubstring("A result") );
+            }
+        }
+    }
+
+    GIVEN( "an absolute system ID") {
+        auto other_wd = trailing_wd + "intentionally_blank";
+
+        WHEN("CWD is set") {
+            validator->setcwd(other_wd.c_str());
+
+            validator->registerSchemaFromString(input.c_str(), (trailing_wd + "root.xsd").c_str());
+
+            THEN( "relative URI in root.xsd is correctly resolved" ) {
+                REQUIRE_THAT( validator->validateToNode(instance_path.c_str())->getStringValue() , ContainsSubstring("A result") );
+            }
+        }
     }
 
     delete validator;
