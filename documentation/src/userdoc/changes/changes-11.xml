@@ -28,7 +28,7 @@
     
     <category name="s9api" class="javaonly">
         
-        <p>A new class <code java="net.sf.saxon.s9api.JsonBuilder">JsonBuilder</code> has been added, analagous to the <code
+        <p>A new class <code java="net.sf.saxon.s9api.JsonBuilder">JsonBuilder</code> has been added, analogous to the <code
             java="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</code>. It can be instantiated from a <code>Processor</code>
             using <code java="net.sf.saxon.s9api.Processor#newJsonBuilder">Processor.newJsonBuilder()</code>, and allows JSON
             documents to be parsed, returning an <code>XdmValue</code>, typically an <code>XdmMap</code> or <code>XdmArray</code>.</p>
@@ -396,7 +396,7 @@
                 <p>Returns the value of its argument unchanged, and a static call will normally be optimized
                     away. The purpose of the function is to suppress
                     optimization of a contained filter expression: for example <code>//x[@y=$z]</code> in Saxon-EE would normally be
-                    optmized by building an index, but <code>saxon:unindexed(//x[@y=$z])</code> suppresses this optimization. This may be
+                    optimized by building an index, but <code>saxon:unindexed(//x[@y=$z])</code> suppresses this optimization. This may be
                     useful if it is known, for example, (a) that the expression will not be evaluated often enough to justify the cost of
                     index construction, or (b) that the sequence <code>//x</code> contains very few items, or (c) that the predicate is
                     likely to select a high proportion of the items in the filtered sequence.</p>

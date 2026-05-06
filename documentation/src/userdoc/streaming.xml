@@ -372,7 +372,7 @@
       <p>The code that processes an individual <code>employee</code> element does not need to be
         streamable; it can use any XSLT constructs. The only constraint is that it cannot navigate
         outside the <code>employee</code> element: because the <code>employee</code> element is a
-        copy of a subtree from the orginal document, it has no parent or siblings.</p>
+        copy of a subtree from the original document, it has no parent or siblings.</p>
 
       <p>Burst-mode streaming can also be applied to the principal input of the transformation. This
         works if the transformation is run from the command line, and also if it is executed from a

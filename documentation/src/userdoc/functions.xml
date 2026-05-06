@@ -1150,7 +1150,7 @@
         <div>
           <p>The W3C specification requires that if <code>document-uri(D) = U</code>, then <code>doc(U) is D</code>.
             A consequence of this rule is that two different documents cannot have the same document URI. This realisation
-            led to a significant change in the implementation of the function beween Saxon 10 and 11, with the effect that
+            led to a significant change in the implementation of the function between Saxon 10 and 11, with the effect that
             many documents no longer have a document URI. For example, at one time a document built from a JAXP <code>Source</code>
             object would automatically have a <code>document-uri()</code> based on the <code>systemID</code> property of the
             <code>Source</code>. This is no longer the case, because there is no way of preventing two different <code>Source</code>         
@@ -1715,7 +1715,7 @@
           daylight savings time (summer time) changeover dates to work out the most likely timezone
           applicable to the date in question.</p>
 
-        <p>If the timezone is formatted as <code>[ZN,6]</code> (specifically, with a minumum length
+        <p>If the timezone is formatted as <code>[ZN,6]</code> (specifically, with a minimum length
           of 6 or more) then the Olsen timezone name is output (again, this requires the country to
           be supplied). The Olsen timezone name generally takes the form
           <code>Continent/City</code>, for example <code>Europe/London</code> or

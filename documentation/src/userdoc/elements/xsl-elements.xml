@@ -1259,7 +1259,7 @@
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
-                <p>Modivated by streaming, the <code>on-empty</code> attribute was introduced in an
+                <p>Motivated by streaming, the <code>on-empty</code> attribute was introduced in an
                     early Working Draft for XSLT 3.0, but later removed and replaced by the new <a
                         class="bodylink code" href="../on-empty">xsl:on-empty</a>, <a
                         class="bodylink code" href="../on-non-empty">xsl:on-non-empty</a> and <a

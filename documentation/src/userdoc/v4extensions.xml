@@ -915,7 +915,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
          <h2>Lambda notation</h2>
 
-         <p>New syntax, similar to lambda expresions in Java, C#, and Javascript, is available for 
+         <p>New syntax, similar to lambda expressions in Java, C#, and Javascript, is available for 
             anonymous inline functions. For example, <code>function($a, $b){$a + $b}</code> can be written as
                <code>($a, $b)->{$a + $b}</code>.</p>
          
