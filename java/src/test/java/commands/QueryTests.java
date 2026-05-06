@@ -7,7 +7,7 @@
 
 package commands;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Query;
 import net.sf.saxon.lib.Initializer;
@@ -15,9 +15,11 @@ import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.XQueryExecutable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -26,8 +28,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests on Query Command Line options
  */
 public class QueryTests {
-    private final ConfigTest configTest = new ConfigTest();
-
     final Query query = new Query();
     /**
      * Run a query using the command line interface capturing the result as a string
@@ -61,7 +61,7 @@ public class QueryTests {
     public void testQueryDirectWithSource() {
         String[] args = {
                 "-qs:count(//*)",
-                "-s:" + configTest.getDataDir() + "books.xml",
+                "-s:" + Testdata.path("books.xml"),
                 "-t",
                 "!omit-xml-declaration=yes"};
         String result = runQuery(args);
@@ -72,7 +72,7 @@ public class QueryTests {
     public void testQueryLineNumbering() {
         String[] args = {
                 "-qs:saxon:line-number((//AUTHOR)[1])",
-                "-s:" + configTest.getDataDir() + "books.xml",
+                "-s:" + Testdata.path("books.xml"),
                 "-l",
                 "-t",
                 "!omit-xml-declaration=yes"};
@@ -84,7 +84,7 @@ public class QueryTests {
     public void testQueryLineNumberingOff() {
         String[] args = {
                 "-qs:saxon:line-number((//AUTHOR)[1])",
-                "-s:" + configTest.getDataDir() + "books.xml",
+                "-s:" + Testdata.path("books.xml"),
                 "-l:off",
                 "-t",
                 "!omit-xml-declaration=yes"};
@@ -95,7 +95,7 @@ public class QueryTests {
     @Test
     public void testQueryLineNumberingOnDoc() {
         String[] args = {
-                "-qs:saxon:line-number((doc('" + configTest.getDataDir() + "books.xml')//AUTHOR)[1])",
+                "-qs:saxon:line-number((doc('" + Testdata.path("books.xml") + "')//AUTHOR)[1])",
                 "-l:on",
                 "-t",
                 "!omit-xml-declaration=yes"};
@@ -109,7 +109,7 @@ public class QueryTests {
                 "-qs:declare variable $doc external; saxon:line-number(($doc//AUTHOR)[1])",
                 "-l:on",
                 "-t",
-                "+doc=" + configTest.getDataDir() + "books.xml",
+                "+doc=" + Testdata.path("books.xml"),
                 "!omit-xml-declaration=yes"};
         String result = runQuery(args);
         assertEquals("6", result);
@@ -119,7 +119,7 @@ public class QueryTests {
     public void testQueryDirectWithJsonSource() {
         String[] args = {
                 "-qs:?name",
-                "-json:" + configTest.getDataDir() + "sample.json",
+                "-json:" + Testdata.path("sample.json"),
                 "-t",
                 "!omit-xml-declaration=yes"};
         String result = runQuery(args);
@@ -130,7 +130,7 @@ public class QueryTests {
     public void testQueryProjection() {
         String[] args = {
                 "-qs:count(//CATEGORY)",
-                "-s:" + configTest.getDataDir() + "books.xml",
+                "-s:" + Testdata.path("books.xml"),
                 "-t",
                 "-projection:on"};
         try {
@@ -142,16 +142,17 @@ public class QueryTests {
     }
 
     @Test
-    public void testQueryUpdate() {
+    public void testQueryUpdate(@TempDir Path tempDir) {
         // This is an update test; copy the file into temp
-        String tempfn = configTest.getTempDir() + "books.xml";
-        String origfn = configTest.getDataDir() + "books.xml";
+
+        File tempfn = tempDir.resolve("books.xml").toFile();
+        File origfn = Testdata.file("books.xml");
         InputStream instream = null;
         OutputStream outstream = null;
 
         try {
-            instream = new FileInputStream(new File(origfn));
-            outstream = new FileOutputStream(new File(tempfn));
+            instream = new FileInputStream(origfn);
+            outstream = new FileOutputStream(tempfn);
             byte[] buf = new byte[4096];
             int length = -1;
             while ((length = instream.read(buf)) > 0) {
