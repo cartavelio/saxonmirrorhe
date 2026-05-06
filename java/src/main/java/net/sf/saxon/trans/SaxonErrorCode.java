@@ -17,12 +17,6 @@ import net.sf.saxon.lib.FeatureKeys;
 public class SaxonErrorCode {
 
     /**
-     * SXLM0001: stylesheet or query appears to be looping/recursing indefinitely
-     */
-
-    public static final String SXLM0001 = "SXLM0001";
-
-    /**
      * SXCH0002: cannot supply output to ContentHandler because it is not well-formed
      */
 
@@ -202,6 +196,18 @@ public class SaxonErrorCode {
      */
 
     public static final String SXJS0001 = "SXJS0001";
+
+    /**
+     * SXLM0001: stylesheet or query appears to be looping/recursing indefinitely
+     */
+
+    public static final String SXLM0001 = "SXLM0001";
+
+    /**
+     * SXLM0002: Sequence exceeds maximum length
+     */
+
+    public static final String SXLM0002 = "SXLM0002";
 
     /**
      * SXPK0001: No binding available for call-template instruction

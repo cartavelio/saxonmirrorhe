@@ -14,6 +14,8 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
@@ -21,7 +23,8 @@ import java.util.Iterator;
 
 /**
  * This class represents a sequence of integers, for example 1 by 5 to 50.
- * The integers must be within the range of a Java long.
+ * The integers must be within the range of a Java long, and the length of the
+ * sequence must be within the range of a Java int.
  */
 
 public class IntegerRange implements AtomicSequence {
@@ -45,8 +48,8 @@ public class IntegerRange implements AtomicSequence {
         if (end != start && (end > start != step > 0)) {
             throw new IllegalArgumentException("end before start in IntegerRange");
         }
-        if (Math.abs((end - start)/step) > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE);
+        if (Math.abs((end - start)/step) >= Integer.MAX_VALUE) {
+            throw new UncheckedXPathException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE, SaxonErrorCode.SXLM0002);
         }
         this.start = start;
         this.step = step;
