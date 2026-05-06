@@ -175,7 +175,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
                     NamespaceResolver resolver = env.getNamespaceResolver();
                     UnionConstructorFunction ucf = new UnionConstructorFunction((UnionType) type, resolver, true);
                     return new StaticFunctionCall(ucf, arguments);
-                } else {
+                } else if (type.isListType()) {
                     NamespaceResolver resolver = env.getNamespaceResolver();
                     try {
                         ListConstructorFunction lcf = new ListConstructorFunction((ListType)type, resolver, true);
@@ -184,6 +184,12 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
                         reasons.add("Missing schema component: " + e.getMessage());
                         return null;
                     }
+                } else if (localName.equals("anySimpleType")) {
+                    reasons.add("Abstract type used in constructor function: {" + uri + '}' + localName);
+                    return null;
+                } else {
+                    reasons.add("Unknown constructor function: {" + uri + '}' + localName);
+                    return null;
                 }
             } else {
                 reasons.add("Unknown constructor function: {" + uri + '}' + localName);

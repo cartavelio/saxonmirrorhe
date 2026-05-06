@@ -4248,8 +4248,8 @@ public class XPathParser {
     /*@NotNull*/
     public Expression reportMissingFunction(int offset, StructuredQName functionName, Expression[] arguments, List<String> reasons) throws XPathException {
         StringBuilder sb = new StringBuilder();
-        sb.append("Cannot find a ").append(arguments.length).append(
-                "-argument function named ").append(functionName.getEQName()).append("()");
+            sb.append("Cannot find a ").append(arguments.length).append(
+                    "-argument function named ").append(functionName.getEQName()).append("()");
         Configuration config = env.getConfiguration();
         for (String reason : reasons) {
             sb.append(". ").append(reason);
@@ -4276,6 +4276,7 @@ public class XPathParser {
         } else {
             sb.append(". External function calls have been disabled");
         }
+
         if (env.isInBackwardsCompatibleMode()) {
             // treat this as a dynamic error to be reported only if the function call is executed
             return new ErrorExpression(sb.toString(), "XTDE1425", false);
