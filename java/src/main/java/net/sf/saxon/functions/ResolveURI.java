@@ -350,14 +350,6 @@ public class ResolveURI extends SystemFunction {
         return new URISyntaxException(input, reason);
     }
 
-
-    /**
-     * Replace spaces by %20
-     *
-     * @param s the input string
-     * @return the input string with each space replaced by %20
-     */
-
     /**
      * Replace spaces by %20
      *
