@@ -2,7 +2,7 @@
 Installation on Windows is a matter of extracting the contents of the download `.zip` to a suitable location. We recommend `{{model.installPath}}`
 
 ### Setting up the PATH to include the SaxonC DLLs
-If you’re intending to use the pre-compiled binaries, like {{model.binariesSentence}},
+If you're intending to use the pre-compiled binaries, like {{model.binariesSentence}},
 then you need to ensure that they can find all the DLLs they need on your PATH.
 
 There are several ways to do this. The most permanent is by setting them

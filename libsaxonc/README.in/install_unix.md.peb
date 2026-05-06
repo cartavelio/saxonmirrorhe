@@ -1,15 +1,15 @@
 ## Installation
-If you’re intending to use the pre-compiled binaries, like {{model.binariesSentence}},
+If you're intending to use the pre-compiled binaries, like {{model.binariesSentence}},
 then installation on your system is a matter of copying the libraries, and 
 binaries to your preferred install location, ensuring the libraries can be found 
 at runtime, and the binaries are on your PATH.
 
-If you’re intending to also use the C API, then you need to ensure the header 
+If you're intending to also use the C API, then you need to ensure the header 
 files and also installed somewhere your build system can find them. We do not 
 currently recommend using the C++ API with the pre-compiled `{{ model.libsaxonc }}` in
 case of ABI conflict, for that you can compile `{{ model.libsaxonc }}` yourself.
 
-If you’re intending to compile `{{ model.libsaxonc }}` yourself, then what you need to do
+If you're intending to compile `{{ model.libsaxonc }}` yourself, then what you need to do
 will depend on your project and its build system. We provide out-of-the-box 
 compatibility with CMake, but using other systems should be straightforward.
 
@@ -35,7 +35,7 @@ directories containing the SaxonC libraries. For instance:
 
 	export {{ model.runtimeLinkerVar }}="{{ model.SaxonCCorePackageLibPath }}:{{ model.SaxonCPackageLibPath }}:${{ model.runtimeLinkerVar }}"
 
-If you’re only going to use the pre-compiled `{{ model.libsaxoncCore }}`, and compile
+If you're only going to use the pre-compiled `{{ model.libsaxoncCore }}`, and compile
 `{{ model.libsaxonc }}` yourself, you only need to add the `{{model.SaxonCCorePackage}}` lib path to
 `{{ model.runtimeLinkerVar }}`.
 
