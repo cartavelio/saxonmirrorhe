@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE eg [ <!ELEMENT eg ANY> <!ENTITY ohai SYSTEM "ohai.txt"> ] >
+<eg>&ohai;</eg>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blah xmlns="http://example.org/#terrible-ns">
+  <moreBlah>A result</moreBlah>
+  <evenMoreBlah/>
+</blah>

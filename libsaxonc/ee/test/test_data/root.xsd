@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" 
+    xmlns:terrible="http://example.org/#terrible-ns"
+    elementFormDefault="qualified"
+    vc:minVersion="1.1" targetNamespace="http://example.org/#terrible-ns">
+
+    <xs:include schemaLocation="included.xsd"/>
+    <xs:element name="blah" type="terrible:blahType"/>
+</xs:schema>

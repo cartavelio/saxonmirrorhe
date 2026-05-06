@@ -9,6 +9,15 @@ include(CTest)
 include(Catch)
 find_package(Threads REQUIRED)
 
+add_executable(common_tests
+        test_processor.cpp
+        test_Xslt30Processor.cpp)
+target_link_libraries(common_tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(common_tests PRIVATE ${saxonc})
+
+catch_discover_tests(common_tests DL_PATHS "$<TARGET_RUNTIME_DLL_DIRS:common_tests>")
+
+
 # Tests
 add_executable(CTestXPath ../samples/cTests/testXPath.c)
 target_link_libraries(CTestXPath PRIVATE ${saxonc})
