@@ -519,6 +519,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                     throw new XPathException("Internal problem: the included stylesheet module '" + href + "' should be in the compiler's module store, but was not found");
                 }
                 StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
+                if (incWrapper == null) {
+                	throw new XPathException("Included document " + href + " is not a stylesheet", "XTSE0165");
+                }
                 gatherUsePackageDeclarations(compilation, incWrapper, declarations);
             }
         }
