@@ -85,8 +85,6 @@ public class Environment implements ResourceResolver {
     public boolean outputSerialize = false;
     public Map<String, CatalogResource> catalogResources = new HashMap<>();
     public Map<String, List<String>> jsCollections;
-    public boolean schemaAware = false;
-    public boolean validateSources = false;
     public String initialWorkingDirectory = null;
     public String initialExpathBaseDirectory = null;
     public File sandpit = null;
@@ -252,11 +250,6 @@ public class Environment implements ResourceResolver {
 
         SchemaManager manager = environment.processor.getSchemaManager();
         boolean validateSources = loadSchemaDocuments(driver, xpc, env, environment, manager);
-
-        if (needsLicense && "EE".equals(driver.driverProc.getSaxonEdition()) /*xpc.isSchemaAware()*/) {
-            XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
-            environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
-        }
 
         // set up the sandpit, if there is one
         createSandpit(name, env, environment);
@@ -1174,7 +1167,7 @@ public class Environment implements ResourceResolver {
     }
 
     private void deleteFolder(Path folder) throws IOException {
-        Files.walkFileTree(folder, new SimpleFileVisitor<>() {
+        Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);
