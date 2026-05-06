@@ -153,9 +153,9 @@ public class PathHelper {
                 name.startsWith("file:");
     }
 
-    public URI cwdToBaseURI(String cwd) throws SaxonApiException {
+    public URI cwdToBaseURI(String cwd) {
         URI intermediate = Paths.get(cwd).toUri();
-        return URI.create(intermediate.toString() + "/");
+        return URI.create(intermediate + "/");
     }
 }
 
