@@ -1039,7 +1039,7 @@
                call <code>$M($K)</code>. If the key to be accessed is known statically, and if it takes
                the form of an <code>NCName</code>, then a lookup
             expression of the form <code>$employee?name</code> can be used. A unary form of this operator
-            is also available, allowing <code>$employees[?name='John']</code>.</p>
+            is also available, allowing <code>$employee[?name='John']</code>.</p>
          </li>
          <li>
             <p>Arrays are available (for more details see <a class="bodylink" href="../xpath31arrays"
@@ -1109,7 +1109,7 @@
             <p>The function <a class="bodylink code" href="/functions/map/merge">map:merge()</a>
                takes a number of maps as input, and combines them into a single map. This can be
                used to construct a map where the number of entries is not known statically: for
-               example <code>map:merge(for $i in 1 to 10 return map{$i :
+               example <code>map:merge(for $i in 49 to 57 return map{$i :
                   codepoints-to-string($i)})</code>.</p>
             <p>(In previous working drafts, this function was named <code>map:new()</code>, but this
                name is no longer supported since Saxon 9.7.)</p>
@@ -1282,7 +1282,7 @@
          </li>
          <li>
             <p><code>array:filter</code>: returns those members of an array that satisfy some condition, expressed as a function.
-            For example, <code>array:filter([1 to 5], function($x){$x mod 2 = 1})</code> returns <code>[1, 3, 5]</code>.</p>
+               For example, <code>array:filter(array{1 to 5}, function($x){$x mod 2 = 1})</code> returns <code>[1, 3, 5]</code>.</p>
          </li>
          <li>
             <p><code>array:flatten</code>: replaces an array by the sequence-concatenation of its members, recursively.
@@ -1317,11 +1317,11 @@
          </li>
          <li>
             <p><code>array:head</code>: returns the first member of the array.
-               For example, <code>array:head([1 to 5, 1 to 10]</code> returns <code>(1 to 5)</code> (a sequence, not an array).</p>
+               For example, <code>array:head([1 to 5, 1 to 10])</code> returns <code>(1 to 5)</code> (a sequence, not an array).</p>
          </li>
          <li>
             <p><code>array:insert-before</code>: inserts a new member at a given position.
-               For example, <code>array:insert-before([1, 2, 3, 4], 3, ()]</code> returns <code>[1, 2, (), 3, 4]</code>.</p>
+               For example, <code>array:insert-before([1, 2, 3, 4], 3, ())</code> returns <code>[1, 2, (), 3, 4]</code>.</p>
          </li>
          <li>
             <p><code>array:join</code>: Joins a number of arrays end-to-end to create a new array.
@@ -1356,7 +1356,7 @@
          </li>
          <li>
             <p><code>array:tail</code>: removes the first member from an array.
-               For example, <code>array:head([1 to 5, 1 to 10]</code> returns <code>[1 to 10]</code>.</p>
+               For example, <code>array:tail([1 to 5, 1 to 10])</code> returns <code>[1 to 10]</code>.</p>
          </li>
 
       </ul>

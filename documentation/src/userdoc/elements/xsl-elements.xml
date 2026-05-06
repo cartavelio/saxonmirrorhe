@@ -490,7 +490,7 @@
                         <tr>
                             <td>
                                 <p>
-                                    <code>XXX[@WIDTH and not(@width="20")]</code>
+                                    <code>XXX[@WIDTH and not(@WIDTH="20")]</code>
                                 </p>
                             </td>
                             <td>
@@ -1987,7 +1987,7 @@
                     <pre><code class="language-xml"><![CDATA[<xsl:function name="my:factorial" as="xs:integer">
     <xsl:param name="number" as="xs:integer"/> 
     <xsl:sequence 
-         select="if ($number=0) then 1 else $number * my:factorial($number-1)"/>
+         select="if ($number=0) then 1 else $number * my:factorial($number - 1)"/>
 </xsl:function>]]></code></pre>
                 </example>
                 <example>
@@ -1996,7 +1996,7 @@
                     <pre><code class="language-xml"><![CDATA[<xsl:function name="x:factorial">
     <xsl:param name="acc" as="xs:integer?"/>
     <xsl:param name="n" as="xs:integer"/>
-    <xsl:sequence as="xs:integer" 
+    <xsl:sequence 
          select="if ($n = 1) 
                  then $acc
                  else x:factorial($acc*$n, $n - 1)" />
@@ -2674,7 +2674,7 @@
                         timestamp:</p>
 
                     <pre><code class="language-xml"><![CDATA[<xsl:merge>
-    <xsl:merge-source for-each-item="collection('log-collection')" select="events/event"/>
+    <xsl:merge-source for-each-item="collection('log-collection')" select="events/event">
         <xsl:merge-key select="@timestamp" order="ascending"/>
     </xsl:merge-source>
     <xsl:merge-action>
@@ -2686,11 +2686,11 @@
                     <p>Merges two log files with different internal structure:</p>
 
                     <pre><code class="language-xml"><![CDATA[<xsl:merge>
-    <xsl:merge-source select="doc('log1.xml')/transactions/transaction"/>
-        <xsl:merge-key select="xs:dateTime(@date, @time)" order="ascending"/>
+    <xsl:merge-source select="doc('log1.xml')/transactions/transaction">
+        <xsl:merge-key select="dateTime(@date, @time)" order="ascending"/>
     </xsl:merge-source>
-    <xsl:merge-source select="doc('log2.xml')/eventdata/transfer"/>
-        <xsl:merge-key select="@timestamp" order="ascending"/>
+    <xsl:merge-source select="doc('log2.xml')/eventdata/transfer">
+        <xsl:merge-key select="xs:dateTime(@timestamp)" order="ascending"/>
     </xsl:merge-source>
     <xsl:merge-action>
         <xsl:apply-templates select="current-merge-group()"/>
@@ -3469,7 +3469,7 @@
                         containing <code>&lt;H1&gt;</code> element and the number of the containing
                             <code>&lt;H2&gt;</code> element.</p>
                     <pre><code class="language-xml"><![CDATA[<xsl:template match="H2/TITLE">
-    <xsl:number count="H1">.<xsl:number count="H2">
+    <xsl:number count="H1"/>.<xsl:number count="H2"/>
     <xsl:text> </xsl:text>
     <xsl:apply-templates/>
 </xsl:template>]]></code></pre>
@@ -4424,9 +4424,9 @@
                 <example>
                     <p>Constructing a sequence-valued variable:</p>
                     <pre><code class="language-xml"><![CDATA[<xsl:variable name="seq" as="xs:integer *">
-    <xsl:for-each select="1 to 5">>
+    <xsl:for-each select="1 to 5">
        <xsl:sequence select=". * ."/>
-    </xsl:for-each/>    
+    </xsl:for-each>    
 </xsl:variable>]]></code></pre>
 
                     <p>This produces the sequence <code>(1, 4, 9, 16, 25)</code> as the value of the
@@ -4521,7 +4521,7 @@
     <h2>
         <xsl:apply-templates select="BOOK">
             <xsl:sort select="AUTHOR"/>
-            <xsl:sort select="@DATE" order="descending" lang="GregorianDate"/>
+            <xsl:sort select="@DATE" order="descending"/>
         </xsl:apply-templates>            
     </h2>
 </xsl:template>]]></code></pre>
@@ -5300,8 +5300,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The character content of the first child <code>TITLE</code>
-                                    element if there is one</p>
+                                <p>The character content of all <code>TITLE</code> child elements if
+                                    there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5332,8 +5332,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The expanded character content of the first <code>TITLE</code>
-                                    child of the parent element, if there is one</p>
+                                <p>The expanded character content of all <code>TITLE</code> child
+                                    elements of the parent element, if there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5343,9 +5343,9 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The expanded character content of the first <code>TITLE</code>
-                                    child of the enclosing <code>SECTION</code> element, if there is
-                                    one</p>
+                                <p>The expanded character content of all <code>TITLE</code> child
+                                    elements of the enclosing <code>SECTION</code> element, if there
+                                    are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5355,9 +5355,9 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The expanded character content of the first <code>TITLE</code>
-                                    child of the nearest enclosing element that has a child element
-                                    named <code>TITLE</code></p>
+                                <p>The expanded character content of all <code>TITLE</code> child
+                                    elements of the nearest enclosing element that has a child
+                                    element named <code>TITLE</code></p>
                             </td>
                         </tr>
                         <tr>
@@ -5367,8 +5367,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The content of the first child <code>PERSON</code> element having
-                                    an <code>ID</code> attribute, if there is one</p>
+                                <p>The content of all <code>PERSON</code> child elements having an
+                                    <code>ID</code> attribute, if there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5379,7 +5379,7 @@
                             </td>
                             <td>
                                 <p>The value of the <code>ID</code> attribute of the last child
-                                    element of any type, if there are any </p>
+                                    element of any type, if there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5389,8 +5389,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The content of the first descendant <code>TITLE</code> element if
-                                    there is one</p>
+                                <p>The content of all <code>TITLE</code> descendant elements if
+                                    there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5481,7 +5481,7 @@
             <examples>
                 <example>
                     <pre><code class="language-xml"><![CDATA[<xsl:variable name="title">A really exciting document</xsl:variable>
-<xsl:variable name="backcolor" expr="'#FFFFCC'" />
+<xsl:variable name="backcolor" select="'#FFFFCC'" />
 <xsl:template match="/*">
     <HTML><TITLE><xsl:value-of select="$title"/></TITLE>
     <BODY BGCOLOR='{$backcolor}'>
