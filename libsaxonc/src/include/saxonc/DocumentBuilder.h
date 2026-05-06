@@ -150,12 +150,13 @@ public:
    *
    * @note This behaviour is a bug, but has been present for a number of
    * releases so we are marking this behaviour as deprecated and it will be
-   * fixed in a future release.
+   * fixed in a future release. Please use .setBaseUri() to avoid this
+   * problem.
    *
-   * @deprecated Relative URI resolution does not respect the cwd specified
-   * with SaxonProcessor.setcwd() if no base URI has been set. This behaviour
-   * is deprecated and will be changed in a future release, which will be a
-   * breaking change in certain situations.
+   * @deprecated From 12.10. Relative URI resolution does not respect the cwd
+   * specified with SaxonProcessor.setcwd(). This behaviour is deprecated and
+   * the behaviour of the method will be changed in a future release, which
+   * will be a breaking change if you rely on the buggy behaviour.
    *
    * @param content - the XML document as a serialized string
    * @param encoding - the encoding of the source document string. If not

@@ -440,9 +440,10 @@ public:
    * @note This behaviour is a bug, but has been present for a number of releases so we are
    * marking this behaviour as deprecated and it will be fixed in a future release.
    *
-   * @deprecated Relative URI resolution does not respect the cwd specified with .setcwd().
-   * This behaviour is deprecated and will be changed in a future release, which will
-   * be a breaking change in certain situations.
+   * @deprecated From 12.10. Relative URI resolution does not respect the cwd
+   * specified with .setcwd(). This behaviour is deprecated and the behaviour
+   * of the method will be changed in a future release, which will be a
+   * breaking change if you rely on the buggy behaviour.
    *
    * @param source - the source document as a lexical string
    * @param encoding - the encoding used to decode the source string. If not
