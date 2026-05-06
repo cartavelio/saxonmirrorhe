@@ -15,6 +15,9 @@ saxonj {
   )
   manifestMainClass = "net.sf.saxon.Transform"
   sourceRoot = layout.projectDirectory.dir("../src")
+
+  editionSourceRoots(layout.projectDirectory.dir("src"))
+
   testDataDir = layout.projectDirectory.dir("../../src/test/testdata")
   editionJarExclusions = listOf(
     "**/sql",
