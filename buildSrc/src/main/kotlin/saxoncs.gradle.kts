@@ -12,6 +12,7 @@ import kotlin.text.substring
 
 plugins {
   base
+  id("jvm-ecosystem")
   id("saxon-build")
 }
 
@@ -69,7 +70,7 @@ dependencies {
 
   saxonRuntime("net.sf.saxon:Saxon-HE:12.9")
 
-  transpilerRuntime(project(":csharp:transpiler", "runtimeElements"))
+  transpilerRuntime(project(":csharp:transpiler"))
   transpilerRuntime("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
   transpilerRuntime("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   transpilerRuntime("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
