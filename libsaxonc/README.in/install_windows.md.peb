@@ -1,0 +1,34 @@
+## Installation
+Installation on Windows is a matter of copying the contents of the download `.zip` to a suitable location. We recommend `C:\Program Files\Saxonica\{{model.SaxonCPackage}}\{{model.productVersion}}`
+
+### Setting up the PATH to include the SaxonC DLLs
+If you’re intending to use the pre-compiled binaries, like {{model.binariesSentence}},
+then you need to ensure that they can find all the DLLs they need on your PATH.
+
+There are several ways to do this. The most permanent is by setting them 
+through the Environment Variables control panel -- on Windows 11, the simplest 
+way to locate this is to search for 'Environment variables' in the start menu, 
+or in the Settings panel. "Edit environment variables for your account" should 
+be what you want, unless you have a clear reason to edit the system environment 
+variables instead. Assuming you've unpacked to `C:\Program Files\Saxonica\{{model.SaxonCPackage}}\{{model.productVersion}}`, 
+you'd need to add the following items to the "Path" entry:
+
+    C:\Program Files\Saxonica\{{model.SaxonCPackage}}\{{model.productVersion}}\{{model.binDirName}}\{{model.SaxonCCorePackage}}\bin
+    C:\Program Files\Saxonica\{{model.SaxonCPackage}}\{{model.productVersion}}\{{model.binDirName}}\{{model.SaxonCPackage}}\bin
+
+### Using as a library in your own project
+If you're intending to develop against the C++ API, we do not  currently 
+recommend using the C++ API with the pre-compiled `libsaxonc`, in case of ABI 
+conflict. You should compile `{{model.libsaxonc}}` yourself, and only use the 
+pre-compiled `{{model.libsaxoncCore}}`. If you aren't planning to use the 
+{{model.binariesSentence}} binaries then you can remove the 
+entry for `{{model.SaxonCPackage}}\bin` from your PATH, which will make it 
+less likely that your project will find itself loading the wrong DLL.
+
+If you're intending to develop against the C API, then you can use the pre-compiled `{{model.libsaxonc}}` as well as `{{model.libsaxoncCore}}`, and you can make use of both PATH entries from the previous step.
+
+In either case, you need to ensure that your build system can locate the header files, from `{{model.SaxonCCorePackage}}\include` and (if using the pre-compiled `{{model.libsaxonc}}`) from `{{model.SaxonCPackage}}\include`. 
+
+If you need to compile `libsaxonc` yourself, then what you need to do 
+will depend on your project and its build system. We provide out-of-the-box 
+compatibility with CMake, but using other systems should be straightforward.
