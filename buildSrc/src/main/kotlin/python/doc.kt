@@ -4,8 +4,10 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
@@ -20,6 +22,9 @@ abstract class SphinxDoc @Inject constructor(private val ex: ExecOperations): De
 
   @get:InputDirectory
   abstract val docSrcDir: DirectoryProperty
+
+  @get:Input
+  abstract val overrides: MapProperty<String, String>
 
   @get:Internal
   abstract val docBuildDir: DirectoryProperty
@@ -40,7 +45,9 @@ abstract class SphinxDoc @Inject constructor(private val ex: ExecOperations): De
 
     ex.exec {
       executable(venv.get().venvBinHostedExe("sphinx-build").get())
-      args("-M", "html", docSrcDir.get().asFile, docBuildDir.get().asFile)
+      args("-M", "html")
+      overrides.get().forEach { (k, v) -> args("--define", "${k}=${v}") }
+      args(docSrcDir.get().asFile, docBuildDir.get().asFile)
     }
   }
 }

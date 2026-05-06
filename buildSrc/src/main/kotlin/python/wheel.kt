@@ -176,6 +176,7 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
             exclude(".pytest_cache")
             exclude("**/__pycache__")
             exclude("test")
+            exclude("doc")
         }
     }
 
