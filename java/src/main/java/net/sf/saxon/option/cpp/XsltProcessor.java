@@ -477,31 +477,6 @@ public class XsltProcessor extends SaxonCAPI {
                         } else if (debug) {
                             System.err.println("DEBUG: Type of node Property error.");
                         }
-                    } /*else if (params[i].equals("m")) {
-                        Object value = map.get("m");
-                        if(value instanceof SaxonCMessageListener) {
-                            transformer.setMessageListener((SaxonCMessageListener)value);
-                        } else {
-                            transformer.setMessageListener(new SaxonCMessageListener(cwd, (String)value));
-                        }
-                        transformer.setMessageListener(((XsltProcessor) api).newMessageListener());
-
-                    } */ else if (params[i].equals("resources")) {
-                        char separatorChar = '/';
-                        if (SaxonCAPI.RESOURCES_DIR == null && values[i] instanceof String) {
-                            String dir1 = (String) values[i];
-                            if (!dir1.endsWith("/")) {
-                                dir1 = dir1.concat("/");
-                            }
-                            if (File.separatorChar != '/') {
-                                dir1.replace(separatorChar, File.separatorChar);
-                                separatorChar = '\\';
-                                dir1.replace('/', '\\');
-                            }
-                            SaxonCAPI.RESOURCES_DIR = dir1;
-
-                        }
-
                     } else if (params[i].startsWith("param:")) {
                         String paramName = params[i].substring(6);
                         Object value = values[i];

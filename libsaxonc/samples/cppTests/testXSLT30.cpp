@@ -3319,6 +3319,49 @@ void testThreads2(SaxonProcessor *processor, Xslt30Processor *trans,
   }
 }
 
+XsltExecutable * getXsltExecutable(SaxonProcessor * saxon, const char * stylesheet)
+  {
+    Xslt30Processor * xslt30Processor = saxon->newXslt30Processor();
+    return xslt30Processor->compileFromFile(stylesheet);
+  }
+
+void testSharedExecutable(const std::string *const dataDir,
+                 sResultCount *sresult) {
+  cerr << endl << "testSharedExecutable test" << endl;
+
+  SaxonProcessor * saxon = new SaxonProcessor();
+
+  XsltExecutable * executable = getXsltExecutable(saxon, CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str());
+
+  delete saxon;
+
+  try {
+    for(int i=0; i<5000; i++) {
+      const char * tmpFileWarning = CppTestUtils::concat(2, dataDir->c_str(), "/temp_remove/warnings").c_str();
+      executable->setSaveXslMessage(true, tmpFileWarning);
+      const char * xmlResult = executable->transformFileToString(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
+
+      delete xmlResult;
+
+    }
+    delete executable;
+  } catch (SaxonApiException &e) {
+    const char *emessage = e.getMessage();
+    if (emessage != nullptr) {
+      cerr << "exception=" << emessage << endl;
+    } else {
+      cerr << "exception is nullptr" << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testSharedExecutable");
+      return;
+
+    }
+  }
+}
+
+
+
+
 int main(int argc, char *argv[]) {
   const std::string dataDir = argc > 1 ? string(argv[1]) : string();
 
@@ -3354,7 +3397,7 @@ int main(int argc, char *argv[]) {
   }
   // testValidation(trans,sresult);
 
- /* testInitialTemplate(processor, trans, sresult);
+  testInitialTemplate(processor, trans, sresult);
 
   cout << endl
        << "============================================================="
@@ -3689,7 +3732,14 @@ int main(int argc, char *argv[]) {
      << endl
      << endl;
 
-  testCallSystemFunction(processor, sresult); */
+  testSharedExecutable(&dataDir, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testCallSystemFunction(processor, sresult);
   cout << endl
      << "============================================================="
      << endl

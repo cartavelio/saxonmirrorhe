@@ -383,13 +383,13 @@ public:
   /**
    * Get the SaxonProcessor which created this XPathProcessor.
    */
-  SaxonProcessor* getSaxonProcessor() { return proc; }
+  SaxonProcessor* getSaxonProcessor() ;
 
 private:
   void createException(const char *message = nullptr);
 
 
-  SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this XPathProcessor */
+  int64_t procRef; /*!< Pointer to the SaxonProcessor object which created this XPathProcessor */
   std::string cwdXP;    /*!< Current working directory */
   char *xp_baseURI;
   // jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI

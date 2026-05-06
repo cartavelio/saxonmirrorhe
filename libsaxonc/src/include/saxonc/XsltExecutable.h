@@ -572,7 +572,7 @@ public:
   /**
    * Get the SaxonProcessor which created this XsltExecutable.
    */
-  SaxonProcessor* getSaxonProcessor() { return proc; }
+  SaxonProcessor* getSaxonProcessor();
 
 
 private:
@@ -587,7 +587,7 @@ private:
    * @param proc - pointer to the SaxonProcessor object
    * @param cwd - the current working directory
    */
-  XsltExecutable(SaxonProcessor *proc, int64_t exObject, std::string cwd,
+  XsltExecutable(int64_t procRef, int64_t exObject, std::string cwd,
                  std::string resources);
 
   /**
@@ -599,7 +599,7 @@ private:
 
   void setParameter(const char *name, XdmValue *value, bool withParam);
 
-  SaxonProcessor *proc; /*! Pointer to the SaxonProcessor object which created this XsltExecutable */
+  //SaxonProcessor *proc; /*! Pointer to the SaxonProcessor object which created this XsltExecutable */
                         // jclass  cppClass;
   // jclass messageListenerClass, resultDocumentClass;
   int64_t procRef, executableRef, selectionRef, saxonMessageListenerRef,

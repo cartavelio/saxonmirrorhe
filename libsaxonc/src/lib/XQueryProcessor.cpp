@@ -29,14 +29,27 @@ XQueryProcessor::~XQueryProcessor() {
   }
   cwdXQ.erase();
   exceptionClear();
+  if (procRef != SXN_UNSET) {
+    j_handles_destroy(thread,
+                      (void *)procRef);
+    procRef = SXN_UNSET;
+  }
+}
+
+SaxonProcessor* XQueryProcessor::getSaxonProcessor() {
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  bool licensed = j_isLicensed(thread, (void *)procRef);
+  int64_t newProcRef = j_copy_handles(thread, (void *)procRef);
+  SaxonProcessor * processor = new SaxonProcessor(newProcRef, licensed);
+  processor->setcwd(cwdXQ.c_str());
+  return processor;
 }
 
 XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
-  proc = p;
   exception = nullptr;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  cppXQ = j_createXQueryEngineWithProcessor(thread,
-                                            (void *)p->procRef);
+  procRef = j_copy_handles(thread, (void *)p->procRef);
+  cppXQ = j_createXQueryEngineWithProcessor(thread,(void *)procRef);
   if (cppXQ == SXN_UNSET) {
     throw SaxonApiException(
         "Error: Failed to create the XPathProcessor internal object");
@@ -44,8 +57,8 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
     throw SaxonApiException();
   }
 
-  if (!(proc->cwd.empty()) && curr.empty()) {
-    cwdXQ = proc->cwd;
+  if (!(p->cwd.empty()) && curr.empty()) {
+    cwdXQ = p->cwd;
   } else {
     cwdXQ = curr;
   }
@@ -53,8 +66,8 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
 
 XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
   cwdXQ = other.cwdXQ;
-  proc = other.proc;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  procRef = j_copy_handles(thread, (void *)other.procRef);
   cppXQ = j_copy_handles(thread, (void *)other.cppXQ);
   if(cppXQ == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -246,14 +259,13 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
                                          const char *ofilename,
                                          const char *query,
                                          const char *encoding) {
-  setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
-  int64_t status = j_executeQueryToFile(thread, (void *)proc->procRef,
+  int64_t status = j_executeQueryToFile(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
@@ -271,14 +283,13 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
 XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
                                                const char *query,
                                                const char *encoding) {
-  setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
-  int64_t result = j_executeQueryToValue(thread, (void *)proc->procRef,
+  int64_t result = j_executeQueryToValue(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
@@ -298,7 +309,6 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
 const char *XQueryProcessor::executeQueryToString(const char *infilename,
                                                   const char *query,
                                                   const char *encoding) {
-  setProperty("resources", proc->getResourcesDirectory());
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
@@ -306,7 +316,7 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
-  char *result = j_executeQueryToString(thread, (void *)fn, (void *)proc->procRef,
+  char *result = j_executeQueryToString(thread, (void *)fn, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));
@@ -368,7 +378,9 @@ void XQueryProcessor::exceptionClear() {
 }
 
 bool XQueryProcessor::exceptionOccurred() {
-  return proc->exceptionOccurred() || exception != nullptr;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  bool exceptionOccurred = (bool)j_checkForException(thread);
+  return exceptionOccurred || exception != nullptr;
 }
 
 const char *XQueryProcessor::getErrorCode() {
@@ -386,12 +398,7 @@ const char *XQueryProcessor::getErrorMessage() {
 }
 
 const char *XQueryProcessor::checkException() {
-  /*if(proc->exception == nullptr) {
-          proc->exception =
-  proc->checkForException(SaxonProcessor::sxn_environ->env, cppClass, cppXQ);
-  }
-  return proc->exception;*/
-  return proc->checkException();
+  return nullptr;
 }
 
 SaxonApiException *XQueryProcessor::getException() { return exception; }
@@ -402,7 +409,7 @@ void XQueryProcessor::createException(const char *message) {
     exception = nullptr;
   }
   if (message == nullptr) {
-    // exception = proc->checkAndCreateException(cppClass);
+
   } else {
     exception = new SaxonApiException(message);
   }
