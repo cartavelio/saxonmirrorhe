@@ -92,6 +92,9 @@ public class StringTool {
             // No surrogate pairs
             return new BMPString(chars.toString());
         } else {
+            if (uLength > Integer.MAX_VALUE/3) {
+                throw new UnsupportedOperationException("Non-BMP string (length " + uLength + ") exceeds Saxon limits");
+            }
             byte[] triples = new byte[uLength * 3];
             for (int i = 0, j = 0; i < chars.length(); i++) {
                 char c = chars.charAt(i);

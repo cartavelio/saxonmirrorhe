@@ -29,12 +29,12 @@ import java.util.Properties;
  * An ExpandedStreamResult is similar to a StreamResult, and is created from a StreamResult. It contains
  * methods to construct a Writer from an OutputStream, and an OutputStream from a File or URI, and
  * (unlike StreamResult) its getWriter() and getOutputStream() methods can therefore be used whether
- * or not the writer and outputstream were explicitly set.
+ * or not the writer and outputStream were explicitly set.
  */
 public class ExpandedStreamResult {
 
     private final Configuration config;
-    private Properties outputProperties;
+    private final Properties outputProperties;
     private final String systemId;
     private Writer writer;
     private OutputStream outputStream;
@@ -57,9 +57,7 @@ public class ExpandedStreamResult {
             encoding = "UTF16";
         }
 
-        if (characterSet == null) {
-            characterSet = config.getCharacterSetFactory().getCharacterSet(encoding);
-        }
+        characterSet = config.getCharacterSetFactory().getCharacterSet(encoding);
 
         String byteOrderMark = outputProperties.getProperty(SaxonOutputKeys.BYTE_ORDER_MARK);
         if ("no".equals(byteOrderMark) && "UTF16".equals(encoding)) {
@@ -82,6 +80,9 @@ public class ExpandedStreamResult {
 
     public UnicodeWriter obtainUnicodeWriter() throws XPathException {
         if (writer != null) {
+            if (writer instanceof UnicodeWriter) {
+                return (UnicodeWriter)writer;
+            }
             return new UnicodeWriterToWriter(writer);
         } else {
             OutputStream os = obtainOutputStream();

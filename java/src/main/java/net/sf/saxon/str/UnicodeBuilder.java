@@ -9,18 +9,20 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
  * Builder class to construct a UnicodeString by appending text incrementally
  */
 
-public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
+@CSharpInjectMembers(code = {"public override System.Text.Encoding Encoding { get => System.Text.Encoding.UTF8; }"})
+
+public final class UnicodeBuilder extends java.io.Writer implements UniStringConsumer, UnicodeWriter {
 
     // The data held by the UnicodeBuilder is in two parts: an archive part
     // of arbitrary length, held as a ZenoString, and an active part which
@@ -374,6 +376,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
         return append(chars);
     }
 
+
     @Override
     public void write(UnicodeString chars) {
         append(chars);
@@ -386,7 +389,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * @param content byte array holding ASCII characters only
      */
     @Override
-    public void writeAscii(byte[] content) throws IOException {
+    public void writeAscii(byte[] content) {
         accept(new Twine8(content));
     }
 
@@ -394,16 +397,25 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * Process a supplied string
      *
      * @param chars the characters to be processed
-     * @throws IOException if processing fails for any reason
      */
     @Override
-    public void write(String chars) throws IOException {
+    public void write(String chars) {
         append(chars);
     }
 
     public void trimToSize() {
         // used from bytecode
         codepoints = Arrays.copyOf(codepoints, used);
+    }
+
+    @Override
+    public void write(char[] cbuf, int off, int len) {
+        write(new String(cbuf, off, len));
+    }
+
+    @Override
+    public void flush() {
+        // no action
     }
 
     /**

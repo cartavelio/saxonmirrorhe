@@ -25,6 +25,8 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.StylesheetCache;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -32,15 +34,14 @@ import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.wrapper.RebasedDocument;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.*;
+import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -1212,7 +1213,7 @@ public class TransformFn extends SystemFunction implements Callable {
     private static class SerializedDeliverer extends Deliverer {
         private final Processor processor;
         private final Map<String, GroundedValue> results = new ConcurrentHashMap<>();
-        private StringWriter primaryWriter;
+        private UnicodeBuilder primaryWriter;
 
         public SerializedDeliverer(Processor processor) {
             this.processor = processor;
@@ -1221,14 +1222,14 @@ public class TransformFn extends SystemFunction implements Callable {
         @Override
         public Destination getPrimaryDestination(MapItem serializationParamsMap) throws XPathException {
             Serializer serializer = makeSerializer(processor, serializationParamsMap);
-            primaryWriter = new StringWriter();
+            primaryWriter = new UnicodeBuilder();
             serializer.setOutputWriter(primaryWriter);
             return serializer;
         }
 
         @Override
         public Sequence getPrimaryResult() throws XPathException {
-            String str = primaryWriter.toString();
+            UnicodeString str = primaryWriter.toUnicodeString();
             if (str.isEmpty()) {
                 return null;
             }
@@ -1241,13 +1242,13 @@ public class TransformFn extends SystemFunction implements Callable {
             if (absolute.getScheme().equals(dummyBaseOutputUriScheme)) {
                 throw new XPathException("The location of output documents is undefined: use the transform option base-output-uri", "FOXT0002");
             }
-            StringWriter writer = new StringWriter();
+            UnicodeBuilder writer = new UnicodeBuilder();
             Serializer serializer = makeSerializer(processor, null);
             serializer.setCharacterMap(properties.getCharacterMapIndex());
             serializer.setOutputWriter(writer);
             serializer.onClose(() -> {
                 try {
-                    GroundedValue result = postProcess(absolute.toASCIIString(), new StringValue(writer.toString()));
+                    GroundedValue result = postProcess(absolute.toASCIIString(), new StringValue(writer.toUnicodeString()));
                     results.put(absolute.toASCIIString(), result);
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);
