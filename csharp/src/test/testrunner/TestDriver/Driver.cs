@@ -159,10 +159,6 @@ namespace TestDriver {
                     testSuiteDir = testSuiteDir.Substring(0, testSuiteDir.Length - 1);
                 }
 
-                System.Environment.SetEnvironmentVariable("expath.base.directory", testSuiteDir + "/file");
-
-                
-
                 string catalogFile = "catalog.xml";
                 string specStr = null;
 
@@ -622,6 +618,20 @@ namespace TestDriver {
                         }
                     }
                 }
+            }
+
+            var envToRemove = new HashSet<string>();
+            foreach (var key in localEnvironments.Keys)
+            {
+                var env =  localEnvironments[key];
+                if (env.Cleanup()) {
+                    envToRemove.Add(key);
+                }
+            }
+
+            foreach (var key in envToRemove)
+            {
+                localEnvironments.Remove(key);
             }
 
             writeTestSetEndElement();
