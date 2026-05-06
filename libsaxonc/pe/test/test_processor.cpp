@@ -14,20 +14,24 @@
 using namespace std;
 using Catch::Matchers::Equals;
 
-TEST_CASE("EE licensed Processor reports it's PE", "[processor][pe]") {
-    SaxonProcessor *processor = new SaxonProcessor(true);
+TEST_CASE( "SaxonProcessor.getSaxonEdition()", "[processor][pe]" ) {
+    SaxonProcessor *processor;
 
-    REQUIRE_THAT( processor->getSaxonEdition(), Equals("PE") );
+    GIVEN( "An unlicensed processor" ) {
+        processor = new SaxonProcessor(false);
 
-    delete processor;
-    processor->release();
-    delete SaxonProcessor::sxn_environ;
-}
+        THEN( "the edition is reported as HE" ) {
+            REQUIRE_THAT( processor->getSaxonEdition(), Equals("HE") );
+        }
+    }
 
-TEST_CASE("Unlicensed Processor reports it's HE", "[processor][pe]") {
-    SaxonProcessor *processor = new SaxonProcessor(false);
+    GIVEN( "A licensed processor" ) {
+        processor = new SaxonProcessor(true);
 
-    REQUIRE_THAT( processor->getSaxonEdition(), Equals("HE") );
+        THEN( "the edition is reported as PE" ) {
+            REQUIRE_THAT( processor->getSaxonEdition(), Equals("PE") );
+        }
+    }
 
     delete processor;
     processor->release();

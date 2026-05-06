@@ -24,7 +24,7 @@ const std::string path_sep = "/";
 using namespace std;
 using Catch::Matchers::ContainsSubstring;
 
-SCENARIO( "SchemaValidator.registerSchemaFromString(): resolving relative URIs" ) {
+TEST_CASE( "SchemaValidator.registerSchemaFromString() relative URI resolution" ) {
     string srcfile = string(__FILE__);
     auto last_path_sep = srcfile.find_last_of(path_sep);
     auto base_wd = srcfile.substr(0, last_path_sep) + path_sep + "test_data";
