@@ -391,10 +391,11 @@ public class PatternParser extends XPathParser {
     /*@NotNull*/
     @Override
     public Expression parseFunctionCall(Expression prefixArgument) throws XPathException {
+        int offset = t.currentTokenStartOffset;
         Expression fn = super.parseFunctionCall(prefixArgument);
         if (inPredicate <= 0 && !fn.isCallOn(SuperId.class) && !fn.isCallOn(KeyFn.class) &&
                 !fn.isCallOn(Doc.class) && !fn.isCallOn(Root_1.class)) {
-            grumble("The " + fn + " function is not allowed at the head of a pattern");
+            grumble("The " + fn + " function is not allowed at the head of a pattern", "XTSE0340", offset);
         }
         return fn;
     }
