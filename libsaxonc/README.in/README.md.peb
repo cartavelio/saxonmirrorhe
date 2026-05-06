@@ -98,15 +98,15 @@ repository.
 
 [saxonc-resources]: https://github.com/Saxonica/saxonc-resources
 
-Full documentation for SaxonC 12 is available. The [SaxonC 12  documentation][]
+Full documentation for {{ model.productName }} {{ model.majorProductVersion }} is available. The [SaxonC {{ model.majorProductVersion }} documentation][]
 contains information specific to SaxonC - including instructions for installing
 and configuring the product, details of the SaxonC C/C++ API, PHP API and
-Python3 API, and sample code. Meanwhile, the main [Saxon 12 documentation][]
+Python3 API, and sample code. Meanwhile, the main [Saxon {{ model.majorProductVersion }} documentation][]
 contains further information relevant to SaxonC.
 
-[SaxonC 12 documentation]: https://www.saxonica.com/saxon-c/documentation12/index.html
+[SaxonC {{ model.majorProductVersion }} documentation]: {{ model.saxonCDocumentationUrl }}
 
-[Saxon 12 documentation]: https://www.saxonica.com/documentation12/index.html
+[Saxon {{ model.majorProductVersion }} documentation]: {{ model.saxonDocumentationUrl }}
 
 For further information, see the [SaxonC web page][]. For bug reporting,
 lists of known bugs, and help forums, please visit
