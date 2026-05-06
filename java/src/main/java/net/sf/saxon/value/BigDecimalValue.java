@@ -7,9 +7,11 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.ma.map.BigDecimalMapKey;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
@@ -46,6 +48,7 @@ public final class BigDecimalValue extends DecimalValue {
     public static final BigDecimalValue ONE = new BigDecimalValue(BigDecimal.valueOf(1));
     public static final BigDecimalValue TWO = new BigDecimalValue(BigDecimal.valueOf(2));
     public static final BigDecimalValue THREE = new BigDecimalValue(BigDecimal.valueOf(3));
+    public static final BigDecimal MIN_INT = BigDecimal.valueOf(Integer.MIN_VALUE);
     public static final BigDecimal MAX_INT = BigDecimal.valueOf(Integer.MAX_VALUE);
 
     /**
@@ -311,6 +314,34 @@ public final class BigDecimalValue extends DecimalValue {
     public BigDecimal getDecimalValue() {
         return value;
     }
+
+    /**
+     * Get a value whose {@code equals()} and {@code hashcode()} methods follows the "same key"
+     * rules for comparing the keys of a map. For numeric values, this is done as follows:
+     * <ul>
+     *     <li>For NaN, return {@code AtomicSortComparer.COLLATION_KEY_NaN;}</li>
+     *     <li>For +INF and -INF, call {@code java.lang.Double.hashcode()}</li>
+     *     <li>For any value that is numerically equal to some 32-bit signed integer, return
+     *         a {@link net.sf.saxon.ma.map.Int32MapKey}</li>
+     *     <li>For any other value, return a {@link net.sf.saxon.ma.map.BigDecimalMapKey}</li>
+     * </ul>
+     *
+     * @return a value with the property that the {@code equals()} and {@code hashcode()} methods follow the rules for comparing
+     * keys in maps.
+     */
+
+    @Override
+    public AtomicMatchKey asMapKey() {
+        if (isWholeNumber() && value.compareTo(MIN_INT) >= 0 && value.compareTo(MAX_INT) <= 0) {
+            try {
+                return new net.sf.saxon.ma.map.Int32MapKey((int) longValue());
+            } catch (XPathException e) {
+                throw new AssertionError(e);
+            }
+        }
+        return new BigDecimalMapKey(value);
+    }
+
 
     /**
      * Get the hashCode. This must conform to the rules for other NumericValue hashcodes
