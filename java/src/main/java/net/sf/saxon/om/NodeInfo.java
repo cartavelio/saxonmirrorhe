@@ -202,10 +202,11 @@ public interface NodeInfo extends Item, Location
      * stylesheets and schema documents. Line numbering can be requested using the
      * -l option on the command line, or by setting options on the TransformerFactory
      * or the Configuration before the source document is built.
-     * <p>The granularity of line numbering is normally the element level: for other nodes
-     * such as text nodes and attributes, the line number of the parent element will normally be returned.</p>
+     * <p>Location information is maintained for element, text, comment, and processing instruction
+     * nodes.</p>
      * <p>In the case of a tree constructed by taking input from a SAX parser, the line number will reflect the
-     * SAX rules: that is, the line number of an element is the line number where the start tag ends. This
+     * SAX rules. This means that the line number of an element is the line number where the start tag ends,
+     * and the line number of a text node is the line where the text node ends. This
      * may be a little confusing where elements have many attributes spread over multiple lines, or where
      * single attributes (as can easily happen with XSLT 2.0 stylesheets) occupy several lines.</p>
      * <p>In the case of a tree constructed by a stylesheet or query, the line number may reflect the line in
@@ -227,12 +228,14 @@ public interface NodeInfo extends Item, Location
      * Get column number. Column numbers are not maintained by default. Column numbering
      * can be requested in the same way as line numbering; but a tree implementation can ignore
      * the request.
-     * <p>The granularity of column numbering is normally the element level: for other nodes
-     * such as text nodes and attributes, the line number of the parent element will normally be returned.</p>
+     * <p>Location information is maintained for element, text, comment, and processing instruction
+     * nodes.</p>
      * <p>In the case of a tree constructed by taking input from a SAX parser, the column number will reflect the
-     * SAX rules: that is, the column number of an element is the column number where the start tag ends. This
+     * SAX rules. This means that the location of an element is the location where the start tag ends,
+     * and the location of a text node is the location where the text node ends. This
      * may be a little confusing where elements have many attributes spread over multiple lines, or where
      * single attributes (as can easily happen with XSLT 2.0 stylesheets) occupy several lines.</p>
+     * * single attributes (as can easily happen with XSLT 2.0 stylesheets) occupy several lines.</p>
      * <p>In the case of a tree constructed by a stylesheet or query, the column number may reflect the line in
      * the stylesheet or query that caused the node to be constructed.</p>
      * <p>The column number can be read from within an XPath expression using the Saxon extension function
