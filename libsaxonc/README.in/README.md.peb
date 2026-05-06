@@ -51,10 +51,29 @@ integrate it into your project:
 
 That will automatically use the `{{ model.SaxonCCorePackage }}` bundled as
 part of the `.zip` (which we assumed you unzipped to
-`{{ model.installPrefix }}` in the example). If you need to use different
-SaxonCCore, for example when you're cross-compiling, then you need to specify
-where CMake can find that version, and then prevent it from using the bundled
-version:
+`{{ model.installPrefix }}` in the example). If you need to use a different
+`{{ model.SaxonCCorePackage }}`, for example, if you're cross-compiling, then you
+need to specify where CMake can find that version, and prevent it from using
+the bundled version. To do that, you can set the `NO_BUNDLED_SAXONC_CORE` CMake
+variable to `TRUE` and then you have to manually make a version of
+`{{ model.SaxonCCorePackage }}` available to CMake.
+
+Here's a minimal example that assumes you have already made a `{{ model.SaxonCCorePackage }}`
+package visible to CMake:
+
+    # We have a non-standard {{ model.libsaxoncCore }} on CMake's search path,
+    # but are using the C/C++ sources from the release version
+
+    include(FetchContent)
+    FetchContent_Declare(
+        SaxonCHE
+        URL "{{ model.cmakeCompatInstallPath }}"
+        SOURCE_SUBDIR src
+    )
+    set(NO_BUNDLED_SAXONC_CORE TRUE)
+    FetchContent_MakeAvailable({{ model.SaxonCPackage }})
+
+And this is a more complete example showing cross-compilation on Linux:
 
     # Assume we are compiling on a Linux x86_64 host and have downloaded an Arm64
     # version of SaxonCCore to /opt/saxonica/{{ model.SaxonCPackage }}-linux-arm64-{{ model.productVersion | replace({'.': '-'}) }},
@@ -72,7 +91,6 @@ version:
         list(APPEND CMAKE_PREFIX_PATH "/opt/saxonica/{{ model.SaxonCPackage }}-linux-arm64-{{ model.productVersion | replace({'.': '-'}) }}")
     endif()
     FetchContent_MakeAvailable({{ model.SaxonCPackage }})
-
 
 ## Other resources
 SaxonC-specific samples can be found at the [saxonc-resources][] GitHub
