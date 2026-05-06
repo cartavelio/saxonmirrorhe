@@ -37,6 +37,15 @@ val libsaxoncDebugArtifactsBucket by configurations.dependencyScope("libsaxoncDe
 val libsaxoncDebugArtifactsDir by configurations.resolvable("libsaxoncDebugArtifactsDir") {
     extendsFrom(libsaxoncDebugArtifactsBucket)
 }
+val libsaxoncCoreReleaseArtifactsBucket by configurations.dependencyScope("libsaxoncCoreReleaseArtifactsBucket")
+val libsaxoncCoreReleaseArtifactsDir by configurations.resolvable("libsaxoncCoreReleaseArtifactsDir") {
+    extendsFrom(libsaxoncCoreReleaseArtifactsBucket)
+}
+val libsaxoncCoreDebugArtifactsBucket by configurations.dependencyScope("libsaxoncCoreDebugArtifactsBucket")
+val libsaxoncCoreDebugArtifactsDir by configurations.resolvable("libsaxoncCoreDebugArtifactsDir") {
+    extendsFrom(libsaxoncCoreDebugArtifactsBucket)
+}
+
 val saxonCSampleDataBucket by configurations.dependencyScope("saxonCSampleDataBucket")
 val saxonCSampleData by configurations.resolvable("saxonCSampleData") {
     extendsFrom(saxonCSampleDataBucket)
@@ -54,6 +63,12 @@ dependencies {
     })
     libsaxoncDebugArtifactsBucket(extension.edition.map { edition ->
         project(path = ":libsaxonc:${edition}", configuration = "debugArtifactsDir")
+    })
+    libsaxoncCoreReleaseArtifactsBucket(extension.edition.map { edition ->
+        project(path = ":libsaxonc-core:${edition}", configuration = "releaseCMakePackageDir")
+    })
+    libsaxoncCoreDebugArtifactsBucket(extension.edition.map { edition ->
+        project(path = ":libsaxonc-core:${edition}", configuration = "debugCMakePackageDir")
     })
     saxonCSampleDataBucket(extension.edition.map { edition ->
         project(path = ":libsaxonc:${edition}", configuration = "sampleData")
@@ -124,6 +139,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
         buildDir = buildDirectory.map { it.dir("release") }
         platformTagTask = releaseWheelPlatformTagTask
         libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
+        libsaxoncCoreDir = libsaxoncCoreReleaseArtifactsDir.elements
     }
 
     val installDevWheel = tasks.register<InstallLocalWheel>("install_${v}_release_wheel") {
@@ -214,6 +230,7 @@ val repairDevWheel = wheelTasksBuilder {
     buildDir = layout.buildDirectory
     platformTagTask = devWheelPlatformTagTask
     libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
+    libsaxoncCoreDir = libsaxoncCoreReleaseArtifactsDir.elements
 }
 
 val repairDevDebugWheel = wheelTasksBuilder {
@@ -224,6 +241,7 @@ val repairDevDebugWheel = wheelTasksBuilder {
     buildDir = layout.buildDirectory
     platformTagTask = devWheelDebugPlatformTagTask
     libsaxoncDir = libsaxoncDebugArtifactsDir.elements
+    libsaxoncCoreDir = libsaxoncCoreDebugArtifactsDir.elements
 }
 
 val installDevWheel = tasks.register<InstallLocalWheel>("install_wheel") {
