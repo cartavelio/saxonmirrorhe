@@ -816,7 +816,7 @@
       <h1>Comparisons</h1>
 
 
-      <p>The simplest comparison operators are <code>eq</code>, <code>ne</code>, <code>lt</code>
+      <p>The simplest comparison operators are <code>eq</code>, <code>ne</code>, <code>lt</code>,
          <code>le</code>, <code>gt</code>, and <code>ge</code>. These compare two atomic values of
          the same type, for example two integers, two dates, or two strings. In the case of strings,
          the default collation is used (this can be set using the configuration property

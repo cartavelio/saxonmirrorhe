@@ -529,6 +529,12 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>Tests whether the first sequence contains the second as a subsequence; items are compared using the supplied
       comparison function, which can be defaulted.</p>
+      
+      <kbd>fn:decode-from-uri(
+         $value	as xs:string?	
+         ) as xs:string</kbd>
+      
+      <p>Decodes URI-escaped characters in a string. Available from Saxon 12.4.</p>
 
       <kbd>fn:ends-with-sequence(
          $input	as item()*,	
