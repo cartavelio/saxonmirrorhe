@@ -229,6 +229,10 @@ abstract class SignedArtifactDownloadTask: AbstractS3ArtifactHandlingTask() {
       }
       if (response.hasMessages()) {
         response.messages().filter { it.hasMessageAttributes() }.filter { it.messageAttributes()["jobId"]!!.stringValue() == jobId }.forEach { message ->
+          if (message.messageAttributes().contains("error")) {
+            logger.error(message.body())
+            throw GradleException("package signing failed!")
+          }
           return message
         }
       }
@@ -244,6 +248,7 @@ abstract class SignedArtifactDownloadTask: AbstractS3ArtifactHandlingTask() {
     objects.map { obj ->
       val target = targetFilePath(obj)
       target.get().asFile.parentFile.mkdirs()
+      logger.info("Downloading [{} / {}]", commonPrefix, obj)
       downloadRequest(commonPrefix, obj, target)
     }.map { req ->
       transferManager.downloadFile(req)
