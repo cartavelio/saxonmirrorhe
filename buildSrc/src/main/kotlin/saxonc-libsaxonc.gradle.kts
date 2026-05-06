@@ -1,8 +1,10 @@
 import com.saxonica.build.LifecycleTasks
+import com.saxonica.build.TemplatedDocTask
 import com.saxonica.build.cpp.CMakeBuildTask
 import com.saxonica.build.cpp.CMakeGeneratorTask
 import com.saxonica.build.cpp.CMakeInstallTask
 import com.saxonica.build.cpp.DoxygenTask
+import com.saxonica.build.doc.SaxonCReadme
 import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.*
 import java.nio.file.Files
@@ -25,6 +27,7 @@ extension.package_file_name.convention(extension.package_name.map { name ->
     val (os, arch) = saxonBuild.targetHost.get()
     "${name}-${os}-${arch}-${saxonBuild.hyphenatedVersion.get()}"
 })
+extension.binaries.addAll("Transform", "Query")
 val saxonCCoreReleaseCMakePackageBucket by configurations.dependencyScope("saxonCCoreReleaseCMakePackageBucket")
 val saxonCCoreReleaseCMakePackageDir by configurations.resolvable("saxonCCoreReleaseCMakePackageDir") {
     extendsFrom(saxonCCoreReleaseCMakePackageBucket)
@@ -275,16 +278,37 @@ fun CopySpec.fromPreservingSymlinks(sourceDir: Provider<File>, dest: java.nio.fi
     }
 }
 
-val relaseFolderTmpDir = packagedDir.map { it.dir("tmp") }
-val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder") {
-    val dest = relaseFolderTmpDir.map { it.dir(extension.package_file_name.get()) }.get().asFile.toPath()
-    val replaceTokens = mapOf(
+fun replaceTokens(): Map<String, String> {
+    return mapOf(
         "edition" to extension.edition.get(),
         "EDITION" to extension.edition.map { it.uppercase() }.get(),
         "version" to saxonBuild.version.get(),
         "platform" to saxonBuild.targetHost.get().platform,
         "architecture" to saxonBuild.targetHost.get().architecture,
     )
+}
+
+val readmeDir = layout.buildDirectory.dir("release-readme")
+
+val editionReadmeTemplateDir = layout.projectDirectory.dir("README.in")
+val readmeTask = tasks.register<TemplatedDocTask>("readme") {
+    templateRoot = layout.projectDirectory.dir("../README.in")
+    if (editionReadmeTemplateDir.asFile.exists()) {
+        editionTemplateRoot = editionReadmeTemplateDir
+    }
+    template = "README.md.peb"
+    renderedDoc = readmeDir.map { it.file("README.md") }
+    model = SaxonCReadme(
+        productVersion = saxonBuild.version.get(),
+        edition = extension.edition.get(),
+        host = saxonBuild.targetHost.get(),
+        binaries = extension.binaries.get().toTypedArray()
+    )
+}
+
+val relaseFolderTmpDir = packagedDir.map { it.dir("tmp") }
+val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder") {
+    val dest = relaseFolderTmpDir.map { it.dir(extension.package_file_name.get()) }.get().asFile.toPath()
 
     // set root destination dir
     into(dest)
@@ -294,7 +318,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
         from(layout.projectDirectory.dir("../source-cmake-distro")) {
             include("CMakeLists.txt.in")
             rename { "CMakeLists.txt" }
-            filter<ReplaceTokens>("tokens" to replaceTokens)
+            filter<ReplaceTokens>("tokens" to replaceTokens())
         }
         from(layout.projectDirectory.dir("../cmake")) {
             into("cmake")
@@ -321,10 +345,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
             into("include")
         }
 
-        from(layout.projectDirectory.dir("../")) {
-            include("README.md")
-            filter<ReplaceTokens>("tokens" to replaceTokens)
-        }
+        from(readmeTask.map { it.outputs.files })
 
         into("lib") {
             from(generator.map { it.outputFiles.get() }) {
@@ -369,7 +390,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
         from(layout.projectDirectory.dir("../samples")) {
             include("CMakeLists.txt.in")
             rename { _ -> "CMakeLists.txt" }
-            filter<ReplaceTokens>("tokens" to replaceTokens)
+            filter<ReplaceTokens>("tokens" to replaceTokens())
         }
     }
 
@@ -378,11 +399,7 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
         from(pythonSamples.elements.map { it.first() })
     }
 
-    // README
-    from(layout.projectDirectory.dir("../")) {
-        include("README.md")
-        filter<ReplaceTokens>("tokens" to replaceTokens)
-    }
+    from(readmeTask.map { it.outputs.files })
 }
 
 val packagedZip = packagedDir.map { it.file("${extension.package_file_name.get()}.zip") }

@@ -3,6 +3,7 @@ import com.saxonica.build.java.BranchInfo
 import com.saxonica.build.java.JarTaskBuilder
 import com.saxonica.build.java.JarTaskBuilder.SaxonJarTasks
 import com.saxonica.build.AsInput
+import com.saxonica.build.doc.SaxonCReadme
 import com.saxonica.build.python.PythonVersion
 import com.saxonica.build.python.PythonVersions
 import org.gradle.api.Action
@@ -268,6 +269,7 @@ interface SaxonCExtension {
     abstract val edition: Property<String>
     abstract val package_name: Property<String>
     abstract val package_file_name: Property<String>
+    abstract val binaries: ListProperty<String>
 }
 
 interface SaxonCPythonExtension {
