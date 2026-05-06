@@ -147,7 +147,7 @@ val preprocessJava = tasks.register<PreprocessSourcesTask>("preprocessJava") {
   }
 }
 
-val jarFinder = JarFinder(configurations.named("transpiler").get())
+val jarFinder = JarFinder(transpilerClasspath)
 
 val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
   group = LifecycleBasePlugin.BUILD_GROUP
