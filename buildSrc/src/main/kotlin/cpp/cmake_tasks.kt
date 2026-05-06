@@ -48,3 +48,52 @@ abstract class CMakeGeneratorTask @Inject constructor(private val ex: ExecOperat
     }
   }
 }
+
+abstract class CMakeBuildTask @Inject constructor(private val ex: ExecOperations, private val layout: ProjectLayout) : DefaultTask() {
+  @get:Internal
+  abstract val buildPath: DirectoryProperty
+
+  @get:InputFiles
+  val cMakeInputFiles: ConfigurableFileCollection = project.objects.fileCollection()
+
+  @get:InputFile
+  val cMakeListsFile = project.file(layout.projectDirectory.file("CMakeLists.txt"))
+
+  @get:Input
+  abstract val configuration: Property<String>
+
+  @get:OutputDirectory
+  val outputDir = buildPath.map { it.dir(configuration.get()) }
+
+  @TaskAction
+  fun build() {
+    ex.exec {
+      workingDir = layout.projectDirectory.asFile
+      executable = "cmake"
+      args("--build", buildPath.get().asFile.toString(), "--config", configuration.get())
+    }
+  }
+}
+
+abstract class CMakeInstallTask @Inject constructor(private val ex: ExecOperations, private val layout: ProjectLayout) : DefaultTask() {
+  @get:InputFiles
+  abstract val buildFiles: ConfigurableFileCollection
+
+  @get:Internal
+  abstract val buildDir: DirectoryProperty
+
+  @get:Input
+  abstract val configuration: Property<String>
+
+  @get:OutputDirectory
+  abstract val stagingDir: DirectoryProperty
+
+  @TaskAction
+  fun install() {
+    ex.exec {
+      workingDir = layout.projectDirectory.asFile
+      executable = "cmake"
+      args("--install", buildDir.get().asFile.toString(), "--config", configuration.get(), "--prefix", stagingDir.get().asFile.toString())
+    }
+  }
+}

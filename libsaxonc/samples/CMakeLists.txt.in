@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-set(SaxonC@EDITION@_DIR ../SaxonC@EDITION@/lib/cmake/SaxonC@EDITION@)
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../@platform@-@architecture@")
+
 find_package(SaxonC@EDITION@ @version@ EXACT REQUIRED)
 
 add_executable(CTestXPath cTests/testXPath.c)

@@ -1,4 +1,4 @@
-README document for SaxonC-@EDITION@ @VERSION@:
+README document for SaxonC-@EDITION@ @version@:
 
 SaxonC-@EDITION@ is a compiled variant of Saxon from the Java
 platform to the C/C++ platform using GraalVM native-image.
