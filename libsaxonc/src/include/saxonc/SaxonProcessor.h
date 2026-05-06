@@ -429,6 +429,21 @@ public:
 
   /**
    * Parse a lexical representation of a source XML document and return it as an XdmNode.
+   *
+   * @note This method is not well suited to parsing complex documents which require URI
+   * resolution to be performed during parsing, for example if external entities are
+   * present. Any relative URI resolution will take place against the working directory
+   * of the controlling process, and not the cwd specified with .setcwd(). We recommend
+   * that you use .createDocumentBuilder() and call its DocumentBuilder.parseXmlFromString()
+   * method after calling DocumentBuilder.setBaseUri() to set an appropriate base URI.
+   *
+   * @note This behaviour is a bug, but has been present for a number of releases so we are
+   * marking this behaviour as deprecated and it will be fixed in a future release.
+   *
+   * @deprecated Relative URI resolution does not respect the cwd specified with .setcwd().
+   * This behaviour is deprecated and will be changed in a future release, which will
+   * be a breaking change in certain situations.
+   *
    * @param source - the source document as a lexical string
    * @param encoding - the encoding used to decode the source string. If not
    * specified then platform default encoding is used.

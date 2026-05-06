@@ -142,13 +142,29 @@ public:
    * Load an XML document, to create a tree representation of the document in
    * memory.
    *
+   * @note If you have not set a base URI with .setBaseUri() then any URIs
+   * resolved during parsing, for example, external entities, or xlink, will
+   * be resolved against the controlling process' working directory, not the
+   * cwd of the SaxonProcessor instance that created this document builder
+   * instance.
+   *
+   * @note This behaviour is a bug, but has been present for a number of
+   * releases so we are marking this behaviour as deprecated and it will be
+   * fixed in a future release.
+   *
+   * @deprecated Relative URI resolution does not respect the cwd specified
+   * with SaxonProcessor.setcwd() if no base URI has been set. This behaviour
+   * is deprecated and will be changed in a future release, which will be a
+   * breaking change in certain situations.
+   *
    * @param content - the XML document as a serialized string
-   * @param encoding - the encoding of the source document string. If not specified then
-   * the platform default encoding is used.
+   * @param encoding - the encoding of the source document string. If not
+   * specified then the platform default encoding is used.
    * @return The document node at the root of the tree of the resulting
-   * in-memory document, as an XdmNode. The caller is responsible for memory deallocation.
-   * @throws SaxonApiException if there is a failure in the parsing of the XML
-   * document
+   * in-memory document, as an XdmNode. The caller is responsible for memory
+   * deallocation.
+   * @throws SaxonApiException if there is a failure in the parsing of the
+   * XML document
    */
 
   XdmNode *parseXmlFromString(const char *content,

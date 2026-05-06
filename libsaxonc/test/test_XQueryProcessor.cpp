@@ -23,64 +23,67 @@ using Catch::Matchers::Equals;
 
 TEST_CASE( "XQueryProcessor CWD is correctly inherited from the SaxonProcessor" ) {
     SaxonProcessor *processor = new SaxonProcessor(false);
-    processor->setcwd("/path/to/nowhere");
 
-    XQueryProcessor *xquery = processor->newXQueryProcessor();
+    GIVEN( "A SaxonProcessor with a CWD set" ) {
+        processor->setcwd("/path/to/nowhere");
+        XQueryProcessor *xquery = processor->newXQueryProcessor();
 
-    REQUIRE_THAT( xquery->getcwd(), Equals("/path/to/nowhere")  );
+        THEN( "an XQueryProcessor created from it inherits the correct CWD" ) {
+            REQUIRE_THAT( xquery->getcwd(), Equals("/path/to/nowhere")  );
+        }
 
-    delete xquery;
+        WHEN( "The CWD is set explicitly" ) {
+            xquery->setcwd("/path/to/somewhere");
+
+            THEN( "the correct CWD is returned" ) {
+                REQUIRE_THAT( xquery->getcwd(), Equals("/path/to/somewhere")  );
+            }
+        }
+
+        delete xquery;
+    }
+
     delete processor;
     processor->release();
     delete SaxonProcessor::sxn_environ;
 }
 
-TEST_CASE( "setting XQueryProcessor CWD locally correctly overrides the inherited value" ) {
-    SaxonProcessor *processor = new SaxonProcessor(false);
-    processor->setcwd("/path/to/nowhere");
-
-    XQueryProcessor *xquery = processor->newXQueryProcessor();
-    xquery->setcwd("/path/to/somewhere");
-
-    REQUIRE_THAT( xquery->getcwd(), Equals("/path/to/somewhere")  );
-
-    delete xquery;
-    delete processor;
-    processor->release();
-    delete SaxonProcessor::sxn_environ;
-}
-
-TEST_CASE( "Resolving a relative URI in an XQuery query parsed from a string where CWD has" ) {
+TEST_CASE( "XQueryProcessor relative URI resolution in quety execution" ) {
     string srcfile = string(__FILE__);
     auto last_path_sep = srcfile.find_last_of(path_sep);
     auto base_wd = srcfile.substr(0, last_path_sep) + path_sep + "test_data";
     auto trailing_wd = base_wd + path_sep;
 
-
-    string input = R"EOQ(xquery version "3.1";
-for $item in doc("input.xml")//input
-return <p>{data($item)}</p>
-)EOQ";
     auto *processor = new SaxonProcessor(false);
     XQueryProcessor *xquery = processor->newXQueryProcessor();
-    xquery->setQueryContent(input.c_str());
 
-    SECTION("no trailing path separator") {
-        xquery->setcwd(base_wd.c_str());
+    GIVEN( "A query using the doc() function with a relative URI" ) {
+        string input = R"EOQ(xquery version "3.1";
+    for $item in doc("input.xml")//input
+    return <p>{data($item)}</p>
+    )EOQ";
+        xquery->setQueryContent(input.c_str());
 
-        auto res = xquery->runQueryToValue();
-        auto expected = res->getHead()->getStringValue();
-        REQUIRE_THAT( expected , Equals("An input") );
+        WHEN( "CWD has no trailing path separator" ) {
+            xquery->setcwd(base_wd.c_str());
+
+            THEN( "The relative URI is correctly resolved" ) {
+                auto res = xquery->runQueryToValue();
+                auto expected = res->getHead()->getStringValue();
+                REQUIRE_THAT( expected , Equals("An input") );
+            }
+        }
+
+        WHEN( "CWD has a trailing path separator" ) {
+            xquery->setcwd(trailing_wd.c_str());
+
+            THEN( "The relative URI is correctly resolved" ) {
+                auto res = xquery->runQueryToValue();
+                auto expected = res->getHead()->getStringValue();
+                REQUIRE_THAT( expected , Equals("An input") );
+            }
+        }
     }
-
-    SECTION("a trailing path separator") {
-        xquery->setcwd(trailing_wd.c_str());
-
-        auto res = xquery->runQueryToValue();
-        auto expected = res->getHead()->getStringValue();
-        REQUIRE_THAT( expected , Equals("An input") );
-    }
-
     delete xquery;
     delete processor;
     processor->release();
