@@ -1516,9 +1516,9 @@ public class TestValidator {
 
 
         final List<TransformerException> errorList = new ArrayList<>();
-        FileOutputStream out = null;
+        ByteArrayOutputStream out = null;
         try {
-            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
+            out = new ByteArrayOutputStream();
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
             StreamSource source_xsd = new StreamSource(Testdata.file( "../bugs/4744/UniqueKeyBug.xsd"));
@@ -1641,9 +1641,9 @@ public class TestValidator {
 
 
         final List<SAXParseException> errorList = new ArrayList<>();
-        FileOutputStream out = null;
+        ByteArrayOutputStream out = null;
         try {
-            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
+            out = new ByteArrayOutputStream();
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
             StreamSource source_xsd = new StreamSource(Testdata.file( "../bugs/4744/UniqueKeyBug.xsd"));
