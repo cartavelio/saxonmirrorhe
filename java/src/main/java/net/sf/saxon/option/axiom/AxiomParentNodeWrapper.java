@@ -141,7 +141,7 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
                     if (node instanceof OMNode || node instanceof OMDocument) {
                         if (node instanceof OMDocument || !isIgnoredNode((OMNode) node)) {
                             NodeInfo wrapper = wrap(node);
-                            if (predicate.test(wrapper)) {
+                            if (nodeTest.test(wrapper)) {
                                 return wrapper;
                             }
                         }
