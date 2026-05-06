@@ -362,7 +362,7 @@ abstract class DotNetHtmlDoc @Inject constructor(private val ex: ExecOperations,
     val clspth = classpath
     ex.javaexec {
       this.classpath = clspth
-      mainClass = "com.saxonica.Transform"
+      mainClass = "net.sf.saxon.Transform"
       args("-s:${merged.get().asFile}",
         "-xsl:${xslt.get().asFile}",
         "-o:${outputDir.get().file("index.html").asFile}")

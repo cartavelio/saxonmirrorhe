@@ -11,7 +11,7 @@ import kotlin.text.replace
 import kotlin.text.substring
 
 plugins {
-  id("java-library")
+  base
   id("saxon-build")
 }
 
@@ -25,14 +25,22 @@ val saxonBuild = the<SaxonBuildExtension>()
 
 val extension = project.extensions.create<SaxonCSExtension>("saxoncs")
 
-extension.classpath = configurations.compileClasspath
 extension.targetHost = saxonBuild.targetHost
 extension.dotnet = saxonBuild.dotnet
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val csharpFeatureKeysBucket by configurations.dependencyScope("csharpFeatureKeysBucket")
 val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
+
+val saxonRuntime by configurations.dependencyScope("saxonRuntime")
+val saxonClasspath by configurations.resolvable("saxonClasspath") {
+  extendsFrom(saxonRuntime)
+}
 val transpilerRuntime by configurations.dependencyScope("transpilerRuntime")
+val transpilerClasspath by configurations.resolvable("transpilerClasspath") {
+  extendsFrom(saxonRuntime)
+  extendsFrom(transpilerRuntime)
+}
 val editionJavaRuntime by configurations.dependencyScope("editionJavaRuntime")
 
 val releaseArtifacts by configurations.consumable("releaseArtifacts")
@@ -59,6 +67,8 @@ dependencies {
   sampleSourcesBucket(project(mapOf("path" to ":samples",
     "configuration" to "sampleSources")))
 
+  saxonRuntime("net.sf.saxon:Saxon-HE:12.9")
+
   transpilerRuntime(project(":csharp:transpiler", "runtimeElements"))
   transpilerRuntime("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
   transpilerRuntime("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
@@ -66,8 +76,6 @@ dependencies {
   transpilerRuntime(files(saxonBuild.saxonLicenseDir.get()))
 
   editionJavaRuntime(project(":java", "runtimeElements"))
-
-  compileOnly(project(":csharp:transpiler", "runtimeElements"))
 
   preprocessor("com.igormaznitsa:jcp:7.0.4")
   preprocessor("com.tonicsystems:jarjar:0.6")
@@ -93,13 +101,6 @@ val transpiler = configurations.resolvable("transpiler") {
 
 val editionJava = configurations.resolvable("editionJava") {
   extendsFrom(editionJavaRuntime)
-}
-
-// Because we have Java stuff going on, there's a Java plugin task for resource copying that
-// we can't get rid of and which clashes when the assemble task is run, so let's point it somewhere
-// harmless
-val processResources by tasks.named<ProcessResources>("processResources") {
-  destinationDir = layout.buildDirectory.dir("ignore/resources").get().asFile
 }
 
 // from() is set in the edition build.gradle.kts
@@ -162,7 +163,7 @@ val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
     mkdir("${layout.buildDirectory.dir("tmp/xml").get()}")
   }
 
-  classpath = configurations.named("transpiler").get()
+  classpath = transpilerClasspath
   mainClass = "ToXml"
   args("-j:${layout.buildDirectory.dir("src").get()}",
     "-repo:${layout.projectDirectory.file("../transpiler/")}",
@@ -184,7 +185,7 @@ val transpileToDigest = tasks.register<JavaExec>("transpileToDigest") {
   val xmldir = saxonBuild.puri("${layout.buildDirectory.dir("tmp/xml").get()}")
   val tmpdigest = saxonBuild.puri("${layout.buildDirectory.file("tmp/digest.xml").get()}")
 
-  classpath = preprocessorClasspath
+  classpath = transpilerClasspath
   mainClass = "net.sf.saxon.Transform"
   args("-it",
     "-xsl:${xdigest}",
@@ -203,7 +204,7 @@ val transpile = tasks.register<JavaExec>("transpile") {
   val tmpdigest = saxonBuild.puri("${layout.buildDirectory.file("tmp/digest.xml").get()}")
   val digest = saxonBuild.puri("${layout.buildDirectory.file("digest.xml").get()}")
 
-  classpath = preprocessorClasspath
+  classpath = transpilerClasspath
   mainClass = "net.sf.saxon.Transform"
   args("-xsl:${rdigest}",
     "-s:${tmpdigest}",
@@ -217,8 +218,7 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
   inputs.files(layout.buildDirectory.dir("tmp/xml"))
   outputs.dir(layout.buildDirectory.dir("generated/Saxon"))
 
-  classpath = configurations.named("transpiler").get()
-  classpath += editionJava.get()
+  classpath = transpilerClasspath
 
   mainClass = "ToXml"
   args("-cs:${layout.buildDirectory.dir("generated").get()}",
@@ -231,7 +231,7 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
 
 }
 
-val preprocessCS = tasks.register<Copy>("preprocessCS") {
+val preprocessCS = tasks.register<Sync>("preprocessCS") {
   from(layout.projectDirectory.dir("../src/main/cs"))
   into(layout.buildDirectory.dir("cs"))
 }
@@ -258,16 +258,11 @@ data class DotNetTasks(
 )
 
 private fun generateDotnetTasks(buildArch: Architectures, buildConfiguration: CSReleaseConfiguration, suffix: String): DotNetTasks {
-  // These tasks run every time because the .nupkg file changes every time.
-  // The DotNet tasks use the outputDir as an output directory. This should
-  // probably be reworked so that only the /obj/ directory is considered,
-  // or something.
-
   val configure = tasks.register<DotNetConfiguration>("dotnet-configure-${buildArch}-${suffix}") {
     csProjXsl = layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")
     resources.from(layout.projectDirectory.dir("..").files("README.md", "LICENSE.txt"))
     group = LifecycleBasePlugin.BUILD_GROUP
-    classpath = configurations.named("transpiler").get()
+    classpath = saxonClasspath
     dotnetversion = saxonBuild.dotnetversion
     version = saxonBuild.version
     edition = extension.edition
@@ -502,8 +497,8 @@ val docParse = tasks.register<JavaExec>("docParse") {
   inputs.file(layout.projectDirectory.file("../tools/parsecs.xsl"))
   outputs.file(layout.buildDirectory.file("dotnetdoc/names.xml"))
 
-  classpath = preprocessorClasspath
-  mainClass = "com.saxonica.Transform"
+  classpath = saxonClasspath
+  mainClass = "net.sf.saxon.Transform"
   args("-it:main",
     "-xsl:${layout.projectDirectory.file("../tools/parsecs.xsl")}",
     "-o:${layout.buildDirectory.file("dotnetdoc/names.xml").get().asFile}",
@@ -522,8 +517,8 @@ val docMergeTask = tasks.register<JavaExec>("docMerge") {
   inputs.file(layout.projectDirectory.file("../tools/merge.xsl"))
   outputs.file(layout.buildDirectory.file("dotnetdoc/merged.xml"))
 
-  classpath = preprocessorClasspath
-  mainClass = "com.saxonica.Transform"
+  classpath = saxonClasspath
+  mainClass = "net.sf.saxon.Transform"
   args("-it:main",
     "-xsl:${layout.projectDirectory.file("../tools/merge.xsl")}",
     "-o:${layout.buildDirectory.file("dotnetdoc/merged.xml").get().asFile}",
@@ -535,7 +530,7 @@ val dotnetDocHtml = tasks.register<DotNetHtmlDoc>("docHtml") {
   group = LifecycleTasks.DOCUMENTATION_GROUP
   description = "Create HTML output for dotnet docs"
 
-  classpath = preprocessorClasspath
+  classpath = saxonClasspath
   merged = docMergeTask.map { it.outputs.files.singleFile }
   xslt = layout.projectDirectory.file("../tools/doctohtml.xsl")
   cssFiles.from(layout.projectDirectory.file("../tools/saxon-dotnetdoc.css"))
@@ -550,8 +545,8 @@ val dotnetDocXml = tasks.register<JavaExec>("docXml") {
   inputs.file(layout.projectDirectory.file("../tools/convert-to-jel-package.xsl"))
   outputs.dir(layout.buildDirectory.file("dotnetdoc-xml"))
 
-  classpath = preprocessorClasspath
-  mainClass = "com.saxonica.Transform"
+  classpath = saxonClasspath
+  mainClass = "net.sf.saxon.Transform"
   args("-s:${docMergeTask.get().outputs.files.singleFile}",
     "-xsl:${layout.projectDirectory.file("../tools/convert-to-jel-package.xsl")}",
     "-o:${layout.buildDirectory.file("dotnetdoc-xml/packages/Saxon.Api.xml").get().asFile}")
@@ -618,7 +613,7 @@ val csprojTemplateTask = tasks.register<JavaExec>("csproj-template") {
   inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
   outputs.file(layout.projectDirectory.file("${templateName}.csproj"))
   outputs.file(layout.projectDirectory.file("${templateName}.sln"))
-  classpath = preprocessorClasspath
+  classpath = saxonClasspath
   mainClass = "net.sf.saxon.Transform"
   args("-it",
     "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",

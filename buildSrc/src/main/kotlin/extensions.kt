@@ -327,6 +327,5 @@ interface SaxonCSExtension {
     val platform: Provider<Platforms>
         get() = targetHost.map { it.platformConst }
     abstract val edition: Property<String>
-    abstract val classpath: Property<Configuration>
     abstract val dotnet: Property<String>
 }
