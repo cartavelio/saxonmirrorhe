@@ -515,12 +515,10 @@ public class JsonParser {
                 char c = input.charAt(position);
                 switch (c) {
                     case '\n':
-                    case '\r':
-                        if (c == '\n') {
-                            lineNumber++;
-                        }
+                        lineNumber++;
                         // drop through
                         CSharp.emitCode("goto case ' ';");
+                    case '\r':
                     case ' ':
                     case '\t':
                         if (++position >= input.length()) {
