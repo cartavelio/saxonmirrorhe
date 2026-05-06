@@ -192,6 +192,8 @@ public class JSONEmitter {
                 }
             } else if (num.isNegativeZero()) {
                 emit("-0");
+            } else if (num.signum() == 0) {
+                emit("0");
             } else {
                 double val = num.getDoubleValue();
                 double abs = Math.abs(val);
