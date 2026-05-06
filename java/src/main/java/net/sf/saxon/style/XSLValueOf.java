@@ -14,7 +14,6 @@ import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -90,7 +89,6 @@ public final class XSLValueOf extends XSLLeafNodeConstructor {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Configuration config = getConfiguration();
-        final TypeHierarchy th = config.getTypeHierarchy();
         if (separator == null && select != null && xPath10ModeIsEnabled()) {
             // Handle XSLT 1.0 backwards compatibility
             select = config.getTypeChecker(true).processValueOf(select, config);
