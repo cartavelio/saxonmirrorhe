@@ -8,7 +8,7 @@ set(SAXON_EDITION "@EDITION@")
 set(SAXONC_SRC_DIR .)
 set(SAXONC_VERSION_SRC_DIR lib)
 set(SAXONC_EDITION_SRC_DIR .)
-set(BUNDLED_SAXONC_CORE_DIR ../@platform@-@architecture@/SaxonCCore@EDITION@)
+set(BUNDLED_SAXONC_CORE_DIR ../SaxonCCore@EDITION@)
 
 include("cmake/libsaxonc.cmake")
 include("cmake/export-header.cmake")
