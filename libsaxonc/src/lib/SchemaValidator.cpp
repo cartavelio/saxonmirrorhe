@@ -198,7 +198,8 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
       SaxonProcessor::createParameterJArray(parameters, properties);
 
   int64_t status = j_registerSchemaString(thread, (void *)proc->procRef,
-      (char *)(systemID == nullptr ? cwdV.c_str() : systemID),
+      (char *)cwdV.c_str(),
+      (char *)(systemID),
       (char *)sourceStr,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
                                              : (void *)processorDataRef));

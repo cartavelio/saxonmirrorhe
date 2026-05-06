@@ -32,6 +32,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     private SchemaManager schemaManager = null;
     private Source source = null;
     private XdmDestination xdmDestination = null;
+    public static PathHelper pathHelper = new PathHelper();
 
 
     /**
@@ -229,14 +230,15 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      *
      * @param thread                      - Graalvm runtime data structure for the thread
      * @param processorRef                - processor reference
-     * @param cxsd                        - File name of the schema relative to the cwd
+     * @param ccwd                        - The CWD of the validator instance
+     * @param cxsd                        - The content of the schema document as a char*
      * @param csystemId                   - The system ID of the document
      * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
      * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
      * @throws SaxonApiException if null found for the processor or schema document
      */
     @CEntryPoint(name = "j_registerSchemaString", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer csystemId, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csystemId, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Processor processor = null;
         if (processorRef == WordFactory.nullPointer()) {
             throw new SaxonApiException("Processor object is null");
@@ -264,6 +266,15 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         if (xsd == null) {
             SaxonApiException ex = new SaxonApiException("Schema document not found");
             throw ex;
+        }
+
+        String cwd = null;
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        }
+
+        if (systemId == null && cwd != null) {
+            systemId = pathHelper.cwdToBaseURI(cwd).toString();
         }
 
         StreamSource source = null;
