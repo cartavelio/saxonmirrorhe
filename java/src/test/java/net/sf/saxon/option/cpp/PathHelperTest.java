@@ -361,9 +361,67 @@ class PathHelperTest {
         @Test
         @DisplayName("returns a URI not a Source")
         void passesThroughToResolveToSourceAndReturnsSystemId() throws SaxonApiException {
-            URI expected = URI.create(subject.resolveToSource(config, cwd, "source.xml", nature).getSystemId());
+            expected = URI.create(subject.resolveToSource(config, cwd, "source.xml", nature).getSystemId());
 
-            URI actual = subject.resolveToURI(config, cwd, "source.xml");
+            actual = subject.resolveToURI(config, cwd, "source.xml");
+
+            assertThat(actual, equalTo(expected));
+        }
+    }
+
+    @Nested
+    class ResolvingCwdToBaseURI {
+        URI expected;
+        URI actual;
+
+        @Nested
+        @EnabledOnOs(OS.WINDOWS)
+        @DisplayName("On Windows")
+        class WindowsOnly {
+            @Test
+            @DisplayName("handles a standard drive:folder path")
+            void handlesWindowsPath() throws SaxonApiException {
+                expected = URI.create("file:///C/path/to/dir/");
+
+                actual = subject.cwdToBaseURI("C:\\path\\to\\dir");
+
+                assertThat(actual, equalTo(expected));
+            }
+
+            @Test
+            @DisplayName("Handles a UNC path")
+            void handlesUncPath() throws SaxonApiException {
+                expected = URI.create("file://thing/share/path/to/dir/");
+
+                actual = subject.cwdToBaseURI("\\\\thing\\share\\path\\to\\dir");
+
+                assertThat(actual, equalTo(expected));
+            }
+        }
+
+//        @Nested
+//        @DisabledOnOs(OS.WINDOWS)
+//        @DisplayName("On Linux/macOS")
+//
+//        class UnicesOnly {
+//
+//        }
+        @Test
+        @DisplayName("converts an absolute path with a trailing slash to an absolute URI with a trailing slash")
+        void absPathWithSlashBecomesAbsURIWithTrailingSlash() throws SaxonApiException {
+            expected = URI.create("file:///path/to/dir/");
+
+            actual = subject.cwdToBaseURI("/path/to/dir");
+
+            assertThat(actual, equalTo(expected));
+        }
+
+        @Test
+        @DisplayName("converts an absolute path without a trailing slash to an absolute URI with a trailing slash")
+        void absPathBecomesAbsURIWithTrailingSlash() throws SaxonApiException {
+            expected = URI.create("file:///path/to/dir/");
+
+            actual = subject.cwdToBaseURI("/path/to/dir/");
 
             assertThat(actual, equalTo(expected));
         }

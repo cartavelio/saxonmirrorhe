@@ -152,6 +152,11 @@ public class PathHelper {
                 name.startsWith("https:") ||
                 name.startsWith("file:");
     }
+
+    public URI cwdToBaseURI(String cwd) throws SaxonApiException {
+        URI intermediate = Paths.get(cwd).toUri();
+        return URI.create(intermediate.toString() + "/");
+    }
 }
 
 
