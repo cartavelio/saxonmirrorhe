@@ -1,8 +1,7 @@
 Include(FetchContent)
 FetchContent_Declare(
         Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG        v3.8.1 # or a later release
+        URL "${CMAKE_CURRENT_SOURCE_DIR}/../vendor/Catch2-3.12.0.zip"
 )
 FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
