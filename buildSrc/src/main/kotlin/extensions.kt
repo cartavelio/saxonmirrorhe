@@ -1,8 +1,10 @@
+import com.saxonica.build.Architectures
 import com.saxonica.build.TargetHost
 import com.saxonica.build.java.BranchInfo
 import com.saxonica.build.java.JarTaskBuilder
 import com.saxonica.build.java.JarTaskBuilder.SaxonJarTasks
 import com.saxonica.build.AsInput
+import com.saxonica.build.Platforms
 import com.saxonica.build.python.PythonVersion
 import com.saxonica.build.python.PythonVersions
 import org.gradle.api.Action
@@ -320,12 +322,11 @@ interface PyenvExtension {
 
 interface SaxonCSExtension {
     val targetHost: Property<TargetHost>
-    val arch: Provider<String>   // Normalized to x64 or arm64 for .NET
-      get() = targetHost.map { if (it.isArm64) "arm64" else "x64" }
-    val platform: Provider<String>
-        get() = targetHost.map { if (it.isMacOS) "osx" else if (it.isWindows) "win" else "linux" }
+    val architecture: Provider<Architectures>
+        get() = targetHost.map { it.architectureConst }
+    val platform: Provider<Platforms>
+        get() = targetHost.map { it.platformConst }
     abstract val edition: Property<String>
-    abstract val release: Property<String>
     abstract val classpath: Property<Configuration>
     abstract val dotnet: Property<String>
 }

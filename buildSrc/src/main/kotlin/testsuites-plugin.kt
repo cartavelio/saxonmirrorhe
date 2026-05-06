@@ -263,7 +263,6 @@ abstract class TestSuitesExtension
 
     val thisSuite = tasks.register<CSharpRunner>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-      dependsOn("dotnetBuild")
       dependsOn("dotnetBuildTestDrivers")
       this.edition = plugin.edition
       this.suite = suite
