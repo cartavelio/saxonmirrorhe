@@ -4074,7 +4074,7 @@ public class XPathParser {
                     if (keywordArgs == null) {
                         keywordArgs = new HashMap<>();
                     } else if (keywordArgs.containsKey(paramName)) {
-                        grumble("Duplicate keyword '" + paramName + "'in function arguments");
+                        grumble("Duplicate keyword '" + paramName + "' in function arguments");
                     }
                     keywordArgs.put(paramName, args.size());
                     args.add(arg);
