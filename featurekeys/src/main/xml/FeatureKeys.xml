@@ -339,8 +339,7 @@
         <getter class="net.sf.saxon.query.StaticQueryContext">getDefaultCollationName</getter>
         <configfile>global/@defaultCollation</configfile>
         <configfiledesc>
-            <p>(Requires Saxon-PE.) The collation URI to be used when no explicit collation is
-                requested.</p>
+            <p>The collation URI to be used when no explicit collation is requested.</p>
         </configfiledesc>
         <desc>
             <p>This option determines the collation that is used for comparing strings when no
