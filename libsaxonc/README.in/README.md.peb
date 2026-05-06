@@ -16,13 +16,37 @@ command line.
 {% include model.isUnix ? "install_unix.md.peb" : "install_windows.md.peb" %}
 
 ## Running the binaries
-Once you have the binaries on your path, you should be able to run the binaries directly, for example:
+Once you have the binaries on your path, you should be able to run the binaries
+directly, for example:
 
 	Transform -s:input.xml -xsl:stylesheet.xsl
 
 {% include "bin_doc_links.md.peb" %}
 
-## Integrating with CMake
+## Integrating with CMake-using project
+
+If you're planning to use both the provided `{{model.libsaxoncCore}}` and
+`{{model.libsaxonc}}` `.{{model.soExtension}}` files, then the `samples`
+directory provides a fully working example, which you can boil down to the
+following snippet for a `CMakeLists.txt`:
+
+    list(APPEND CMAKE_PREFIX_PATH "/opt/saxonica")
+    find_package({{ model.SaxonCPackage }} {{ model.productVersion }} EXACT REQUIRED)
+    target_link_libraries(YourTarget PRIVATE {{ model.SaxonCPackage }}::{{ model.SaxonCTarget }})
+
+(Where `/opt/saxonica` is where you installed the libraries.)
+
+If you're planning to compile `{{model.libsaxonc}}` yourself, to use the C++
+API, then you can effectively use the `src` folder as a CMake subdirectory
+
+
+    include(FetchContent)
+    FetchContent_Declare(
+        SaxonCHE
+        URL ${CMAKE_CURRENT_LIST_DIR}/../libsaxonc/he/build/packaged/SaxonCHE-macos-arm64-12-9-0.zip
+        SOURCE_SUBDIR src
+    )
+    FetchContent_MakeAvailable(SaxonCHE)
 
 ## Other resources
 SaxonC-specific samples can be found at the [saxonc-resources][] GitHub

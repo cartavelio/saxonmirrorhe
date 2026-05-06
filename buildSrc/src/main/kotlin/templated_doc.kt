@@ -15,15 +15,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.FileWriter
-import java.io.IOException
-import java.io.UncheckedIOException
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.exists
-import kotlin.io.path.isRegularFile
-
-
 
 abstract class TemplatedDocTask : DefaultTask() {
   @get:InputDirectory
@@ -54,12 +45,5 @@ abstract class TemplatedDocTask : DefaultTask() {
 
 
     compiledTemplate.evaluate(writer, mapOf("model" to model.get()));
-
-//
-//    val codeResolver = MultiRootCodeResolver(templateRoot.get().asFile.toPath(), editionTemplateRoot.get().asFile.toPath()) // This is the directory where your .kte files are located.
-//    val templateEngine = TemplateEngine.create(codeResolver, ContentType.Plain) // Two choices: Plain or Html
-//
-//    val output = FileOutput(renderedDoc.get().asFile.toPath())
-//    templateEngine.render(template.get(), model.get(), output)
   }
 }
