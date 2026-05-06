@@ -9,7 +9,8 @@
 project = 'Saxon C'
 copyright = "2025, Saxonica Ltd"
 author = "O'Neil Delpratt, Matthew Patterson"
-release = '12.8'
+version = "Set by sphinx -D"
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -22,6 +23,15 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
 ]
+
+add_module_names = False
+toc_object_entries = False
+autoclass_content = 'both'
+
+autodoc_default_options = {
+    'special-members': True,
+    'undoc-members': True,
+}
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
