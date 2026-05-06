@@ -964,26 +964,6 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
 
       </section>
-      <section id="sequence-variadic-functions" title="Variadic functions">
-         <h1>Variadic functions</h1>
-
-         <p>Variadic functions can be called with a variable number of positional arguments,
-            rather like the <code>concat()</code> function in previous XPath versions.</p>
-
-         <p>Saxon 12 implements variadic functions, but only for built-in system functions
-            (not for user-defined functions).</p>
-
-         <p>The sequence-variadic functions available include:</p>
-
-         <ul>
-            <li>
-               <code>fn:concat()</code>
-            </li>
-            <li>
-               <code>fn:codepoints-to-string()</code>
-            </li>
-         </ul>
-      </section>
 
       <section id="optional-parameters" title="Optional parameters">
          <h1>Optional parameters</h1>
@@ -993,12 +973,14 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <ul>
             <li>
                <p>XQuery syntax:</p>
-               <pre><code class="language-xquery"><![CDATA[declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S'))
-                         as xs:dateTime]]></code></pre>
+               <pre><code class="language-xquery"><![CDATA[declare function local:f(
+  $x as xs:dateTime, 
+  $y as xs:duration := xs:duration('PT0S')
+) as xs:dateTime]]></code></pre>
             </li>
             <li>
                <p>XSLT syntax:</p>
-               <pre><code class="language-xml"><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
+               <pre><code class="language-xml"><![CDATA[<xsl:function name="local:f" as="xs:dateTime">
   <xsl:param name="x" as="xs:dateTime" required="yes"/>
   <xsl:param name="x" as="xs:duration" required="no" select="xs:duration('PT0S')"/>
 </xsl:function>]]></code></pre>
@@ -1010,8 +992,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <p>If two functions in a query or stylesheet have the same name, then they must have non-overlapping
             arity ranges. The arity range indicates the number of arguments that must be supplied in a call to the
             function: the minimum is the number of required parameters, the maximum is the number of required parameters
-            plus optional parameters.
-            </p>
+            plus optional parameters.</p>
 
          <aside>The rules for XSLT, where different functions may have different import precedence, are more complex:
             see the specification for details.</aside>

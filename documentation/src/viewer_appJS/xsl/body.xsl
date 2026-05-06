@@ -50,7 +50,7 @@
                 <xsl:attribute name="class" select="'columns'"/>
             </xsl:if>
             <ul>
-                <xsl:for-each select="../(article|section)[not($except = @id)]">
+                <xsl:for-each select="(ancestor::article|ancestor::section)[last()]/(article|section)[not($except = @id)]">
                     <li>
                         <p>
                             <span class="link" data-href="{@id}">

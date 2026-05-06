@@ -951,9 +951,8 @@
    <section id="xpath30new" title="New features in XPath 3.0">
       <h1>New features in XPath 3.0</h1>
 
-      <aside>From Saxon 9.6, Saxon supports XPath 3.0 by default. Some features vary by Saxon
-         edition: higher-order functions require Saxon-PE or higher, and schema-awareness requires
-         Saxon-EE.</aside>
+      <aside>In Saxon 9.6, Saxon supported XPath 3.0 by default. Note that schema-awareness requires
+         Saxon-EE. From Saxon 10, higher-order functions are available in all editions.</aside>
 
       <p>Some of the new features in XPath 3.0 are as follows. For full details, see the W3C
          specifications, and for further Saxon implementation details see the <a class="bodylink"
@@ -981,11 +980,10 @@
 
          <li>
             <p>Inline function items can be declared, and used as arguments to higher-order
-               functions. For example <code>map(//employee, function($e){$e/salary +
+               functions. For example <code>for-each(//employee, function($e){$e/salary +
                   $e/bonus})</code>. A <i>function item</i> is a third kind of item, alongside nodes
                and atomic values. The function represented by a function item <code>$f</code> can be
-               invoked using a dynamic function call <code>$f(args)</code>. <i>Higher-order
-                  functions require Saxon-PE or higher.</i></p>
+               invoked using a dynamic function call <code>$f(args)</code>.</p>
          </li>
 
          <li>
