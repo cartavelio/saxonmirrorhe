@@ -29,7 +29,7 @@ import java.util.List;
  * @since 9.9
  */
 
-public class OutputterEventBuffer extends Outputter {
+public class OutputterEventBuffer extends AbstractOutputter {
 
     private List<OutputterEvent> buffer = new ArrayList<>();
 
