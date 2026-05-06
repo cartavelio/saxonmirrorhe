@@ -10,8 +10,6 @@ include(CTest)
 include(Catch)
 find_package(Threads REQUIRED)
 
-set(saxonc "saxonc-${SaxonC_EDITION}")
-
 # Tests
 add_executable(CTestXPath ../samples/cTests/testXPath.c)
 target_link_libraries(CTestXPath PRIVATE ${saxonc})
