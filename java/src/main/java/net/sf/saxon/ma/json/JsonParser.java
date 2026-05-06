@@ -516,7 +516,7 @@ public class JsonParser {
                 switch (c) {
                     case '\n':
                     case '\r':
-                        if (!(c == '\n' && position > 0 && input.charAt(position) == '\n')) {
+                        if (c == '\n') {
                             lineNumber++;
                         }
                         // drop through
