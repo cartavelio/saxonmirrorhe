@@ -41,7 +41,7 @@ val transpilerClasspath by configurations.resolvable("transpilerClasspath") {
   extendsFrom(saxonRuntime)
   extendsFrom(transpilerRuntime)
 }
-val editionJavaRuntime by configurations.dependencyScope("editionJavaRuntime")
+val transpilerInputSaxonJarBucket by configurations.dependencyScope("transpilerInputSaxonJarBucket")
 
 val releaseArtifacts by configurations.consumable("releaseArtifacts")
 val apiSourceArtifacts by configurations.consumable("apiSourceArtifacts")
@@ -75,7 +75,7 @@ dependencies {
   transpilerRuntime("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
   transpilerRuntime(files(saxonBuild.saxonLicenseDir.get()))
 
-  editionJavaRuntime(project(":java", "runtimeElements"))
+  transpilerInputSaxonJarBucket(project(":java", "saxonJarArtifact"))
 
   preprocessor("com.igormaznitsa:jcp:7.0.4")
   preprocessor("com.tonicsystems:jarjar:0.6")
@@ -94,13 +94,8 @@ val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources")
   extendsFrom(javaFeatureKeysBucket)
 }
 
-val transpiler = configurations.resolvable("transpiler") {
-  extendsFrom(transpilerRuntime)
-  extendsFrom(editionJavaRuntime)
-}
-
-val editionJava = configurations.resolvable("editionJava") {
-  extendsFrom(editionJavaRuntime)
+val transpilerInputSaxonJar = configurations.resolvable("transpilerInputSaxonJar") {
+  extendsFrom(transpilerInputSaxonJarBucket)
 }
 
 // from() is set in the edition build.gradle.kts
@@ -157,6 +152,7 @@ val jarFinder = JarFinder(configurations.named("transpiler").get())
 val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
   group = LifecycleBasePlugin.BUILD_GROUP
   inputs.files(preprocessJava)
+  inputs.files(transpilerInputSaxonJar)
   inputs.dir(layout.projectDirectory.dir("../transpiler/tools/xslt"))
   outputs.dir(layout.buildDirectory.dir("tmp/xml"))
   doFirst {
@@ -170,7 +166,7 @@ val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
     "-xml:${layout.buildDirectory.dir("tmp/xml").get()}",
     "-h:${layout.buildDirectory.dir("src/main/java").get()}",
     "-src:${layout.buildDirectory.dir("src/main/java").get()}",
-    "-${extension.edition.get()}:${editionJava.get().map { it }.get(0)}",
+    "-${extension.edition.get()}:${transpilerInputSaxonJar.map { it.singleFile }.get() }",
     "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}")
 }
 
@@ -225,7 +221,7 @@ val generateCode = tasks.register<JavaExec>("generateCode") {
     "-xml:${layout.buildDirectory.dir("tmp/xml/main/java").get()}",
     "-repo:${layout.projectDirectory}/../transpiler/",
     "-digest:${layout.buildDirectory.file("digest.xml").get()}",
-    "-${extension.edition.get()}:${editionJava.get().map { it }.get(0)}",
+    "-${extension.edition.get()}:${transpilerInputSaxonJar.get().map { it }.get(0)}",
     "-icu4j:${jarFinder.find("icu4j-${findProperty("icu4jVersion")}.jar")}",
     "-debug")
 

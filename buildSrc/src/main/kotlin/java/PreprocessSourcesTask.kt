@@ -60,7 +60,7 @@ abstract class PreprocessSourcesTask @Inject constructor(private val layout: Pro
             mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
             args("/c",
                 "/i:${sources.get()}",
-                "/o:${layout.buildDirectory.dir("src/main/java").get()}",
+                "/o:${output.get().asFile}",
                 *getOpts())
         }
 
