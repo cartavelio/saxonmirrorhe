@@ -10,6 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -133,8 +134,8 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(locationId);
             }
-            checkItemType(NodeKindTest.PROCESSING_INSTRUCTION,
-                          nodeSupplier(Type.PROCESSING_INSTRUCTION, new NoNamespaceName(target), null, data.tidy()), locationId);
+            checkItemType(new NameTest(Type.PROCESSING_INSTRUCTION, NamespaceUri.NULL, target, getConfiguration().getNamePool()),
+                                       nodeSupplier(Type.PROCESSING_INSTRUCTION, new NoNamespaceName(target), null, data.tidy()), locationId);
         }
         getNextOutputter().processingInstruction(target, data, locationId, properties);
     }
