@@ -13,7 +13,10 @@ namespace Saxon.Impl.Helpers {
         public static Singulink.Numerics.BigDecimal ValueOf(string s) {
             return Singulink.Numerics.BigDecimal.Parse(s);
         }
-        
+    
+        public static Singulink.Numerics.BigDecimal ExactValueOf(double val) {
+            return Singulink.Numerics.BigDecimal.FromDouble(val, Singulink.Numerics.FloatConversion.Exact);
+        }
         
         public static Singulink.Numerics.BigDecimal StripTrailingZeros(Singulink.Numerics.BigDecimal val) {
             return val;
