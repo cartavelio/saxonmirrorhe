@@ -317,3 +317,15 @@ interface PyenvExtension {
     val definitionsDir: DirectoryProperty
     val pyenvRoot: DirectoryProperty
 }
+
+interface SaxonCSExtension {
+    val targetHost: Property<TargetHost>
+    val arch: Provider<String>   // Normalized to x64 or arm64 for .NET
+      get() = targetHost.map { if (it.isArm64) "arm64" else "x64" }
+    val platform: Provider<String>
+        get() = targetHost.map { if (it.isMacOS) "osx" else if (it.isWindows) "win" else "linux" }
+    abstract val edition: Property<String>
+    abstract val release: Property<String>
+    abstract val classpath: Property<Configuration>
+    abstract val dotnet: Property<String>
+}

@@ -30,14 +30,6 @@ dependencies {
 
 gradlePlugin {
   plugins {
-//    create("saxon-build") {
-//      id = "com.saxonica.build.saxon-build"
-//      implementationClass = "com.saxonica.build.SaxonBuildPlugin"
-//    }
-    create("saxoncs") {
-      id = "com.saxonica.build.saxoncs"
-      implementationClass = "com.saxonica.build.SaxonCSPlugin"
-    }
     create("managebranches") {
       id = "com.saxonica.build.managebranches"
       implementationClass = "com.saxonica.build.ManageBranchesPlugin"
