@@ -423,54 +423,8 @@ val releaseZipUnicesTask = tasks.register<Exec>("release_zip") {
     workingDir = packagedDir.map { it.dir("tmp") }.get().asFile
 }
 
-val sourceZipTask = tasks.register<Zip>("source_release_zip") {
-    archiveBaseName = extension.package_name
-    archiveAppendix = "source"
-    archiveVersion = saxonBuild.hyphenatedVersion
-
-    val topLevelDir = extension.package_name.map { name -> "${name}-source-${saxonBuild.hyphenatedVersion.get()}" }
-    into(topLevelDir)
-
-    // C/C++/Java Sources
-    from(layout.projectDirectory.dir("../src")) {
-        into("src/main/c")
-        exclude("**/*.c.in", "**/Gizmo.c")
-    }
-    from(layout.projectDirectory.dir("src")) {
-        into("src/main/c")
-    }
-    from(saxonCCoreJavaSrcDir.elements.map { it.first() }) {
-        into("src/main/java")
-    }
-    from(exportHeaderTask) {
-        into("src/main/c/include")
-    }
-    from(build.map { layout.buildDirectory.file("saxonc_version.c") }) {
-        into("src/main/c/lib")
-    }
-    // Python sources
-    from(pythonSourceDir.elements.map { it.first() }) {
-        into("python")
-    }
-    // License
-    from(layout.projectDirectory.dir("../../src/main/notices")) {
-        include("LICENSE.txt")
-        into("notices")
-    }
-    // Readme
-    from(layout.projectDirectory.dir("../")) {
-        include("README-source-zip.md")
-        rename { _ -> "README.md" }
-        filter<ReplaceTokens>("tokens" to mapOf(
-            "EDITION" to extension.edition.map { it.uppercase() }.get(),
-            "VERSION" to saxonBuild.version.get(),
-        ))
-    }
-}
-
 val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(if (saxonBuild.targetHost.get().isWindows) releaseZipWindowsTask else releaseZipUnicesTask)
-    dependsOn(sourceZipTask)
 }
 
 libDir.outgoing.artifact(stagingPath.map { it.dir("lib") }) { builtBy(stage) }
