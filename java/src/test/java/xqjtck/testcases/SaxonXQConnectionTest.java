@@ -2,16 +2,36 @@
 package xqjtck.testcases;
 
 
+import javax.xml.xquery.XQConnection;
+import javax.xml.xquery.XQDataSource;
 import javax.xml.xquery.XQException;
+import com.saxonica.xqj.SaxonXQDataSource;
 
-public class SaxonXQConnectionTest extends XQJTestCase {
+import org.junit.jupiter.api.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class SaxonXQConnectionTest {
+    XQDataSource xqds;
+    XQConnection xqc;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        xqds = new SaxonXQDataSource();
+        xqc = xqds.getConnection();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        xqc.close();
+    }
 
     /**
      * Test the Saxon method to copy a preparedExpression from one connection to another
      * @throws XQException
      */
-
-//    public void testCopy() throws XQException {
+//    @Test
+//    void testCopy() throws XQException {
 //
 //        XQConnection xqc1, xqc2;
 //        XQPreparedExpression xqe1, xqe2;
@@ -33,10 +53,9 @@ public class SaxonXQConnectionTest extends XQJTestCase {
 //        xqs1.next();
 //        xqs2.next();
 //
-//        Assert.assertEquals("A-SXQC-1.1: copied expression produces same result",
-//                xqs1.getItem().getInt(), xqs2.getItem().getInt());
-//        Assert.assertEquals("A-SXQC-1.2: copied expression has same base URI",
-//                xqe1.getStaticContext().getBaseURI(), xqe2.getStaticContext().getBaseURI());
+//        Assert.assertEquals(xqs1.getItem().getInt(), xqs2.getItem().getInt(),
+//                "A-SXQC-1.1: copied expression produces same result");
+//        Assert.assertEquals(xqe1.getStaticContext().getBaseURI(), xqe2.getStaticContext().getBaseURI(),
+//                "A-SXQC-1.2: copied expression has same base URI");
 //    }
-
 }
