@@ -381,7 +381,7 @@ class PathHelperTest {
             @Test
             @DisplayName("handles a standard drive:folder path")
             void handlesWindowsPath() throws SaxonApiException {
-                expected = URI.create("file:///C/path/to/dir/");
+                expected = URI.create("file:///C:/path/to/dir/");
 
                 actual = subject.cwdToBaseURI("C:\\path\\to\\dir");
 
@@ -399,31 +399,29 @@ class PathHelperTest {
             }
         }
 
-//        @Nested
-//        @DisabledOnOs(OS.WINDOWS)
-//        @DisplayName("On Linux/macOS")
-//
-//        class UnicesOnly {
-//
-//        }
-        @Test
-        @DisplayName("converts an absolute path with a trailing slash to an absolute URI with a trailing slash")
-        void absPathWithSlashBecomesAbsURIWithTrailingSlash() throws SaxonApiException {
-            expected = URI.create("file:///path/to/dir/");
+        @Nested
+        @DisabledOnOs(OS.WINDOWS)
+        @DisplayName("On Linux/macOS")
+        class UnicesOnly {
+            @Test
+            @DisplayName("converts an absolute path with a trailing slash to an absolute URI with a trailing slash")
+            void absPathWithSlashBecomesAbsURIWithTrailingSlash() throws SaxonApiException {
+                expected = URI.create("file:///path/to/dir/");
 
-            actual = subject.cwdToBaseURI("/path/to/dir");
+                actual = subject.cwdToBaseURI("/path/to/dir");
 
-            assertThat(actual, equalTo(expected));
-        }
+                assertThat(actual, equalTo(expected));
+            }
 
-        @Test
-        @DisplayName("converts an absolute path without a trailing slash to an absolute URI with a trailing slash")
-        void absPathBecomesAbsURIWithTrailingSlash() throws SaxonApiException {
-            expected = URI.create("file:///path/to/dir/");
+            @Test
+            @DisplayName("converts an absolute path without a trailing slash to an absolute URI with a trailing slash")
+            void absPathBecomesAbsURIWithTrailingSlash() throws SaxonApiException {
+                expected = URI.create("file:///path/to/dir/");
 
-            actual = subject.cwdToBaseURI("/path/to/dir/");
+                actual = subject.cwdToBaseURI("/path/to/dir/");
 
-            assertThat(actual, equalTo(expected));
+                assertThat(actual, equalTo(expected));
+            }
         }
     }
 }
