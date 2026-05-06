@@ -99,12 +99,9 @@ SaxonApiException::~SaxonApiException() throw() {
   if (!systemId.empty()) {
     systemId.clear();
   }
-  if (!cppException && !isStaticError) {
+  if (!cppException) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     j_clearException(thread);
-  } else if (isStaticError) {
-      graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-      j_clearStaticExceptions(thread);
   }
 }
 
