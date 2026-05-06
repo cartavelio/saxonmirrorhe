@@ -1,5 +1,7 @@
 import com.saxonica.build.java.PomGenerator
 import com.saxonica.build.GatherReleaseArtifacts
+import com.saxonica.build.cpp.UnjarBundleDependencies
+import org.gradle.kotlin.dsl.register
 
 plugins {
   id("saxon-build")
@@ -34,6 +36,10 @@ sourceSets.named("editionTest") {
 }
 
 val downloadReleaseBundled by configurations.getting
+val junit4 by configurations.dependencyScope("junit4")
+val junit4Resolvable = configurations.register("junit4Resolvable") {
+  extendsFrom(junit4)
+}
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
   extendsFrom(configurations["testImplementation"])
 }
@@ -100,6 +106,8 @@ dependencies {
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 
   downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
+
+  junit4("junit:junit:4.13.2")
 }
 
 tasks.filteredSources {
@@ -423,6 +431,20 @@ publishing {
       url = uri(layout.buildDirectory.dir("maven-o-matic").get())
     }
   }
+}
+
+val xqjTckJarFile = layout.projectDirectory.file("../tools/xqj/tck/lib/xqjtck.jar")
+val xqjTckPropFile = layout.projectDirectory.file("src/test/resources/saxon-xqj-tck.properties").asFile.toString()
+tasks.register<JavaExec>("xqjTckTest") {
+  classpath(tasks.named<Jar>("editionMavenJar").map { it.outputs.files },
+    mavenXqjJar.map { it.outputs.files }, xqjTckJarFile,
+    configurations["testRuntimeClasspath"], configurations["junit4Resolvable"]
+  )
+
+  systemProperty("com.oracle.xqj.tck.datasource", xqjTckPropFile)
+
+  mainClass = "org.junit.runner.JUnitCore"
+  args("com.oracle.xqj.tck.AllTests")
 }
 
 signing {
