@@ -316,7 +316,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                     String prefix = tree.getPrefix(next);
                     if (location.getLineNumber() < tree.getLineNumber(next)) {
                         String systemId = location.getSystemId() == null ? getSystemId() : location.getSystemId();
-                        location = new Loc(systemId, tree.getLineNumber(next), getColumnNumber());
+                        location = new Loc(systemId, tree.getLineNumber(next), tree.getColumnNumber(next));
                     }
 
                     // decide on namespaces
