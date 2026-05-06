@@ -1,5 +1,6 @@
 import com.saxonica.build.java.PomGenerator
 import com.saxonica.build.GatherReleaseArtifacts
+import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.cpp.UnjarBundleDependencies
 import org.gradle.kotlin.dsl.register
 
@@ -435,7 +436,7 @@ publishing {
 
 val xqjTckJarFile = layout.projectDirectory.file("../tools/xqj/tck/lib/xqjtck.jar")
 val xqjTckPropFile = layout.projectDirectory.file("src/test/resources/saxon-xqj-tck.properties").asFile.toString()
-tasks.register<JavaExec>("xqjTckTest") {
+val xqjTckTest = tasks.register<JavaExec>("xqjTckTest") {
   classpath(tasks.named<Jar>("editionMavenJar").map { it.outputs.files },
     mavenXqjJar.map { it.outputs.files }, xqjTckJarFile,
     configurations["testRuntimeClasspath"], configurations["junit4Resolvable"]
@@ -445,6 +446,10 @@ tasks.register<JavaExec>("xqjTckTest") {
 
   mainClass = "org.junit.runner.JUnitCore"
   args("com.oracle.xqj.tck.AllTests")
+}
+
+tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
+  dependsOn(xqjTckTest)
 }
 
 signing {
