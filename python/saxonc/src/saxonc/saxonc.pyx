@@ -4,7 +4,6 @@ and adding APIs for C/C++, Python, and PHP.
 SaxonC provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and Schema validation 1.0/1.1.
 Main classes in SaxonC Python API: PySaxonProcessor, PyXslt30Processor, PyXsltExecutable, PyXQueryProcessor,
 PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmArray, and PyXdmMap."""
-from logging import NullHandler
 
 # distutils: language = c++
 # distutils: sources = SaxonProcessor.cpp
@@ -15,7 +14,6 @@ from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.map cimport map
 from cython.operator import dereference, postincrement
-from os.path import isfile
 import sys
 import os
 from enum import IntEnum
@@ -168,29 +166,6 @@ cdef char * out_make_c_str(str str_value, encoding='utf-8'):
          return c_string
 
 
-cdef char * make_c_str2(str_value, encoding='utf-8'):
-    cdef char         *line
-    cdef Py_ssize_t   i
-    cdef Py_ssize_t   length = 0
-    cdef Py_ssize_t   incrlength
-    cdef char         *out = <char *>malloc(1)  # Reallocate as needed
-
-    py_string_string = str_value.encode(encoding) if str_value is not None else None
-    line = py_string_string if str_value is not None else ""
-
-    try:
-        out[0] = b'\x00'.encode('ascii') # keep C-strings null-terminated
-        incrlength = len(line)
-        out = <char *>realloc(out, length + incrlength + 1)
-        memcpy(out + length, line, incrlength)
-        length += incrlength
-        out[length] = '\x00'.encode('ascii')  # keep C-strings null-terminated
-        return out  # autoconversion back to a Python string
-
-    finally:
-       free(out)
-
-
 cdef str make_py_str(const char * c_value, encoding='utf-8'):
     try:
         ustring = c_value.decode(encoding) if c_value is not NULL else None
@@ -231,18 +206,23 @@ cdef class PySaxonProcessor:
         cdef const char * c_str = NULL
         cdef bool l = license
         self._proc_counter.increment_proc_counter()
+        cdef char * c_cwd = NULL
+
+        py_str = os.getcwd().encode('UTF-8')
+        c_str = py_str if py_str is not None else ""
 
         if config_file is not None:
             '''make_c_str(config_file)'''
+
             py_config_string = config_file.encode('UTF-8') if config_file is not None else None
             c_str = py_config_string if config_file is not None else ""
             if c_str is not NULL:
                 self.thisptr = new saxoncClasses.SaxonProcessor(c_str)
-                self.thisptr.setcwd(os.getcwd().encode('UTF-8'))
+                self.thisptr.setcwd(c_cwd)
         else:
             try:
                 self.thisptr = new saxoncClasses.SaxonProcessor(l)
-                self.thisptr.setcwd(os.getcwd().encode('UTF-8'))
+                self.thisptr.setcwd(c_cwd)
             except:
                 raise Exception("Failed to create PySaxonProcessor object") from None
 
@@ -690,7 +670,7 @@ cdef class PySaxonProcessor:
         """
         return self.wrap_atomic_value(self.thisptr.makeDoubleValue(value))
 
-    def make_float_value(self, value):
+    def make_float_value(self, float value):
         """
         make_float_value(self, value)
         Factory method: makes a float value
@@ -1717,6 +1697,7 @@ cdef class PyXslt30Processor:
         """
         cdef const char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
+        cdef char * c_base_output_uri = NULL
         for key, value in kwds.items():
           if isinstance(value, str):
             if key == "source_file":
@@ -2376,6 +2357,7 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
+        cdef char * c_base_output_uri = NULL
         for key, value in kwds.items():
             if isinstance(value, str):
                 if key == "source_file":
@@ -2429,6 +2411,7 @@ cdef class PyXsltExecutable:
             2) result = executable.apply_templates_returning_value(source_file="cat.xml")
         """
         cdef const char * c_sourcefile = NULL
+        cdef const char * c_base_output_uri = NULL
         for key, value in kwds.items():
             if isinstance(value, str):
                 if key == "source_file":
@@ -2484,6 +2467,7 @@ cdef class PyXsltExecutable:
 			   print(content)
         """
         cdef const char * c_sourcefile = NULL
+        cdef const char * c_base_output_uri = NULL
         encoding = "UTF-8"
 
         for key, value in kwds.items():
@@ -2531,6 +2515,7 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_sourcefile = NULL
         cdef const char * c_outputfile = NULL
+        cdef const char * c_base_output_uri = NULL
         py_output_string = None
         for key, value in kwds.items():
             if isinstance(value, str):
@@ -2573,6 +2558,7 @@ cdef class PyXsltExecutable:
                result = executable.call_template_returning_value("main")
         """
         cdef const char * c_templateName = NULL
+        cdef const char * c_base_output_uri = NULL
         for key, value in kwds.items():
             if isinstance(value, str):
                 if key == "base_output_uri":
@@ -2613,6 +2599,7 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_templateName = NULL
         cdef const char * c_string = NULL
+        cdef const char * c_base_output_uri = NULL
         for key, value in kwds.items():
             if isinstance(value, str):
                 if key == "base_output_uri":
@@ -2658,6 +2645,7 @@ cdef class PyXsltExecutable:
         """
         cdef char * c_outputfile = NULL
         cdef const char * c_templateName = NULL
+        cdef const char * c_base_output_uri = NULL
         py_output_string = None
         for key, value in kwds.items():
             if isinstance(value, str):
@@ -2696,6 +2684,7 @@ cdef class PyXsltExecutable:
 
         """
         cdef const char * c_functionName = NULL
+        cdef const char * c_base_output_uri = NULL
         for key, value in kwds.items():
             if isinstance(value, str):
                 if key == "base_output_uri":
@@ -2741,6 +2730,7 @@ cdef class PyXsltExecutable:
                result = executable.call_function_returning_string("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
         """
         cdef const char * c_functionName = NULL
+        cdef const char * c_base_output_uri = NULL
         cdef PyXdmValue value_ = None
         for key, value in kwds.items():
             if isinstance(value, str):
@@ -2788,6 +2778,7 @@ cdef class PyXsltExecutable:
         """
         cdef const char * c_functionName = NULL
         cdef const char * c_outputfile = NULL
+        cdef const char * c_base_output_uri = NULL
         cdef PyXdmValue value_ = None
         for key, value in kwds.items():
             if isinstance(value, str):
@@ -2974,6 +2965,7 @@ cdef class PyXQueryProcessor:
         Returns:
             bool: True if the removal of the parameter has been successful, False otherwise.
         """
+        cdef const char * c_name = NULL
         py_value_string = name.encode('UTF-8') if name is not None else None
         c_name = py_value_string if name is not None else ""
         ok = self.thisxqptr.removeParameter(c_name)
@@ -2995,6 +2987,8 @@ cdef class PyXQueryProcessor:
             'resources': directory to find Saxon data files,\r
             's': source as file name,\r
         """
+        cdef const char * c_name = NULL
+        cdef const char * c_value = NULL
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_name = py_name_string if name is not None else ""
         py_value_string = value.encode('UTF-8') if value is not None else None
@@ -3281,6 +3275,7 @@ cdef class PyXQueryProcessor:
         Args:
             cwd (str): current working directory
         """
+        cdef const char * c_cwd = NULL
         py_cwd_string = cwd.encode('UTF-8') if cwd is not None else None
         c_cwd = py_cwd_string if cwd is not None else ""
         self.thisxqptr.setcwd(c_cwd)
@@ -3381,6 +3376,7 @@ cdef class PyXPathProcessor:
             PySaxonApiError: Error if failure to evaluate XPath expression
         """
         cdef char * c_encoding_string = NULL
+        cdef const char * c_xpath = NULL
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
         cdef PyXdmFunctionItem fval = None
@@ -3476,8 +3472,9 @@ cdef class PyXPathProcessor:
         Args:
             cwd (str): current working directory
         """
+        cdef const char * c_cwd = NULL
         py_cwd_string = cwd.encode('UTF-8') if cwd is not None else None
-        cdef char * c_cwd = py_cwd_string if cwd is not None else ""
+        c_cwd = py_cwd_string if cwd is not None else ""
         self.thisxpptr.setcwd(c_cwd)
 
     @property
@@ -3504,6 +3501,7 @@ cdef class PyXPathProcessor:
             PySaxonApiError: Error if failure to evaluate XPath expression
         """
         cdef char * c_encoding_string = NULL
+        cdef char * c_xpath = NULL
         if encoding is None:
             encoding = sys.getdefaultencoding()
         else:
@@ -3556,6 +3554,8 @@ cdef class PyXPathProcessor:
             's': source as file name,\r
             'extc': Register native library to be used with extension functions
         """
+        cdef char * c_name = NULL
+        cdef const char * c_value = NULL
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_name = py_name_string if name is not None else ""
         py_value_string = value.encode('UTF-8') if value is not None else None
@@ -3588,6 +3588,8 @@ cdef class PyXPathProcessor:
                 in this case the prefix will not be available for use, except in the case where the prefix is also a
                 zero length string, in which case the absence of a prefix implies that the name is in no namespace.
         """
+        cdef char * c_prefix = NULL
+        cdef char * c_uri = NULL
         py_prefix_string = prefix.encode('UTF-8') if prefix is not None else None
         c_prefix = py_prefix_string if prefix is not None else ""
         py_uri_string = uri.encode('UTF-8') if uri is not None else None
@@ -3615,6 +3617,7 @@ cdef class PyXPathProcessor:
         Args:
         name (str): The name of the variable, as a string in clark notation
         """
+        cdef char * c_name = NULL
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_name = py_name_string if name is not None else ""
         self.thisxpptr.declareVariable(c_name)
@@ -3688,6 +3691,7 @@ cdef class PyXPathProcessor:
         uri (str): The schema namespace to be imported. To import declarations in a no-namespace schema,
            supply a zero-length string.
         """
+        cdef char * c_name = NULL
         py_uri_string = uri.encode('UTF-8') if uri is not None else None
         c_name = py_uri_string if uri is not None else ""
         self.thisxpptr.importSchemaNamespace(c_name)
@@ -3834,6 +3838,7 @@ cdef class PySchemaValidator:
         Args:
             file_name (str): The file name that will be used for the saved SCM
         """
+        cdef const char * c_source = NULL
         py_value_string = file_name.encode('UTF-8') if file_name is not None else None
         c_source = py_value_string
         if file_name is not None:
@@ -3984,7 +3989,6 @@ cdef class PySchemaValidator:
             value (PyXdmValue): the value of the parameter, or NULL to clear a previously set value
         """
         cdef const char * c_str = NULL
-        '''make_c_str(name)'''
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_str = py_name_string if name is not None else ""
         if c_str is not NULL:
@@ -4035,7 +4039,6 @@ cdef class PySchemaValidator:
             'lax': Boolean to set the validation mode to strict (False) or lax ('True')
         """
         cdef const char * c_name = NULL
-        '''make_c_str(name)'''
 
         if encoding is None:
             encoding = sys.getdefaultencoding()
@@ -5014,7 +5017,7 @@ cdef class PyXdmAtomicValue(PyXdmItem):
         elif isinstance(other, float):
             return self.double_value == other
         elif isinstance(other, str):
-            return (self.string_value) == (other.string_value)
+            return self.string_value == other
         elif other in (True, False):
             return self.boolean_value == other
         return False
@@ -5114,6 +5117,7 @@ cdef class PyXdmFunctionItem(PyXdmItem):
             PyXdmFunctionItem: the requested function
         """
         cdef char * c_str = NULL
+        cdef char * c_name = NULL
         cdef PyXdmFunctionItem func = None
         cdef saxoncClasses.XdmFunctionItem * c_func = NULL
         if proc is None:
