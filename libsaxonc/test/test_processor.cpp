@@ -25,7 +25,6 @@ TEST_CASE( "Resolving a relative path to an external entity where CWD has", "[pr
     auto base_wd = srcfile.substr(0, last_path_sep) + path_sep + "test_data";
     auto trailing_wd = base_wd + path_sep;
 
-
     std::ifstream is(trailing_wd + "has_ent.xml");
     std::stringstream buf;
     buf << is.rdbuf();
