@@ -32,25 +32,27 @@ TEST_CASE( "parsing a document from a string with a DocumentBuilder resolves a r
     buf << is.rdbuf();
     string input = buf.str();
     auto *processor = new SaxonProcessor(false);
-    DocumentBuilder *builder = processor->newDocumentBuilder();
 
     SECTION("no trailing path separator") {
         processor->setcwd(base_wd.c_str());
+        DocumentBuilder *builder = processor->newDocumentBuilder();
 
         auto document = builder->parseXmlFromString(input.c_str(), "UTF-8");
         auto expected = document->getStringValue();
         REQUIRE_THAT( expected , ContainsSubstring("Hello Entity") );
+        delete builder;
     }
 
     SECTION("a trailing path separator") {
         processor->setcwd(trailing_wd.c_str());
+        DocumentBuilder *builder = processor->newDocumentBuilder();
 
         auto document = builder->parseXmlFromString(input.c_str(), "UTF-8");
         auto expected = document->getStringValue();
         REQUIRE_THAT( expected , ContainsSubstring("Hello Entity") );
+        delete builder;
     }
 
-    delete builder;
     delete processor;
     processor->release();
     delete SaxonProcessor::sxn_environ;

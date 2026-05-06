@@ -101,7 +101,7 @@ XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
                                              const char *encoding) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result = j_main_parseXmlString(thread,
-      (baseURI.empty() ? (char *)nullptr : (char *)baseURI.c_str()),
+      nullptr,
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValidator != nullptr
            ? (void *)schemaValidator->getUnderlyingValidator()
