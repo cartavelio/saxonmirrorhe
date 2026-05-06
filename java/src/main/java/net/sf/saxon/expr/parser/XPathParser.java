@@ -3277,7 +3277,7 @@ public class XPathParser {
             try {
                 ref = env.bindVariable(vtest);
             } catch (XPathException err) {
-                throw err.maybeWithLocation(makeLocation());
+                throw err.maybeWithLocation(makeLocation(offset));
             }
         }
         setLocation(ref, offset);
@@ -3499,12 +3499,14 @@ public class XPathParser {
                 return parseUnionNodeTest(nodeType);
 
             case Token.NAME:
+                NodeTest nt = makeNameTest(nodeType, tokv, nodeType == Type.ELEMENT);
                 nextToken();
-                return makeNameTest(nodeType, tokv, nodeType == Type.ELEMENT);
+                return nt;
 
             case Token.PREFIX:
+                NamespaceTest nmt = makeNamespaceTest(nodeType, tokv);
                 nextToken();
-                return makeNamespaceTest(nodeType, tokv);
+                return nmt;
 
             case Token.SUFFIX:
                 nextToken();
