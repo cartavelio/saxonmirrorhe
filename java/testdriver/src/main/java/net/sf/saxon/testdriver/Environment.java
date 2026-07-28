@@ -345,6 +345,12 @@ public class Environment implements ResourceResolver {
         // handle sandpit
         for (XdmNode param : env.children("sandpit")) {
             String path = param.attribute("path");
+            String cwd = param.attribute("cwd");
+
+            if (cwd != null && !"parent".equals(cwd)) {
+                throw new IllegalArgumentException("The only sandpit/@cwd value supported is 'parent'");
+            }
+
             try {
                 File tempdir = File.createTempFile(name + ".", ".sandpit");
                 boolean ok = tempdir.delete();
@@ -365,8 +371,13 @@ public class Environment implements ResourceResolver {
                     environment.sandpit = sandpit;
                     System.err.println("Sandpit: " + sandpit.getAbsolutePath());
 
-                    System.setProperty("user.dir", sandpit.getAbsolutePath());
-                    System.setProperty("expath.base.directory", sandpit.getAbsolutePath());
+                    if ("parent".equals(cwd)) {
+                        System.setProperty("user.dir", sandpit.getParentFile().getAbsolutePath());
+                        System.setProperty("expath.base.directory", sandpit.getParentFile().getAbsolutePath());
+                    } else {
+                        System.setProperty("user.dir", sandpit.getAbsolutePath());
+                        System.setProperty("expath.base.directory", sandpit.getAbsolutePath());
+                    }
                 } else {
                     System.err.println("Failed to make temporary directories for sandpit");
                 }
