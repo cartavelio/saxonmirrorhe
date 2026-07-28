@@ -2,8 +2,6 @@ plugins {
   id("java-library")
   id("saxon-build")
   id("com.saxonica.build.managebranches")
-  id("com.saxonica.build.testsuites")
-  id("saxonj")
 }
 
 repositories {
