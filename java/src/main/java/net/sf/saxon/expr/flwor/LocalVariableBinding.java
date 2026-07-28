@@ -11,7 +11,7 @@ import net.sf.saxon.expr.FilterExpression;
 import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.IntegerValue;
@@ -29,6 +29,7 @@ public class LocalVariableBinding implements LocalBinding {
     private SequenceType requiredType;
     private int slotNumber = -999;
     private int refCount = 0;
+    private boolean requiresEagerEvaluation;
 
     /**
      * Create a LocalVariableBinding
@@ -122,6 +123,9 @@ public class LocalVariableBinding implements LocalBinding {
         if (refCount != FilterExpression.FILTERED) {
             refCount += (isLoopingReference ? 10 : 1);
         }
+        if (ExpressionTool.isCatchableReference(ref, this)) {
+            requiresEagerEvaluation = true;
+        }
     }
 
     /**
@@ -201,6 +205,10 @@ public class LocalVariableBinding implements LocalBinding {
     @Override
     public boolean isGlobal() {
         return false;
+    }
+
+    public boolean isRequiresEagerEvaluation() {
+        return requiresEagerEvaluation;
     }
 
 

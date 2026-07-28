@@ -46,6 +46,24 @@ public class LetExpression extends Assignation {
         //System.err.println("let");
     }
 
+    /**
+     * Register a variable reference that refers to the variable bound in this expression
+     *
+     * @param ref                the variable reference
+     * @param isLoopingReference - true if the reference occurs within a loop, such as the predicate
+     *                           of a filter expression
+     */
+
+    @Override
+    public void addReference(VariableReference ref, boolean isLoopingReference) {
+        super.addReference(ref, isLoopingReference);
+        // If a reference to this variable appears within a try/catch, and the declaration
+        // is outside the try/catch, then we need to use eager evaluation to ensure that errors
+        // are not caught inappropriately. See bug 7083.
+        if (ExpressionTool.isCatchableReference(ref, this)) {
+            needsEagerEvaluation = true;
+        }
+    }
 
     /**
      * Say whether this expression originates as an XSLT instruction
