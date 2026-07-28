@@ -393,7 +393,7 @@ void XdmValue::releaseXdmValue() {
 }
 
 XdmItem *XdmValue::itemAt(int n) {
-  if (values!= nullptr && n >= 0 && (unsigned int)n < xdmSize) {
+  if (values!= nullptr && n >= 0 && n < xdmSize) {
     relinquished_values[n] = (char)1;
     return values[n];
   }
