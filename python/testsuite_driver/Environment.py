@@ -103,8 +103,16 @@ class Spec:
 
 
 class Environment:
+    remove_temp_files = []
 
-
+    @staticmethod
+    def environment_cleanup():
+        for file in Environment.remove_temp_files:
+            if os.path.exists(file):
+                if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                    print("Removing file = ", file)
+                os.remove(file)
+        Environment.remove_temp_files.clear()
 
 
     def __init__(self):
@@ -158,6 +166,7 @@ class Environment:
         self.params = {}
 
         self.reset_actions = []
+
         self.usable = True
 
     def create_processors(self):
@@ -208,6 +217,7 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
         resources_exec.set_cwd(str(cwd_from_base_uri))
         resources_exec.apply_templates_returning_file(xdm_value=env_tempi, output_file=base_uri+"/"+resource_filename, base_output_uri=cwd_from_base_uri)
         environment.proc.set_catalog_files([base_uri+"/"+resource_filename])
+        Environment.remove_temp_files.append(base_uri+"/"+resource_filename)
         '''
         TODO: remove the created temp catalog files
         environment.resources_remove.append(base_uri+"/"+resource_filename)'''
@@ -508,3 +518,5 @@ def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, e
             except saxonc.PySaxonApiError as ex:
                 print("Failed loading source raw_uri = ", raw_uri)
                 print("*** failed to build source document " + str(ex))
+
+
