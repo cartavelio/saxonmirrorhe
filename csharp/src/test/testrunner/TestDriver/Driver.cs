@@ -47,7 +47,6 @@ namespace TestDriver {
         protected string edition = "EE";
         public bool schemaAware = false;
 
-
         static HashSet<string> unsharedEnvironments = new HashSet<string>();
         protected bool export = false;
         private string exceptionsFileName = "exceptions.xml";
@@ -249,6 +248,7 @@ namespace TestDriver {
                     feedback.Message("No results document specified (use -lang option)", true);
                 }
 
+                resultsDoc.SetDriverArgs(args);
                 schemaAware = edition == "EE";
                 driverSerializer.OutputStream = Console.OpenStandardError();
                 driverSerializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");

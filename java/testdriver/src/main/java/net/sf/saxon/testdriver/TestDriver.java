@@ -78,6 +78,7 @@ public abstract class TestDriver {
     protected boolean quiet = false;
     protected boolean strict = false;
     protected Set<String> laxTests = new HashSet<>();
+    protected String[] driverArgs;
 
     static Set<String> unsharedEnvironments = new HashSet<>();
     static {
@@ -92,7 +93,7 @@ public abstract class TestDriver {
     }
 
     public void go(String[] args) throws Exception {
-
+        driverArgs = args;
         long startTime = System.nanoTime();
         if (driverProc == null) {
             driverProc = new Processor(false);
@@ -325,6 +326,7 @@ public abstract class TestDriver {
         }
 
         try {
+            resultsDoc.setDriverArgs(driverArgs);
             writeResultFilePreamble(driverProc, catalog);
         } catch (Exception e) {
             throw new RuntimeException(e);

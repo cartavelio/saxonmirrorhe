@@ -11,7 +11,6 @@ now = datetime.now()
 '''product = "SaxonC-HE"'''
 
 
-
 class PyTestReport:
     result_root: ET.Element
     current_test_set: ET.Element
@@ -21,6 +20,7 @@ class PyTestReport:
     product = None
     version = None
     filename = None
+    driverArgs = None
 
     def __init__(self, td, ns, lang, p, v, fname=None):
         self.result_root = None
@@ -34,6 +34,9 @@ class PyTestReport:
 
     def file_name(self, fn):
         self.filename = fn
+
+    def set_driver_args(self, argv):
+        self.driverArgs = argv
 
     def write_result_file_preamble(self, proc: saxonc.PySaxonProcessor, td, config: list):
         global product
@@ -50,6 +53,13 @@ class PyTestReport:
         ET.SubElement(implementation, "organization",  name="http://www.saxonica.com/", anonymous="false")
         ET.SubElement(implementation, "submitter", name="O'Neil Delpratt", email="oneil@saxonica.com")
         ET.SubElement(implementation, "configuration", timeRun=str(current_time), lang=self.language)
+
+        if self.driverArgs:
+            arguments = ET.SubElement(implementation, "arguments")
+            for darg in self.driverArgs:
+                arg = ET.SubElement(arguments, "arg")
+                arg.text = darg
+
         ET.SubElement(self.result_root, "test-run", dateRun=str(datetime.today())[0:10], testsuiteVersion="3.0.1")
 
     def start_test_set_element(self, func_set_node: saxonc.PyXdmNode, comment):
