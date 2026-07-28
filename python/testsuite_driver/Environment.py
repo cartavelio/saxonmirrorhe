@@ -107,15 +107,15 @@ class Environment:
 
     @staticmethod
     def environment_cleanup():
-        print("environment cleanup called")
+        print("Environment cleanup called")
         for file in Environment.remove_temp_files:
             if os.path.exists(file):
                 if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                     print("Removing file = ", file)
-                print("Removing file = ", file)
                 os.remove(file)
             else:
-                print("Not removing file = ", file)
+                if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                    print("Not removing file = ", file)
 
         Environment.remove_temp_files.clear()
 
