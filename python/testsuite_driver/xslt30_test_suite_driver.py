@@ -671,7 +671,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
         if stylesheet is not None:
             file_name = stylesheet.get_node_value().get_attribute_value("file")
-            environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, lang=spec.version)
+            environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, lang="3.0")
         elif principle_package is not None:
             if used_package is not None:
                 print('used Package = ' + str(used_package.size))
@@ -720,7 +720,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         environment.sheet.set_save_xsl_message(True, None)
 
         if environment.context_item is not None:
-            '''print(environment.context_item)'''
+            print(environment.context_item)
             environment.sheet.set_global_context_item(xdm_item=environment.context_item)
 
         '''if initial_template is not None or initial_mode_name is not None:'''

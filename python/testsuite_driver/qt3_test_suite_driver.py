@@ -448,6 +448,7 @@ def run_test_case(test_set_name, test_case_node: saxonc.PyXdmNode, xpath_proc: s
     test_queries = xpath_proc.evaluate("test")
 
     environment = Environment()
+    environment.create_processors()
     '''(localEnvironments)['default']'''
     '''Environment()'''
 
@@ -459,8 +460,7 @@ def run_test_case(test_set_name, test_case_node: saxonc.PyXdmNode, xpath_proc: s
         if env_ref is None:
             if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                 print('Creating new environment')
-            environment = Environment()
-            process_environment(cwd_from_base_uri, xpath_proc, env_node_i, spec, globalEnvironments,
+            environment = process_environment(cwd_from_base_uri, xpath_proc, env_node_i, spec, globalEnvironments,
                                               environment)
 
         else:
