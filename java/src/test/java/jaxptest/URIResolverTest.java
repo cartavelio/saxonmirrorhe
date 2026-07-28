@@ -43,10 +43,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  * originally created by Scott Boag, but much evolved since.
  */
 public class URIResolverTest {
-    private final Path d = Testdata.path("trax");
+    private final Path traxDir = Testdata.path("trax");
 
-    private final File foo_xml = d.resolve("xml/foo.xml").toFile();
-    private final File foo_xsl = d.resolve("xsl/foo.xsl").toFile();
+    private final File foo_xml = traxDir.resolve("xml/foo.xml").toFile();
+    private final File foo_xsl = traxDir.resolve("xsl/foo.xsl").toFile();
 
     @Test
     public void testGetURIResolver() {
@@ -288,15 +288,13 @@ public class URIResolverTest {
 
     private static class Resolver2 extends StandardURIResolver {
         public Configuration config;
-        public Set<String> history = new HashSet<String>();
-        public Map<String, String> mappings = new HashMap<String, String>();
+        public Set<String> history = new HashSet<>();
+        public Map<String, String> mappings = new HashMap<>();
+
+        private final Path traxDir = Testdata.path("trax");
 
         public Resolver2(Configuration config) {
             this.config = config;
-        }
-
-        public void map(String from, String to) {
-            mappings.put(from, to);
         }
 
         @Override
@@ -304,15 +302,15 @@ public class URIResolverTest {
             try {
                 history.add(href);
                 base = base.replace("/dummy/", "");
-                for (Map.Entry<String, String> entry : mappings.entrySet()) {
-                    href = href.replace(entry.getKey(), entry.getValue());
-                }
+//                for (Map.Entry<String, String> entry : mappings.entrySet()) {
+//                    href = href.replace(entry.getKey(), entry.getValue());
+//                }
                 SAXBuilder builder = new SAXBuilder();
                 File file;
                 if (href.endsWith("inc1/inc1.xsl")) {
-                    file = Testdata.file("/trax/xsl/inc1/inc1.xsl");
+                    file = traxDir.resolve("xsl/inc1/inc1.xsl").toFile();
                 } else if (href.endsWith("inc2/inc2.xsl")) {
-                    file = Testdata.file("/trax/xsl/inc1/inc2/inc2.xsl");
+                    file = traxDir.resolve("xsl/inc1/inc2/inc2.xsl").toFile();
                 } else {
                     throw new XPathException("Unknown file " + href);
                 }
