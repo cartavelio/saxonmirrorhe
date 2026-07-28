@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- exceptions file for the QT4 Test Suite -->
 <exceptions>
+   <exception test-set="fn-generate-id" 
+      test-case="generate-id-024
+                 generate-id-025
+                 generate-id-026
+                 generate-id-027
+                 generate-id-028
+                 generate-id-029
+                 generate-id-030
+                 generate-id-031
+                 generate-id-032
+                 generate-id-033
+                 generate-id-034" run="false" report="n/a">
+      <created by="Norman Walsh" on="2026-07-02"/>
+      <reason>Not implemented in Saxon 12</reason>
+   </exception>
+
    <exception test-set="fn-deep-equal" 
       test-case="deep-equal-40-functions-001
       deep-equal-40-functions-002
@@ -18,9 +34,6 @@
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
-   
-   
-   
    
    <exception test-set="op-same-key" 
       test-case="same-key-006a" run="false" report="n/a">

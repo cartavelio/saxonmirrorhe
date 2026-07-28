@@ -42,7 +42,11 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
                 Configuration config = getRetainedStaticContext().getConfiguration();
                 UnicodeString re = ((StringLiteral) arguments[1]).getGroundedValue().getUnicodeStringValue();
                 String flags = ((StringLiteral) arguments[arguments.length - 1]).stringify();
-                String hostLang = "XP" + getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                String hostLang = "XP30";
+                // Saxon 12 isn't really prepared for XP40 regular expressions
+                if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+                    hostLang = "XP" + getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+                }
                 if (config.getXsdVersion() == Configuration.XSD11) {
                     hostLang += "/XSD11";
                 }

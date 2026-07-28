@@ -51,12 +51,10 @@ public class Matches extends RegexFunction {
                 case 30:
                     lang = "XP30";
                     break;
+                case 40: // Saxon 12 isn't really prepared for 4.0 regex
                 case 31:
                 default:
                     lang = "XP31";
-                    break;
-                case 40:
-                    lang = "XP40";
                     break;
             };
             if (context.getConfiguration().getXsdVersion() == Configuration.XSD11) {
