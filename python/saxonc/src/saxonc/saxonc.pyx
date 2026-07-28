@@ -137,7 +137,7 @@ def create_xdm_dict(proc, mmap):
 
             xdmMap[xdmKey_] = xdmValue_
         else:
-                   raise Exception("Error in making Dictionary")
+                   raise PySaxonApiError("Error in making Dictionary")
 
     return xdmMap
 
@@ -224,7 +224,7 @@ cdef class PySaxonProcessor:
                 self.thisptr = new saxoncClasses.SaxonProcessor(l)
                 self.thisptr.setcwd(c_cwd)
             except:
-                raise Exception("Failed to create PySaxonProcessor object") from None
+                raise PySaxonApiError("Failed to create PySaxonProcessor object") from None
 
 
     def __dealloc__(self):
@@ -438,7 +438,7 @@ cdef class PySaxonProcessor:
         cdef PySchemaValidator val = PySchemaValidator(self)
         val.thissvptr = self.thisptr.newSchemaValidator()
         if val.thissvptr is NULL:
-            raise Exception("Error: Saxon Processor is not licensed for schema processing!")
+            raise PySaxonApiError("Error: Saxon Processor is not licensed for schema processing!")
         return val
 
     def eqname_to_clark_name(self, name, encoding=None):
@@ -760,7 +760,7 @@ cdef class PySaxonProcessor:
                 value = args[x]
                 args_array[x] = value._get_underlying_value()
             else:
-                raise Exception("Argument value at position ", x, " is not a PyXdmValue. The following object found: ",
+                raise PySaxonApiError("Argument value at position ", x, " is not a PyXdmValue. The following object found: ",
                                 type(args[x]))
         return args_array
 
@@ -807,7 +807,7 @@ cdef class PySaxonProcessor:
                 c_keys[i]= (<PyXdmAtomicValue> key)._get_underlying_atomic_value()
                 c_values[i] = (<PyXdmValue> value)._get_underlying_value()
             else:
-                 raise Exception("Error in the making of the PyXdmMap - wrong key type")
+                 raise PySaxonApiError("Error in the making of the PyXdmMap - wrong key type")
             i +=1
 
         if len_ == 0:
@@ -859,10 +859,10 @@ cdef class PySaxonProcessor:
 
                      c_dataMap[c_key] = <saxoncClasses.XdmValue *> avalue_.derivedaptr
                  else:
-                       raise Exception("Error in making PyXdmMap")
+                       raise PySaxonApiError("Error in making PyXdmMap")
 
             else:
-                 raise Exception("Error in the making of the PyXdmMap - wrong key type")
+                 raise PySaxonApiError("Error in the making of the PyXdmMap - wrong key type")
 
         if len(dataMap) == 0:
             return None
@@ -907,7 +907,7 @@ cdef class PySaxonProcessor:
             if c_filename_string is not NULL:
                 catalog_files_array[x] = c_filename_string
             else:
-                raise Exception("Found None catalog file")
+                raise PySaxonApiError("Found None catalog file")
 
         self.thisptr.setCatalogFiles(catalog_files_array, _len)
         free(catalog_files_array)
@@ -961,12 +961,12 @@ cdef class PySaxonProcessor:
         if "xml_text" in kwds:
           py_value = kwds["xml_text"]
           if py_value is None:
-              raise Exception("XML text is None")
+              raise PySaxonApiError("XML text is None")
           '''c_xml_string = make_c_str(py_value)'''
           py_text_string = py_value.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_value is not None else None
           c_xml_string = py_text_string if py_value is not None else ""
           if c_xml_string == NULL:
-              raise Exception("Error converting XML text")
+              raise PySaxonApiError("Error converting XML text")
           return self.wrap_node(self.thisptr.parseXmlFromString(c_xml_string, c_encoding_string, NULL))
         elif "xml_file_name" in kwds:
           py_value  = kwds["xml_file_name"]
@@ -1016,11 +1016,11 @@ cdef class PySaxonProcessor:
         if "json_text" in kwds:
           py_value = kwds["json_text"]
           if py_value is None:
-              raise Exception("JSON text is None")
+              raise PySaxonApiError("JSON text is None")
           py_text_string = py_value.encode(encoding if encoding is not None else sys.getdefaultencoding()) if py_value is not None else None
           c_json_string = py_text_string if py_value is not None else ""
           if c_json_string == NULL:
-              raise Exception("Error converting JSON text")
+              raise PySaxonApiError("Error converting JSON text")
           return self.wrap_value(self.thisptr.parseJsonFromString(c_json_string, c_encoding_string if encoding is not None else NULL))
         elif "json_file_name" in kwds:
           py_value  = kwds["json_file_name"]
@@ -1028,7 +1028,7 @@ cdef class PySaxonProcessor:
           c_json_string = py_value_string if py_value is not None else ""
           return self.wrap_value(self.thisptr.parseJsonFromFile(c_json_string))
         else:
-           raise Exception(py_error_message)
+           raise PySaxonApiError(py_error_message)
 
     @property
     def exception_occurred(self):
@@ -1158,7 +1158,7 @@ cdef class PyDocumentBuilder:
        cdef PySchemaValidator val = PySchemaValidator(self.processor)
        val.thissvptr = self.thisdbptr.getSchemaValidator()
        if val.thissvptr is NULL:
-           raise Exception("Error: Saxon Processor is not licensed for schema processing!")
+           raise PySaxonApiError("Error: Saxon Processor is not licensed for schema processing!")
        return val
 
     @property
@@ -1495,7 +1495,7 @@ cdef class PyXslt30Processor:
               self.thisxptr.setRelocatable(c_relocate)
 
           if "output_file" not in kwds:
-            raise Exception("output_file keyword argument is required for compile_stylesheet when save=True")
+            raise PySaxonApiError("output_file keyword argument is required for compile_stylesheet when save=True")
           py_output_string = kwds["output_file"]
           '''c_outputfile = make_c_str(py_output_string)'''
           py_output_sstring = py_output_string.encode('UTF-8') if py_output_string is not None else None
@@ -1510,7 +1510,7 @@ cdef class PyXslt30Processor:
           elif "stylesheet_file" in kwds:
             py_stylesheet_string = kwds["stylesheet_file"]
             '''if py_stylesheet_string  is None or isfile(py_stylesheet_string) == False:
-              raise Exception("Stylesheet file does not exist")'''
+              raise PySaxonApiError("Stylesheet file does not exist")'''
             '''c_stylesheet = make_c_str(py_stylesheet_string)'''
             py__string = py_stylesheet_string.encode('UTF-8') if py_stylesheet_string is not None else None
             c_stylesheet = py__string if py_stylesheet_string is not None else ""
@@ -1604,7 +1604,7 @@ cdef class PyXslt30Processor:
         cdef py_value = None
         cdef py_value2 = None
         if len(kwds) == 0:
-            raise Exception("transform_to_string should only contain the following keyword arguments: (source_file, stylesheet_file, base_output_uri, encoding)")
+            raise PySaxonApiError("transform_to_string should only contain the following keyword arguments: (source_file, stylesheet_file, base_output_uri, encoding)")
 
         if "source_file" in kwds:
             py_value2 = kwds["source_file"]
@@ -1612,7 +1612,7 @@ cdef class PyXslt30Processor:
             py_string_string2 = py_value2.encode('utf-8') if py_value2 is not None else None
             c_sourcefile = py_string_string2 if py_value2 is not None else ""
         else:
-            raise Exception("Error transform_to_string keyword arguments does not contain source_file")
+            raise PySaxonApiError("Error transform_to_string keyword arguments does not contain source_file")
 
         if "base_output_uri" in kwds:
             py_value = kwds["base_output_uri"]
@@ -1627,7 +1627,7 @@ cdef class PyXslt30Processor:
             c_stylesheet = py_string_string if py_value1 is not None else ""
             '''make_c_str(py_value)'''
         else:
-            raise Exception("Error transform_to_string keyword arguments does not contain stylesheet_file")
+            raise PySaxonApiError("Error transform_to_string keyword arguments does not contain stylesheet_file")
 
         encoding = sys.getdefaultencoding()
         if "encoding" in kwds:
@@ -1894,7 +1894,7 @@ cdef class PyXsltExecutable:
                 self.__global_context_item = self.processor.wrap_item(xdm_item.derivedptr)
                 self.thisxptr.setGlobalContextItem(xdm_item.derivedptr)
             else:
-                raise Exception("xdm_item value must be of type PyXdmItem")
+                raise PySaxonApiError("xdm_item value must be of type PyXdmItem")
         else:
             raise Exception(py_error_message)
 
@@ -2169,7 +2169,7 @@ cdef class PyXsltExecutable:
                 param_dict[key] = self.processor.wrap_value(_value._get_underlying_value())
                 c_params[key_str] = _value._get_underlying_value()
             else:
-                raise Exception("Initial template parameters can only be of type PyXdmValue or its sub-types")
+                raise PySaxonApiError("Initial template parameters can only be of type PyXdmValue or its sub-types")
         if len(parameters) > 0:
             self.thisxptr.setInitialTemplateParameters(c_params, c_tunnel)
 
@@ -2328,7 +2328,7 @@ cdef class PyXsltExecutable:
                 self.__parameters["node"] = self.processor.wrap_value(node_._get_underlying_value())
                 self.thisxptr.transformToFile(node_.derivednptr)
             else:
-                raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
+                raise PySaxonApiError("Keyword argument 'xdm_node' is not of type PyXdmNode")
 
         else:
             self.thisxptr.transformFileToFile(c_sourcefile, NULL)
@@ -2380,7 +2380,7 @@ cdef class PyXsltExecutable:
                 self.__parameters["node"] = self.processor.wrap_value(node_._get_underlying_value())
                 xdmValue = self.thisxptr.transformToValue(node_.derivednptr)
             else:
-                raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
+                raise PySaxonApiError("Keyword argument 'xdm_node' is not of type PyXdmNode")
 
         else:
             xdmValue = self.thisxptr.transformFileToValue(c_sourcefile)
@@ -4425,7 +4425,7 @@ cdef class PyXdmItem(PyXdmValue):
             PyXdmNode: Subclass this object to PyXdmNode or error
         """
         if self.is_node == False:
-          raise Exception("The PyXdmItem is not a PyXdmNode therefore cannot be sub-classed to a PyXdmNode")
+          raise PySaxonApiError("The PyXdmItem is not a PyXdmNode therefore cannot be sub-classed to a PyXdmNode")
         return self.processor.wrap_node(<saxoncClasses.XdmNode*> self.derivedptr)
 
      def get_map_value(self):
@@ -4436,7 +4436,7 @@ cdef class PyXdmItem(PyXdmValue):
             PyXdmNode: Subclass this object to PyXdmMap or error
         """
         if self.is_map == False:
-          raise Exception("The PyXdmItem is not a PyXdmMap therefore cannot be sub-classed to a PyXdmMap")
+          raise PySaxonApiError("The PyXdmItem is not a PyXdmMap therefore cannot be sub-classed to a PyXdmMap")
         return self.processor.wrap_map(<saxoncClasses.XdmMap*> self.derivedptr)
 
      def get_function_value(self):
@@ -4447,7 +4447,7 @@ cdef class PyXdmItem(PyXdmValue):
             PyXdmFunctionItem: Subclass this object to PyXdmFunctionItem or error
         """
         if self.is_function == False:
-          raise Exception("The PyXdmItem is not a PyXdmFunctionItem therefore cannot be sub-classed to a PyXdmFunctionItem")
+          raise PySaxonApiError("The PyXdmItem is not a PyXdmFunctionItem therefore cannot be sub-classed to a PyXdmFunctionItem")
         return self.processor.wrap_function_item(<saxoncClasses.XdmFunctionItem*> self.derivedptr)
 
      def get_array_value(self):
@@ -4458,7 +4458,7 @@ cdef class PyXdmItem(PyXdmValue):
             PyXdmArray: Subclass this object to PyXdmArray or error
         """
         if self.is_array == False:
-          raise Exception("The PyXdmItem is not a PyXdmArray therefore cannot be sub-classed to a PyXdmArray")
+          raise PySaxonApiError("The PyXdmItem is not a PyXdmArray therefore cannot be sub-classed to a PyXdmArray")
         return self.processor.wrap_array(<saxoncClasses.XdmArray*> self.derivedptr)
 
      @property
@@ -4494,7 +4494,7 @@ cdef class PyXdmItem(PyXdmValue):
             PyXdmAtomicValue: Subclass this object to PyXdmAtomicValue or error
         """
         if self.is_atomic == False:
-          raise Exception("The PyXdmItem is not a PyXdmAtomicValue")
+          raise PySaxonApiError("The PyXdmItem is not a PyXdmAtomicValue")
         return self.processor.wrap_atomic_value(<saxoncClasses.XdmAtomicValue*>self.derivedptr)
 
      cdef PyXdmItem _wrap_item(self, saxoncClasses.XdmItem* item_ptr):
