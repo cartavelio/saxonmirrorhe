@@ -494,6 +494,12 @@
       <reason>Spec has changed, implementation needs updating.</reason>
    </exception>
    
+   <exception test-set="prod-CompNamespaceConstructor" test-case="nscons-043 nscons-044" run="false" report="bug">
+      <created by="Michael Kay" on="2026-06-19"/>
+      <reason>See Saxon issue 6927. We decided to go with the XQ40 spec unconditionally.</reason>
+   </exception>
+   
+   
    
  
    
