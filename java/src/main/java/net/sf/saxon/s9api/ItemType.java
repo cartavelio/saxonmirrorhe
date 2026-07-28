@@ -57,7 +57,6 @@ public abstract class ItemType implements Predicate<XdmItem> {
 
     static {
         defaultConversionRules.setStringToDoubleConverter(StringToDouble.getInstance());
-        defaultConversionRules.setNotationSet(null);
         defaultConversionRules.setURIChecker(StandardURIChecker.getInstance());
     }
 

@@ -7,9 +7,6 @@
 
 package net.sf.saxon.lib;
 
-import net.sf.saxon.expr.sort.LFUCache;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NotationSet;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringToDouble11;
@@ -29,13 +26,8 @@ import net.sf.saxon.value.StringToDouble11;
 public class ConversionRules {
 
     private StringToDouble stringToDouble = StringToDouble11.getInstance();
-    private NotationSet notationSet; // may be null
     private URIChecker uriChecker;
     private boolean allowYearZero = true;
-    private TypeHierarchy typeHierarchy; // may be null
-
-    private final LFUCache<Integer, Converter> converterCache =
-            new LFUCache<>(100, true);
 
     /**
      * Default conversion rules. Changed in Saxon 9.9 so these are the XSD 1.1 rules (year zero allowed in dates,
@@ -71,15 +63,8 @@ public class ConversionRules {
 
     public void copyTo(ConversionRules cr) {
         cr.stringToDouble = stringToDouble;
-        cr.notationSet = notationSet;
         cr.uriChecker = uriChecker;
         cr.allowYearZero = allowYearZero;
-        cr.typeHierarchy = typeHierarchy;
-        cr.converterCache.clear();
-    }
-
-    public void setTypeHierarchy(TypeHierarchy typeHierarchy) {
-        this.typeHierarchy = typeHierarchy;
     }
 
     /**
@@ -220,39 +205,6 @@ public class ConversionRules {
     }
 
     /**
-     * Specify the set of notations that are accepted by xs:NOTATION and its subclasses. This is to
-     * support the rule that for a notation to be valid, it must be declared in an xs:notation declaration
-     * in the schema
-     *
-     * @param notations the set of notations that are recognized; or null, to indicate that all notation
-     *                  names are accepted
-     */
-
-    public void setNotationSet(/*@Nullable*/ NotationSet notations) {
-        this.notationSet = notations;
-    }
-
-    /**
-     * Ask whether a given notation is accepted by xs:NOTATION and its subclasses. This is to
-     * support the rule that for a notation to be valid, it must be declared in an xs:notation declaration
-     * in the schema
-     *
-     * @param uri   the namespace URI of the notation
-     * @param local the local part of the name of the notation
-     * @return true if the notation is in the set of recognized notation names
-     */
-
-
-    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
-        //noinspection SimplifiableIfStatement
-        if (notationSet == null) {
-            return true;    // in the absence of a known configuration, treat all notations as valid
-        } else {
-            return notationSet.isDeclaredNotation(uri, local);
-        }
-    }
-
-    /**
      * Set the class to be used for checking URI values. By default, no checking takes place.
      *
      * @param checker an object to be used for checking URIs; or null if any string is accepted as an anyURI value
@@ -317,19 +269,7 @@ public class ConversionRules {
         } else if (target == BuiltInAtomicType.UNTYPED_ATOMIC) {
             return Converter.ToUntypedAtomicConverter.INSTANCE;
         }
-        // For a lookup key, use the primitive type of the source type (always 10 bits) and the
-        // fingerprint of the target type (20 bits)
-        int key = (source.getPrimitiveType() << 20) | target.getFingerprint();
-        Converter converter = converterCache.get(key);
-        if (converter == null) {
-            converter = makeConverter(source, target);
-            if (converter != null) {
-                converterCache.put(key, converter);
-            } else {
-                return null;
-            }
-        }
-        return converter;
+        return makeConverter(source, target);
     }
 
     /**
@@ -377,7 +317,7 @@ public class ConversionRules {
 
         if (st == tt) {
             // we are casting between subtypes of the same primitive type.
-            if (typeHierarchy != null && typeHierarchy.isSubType(sourceType, targetType)) {
+            if (derivesFrom(sourceType, targetType)) {
                 return new Converter.UpCastingConverter(targetType);
             }
             @SuppressWarnings("RedundantCast")
@@ -656,6 +596,18 @@ public class ConversionRules {
             default:
                 throw new IllegalArgumentException("Unknown primitive type " + tt);
         }
+    }
+
+
+    private static boolean derivesFrom(AtomicType t1, AtomicType t2) {
+        SchemaType t = t1;
+        do {
+            if (t.getFingerprint() == t2.getFingerprint()) {
+                return true;
+            }
+            t = t.getBaseType();
+        } while (t instanceof AtomicType);
+        return false;
     }
 
     /**
