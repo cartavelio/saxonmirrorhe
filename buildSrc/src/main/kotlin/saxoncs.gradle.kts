@@ -481,11 +481,7 @@ val artifacts = tasks.register<Copy>("downloadRelease") {
   from(nupkgBuildTask.map { it.nupkgFile.get() })
 }
 
-tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
-  dependsOn(artifacts)
-}
-
-releaseArtifacts.outgoing.artifacts(artifacts.map { it.outputs.files })
+releaseArtifacts.outgoing.artifacts(artifacts.map { it.outputs.files }) { builtBy(artifacts) }
 
 // ============================================================
 
