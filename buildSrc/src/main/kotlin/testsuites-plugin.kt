@@ -256,7 +256,7 @@ abstract class TestSuitesExtension
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       dependsOn("dotnetBuildTestDrivers")
       this.edition = plugin.edition
-      this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
+      this.showOutput = project.findProperty("saxonicaTestDriverOutputRedirect") != "true"
       this.suite = suite
       this.language = language
       this.suiteDir = suiteDir(suite)
