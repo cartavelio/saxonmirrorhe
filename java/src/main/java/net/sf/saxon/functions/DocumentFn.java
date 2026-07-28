@@ -23,6 +23,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.value.Cardinality;
+import org.xmlresolver.utils.URIUtils;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
@@ -423,7 +424,8 @@ public class DocumentFn extends SystemFunction implements Callable {
                     if (href.isEmpty()) {
                         request.uri = baseURI;
                     } else {
-                        request.uri = new URI(baseURI).resolve(href).toString();
+                        // Use URIUtils (not URI.resolve) because URIUtils handles jar:file: URIs correctly.
+                        request.uri = URIUtils.resolve(new URI(baseURI), href).toString();
                     }
                 } catch (Exception ex) {
                     // Nevermind, just leave it relative
