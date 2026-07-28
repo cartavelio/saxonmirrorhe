@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 abstract class WinPythonVersionInstallTask : PythonVersionTask() {
     @get:OutputFile
-    abstract val pythonExe: RegularFileProperty
+    val _pythonExePathFile = pythonExePathFile.map { it }
 
     @TaskAction
     fun execute() {
@@ -29,7 +29,7 @@ abstract class WinPythonVersionInstallTask : PythonVersionTask() {
             outputStream.toString()
         }
 
-        pythonExe.get().asFile.writeText(exePath)
+        _pythonExePathFile.get().asFile.writeText(exePath)
     }
 }
 

@@ -13,6 +13,7 @@ import com.saxonica.build.python.PyenvUninstallPythonTask
 import com.saxonica.build.python.PythonReleaseWheels
 import com.saxonica.build.python.PythonVersionTask
 import com.saxonica.build.python.WinPythonVersionInstallTask
+import com.saxonica.build.python.WinPythonVersionUninstallTask
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.register
 import kotlin.collections.joinToString
@@ -35,11 +36,12 @@ extension.debugVariant = "valgrind"
 extension.definitionsDir = layout.projectDirectory.dir("pyenv")
 extension.installRoot = layout.projectDirectory.dir(".python-versions")
 
-inline fun <reified T : PythonVersionTask> createPythonVersionTask(name: String, py: PythonVersion, th: TargetHost, publish: ConsumableConfiguration): TaskProvider<T> {
+inline fun <reified T : PythonVersionTask> createPythonVersionTask(name: String, py: PythonVersion, th: TargetHost, publish: ConsumableConfiguration, action: Action<T>): TaskProvider<T> {
   val installTask = tasks.register<T>(name) {
     targetHost = th
     pythonVersionsRoot = extension.installRoot
     this.pythonVersion = AsInput.from<PythonVersion>(py)
+    action(this)
   }
   publish.outgoing.artifact(installTask) { builtBy(installTask) }
 
@@ -57,17 +59,15 @@ inline fun <reified T : PyenvPythonVersionTask> createUninstallTask(name: String
 }
 
 inline fun <reified T : PyenvPythonVersionTask> createPyenvPythonVersionTask(name: String, py: PythonVersion, th: TargetHost, publish: ConsumableConfiguration, action: Action<PyenvPythonVersionTask>) {
-  val installTask = createPythonVersionTask<T>(name, py, th, publish)
-
   val _pythonExePathFile = layout.buildDirectory.map { it.file("python-${py.version}") }
-  installTask.configure {
+  val installTask = createPythonVersionTask<T>(name, py, th, publish) {
     action(this)
     pythonExePathFile = _pythonExePathFile
   }
 
   tasks.register<PyenvUninstallPythonTask>("uninstall_${name}") {
     description = "Remove ${name}"
-    pythonExePathFile = installTask.map { it.outputs.files.singleFile }
+    pythonExePathFile = _pythonExePathFile
     pythonVersionsRoot = extension.installRoot
     pythonVersion = AsInput.from<PythonVersion>(py)
     pythonExePathFile = _pythonExePathFile
@@ -105,8 +105,20 @@ if (!_targetHost.isWindows) {
     debugVariant = extension.debugVariant
   }
 } else {
-  createPythonVersionTasks(_targetHost) { name, python, th, publish ->
-    createPythonVersionTask<WinPythonVersionInstallTask>(name, python, _targetHost, publish)
+  createPythonVersionTasks(_targetHost) { name, py, th, publish ->
+    val _pythonExePathFile = layout.buildDirectory.map { it.file("python-${py.version}") }
+
+    createPythonVersionTask<WinPythonVersionInstallTask>(name, py, _targetHost, publish) {
+      pythonExePathFile = _pythonExePathFile
+    }
+
+    tasks.register<WinPythonVersionUninstallTask>("${name}_uninstall") {
+      description = "Remove ${name}"
+      pythonExePathFile = _pythonExePathFile
+      pythonVersionsRoot = extension.installRoot
+      pythonVersion = AsInput.from<PythonVersion>(py)
+      pythonExePathFile = _pythonExePathFile
+    }
   }
 
 }
