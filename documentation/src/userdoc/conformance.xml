@@ -61,16 +61,16 @@
       
       <h2 class="subtitle">Test results</h2>
       
-      <p class="javaonly">SaxonJ 11.1 passes all 11714 applicable tests from the XSLT 3.0 test suite.</p>
+      <p class="javaonly">SaxonJ-EE 12.10 passes all 11817 applicable tests from the XSLT 3.0 test suite.</p>
       
-      <p class="csonly">SaxonCS 11.1 passes all 11475 applicable tests from the XSLT 3.0 test suite.
-         (The totals are different because some tests are applicable to one product
-         but not the other, for example because they have dependencies on optional settings such as
-         localization.)</p>
+      <p class="csonly">SaxonCS 12.10 passes all 11610 applicable tests from the XSLT 3.0 test suite.</p>
       
       <p>These figures exclude tests that were specifically omitted because they cannot be run, even where this represents
       a non-conformance. For example, the Microsoft <code>System.Xml</code> parser does not report DTD-based attribute types
-      to the application, which means that some of the tests for the <code>id()</code> function cannot succeed.</p>
+      to the application, which means that some of the tests for the <code>id()</code> function cannot
+         succeed. (The totals are different because some tests are applicable to one product
+         but not the other, for example because they have dependencies on optional settings such as
+         localization.)</p>
       
       <p>Although the W3C XSLT Working Group has ceased operation, the W3C test suite continues to be developed by
       volunteers, and Saxonica remains an active contributor. Conformance issues raised by Saxon users typically
@@ -831,8 +831,8 @@
          <li><p>Functions in the standard function library are added to the static context only if they were available in XPath 2.0</p></li>
       </ul>
       
-      <p class="javaonly">SaxonJ-EE 11.1 passes 15338 out of 15341 applicable XPath 2.0 tests in the W3C test suite.</p>
-      <p class="csonly">SaxonCS 11.1 passes 15295 out of 15298 applicable XPath 2.0 tests in the W3C test suite.</p>
+      <p class="javaonly">SaxonJ-EE 12.10 passes 15346 out of 15349 applicable XPath 2.0 tests in the W3C test suite.</p>
+      <p class="csonly">SaxonCS 12.10 passes 15304 out of 15307 applicable XPath 2.0 tests in the W3C test suite.</p>
          
        <p>The failures occur in cases where XPath 3.1 relaxes the rules
       and it is not practical or sensible for Saxon to enforce several different sets of constraints. In particular:</p>
@@ -863,11 +863,11 @@
 
       <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
 
-      <p class="javaonly">SaxonJ-EE 11.1 passes all 22268 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="javaonly">SaxonJ-EE 12.10 passes all 22395 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XPath 3.1 processor.
       </p>
       
-      <p class="csonly">SaxonCS 11.1 passes all 21625 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="csonly">SaxonCS 12.10 passes all 21739 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XPath 3.1 processor.
       </p>
       
@@ -1031,12 +1031,12 @@
       <h2 class="subtitle">Test results</h2>
       
       
-      <p class="javaonly">SaxonJ 11.1 passes all 31291 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="javaonly">SaxonJ-EE 12.10 passes all 31430 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XQuery 3.1 processor.
       </p>
 
       
-      <p class="csonly">SaxonCS 11.1 passes all 31200 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p class="csonly">SaxonCS 12.10 passes all 31319 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XQuery 3.1 processor.
       </p>
       
