@@ -216,16 +216,17 @@ public class Query {
         options.addRecognizedOption("Tlevel", CommandLineOptions.TYPE_STRING,
                                     "Level of detail for trace listener output");
         options.setPermittedValues("Tlevel", new String[]{"none", "low", "normal", "high"}, "normal");
+        //#if CSHARP==false
         options.addRecognizedOption("Tout", CommandLineOptions.TYPE_FILENAME,
                                     "File for trace listener output");
-        //#if CSHARP==false
         options.addRecognizedOption("TP", CommandLineOptions.TYPE_FILENAME,
                                     "Use profiling trace listener, with specified output file");
         options.addRecognizedOption("TPxsl", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Stylesheet for formatting -TP output");
-        //#endif
+
         options.addRecognizedOption("traceout", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
-                                    "File for output of trace() messages");
+                                    "File for fn:trace() output");
+        //#endif
         options.addRecognizedOption("tree", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified tree model for source documents");
         options.setPermittedValues("tree", new String[]{"linked", "tiny", "tinyc"}, null);
