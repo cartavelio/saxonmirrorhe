@@ -114,32 +114,46 @@ package net.sf.saxon.lib;
 // If you edit this file, your edits WILL BE TERMINATED with
 // extreme prejudice by the next build.
 
+import java.util.stream.Collectors;
+
 public class FeatureData {
     public String uri;
     public int code;
     public String editions;
     public Class<?> type;
     public Object defaultValue;
+    public final FeatureConfig configFileDetails;
     
-    public FeatureData(String uri, int code, String editions, Class<?> type, Object defaultValue) {
+    public FeatureData(String uri, int code, String editions, Class<?> type, Object defaultValue, FeatureConfig configFileDetails) {
         this.uri = uri;
         this.code = code;
         this.editions = editions;
         this.type = type;
         this.defaultValue = defaultValue;
+        this.configFileDetails = configFileDetails;
     }
 
     public static java.util.List<FeatureData> featureList = new java.util.ArrayList<>();
-    
+
+    public static java.util.Map<String, FeatureData> featuresByUri() {
+        return featureList.stream().collect(Collectors.toMap(feature -> feature.uri, feature -> feature));
+    }
+
     public static void init() {]]>
             </xsl:text>
             <xsl:for-each select="//feature">
                 <xsl:variable name="type" as="xs:string">
                     <xsl:apply-templates select="type"/>
                 </xsl:variable>
+                <xsl:variable name="featureConfig" as="xs:string+">
+                    <xsl:apply-templates select="configfile" mode="FeatureData.java"/>
+                    <xsl:on-empty>
+                        <xsl:sequence select="'new FeatureConfig()'"/>
+                    </xsl:on-empty>
+                </xsl:variable>
                 <xsl:variable name="default" select="if ($type='Boolean') then 'Boolean.FALSE' else 'null'"/>
                 <xsl:text expand-text="yes">
-       featureList.add(new FeatureData("{uri}", {featureCode}, "{editions}", {$type}.class, {$default}));     
+       featureList.add(new FeatureData("{uri}", {featureCode}, "{editions}", {$type}.class, {$default}, {$featureConfig[last()]}));
                 </xsl:text>
             </xsl:for-each>
     <xsl:text>
@@ -191,7 +205,7 @@ public class Feature<T> {
         </xsl:text> 
         </xsl:result-document>
     </xsl:template>
-    
+
     <xsl:template match="feature" mode="FeatureKeys.java">
         <!--<xsl:message>Processing <xsl:value-of select="name"/></xsl:message>-->
         <xsl:apply-templates select="desc, name, uri" mode="#current"/>
@@ -293,16 +307,25 @@ public class Feature<T> {
     <xsl:template match="type">
         <xsl:text><![CDATA[Object]]></xsl:text>
     </xsl:template>
- 
-    
-<xsl:template name="validate" expand-text="yes">
-    <xsl:if test="//feature[not(featureCode)]">
-        <xsl:message terminate="yes">Every feature must have a numeric featureCode</xsl:message>
-    </xsl:if>
-    <xsl:if test="count(//featureCode) ne count(distinct-values(//featureCode))">
-        <xsl:message terminate="yes">Every featureCode must be unique</xsl:message>
-    </xsl:if>
-</xsl:template>
+
+    <xsl:mode name="FeatureData.java" on-no-match="shallow-skip"/>
+
+    <xsl:template match="configfile" mode="FeatureData.java" as="xs:string">
+        <xsl:variable name="featureConfig-params" select="tokenize(string(normalize-space(.)), '/@')"/>
+        <xsl:if test="not(count($featureConfig-params) = 2)">
+            <xsl:message expand-text="yes" terminate="yes">configfile element for feature {parent::*/uri} "{.}" must be of the format "section/@attr".</xsl:message>
+        </xsl:if>
+        <xsl:sequence expand-text="yes">new FeatureConfig("{$featureConfig-params[1]}", "{$featureConfig-params[2]}")</xsl:sequence>
+    </xsl:template>
+
+    <xsl:template name="validate" expand-text="yes">
+        <xsl:if test="//feature[not(featureCode)]">
+            <xsl:message terminate="yes">Every feature must have a numeric featureCode</xsl:message>
+        </xsl:if>
+        <xsl:if test="count(//featureCode) ne count(distinct-values(//featureCode))">
+            <xsl:message terminate="yes">Every featureCode must be unique</xsl:message>
+        </xsl:if>
+    </xsl:template>
     
     
 </xsl:stylesheet>

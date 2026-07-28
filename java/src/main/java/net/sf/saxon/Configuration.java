@@ -4482,7 +4482,23 @@ public class Configuration implements SourceResolver, NotationSet {
         } else {
             switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
-                    protocolRestrictor = new ProtocolRestrictor((String)value);
+                    String suppliedValue = (String) value;
+                    String protocols;
+                    if (suppliedValue != null) {
+                        switch (suppliedValue) {
+                            case "#none":
+                                protocols = "";
+                                break;
+                            case "":
+                                protocols = "all";
+                                break;
+                            default:
+                                protocols = suppliedValue;
+                        }
+                    } else {
+                        protocols = "";
+                    }
+                    protocolRestrictor = new ProtocolRestrictor(protocols);
                     final ResourceResolver existing = getResourceResolver();
                     setResourceResolver(protocolRestrictor.asResourceResolver(existing));
                     break;
