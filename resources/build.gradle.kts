@@ -2,6 +2,8 @@ plugins {
   id("java-library")
   id("saxon-build")
   id("com.saxonica.build.managebranches")
+  id("com.saxonica.build.testsuites")
+  id("saxonj")
 }
 
 repositories {
@@ -17,9 +19,9 @@ val documentation by configurations.creating {
   extendsFrom(configurations["implementation"])
 }
 
-val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
-val javaSources by configurations.resolvable("javaSources") {
-    extendsFrom(javaSourcesBucket)
+val testdriverSourcesBucket by configurations.dependencyScope("testdriverSourcesBucket")
+val testdriverSources by configurations.resolvable("testdriverSources") {
+    extendsFrom(testdriverSourcesBucket)
 }
 
 val javaSampleClassesBucket by configurations.dependencyScope("javaSampleClassesBucket")
@@ -52,9 +54,9 @@ val copySaxoncDoc by configurations.resolvable("copySaxoncDoc") {
   extendsFrom(copySaxoncDocBucket)
 }
 
-val featureKeysSourcesBucket by configurations.dependencyScope("featureKeysSourcesBucket")
-val featureKeysSources = configurations.resolvable("featureKeysSources") {
-  extendsFrom(featureKeysSourcesBucket)
+val featureKeysResourcesBucket by configurations.dependencyScope("featureKeysResourcesBucket")
+val featureKeysResources = configurations.resolvable("featureKeysResources") {
+  extendsFrom(featureKeysResourcesBucket)
 }
 
 val dotnetDocHtmlBucket by configurations.dependencyScope("dotnetDocHtmlBucket")
@@ -67,8 +69,12 @@ val userdocViewerAppJS by configurations.resolvable("userdocViewerAppJS") {
   extendsFrom(userdocViewerAppJSBucket)
 }
 
+val testDriverClasses = configurations.resolvable("testDriverClasses") {
+    extendsFrom(testDriversBucket)
+}
+
 dependencies {
-  javaSourcesBucket(files(layout.projectDirectory.files("../java/src/main/java")))
+  testdriverSourcesBucket(files(layout.projectDirectory.files("../java/testdriver/src/main/java")))
 
   javaSampleClassesBucket(project(mapOf("path" to ":java",
                                         "configuration" to "javaSampleClasses")))
@@ -76,8 +82,8 @@ dependencies {
   javadocBucket(project(mapOf("path" to ":java",
                               "configuration" to "javadocArtifacts")))
 
-  testDriversBucket(project(mapOf("path" to ":java",
-                                  "configuration" to "testDriversArtifacts")))
+  testDriversBucket(project(mapOf("path" to ":java:testdriver",
+                                  "configuration" to "testDriverClasses")))
   saxoncApiDocBucket(project(mapOf("path" to ":documentation",
                                    "configuration" to "saxoncApiDocArtifacts")))
   saxoncDocSefBucket(project(mapOf("path" to ":documentation",
@@ -85,7 +91,7 @@ dependencies {
   copySaxoncDocBucket(project(mapOf("path" to ":documentation",
                                    "configuration" to "copySaxoncDoc")))
 
-  featureKeysSourcesBucket(project(mapOf("path" to ":featurekeys",
+  featureKeysResourcesBucket(project(mapOf("path" to ":featurekeys",
                                          "configuration" to "featureKeysSources")))
 
   dotnetDocHtmlBucket(project(mapOf("path" to ":documentation",
@@ -105,7 +111,7 @@ val resources = tasks.register<Zip>("resources") {
 
 val stageTestDriverSources = tasks.register<Copy>("stageTestDriverSources") {
   group = "Internal"
-  from(javaSources)
+  from(testdriverSources)
   into(layout.buildDirectory.dir("stage/drivers/java"))
   include("net/sf/saxon/testdriver/**")
   include("com/saxonica/testdriver/**")
@@ -114,10 +120,8 @@ resources { dependsOn(stageTestDriverSources) }
 
 val stageTestDriverClasses = tasks.register<Copy>("stageTestDriverClasses") {
   group = "Internal"
-  from(testDrivers.elements.map { it.first().asFile })
+  from(testDriverClasses)
   into(layout.buildDirectory.dir("stage/drivers/java/classes"))
-  include("com/**")
-  include("net/**")
 }
 resources { dependsOn(stageTestDriverClasses) }
 
@@ -197,10 +201,10 @@ val stageSampleClasses = tasks.register<Copy>("stageSampleClasses") {
 }
 resources { dependsOn(stageSampleClasses) }
 
-val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
+val copy_feature_keys = tasks.register<Copy>("copy_feature_keys_for_resources") {
   group = "Internal"
   into(layout.buildDirectory.dir("featureKeys"))
-  from(featureKeysSources)
+  from(featureKeysResources)
 }
 
 val stageConfigSchema = tasks.register<JavaExec>("stageConfigSchema") {
