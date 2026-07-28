@@ -127,6 +127,9 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
                     .withErrorCode("XTDE1490");
         }
         usedAsSecondaryResult = true;
+        if (nextReceiver != null) {     // Bug 7156
+            nextReceiver.close();
+        }
     }
 
     public Receiver makeReceiver(SerializationProperties params) {
