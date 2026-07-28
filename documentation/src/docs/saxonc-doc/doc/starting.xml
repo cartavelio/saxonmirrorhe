@@ -58,23 +58,33 @@
         </li>
         <li>
           <p>
-            <b>Copy the libraries, binaries and include files to the install location</b>
+            <b>Copy the distribution to the install location</b>
           </p>
-          <p>We recommend copying the contents of the <code>SaxonC[EDITION]</code> directory within
-            the zip to a location like <code>/opt/saxonica/</code>. You would then end up with a
-            structure like <code>/opt/saxonica/lib</code>, <code>/opt/saxonica/bin</code>, and
-              <code>/opt/saxonica/include</code>.</p>
+          <p>We recommend copying the entire <code>SaxonC[EDITION]-linux-[ARCH]-[VERSION]</code>
+            directory within the zip to a location like <code>/opt/saxonica/</code>. You would
+            then end up with a structure like <code>/opt/saxonica/SaxonC[EDITION]-linux-[ARCH]-[VERSION]</code>.
+            This makes it easy to support having multiple versions, or editions, of SaxonC
+            installed simultaneously should you require it.</p>
         </li>
         <li>
           <p>
             <b>Set the <code>LD_LIBRARY_PATH</code> and <code>PATH</code> environment variables</b>
           </p>
-          <p>The LD_LIBRARY_PATH variable must be set to the location of the <code>lib</code>
-            directory containing the SaxonC libraries. For instance:</p>
-          <kbd>export LD_LIBRARY_PATH="/opt/saxonica/lib:$LD_LIBRARY_PATH"</kbd>
+          <p>The LD_LIBRARY_PATH variable must be set to include the location of the <code>lib</code>
+            directories containing the SaxonC libraries. For instance:</p>
+          <kbd>export LD_LIBRARY_PATH="/opt/saxonica/SaxonCEE-linux-aarch64-12-9-0/SaxonCEE/lib:$LD_LIBRARY_PATH"</kbd>
+          <p>For version 12.9 and later, you need to add both the SaxonC[EDITION] and
+            SaxonCCore[EDITION] directories to <code>LD_LIBRARY_PATH</code>, if you intend to use the
+            supplied prebuilt Transform, Query, and Validate (EE only) binaries. For instance:</p>
+          <kbd>export LD_LIBRARY_PATH="/opt/saxonica/SaxonCEE-linux-aarch64-12-9-0/SaxonCEE/lib:/opt/saxonica/SaxonCEE-linux-aarch64-12-9-0/SaxonCCoreEE/lib:$LD_LIBRARY_PATH"</kbd>
+          <p>If you intend to build the C++ libsaxonc library yourself, you only need to add
+            SaxonCCore[EDITION]:</p>
+          <kbd>export LD_LIBRARY_PATH="/opt/saxonica/SaxonCEE-linux-aarch64-12-9-0/SaxonCCoreEE/lib:$LD_LIBRARY_PATH"</kbd>
+          <p>The <code>README.md</code> file included with the .zip includes extensive guidance on
+            compiling libsaxonc yourself, and integrating it into your C/C++ project</p>
           <p>To run the Transform, Query, and Validate (EE only) binaries without referencing their
-            full path, the <code>PATH</code> variable can be set. For instance:</p>
-          <kbd>export PATH="/opt/saxonica/bin:$PATH"</kbd>
+            full path, the <code>PATH</code> environment variable can be set. For instance:</p>
+          <kbd>export PATH="/opt/saxonica/SaxonCEE-linux-aarch64-12-9-0/SaxonCEE/bin:$PATH"</kbd>
         </li>
       </ol>
 
@@ -165,22 +175,19 @@
         </li>
         <li>
           <p>
-            <b>Copy the libraries, binaries and include files to the install location</b>
+            <b>Copy the distribution to the install location</b>
           </p>
-          <p>The SaxonC libraries, binaries and include files are located under the
-              <code>SaxonC[EDITION]</code> directory within the zipped archive.</p>
-          <p>We recommend copying the contents of the <code>SaxonC[EDITION]</code> directory within
-            the zip to a location like <code>/opt/saxonica/</code>. You would then end up with a
-            structure like <code>/opt/saxonica/lib</code>, <code>/opt/saxonica/bin</code>, and
-              <code>/opt/saxonica/include</code>.</p>
+          <p>We recommend copying the entire <code>SaxonC[EDITION]-macos-[ARCH]-[VERSION]</code>
+            directory within the zip to a location like <code>/opt/saxonica/</code>. You would
+            then end up with a structure like <code>/opt/saxonica/SaxonC[EDITION]-macos-[ARCH]-[VERSION]</code>.
+            This makes it easy to support having multiple versions, or editions, of SaxonC
+            installed simultaneously should you require it.</p>
 
+          <p>For instance, to copy the unzipped SaxonC-HE 12.6 MacOS AArch64 distribution from
+            <code>SaxonCHE-macos-aarch64-12-6-0</code>, to <code>/opt/saxonica</code>:</p>
 
-          <p>For instance, to copy the SaxonC-HE 12.6 MacOS AArch64 library from the unpacked
-            location <code>SaxonCHE-macos-aarch64-12-6-0</code>, to <code>/opt/saxonica</code>:</p>
-
-          <kbd>cd libsaxonCHE-macos-aarch64-12-6-0/</kbd>
           <kbd>sudo mkdir -p /opt/saxonica</kbd>
-          <kbd>sudo cp -r -f SaxonCHE/. /opt/saxonica</kbd>
+          <kbd>sudo cp -r -f libsaxonCHE-macos-aarch64-12-6-0 /opt/saxonica</kbd>
 
           <aside>If you encounter permission issues after copying, then the privileges of the
             folders and files may need adjusting.</aside>
@@ -190,12 +197,21 @@
             <b>Set the <code>DYLD_LIBRARY_PATH</code> and <code>PATH</code> environment
               variables</b>
           </p>
-          <p>The <code>DYLD_LIBRARY_PATH</code> variable must be set to the location where the
-            SaxonC files have been installed. For instance:</p>
-          <kbd>export DYLD_LIBRARY_PATH="/opt/saxonica/lib:$DYLD_LIBRARY_PATH"</kbd>
+          <p>The <code>DYLD_LIBRARY_PATH</code> variable must be set to include the location of the <code>lib</code>
+            directories containing the SaxonC libraries. For instance:</p>
+          <kbd>export DYLD_LIBRARY_PATH="/opt/saxonica/SaxonCEE-macos-aarch64-12-9-0/SaxonCEE/lib:$DYLD_LIBRARY_PATH"</kbd>
+          <p>For version 12.9 and later, you need to add both the SaxonC[EDITION] and
+            SaxonCCore[EDITION] directories to <code>DYLD_LIBRARY_PATH</code>, if you intend to use the
+            supplied prebuilt Transform, Query, and Validate (EE only) binaries. For instance:</p>
+          <kbd>export DYLD_LIBRARY_PATH="/opt/saxonica/SaxonCEE-macos-aarch64-12-9-0/SaxonCEE/lib:/opt/saxonica/SaxonCEE-macos-aarch64-12-9-0/SaxonCCoreEE/lib:$DYLD_LIBRARY_PATH"</kbd>
+          <p>If you intend to build the C++ libsaxonc library yourself, you only need to add
+            SaxonCCore[EDITION]:</p>
+          <kbd>export DYLD_LIBRARY_PATH="/opt/saxonica/SaxonCEE-macos-aarch64-12-9-0/SaxonCCoreEE/lib:$DYLD_LIBRARY_PATH"</kbd>
+          <p>The <code>README.md</code> file included with the .zip includes extensive guidance on
+            compiling libsaxonc yourself, and integrating it into your C/C++ project</p>
           <p>To run the Transform, Query, and Validate (EE only) binaries without referencing their
-            full path, the <code>PATH</code> variable can be set. For instance:</p>
-          <kbd>export PATH="/opt/saxonica/bin:$PATH"</kbd>
+            full path, the <code>PATH</code> environment variable can be set. For instance:</p>
+          <kbd>export PATH="/opt/saxonica/SaxonCEE-linux-aarch64-12-9-0/SaxonCEE/bin:$PATH"</kbd>
         </li>
       </ol>
 
@@ -286,14 +302,18 @@
             <b>Add the core SaxonC libraries location to the PATH environment variable</b>
           </p>
           <p>The core SaxonC libraries are located under the <code>SaxonC[EDITION]/bin</code>
-            directory, named <code>saxonc-[EDITION].dll</code> and
-              <code>saxonc-[EDITION]-core.dll</code>.</p>
-          <p>The <code>bin</code> path must be added to the environment variable
+            and <code>SaxonCCore[EDITION]/bin</code> directories, named <code>saxonc-[EDITION].dll</code>
+            and <code>saxonc-[EDITION]-core.dll</code>.</p>
+          <p>For Saxon 12.6 – 12.8, both DLLs are in the <code>SaxonC[EDITION]/bin</code>
+            directory.</p>
+          <p>The <code>bin</code> paths must be added to the environment variable
             <code>PATH</code>.</p>
           <p>On Windows, this can be done in various ways. The environment variable can be set from
             Window Settings &gt; System Properties &gt; Environment Variables; or from the command
             line using a set command like:</p>
-          <kbd>set PATH="%PATH%;C:\Program Files\Saxonica\SaxonC[EDITION][VERSION]\bin"</kbd>
+          <kbd>set PATH="%PATH%;C:\Program Files\Saxonica\SaxonC[EDITION][VERSION]\SaxonC[EDITION]\bin;C:\Program Files\Saxonica\SaxonC[EDITION][VERSION]\SaxonCCore[EDITION]\bin"</kbd>
+          <p>Again, in Saxon 12.6 – 12.8, you do not need to also add the <code>SaxonCCore[EDITION]\bin</code>
+            directory to <code>PATH</code>.</p>
         </li>
       </ol>
       
