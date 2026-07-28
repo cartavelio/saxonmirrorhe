@@ -1,13 +1,15 @@
 import os
 import psutil
 import re
-from Environment import Environment, Spec
+from Environment import Environment, Spec, process_environment
 from test_outcome import PyTestOutcome
 from test_report import PyTestReport
 import sys, getopt
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 import pathlib
 import import_saxon
+
+
 saxonc = import_saxon.import_mod()
 
 process = psutil.Process()
@@ -47,13 +49,12 @@ xpathProcForCompareNodes = driver_proc.new_xpath_processor()
 
 xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
 
-schemaValidator = None
 test_report = None
 
 old_xsd_version = "1.1"
 current_xsd_version = "1.1"
 
-spec: Spec
+spec = None
 
 globalEnvironments = {}
 localEnvironments = {}
@@ -78,37 +79,6 @@ run_assertion = None
 total_tests = 0
 exceptionList = []
 
-
-def process_spec(spec_str: str):
-    if spec_str == "XP20":
-        return Spec.XP20()
-    elif spec_str == "XP30":
-        return Spec.XP30()
-    elif spec_str == "XP31":
-        return Spec.XP31()
-        
-    elif spec_str == "XP40":
-        return Spec.XP40()
-                
-    elif spec_str == "XQ10":
-        return Spec.XQ10()
-        
-    elif spec_str == "XQ30":
-        return Spec.XQ30()
-
-    elif spec_str == "XQ31":
-        return Spec.XQ31()
-
-    elif spec_str == "XQ40":
-        return Spec.XQ40()
-
-    elif spec_str == "XT30":
-        return Spec.XT30()
-    else:
-        raise Exception("The specific language must be one of the following: XP20, XP30, XP31, XP40, XQ10, XQ30, XQ31, XQ40, XT30")
-
-
-
 def process_catalog(path: pathlib.Path, catalogi: pathlib.Path):
     att_name = None
     att_file = None
@@ -125,9 +95,8 @@ def process_catalog(path: pathlib.Path, catalogi: pathlib.Path):
         if os.getenv("SAXON_LICENSE_DIR") is not None:
             driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
                                                    os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
-        schemaValidator = driver_proc.new_schema_validator()
     except saxonc.PySaxonApiError as ex:
-        print("*** Failed to create PySchemaValidator :" + str(ex))
+        print("*** Unlicensed Test Suite run :" + str(ex))
 
     '''xpc.set_lanaguage("3.1")'''
     if catalogi.exists():
@@ -207,8 +176,10 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
 
                 for ii in range(dependencies.size):
                     dep = dependencies.item_at(ii).get_node_value()
-                    if not ensure_dependency_satisfied(dep, localEnvironments["default"]):
-                        print("dependency failed at test set level")
+                    environment = Environment()
+                    if not ensure_dependency_satisfied(dep, environment):
+                        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                            print("dependency failed at test set level")
                         test_report.start_test_set_element(child0, "dependency not satisfied")
                         not_run = not_run + tcs_count
                         return
@@ -221,10 +192,11 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
                         for ii in range(dependencies.size):
                             dep = dependencies.item_at(ii).get_node_value()
                             if not ensure_dependency_satisfied(dep, environment):
-                                print("dependency failed at test set level XXXX")
+                                if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                                    print("dependency failed at test set level XXXX")
                                 return
                     env = envs.item_at(i)
-                    process_environment(xpathProcForEnv, env.get_node_value(), spec, localEnvironments,
+                    process_environment(cwd_from_base_uri, xpathProcForEnv, env.get_node_value(), spec, localEnvironments,
                                         environment)
             if child0 is None:
                 print("Cannot find child node of test " + test_set_file)
@@ -247,7 +219,7 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
                         test_case_name = test_casei.get_attribute_value("name")
                         if (test_case_name_pattern is None or test_case_name_pattern.fullmatch(test_case_name)) and test_set_name not in exceptionList:
                             print("-s:" + test_set_name + " -t:" + test_case_name)
-                            run_test_case(test_case, xpathProcForEnv)
+                            run_test_case(test_set_name, test_case, xpathProcForEnv)
                     else:
                         print("Error test_case is not a node")
 
@@ -346,290 +318,51 @@ def ensure_dependency_satisfied(dependency: saxonc.PyXdmNode, env: Environment):
     return True
 
 def cwd_from_base_uri(base_uri: str):
+    if base_uri is None:
+        return None
     cwd = os.path.dirname(urlparse(base_uri).path)
     if os.path.isdir(cwd):
         return cwd
     raise IOError("Specified directory <%s> does not exist!" % cwd)
 
-def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spec: Spec, environments_i: dict,
-                        environment: Environment):
-    environment.create_processors()
-    xpc.set_context(xdm_item=env)
-    name = env.get_attribute_value("name")
-    if name is not None:
-        print("Loading environment " + name)
-        environments_i[name] = environment
-        '''if name == "works-mod":
-            print(env)
-            exit(0)'''
-    else:
-        print("Loading environment without name")
-        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-            print(str(env))
 
-    '''set the base URI if specified'''
-    base_uri = str(env.base_uri)
-    print("set_base_uri(base_uri) cp0 = " + base_uri)
-    environment.proc.set_cwd(cwd_from_base_uri(base_uri))
-    environment.xquery_proc.set_query_base_uri(base_uri)
-    '''TODO There is a bug with the DocumentBuilder base_uri and cwd for the processor'''
-    builder = environment.proc.new_document_builder()
-    base = xpc.evaluate("//static-base-uri")
-    if base is not None:
-        for i in range(base.size):
-            basei = base.item_at(i)
-            uri = basei.get_node_value().get_attribute_value("uri")
-            if uri is None or uri == "UNDEFINED":
-                environment.xquery_proc.set_query_base_uri(None)
-                environment.xpath_proc.set_base_uri(None)
-            else:
-                print("base-uri = " + uri)
-                if uri != "#UNDEFINED":
-                    environment.xquery_proc.set_query_base_uri(uri)
-                    environment.xquery_proc.set_cwd(uri)
-                    environment.xpath_proc.set_base_uri(uri)
-                    environment.xpath_proc.set_cwd(uri)
-                    environment.base_uri = uri
-
-    '''set any requested collations - TODO'''
-
-    '''declare the requested namespaces - TODO'''
-
-    decimal_formats = xpc.evaluate("decimal-format")
-    if decimal_formats is not None:
-        environment.param_decimal_declarations = ""
-
-        for decimal_format in decimal_formats:
-            if spec.short_spec_name == "XP":
-                environment.usable = False
-                break
-            format_name = decimal_format.get_node_value().get_attribute_value("name")
-            if format_name is not None:
-                '''TODO fixup format_name as EQName'''
-                environment.param_decimal_declarations = environment.param_decimal_declarations + "declare decimal-format Q{}" + format_name
-            else:
-                environment.param_decimal_declarations = environment.param_decimal_declarations + "declare default decimal-format "
-            xpc.set_context(xdm_item=decimal_format)
-            decimal_format_Atts = xpc.evaluate("@* except @name")
-
-            for decimal_format_Att in decimal_format_Atts:
-                propertyi = decimal_format_Att.local_name
-                valuei = decimal_format_Att.string_value
-                environment.param_decimal_declarations = environment.param_decimal_declarations + " " + (propertyi + "=\"" + valuei + "\" ")
-            environment.param_decimal_declarations = environment.param_decimal_declarations + ";"
-
-
-        xpc.set_context(xdm_item=env)
-
-    '''declare any variable'''
-    params = xpc.evaluate("param")
-
-    if params is not None:
-        environment.param_declarations = ""
-
-
-        for parami in params:
-            param_node = parami.get_node_value()
-            var_name = param_node.get_attribute_value("name")
-            source = param_node.get_attribute_value("source")
-
-            parami_value = None
-
-            if source is not None:
-                source_doc = environment.source_docs[source]
-
-                if source_doc is None:
-                    print("**** Unknown source document " + source)
-
-                parami_value = source_doc
-            else:
-                select = param_node.get_attribute_value("select")
-                parami_value = xpc.evaluate(select)
-
-            statici = param_node.get_attribute_value('static')
-            is_static = False
-            if statici is not None:
-                is_static = True if statici == "true" or statici == "yes" else False
-            environment.xpath_proc.declare_variable(var_name)
-            declared = False
-            declaredi = param_node.get_attribute_value("declared")
-            if declaredi is not None:
-                declared = True if declaredi == "true" or declaredi == "yes" else False
-
-            if not declared:
-                environment.param_declarations = environment.param_declarations + "declare variable $" + var_name + " external; "
-
-            if not is_static:
-                environment.params[var_name] = parami_value
-
-            '''else:
-                For XSLT we handle this in the xslt30 test suite driver - maybe move logic here
-                environment.xslt_proc.set_parameter(var_name, parami_value)
-                print("set " + var_name + " = " + str(parami_value))'''
-
-
-
-
-
-
-
-    ns_nodes = xpc.evaluate("//namespace")
-    if ns_nodes is not None:
-        for i in range(ns_nodes.size):
-            ns_node = ns_nodes.item_at(i)
-            prefix = ns_node.get_node_value().get_attribute_value("prefix")
-            uri = ns_node.get_node_value().get_attribute_value("uri")
-            environment.xquery_proc.declare_namespace(prefix=prefix, uri=uri)
-            environment.xpath_proc.declare_namespace(prefix=prefix, uri=uri)
-
-    '''load the requested schema documents'''
-
-    schema_validator = None
-
-    try:
-        schema_validator = environment.proc.new_schema_validator()
-        schema_validator.set_cwd(cwd_from_base_uri(base_uri))
-    except saxonc.PySaxonApiError as ex:
-        print("*** Failed to create PySchemaValidator :" + str(ex))
-
-    ''' PyXdmNode.base_uri returns file:// - this will cause problems with resolving later.'''
-    '''Create bug issue to remove the file:// internally TODO create bug issue '''
-
-
-
-    schemas = xpc.evaluate("schema")
-    validate_sources = False
-    if schemas is not None and schema_validator is not None:
-        print("schema found count=" + str(schemas.size))
+def load_schema_documents(xpc: saxonc.PyXPathProcessor, environment, builder, xsd_compiler: saxonc.PyXsdCompiler):
+    schemas = xpc.evaluate("//schema")
+    print(str(schemas))
+    source_arr = []
+    if schemas is not None:
         for i in range(schemas.size):
-            schema = schemas.item_at(i).get_node_value()
-            role = schema.get_attribute_value("role")
-            xsd_version = schema.get_attribute_value("xsd-version")
-
-            if xsd_version is not None:
-                schema_validator.set_property("xsdversion", xsd_version)
+            environment.schema_aware = True
+            schemaNode = schemas.item_at(i).get_node_value()
+            xsd_ver = schemaNode.get_attribute_value("xsd-version")
+            role = schemaNode.get_attribute_value("role")
+            if xsd_compiler is None:
+                print("*** Processor is not schema aware")
+                environment.usable = False
+                return None
+            if xsd_ver is not None:
+                xsd_compiler.set_xsd_version(xsd_ver)
             else:
-                schema_validator.set_property("xsdversion", "1.0")
-
+                xsd_compiler.set_xsd_version("1.0")
             if role != "secondary":
-                href = schema.get_attribute_value("file")
-                ns = schema.get_attribute_value("uri")
-
+                href = schemaNode.get_attribute_value("file")
+                ns = schemaNode.get_attribute_value("uri")
                 if ns == "http://www.w3.org/2005/xpath-functions":
-                    schema_validator.set_property("xsdversion", "1.1")
-
-                if href is None:
-                    try:
-                        schema_validator.register_schema(xsd_file=ns)
-                    except saxonc.PySaxonApiError as ex:
-                        print("*** Failed to load schema by URI: " + ns + " - " + str(ex))
-
-
-                else:
-                    try:
-                        schema_validator.register_schema(xsd_file=href)
-                    except saxonc.PySaxonApiError as ex:
-                        print("*** Failed to load schema by URI: " + href + " - " + str(ex))
-
-                xpc.import_schema_namespace(str(ns))
-                '''TODO create bug issue byte type require str for import_schema_namespace'''
-                environment.xpath_proc.import_schema_namespace(str(ns))
-
-                if role == "source-reference":
-                    validate_sources = True
-                '''if role == "stylesheet-import": '''
-
-    stylesheets = xpc.evaluate("stylesheet[not(@role='secondary')]")
-    if stylesheets is not None:
-        stylesheet_file = ""
-        try:
-            for ii in range(stylesheets.size):
-                sheet = stylesheets.item_at(ii).get_node_value()
-                stylesheet_file = sheet.get_attribute_value("file")
-                print(stylesheet_file)
-                environment.xslt_proc.set_cwd(cwd_from_base_uri(base_uri))
-                environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=stylesheet_file)
-        except saxonc.PySaxonApiError as ex:
-            print(ex)
-            print("**** failure while compiling environment-defined stylesheet " + stylesheet_file)
-
-    '''SchemaManager manager = environment.processor.getSchemaManager()
-    boolean validateSources = loadSchemaDocuments(driver, xpc, env, environment, manager)'''
-
-    '''load the requested source documents'''
-
-    load_source_documents(xpc, env, environment, builder, schemaValidator, validate_sources)
-    return environment
-
-
-def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, environment: Environment, builder: saxonc.PyDocumentBuilder,
-                          schema_validator: saxonc.PySchemaValidator, validate_sources: bool):
-    sources = xpc.evaluate("//source")
-    if sources is not None:
-        for i in range(sources.size):
-
-            source = sources.item_at(i).get_node_value()
-            raw_uri = source.get_attribute_value("uri")
-            role = source.get_attribute_value("role")
-            media_type = source.get_attribute_value("media-type")
-            validation = source.get_attribute_value("validation")
-            if validation is None:
-                validation = "skip"
-            streaming = source.get_attribute_value("streaming")
-
-            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-                print("Loading source raw_uri = ", raw_uri)
-
-            if not validate_sources and validation == "skip":
-                print('validation is skipped')
-                '''builder.set_schema_validator(None)
-                builder.set_schema_validator(None) 
-                TODO this is a bug cannot set validator to None'''
-            else:
-                try:
-                    schema_validatori = environment.proc.new_schema_validator()
-                    schema_validatori.set_lax(validation == "lax")
-                    builder.set_schema_validator(schema_validatori)
-                except saxonc.PySaxonApiError as ex:
-                    print("*** Failed to create PySchemaValidator :" + str(ex))
-            href = source.get_attribute_value("file")
-            select = source.get_attribute_value("select")
-            xinc = source.get_attribute_value("xinclude")
-            content = None
-            builder.set_line_numbering(True)
-
-            try:
+                    xsd_compiler.set_xsd_version("1.1")
+                    source_arr.append(str(ns))
                 if href is not None:
-                    base_uri = source.base_uri
-                    builder.set_base_uri(base_uri)
-                    content = builder.parse_xml(xml_file_name=href)
-                    environment.source_docs[href] = content
+                    base_uri = schemaNode.base_uri
                     if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-                        print("loaded source doc with base_uri = ", base_uri)
-                        print("loaded source doc with href = ", href)
-                else:
-                    '''print(source)'''
-                    builder.set_base_uri(source.base_uri)
-                    xpc.set_context(xdm_item=source)
-                    contenti = xpc.evaluate_single("string(content)")
-                    content = builder.parse_xml(xml_text=contenti.string_value)
-
-                    if href is None:
-                        environment.source_docs["default"] = content
-                    else:
-                        environment.source_docs[href] = content
-                if role is not None:
-                    if "." == role:
-                        if href is None:
-                            environment.context_item = environment.source_docs["default"]
-                        else:
-                            environment.context_item = environment.source_docs[href]
-
-                    '''else:'''
-
-            except saxonc.PySaxonApiError as ex:
-                print("Failed loading source raw_uri = ", raw_uri)
-                print("*** failed to build source document " + str(ex))
+                        print("Loading schema href= ", href, " with ns=", ns, " baase_uri=", base_uri)
+                    full_uri = urljoin(base_uri, href)
+                    path = pathlib.Path(full_uri.replace("file://", ""))
+                    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                        print("Path= ", path)
+                    source_arr.append(str(path))
+        schema = xsd_compiler.compile(xsd_list=source_arr)
+        if schema is not None:
+            return schema
+    return None
 
 
 def create_global_environment(catalog: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
@@ -639,9 +372,10 @@ def create_global_environment(catalog: saxonc.PyXdmNode, xpath_proc: saxonc.PyXP
     environment = None
     nodes = xpath_proc.evaluate("//environment")
     if nodes is not None:
-        environment = Environment()
+
         for env in nodes:
-            process_environment(xpath_proc, env, spec, globalEnvironments, environment)
+            environment = Environment()
+            process_environment(cwd_from_base_uri, xpath_proc, env, spec, globalEnvironments, environment)
 
 
 def create_local_environments(test_set_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
@@ -694,7 +428,7 @@ def get_named_parameters(proc: saxonc.PySaxonProcessor, xpath_proc: saxonc.PyXPa
         return params
 
 
-def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
+def run_test_case(test_set_name, test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
     global localEnvironments
     global successes
     global failures
@@ -712,17 +446,9 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     test_queries = xpath_proc.evaluate("test")
 
     environment = Environment()
-    if dependencies is not None:
-        '''print("environment found !!!!")'''
+    '''(localEnvironments)['default']'''
+    '''Environment()'''
 
-        for i in range(dependencies.size):
-            dep = dependencies.item_at(i).get_node_value()
-            if not ensure_dependency_satisfied(dep, environment):
-                not_run += 1
-                test_report.write_test_case_element(test_name, "n/a", None)
-                return
-
-        ''' get environment for this testcase'''
 
     if env_node is not None:
         '''print(env_node)'''
@@ -731,7 +457,8 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         if env_ref is None:
             if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                 print('Creating new environment')
-            environment = process_environment(xpath_proc, env_node_i, spec, globalEnvironments,
+            environment = Environment()
+            process_environment(cwd_from_base_uri, xpath_proc, env_node_i, spec, globalEnvironments,
                                               environment)
 
         else:
@@ -748,19 +475,32 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                     environment = globalEnvironments[env_ref]
                 except KeyError as ex:
                     print("environment not found - should probably fail")
-                    environment = process_environment(xpath_proc, env_node_i, spec, globalEnvironments,
-                                                  environment)
+                    environment = process_environment(cwd_from_base_uri, xpath_proc, env_node_i, spec, globalEnvironments,
+                                                      environment)
 
 
         '''print(environment.source_docs.keys())'''
 
     else:
         environment.create_processors()
+        '''localEnvironments['default']'''
+        '''.create_processors()'''
 
     if not environment.usable:
         test_report.write_test_case_element(str(test_name), "notRun", None)
         not_run += 1
         return
+    if dependencies is not None:
+        '''print("environment found !!!!")'''
+
+        for i in range(dependencies.size):
+            dep = dependencies.item_at(i).get_node_value()
+            if not ensure_dependency_satisfied(dep, environment):
+                not_run += 1
+                test_report.write_test_case_element(test_name, "n/a", None)
+                return
+
+        ''' get environment for this testcase'''
 
 
     xpath_proc.set_context(xdm_item=test_case_node)
@@ -778,24 +518,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
 
     environment.xpath_proc.set_backwards_compatible(False)
-    '''Get config for XSLT Processor'''
 
-
-    '''base_output_uri = ""
-    if path is not None:
-        base_output_uri = "file:/" + abspath(str(path) + "results/output.xml")        
-
-    if output_uri is not None:
-      
-        base_output_uri = urllib.parse.urljoin(base_output_uri,
-                                               str(output_uri.item_at(0).get_atomic_value().string_value))'''
-
-    '''global_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
-                                      False, False)
-
-    static_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
-                                         True, False)
-    '''
     if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
         print(test_case_node.base_uri)
     '''print(test_case_node)'''
@@ -817,10 +540,26 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
             exp = str(xpath_proc.evaluate("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)"))
 
+            if exp is not None and environment.proc.edition == "HE" and test_set_name == "app-spec-examples":
+                'Some tests in app-spec-examples do not have their dependencies tagged'
+                if "http://www.w3.org/2013/collation/UCA?lang=en;alternate=blanked;strength=primary" in exp:
+                    test_report.write_test_case_element(str(test_name), "notRun", "requires ICU")
+                    not_run += 1
+                    return
+
+                if "validate lax" in exp:
+                    test_report.write_test_case_element(str(test_name), "notRun", "requires schema-awareness")
+                    not_run += 1
+                    return
+                if "'fallback':function($s)" in exp:
+                    test_report.write_test_case_element(str(test_name), "notRun", "requires HOF")
+                    not_run += 1
+                    return
+
             if exp is not None:
                 if "XP" == spec.short_spec_name or "XT" == spec.short_spec_name:
                     testxpc = environment.xpath_proc
-                    testxpc.set_property("sa", "true")
+                    '''testxpc.set_property("sa", "true")'''
                     testxpc.set_language_version(spec.version)
                     testxpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
                     testxpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
@@ -848,6 +587,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                     break
                 elif "XQ" == spec.short_spec_name:
                     testxqc = environment.xquery_proc
+                    '''testxqc.use_schema(environment.xsd_schema)'''
                     testxqc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
                     testxqc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
                     testxqc.declare_namespace("array", "http://www.w3.org/2005/xpath-functions/array")
@@ -878,7 +618,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
                     if environment.context_item is not None:
                         testxqc.set_context(xdm_item=environment.context_item)
-                    result = testxqc.run_query_to_value(query_text=exp)
+                    result = testxqc.run_query_to_value(query_text=exp, lang=spec.version)
                 else:
                     test_report.write_test_case_element(str(test_name), "notRun", None)
                     not_run += 1
@@ -889,7 +629,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         errorResult = ex
 
     assert_xpc = environment.proc.new_xpath_processor()
-    assert_xpc.set_property("sa", "true")
+    '''assert_xpc.set_property("sa", "true")'''
     assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
     assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
     assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
@@ -900,7 +640,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
     assert_xpc.declare_variable("result")
 
-    if lang_version is "4.0":
+    if lang_version == "4.0":
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print("set assert_xpc.Spec version=", lang_version)
         assert_xpc.set_language_version(lang_version)
@@ -956,6 +696,8 @@ def main(argv):
     global saxon_version
     global driver_proc
 
+    report_file_name = None
+
     saxon_version = driver_proc.version
 
     print("W3 QT3 Test Suite")
@@ -970,7 +712,7 @@ def main(argv):
             diri = pathlib.Path(argv[0])
         except TypeError as ex:
             print("Error test suite directory missing")
-            print('qt3_test_suite_driver.py <testsuitedir> -l <lang> -t <testpattern> -s <testset> -o <resultdir>')
+            print('qt3_test_suite_driver.py <testsuitedir> -l <lang> -t <testpattern> -s <testset> -o <resultdir> -reportfilename <report file name>')
             sys.exit(2)
 
         print(f"Test suite directory = {diri}")
@@ -978,9 +720,9 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
+            opts, args = getopt.getopt(argvv, "ht:s:o:l:r:", ["testpattern=", "testset=", "resultdir=", "lang=", "reportfilename="])
         except getopt.GetoptError:
-            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -l <processor language>')
+            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -l <processor language> -reportfilename <report file name>')
             sys.exit(2)
         print(opts)
         print(args)
@@ -996,10 +738,14 @@ def main(argv):
             elif opt in ("-o", "--resultdir"):
                 results_path = arg
 
+            elif opt in ("-r", "--reportfilename"):
+                report_file_name = arg
+
             elif opt in ("-l", "--lang"):
                 host_lang = arg
-                spec = process_spec(arg)
-                test_report = PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version[10:14])
+                spec = Spec.process_spec(arg)
+
+        test_report = PyTestReport(spec.testsuite, "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version, report_file_name if report_file_name is not None else None)
 
     '''dir = os.getcwd()'''
     if spec is None:
