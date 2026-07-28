@@ -83,7 +83,6 @@ dependencies {
     compileOnly("org.graalvm.nativeimage:svm:${project.findProperty("graalSvmVersion")}")
     compileOnly("xerces:xercesImpl:${project.findProperty("xercesVersion")}")
     compileOnly("com.ibm.icu:icu4j:${project.findProperty("icu4jVersion")}")
-    compileOnly("org.nineml:coffeefilter:${project.findProperty("ninemlVersion")}")
 
     testImplementation(platform("org.junit:junit-bom:5.12.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -167,8 +166,6 @@ val bundleDependencies = tasks.register<UnjarBundleDependencies>("bundleJarDepen
         jar("jline-${project.findProperty("jlineVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}-data.jar")
-        jar("coffeefilter-${project.findProperty("ninemlVersion")}.jar")
-        jar("coffeegrinder-${project.findProperty("ninemlVersion")}.jar")
     }
 }
 
