@@ -5,15 +5,14 @@ import com.saxonica.build.AsInput
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import java.io.ByteArrayOutputStream
@@ -68,9 +67,6 @@ abstract class PythonVersionTask: DefaultTask() {
     @get:Internal
     val _pythonVersion = pythonVersion.map { it.get<PythonVersion>() }
 
-    @get:OutputFile
-    val pythonExe = _pythonVersion.map { layout.buildDirectory.file("python-${it.version}").get() }
-
     @get:Internal
     abstract val pythonVersionsRoot: DirectoryProperty
 
@@ -80,9 +76,12 @@ abstract class PythonVersionTask: DefaultTask() {
     @get:Optional
     @get:Input
     abstract val debugVariant: Property<String>
+
+    @get:Internal
+    abstract val pythonExePathFile: RegularFileProperty
 }
 
-abstract class PyenvPythonVersionTask : PythonVersionTask() {
+abstract class PyenvPythonVersionTask: PythonVersionTask() {
     @get:InputFile
     abstract val pyenvExe: RegularFileProperty
 
@@ -94,24 +93,74 @@ abstract class PyenvPythonVersionTask : PythonVersionTask() {
         "${it.buildName}${if (debugVariant.isPresent()) "-${debugVariant.get()}" else "" }"
     }
 
-    private fun execToString(action: ExecSpec.() -> Unit): String {
+    fun execToString(action: ExecSpec.() -> Unit): Triple<Boolean, String, String> {
         ByteArrayOutputStream().use { out ->
-            ex.exec {
-                action(this)
-                standardOutput = out
+            ByteArrayOutputStream().use { err ->
+                val result = ex.exec {
+                    action(this)
+                    standardOutput = out
+                    errorOutput = err
+                    setIgnoreExitValue(true)
+                }
+
+                return Triple(result.exitValue == 0, out.toString().trim(), err.toString().trim())
             }
-            return out.toString().trim()
         }
     }
 
-    private fun pythonExePath(pyenv: RegularFile): String {
+    fun execWithPyenv(action: ExecSpec.() -> Unit): Triple<Boolean, String, String> {
         return execToString {
-            environment("PYENV_VERSION", pyenvVersionName.get())
+            environment("PYENV_VERSION", _pythonVersion.get().version)
             environment("PYENV_ROOT", _pythonVersionsRoot.get())
+            action(this)
+        }
+
+    }
+
+    fun checkPyenvLatest(pyenv: RegularFile, pythonBuildVersionName: String): Triple<Boolean, String, String> {
+        return execWithPyenv {
+            executable(pyenv)
+            args("latest", pythonBuildVersionName)
+        }
+    }
+
+    protected fun pythonExePath(pyenv: RegularFile): Triple<Boolean, String, String> {
+        return execWithPyenv {
             executable(pyenv)
             args("which", "python")
         }
     }
+
+    protected fun pythonExecutesNonZero(pythonExe: String): Boolean {
+        val (ok, _, err) = execWithPyenv {
+            executable(pythonExe)
+            args("--version")
+        }
+        if (!ok) {
+            logger.warn("Python version $pythonExe found, but exited non-zero:\n$err")
+        }
+        return ok
+    }
+
+    protected fun checkInstalled(pyenv: RegularFile, pythonBuildVersionName: String): Pair<Boolean, String> {
+        val (claimedInstalled, latestOut, latestErr) = checkPyenvLatest(pyenv, pythonBuildVersionName)
+        if (!claimedInstalled) {
+            logger.info("$pythonBuildVersionName is not installed")
+            logger.debug(latestOut)
+            logger.debug(latestErr)
+            return Pair(false, "")
+        }
+        val (ok, exePath, err) = pythonExePath(pyenv)
+        if (!ok) {
+            logger.info("Could not find python version $pythonBuildVersionName:\n$err")
+        }
+        return Pair(ok && pythonExecutesNonZero(exePath), exePath)
+    }
+}
+
+abstract class InstallPyenvPythonVersionTask : PyenvPythonVersionTask() {
+    @get:OutputFile
+    val _pythonExePathFile = pythonExePathFile.map { it }
 
     @TaskAction
     fun execute() {
@@ -126,15 +175,10 @@ abstract class PyenvPythonVersionTask : PythonVersionTask() {
         }
         val pyenv = pyenvExe.get()
         var pythonBuildVersionName = pyenvVersionName.get()
-        val execResult = ex.exec {
-            environment("PYENV_ROOT", _pythonVersionsRoot.get())
-            executable(pyenv)
-            args("latest", pythonBuildVersionName)
-            setIgnoreExitValue(true)
-        }
-        val notInstalled = execResult.exitValue != 0
+        val (alreadyInstalled, existingPythonExePath) = checkInstalled(pyenv, pythonBuildVersionName)
+        var pythonExePath = existingPythonExePath
 
-        if (notInstalled) {
+        if (!alreadyInstalled) {
             val definitionFile = pythonBuildDefinitionsDir.get().file(pythonBuildVersionName)
             if (definitionFile.asFile.exists()) {
                 pythonBuildVersionName = definitionFile.asFile.toString()
@@ -145,10 +189,54 @@ abstract class PyenvPythonVersionTask : PythonVersionTask() {
                 if (_targetHost.isMacOS) {
                     environment("MACOSX_DEPLOYMENT_TARGET", _pythonVersion.get().macOsMinVersion(_targetHost))
                 }
-                args("install", pythonBuildVersionName)
+                args("install")
+                if (debugVariant.isPresent() && !definitionFile.asFile.exists()) {
+                    args("--debug")
+                }
+                args(pythonBuildVersionName)
+            }
+
+            val (installed, installedPythonExePath) = checkInstalled(pyenv, pythonBuildVersionName)
+            if (!installed) {
+                throw GradleException("Python version $pythonBuildVersionName installation failed")
+            }
+            pythonExePath = installedPythonExePath
+        }
+
+        _pythonExePathFile.get().asFile.writeText(pythonExePath)
+    }
+}
+
+abstract class PyenvUninstallPythonTask : PyenvPythonVersionTask() {
+    @get:Inject
+    abstract val fs: FileSystemOperations
+
+    @TaskAction
+    fun uninstall() {
+        if (pythonExePathFile.isPresent && pythonExePathFile.get().asFile.exists()) {
+            fs.delete {
+                delete(pythonExePathFile)
             }
         }
 
-        pythonExe.get().asFile.writeText(pythonExePath(pyenv))
+        val pythonBuildVersionName = pyenvVersionName.get()
+        val (claimedInstalled, latestOut, latestErr) = checkPyenvLatest(pyenvExe.get(), pythonBuildVersionName)
+
+        if (!claimedInstalled) {
+            logger.info("${pythonBuildVersionName} is not installed")
+            return
+        }
+
+        val (ok, out, err) = execWithPyenv {
+            executable(pyenvExe.get())
+            args("uninstall", "-f", latestOut)
+        }
+        logger.info(out)
+
+        if (!ok) {
+            throw GradleException("Unable to remove Python ${pythonBuildVersionName}:\n$out\n$err")
+        } else {
+            logger.info("pyenv uninstall successful:\n$out")
+        }
     }
 }
