@@ -231,9 +231,6 @@ abstract class SignedArtifactDownloadTask: AbstractS3ArtifactHandlingTask() {
   @get:Input
   abstract val payload: ListProperty<String>
 
-  @get:OutputFiles
-  val outputFiles = outputDir.map { it.files(*payload.get().toTypedArray()) }
-
   private val jobId by lazy {
     jobFile.get().asFile.readText().trim()
   }
