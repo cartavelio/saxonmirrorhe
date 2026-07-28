@@ -16,6 +16,7 @@ services:
         POSTGRES_PASSWORD: admin
       networks:
         - external_net
+      restart: unless-stopped
 
 networks:
   external_net: {}

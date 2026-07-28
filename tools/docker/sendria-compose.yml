@@ -19,6 +19,7 @@ services:
         - MAIL_FROM_ADDRESS=qt3extra@saxonica.com
       networks:
         - saxonica_net
+      restart: unless-stopped
 
 networks:
   saxonica_net: {}
