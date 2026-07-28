@@ -3,6 +3,7 @@
 	xmlns:functx="http://www.functx.com"
 	xmlns:local="http://saxonica.sf.net/xslt/utils/function"
 	xmlns:m="http://xylarium.org/ns/xml/documentation"
+	xmlns:map="http://www.w3.org/2005/xpath-functions/map"
 	xmlns:math="http://www.w3.org/2005/xpath-functions/math"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -69,6 +70,10 @@
 						padding-top: 0;
 						border-top: 0;
 					}}
+					.guidance h3 {{
+						padding: 0;
+						background-color: inherit;
+					}}
 					h3 {{
 						padding: .25em 1em;
 						background-color: rgba(255, 250, 205, 0.5);
@@ -103,14 +108,20 @@
 					}}
 					
 					.code,
+					.key .mode,
 					.language-list span {{
 						font-family: monospace;
 						background-color: #dcdcdc60;
 						padding-inline: .5em;
 					}}
 					
+					.key .mode,
 					.language-list span {{
 						border-radius: .5em;
+					}}
+					.language-list .xp20 {{
+						background-color: #5595D4;
+						color: #ffffff;
 					}}
 					.language-list .xp31 {{
 						background-color: #4477aa;
@@ -126,14 +137,17 @@
 					.language-list .xq40 {{
 						background-color: #f6a482;
 					}}
+					
+					.key .mode.U,
+					.product-code .mode.U {{
+						background-color: #AFD455						
+					}}
 				</style>
 			</head>
 			<body>
 				<h1>{$doc-title}</h1>
 				<div class="metadata">
-					<xsl:variable name="test-suite-version" select="distinct-values(*/test-suite-result/submission/test-run/@test-suite-version)" as="xs:string" />
-					<p>Test suite version: {$test-suite-version}</p>
-					<p>Languages and editions:</p>
+					<p>Languages and editions tested:</p>
 					<ul class="language-list">
 						<xsl:for-each-group select="*/test-suite-result/product" group-by="@language">
 							<xsl:sort select="translate(lower-case(current-grouping-key()), 'abcdefghijklmnopqrstuvwxyz', '')" data-type="number" order="ascending" />
@@ -146,12 +160,35 @@
 						</xsl:for-each-group>
 					</ul>
 				</div>
+				<xsl:variable name="modes" select="distinct-values(*/test-suite-result/product/@mode)" as="xs:string*" />				
 				<xsl:call-template name="table-of-contents" />
 				<section class="guidance">
 					<h2>Notes</h2>
 					<p>The number in round brackets at the end of a heading is the total number of cases grouped under that heading.</p>
 					<p>If more than 20 test cases in the same test file share the same comment, they are not itemised.</p>
 					<p>The high-level result categories other than 'Pass' and 'Fail' are defined in the exceptions file that was specified when these tests were run (<span class="code">exception/@report</span>).  The same is true for the reasons cited in all categories except 'Fail' and 'WrongError' (<span class="code">exception/reason</span>).</p>
+					<xsl:if test="count($modes) > 0">
+						<div class="key mode-codes">
+							<h3>Mode Codes</h3>
+							<p>Sometimes a set of tests are run more than once for a single product edition in order to test different configurations.  The configurations (modes) included in this collection of tests are: </p>
+							<table>
+								<thead>
+									<tr>
+										<th>Code</th><th>Mode</th>
+									</tr>
+								</thead>
+								<tbody>
+									<xsl:for-each select="$modes">
+										<xsl:variable name="code" select="local:get-mode-code(.)" as="xs:string" />
+										<tr>
+											<td><span class="mode {$code}">{$code}</span></td>
+											<td>{.}</td>
+										</tr>
+									</xsl:for-each>
+								</tbody>
+							</table>
+						</div>
+					</xsl:if>					
 				</section>
 				<xsl:for-each-group select="//test-case" group-by="@result">
 					<xsl:sort select="count(current-group())" data-type="number" order="ascending" />
@@ -258,7 +295,21 @@
 		
 		<xsl:for-each-group select="current-group()" group-by="ancestor::test-suite-result/product/@name/substring-after(., 'Saxon-')">
 			<xsl:sort select="current-grouping-key()" data-type="text" order="ascending" />
-			<span class="{lower-case(current-grouping-key())}">{current-grouping-key()}</span>
+			
+			<xsl:variable name="edition" select="current-grouping-key()" as="xs:string" />
+			
+			<xsl:for-each-group select="current-group()" group-by="if (ancestor::test-suite-result/product/@mode/normalize-space(.) != '') then ancestor::test-suite-result/product/@mode else ''">
+				<xsl:sort select="current-grouping-key()" data-type="text" order="ascending" />
+				
+				<span class="product-code">
+					<span class="edition {lower-case($edition)}">{$edition}</span>
+					<xsl:if test="current-grouping-key() != ''">
+						<xsl:variable name="mode-code" select="local:get-mode-code(current-grouping-key())" as="xs:string" />
+						<span class="mode {$mode-code}">{$mode-code}</span>
+					</xsl:if>
+				</span>
+				<xsl:text>{if (position() != last()) then ', ' else ()}</xsl:text>
+			</xsl:for-each-group>
 			<xsl:text>{if (position() != last()) then ', ' else ()}</xsl:text>
 		</xsl:for-each-group>
 	</xsl:template>
@@ -266,10 +317,8 @@
 	
 
 	<xsl:template match="/*" mode="doc-title">
-		<xsl:variable name="product-name" select="distinct-values(test-suite-result/product/@name)" as="xs:string*" />
-		<xsl:variable name="product-version" select="distinct-values(test-suite-result/product/@version)" as="xs:string" />
 		<xsl:variable name="date" select="distinct-values(test-suite-result/submission/test-run/@date-run)" as="xs:string" />
-		<xsl:text>{string-join($product-name, ' and ')} {$product-version} ({$date})</xsl:text>
+		<xsl:text>{@test-suite-name} test suite, v{@test-suite-version} ({$date})</xsl:text>
 	</xsl:template>
 	
 	
@@ -303,6 +352,19 @@
 				substring($arg,2))
 			"/>
 		
+	</xsl:function>
+	
+	<xsl:variable name="mode-codes" as="map(*)" select="map {
+			'unfolded' : 'U',
+			'export' : 'E',
+			'strict' : 'S',
+			'threads_5' : 'T5'
+		}" />
+	
+	<xsl:function name="local:get-mode-code" as="xs:string?">
+		<xsl:param name="mode" as="xs:string?" />
+		
+		<xsl:value-of select="map:get($mode-codes, $mode)" />
 	</xsl:function>
 
 </xsl:stylesheet>

@@ -6,7 +6,6 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	expand-text="true"
 	exclude-result-prefixes="#all"
-	xpath-default-namespace="http://www.w3.org/2012/08/qt-fots-results"
 	version="3.0">
 	
 	<xsl:strip-space elements="*"/>
@@ -24,13 +23,23 @@
 	</m:documentation>
 
 	<xsl:template match="/">
-		<xsl:for-each-group select="descendant::test-suite-result" group-by="submission/test-run/@test-suite-version">
-			<xsl:document>
-				<aggregated-test-results>
-					<xsl:apply-templates select="current-group()" />
-				</aggregated-test-results>
-			</xsl:document>
+		<xsl:for-each-group select="aggregated-test-results/c:directory/c:directory" group-by="@name">
+			<xsl:variable name="test-suite-name" select="current-grouping-key()" as="xs:string" />
+			<xsl:for-each-group select="current-group()/descendant::*:test-suite-result" group-by="*:submission/*:test-run/@test-suite-version">
+				<xsl:document>
+					<aggregated-test-results test-suite-name="{$test-suite-name}" test-suite-version="{current-grouping-key()}">
+						<xsl:apply-templates select="current-group()" />
+					</aggregated-test-results>
+				</xsl:document>
+			</xsl:for-each-group>
 		</xsl:for-each-group>
+	</xsl:template>
+	
+	<xsl:template match="*:test-suite-result">
+		<xsl:copy>
+			<xsl:attribute name="gradle-task" select="parent::c:file/@name/substring-before(., '.xml')" />
+			<xsl:apply-templates select="attribute(), node()" />
+		</xsl:copy>
 	</xsl:template>
 	
 	<xsl:template match="node() | attribute()">

@@ -78,6 +78,7 @@
 	<p:documentation m:ref="date">
 		<m:p>The date that the tests were run (YYYYMMDD).</m:p>
 		<m:note>Default: today</m:note>
+		<m:note>Only required if <m:code>$run-tests</m:code> is <m:code>false()</m:code></m:note>
 	</p:documentation>
 	<p:option name="date" select="format-date(current-date(), '[Y0001][M01][D01]')" as="xs:string" />
 	
@@ -137,7 +138,7 @@
 		<m:desc>Split the aggregated results by test suite version, eg 3.1, 4.0.</m:desc>
 	</p:documentation>
 	<p:xslt>
-		<p:with-input port="stylesheet" href="xsl/group_by_test_suite_version.xsl" />
+		<p:with-input port="stylesheet" href="xsl/group_by_test_suite_name_and_version.xsl" />
 	</p:xslt>
 	
 	
@@ -147,15 +148,20 @@
 	<p:for-each name="report">
 		<p:with-input select="/aggregated-test-results" />
 		
-		<p:variable name="test-suite-version" select="distinct-values(/aggregated-test-results/*:test-suite-result/*:submission/*:test-run/@test-suite-version) ! translate(., '.', '')" as="xs:string" />
+		<p:variable name="test-suite-name" select="/aggregated-test-results/@test-suite-name" as="xs:string" />
+		<p:variable name="test-suite-version" select="/aggregated-test-results/@test-suite-version ! translate(., '.', '')" as="xs:string" />
 		
-		<p:store href="{$output-dir}aggregated_test_results.{$test-suite-version}.xml" />
+		<p:xslt message="Infering mode from gradle task names for {$test-suite-name} {$test-suite-version}">
+			<p:with-input port="stylesheet" href="xsl/infer_mode.xsl" />
+		</p:xslt>
 		
-		<p:xslt message="Generating report for {$test-suite-version}">
+		<p:store href="{$output-dir}/aggregated_test_results.{$test-suite-name}.{$test-suite-version}.xml" />
+		
+		<p:xslt message="Generating report for {$test-suite-name} {$test-suite-version}">
 			<p:with-input port="stylesheet" href="xsl/aggregated_test_suite_results2html.xsl" />
 		</p:xslt>
 			
-		<p:store href="{$output-dir}aggregated_test_results.{$test-suite-version}.html" name="store-html" />	
+		<p:store href="{$output-dir}aggregated_test_results.{$test-suite-name}.{$test-suite-version}.html" name="store-html" />	
 		
 		<p:sink />	
 		
