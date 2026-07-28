@@ -20,9 +20,27 @@ namespace Saxon.Api.Support {
         
         public Source resolve(Saxon.Hej.lib.JJ_ResourceRequest jRequest) {
             IResource resource = null;
+            
+            // Make the uri absolute with the base URI, if we can.
+            // C#'s Uri class won't make a relative URI without a scheme
+            var rbase = string.IsNullOrEmpty(jRequest.baseUri) ? null : new Uri(jRequest.baseUri);
+            Uri ruri = null;
+            if (jRequest.uri != null)
+            {
+                if (rbase == null)
+                {
+                    ruri = new Uri(jRequest.uri); // Fingers crossed!
+                }
+                else
+                {
+                    ruri = new Uri(rbase, jRequest.uri);
+                
+                }
+            }
+            
             ResourceRequest request = new() {
-                Uri = jRequest.uri == null ? null : new Uri(jRequest.uri),
-                BaseUri = string.IsNullOrEmpty(jRequest.baseUri) ? null : new Uri(jRequest.baseUri),
+                Uri = ruri,
+                BaseUri = rbase,
                 RelativeUri = jRequest.relativeUri,
                 Nature = jRequest.nature,
                 Purpose = jRequest.purpose,
