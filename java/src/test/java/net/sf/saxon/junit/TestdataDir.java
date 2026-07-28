@@ -70,9 +70,7 @@ public class TestdataDir {
 
     private URI addQueryString(URI base, String queryString) {
         try {
-            return new URI(base.getScheme(),
-                    base.getAuthority(),
-                    base.getPath(), queryString);
+            return new URI(base.getScheme(), base.getAuthority(), base.getPath(), queryString, "");
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
