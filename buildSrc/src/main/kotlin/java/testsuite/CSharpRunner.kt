@@ -1,5 +1,6 @@
 package com.saxonica.build.java.testsuite
 
+import com.saxonica.build.csharp.MSBuildConventions
 import java.io.File
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -7,6 +8,7 @@ import java.io.PrintStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.*
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -18,7 +20,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
-abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations): MSBuildConventions() {
   override fun getGroup(): String {
     return "Testsuite"
   }
@@ -29,6 +31,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   abstract val language: Property<String>
   @get:Input
   abstract val edition: Property<String>
+  @get:Input
+  abstract val showOutput: Property<Boolean>
   @get:InputDirectory
   abstract val suiteDir: DirectoryProperty
   @get:InputFile
@@ -36,17 +40,15 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   @get:Internal
   abstract val reportingRootDir: DirectoryProperty
   @get:Internal
-  abstract val arch: Property<String>
-  @get:Internal
   abstract val netver: Property<String>
   @get:Internal
   abstract val dotnet: Property<String>
   @get:Internal
   abstract val dotnetBuildType: Property<String>
   @get:Internal
-  abstract val platform: Property<String>
+  abstract val testargs: ListProperty<String>
   @get:Internal
-  abstract val options: MapProperty<String,String>
+  abstract val projectLayout: Property<ProjectLayout>
 
   @get:Internal
   val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
@@ -54,7 +56,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   @get:Internal
   val catalog: String
     get() = when (suite.get()) {
-      "qt3extra" -> "j-catalog.xml"
+      "qt3extra" -> "j13-catalog.xml"
+      "xslt30extra" -> "j13-catalog.xml"
       else -> "catalog.xml"
     }
 
@@ -80,20 +83,10 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   fun execute() {
     val stdOutput = ByteArrayOutputStream()
     val errOutput = ByteArrayOutputStream()
-    var showOutput = true
 
-    for (task in project.gradle.taskGraph.getAllTasks()) {
-      // If the testsuites task(s) are in the graph, assume we're doing
-      // a longer run and we don't want to see all the detailed output
-      if (task.name == "testsuites") {
-        showOutput = false
-        break;
-      }
-    }
-
-    val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
-    val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
-    val testDrivers = project.layout.buildDirectory.file("${relprefix}/${relarch}")
+    val relprefix = "${msbuildArch.get()}/TestDrivers/artifacts/bin/TestDrivers/${dotnetBuildType.get().lowercase()}_"
+    val relarch = "${msbuildPlatform.get()}-${msbuildArch.get()}/TestDrivers.dll"
+    val testDrivers = projectLayout.get().buildDirectory.file("${relprefix}${relarch}")
 
     // This makes the report name match what the regression report builder
     // expects. Since I don't think any one else cares...
@@ -103,32 +96,22 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
       "${name}.xml"
     }
 
-    val testargs = mutableListOf<String>("${dotnet.get()}",
-                                         "${testDrivers.get().asFile}",
-                                         "${suiteDir.get()}",
-                                         "-catalog:${catalog}",
-                                         "-exceptions:${exceptionsFile.get()}",
-                                         "-reportfilename:${reportName}",
-                                         "-o:${reportDir.get()}",
-                                         "-lang:${language.get()}")
+    val driverargs = mutableListOf<String>(dotnet.get(),
+                                           "${testDrivers.get().asFile}",
+                                           "${suiteDir.get()}",
+                                           "-catalog:${catalog}",
+                                           "-exceptions:${exceptionsFile.get()}",
+                                           "-reportfilename:${reportName}",
+                                           "-o:${reportDir.get()}",
+                                           "-lang:${language.get()}")
+    driverargs.addAll(testargs.get())
 
-
-    for ((optname, optvalue) in options.get()) {
-      if (optvalue == "") {
-        testargs.add("-${optname}")
-      } else {
-        testargs.add("-${optname}:${optvalue}")
-      }
-    }
-
-    //testargs.add("-s:expath-file")
-    //testargs.add("-t:EXPath-file-exists-001")
     //testargs.add("-debug")
 
-    //println(listOf(testargs))
+    println(driverargs)
 
     ex.exec {
-      if (!showOutput) {
+      if (!showOutput.get()) {
         println("(buffering output)")
         standardOutput = stdOutput
         errorOutput = errOutput
@@ -136,13 +119,13 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
 
       workingDir = suiteDir.get().asFile
 
-      commandLine = testargs
+      commandLine = driverargs
     }
 
-    if (!showOutput) {
+    if (!showOutput.get()) {
       println("==> ${reportDir.get()}/stderr.txt")
       var outputStream = PrintStream(File("${reportDir.get()}/stderr.txt"))
-      outputStream.println(testargs.joinToString(" "))
+      outputStream.println(driverargs.joinToString(" "))
       var lines = errOutput.toString("utf-8")
       outputStream.print(lines)
       outputStream.close()

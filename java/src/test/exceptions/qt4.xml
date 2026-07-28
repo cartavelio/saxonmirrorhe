@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- exceptions file for the QT4 Test Suite -->
 <exceptions>
-
    <exception test-set="fn-deep-equal" 
       test-case="deep-equal-40-functions-001
       deep-equal-40-functions-002

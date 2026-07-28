@@ -39,18 +39,19 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
-val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
-val testdriverJar = configurations.resolvable("testdriverJar") {
-  extendsFrom(testdriverJarBucket)
-}
-
 val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 sourceSets.named("editionTest") {
   java {
     // TODO Exclude everything that won't build in PE...
     exclude("xqjtck/**")
+    exclude("bugs/Bug6547.java")
     exclude("com/saxonica/functions/extfn/LastModifiedTest.java")
+    exclude("com/saxonica/functions/qt4/csv/CsvRecordGeneratorTest.java")
+    exclude("com/saxonica/functions/qt4/csv/ParseCsvTest.java")
+    exclude("com/saxonica/test/matchers/MatchesCsvGetFunctionWithRow.java")
+    exclude("com/saxonica/test/matchers/MatchesCsvRecord.java")
+    exclude("com/saxonica/test/matchers/MatchesCsvRecordGetFunction.java")
     exclude("commands/AntTests.java")
     exclude("commands/QueryTests.java")
     exclude("commands/Saxon3483.java")
@@ -66,6 +67,8 @@ sourceSets.named("editionTest") {
     exclude("internaltests/LFUCacheTest.java")
     exclude("internaltests/LicenseTests.java")
     exclude("internaltests/NumberingTests.java")
+    exclude("internaltests/OrderedMapTests.java")
+    exclude("internaltests/PriorityTests.java")
     exclude("internaltests/RedirectTests.java")
     exclude("internaltests/ResourceTests.java")
     exclude("internaltests/SignatureTest.java")
@@ -124,6 +127,7 @@ sourceSets.named("editionTest") {
     exclude("net/sf/saxon/option/cpp/**")
     exclude("performance/ArrayPerformance.java")
     exclude("performance/Fernandes.java")
+    exclude("performance/MapPerformance.java")
     exclude("performance/PerformanceTestCase.java")
     exclude("performance/Playground.java")
     exclude("performance/QueryGroupingPerformance.java")
@@ -157,11 +161,14 @@ sourceSets.named("editionTest") {
     exclude("s9apitest/TestSchematron.java")
     exclude("s9apitest/TestSerializer.java")
     exclude("s9apitest/TestValidator.java")
+    exclude("s9apitest/TestValidatorOldApi.java")
     exclude("s9apitest/TestXMLParserOptions.java")
     exclude("s9apitest/TestXMarkProjection.java")
     exclude("s9apitest/TestXPathCompiler.java")
+    exclude("s9apitest/TestXPathCompilerEE.java")
     exclude("s9apitest/TestXPathErrorCode.java")
     exclude("s9apitest/TestXQueryCompiler.java")
+    exclude("s9apitest/TestXQueryCompilerEE.java")
     exclude("s9apitest/TestXQueryEvaluator.java")
     exclude("s9apitest/TestXQueryStreaming.java")
     exclude("s9apitest/TestXQueryThreads.java")
@@ -171,7 +178,9 @@ sourceSets.named("editionTest") {
     exclude("s9apitest/TestXslt30Streaming.java")
     exclude("s9apitest/TestXslt30Transformer.java")
     exclude("s9apitest/TestXslt30TransformerDebug.java")
+    exclude("s9apitest/TestXslt30TransformerDebugEE.java")
     exclude("s9apitest/TestXsltCompiler.java")
+    exclude("s9apitest/TestXsltCompilerEE.java")
     exclude("s9apitest/TestXsltIn10Mode.java")
     exclude("s9apitest/TestXsltTracing.java")
     exclude("s9apitest/TestXsltTransformer.java")
@@ -211,11 +220,17 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
-  testdriverJarBucket(project(":java:testdriver"))
+
+  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
+  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
+  testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
+  testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
+  testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 }
 
+val testdriverJar = configurations.named("testdriverJar")
 configurations {
-  testImplementation { extendsFrom(testdriverJar.get()) }
+  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.named("compileJava") {
@@ -318,7 +333,6 @@ tasks.named<Sync>("signingMavenJars") {
 val testSuitesClasspath = files(sourceSets["edition"].output)
     .from(testdriverJar)
     .from(testsuiteExtra)
-
 testSuites {
   product = "java"
   edition = "pe"
@@ -390,19 +404,41 @@ tasks.register<JavaExec>("pe_run_test") {
   mainClass = "net.sf.saxon.Transform"
 }
 
-testSuites.configure("expath", "XP31")
-testSuites.configure("expath", "XQ31")
-
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
 
+testSuites.configure("expath", "XP31")
+testSuites.configure("expath", "XQ31")
+
 testSuites.configure("qt3extra", "XP31")
 testSuites.configure("qt3extra", "XQ31")
+testSuites.configure("qt3extra", "XQ40")
 
 testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
 
 testSuites.configure("xslt30extra", "XT30")
+
+testSuites.configure("qt4", "XQ31")
+testSuites.configure("qt4", "XP31")
+testSuites.configure("qt4", "XQ40")
+testSuites.configure("qt4", "XP40")
+
+testSuites.configure("xslt40", "XT40")
+testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))
+
+tasks.register("aggregated-test-results") {
+  inputs.files(tasks.named("test_suite_qt3_XP31"))
+  inputs.files(tasks.named("test_suite_qt3_XQ31"))
+  inputs.files(tasks.named("test_suite_qt4_XP31"))
+  inputs.files(tasks.named("test_suite_qt4_XQ31"))
+  inputs.files(tasks.named("test_suite_qt4_XP40"))
+  inputs.files(tasks.named("test_suite_qt4_XQ40"))
+
+  doLast {
+    println(inputs.files.files)
+  }
+}
 
 val signTask = tasks.named("downloadSignedMavenJars")
 val mavenArtifactId = "Saxon-PE"

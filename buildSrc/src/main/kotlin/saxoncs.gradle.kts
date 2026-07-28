@@ -3,6 +3,10 @@ import com.saxonica.build.csharp.*
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.java.JarFinder
 import com.saxonica.build.java.PreprocessSourcesTask
+import com.saxonica.build.AwsSigningResources
+import com.saxonica.build.UnsignedArtifactUploadTask
+import com.saxonica.build.SignedArtifactDownloadTask
+import org.gradle.api.attributes.Usage
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
 import java.util.UUID
@@ -38,10 +42,6 @@ val saxonClasspath by configurations.resolvable("saxonClasspath") {
   extendsFrom(saxonRuntime)
 }
 val transpilerRuntime by configurations.dependencyScope("transpilerRuntime")
-val transpilerClasspath by configurations.resolvable("transpilerClasspath") {
-  extendsFrom(saxonRuntime)
-  extendsFrom(transpilerRuntime)
-}
 val transpilerInputSaxonJarBucket by configurations.dependencyScope("transpilerInputSaxonJarBucket")
 
 val releaseArtifacts by configurations.consumable("releaseArtifacts")
@@ -97,6 +97,11 @@ val javaFeatureKeysSources = configurations.resolvable("javaFeatureKeysSources")
 
 val transpilerInputSaxonJar = configurations.resolvable("transpilerInputSaxonJar") {
   extendsFrom(transpilerInputSaxonJarBucket)
+}
+
+val transpilerClasspath by configurations.resolvable("transpilerClasspath") {
+  extendsFrom(saxonRuntime)
+  extendsFrom(transpilerRuntime)
 }
 
 // from() is set in the edition build.gradle.kts
@@ -257,7 +262,8 @@ data class DotNetTasks(
 private fun generateDotnetTasks(buildArch: Architectures, buildConfiguration: CSReleaseConfiguration, suffix: String): DotNetTasks {
   val configure = tasks.register<DotNetConfiguration>("dotnet-configure-${buildArch}-${suffix}") {
     csProjXsl = layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")
-    resources.from(layout.projectDirectory.dir("..").files("README.md", "LICENSE.txt"))
+    resources.from(layout.projectDirectory.dir("..").files("LICENSE.txt"))
+    resources.from(layout.projectDirectory.dir(".").files("README.md"))
     group = LifecycleBasePlugin.BUILD_GROUP
     classpath = saxonClasspath
     dotnetversion = saxonBuild.dotnetversion
@@ -349,21 +355,21 @@ fun csZipArtifactTasks(configuration: CSReleaseConfiguration, publishTask: TaskP
   val stageZip = tasks.register("stage-${lowercaseConfiguration}-zip") {
     inputs.files(publishTask)
     inputs.files(layout.projectDirectory.dir("../../src/main/zipdoc"))
-    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
+    outputs.dir(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
 
     doFirst {
-      delete(layout.buildDirectory.dir("SaxonCS.app"))
+      delete(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
     }
 
     doLast {
       copy {
         from(publishTask.map { it.outputDir.get() })
-        into(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
+        into(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/SaxonCS-${extension.edition.get().uppercase()}"))
       }
 
       copy {
         from(layout.projectDirectory.dir("../../src/main/zipdoc"))
-        into(layout.buildDirectory.dir("SaxonCS.app/doc"))
+        into(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/doc"))
       }
     }
   }
@@ -376,9 +382,9 @@ fun csZipArtifactTasks(configuration: CSReleaseConfiguration, publishTask: TaskP
       dirver = dirver.substring(0, dirver.length - 2)
     }
 
-    archiveFileName = "SaxonCS-${zipver}-${zipname}-${ziparch}.zip"
+    archiveFileName = "SaxonCS-${extension.edition.get().uppercase()}-${zipver}-${zipname}-${ziparch}.zip"
     from(stageZip)
-    into("/SaxonCS-${dirver}/")
+    into("/SaxonCS-${extension.edition.get().uppercase()}-${dirver}/")
   }
 }
 
@@ -412,32 +418,32 @@ if (!saxonBuild.targetHost.get().isMacOS) {
     group = LifecycleTasks.RELEASE_GROUP
 
     inputs.files(*makeAppTasks)
-    outputs.file(layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS"))
+    outputs.file(layout.buildDirectory.file("SaxonCS-${extension.edition.get().uppercase()}.app/Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}"))
 
     doFirst {
       // If a previous build put the docs in there, delete them; they aren't
       // allowed in a signed build
-      delete(layout.buildDirectory.dir("SaxonCS.app/doc"))
-      delete(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
+      delete(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/doc"))
+      delete(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/SaxonCS-${extension.edition.get().uppercase()}"))
     }
 
     doFirst {
       copy {
         from(makeAppTask)
-        into(layout.buildDirectory.dir("SaxonCS.app"))
-        exclude("Contents/MacOS/SaxonCS")
+        into(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
+        exclude("Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}")
       }
     }
 
     workingDir = layout.buildDirectory.get().asFile
     commandLine("lipo", "-create", "-output",
-      "${layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS").get()}",
-      *makeAppTasks.map { it.map { it.outputDir.get().dir("Contents/MacOS/SaxonCS") }.get().asFile }.toTypedArray())
+      "${layout.buildDirectory.file("SaxonCS-${extension.edition.get().uppercase()}.app/Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}").get()}",
+      *makeAppTasks.map { it.map { it.outputDir.get().dir("Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}") }.get().asFile }.toTypedArray())
   }
 
   val signedMacOSAppTask = tasks.register<Exec>("macos-release-app") {
     inputs.files(buildUnsignedMacOSAppTask)
-    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
+    outputs.dir(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
 
     // Putting documentation in the app causes the signature to fail
     // "unsealed content is present in the bundle root"
@@ -446,7 +452,7 @@ if (!saxonBuild.targetHost.get().isMacOS) {
       "${layout.projectDirectory.file("../tools/entitlements.plist")}",
       "--deep", "--sign", "Developer ID Application: Saxonica Limited",
       "--timestamp",
-      "${layout.buildDirectory.file("SaxonCS.app").get()}")
+      "${layout.buildDirectory.file("SaxonCS-${extension.edition.get().uppercase()}.app").get()}")
   }
 
   val zipArtifactTask = tasks.register<Zip>(dotnetPublishZipArtifactTaskName("release")) {
@@ -454,7 +460,7 @@ if (!saxonBuild.targetHost.get().isMacOS) {
     archiveFileName = "SaxonCS-${saxonBuild.version.get().replace(".", "-")}-MacOS.zip"
 
     from(signedMacOSAppTask)
-    into("/SaxonCS.app/")
+    into("/SaxonCS-${extension.edition.get().uppercase()}.app/")
   }
 
   releaseZipArtifactTasks.add(zipArtifactTask)
@@ -480,6 +486,36 @@ tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
 }
 
 releaseArtifacts.outgoing.artifacts(artifacts.map { it.outputs.files })
+
+// ============================================================
+
+val signingResources = tasks.register<AwsSigningResources>("signingResources") {
+  region = "eu-west-2"
+  stackName = "SaxonicaCiCdStack"
+}
+
+val unsignedNugetPkgs = tasks.register<Sync>("unsignedNugetPkgs") {
+  inputs.files(nupkgBuildTask)
+  into(layout.buildDirectory.dir("unsignedNugetPkgs"))
+  from(nupkgBuildTask.map { it.nupkgFile.get() })
+}
+
+val uploadUnsignedNugetPkg = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedNugetPkg") {
+  inputDir = layout.projectDirectory.dir(unsignedNugetPkgs.map { it.destinationDir.toString() })
+  bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+  queueUrl = signingResources.map { it.windowsCodeSigningInputsQueueUrl.get() }
+  region = signingResources.map { it.region.get() }
+  baseKeyPrefix = "inputs"
+  jobFileDir = layout.buildDirectory.dir("uploadNugetPkg")
+}
+
+val downloadSignedNugetPkg = tasks.register<SignedArtifactDownloadTask>("downloadSignedNugetPkg") {
+  outputDir = layout.buildDirectory.dir("signed-nuget")
+  bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
+  queueUrl = signingResources.map { it.windowsCodeSigningOutputsQueueUrl.get() }
+  region = signingResources.map { it.region.get() }
+  jobFile = uploadUnsignedNugetPkg.map { it.jobFile.get() }
+}
 
 // ============================================================
 // Documentation tasks
@@ -604,17 +640,17 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
-val templateName = project.findProperty("projectTemplateName") ?: "SaxonCS"
-
 val csprojTemplateTask = tasks.register<JavaExec>("csproj-template") {
   inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
-  outputs.file(layout.projectDirectory.file("${templateName}.csproj"))
-  outputs.file(layout.projectDirectory.file("${templateName}.sln"))
+  outputs.file(layout.projectDirectory.file("SaxonCS.csproj"))
+  outputs.file(layout.projectDirectory.file("SaxonCS.sln"))
+  outputs.file(layout.projectDirectory.file("NUnitTests.csproj"))
+  outputs.file(layout.projectDirectory.file("Directory.Build.props"))
   classpath = saxonClasspath
   mainClass = "net.sf.saxon.Transform"
   args("-it",
     "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
-    "-o:${layout.projectDirectory.file("${templateName}.sln")}",
+    "-o:${layout.projectDirectory.file("SaxonCS.sln")}",
     "release=${CSReleaseConfiguration.Debug}",
     "platform=${extension.platform.get().msbuild}",
     "arch=${extension.architecture.get().msbuild}",

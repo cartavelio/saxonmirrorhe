@@ -20,7 +20,6 @@ val testSuites = the<TestSuitesExtension>()
 val extension = project.extensions.create<SaxonJExtension>("saxonj")
 
 configure<TestSuitesExtension> {
-    platform = "java"
     edition = extension.edition
 }
 
@@ -56,6 +55,11 @@ val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
 val configXsdBucket by configurations.dependencyScope("configXsdBucket")
+val testdriverDownloadEditionJarBucket by configurations.dependencyScope("testdriverDownloadEditionJarBucket")
+val testdriverDownloadEditionSourcesJarBucket by configurations.dependencyScope("testdriverDownloadEditionSourcesJarBucket")
+val testdriverMavenEditionJarBucket by configurations.dependencyScope("testdriverMavenEditionJarBucket")
+val testdriverMavenEditionSourcesJarBucket by configurations.dependencyScope("testdriverMavenEditionSourcesJarBucket")
+val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
 val sourceArtifacts by configurations.consumable("sourceArtifacts")
 val resources by configurations.consumable("resources")
 val filteredSourcesDir by configurations.consumable("filteredSourcesDir")
@@ -69,6 +73,7 @@ val releaseMaven by configurations.consumable("releaseMaven")
 val preprocessor by configurations.creating {
     extendsFrom(configurations["runtimeOnly"])
 }
+
 val testRuntime by configurations.creating {
     extendsFrom(configurations["runtimeOnly"])
 }
@@ -108,6 +113,22 @@ val testImplementationResolvable by configurations.resolvable("testImplementatio
   extendsFrom(testImplementation)
 }
 
+val testdriverJar = configurations.resolvable("testdriverJar") {
+  extendsFrom(testdriverJarBucket)
+}
+val testdriverDownloadEditionJar by configurations.resolvable("testdriverDownloadEditionJar") {
+    extendsFrom(testdriverDownloadEditionJarBucket)
+}
+val testdriverDownloadEditionSourcesJar by configurations.resolvable("testdriverDownloadEditionSourcesJar") {
+    extendsFrom(testdriverDownloadEditionSourcesJarBucket)
+}
+val testdriverMavenEditionJar by configurations.resolvable("testdriverMavenEditionJar") {
+    extendsFrom(testdriverMavenEditionJarBucket)
+}
+val testdriverMavenEditionSourcesJar by configurations.resolvable("testdriverMavenEditionSourcesJar") {
+    extendsFrom(testdriverMavenEditionSourcesJarBucket)
+}
+
 configurations.configureEach {
   exclude("net.sf.saxon", "Saxon-HE")
   exclude("com.saxonica", "Saxon-EE")
@@ -133,11 +154,23 @@ dependencies {
 
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
     downloadReleaseBundled("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
-    downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
-
-    implementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
-    implementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
-    implementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
+    downloadReleaseBundled("org.nineml:coffeegrinder:${findProperty("ninemlVersion")}") {
+        exclude("net.sf.saxon", "Saxon-HE")
+        exclude("com.saxonica", "Saxon-EE")
+        // I don't think these should be in the dependencies for CoffeeFilter, but
+        // https://discuss.gradle.org/t/how-do-i-track-down-a-dependency/52035
+        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        exclude("org.jetbrains", "annotations")
+    }
+    downloadReleaseBundled("org.nineml:coffeefilter:${findProperty("ninemlVersion")}") {
+        exclude("net.sf.saxon", "Saxon-HE")
+        exclude("com.saxonica", "Saxon-EE")
+        exclude("org.relaxng", "jing")
+        // I don't think these should be in the dependencies for CoffeeFilter, but
+        // https://discuss.gradle.org/t/how-do-i-track-down-a-dependency/52035
+        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        exclude("org.jetbrains", "annotations")
+    }
 
     editionCompileAndTestOnly("xom:xom:1.3.5")
     editionCompileAndTestOnly("org.jdom:jdom:1.1.3")
@@ -146,14 +179,18 @@ dependencies {
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-dom:1.2.15")
     editionCompileAndTestOnly("org.apache.ws.commons.axiom:axiom-impl:1.2.15")
-
+    implementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
+    downloadReleaseBundled("jline:jline:${findProperty("jlineVersion")}")
+    compileOnly("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
+    compileOnly("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
     compileOnly("org.graalvm.sdk:graal-sdk:${findProperty("graalSdkVersion")}")
     compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
     compileOnly(libTidyPath.map { files(it.asFile) })
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    testImplementation(platform("org.junit:junit-bom:5.9.2"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.apiguardian:apiguardian-api:1.0.0")
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.apache.ant:ant:1.10.9")
@@ -166,6 +203,20 @@ dependencies {
     preprocessor("com.tonicsystems:jarjar:0.6")
     preprocessor("net.sf.saxon:Saxon-HE:12.4")
     preprocessor(files(saxonBuild.saxonLicenseDir.get()))
+
+    testdriverDownloadEditionJarBucket(extension.edition.map { edition ->
+        project(path = ":java:testdriver", configuration = "download${edition.uppercase()}Jar")
+    })
+    testdriverDownloadEditionSourcesJarBucket(extension.edition.map { edition ->
+        project(path = ":java:testdriver", configuration = "download${edition.uppercase()}SourcesJar")
+    })
+    testdriverMavenEditionJarBucket(extension.edition.map { edition ->
+        project(path = ":java:testdriver", configuration = "maven${edition.uppercase()}Jar")
+    })
+    testdriverMavenEditionSourcesJarBucket(extension.edition.map { edition ->
+        project(path = ":java:testdriver", configuration = "maven${edition.uppercase()}SourcesJar")
+    })
+    testdriverJarBucket(project(":java:testdriver"))
 }
 
 val javaSources = configurations.resolvable("javaSources") {
@@ -327,7 +378,6 @@ val editionJavadoc = tasks.register<Exec>("editionJavadoc") {
   val toPackageName: (java.nio.file.Path) -> String = { p ->
     p.iterator().asSequence().joinToString(".")
   }
-
   if (sourceDir.asFileTree.map(relativizedPath).toSet().map(toPackageName).isEmpty()) {
     executable = "/bin/echo"
     args("***********************************************************************\n"
@@ -346,7 +396,7 @@ val editionJavadoc = tasks.register<Exec>("editionJavadoc") {
         "-group", "s9api Interfaces", "net.sf.saxon.s9api:net.sf.saxon.s9api.push:net.sf.saxon.s9api.streams",
         "-group", "Other Interfaces", "com.saxonica.config:net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
         "-group", "External Interfaces", "javax.xml.xquery",
-        "-source", "1.8"
+        "-source", "17"
     )
 
     args("-classpath", editionSourceSet.compileClasspath.joinToString(":"))
@@ -444,17 +494,19 @@ val signingDownloadJars = tasks.register<Sync>("signingDownloadJars") {
     duplicatesStrategy = DuplicatesStrategy.WARN
     into(layout.buildDirectory.dir("signing/download"))
     from(editionDownloadJarTask)
+    from(testdriverDownloadEditionJar)
 }
 
 val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
     duplicatesStrategy = DuplicatesStrategy.WARN
     into(layout.buildDirectory.dir("signing/mavendownload"))
-    from(tasks.named<Jar>("editionMavenJar"))
-    from(tasks.named<Jar>("javadocMavenJar"))
+    from(editionMavenJarTask)
+    from(javadocMavenJarTask)
+    from(testdriverMavenEditionJar)
+    from(testdriverMavenEditionSourcesJar)
     if (extension.edition.get().uppercase() == "HE") {
-      from(tasks.named<Jar>("editionSourceMavenJar"))
+      from(editionMavenSourceJarTask)
     }
-    from(tasks.named<Jar>("testDriversSourceMavenJar"))
 }
 
 val signingResources = tasks.register<AwsSigningResources>("signingResources") {

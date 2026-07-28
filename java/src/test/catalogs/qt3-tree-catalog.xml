@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="http://www.w3.org/2010/09/qt-fots-catalog" 
+    test-suite="FOTS" version="3.1">
+
+    <environment name="empty">
+        <!-- The context item MUST be undefined/absent for queries run in this environment. -->
+        <!-- The test query will always be an expression, and if necessary an
+             empty context can be achieved by wrapping the expression as the
+             body of a function -->
+    </environment>
+
+   <environment name="auction">
+      <namespace prefix="ma" uri="http://www.example.com/AuctionWatch"/>
+      <namespace prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
+      <namespace prefix="anyzone" uri="http://www.example.com/auctioneers#anyzone"/>
+      <namespace prefix="eachbay" uri="http://www.example.com/auctioneers#eachbay"/>
+      <namespace prefix="yabadoo" uri="http://www.example.com/auctioneers#yabadoo"/>
+      <namespace prefix="map" uri="http://www.w3.org/2005/xpath-functions/map"/>
+      <source role="." file="../../../../submodules/qt3/docs/auction.xml">
+         <description>Data for the the XML Query NS use cases: version for XPath tests</description>
+         <created by="XQuery WG" on="2005-02-11"/>
+      </source>
+   </environment>
+
+    <environment name="atomic">
+        <namespace prefix="atomic" uri="http://www.w3.org/XQueryTest"/> 
+        <schema uri="http://www.w3.org/XQueryTest" file="../../../../submodules/qt3/docs/atomic.xsd">
+            <description>A Schema for atomic.xml</description>
+            <created by="Carmelo Montanez" on="2005-03-08"/>
+        </schema>        
+        <source role="." file="../../../../submodules/qt3/docs/atomic.xml" validation="strict" uri="http://www.w3.org/fots/docs/atomic.xml">
+            <description>A Schema validated xml file, that contains values for data types. Can be used by any test.</description>
+            <created by="Carmelo Montanez" on="2005-03-08"/>
+        </source>
+   </environment>
+
+   <environment name="qname">
+      <schema uri="http://www.example.com/QNameXSD" file="docs/QName-schema.xsd">
+          <description>A Schema for QName-source.xml</description>
+          <created by="XQuery WG" on="2005-03-08"/>
+      </schema>
+      <source role="." file="../../../../submodules/qt3/docs/QName-source.xml" validation="strict">
+          <description>Data containing QNames in content</description>
+          <created by="XQuery WG" on="2005-02-11"/>
+      </source>
+      <namespace prefix="" uri="http://www.example.com/QNameXSD"/>
+   </environment>
+   
+   <environment name="works-mod">
+      <source role="." file="../../../../submodules/qt3/docs/works-mod.xml">
+         <description>Data for various NIST tests (abbreviated, unabbreviated syntax)</description>
+         <created by="Carmelo Montanez" on="2005-03-04"/>
+      </source>
+   </environment>
+
+    <environment name="array">
+        <namespace prefix="array" uri="http://www.w3.org/2005/xpath-functions/array"/>
+    </environment>
+
+    <test-set name="fn-local-name"                      file="fn/local-name.xml"/>
+    <test-set name="fn-local-name-from-QName"           file="fn/local-name-from-QName.xml"/>
+
+    <test-set name="fn-name"                            file="fn/name.xml"/>
+    <test-set name="fn-namespace-uri"                   file="fn/namespace-uri.xml"/>
+    <test-set name="fn-namespace-uri-for-prefix"        file="fn/namespace-uri-for-prefix.xml"/>
+    <test-set name="fn-namespace-uri-from-QName"        file="fn/namespace-uri-from-QName.xml"/>
+    <test-set name="fn-nilled"                          file="fn/nilled.xml"/>
+    <test-set name="fn-node-name"                       file="fn/node-name.xml"/>
+    <test-set name="fn-normalize-space"                 file="fn/normalize-space.xml"/>
+    <test-set name="fn-normalize-unicode"               file="fn/normalize-unicode.xml"/>
+    <test-set name="fn-not"                             file="fn/not.xml"/>
+    <test-set name="fn-number"                          file="fn/number.xml"/>
+   
+   <!-- LANGUAGE CONSTRUCTS -->
+   
+   <test-set name="prod-AxisStep"                       file="prod/AxisStep.xml"/>
+   <test-set name="prod-AxisStep.abbr"                  file="prod/AxisStep.abbr.xml"/>
+   <test-set name="prod-AxisStep.ancestor"              file="prod/AxisStep.ancestor.xml"/>
+   <test-set name="prod-AxisStep.ancestor-or-self"      file="prod/AxisStep.ancestor-or-self.xml"/>
+   <test-set name="prod-AxisStep.following"             file="prod/AxisStep.following.xml"/>
+   <test-set name="prod-AxisStep.following-sibling"     file="prod/AxisStep.following-sibling.xml"/>
+   <test-set name="prod-AxisStep.preceding"             file="prod/AxisStep.preceding.xml"/>
+   <test-set name="prod-AxisStep.preceding-sibling"     file="prod/AxisStep.preceding-sibling.xml"/>
+   <test-set name="prod-AxisStep.static-typing"         file="prod/AxisStep.static-typing.xml"/>
+   <test-set name="prod-AxisStep.unabbr"                file="prod/AxisStep.unabbr.xml"/>
+   <test-set name="prod-BaseURIDecl"                    file="prod/BaseURIDecl.xml"/>
+
+   <test-set name="prod-Comment"                        file="prod/Comment.xml"/>
+   <test-set name="prod-CompAttrConstructor"            file="prod/CompAttrConstructor.xml"/>
+   <test-set name="prod-CompDocConstructor"             file="prod/CompDocConstructor.xml"/>  
+   <test-set name="prod-CompCommentConstructor"         file="prod/CompCommentConstructor.xml"/>
+   <test-set name="prod-CompElemConstructor"            file="prod/CompElemConstructor.xml"/>
+   <test-set name="prod-CompNamespaceConstructor"       file="prod/CompNamespaceConstructor.xml"/>
+   <test-set name="prod-CompPIConstructor"              file="prod/CompPIConstructor.xml"/>
+   <test-set name="prod-CompTextConstructor"            file="prod/CompTextConstructor.xml"/>
+   <test-set name="prod-ConstructionDecl"               file="prod/ConstructionDecl.xml"/>
+   <test-set name="prod-ConstructionDecl.schema"        file="prod/ConstructionDecl.schema.xml"/>
+   <test-set name="prod-ContextItemDecl"                file="prod/ContextItemDecl.xml"/>
+   <test-set name="prod-ContextItemExpr"                file="prod/ContextItemExpr.xml"/>
+   <test-set name="prod-CopyNamespacesDecl"             file="prod/CopyNamespacesDecl.xml"/>
+   <test-set name="prod-CountClause"                    file="prod/CountClause.xml"/>
+   <test-set name="prod-CurlyArrayConstructor"          file="prod/CurlyArrayConstructor.xml"/>
+   
+   <!-- SERIALIZATION -->
+   
+   <test-set name="method-adaptive"                     file="ser/method-adaptive.xml"/>
+   <test-set name="method-html"                         file="ser/method-html.xml"/>
+   <test-set name="method-json"                         file="ser/method-json.xml"/>
+   <test-set name="method-text"                         file="ser/method-text.xml"/>
+   <test-set name="method-xhtml"                        file="ser/method-xhtml.xml"/>
+   <test-set name="method-xml"                          file="ser/method-xml.xml"/>
+    
+</catalog>

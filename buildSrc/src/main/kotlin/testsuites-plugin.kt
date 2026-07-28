@@ -5,6 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.Date
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -28,14 +29,15 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 
 abstract class TestSuitesExtension
-  @Inject constructor(private val layout: ProjectLayout,
+  @Inject constructor(private val fs: FileSystemOperations,
+                      private val layout: ProjectLayout,
                       private val tasks: TaskContainer) {
 
   abstract val testclasspath: Property<FileCollection>
   abstract val propertyOptions: MapProperty<String,String>
   abstract val product: Property<String>
-  abstract val platform: Property<String>
-  abstract val arch: Property<String>
+  abstract val platform: Property<Platforms>
+  abstract val arch: Property<Architectures>
   abstract val edition: Property<String>
   abstract val dotnet: Property<String>
   abstract val dotnetBuildType: Property<String>
@@ -67,17 +69,34 @@ abstract class TestSuitesExtension
       "test_suite_${taskName}"
     }
 
+    val testargs = mutableListOf<String>()
+    for((optname, optvalue) in options) {
+      if (optvalue == "") {
+        testargs.add("-${optname}")
+      } else {
+        testargs.add("-${optname}:${optvalue}")
+      }
+    }
+
+    for((optname, optvalue) in propertyOptions.get()) {
+      if (optvalue == "") {
+        testargs.add("-${optname}")
+      } else {
+        testargs.add("-${optname}:${optvalue}")
+      }
+    }
+
     return when (product.get()) {
       "java" -> if (suite.startsWith("xsd")) {
-        configureJavaXsd(suite, language, options, name)
+        configureJavaXsd(suite, language, testargs, name)
       } else {
-        configureJava(suite, language, options, name)
+        configureJava(suite, language, testargs, name)
       }
 
       "csharp" -> if (suite.startsWith("xsd")) {
-        configureCsharpXsd(suite, language, options, name)
+        configureCsharpXsd(suite, language, testargs, name)
       } else {
-        configureCsharp(suite, language, options, name)
+        configureCsharp(suite, language, testargs, name)
       }
 
       else -> throw GradleException("Unexpected test product: ${product.get()}")
@@ -88,9 +107,10 @@ abstract class TestSuitesExtension
     return when (suite) {
       "qt3" -> submodulesDir.dir("qt3")
       "qt3extra" -> submodulesDir.dir("extra/suites/qt3")
-      "expath" -> layout.buildDirectory.dir("suite/expath")
+      "expath" -> submodulesDir.dir("expath/tests/qt3")
       "xslt30" -> submodulesDir.dir("xslt30")
       "xslt30extra" -> submodulesDir.dir("extra/suites/xslt30")
+      "xsltfromqt4" -> submodulesDir.dir("extra/suites/xsltfromqt4")
       "qt4" -> submodulesDir.dir("qt4")
       "xslt40" -> submodulesDir.dir("xslt40")
       "xsd" -> submodulesDir.dir("xsd")
@@ -99,15 +119,41 @@ abstract class TestSuitesExtension
     }
   }
 
-  fun exceptions(suite: String): Provider<RegularFile> {
+  fun exceptions(suite: String, language: String): Provider<RegularFile> {
+    // N.B. The exceptionsDir is set appropriately in the Java/C# configuration
     return when (suite) {
-      "qt3" -> exceptionsDir.file("qt3.xml")
+      "qt3" -> {
+        if (language.contains("4")) {
+          exceptionsDir.file("qt4.xml")
+        } else {
+          exceptionsDir.file("qt3.xml")
+        }
+      }
+      "qt4" -> {
+        if (language.contains("4")) {
+          exceptionsDir.file("qt4.xml")
+        } else {
+          exceptionsDir.file("qt3.xml")
+        }
+      }
+      "xslt30" -> {
+        if (language.contains("4")) {
+          exceptionsDir.file("xslt40.xml")
+        } else {
+          exceptionsDir.file("xslt30.xml")
+        }
+      }
+      "xslt40" -> {
+        if (language.contains("4")) {
+          exceptionsDir.file("xslt40.xml")
+        } else {
+          exceptionsDir.file("xslt30.xml")
+        }
+      }
       "qt3extra" -> exceptionsDir.file("qt3extra.xml")
       "expath" -> exceptionsDir.file("expath.xml")
-      "xslt30" -> exceptionsDir.file("xslt30.xml")
       "xslt30extra" -> exceptionsDir.file("xslt30extra.xml")
-      "qt4" -> exceptionsDir.file("qt4.xml")
-      "xslt40" -> exceptionsDir.file("xslt40.xml")
+      "xsltfromqt4" -> exceptionsDir.file("qt4-xslt.xml")
       "xsd" -> exceptionsDir.file("xsd11.xml")
       "xsdextra" -> exceptionsDir.file("xsd-extra.xml")
       else -> throw GradleException("Unknown exceptions for test suite: ${suite}")
@@ -115,87 +161,38 @@ abstract class TestSuitesExtension
   }
   
   fun configureJava(suite: String, language: String,
-                    @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
+                    testargs: List<String>,
                     taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
-    // This is annoying. We have to copy the suite because
-    // the sandpit is writable...
-    val actualSuiteDir = if (suite == "expath") {
-      layout.buildDirectory.dir("suite/expath/${taskName}")
-    } else {
-      suiteDir(suite)
-    }
-
     val thisSuite = tasks.register<JavaRunner>(taskName) {
+      outputs.upToDateWhen { false }
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       this.edition = plugin.edition
       this.suite = suite
       this.language = language
-      this.suiteDir = actualSuiteDir
-      this.options = options
-      this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
-      exceptionsFile = exceptions(suite)
+      this.suiteDir = suiteDir(suite)
+      this.testargs = testargs
+      this.showOutput = project.findProperty("saxonicaTestDriverOutputRedirect") != "true"
+      exceptionsFile = exceptions(suite, language)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
-    }
-
-    if (suite == "expath") {
-      val copySuite = tasks.register("${taskName}_copy_suite") {
-        group = "Internal"
-        description = "Copy the expath test suite"
-        inputs.files(submodulesDir.dir("expath/tests/qt3"))
-        outputs.dir(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        doLast {
-          project.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              // Unless other changes are ported over from main,
-              // the saxon12 branch seems to need to copy sandpit2
-              //exclude("archive/sandpit2/**")
-            }
-          }
-        }
-
-        doLast {
-          // Also, make sure that the file "test.bin" exists
-          // or some tests will fail.
-          project.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              include("catalog.xml")
-            }
-            rename { "test.bin" }
-          }
-        }
-      }
-
-      val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
-        group = "Internal"
-        description = "Copy the expath test suite sandpit" 
-        dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
-        // sandpit2!?
-        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
-          include("**")
-        }
-      }
-      thisSuite.configure {
-        dependsOn(copySandpit)
-      }
     }
 
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
-    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
-      dependsOn(thisSuite)
-    }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }   
     @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
 
-  fun configureJavaXsd(suite: String, language: String, options: Map<String,String>, taskName: String): TaskProvider<DefaultTask> {
+  fun configureJavaXsd(suite: String,
+                       language: String,
+                       testargs: List<String>,
+                       taskName: String): TaskProvider<DefaultTask> {
     val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
 
     val xsdVersion = "1.1"
@@ -203,7 +200,7 @@ abstract class TestSuitesExtension
     val driverClass = "com.saxonica.testdriver.ee.SchemaTestSuiteDriver"
 
     val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite)
+    val exceptionsFile = exceptions(suite, language)
 
     val catalog = "catalog.xml"
 
@@ -215,24 +212,23 @@ abstract class TestSuitesExtension
 
     val summarizeResults = submodulesDir.file("extra/tools/summarize-results.xsl").get()
 
-    val testargs = mutableListOf<String>("${directory.get()}",
-                                         "${catalog}",
-                                         "-exceptions:${exceptionsFile.get()}",
-                                         "-reportfilename:${reportFn}",
-                                         "-errorfilename:${errorFn}",
-                                         "-local:${reportDir}",
-                                         "-summarizeresults:${summarizeResults}",
-                                         "-v:${xsdVersion}")
-    for ((optname, optvalue) in options) {
-      testargs.add("-${optname}:${optvalue}")
-    }
+    val driverargs = mutableListOf<String>("${directory.get()}",
+                                           "${catalog}",
+                                           "-exceptions:${exceptionsFile.get()}",
+                                           "-reportfilename:${reportFn}",
+                                           "-errorfilename:${errorFn}",
+                                           "-local:${reportDir}",
+                                           "-summarizeresults:${summarizeResults}",
+                                           "-v:${xsdVersion}")
+    driverargs.addAll(testargs)
 
     val thisSuite = tasks.register<JavaExec>(taskName) {
+      outputs.upToDateWhen { false }
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       mainClass.set(driverClass)
       workingDir = directory.get().asFile
       classpath = testclasspath.get()
-      args(testargs)
+      args(driverargs)
 
       doFirst {
         Files.createDirectories(Paths.get(reportDir.toString()))
@@ -242,95 +238,54 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
-    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
-      dependsOn(thisSuite)
-    }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_JAVA_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }
 
     @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
 
   fun configureCsharp(suite: String, language: String,
-                      @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
+                      testargs: List<String>,
                       taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
-    // This is annoying. We have to copy the suite because
-    // the sandpit is writable...
-    val actualSuiteDir = if (suite == "expath") {
-      layout.buildDirectory.dir("suite/expath/${taskName}")
-    } else {
-      suiteDir(suite)
-    }
-
     val thisSuite = tasks.register<CSharpRunner>(taskName) {
+      outputs.upToDateWhen { false }
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       dependsOn("dotnetBuildTestDrivers")
       this.edition = plugin.edition
+      this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
       this.suite = suite
       this.language = language
-      this.suiteDir = actualSuiteDir
+      this.suiteDir = suiteDir(suite)
       this.arch = plugin.arch
       this.netver = plugin.netver
       this.dotnet = plugin.dotnet
       this.dotnetBuildType = plugin.dotnetBuildType
       this.platform = plugin.platform
-      this.options = options
-      exceptionsFile = exceptions(suite)
+      this.testargs = testargs
+      exceptionsFile = exceptions(suite, language)
+      this.projectLayout = layout
       reportingRootDir = layout.buildDirectory.dir("test-results")
-    }
-
-    if (suite == "expath") {
-      val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
-        group = "Internal"
-        description = "Copy the expath test suite"
-        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        from(submodulesDir.dir("expath/tests/qt3")) {
-          exclude("archive/sandpit2/**")
-        }
-
-        doLast {
-          // Also, make sure that the file "test.bin" exists
-          // or some tests will fail.
-          project.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              include("catalog.xml")
-            }
-            rename { "test.bin" }
-          }
-        }
-      }
-
-      val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
-        group = "Internal"
-        description = "Copy the expath test suite sandpit" 
-        dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
-        // sandpit2!?
-        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
-          include("**")
-        }
-      }
-      thisSuite.configure {
-        dependsOn(copySandpit)
-      }
     }
 
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
-    tasks.named(LifecycleTasks.ACCEPTANCE_CSHARP_TEST_TASK_NAME) {
-      dependsOn(thisSuite)
-    }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_CSHARP_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }
 
     @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
   }
 
   fun configureCsharpXsd(suite: String,
-                         @Suppress("UNUSED_PARAMETER") language: String,
-                         options: Map<String,String>, taskName: String): TaskProvider<DefaultTask> {
+                         language: String,
+                         testargs: List<String>,
+                         taskName: String): TaskProvider<DefaultTask> {
     val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME).get()
     val build = tasks.named("dotnetBuildTestDrivers").get()
 
@@ -339,38 +294,30 @@ abstract class TestSuitesExtension
     val xsdVersion = "11"
 
     val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite)
+    val exceptionsFile = exceptions(suite, language)
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
-    val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
-    val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
+    val relprefix = "${arch.get().msbuild}/TestDrivers/artifacts/bin/TestDrivers/${dotnetBuildType.get().lowercase()}_"
+    val relarch = "${platform.get().msbuild}-${arch.get().msbuild}/TestDrivers.dll"
 
-    val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
+    val testDrivers = layout.buildDirectory.file("${relprefix}${relarch}")
 
-    val testargs = mutableListOf<String>("${dotnet.get()}",
-                                         "${testDrivers.get().asFile}",
-                                         "${directory.get()}",
-                                         "-o:${reportDir}",
-                                         "-lang:XSD${xsdVersion}",
-                                         "-debug",
-                                         "-exceptions:${exceptionsFile.get()}")
-    for ((optname, optvalue) in options) {
-      testargs.add("-${optname}:${optvalue}")
-    }
-    for((optname, optvalue) in propertyOptions.get()) {
-      if (optvalue == "") {
-        testargs.add("-${optname}")
-      } else {
-        testargs.add("-${optname}:${optvalue}")
-      }
-    }
+    val driverargs = mutableListOf<String>("${dotnet.get()}",
+                                           "${testDrivers.get().asFile}",
+                                           "${directory.get()}",
+                                           "-o:${reportDir}",
+                                           "-lang:XSD${xsdVersion}",
+                                           "-debug",
+                                           "-exceptions:${exceptionsFile.get()}")
+    driverargs.addAll(testargs)
 
     val thisSuite = tasks.register<Exec>(taskName) {
+      outputs.upToDateWhen { false }
       dependsOn(build)
 
       workingDir = directory.get().asFile
-      commandLine = testargs
+      commandLine = driverargs
       //ignoreExitValue = true
 
       doFirst {
@@ -399,9 +346,9 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
-    tasks.named(LifecycleTasks.ACCEPTANCE_CSHARP_TEST_TASK_NAME) {
-      dependsOn(thisSuite)
-    }
+//    tasks.named(LifecycleTasks.ACCEPTANCE_CSHARP_TEST_TASK_NAME) {
+//      dependsOn(thisSuite)
+//    }
 
     @Suppress("UNCHECKED_CAST")
     return thisSuite as TaskProvider<DefaultTask>
@@ -425,8 +372,8 @@ class TestSuitesPlugin : Plugin<Project> {
     }
     extension.propertyOptions.convention(pmap)
     extension.product.convention("")
-    extension.platform.convention(saxonBuild.platform.get())
-    extension.arch.convention(if (saxonBuild.arch.get() == "aarch64") "arm64" else "x64")
+    extension.platform.convention(saxonBuild.targetHost.map { it.platformConst })
+    extension.arch.convention(saxonBuild.targetHost.map { it.architectureConst })
     extension.edition.convention("")
     extension.dotnet.convention(saxonBuild.dotnet.get())
     extension.netver.convention("net${saxonBuild.dotnetversion.get()}")

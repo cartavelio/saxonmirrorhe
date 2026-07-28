@@ -9,6 +9,7 @@ import org.gradle.kotlin.dsl.*
 
 plugins {
     id("java-library")
+    `jvm-test-suite`
     id("saxon-build")
 }
 
@@ -78,9 +79,22 @@ dependencies {
         project(path = javaEditionProject(edition), configuration = "implementationDependencies")
     })
 
-    compileOnly("org.graalvm.sdk:graal-sdk:${findProperty("graalSdkVersion")}")
-    compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
+    compileOnly("org.graalvm.sdk:graal-sdk:${project.findProperty("graalSdkVersion")}")
+    compileOnly("org.graalvm.nativeimage:svm:${project.findProperty("graalSvmVersion")}")
+    compileOnly("xerces:xercesImpl:${project.findProperty("xercesVersion")}")
     compileOnly("com.ibm.icu:icu4j:${project.findProperty("icu4jVersion")}")
+    compileOnly("org.nineml:coffeefilter:${project.findProperty("ninemlVersion")}")
+
+    testImplementation(platform("org.junit:junit-bom:6.1.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.hamcrest:hamcrest:2.2")
+//    testImplementation("org.apiguardian:apiguardian-api:1.0.0")
+//    testImplementation("org.apache.ant:ant:1.10.9")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.sparkjava:spark-core:2.9.4")
+    testImplementation("org.graalvm.sdk:graal-sdk:${project.findProperty("graalSdkVersion")}")
+
 }
 
 java {
@@ -143,7 +157,7 @@ val bundleDependencies = tasks.register<UnjarBundleDependencies>("bundleJarDepen
     outputDir = project.layout.buildDirectory.dir("unjar")
 
     bundle {
-        jar(project.layout.projectDirectory.file("../lib/xercesImpl.jar")) {
+        jar("xercesImpl-${project.findProperty("xercesVersion")}.jar") {
             include("**/*.class")
             include("**/*.properties")
             exclude("org.w3c.dom.html.HTMLDOMImplementation.class")
@@ -153,6 +167,8 @@ val bundleDependencies = tasks.register<UnjarBundleDependencies>("bundleJarDepen
         jar("jline-${project.findProperty("jlineVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}-data.jar")
+        jar("coffeefilter-${project.findProperty("ninemlVersion")}.jar")
+        jar("coffeegrinder-${project.findProperty("ninemlVersion")}.jar")
     }
 }
 
@@ -215,6 +231,26 @@ val configPackageOutputDir = layout.buildDirectory.dir("cmake-package")
 
 val editionLibName = extension.edition.map { edition -> "saxonc-core-${edition}" }
 
+sourceSets {
+    test {
+        java {
+            srcDir(layout.projectDirectory.dir("../../java/src/test/java"))
+            include("net/sf/saxon/option/cpp/**/*")
+            include("net/sf/saxon/test/**/*")
+            include("net/sf/saxon/lib/**/*")
+            include("net/sf/saxon/junit/**/*")
+        }
+    }
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+    }
+}
+
 fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): TaskProvider<CMakePackageBuilder> {
     val configTaskName = config.lowercase()
     val cmakeBuildDir = ersatzPath.map { it.dir("build-${configTaskName}") }
@@ -222,6 +258,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
     val debugPostfix = DebugPostfix(targetHost)
     val releaseKindLibName = editionLibName.map { if (debug) "${it}${debugPostfix}" else it }
     val libFilenames = releaseKindLibName.map { LibFilenames(it, targetHost) }
+    val extraHeaders = layout.projectDirectory.file("../src/main/c/include/saxon_error.h")
 
     val imageTask = tasks.register<GraalNativeImageTask>("${configTaskName}_graal_image") {
         group = LifecycleBasePlugin.BUILD_GROUP
@@ -232,6 +269,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
         graalNativeImage = extension.graal()!!.nativeImage
         libName = releaseKindLibName
         headerLibName = editionLibName
+        extraHeaderFiles.from(extraHeaders)
         version = saxonBuild.version
         majorVersion = saxonBuild.majorVersion
         macosx_min_version = saxonBuild.macosx_min_version
@@ -287,7 +325,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
         majorVersion = saxonBuild.majorVersion
         sharedLibFiles.from(imageTask.map { it.sharedLibFiles })
         importLibFiles.from(imageTask.map { it.importLibFiles })
-        headerFiles.from(imageTask.map { it.headerFiles })
+        headerFiles.from(imageTask.map { it.headerFiles }).from(extraHeaders)
         debugConfig = debug
         packageCMakeFiles.from(install)
         packageDir = configPackageOutputDir.map { it.dir(config) }

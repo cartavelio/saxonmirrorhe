@@ -1,6 +1,6 @@
 import com.saxonica.build.java.PomGenerator
 import com.saxonica.build.GatherReleaseArtifacts
-import org.gradle.kotlin.dsl.register
+import java.util.Locale
 
 plugins {
   id("saxon-build")
@@ -29,11 +29,6 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
-val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
-val testdriverJar = configurations.resolvable("testdriverJar") {
-  extendsFrom(testdriverJarBucket)
-}
-
 val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 sourceSets.named("editionTest") {
@@ -48,10 +43,6 @@ val testsuiteExtra by configurations.resolvable("testsuiteExtraConfiguration") {
 }
 
 val downloadReleaseBundled by configurations.getting
-val junit4 by configurations.dependencyScope("junit4")
-val junit4Resolvable = configurations.register("junit4Resolvable") {
-  extendsFrom(junit4)
-}
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
   extendsFrom(configurations["testImplementation"])
 }
@@ -108,7 +99,6 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
-  testdriverJarBucket(project(":java:testdriver"))
 
   testImplementation(files(layout.projectDirectory.dir("../lib/Tidy.jar")))
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
@@ -116,12 +106,11 @@ dependencies {
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 
   downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
-
-  junit4("junit:junit:4.13.2")
 }
 
+val testdriverJar = configurations.named("testdriverJar")
 configurations {
-  testImplementation { extendsFrom(testdriverJar.get()) }
+  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.filteredSources {
@@ -302,7 +291,6 @@ if (project.findProperty("xmark") == "true") {
 val testSuitesClasspath = files(sourceSets["edition"].output)
     .from(testdriverJar)
     .from(testsuiteExtra)
-
 testSuites {
   product = "java"
   edition = "ee"
@@ -318,10 +306,13 @@ testSuites.configure("expath", "XQ40")
 
 testSuites.configure("qt3", "XP20")
 testSuites.configure("qt3", "XP31")
-//testSuites.configure("qt3", "XP31", mapOf("tree" to "JDOM"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "JDOM2"))
-testSuites.configure("qt3", "XP31", mapOf("tree" to "XOM"))
+testSuites.configure("qt3", "XP31", mapOf("opt" to "0"))
+//testSuites.configure("qt3", "XP31", mapOf("tree" to "DOM"))
+//testSuites.configure("qt3", "XP31", mapOf("tree" to "DOM4J"))
+//testSuites.configure("qt3", "XP31", mapOf("tree" to "JDOM2"))
+//testSuites.configure("qt3", "XP31", mapOf("tree" to "XOM"))
 //testSuites.configure("qt3", "XP31", mapOf("tree" to "Axiom"))
+//testSuites.configure("qt3", "XP31", mapOf("tree" to "Domino"))
 
 testSuites.configure("qt3", "XP31", mapOf("unfolded" to "on"))
 
@@ -329,21 +320,48 @@ testSuites.configure("qt3", "XQ31")
 testSuites.configure("qt3", "XQ31", mapOf("unfolded" to "on"))
 
 testSuites.configure("qt3extra", "XP31")
+//testSuites.configure("qt3extra", "XP40")
 testSuites.configure("qt3extra", "XQ31")
 testSuites.configure("qt3extra", "XQ40")
 
-testSuites.configure("qt4", "XP40")
+testSuites.configure("qt4", "XP20")
+testSuites.configure("qt4", "XP31")
+
 testSuites.configure("qt4", "XQ31")
+testSuites.configure("qt4", "XQ31", mapOf("opt" to "0"))
 testSuites.configure("qt4", "XQ31", mapOf("unfolded" to "on"))
+
 testSuites.configure("qt4", "XQ40")
+//testSuites.configure("qt4", "XQ40", mapOf("opt" to "0"))
+//testSuites.configure("qt4", "XQ40", mapOf("tree" to "DOM"))
+//testSuites.configure("qt4", "XQ40", mapOf("tree" to "DOM4J"))
+//testSuites.configure("qt4", "XQ40", mapOf("tree" to "JDOM2"))
+//testSuites.configure("qt4", "XQ40", mapOf("tree" to "XOM"))
+//testSuites.configure("qt4", "XQ40", mapOf("tree" to "Axiom"))
+//testSuites.configure("qt4", "XQ40", mapOf("tree" to "Domino"))
+//testSuites.configure("qt4", "XQ40", mapOf("unfolded" to "on"))
+
+testSuites.configure("qt4", "XP40")
+//testSuites.configure("qt4", "XP40", mapOf("opt" to "0"))
+//testSuites.configure("qt4", "XP40", mapOf("tree" to "DOM"))
+//testSuites.configure("qt4", "XP40", mapOf("tree" to "DOM4J"))
+//testSuites.configure("qt4", "XP40", mapOf("tree" to "JDOM2"))
+//testSuites.configure("qt4", "XP40", mapOf("tree" to "XOM"))
+//testSuites.configure("qt4", "XP40", mapOf("tree" to "Axiom"))
+//testSuites.configure("qt4", "XP40", mapOf("tree" to "Domino"))
+//testSuites.configure("qt4", "XP40", mapOf("unfolded" to "on"))
 
 testSuites.configure("xslt30", "XT30")
-//testSuites.configure("xslt30", "XT30", mapOf("tree" to "JDOM"))
+testSuites.configure("xslt30", "XT30", mapOf("opt" to "0"))
+//testSuites.configure("xslt30", "XT30", mapOf("tree" to "DOM"))
+//testSuites.configure("xslt30", "XT30", mapOf("tree" to "DOM4J"))
 //testSuites.configure("xslt30", "XT30", mapOf("tree" to "JDOM2"))
 //testSuites.configure("xslt30", "XT30", mapOf("tree" to "XOM"))
 //testSuites.configure("xslt30", "XT30", mapOf("tree" to "Axiom"))
+//testSuites.configure("xslt30", "XT30", mapOf("tree" to "Domino"))
 testSuites.configure("xslt30", "XT30", mapOf("export" to "on"))
 testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
+testSuites.configure("xslt30", "XT30", mapOf("threads" to "5"))
 
 testSuites.configure("xslt30extra", "XT30")
 testSuites.configure("xslt30extra", "XT30", mapOf("export" to "on"))
@@ -351,12 +369,37 @@ testSuites.configure("xslt30extra", "XT30", mapOf("strict" to "on"))
 testSuites.configure("xslt30extra", "XT40")
 testSuites.configure("xslt30extra", "XT40", mapOf("export" to "on"))
 testSuites.configure("xslt30extra", "XT40", mapOf("strict" to "on"))
+//testSuites.configure("xslt30extra", "XT40", mapOf("jit" to "on"))
 
 testSuites.configure("xslt40", "XT40")
+//testSuites.configure("xslt40", "XT40", mapOf("opt" to "0"))
+//testSuites.configure("xslt40", "XT40", mapOf("tree" to "DOM"))
+//testSuites.configure("xslt40", "XT40", mapOf("tree" to "DOM4J"))
+//testSuites.configure("xslt40", "XT40", mapOf("tree" to "JDOM2"))
+//testSuites.configure("xslt40", "XT40", mapOf("tree" to "XOM"))
+//testSuites.configure("xslt40", "XT40", mapOf("tree" to "Axiom"))
+//testSuites.configure("xslt40", "XT40", mapOf("tree" to "Domino"))
+//testSuites.configure("xslt40", "XT40", mapOf("export" to "on"))
 testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))
+//testSuites.configure("xslt40", "XT40", mapOf("jit" to "on"))
+//testSuites.configure("xslt40", "XT40", mapOf("threads" to "5"))
 
 testSuites.configure("xsd", "XSD11")
 testSuites.configure("xsdextra", "XSD11")
+
+tasks.register("aggregated-test-results") {
+  inputs.files(tasks.named("test_suite_qt3_XP31"))
+  inputs.files(tasks.named("test_suite_qt3_XQ31"))
+  inputs.files(tasks.named("test_suite_qt4_XP31"))
+  inputs.files(tasks.named("test_suite_qt4_XQ31"))
+//  inputs.files(tasks.named("test_suite_qt4_XP40"))
+//  inputs.files(tasks.named("test_suite_qt4_XQ40"))
+
+  doLast {
+    println(inputs.files.files)
+  }
+}
+
 
 tasks.named<Sync>("signingDownloadJars") {
   into(layout.buildDirectory.dir("signing/download"))
@@ -430,24 +473,6 @@ publishing {
       url = uri(layout.buildDirectory.dir("maven-o-matic").get())
     }
   }
-}
-
-val xqjTckJarFile = layout.projectDirectory.file("../tools/xqj/tck/lib/xqjtck.jar")
-val xqjTckPropFile = layout.projectDirectory.file("src/test/resources/saxon-xqj-tck.properties").asFile.toString()
-val xqjTckTest = tasks.register<JavaExec>("xqjTckTest") {
-  classpath(tasks.named<Jar>("editionMavenJar").map { it.outputs.files },
-    mavenXqjJar.map { it.outputs.files }, xqjTckJarFile,
-    configurations["testRuntimeClasspath"], configurations["junit4Resolvable"]
-  )
-
-  systemProperty("com.oracle.xqj.tck.datasource", xqjTckPropFile)
-
-  mainClass = "org.junit.runner.JUnitCore"
-  args("com.oracle.xqj.tck.AllTests")
-}
-
-tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
-  dependsOn(xqjTckTest)
 }
 
 // add license dir to classpath for transform/query/gizmo executable tasks

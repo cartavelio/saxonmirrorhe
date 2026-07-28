@@ -8,6 +8,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.*
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
@@ -40,7 +41,7 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
   @get:InputFiles
   abstract val classpath: ConfigurableFileCollection
   @get:Internal
-  abstract val options: MapProperty<String,String>
+  abstract val testargs: ListProperty<String>
 
   @get:Internal
   val EDITION: String by lazy { edition.get().uppercase() }
@@ -59,6 +60,7 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
       "expath" -> "${driverPackage}.QT3TestDriver${EDITION}"
       "xslt30" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
       "xslt30extra" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
+      "xsltfromqt4" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
       "qt4" -> "${driverPackage}.QT3TestDriver${EDITION}"
       "xslt40" -> "${driverPackage}.Xslt30TestSuiteDriver${EDITION}"
       else -> throw GradleException("Unknown test driver class for test suite: ${suite}")
@@ -66,27 +68,43 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
 
   @get:Internal
   val catalog: String
-    get() = when (suite.get()) {
-      "qt3extra" -> "j-catalog.xml"
-      else -> "catalog.xml"
-    }
+    get() {
+      // This is ugly. I'm threading a need to allow the tree model tests
+      // to run with different catalogs. But because I don't want to check
+      // those catalogs into the submodule repositories directly, I have 
+      // to do ... gestures wildly ... this
+      var tree = "none"
+      for (arg in testargs.get()) {
+        if (arg.startsWith("-tree:")) {
+          tree = arg.substring(6).lowercase()
+        }
+      }
+
+      if (tree != "none") {
+        return "../../java/src/test/catalogs/${suite.get()}-tree-catalog.xml"
+      }
+
+      return when (suite.get()) {
+        "qt3extra" -> "j13-catalog.xml"
+        "xslt30extra" -> "j13-catalog.xml"
+        else -> "catalog.xml"
+      }
+    } 
 
   @OutputDirectory
   val reportDir = reportingRootDir.map { it.dir("${suite.get()}/${dateStamp}") }
 
-  @get:Internal
-  val testOpts = mutableMapOf<String, String>()
+  @get:Input
+  @get:Option(option = "s", description = "request specific test set")
+  abstract val testSet: Property<String>
 
-  @Option(option = "s", description = "request specific test set")
-  fun setTestSet(arg: String): JavaRunner {
-    testOpts["s"] = arg
-    return this;
-  }
+  @get:Input
+  @get:Option(option = "t", description = "set test matching pattern")
+  abstract val testPattern: Property<String>
 
-  @Option(option = "t", description = "set test matching pattern")
-  fun setTestPattern(arg: String): JavaRunner {
-    testOpts["t"] = arg
-    return this;
+  init {
+    testSet.convention("")
+    testPattern.convention("")
   }
 
   @TaskAction
@@ -114,16 +132,14 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
                         "-lang:${language.get()}"
                     ))
 
-    options.get().forEach { (opt, arg) -> 
-              if (arg == "") {
-                javaArgs.add("-${opt}")
-              } else {
-                javaArgs.add("-${opt}:${arg}")
-              }
-            }
+    javaArgs.addAll(testargs.get())
 
-    testOpts.forEach { (opt, arg) ->
-      javaArgs.add("-${opt}:${arg}")
+    if (testSet.get() != "") {
+      javaArgs.add("-s:${testSet.get()}")
+    }
+
+    if (testPattern.get() != "") {
+      javaArgs.add("-t:${testPattern.get()}")
     }
 
     println("cd ${suiteDir.asFile.get()}")

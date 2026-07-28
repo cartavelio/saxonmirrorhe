@@ -119,6 +119,7 @@ val phpConfigureTask = tasks.register<PhpDefaultWithExec>("configure") {
     ex.exec {
       workingDir = phpBuildRoot.get().asFile
       executable("./configure")
+
       environment("SAXON_VERSION" to saxonBuild.version.get(), "SAXON_EXTENSION_DIR" to phpExtensionLibDir.get().asFile)
       args("--with-saxonc=${libsaxoncDir}", "--with-saxonc-core=${libsaxoncCoreDir}")
     }

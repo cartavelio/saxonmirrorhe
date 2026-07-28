@@ -20,11 +20,6 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
-val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
-val testdriverJar = configurations.resolvable("testdriverJar") {
-  extendsFrom(testdriverJarBucket)
-}
-
 sourceSets.named("editionTest") {
   java {
     // Exclude everything that won't build in HE...
@@ -45,6 +40,8 @@ sourceSets.named("editionTest") {
     exclude("internaltests/LFUCacheTest.java")
     exclude("internaltests/LicenseTests.java")
     exclude("internaltests/NumberingTests.java")
+    exclude("internaltests/OrderedMapTests.java")
+    exclude("internaltests/PriorityTests.java")
     exclude("internaltests/RedirectTests.java")
     exclude("internaltests/ResourceTests.java")
     exclude("internaltests/SignatureTest.java")
@@ -103,6 +100,7 @@ sourceSets.named("editionTest") {
     exclude("net/sf/saxon/option/cpp/**")
     exclude("performance/ArrayPerformance.java")
     exclude("performance/Fernandes.java")
+    exclude("performance/MapPerformance.java")
     exclude("performance/PerformanceTestCase.java")
     exclude("performance/Playground.java")
     exclude("performance/QueryGroupingPerformance.java")
@@ -119,41 +117,22 @@ sourceSets.named("editionTest") {
     exclude("resolvers/ResolverConfigurationTest.java")
     exclude("resolvers/SchemaURIResolverTest.java")
     exclude("s9apitest/SumanGantaTest.java")
-    exclude("s9apitest/TestCanonicalSerializer.java")
-    exclude("s9apitest/TestChecksums.java")
-    exclude("s9apitest/TestCollections.java")
-    exclude("s9apitest/TestDocumentBuilder.java")
     exclude("s9apitest/TestErrorListener.java")
     exclude("s9apitest/TestFunctionLibrary.java")
-    exclude("s9apitest/TestIntegratedFunctions.java")
-    exclude("s9apitest/TestModuleURIResolver.java")
     exclude("s9apitest/TestPackage.java")
-    exclude("s9apitest/TestPipeline.java")
-    exclude("s9apitest/TestQueryToTransform.java")
     exclude("s9apitest/TestReflexion.java")
     exclude("s9apitest/TestSaxonParam.java")
     exclude("s9apitest/TestSchemaProcessing.java")
-    exclude("s9apitest/TestSchematron.java")
-    exclude("s9apitest/TestSerializer.java")
     exclude("s9apitest/TestValidator.java")
-    exclude("s9apitest/TestXMLParserOptions.java")
-    exclude("s9apitest/TestXMarkProjection.java")
-    exclude("s9apitest/TestXPathCompiler.java")
-    exclude("s9apitest/TestXPathErrorCode.java")
-    exclude("s9apitest/TestXQueryCompiler.java")
-    exclude("s9apitest/TestXQueryEvaluator.java")
+    exclude("s9apitest/TestXMLParserOptionsEE.java")
+    exclude("s9apitest/TestXPathCompilerEE.java")
+    exclude("s9apitest/TestXQueryCompilerEE.java")
     exclude("s9apitest/TestXQueryStreaming.java")
     exclude("s9apitest/TestXQueryThreads.java")
-    exclude("s9apitest/TestXQueryToSaxDestination.java")
-    exclude("s9apitest/TestXQueryUpdate.java")
-    exclude("s9apitest/TestXdmFunction.java")
-    exclude("s9apitest/TestXslt30Streaming.java")
-    exclude("s9apitest/TestXslt30Transformer.java")
-    exclude("s9apitest/TestXslt30TransformerDebug.java")
-    exclude("s9apitest/TestXsltCompiler.java")
-    exclude("s9apitest/TestXsltIn10Mode.java")
-    exclude("s9apitest/TestXsltTracing.java")
-    exclude("s9apitest/TestXsltTransformer.java")
+    exclude("s9apitest/TestXslt30TransformerDebugEE.java")
+    exclude("s9apitest/TestXslt30TransformerEE.java")
+    exclude("s9apitest/TestXsltCompilerEE.java")
+    exclude("s9apitest/TestXsltTransformerEE.java")
     exclude("s9apitest/ThreadCountTest.java")
     exclude("s9apitest/XQueryStreamingTest.java")
     exclude("xqjtests/RennauBugs.java")
@@ -203,14 +182,19 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
-  testdriverJarBucket(project(":java:testdriver"))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
   xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
   xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
+
+  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
+  testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
+  testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
+  testImplementation("com.sun.mail:javax.mail:${findProperty("mailVersion")}")
+  testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 }
 
 configurations {
-  testImplementation { extendsFrom(testdriverJar.get()) }
+  testImplementation { extendsFrom(testdriverJar) }
 }
 
 tasks.named("compileJava") {
@@ -309,10 +293,10 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
+val testdriverJar = configurations.named("testdriverJar")
 val testSuitesClasspath = files(sourceSets["edition"].output)
     .from(testdriverJar)
     .from(testsuiteExtra)
-
 testSuites {
   product = "java"
   edition = "he"
@@ -323,8 +307,26 @@ testSuites {
 
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
+
 testSuites.configure("xslt30", "XT30")
+
 testSuites.configure("xslt30extra", "XT30")
+
+//testSuites.configure("qt4", "XQ31")
+//testSuites.configure("qt4", "XP31")
+//testSuites.configure("qt4", "XQ40")
+//testSuites.configure("qt4", "XP40")
+//testSuites.configure("xslt40", "XT40")
+
+tasks.register("aggregated-test-results") {
+  inputs.files(tasks.named("test_suite_qt3_XP31"))
+  inputs.files(tasks.named("test_suite_qt3_XQ31"))
+
+  doLast {
+    println(inputs.files.files)
+  }
+}
+
 
 tasks.named<Sync>("signingDownloadJars") {
   into(layout.buildDirectory.dir("signing/download"))
@@ -350,6 +352,7 @@ val pseudoXqjSourceMavenJar = tasks.register("pseudoXqjSourceMavenJar") {
   inputs.file(xqjSourceMavenJar)
   outputs.file(xqjSourceMavenJar)
 }
+
 
 tasks.named<Sync>("signingMavenJars") {
   into(layout.buildDirectory.dir("signing/mavendownload"))
@@ -414,16 +417,6 @@ publishing {
       name = "maven-o-matic"
       url = uri(mavenOMaticDir.get())
     }
-/*
-    maven {
-      name = "sonatype"
-      url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-      credentials {
-        username = project.findProperty("sonatypeUsername")?.toString() ?: "NOUSER"
-        password = project.findProperty("sonatypePassword")?.toString() ?: "NOPASS"
-      }
-    }
-*/
   }
 }
 

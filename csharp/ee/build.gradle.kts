@@ -230,9 +230,6 @@ testSuites {
   exceptionsDir = layout.projectDirectory.dir("../src/test/exceptions")
 }
 
-testSuites.configure("expath", "XP31")
-testSuites.configure("expath", "XQ31")
-testSuites.configure("expath", "XQ40")
 testSuites.configure("qt3", "XP20")
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XP31", mapOf("linq" to "on"))
@@ -246,7 +243,7 @@ testSuites.configure("qt4", "XP40")
 testSuites.configure("qt4", "XQ31")
 testSuites.configure("qt4", "XQ31", mapOf("unfolded" to "on"))
 testSuites.configure("qt4", "XQ40")
-//testSuites.configure("xsd", "XSD11")
+testSuites.configure("xsd", "XSD11")
 testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30", "XT30", mapOf("export" to "on"))
 testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
@@ -258,32 +255,3 @@ testSuites.configure("xslt30extra", "XT40", mapOf("export" to "on"))
 testSuites.configure("xslt30extra", "XT40", mapOf("strict" to "on"))
 testSuites.configure("xslt40", "XT40")
 testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))
-
-val signingResources = tasks.register<AwsSigningResources>("signingResources") {
-  region = "eu-west-2"
-  stackName = "SaxonicaCiCdStack"
-}
-
-val unsignedNugetPkgs = tasks.register<Sync>("unsignedNugetPkgs") {
-  into(layout.buildDirectory.dir("unsignedNugetPkgs"))
-  from(tasks.named("downloadRelease")) {
-    include("*.nupkg")
-  }
-}
-
-val uploadUnsignedNugetPkg = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedNugetPkg") {
-  inputDir = layout.projectDirectory.dir(unsignedNugetPkgs.map { it.destinationDir.toString() })
-  bucket = signingResources.map { it.codeSigningInputsBucket.get() }
-  queueUrl = signingResources.map { it.windowsCodeSigningInputsQueueUrl.get() }
-  region = signingResources.map { it.region.get() }
-  baseKeyPrefix = "inputs"
-  jobFileDir = layout.buildDirectory.dir("uploadNugetPkg")
-}
-
-val downloadSignedNugetPkg = tasks.register<SignedArtifactDownloadTask>("downloadSignedNugetPkg") {
-  outputDir = layout.buildDirectory.dir("signed-nuget")
-  bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
-  queueUrl = signingResources.map { it.windowsCodeSigningOutputsQueueUrl.get() }
-  region = signingResources.map { it.region.get() }
-  jobFile = uploadUnsignedNugetPkg.map { it.jobFile.get() }
-}
