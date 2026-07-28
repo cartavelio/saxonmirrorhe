@@ -53,7 +53,6 @@ public class SaxonCException  {
     public static CCharPointer j_getErrorMessage(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         Throwable throwable = SaxonCCurrentException.get();
         String errorMessage = null;
-        SaxonApiException exception = null;
         if(throwable == null) {
             if(SaxonCAPI.debug) {
                 System.err.println("Java DEBUG: j_getErrorMessage throwable is null");
@@ -63,15 +62,7 @@ public class SaxonCException  {
         if(SaxonCAPI.debug) {
             System.err.println("Java DEBUG: j_getErrorMessage = " + throwable.getClass().getName());
         }
-        if(throwable instanceof SaxonApiException) {
-
-            exception = (SaxonApiException)throwable;
-            errorMessage = getAllCausedMessages(throwable.getCause());
-
-        } else {
-            errorMessage = getAllCausedMessages(throwable.getCause());
-            exception = new SaxonApiException(errorMessage);
-        }
+        errorMessage = getAllCausedMessages(throwable);
 
         if(errorMessage != null && errorMessage.isEmpty()) {
             errorMessage = "Exception thrown but getMessage() is null";
@@ -121,6 +112,9 @@ public class SaxonCException  {
             if(throwable instanceof LicenseException) {
                 System.err.println("Java DEBUG: j_getErrorMessageWithErroCode LicenseException found="+((LicenseException)throwable).getMessage());
             }
+            if(throwable != null) {
+                throwable.printStackTrace();
+            }
         }
 
         if(throwable == null) {
@@ -130,13 +124,12 @@ public class SaxonCException  {
             return WordFactory.nullPointer();
         }
 
+        errorMessage = getAllCausedMessages(throwable);
+
+
         if(throwable instanceof SaxonApiException) {
-
-           exception = (SaxonApiException)throwable;
-           errorMessage = getAllCausedMessages(throwable.getCause());
-
+            exception = (SaxonApiException)throwable;
         } else {
-            errorMessage = getAllCausedMessages(throwable.getCause());
             exception = new SaxonApiException(errorMessage);
         }
 
@@ -156,15 +149,16 @@ public class SaxonCException  {
         } else {
 
             int lineNumber = exception.getLineNumber();
+            String lineStr = exception.getLineNumber() == -1 ? "" : ". Line number: " + exception.getLineNumber();
             if(exception.getErrorCode() == null) {
-                errorMessage = errorMessage+". Line number: "+lineNumber;
+                errorMessage = errorMessage+lineStr;
             } else {
-               errorMessage = exception.getErrorCode().getLocalName() + ": " + errorMessage + ". Line number: "+lineNumber;
+               errorMessage = exception.getErrorCode().getLocalName() + ": " + errorMessage + lineStr;
             }
         }
 
         if(SaxonCAPI.debug) {
-            System.err.println("Java Debug: Exception found cp0: " + errorMessage);
+            System.err.println("Java Debug: Exception found message: " + errorMessage);
         }
 
         //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
@@ -173,9 +167,7 @@ public class SaxonCException  {
             final CCharPointer result=holder.get();
             return result;
         }
-
-        //a = SaxonCAPI.stringToNative2(alloc, errorMessage);
-        //return a;
+        
     }
 
 

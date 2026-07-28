@@ -173,6 +173,8 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
     if name is not None:
         print("Loading environment " + name)
         environments_i[name] = environment
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            print(str(env))
         '''if name == "works-mod":
             print(env)
             exit(0)'''
