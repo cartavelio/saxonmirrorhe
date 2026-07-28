@@ -567,6 +567,12 @@ namespace TestDriver {
                         outputUri = testSetUri.Substring(c + 7);
                     }
 
+                    else if (outputUri.Equals("#absent")) {
+                        notrun++;
+                        resultsDoc.writeTestcaseElement(testName, "notRun", "requires absent output base URI");
+                        return;
+                    }
+
                     baseOutputURI = (new XmlUrlResolver()).ResolveUri(new Uri(baseOutputURI), outputUri).AbsolutePath;
                 }
 
