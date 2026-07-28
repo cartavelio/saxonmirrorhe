@@ -112,6 +112,9 @@ abstract class DotNetImplementation: MSBuildConventions() {
   abstract val dotnetversion: Property<String>
 
   @get:Internal
+  val csarch = msbuildPlatform.map { "${msbuildArch.get()}" }
+
+  @get:Internal
   val csrid = msbuildPlatform.map { "${it}-${msbuildArch.get()}" }
 
   @get:Internal
@@ -279,18 +282,23 @@ abstract class DotNetPublish : DotNetImplementation() {
   @get:InputFiles
   abstract val inputSources: ConfigurableFileCollection
 
+  // For 12.10, the --output option was removed from publish because
+  // msbuild said it was unreliable. That meant that the build outputs
+  // went somewhere else. The outputDir setting is reverse engineered
+  // from where they actually ended up. It'd be nice to fix this so
+  // they go somewhere intentionally.
   @get:OutputDirectory
-  val outputDir: Provider<Directory> = dotnetversion.map { v -> projectLayout.buildDirectory.dir("net${v}/${configuration.get()}/${csrid.get()}").get() }
-
+  val outputDir: Provider<Directory> = dotnetversion.map {
+    v -> projectLayout.buildDirectory.dir(
+             "${csarch.get()}/SaxonCS/artifacts/publish/SaxonCS/release_${csrid.get()}").get()
+  }
 
   @TaskAction
   fun build() {
-
     dotnetExec("publish") {
       args(solution.get(), "-r", csrid.get(),
         "--self-contained", "true",
         "--configuration", configuration.get(),
-//        "--output", outputDir.get().asFile,
         "-p:PublishSingleFile=true",
         "-p:Version=${version.get()}", "-p:PackageVersion=${version.get()}",
         "-p:Platform=Any CPU")
