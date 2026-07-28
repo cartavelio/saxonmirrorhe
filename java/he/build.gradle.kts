@@ -20,6 +20,11 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
+val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
+val testdriverJar = configurations.resolvable("testdriverJar") {
+  extendsFrom(testdriverJarBucket)
+}
+
 sourceSets.named("editionTest") {
   java {
     // Exclude everything that won't build in HE...
@@ -175,6 +180,10 @@ val xqjSourceMavenJar by configurations.resolvable("xqjSourceMavenJar") {
   extendsFrom(xqjSourceMavenJarBucket)
 }
 
+val testsuiteExtra by configurations.resolvable("testsuiteExtraConfiguration") {
+  extendsFrom(configurations["testImplementation"])
+}
+
 val samplesConfiguration by configurations.resolvable("samplesConfiguration") {
   extendsFrom(configurations["testImplementation"])
 }
@@ -194,9 +203,14 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
+  testdriverJarBucket(project(":java:testdriver"))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
   xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
   xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
+}
+
+configurations {
+  testImplementation { extendsFrom(testdriverJar.get()) }
 }
 
 tasks.named("compileJava") {
@@ -209,7 +223,6 @@ tasks.filteredSources {
     include("net/sf/saxon/**/package.html")
     exclude("javax/xml/xquery/*.java")
     exclude("**/dotnet/**")
-    exclude("net/sf/saxon/testdriver/**")
     exclude("net/sf/saxon/option/sql/**")
     exclude("net/sf/saxon/option/cpp/**")
 
@@ -296,10 +309,10 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
-val compile_testdrivers = tasks.named<JavaCompile>("compileTestDrivers")
 val testSuitesClasspath = files(sourceSets["edition"].output)
-    .from(configurations.testDrivers)
-    .from(compile_testdrivers)
+    .from(testdriverJar)
+    .from(testsuiteExtra)
+
 testSuites {
   product = "java"
   edition = "he"

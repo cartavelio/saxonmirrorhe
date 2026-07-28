@@ -23,11 +23,12 @@ val inputSqlJar = configurations.resolvable("inputSqlJar") {
 dependencies {
   inputSaxonJarBucket(project(":java", "saxonJarArtifact"))
   inputSqlJarBucket(project(":java", "sqlMavenJarArtifact"))
+  implementation(files(layout.projectDirectory.dir("../lib/Tidy.jar")))
 }
 
 configurations {
-  implementation { extendsFrom(inputSaxonJar) }
-  implementation { extendsFrom(inputSqlJar) }
+  implementation { extendsFrom(inputSaxonJar.get()) }
+  implementation { extendsFrom(inputSqlJar.get()) }
 }
 
 tasks.register<Jar>("he_jar") {
