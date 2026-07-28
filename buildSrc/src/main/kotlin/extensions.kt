@@ -16,6 +16,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.jvm.JvmTestSuite
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
@@ -310,6 +311,9 @@ interface SaxonCPythonExtension {
 
 interface SaxonCPhpExtension {
     val edition: Property<String>
+    val phpExe: Property<File>
+    val phpizeExe: Property<File>
+    val makeExe: Property<File>
 }
 
 interface PyenvExtension {
