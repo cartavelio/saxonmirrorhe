@@ -106,6 +106,9 @@ public class ProcessorDataAccumulator {
 
                 processorData.paramNames.add(paramNamei);
                 processorData.values.add(object);
+            } else {
+                processorData.paramNames.add(paramNamei);
+                processorData.values.add(null);
             }
 
         } catch (Exception ex) {
@@ -127,7 +130,9 @@ public class ProcessorDataAccumulator {
 
         try {
             paramNamei = SaxonCAPI.toJavaString(cpropName, WordFactory.nullPointer());
-            object = SaxonCAPI.toJavaString(cpropvalue, WordFactory.nullPointer());
+            if(cpropvalue != WordFactory.nullPointer()) {
+                object = SaxonCAPI.toJavaString(cpropvalue, WordFactory.nullPointer());
+            }
         } catch(SaxonApiException ex) {
             if(SaxonCAPI.debug) {
                 System.err.println(ex.getMessage());

@@ -125,7 +125,7 @@ public class XQueryEngine extends SaxonCAPI {
                 } else if (params[i].equals("base")) {
                     String baseURI = (String) values[i];
                     try {
-                        compiler.setBaseURI(new URI(baseURI));
+                        compiler.setBaseURI(baseURI == null ? null : new URI(baseURI));
                     } catch (URISyntaxException e) {
                         SaxonApiException ex = new SaxonApiException(e);
                         throw ex;

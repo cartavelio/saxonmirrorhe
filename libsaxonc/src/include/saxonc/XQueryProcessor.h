@@ -19,6 +19,12 @@ class SaxonApiException;
 class XdmValue;
 class XdmItem;
 
+enum class BaseUriState {
+    Unset,
+    Null,
+    Value
+};
+
 /** An <code>XQueryProcessor</code> represents a factory to compile, load and
  * execute queries.
  */
@@ -364,6 +370,8 @@ public:
 private:
   void createException(const char *message = nullptr);
   bool streaming;
+  BaseUriState baseURIState = BaseUriState::Unset;
+  std::string baseURI;
   std::string cwdXQ; /*!< Current working directory */
   int64_t procRef;
   int64_t cppXQ;

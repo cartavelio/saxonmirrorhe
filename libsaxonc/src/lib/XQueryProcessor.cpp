@@ -72,6 +72,9 @@ XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
   if(cppXQ == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
+
+  baseURIState = other.baseURIState;
+  baseURI = other.baseURI;
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
   while (paramIter != other.parameters.end()) {
@@ -239,12 +242,21 @@ const char * XQueryProcessor::getcwd() {
   return cwdXQ.c_str();
 }
 
-void XQueryProcessor::setQueryBaseURI(const char *baseURI) {
-  setProperty("base", baseURI);
+void XQueryProcessor::setQueryBaseURI(const char *base) {
+  if (base == nullptr) {
+    baseURIState = BaseUriState::Null;
+    baseURI.clear();
+  } else {
+    baseURIState = BaseUriState::Value;
+    baseURI = base;
+  }
 }
 
 const char * XQueryProcessor::getQueryBaseURI() {
-  return getProperty("base");
+  if (baseURIState == BaseUriState::Unset || baseURIState == BaseUriState::Null) {
+    return nullptr;
+  }
+  return baseURI.c_str();
 }
 
 void XQueryProcessor::setUpdating(bool updating) {
@@ -262,9 +274,21 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
+  int addition = 0;
+  if (baseURIState != BaseUriState::Unset) {
+    addition += 1;
+  }
+
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (baseURIState != BaseUriState::Unset) {
+    std::string baseStr = "base";
+    addProcessorPropertyPair(thread, (void *)processorDataRef,
+    (char *)baseStr.c_str(), baseURIState == BaseUriState::Null ? (char *)nullptr : (char *)baseURI.c_str());
+  }
+
   int64_t status = j_executeQueryToFile(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
@@ -287,8 +311,19 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
     setProperty("s", infilename);
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int addition = 0;
+  if (baseURIState != BaseUriState::Unset) {
+    addition += 1;
+  }
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (baseURIState != BaseUriState::Unset) {
+    std::string baseStr = "base";
+    addProcessorPropertyPair(thread, (void *)processorDataRef,
+    (char *)baseStr.c_str(), baseURIState == BaseUriState::Null ? (char *)nullptr : (char *)baseURI.c_str());
+  }
+
   int64_t result = j_executeQueryToValue(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
@@ -312,10 +347,21 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
+  int addition = 0;
+  if (baseURIState != BaseUriState::Unset) {
+    addition += 1;
+  }
   allocFn fn = operator new;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+
+  if (baseURIState != BaseUriState::Unset) {
+    std::string baseStr = "base";
+    addProcessorPropertyPair(thread, (void *)processorDataRef,
+    (char *)baseStr.c_str(), baseURIState == BaseUriState::Null ? (char *)nullptr : (char *)baseURI.c_str());
+  }
+
   char *result = j_executeQueryToString(thread, (void *)fn, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
