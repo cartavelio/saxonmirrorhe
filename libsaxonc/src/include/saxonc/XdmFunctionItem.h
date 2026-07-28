@@ -139,6 +139,9 @@ protected:
 
 private:
   int arity; /*!< The arity of this function */
+
+  XdmFunctionItem & operator=(XdmFunctionItem i);
+
 };
 
 #endif
