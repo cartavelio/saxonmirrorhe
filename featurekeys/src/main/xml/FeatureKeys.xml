@@ -866,7 +866,7 @@
     <feature>
         <featureCode>41</featureCode>
         <name>MESSAGE_EMITTER_CLASS</name>
-        <type>String</type>
+        <type>string</type>
         <uri>http://saxon.sf.net/feature/messageEmitterClass</uri>
         <editions>HE PE EE</editions>
         <platforms>J</platforms>
@@ -2817,7 +2817,7 @@
     <feature>
         <featureCode>124</featureCode>
         <name>ALLOWED_PROTOCOLS</name>
-        <type>String</type>
+        <type>string</type>
         <uri>http://saxon.sf.net/feature/allowedProtocols</uri>
         <editions>EE</editions>
         <platforms>J</platforms>
