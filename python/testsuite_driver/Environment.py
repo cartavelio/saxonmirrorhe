@@ -178,6 +178,12 @@ class Environment:
         self.xpath_proc = self.proc.new_xpath_processor()
         self.xquery_proc = self.proc.new_xquery_processor()
         self.xslt_proc = self.proc.new_xslt30_processor()
+        if self.need_license and self.proc.edition == "EE":
+            try:
+                self.schema_validator = self.proc.new_schema_validator()
+            except saxonc.PySaxonApiError as ex:
+                print("*** Failed to create PySchemaValidator :" + str(ex))
+
 
 
 def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spec: Spec, environments_i: dict,
@@ -203,7 +209,8 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri)
-    print("set_base_uri(base_uri) cp0 = " + base_uri)
+    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+        print("set_base_uri(base_uri) = " + base_uri)
 
     resources = xpc.evaluate("resource")
 
@@ -256,6 +263,13 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
                     environment.xpath_proc.set_base_uri(uri)
                     environment.xpath_proc.set_cwd(uri)
                     environment.base_uri = uri
+                else:
+                    environment.xquery_proc.set_query_base_uri(None)
+                    environment.xquery_proc.set_cwd(None)
+                    environment.xpath_proc.set_base_uri(None)
+                    environment.xpath_proc.set_cwd(None)
+                    environment.base_uri = None
+
 
     '''set any requested collations - TODO'''
 
@@ -383,16 +397,16 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
                     xsd_version = schema.get_attribute_value("xsd-version")
 
                     if xsd_version is not None:
-                        schema_validator.set_property("xsdversion", xsd_version)
+                        environment.schema_validator.set_property("xsdversion", xsd_version)
                     else:
-                        schema_validator.set_property("xsdversion", "1.0")
+                        environment.schema_validator.set_property("xsdversion", "1.0")
 
                     if role != "secondary":
                         href = schema.get_attribute_value("file")
                         ns = schema.get_attribute_value("uri")
 
                         if ns == "http://www.w3.org/2005/xpath-functions":
-                            schema_validator.set_property("xsdversion", "1.1")
+                            environment.schema_validator.set_property("xsdversion", "1.1")
 
                         if href is None:
                             try:
@@ -421,15 +435,15 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
                         '''if role == "stylesheet-import": '''
 
                     if environment.schema_validator is not None:
-                        environment.xquery_proc.set_schema_aware(True)
+                        environment.xquery_proc.set_property("sa", "true")
+                        environment.xpath_proc.set_property("sa", "true")
             else:
                 environment.schema_aware = True
                 environment.usable = False
     except saxonc.PySaxonApiError as ex:
         print("*** Failed to load schema by URI: " + str(ex))
-        environment.xquery_proc.set_schema_aware(False)
-        environment.xpath_proc.set_schema_aware(False)
-        environment.xslt_proc.set_schema_aware(False)
+        environment.xquery_proc.set_property("sa", "false")
+        environment.xpath_proc.set_property("sa", "false")
         '''environment.usable = False
         return environment'''
 
@@ -477,7 +491,8 @@ def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, e
                 print("Loading source raw_uri = ", raw_uri)
 
             if not validate_sources and validation == "skip":
-                print('validation is skipped')
+                if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                    print('validation is skipped')
                 '''builder.set_schema_validator(None)
                 builder.set_schema_validator(None) 
                 TODO this is a bug cannot set validator to None'''

@@ -631,7 +631,8 @@ def run_test_case(test_set_name, test_case_node: saxonc.PyXdmNode, xpath_proc: s
         errorResult = ex
 
     assert_xpc = environment.proc.new_xpath_processor()
-    '''assert_xpc.set_property("sa", "true")'''
+    if environment.need_license and environment.proc.edition == "EE":
+        assert_xpc.set_property("sa", "true")
     assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
     assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
     assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")

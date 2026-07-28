@@ -13,6 +13,7 @@ class PyTestOutcome:
     xsl_messages = None
     serialized_result = None
     base_uri = None
+    schema_aware = False
 
     def __init__(self):
         self.wrong_error = None
