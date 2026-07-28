@@ -854,7 +854,11 @@ public class SlashExpression extends BinaryExpression
         }
         if (headPattern == null) {
             axis = PatternMaker.getAxisForPathStep(tail);
-            headPattern = head.toPattern(config);
+            if (head instanceof ContextItemExpression) {
+                headPattern = AnchorPattern.getInstance();   // See bug #7130
+            } else {
+                headPattern = head.toPattern(config);
+            }
         }
         return new AncestorQualifiedPattern(tailPattern, headPattern, axis);
     }
