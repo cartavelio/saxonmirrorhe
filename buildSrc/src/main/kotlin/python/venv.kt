@@ -81,7 +81,7 @@ abstract class PythonVenv @Inject constructor(ex: ExecOperations) : ErrorLogging
     abstract val pythonEnv: Property<SaxonCPythonExtension>
 
     @get:InputFile
-    abstract val pyenvPythonExe: RegularFileProperty
+    abstract val pythonVersionExe: RegularFileProperty
 
     @get:Optional
     @get:Input
@@ -144,7 +144,7 @@ abstract class PythonVenv @Inject constructor(ex: ExecOperations) : ErrorLogging
         logger.info("Creating Python Venv for ${branch.get()}: ${venvName.get()}")
 
         execWithLogging {
-            executable(pyenvPythonExe.get())
+            executable(pythonVersionExe.get())
             args("-m", "venv", venvPath.get())
         }
 

@@ -19,7 +19,7 @@ saxoncPython {
 val devPythonExe by configurations.named<ResolvableConfiguration>(saxoncPython.version.map { v -> "python${v}" }.get())
 
 val venv = tasks.named<PythonVenv>("venv") {
-    pyenvPythonExe = devPythonExe.elements.map { project.file(it.single().asFile.readText()) }
+    pythonVersionExe = devPythonExe.elements.map { project.file(it.single().asFile.readText()) }
 }
 val installWheelTask = tasks.named<InstallLocalWheel>("install_wheel")
 
