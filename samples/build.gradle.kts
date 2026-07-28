@@ -113,7 +113,7 @@ val validate_ee_config = tasks.register<JavaExec>("validate_ee_config") {
 
 val validate_he_config = tasks.register<JavaExec>("validate_he_config") {
   group = "Internal"
-  description = "Validate the config.xml sample configuration file"
+  description = "Validate the config-HE.xml sample configuration file"
 
   inputs.files(create_config_xsd)
   inputs.files(layout.projectDirectory.file("src/config/config-HE.xml"))
@@ -126,34 +126,6 @@ val validate_he_config = tasks.register<JavaExec>("validate_he_config") {
        "-xsd:${create_config_xsd.get().outputs.files.singleFile}",
        "-report:${layout.buildDirectory.file("he_validated.xml").get()}")
 }
-
-/*
-val run_with_config_xsd = tasks.register<JavaExec>("run_with_config_xsd") {
-  group = "Internal"
-  inputs.files(layout.projectDirectory.file("src/config/saxon-attributes.xsd"))
-  inputs.files(layout.projectDirectory.file("src/config/config-raw.xsd"))
-  inputs.files(copy_feature_keys)
-  outputs.files(layout.buildDirectory.file("config/config.xsd"))
-
-  doFirst {
-    copy {
-      into(layout.buildDirectory.file("config").get())
-      from(layout.projectDirectory.file("src/config")) {
-        include("saxon-attributes.xsd")
-      }
-    }
-  }
-
-  classpath = configurations.named("samplesBuild").get()
-  mainClass = "com.saxonica.Transform"
-  args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToSchema.xsl").get()}",
-       "-o:${layout.buildDirectory.file("config/config.xsd").get()}",
-       "-it:main",
-       "FeatureKeys=${layout.buildDirectory.file("featureKeys/xml/FeatureKeys.xml").get()}",
-       "AdditionalFeatures=${layout.buildDirectory.file("featureKeys/xml/AdditionalFeatures.xml").get()}",
-       "ConfigSchema=file://${layout.projectDirectory.file("src/config/config-raw.xsd")}")
-}
-*/
 
 val setup_sample_sources = tasks.register<Copy>("setup_samples") {
   group = "Internal"
@@ -186,14 +158,16 @@ val setup_sample_sources = tasks.register<Copy>("setup_samples") {
 }
 sampleSources.outgoing.artifact(setup_sample_sources)
 
+// See books_with_config and books_with_config-HE transform tests in
+// tools/run-samples.py for tests using these sample configuration files.
+
 // ============================================================
 
-// These tests of generated configuration files are intended to check for
+// The following tests of generated configuration files are intended to check for
 // consistency between ConfigurationReader and the FeatureKeys source. If the
-// tests fail, then there is some inconsistency to resolve. The generated
+// tests fail, then there is some inconsistency to resolve. These generated
 // configuration files are not actually included in the samples in
-// saxon-resources (see run_config_samples below for testing of the sample
-// configuration files.)
+// saxon-resources.
 
 val configuration_tests = tasks.register("configuration_tests") {
   group = "Internal"
