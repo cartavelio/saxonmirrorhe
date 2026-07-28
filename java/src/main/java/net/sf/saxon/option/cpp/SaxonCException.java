@@ -52,6 +52,7 @@ public class SaxonCException  {
     @CEntryPoint(name = "j_getErrorMessage")
     public static CCharPointer j_getErrorMessage(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         Throwable throwable = SaxonCCurrentException.get();
+        String errorMessage = null;
         SaxonApiException exception = null;
         if(throwable == null) {
             if(SaxonCAPI.debug) {
@@ -63,37 +64,49 @@ public class SaxonCException  {
             System.err.println("Java DEBUG: j_getErrorMessage = " + throwable.getClass().getName());
         }
         if(throwable instanceof SaxonApiException) {
-           exception = (SaxonApiException)throwable;
-        } else if(throwable instanceof NullPointerException) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-          exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
-        } else {
-            exception = new SaxonApiException(throwable);
-        }
-        if(exception.getMessage() == null) {
-            if(SaxonCAPI.debug) {
-                System.err.println("Exception thrown but getMessage() is null");
-                System.err.println(exception.getCause().toString());
-            }
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-            exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
 
-            //return WordFactory.nullPointer();
+            exception = (SaxonApiException)throwable;
+            errorMessage = getAllCausedMessages(throwable.getCause());
+
+        } else {
+            errorMessage = getAllCausedMessages(throwable.getCause());
+            exception = new SaxonApiException(errorMessage);
+        }
+
+        if(errorMessage != null && errorMessage.isEmpty()) {
+            errorMessage = "Exception thrown but getMessage() is null";
         }
 
         //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
-        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(exception.getMessage())){
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(errorMessage)){
 
             final CCharPointer result=holder.get();
             return result;
         }
+    }
 
-        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
-        //return a;
+    private static String getAllCausedMessages(Throwable throwable) {
+        StringBuilder builder = new StringBuilder();
+        String previous = null;
+
+        for (Throwable t = throwable; t != null; t = t.getCause()) {
+
+            String message = t.getMessage();
+
+            if (message == null || message.isEmpty()) {
+                message = t.getClass().getSimpleName();
+            }
+            if (!message.equals(previous)) {
+
+                if (!builder.isEmpty()) {
+                    builder.append("\nCaused by: ");
+                }
+                builder.append(message);
+                previous = message;
+            }
+        }
+        return builder.toString();
+
     }
 
 
@@ -101,6 +114,7 @@ public class SaxonCException  {
     public static CCharPointer j_getErrorMessageWithErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
         Throwable throwable = SaxonCCurrentException.get();
         SaxonApiException exception = null;
+        String errorMessage = null;
         if(SaxonCAPI.debug) {
             System.err.println("Java DEBUG: j_getErrorMessageWithErrorCode called");
             System.err.println("Java DEBUG: j_getErrorMessageWithErroCode erroReporter message="+errorReporter.getErrors().toString());
@@ -115,53 +129,37 @@ public class SaxonCException  {
             }
             return WordFactory.nullPointer();
         }
-        if(throwable instanceof SaxonApiException) {
-           exception = (SaxonApiException)throwable;
-        } else if(throwable instanceof NullPointerException) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-          exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
-        } else {
-            exception = new SaxonApiException(throwable);
-        }
-        if(exception.getMessage() == null) {
-            if(SaxonCAPI.debug) {
-                System.err.println("Java Debug: Exception found: " + throwable.getClass().getName());
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                throwable.printStackTrace(pw);
-                System.err.println(sw.toString());
-            }
 
-            return WordFactory.nullPointer();
+        if(throwable instanceof SaxonApiException) {
+
+           exception = (SaxonApiException)throwable;
+           errorMessage = getAllCausedMessages(throwable.getCause());
+
+        } else {
+            errorMessage = getAllCausedMessages(throwable.getCause());
+            exception = new SaxonApiException(errorMessage);
         }
+
         if(SaxonCAPI.debug) {
-            String messageStr = exception.getMessage();
-            System.err.println("Java Debug: Exception found: " + messageStr);
+            String messageStr = errorMessage==null?"":errorMessage;
+            System.err.println("Java Debug: Exception found message: " + messageStr);
             if(messageStr.contains("Invalid handle")){
                 System.err.println("Found Invalid Handle error");
             }
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-            System.err.println(sw.toString());
-
-            if(errorReporter.getErrors() != null) {}
 
         }
         CCharPointer a = null;
-        String errorMessage = null;
 
         if(errorReporter.getErrors().toString() != null && !errorReporter.getErrors().toString().isEmpty()) {
             errorMessage = errorReporter.getErrors().toString();
 
         } else {
+
             int lineNumber = exception.getLineNumber();
             if(exception.getErrorCode() == null) {
-                errorMessage = exception.getMessage()+". Line number: "+lineNumber;
+                errorMessage = errorMessage+". Line number: "+lineNumber;
             } else {
-               errorMessage = exception.getErrorCode().getLocalName() + ": " + exception.getMessage() + ". Line number: "+lineNumber;
+               errorMessage = exception.getErrorCode().getLocalName() + ": " + errorMessage + ". Line number: "+lineNumber;
             }
         }
 

@@ -589,6 +589,16 @@ def testLineNumber(data_dir):
     assert val is not None
     assert val.line_number == 7
 
+def testMissingDtd(data_dir):
+    proc = PySaxonProcessor(license=False)
+    try:
+        input_ = proc.parse_xml(xml_file_name=os.path.join(data_dir, "booksMissingDtd.xml"))
+        assert False
+    except saxonc.PySaxonApiError as e:
+        print(e)
+        assert "booksMissing.dtd (No such file or directory)" in str(e)
+
+
 
 def testColumnNumber(data_dir):
     proc = PySaxonProcessor(license=False)
