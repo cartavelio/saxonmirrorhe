@@ -126,7 +126,8 @@ abstract class JavaRunner @Inject constructor(private val ex: ExecOperations): D
       javaArgs.add("-${opt}:${arg}")
     }
 
-    println("JARG: ${javaArgs}")
+    println("cd ${suiteDir.asFile.get()}")
+    println("java ${driverClass} ${javaArgs.joinToString(" ")}")
 
     ex.javaexec {
       mainClass = driverClass

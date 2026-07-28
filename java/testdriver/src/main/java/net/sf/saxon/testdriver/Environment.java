@@ -358,6 +358,9 @@ public class Environment implements ResourceResolver {
 
                     Path source = Paths.get(env.getBaseURI().resolve(path).getPath());
                     Path dest = Paths.get(sandpit.getAbsolutePath());
+
+                    System.err.println("Copy sandpit: " + source.toAbsolutePath());
+
                     copyFolder(source, dest);
                     environment.sandpit = sandpit;
                     System.err.println("Sandpit: " + sandpit.getAbsolutePath());

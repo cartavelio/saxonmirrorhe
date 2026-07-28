@@ -150,7 +150,9 @@ abstract class TestSuitesExtension
           project.copy {
             into(layout.buildDirectory.dir("suite/expath/${taskName}"))
             from(submodulesDir.dir("expath/tests/qt3")) {
-              exclude("archive/sandpit2/**")
+              // Unless other changes are ported over from main,
+              // the saxon12 branch seems to need to copy sandpit2
+              //exclude("archive/sandpit2/**")
             }
           }
         }
