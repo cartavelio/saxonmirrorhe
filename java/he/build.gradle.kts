@@ -307,26 +307,19 @@ testSuites {
 
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
-
 testSuites.configure("xslt30", "XT30")
-
 testSuites.configure("xslt30extra", "XT30")
-
-//testSuites.configure("qt4", "XQ31")
-//testSuites.configure("qt4", "XP31")
-//testSuites.configure("qt4", "XQ40")
-//testSuites.configure("qt4", "XP40")
-//testSuites.configure("xslt40", "XT40")
 
 tasks.register("aggregated-test-results") {
   inputs.files(tasks.named("test_suite_qt3_XP31"))
   inputs.files(tasks.named("test_suite_qt3_XQ31"))
+  inputs.files(tasks.named("test_suite_xslt30_XT30"))
+  inputs.files(tasks.named("test_suite_xslt30extra_XT30"))
 
   doLast {
     println(inputs.files.files)
   }
 }
-
 
 tasks.named<Sync>("signingDownloadJars") {
   into(layout.buildDirectory.dir("signing/download"))

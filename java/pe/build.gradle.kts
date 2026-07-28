@@ -404,37 +404,26 @@ tasks.register<JavaExec>("pe_run_test") {
   mainClass = "net.sf.saxon.Transform"
 }
 
-testSuites.configure("qt3", "XP31")
-testSuites.configure("qt3", "XQ31")
-
 testSuites.configure("expath", "XP31")
 testSuites.configure("expath", "XQ31")
-
+testSuites.configure("qt3", "XP31")
+testSuites.configure("qt3", "XQ31")
 testSuites.configure("qt3extra", "XP31")
 testSuites.configure("qt3extra", "XQ31")
-testSuites.configure("qt3extra", "XQ40")
-
 testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
-
 testSuites.configure("xslt30extra", "XT30")
 
-testSuites.configure("qt4", "XQ31")
-testSuites.configure("qt4", "XP31")
-testSuites.configure("qt4", "XQ40")
-testSuites.configure("qt4", "XP40")
-
-testSuites.configure("xslt40", "XT40")
-testSuites.configure("xslt40", "XT40", mapOf("strict" to "on"))
-
 tasks.register("aggregated-test-results") {
+  inputs.files(tasks.named("test_suite_expath_XP31"))
+  inputs.files(tasks.named("test_suite_expath_XQ31"))
   inputs.files(tasks.named("test_suite_qt3_XP31"))
   inputs.files(tasks.named("test_suite_qt3_XQ31"))
-  inputs.files(tasks.named("test_suite_qt4_XP31"))
-  inputs.files(tasks.named("test_suite_qt4_XQ31"))
-  inputs.files(tasks.named("test_suite_qt4_XP40"))
-  inputs.files(tasks.named("test_suite_qt4_XQ40"))
-
+  inputs.files(tasks.named("test_suite_qt3extra_XP31"))
+  inputs.files(tasks.named("test_suite_qt3extra_XQ31"))
+  inputs.files(tasks.named("test_suite_xslt30_XT30"))
+  inputs.files(tasks.named("test_suite_xslt30_XT30_strict"))
+  inputs.files(tasks.named("test_suite_xslt30extra_XT30"))
   doLast {
     println(inputs.files.files)
   }
