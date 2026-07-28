@@ -235,7 +235,6 @@ public interface NodeInfo extends Item, Location
      * and the location of a text node is the location where the text node ends. This
      * may be a little confusing where elements have many attributes spread over multiple lines, or where
      * single attributes (as can easily happen with XSLT 2.0 stylesheets) occupy several lines.</p>
-     * * single attributes (as can easily happen with XSLT 2.0 stylesheets) occupy several lines.</p>
      * <p>In the case of a tree constructed by a stylesheet or query, the column number may reflect the line in
      * the stylesheet or query that caused the node to be constructed.</p>
      * <p>The column number can be read from within an XPath expression using the Saxon extension function
