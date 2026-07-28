@@ -98,13 +98,12 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
      * unfolding" optimization whereby expressions are evaluated at compile time; as such it forces
      * greater coverage of code paths in the interpreter and in the byte code generator.
      */
-
     private static class LazyLiteralInjector implements CodeInjector {
 
         @Override
-        public Expression inject(Expression exp) {
+        public Expression injectDuringParsing(Expression exp) {
             if (exp instanceof Literal) {
-                if (exp instanceof StringLiteral && ((StringLiteral)exp).getString().toString().startsWith("http://www.w3.org/")) {
+                if (exp instanceof StringLiteral && ((StringLiteral) exp).stringify().startsWith("http://www.w3.org/")) {
                     // This is to avoid dynamic computation of Collation uris, which affects optimization paths
                     return exp;
                 }

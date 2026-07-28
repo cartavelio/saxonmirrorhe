@@ -5392,12 +5392,12 @@ public class XPathParser {
 
     public Expression makeTracer(Expression exp,  /*@Nullable*/ StructuredQName qName) {
         exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
-        //return exp;
-        if (codeInjector != null) {
-            return codeInjector.inject(exp);
-        } else {
-            return exp;
+        exp.setRetainedStaticContextLocally(env.makeRetainedStaticContext());
+        CodeInjector injector = getCodeInjector();
+        if (injector != null) {
+            exp = injector.injectDuringParsing(exp);
         }
+        return exp;
     }
 
     /**
