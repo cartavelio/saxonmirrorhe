@@ -5,13 +5,40 @@
       "pattern":"\\Qcom/ibm/icu/ICUConfig.properties\\E"
     },
     {
-      "pattern": "com/ibm/icu/.*/*.*res$"
+      "pattern": "com/ibm/icu/impl/data/.*/.*.brk"
     },
     {
-      "pattern": "com/ibm/icu/.*/*.*icu$"
+      "pattern": "com/ibm/icu/impl/data/.*/.*.cfu"
     },
     {
-      "pattern": "com/ibm/icu/.*/*.*dat$"
+      "pattern": "com/ibm/icu/impl/data/.*/.*.dict"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/data/.*/.*.html"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/data/.*/.*.icu"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/data/.*/.*.lst"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/data/.*/.*.nrm"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/data/.*/.*.res"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/data/.*/.*.spp"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/duration/impl/data/.*/.*.escaped"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/duration/impl/data/.*/.*.txt"
+    },
+    {
+      "pattern": "com/ibm/icu/impl/duration/impl/data/.*/.*.xml"
     },
     {
       "pattern":"\\Qnet/sf/saxon/data/*.xml\\E"
