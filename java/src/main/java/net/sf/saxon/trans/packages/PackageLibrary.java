@@ -360,8 +360,7 @@ public class PackageLibrary {
             }
         }
         PackageVersion actualVersion = pack.getPackageVersion();
-        // Bug 6762. Suggestion is to change this to equalsIgnoringSuffix(), but needs further testing
-        if (!actualVersion.equals(details.nameAndVersion.packageVersion)) {
+        if (!actualVersion.equalsIgnoringSuffix(details.nameAndVersion.packageVersion)) {
             throw new XPathException("Registered version number of package (" + details.nameAndVersion.packageVersion +
                                              ") does not match the value in the XSLT source (" +
                                              actualVersion + ")");
