@@ -690,10 +690,10 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                 output_file = (file_name[-4] + "_created_from_test_driver.sef")
                 output_file1 = str(os.path.join(environment.xslt_proc.cwd, output_file))
                 try:
-                    environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file, lang=spec.version)
-                    environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file, lang=spec.version)
+                    environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file1, lang=spec.version)
+                    environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file1, lang=spec.version)
                     if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-                        print("Checking the output file " + str(os.path.join(environment.xslt_proc.cwd, output_file)) +": ")
+                        print("Checking the output file " + str(os.path.join(environment.xslt_proc.cwd, output_file1)) +": ")
 
                     if os.path.exists(output_file1):
                         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
