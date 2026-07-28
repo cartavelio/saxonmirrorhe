@@ -491,34 +491,42 @@ val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
 }
 
 val signingResources = tasks.register<AwsSigningResources>("signingResources") {
-    region = "eu-west-2"
-    stackName = "SaxonicaCiCdStack"
+  region = "eu-west-2"
+  stackName = "SaxonicaCiCdStack"
 }
 
 val uploadUnsignedDownloadJars = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedDownloadJars") {
-    inputDir = signingDownloadJars.map { it.destinationDir }
-    bucket = signingResources.map { it.codeSigningInputsBucket.get() }
-    queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
-    region = signingResources.map { it.region.get() }
-    baseKeyPrefix = "inputs"
-    jobFileDir = layout.buildDirectory.dir("uploadUnsignedDownloadJars")
+  inputDir = signingDownloadJars.map { it.destinationDir }
+  bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+  queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
+  region = signingResources.map { it.region.get() }
+  baseKeyPrefix = "inputs"
+  jobFileDir = layout.buildDirectory.dir("uploadUnsignedDownloadJars")
 }
 
-val uploadUnsignedMavenJars = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedMavenJars") {
-    inputDir = signingMavenJars.map { it.destinationDir }
-    bucket = signingResources.map { it.codeSigningInputsBucket.get() }
-    queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
-    region = signingResources.map { it.region.get() }
-    baseKeyPrefix = "inputs"
-    jobFileDir = layout.buildDirectory.dir("uploadMavenDownloadJars")
-}
-
-val downloadSignedDownloadJars = tasks.register<SignedArtifactDownloadTask>("downloadSignedDownloadJars") {
+val downloadSignedDownloadJars = if (signedReleaseArtifacts) {
+  tasks.register<SignedArtifactDownloadTask>("downloadSignedDownloadJars") {
     outputDir = layout.buildDirectory.dir("signed-download")
     bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
     queueUrl = signingResources.map { it.codeSigningOutputsQueueUrl.get() }
     region = signingResources.map { it.region.get() }
     jobFile = uploadUnsignedDownloadJars.map { it.jobFile.get() }
+  }
+} else {
+  tasks.register<Copy>("downloadSignedDownloadJars") {
+    dependsOn(signingDownloadJars)
+    into(layout.buildDirectory.dir("signed-download"))
+    from(layout.buildDirectory.dir("signing/download"))
+  }
+}
+
+val uploadUnsignedMavenJars = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedMavenJars") {
+  inputDir = signingMavenJars.map { it.destinationDir }
+  bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+  queueUrl = signingResources.map { it.codeSigningInputsQueueUrl.get() }
+  region = signingResources.map { it.region.get() }
+  baseKeyPrefix = "inputs"
+  jobFileDir = layout.buildDirectory.dir("uploadMavenDownloadJars")
 }
 
 val downloadSignedMavenJars = if (signedReleaseArtifacts) {
