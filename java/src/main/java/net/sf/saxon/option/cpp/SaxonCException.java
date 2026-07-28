@@ -141,7 +141,7 @@ public class SaxonCException  {
         }
 
         if(SaxonCAPI.debug) {
-            String messageStr = errorMessage==null?"":errorMessage;
+            String messageStr = errorMessage;
             System.err.println("Java Debug: Exception found message: " + messageStr);
             if(messageStr.contains("Invalid handle")){
                 System.err.println("Found Invalid Handle error");
