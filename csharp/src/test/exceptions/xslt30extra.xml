@@ -2,6 +2,11 @@
   
   <!-- Exceptions file for xslt30-extra tests with Saxon-CS -->
   
+  <exception test-case="internal-dtd-subset-002" run="false">
+    <created by="Debbie Lockett" on="2026-07-01"/>
+    <reason>Fix for bug 7024 causes failure. Test fixed 2026-04-16, but skip when running older version</reason>
+  </exception>
+  
   <exception test-case="evaluate-010 evaluate-027" run="false" report="not-applicable">
     <created by="Michael Kay" on="2021-08-31"/>
     <reason>Requires Java reflexive functions</reason>

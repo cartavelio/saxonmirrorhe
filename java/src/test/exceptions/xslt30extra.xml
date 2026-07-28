@@ -1,4 +1,9 @@
 <exceptions>
+  
+  <exception test-case="internal-dtd-subset-002" run="false">
+    <created by="Debbie Lockett" on="2026-07-01"/>
+    <reason>Fix for bug 7024 causes failure. Test fixed 2026-04-16, but skip when running older version</reason>
+  </exception>
 
   <exception test-case="stream-001" run="true">
     <optimization explain="false" assert="exists(//stream)"/>
