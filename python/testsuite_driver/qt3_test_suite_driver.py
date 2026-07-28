@@ -326,7 +326,7 @@ def cwd_from_base_uri(base_uri: str):
     raise IOError("Specified directory <%s> does not exist!" % cwd)
 
 
-def load_schema_documents(xpc: saxonc.PyXPathProcessor, environment, builder, xsd_compiler: saxonc.PyXsdCompiler):
+'''def load_schema_documents(xpc: saxonc.PyXPathProcessor, environment, builder, xsd_compiler: saxonc.PyXsdCompiler):
     schemas = xpc.evaluate("//schema")
     print(str(schemas))
     source_arr = []
@@ -363,6 +363,7 @@ def load_schema_documents(xpc: saxonc.PyXPathProcessor, environment, builder, xs
         if schema is not None:
             return schema
     return None
+'''
 
 
 def create_global_environment(catalog: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
