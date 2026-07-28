@@ -154,3 +154,8 @@ tasks.register(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
   group = LifecycleTasks.DOCUMENTATION_GROUP
   description = "Generate documentation"
 }
+
+tasks.register(LifecycleTasks.SMOKETEST_TASK_NAME) {
+  group = LifecycleTasks.SMOKETEST_GROUP
+  description = "Smoketest release artifacts"
+}

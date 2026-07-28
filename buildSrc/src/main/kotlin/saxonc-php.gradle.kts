@@ -41,6 +41,11 @@ val phpComposer by configurations.resolvable("phpComposer") {
   extendsFrom(phpComposerBucket)
 }
 
+val saxoncReleaseZipBucket by configurations.dependencyScope("saxoncReleaseZipBucket")
+val saxoncReleaseZip by configurations.resolvable("saxoncReleaseZip") {
+  extendsFrom(saxoncReleaseZipBucket)
+}
+
 dependencies {
   libsaxoncReleaseArtifactsBucket(extension.edition.map { edition ->
     project(path = ":libsaxonc:${edition}", configuration = "releaseArtifactsDir")
@@ -55,6 +60,10 @@ dependencies {
     project(path = ":libsaxonc-core:${edition}", configuration = "debugCMakePackageDir")
   })
   phpComposerBucket(project(":php", configuration = "composer"))
+
+  saxoncReleaseZipBucket(extension.edition.map { edition ->
+    project(":libsaxonc:${edition}", configuration = "releaseZips")
+  })
 }
 
 val srcFolder = project.layout.projectDirectory.dir("../src")
@@ -309,3 +318,82 @@ val releaseTask = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
 
 val releaseFolder by configurations.consumable("releaseFolder")
 releaseFolder.outgoing.artifact(releaseBuildFolder) { builtBy(releaseTask) }
+
+val smoketestReleaseZip = saxoncReleaseZip.elements.map { it.single().asFile }
+val smoketestDir = layout.buildDirectory.dir("smoketest")
+val smoketestSrcDir = smoketestDir.map { it.dir(smoketestReleaseZip.get().nameWithoutExtension) }
+val smoketestPhpBuildRoot = smoketestDir.map { it.dir("php") }
+
+// This has to be an Exec shelling out to native unzip or the .so symlinks get trashed
+val smoketestUnzip = tasks.register<Exec>("smoketest-unzip") {
+  inputs.file(smoketestReleaseZip)
+  outputs.dir(smoketestSrcDir)
+  workingDir(smoketestDir)
+  executable("unzip")
+  val zipFilePath = CommandLineArgumentProvider { listOf(smoketestReleaseZip.map { it.toString() }.get()) }
+  argumentProviders.add(zipFilePath)
+
+  doFirst {
+    delete(smoketestSrcDir)
+  }
+}
+
+val smoketestCreatePhpBuildRoot = tasks.register<Copy>("smoketest-create-php-build-root") {
+  from(smoketestUnzip.map { smoketestSrcDir.get().dir("php/src") })
+  into(smoketestPhpBuildRoot)
+
+  doFirst {
+    delete(smoketestPhpBuildRoot)
+  }
+}
+
+val smoketestPhpize = tasks.register<LazyExec>("smoketest-phpize") {
+  inputs.files(smoketestCreatePhpBuildRoot.map { fileTree(it.destinationDir).filter {
+    it.extension == "cpp"
+  } }) // avoid marking the build root as an input...
+  outputs.files(smoketestPhpBuildRoot.map { it.files(phpizeOutputs) })
+
+  workingDir = smoketestPhpBuildRoot
+  executable(extension.phpizeExe)
+}
+
+val smoketestLibsaxoncDir = smoketestUnzip.map { smoketestSrcDir.map { it.dir("SaxonC${extension.edition.get().uppercase()}") }.get() }
+val smoketestLibsaxoncCoreDir = smoketestUnzip.map { smoketestSrcDir.map { it.dir("SaxonCCore${extension.edition.get().uppercase()}") }.get() }
+
+val smoketestConfigure = tasks.register<PhpDefaultWithExec>("smoketest-configure") {
+  inputs.files(smoketestPhpize)
+  outputs.files(smoketestPhpBuildRoot.map { it.files(configureOutputs) })
+
+  doLast {
+
+    ex.exec {
+      workingDir(smoketestPhpBuildRoot)
+      executable("./configure")
+
+      args("--with-saxonc=${smoketestLibsaxoncDir.get()}", "--with-saxonc-core=${smoketestLibsaxoncCoreDir.get()}")
+    }
+  }
+}
+
+val smoketestMake = tasks.register<LazyExec>("smoketest-make") {
+  inputs.files(smoketestConfigure)
+  outputs.file(smoketestPhpBuildRoot.map { it.file("modules/saxon.so") })
+
+  workingDir = smoketestPhpBuildRoot
+  executable(extension.makeExe)
+}
+
+val smoketestTestRunner = tasks.register<PhpExec>("smoketest-runner") {
+  inputs.files(smoketestMake.map { it.outputs.files })
+  phpExe = extension.phpExe
+  workingDir = smoketestSrcDir.map { it.dir("php/samples") }
+  saxonPhpExt = smoketestMake.map { it.outputs.files.singleFile }
+  libsaxoncLibPath = smoketestLibsaxoncDir.map { it.dir("lib") }
+  libsaxoncCoreLibPath = smoketestLibsaxoncCoreDir.map { it.dir("lib") }
+
+  args("xpathExamples.php")
+}
+
+tasks.named(LifecycleTasks.SMOKETEST_TASK_NAME) {
+  dependsOn(smoketestTestRunner)
+}
