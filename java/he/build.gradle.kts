@@ -305,9 +305,12 @@ testSuites {
   exceptionsDir = layout.projectDirectory.dir("../src/test/exceptions")
 }
 
+testSuites.configure("qt3", "XP20")
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
+
 testSuites.configure("xslt30", "XT30")
+
 testSuites.configure("xslt30extra", "XT30")
 
 tasks.register("aggregated-test-results") {

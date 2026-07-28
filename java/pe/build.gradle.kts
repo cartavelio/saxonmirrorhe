@@ -406,12 +406,17 @@ tasks.register<JavaExec>("pe_run_test") {
 
 testSuites.configure("expath", "XP31")
 testSuites.configure("expath", "XQ31")
+
+testSuites.configure("qt3", "XP20")
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XQ31")
+
 testSuites.configure("qt3extra", "XP31")
 testSuites.configure("qt3extra", "XQ31")
+
 testSuites.configure("xslt30", "XT30")
 testSuites.configure("xslt30", "XT30", mapOf("strict" to "on"))
+
 testSuites.configure("xslt30extra", "XT30")
 
 tasks.register("aggregated-test-results") {
