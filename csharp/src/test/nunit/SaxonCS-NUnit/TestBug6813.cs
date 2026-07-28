@@ -20,7 +20,8 @@ public class TestBug6813
         XPathCompiler compiler = processor.NewXPathCompiler();
         compiler.BaseUri =  new Uri("file:///tmp/");
         compiler.DeclareNamespace("saxon", "http://saxon.sf.net/");
-        string uri = "file://" + System.IO.Directory.GetCurrentDirectory() + "/../../../../../../../../BUILD.md";
+        //string uri = "file://" + System.IO.Directory.GetCurrentDirectory() + "/../../../../../../../../BUILD.md";
+        Uri uri = new Uri(ConfigTest.DataDirUri, "saxon-cs.config");
         XPathExecutable executable = compiler.Compile("saxon:read-binary-resource('" + uri + "')");
         XPathSelector selector = executable.Load();
         XdmValue value = selector.Evaluate();
@@ -42,7 +43,8 @@ public class TestBug6813
             XPathCompiler compiler = processor.NewXPathCompiler();
             compiler.BaseUri = new Uri("file:///tmp/");
             compiler.DeclareNamespace("saxon", "http://saxon.sf.net/");
-            string uri = "file://" + System.IO.Directory.GetCurrentDirectory() + "/../../../../../../../../BUILD.md";
+            Uri uri = new Uri(ConfigTest.DataDirUri, "saxon-cs.config");
+            //string uri = "file://" + System.IO.Directory.GetCurrentDirectory() + "/../../../../../../../../BUILD.md";
             XPathExecutable executable = compiler.Compile("saxon:read-binary-resource('" + uri + "')");
             XPathSelector selector = executable.Load();
             XdmValue value = selector.Evaluate();
