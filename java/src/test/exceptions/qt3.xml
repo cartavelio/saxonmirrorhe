@@ -45,6 +45,9 @@
     <reason>(Generated) Tests use a validate expression but are not tagged as schema-aware.</reason>
   </exception>
   
-  
+  <exception test-set="fn-unparsed-text" test-case="fn-unparsed-text-054a" run="false" report="notRun">
+    <created by="Michael Kay" on="2025-12-18"/>
+    <reason>Getting access problems with https://timeanddate.com</reason>
+  </exception>
 
 </exceptions>
