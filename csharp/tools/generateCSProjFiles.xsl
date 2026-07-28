@@ -210,7 +210,7 @@ EndGlobal
           </ItemGroup>
           <ItemGroup>
             <Reference Include="SaxonCS">
-              <HintPath>..\..\..\{$edition}\build\{$arch}\SaxonCS\bin\{$release}\{$framework}\{$platform}-{$arch}\SaxonCS-{$EDITION}.dll</HintPath>
+              <HintPath>..\..\..\{$edition}\build\{$arch}\SaxonCS\bin\{$release}\{$framework}\{$platform}-{$arch}\SaxonCS.dll</HintPath>
             </Reference>
           </ItemGroup>
           <ItemGroup>
@@ -271,24 +271,16 @@ EndGlobal
             <UseArtifactsOutput>true</UseArtifactsOutput>
             <StartupObject>Saxon.Cmd.Command</StartupObject>
             <OutputType>Exe</OutputType>
-            <AssemblyName>SaxonCS-{$EDITION}</AssemblyName>
+            <AssemblyName>SaxonCS</AssemblyName>
 <xsl:choose>
   <xsl:when test="$EDITION = 'EE'">
-            <Description>SaxonCS-{$EDITION} is a high-performance XPath, XQuery, and XSLT
+            <Description>SaxonCS is a high-performance XPath, XQuery, and XSLT
             processor.</Description>
-            <PackageReleaseNotes>SaxonCS-{$EDITION} conforms with the latest W3C
+            <PackageReleaseNotes>SaxonCS conforms with the latest W3C
             specifications, XSLT 3.0, XQuery 3.1, and XPath 3.1. It also
             includes support for many features in the XPath, XQuery, and XSLT
             4.0 specifications currently in development in the QT4 Community
             Group.</PackageReleaseNotes>
-  </xsl:when>
-  <xsl:when test="$EDITION = 'HE'">
-            <Description>SaxonCS-{$EDITION} is a high-performance XPath, XQuery, and XSLT
-            processor.</Description>
-            <PackageReleaseNotes>SaxonCS-{$EDITION} conforms with the latest W3C
-            specifications, XSLT 3.0, XQuery 3.1, and XPath 3.1. It aims to have
-            feature parity with our open source Saxon-HE product, subject to constraints
-            such as limitations in the Microsoft XML parser.</PackageReleaseNotes>
   </xsl:when>
   <xsl:otherwise>
     <xsl:message terminate="yes">Unrecognized edition: {$EDITION}</xsl:message>
@@ -301,12 +293,12 @@ EndGlobal
                  And didn't see to have much performance benefit
             <PublishAot>True</PublishAot>
             -->
-            <CFBundleName>SaxonCS-{$EDITION}</CFBundleName>
-            <CFBundleDisplayName>SaxonCS-{$EDITION}</CFBundleDisplayName>
+            <CFBundleName>SaxonCS</CFBundleName>
+            <CFBundleDisplayName>SaxonCS</CFBundleDisplayName>
             <CFBundleIdentifier>com.saxonica.saxoncs</CFBundleIdentifier>
             <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
             <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
-            <CFBundleExecutable>SaxonCS-{$EDITION}</CFBundleExecutable>
+            <CFBundleExecutable>SaxonCS</CFBundleExecutable>
             <CFBundleIconFile>SaxonicaDisk.icns</CFBundleIconFile>
             <NSPrincipalClass>NSApplication</NSPrincipalClass>
             <NSHighResolutionCapable>true</NSHighResolutionCapable>
@@ -399,7 +391,7 @@ EndGlobal
     </ItemGroup>
     <ItemGroup>
       <Reference Include="SaxonCS">
-        <HintPath>{translate($relative-hint-path, '/', '\')}artifacts\bin\SaxonCS\release_{$platform}-{$arch}\SaxonCS-{$EDITION}.dll</HintPath>
+        <HintPath>{translate($relative-hint-path, '/', '\')}artifacts\bin\SaxonCS\release_{$platform}-{$arch}\SaxonCS.dll</HintPath>
       </Reference>
     </ItemGroup>
   </Project>
