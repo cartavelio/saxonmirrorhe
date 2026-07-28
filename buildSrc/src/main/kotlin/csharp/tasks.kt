@@ -290,7 +290,7 @@ abstract class DotNetPublish : DotNetImplementation() {
       args(solution.get(), "-r", csrid.get(),
         "--self-contained", "true",
         "--configuration", configuration.get(),
-        "--output", outputDir.get().asFile,
+//        "--output", outputDir.get().asFile,
         "-p:PublishSingleFile=true",
         "-p:Version=${version.get()}", "-p:PackageVersion=${version.get()}",
         "-p:Platform=Any CPU")
