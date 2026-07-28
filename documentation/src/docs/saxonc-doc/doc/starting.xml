@@ -672,13 +672,13 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
     <kbd>./configure --with-saxon</kbd>
 
     <kbd>make</kbd>
+    
+    <kbd>sudo make install</kbd>
 
     <p>If your PHP install can't find the <code>libsaxon-[edition]c</code> <code>.so</code>/<code>.dylib</code>
       file, this will error. You will need to alter <code>LD_LIBRARY_PATH</code> (Linux), or
       <code>DYLD_LIBRARY_PATH</code> (macOS) for the PHP process, or move the library to a location
       that is known to work.</p>
-
-    <kbd>sudo make install</kbd>
 
     <p><b>For all versions:</b></p>
 
