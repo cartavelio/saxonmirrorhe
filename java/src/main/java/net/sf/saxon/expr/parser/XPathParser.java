@@ -4430,10 +4430,8 @@ public class XPathParser {
 
         try {
             functionName = getQNameParser().parse(fname, env.getDefaultFunctionNamespace());
-            if (functionName.getPrefix().equals("")) {
-                if (XPathParser.isReservedFunctionName(functionName.getLocalPart(), languageVersion)) {
-                    grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is reserved in XPath 3.1");
-                }
+            if (NameChecker.isValidNCName(fname) && isReservedFunctionName(fname, languageVersion)) {
+                grumble("The unprefixed function name '" + functionName.getLocalPart() + "' is a reserved name");
             }
         } catch (XPathException e) {
             grumble(e.getMessage(), e.getErrorCodeQName());
