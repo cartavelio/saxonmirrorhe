@@ -375,6 +375,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_getcwd, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setSchemaAware, 0, 0, 1)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_isSchemaAware, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setJustInTimeCompilation, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()

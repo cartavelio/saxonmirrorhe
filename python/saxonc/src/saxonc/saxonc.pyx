@@ -1285,6 +1285,27 @@ cdef class PyXslt30Processor:
         c_cwd = py_cwd_string if cwd is not None else ""
         self.thisxptr.setcwd(c_cwd)
 
+     def set_schema_aware(self, schema_aware):
+         """
+         set_schema_aware(self, schema_aware)
+         Say that the stylesheet must be compiled to be schema-aware, even if it contains no
+        xsl:import-schema declarations. By default a stylesheet is treated as schema-aware
+        only if it contains one or more xsl:import-schema declarations. If it is not schema-aware,
+        then all input documents must be untyped, and validation of temporary trees is disallowed
+        (though validation of the final result tree is permitted). Setting the argument to true
+        means that schema-aware code will be compiled regardless.
+         """
+         cdef bool c_option
+         c_option = schema_aware
+         self.thisxptr.setSchemaAware(c_option)
+
+     def is_schema_aware(self):
+         """
+         is_schema_aware(self)
+         Ask whether schema-awareness has been requested by means of a call on set_schema_aware
+         """
+         return self.thisxptr.isSchemaAware()
+
      def set_jit_compilation(self, bool jit):
         """
         set_jit_compilation(self, bool jit)

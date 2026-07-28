@@ -245,6 +245,33 @@ SaxonApiException *Xslt30Processor::getException() { return exception; }
 
 void Xslt30Processor::createException(const char *message) {}
 
+
+void Xslt30Processor::setSchemaAware(bool schemaAware) {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("sa:");
+  if (it != properties.end()) {
+    parameters.erase("sa:");
+  }
+  if (schemaAware) {
+    setProperty("sa:", "true");
+  } else {
+    setProperty("sa:", "false");
+  }
+}
+
+bool Xslt30Processor::isSchemaAware() {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find("sa:");
+  if (it != properties.end()) {
+    std::string valuei = it->second;
+    if (valuei == "true" || valuei == "on") {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
                                                 const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);

@@ -79,6 +79,31 @@ public:
   */
  const char * getcwd();
 
+
+    /**
+    * Say that the stylesheet must be compiled to be schema-aware, even if it contains no
+     * xsl:import-schema declarations. By default a stylesheet is treated as schema-aware
+     * only if it contains one or more xsl:import-schema declarations. If it is not schema-aware,
+     * then all input documents must be untyped, and validation of temporary trees is disallowed
+     * (though validation of the final result tree is permitted). Setting the argument to true
+     * means that schema-aware code will be compiled regardless.
+     *
+     * <p>Setting the value to true has no effect (it is not an error) if the configuration does
+     * not support schema processing. (Schema processing requires a Saxon-EE license.)</p>
+     *
+     * @param schemaAware true if expressions are to be schema-aware, false otherwise
+     * @throws SaxonApiException if schema-awareness is requested when this is
+     * not a licensed Saxon-EE configuration.
+     * @since 13.
+     */
+    void setSchemaAware(bool schemaAware);
+
+    /**
+   * Ask whether schema-awareness has been requested by means of a call on setSchemaAware
+   * @return bool
+   */
+   bool isSchemaAware();
+
   /**
    * Set the base output URI.
    * The base output URI is used for resolving relative URIs in the

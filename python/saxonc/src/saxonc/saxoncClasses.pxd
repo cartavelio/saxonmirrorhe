@@ -200,6 +200,10 @@ cdef extern from "saxonc/SaxonProcessor.h":
         # Set the base output URI.
         void setBaseOutputURI(const char * baseURI)
 
+        void setSchemaAware(bool schemaAware)  except +handle_saxonc_api_exceptions
+
+        bool isSchemaAware()  except +handle_saxonc_api_exceptions
+
         # Set the value of a stylesheet parameter
         void setParameter(const char* name, XdmValue*value)
 
