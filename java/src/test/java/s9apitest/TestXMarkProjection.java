@@ -25,8 +25,8 @@ public class TestXMarkProjection {
             //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
             //proc.setConfigurationProperty(Feature.DISPLAY_BYTE_CODE, true);
             //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR);
-            File queryFile = Testdata.file("../xmark/" + query + ".xq");
-            File source = Testdata.file("../xmark/xmark4.xml");
+            File queryFile = Testdata.xmark().file(query + ".xq");
+            File source = Testdata.xmark().file("xmark4.xml");
             DocumentBuilder b1 = proc.newDocumentBuilder();
             XdmNode fullDoc = b1.build(source);
             XQueryCompiler c1 = proc.newXQueryCompiler();
