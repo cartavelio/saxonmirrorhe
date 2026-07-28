@@ -107,11 +107,16 @@ class Environment:
 
     @staticmethod
     def environment_cleanup():
+        print("environment cleanup called")
         for file in Environment.remove_temp_files:
             if os.path.exists(file):
                 if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                     print("Removing file = ", file)
+                print("Removing file = ", file)
                 os.remove(file)
+            else:
+                print("Not removing file = ", file)
+
         Environment.remove_temp_files.clear()
 
 
@@ -204,22 +209,25 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
         builderi = environment.proc.new_document_builder()
         script_dir = pathlib.Path(__file__).resolve().parent
 
-        base_uri = script_dir.as_uri()
+        base_uri = str(script_dir.as_uri())
 
-        print(base_uri)
+        print("resource base uri=", base_uri)
+        print("resource base uri=", cwd_from_base_uri(base_uri))
 
         resource_xsl_filename = str(script_dir)+"/XML_Resolver_Catalog_Maker.xsl"
+
         resources_exec = resource_xslt_proc.compile_stylesheet(stylesheet_file=resource_xsl_filename)
-        resource_filename = "temp/"+str(name)+".xml"
+        resource_filename = "testsuite_driver/temp/"+str(name)+".xml"
         env_text = str(env)
         builderi.set_base_uri(env.base_uri)
         env_tempi = builderi.parse_xml(xml_text=env_text)
-        resources_exec.set_cwd(str(cwd_from_base_uri))
-        resources_exec.apply_templates_returning_file(xdm_value=env_tempi, output_file=base_uri+"/"+resource_filename, base_output_uri=cwd_from_base_uri)
-        environment.proc.set_catalog_files([base_uri+"/"+resource_filename])
-        Environment.remove_temp_files.append(base_uri+"/"+resource_filename)
+        resources_exec.set_cwd(cwd_from_base_uri(base_uri))
+        resources_exec.apply_templates_returning_file(xdm_value=env_tempi, output_file=resource_filename)
+        environment.proc.set_catalog_files([cwd_from_base_uri(base_uri)+"/"+resource_filename])
+        Environment.remove_temp_files.append(cwd_from_base_uri(base_uri)+"/"+resource_filename)
+
         '''
-        TODO: remove the created temp catalog files
+        TODO: remove the created temp catalog files 
         environment.resources_remove.append(base_uri+"/"+resource_filename)'''
 
     environment.create_processors()
