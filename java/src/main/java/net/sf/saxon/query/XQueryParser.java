@@ -4104,6 +4104,7 @@ public class XQueryParser extends XPathParser {
             tryExpr = parseExpression();
         }
         TryCatch tryCatch = new TryCatch(tryExpr);
+        tryCatch.setRollbackOutput(true);
         setLocation(tryCatch, offset);
         expect(Token.RCURLY);
         lookAhead();  // must be done manually after an RCURLY
