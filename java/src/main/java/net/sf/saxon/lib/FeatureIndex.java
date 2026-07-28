@@ -36,7 +36,5 @@ public class FeatureIndex {
     public static FeatureData getData(int code) {
         return byCode.get(code);
     }
-
-    public static Stream<FeatureData> stream() { return FeatureData.featureList.stream(); }
 }
 

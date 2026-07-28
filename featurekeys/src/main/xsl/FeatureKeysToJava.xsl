@@ -114,8 +114,6 @@ package net.sf.saxon.lib;
 // If you edit this file, your edits WILL BE TERMINATED with
 // extreme prejudice by the next build.
 
-import java.util.stream.Collectors;
-
 public class FeatureData {
     public String uri;
     public int code;
@@ -134,10 +132,6 @@ public class FeatureData {
     }
 
     public static java.util.List<FeatureData> featureList = new java.util.ArrayList<>();
-
-    public static java.util.Map<String, FeatureData> featuresByUri() {
-        return featureList.stream().collect(Collectors.toMap(feature -> feature.uri, feature -> feature));
-    }
 
     public static void init() {]]>
             </xsl:text>

@@ -9,7 +9,9 @@ import javax.xml.transform.Source;
 import java.io.StringWriter;
 
 import static net.sf.saxon.sapling.Saplings.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestSapling {
 

@@ -4494,6 +4494,7 @@ public class Configuration implements SourceResolver, NotationSet {
                                 break;
                             default:
                                 protocols = suppliedValue;
+                                break;
                         }
                     } else {
                         protocols = "";

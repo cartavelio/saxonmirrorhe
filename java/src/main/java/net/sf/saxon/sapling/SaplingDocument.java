@@ -58,6 +58,7 @@ import javax.xml.transform.Source;
         + "            }"
         + "        }"})
 public class SaplingDocument extends SaplingNode implements ActiveSource {
+
     private String baseUri;
     private ImmutableList<SaplingNode> reversedChildren;
 
