@@ -466,7 +466,7 @@ public class DocumentFn extends SystemFunction implements Callable {
 
         // Saxon takes charge of absolutization, leaving the user URIResolver to handle dereferencing only
         href = ResolveURI.escapeSpaces(href);
-        if (baseURI == null) {    // no base URI available
+        if (baseURI == null || baseURI.isEmpty()) {    // no base URI available
             try {
                 // the href might be an absolute URL
                 absURI = new URI(href).toString();
