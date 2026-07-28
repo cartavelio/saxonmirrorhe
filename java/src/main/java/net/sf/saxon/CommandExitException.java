@@ -10,7 +10,7 @@ public class CommandExitException extends RuntimeException {
     private final int code;
 
     /**
-     * Get the status code for this exception
+     * Get the exit status code for this exception
      * @return the status code that should be passed to {@link System#exit}
      */
     public int getCode() {
