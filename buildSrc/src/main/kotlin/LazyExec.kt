@@ -5,6 +5,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -43,6 +44,17 @@ abstract class LazyExec: DefaultTask() {
     }
   }
 
+  @get:Input
+  abstract val _env: MapProperty<String, String>
+
+  fun environment(key: String, value: String) {
+    _env.put(key, value)
+  }
+
+  fun environment(key: String, value: Provider<String>) {
+    _env.put(key, value)
+  }
+
   @get:Internal
   abstract val workingDir: DirectoryProperty
 
@@ -75,6 +87,7 @@ abstract class LazyExec: DefaultTask() {
         workingDir = wd.get().asFile
       }
 
+      environment(_env.get())
       executable = exe
       args(_args.get())
     }

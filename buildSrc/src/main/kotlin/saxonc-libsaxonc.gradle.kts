@@ -1,3 +1,4 @@
+import com.saxonica.build.LazyExec
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.TemplatedDocTask
 import com.saxonica.build.cpp.CMakeBuildTask
@@ -410,26 +411,97 @@ val releaseFolderTask = tasks.register<Copy>("build_release_zip_contents_folder"
 }
 
 val packagedZip = packagedDir.map { it.file("${extension.package_file_name.get()}.zip") }
-val releaseZipWindowsTask = tasks.register<Zip>("release_zip_windows") {
-    from(releaseFolderTask.map { it.destinationDir })
-    destinationDirectory = packagedDir
-    archiveBaseName = extension.package_file_name
+
+val releaseZipTask = if (saxonBuild.targetHost.get().isWindows) {
+    tasks.register<Zip>("release_zip") {
+        from(releaseFolderTask.map { it.destinationDir })
+        destinationDirectory = packagedDir
+        archiveBaseName = extension.package_file_name
+    }
+} else {
+    tasks.register<Exec>("release_zip") {
+        group = LifecycleTasks.RELEASE_GROUP
+        description = "generate the libsaxon download .zip package"
+
+        inputs.dir(releaseFolderTask.map { it.destinationDir })
+        outputs.file(packagedZip)
+
+        executable("zip")
+        args("--recurse-paths", "--symlinks", packagedZip.get(), extension.package_file_name.get())
+        workingDir = packagedDir.map { it.dir("tmp") }.get().asFile
+    }
 }
 
-val releaseZipUnicesTask = tasks.register<Exec>("release_zip") {
-    group = LifecycleTasks.RELEASE_GROUP
-    description = "generate the libsaxon download .zip package"
-
-    inputs.dir(releaseFolderTask.map { it.destinationDir })
-    outputs.file(packagedZip)
-
-    executable("zip")
-    args("--recurse-paths", "--symlinks", packagedZip.get(), extension.package_file_name.get())
-    workingDir = packagedDir.map { it.dir("tmp") }.get().asFile
-}
 
 val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
-    dependsOn(if (saxonBuild.targetHost.get().isWindows) releaseZipWindowsTask else releaseZipUnicesTask)
+    dependsOn(releaseZipTask)
+}
+
+val smoketestDir = layout.buildDirectory.dir("smoketest")
+val smoketestSrcDir = smoketestDir.map { it.dir(extension.package_file_name.get()) }
+val smoketestWorkingDir = smoketestSrcDir.map { it.dir("samples") }
+
+// This has to be an Exec shelling out to native unzip on Unices, or the .so symlinks get trashed
+val smoketestUnzip = if (saxonBuild.targetHost.get().isWindows) {
+    tasks.register<Sync>("smoketest-unzip") {
+        group = LifecycleTasks.SMOKETEST_GROUP
+        from(releaseZipTask.map { zipTree(it.outputs.files.singleFile) })
+        into(smoketestSrcDir)
+    }
+} else {
+    tasks.register<Exec>("smoketest-unzip") {
+        group = LifecycleTasks.SMOKETEST_GROUP
+        inputs.file(releaseZipTask.map { it.outputs.files.singleFile })
+        outputs.dir(smoketestSrcDir)
+        workingDir(smoketestDir)
+        executable("unzip")
+        val zipFilePath = CommandLineArgumentProvider { listOf(releaseZipTask.map { it.outputs.files.singleFile.toString() }.get()) }
+        argumentProviders.add(zipFilePath)
+
+        doFirst {
+            delete(smoketestSrcDir)
+        }
+    }
+}
+
+val smoketestCMakeGenerate = tasks.register<LazyExec>("smoketest-cmake-generate") {
+    group = LifecycleTasks.SMOKETEST_GROUP
+    inputs.file(smoketestUnzip.map { smoketestWorkingDir.map { it.file("CMakeLists.txt") }.get() })
+    outputs.file(smoketestWorkingDir.map { it.file("CMakeCache.txt") })
+    workingDir = smoketestWorkingDir
+    executable = "cmake"
+    args(".")
+}
+
+val smoketestCMakeBuild = tasks.register<LazyExec>("smoketest-cmake-build") {
+    group = LifecycleTasks.SMOKETEST_GROUP
+    inputs.files(smoketestCMakeGenerate.map { it.outputs.files })
+    outputs.file(smoketestWorkingDir.map { it.file("CppTestXPath") })
+    workingDir = smoketestWorkingDir
+    executable = "cmake"
+    args("--build", ".")
+}
+
+val smoketestRunner = tasks.register<LazyExec>("smoketest-runner") {
+    group = LifecycleTasks.SMOKETEST_GROUP
+    inputs.files(smoketestCMakeBuild.map { it.outputs.files })
+
+    val libpaths = extension.edition.map { edition ->
+        listOf("SaxonC", "SaxonCCore").map { product ->
+            smoketestSrcDir.map { it.dir("${product}${edition.uppercase()}") }.get().asFile.toString()
+        }.joinToString(":")
+    }
+
+    workingDir = smoketestWorkingDir
+    executable = smoketestCMakeBuild.map { it.outputs.files.singleFile.toString() }
+
+
+    environment("DYLD_LIBRARY_PATH", libpaths)
+    args("data")
+}
+
+val smoketest = tasks.named(LifecycleTasks.SMOKETEST_TASK_NAME) {
+    dependsOn(smoketestRunner)
 }
 
 sourceIncludeDir.outgoing.artifact(layout.projectDirectory.dir("../src/include"))
