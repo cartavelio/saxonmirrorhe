@@ -25,7 +25,10 @@ class XdmFunctionItem;
 
 /** An <code>XsltExecutable</code> represents the compiled form of a stylesheet.
  * <p>An XsltExecutable is created by using one of the <code>compile</code>
- * methods on the Xslt30Processor class.</p>
+ * methods on the Xslt30Processor class.
+ * The XsltExecutable is not thread-safe; so to run it in multiple transformations,
+ * in series or concurrently, you must clone the object for each thread using
+ * the <code>clone()</code> method.</p>
  */
 class SAXONC_EXPORT XsltExecutable {
 
