@@ -1,76 +1,194 @@
 package performance;
 
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.functions.Count;
+import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.DoubleValue;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ArrayPerformance extends PerformanceTestCase {
+public class MapPerformance extends PerformanceTestCase {
 
-    public void measurePut(final int n) {
-        try {
-            List<AtomicValue> numbers = new ArrayList<>(n);
-            for (int i=0; i<n; i++) {
-                numbers.add(new Int64Value(i));
+    public void measureBuild(final int n) {
+
+        measure(new Measurable() {
+
+            @Override
+            public void run() {
+                Random random = new Random();
+                HashTrieMap map = new HashTrieMap();
+                for (int i = 0; i < n; i++) {
+                    map.initialPut(new StringValue("abc" + i), new DoubleValue(random.nextDouble()));
+                }
+//                try {
+                    assertNotNull(map.get(new StringValue("abc123")));
+                    assertEquals(n, map.size());
+//                } catch (XPathException e) {
+//                    fail(e.getMessage());
+//                }
             }
-            final SimpleArrayItem array = SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(numbers));
-            measure(new Measurable() {
 
-                final ArrayItem a = array;
-                @Override
-                public void run() {
-                    ArrayItem a = array;
-                    for (int i=0; i<n; i++) {
-                        a = a.put(i, ((IntegerValue)a.get(i)).plus(Int64Value.PLUS_ONE));
-                    }
-                }
+            @Override
+            public int expectedTimeMicroseconds() {
+                return n;
+            }
 
-                @Override
-                public int expectedTimeMicroseconds() {
-                    return n;
-                }
+            @Override
+            public String name() {
+                return "testMapBuild" + n;
+            }
+        });
 
-                @Override
-                public String name() {
-                    return "testPut" + n;
+    }
+
+    public void measureIncrementalBuild(final int n) {
+
+        measure(new Measurable() {
+
+            @Override
+            public void run() {
+                Random random = new Random();
+                MapItem map = new HashTrieMap();
+                for (int i = 0; i < n; i++) {
+                    map = map.addEntry(new StringValue("abc" + i), new DoubleValue(random.nextDouble()));
                 }
-            });
-        } catch (XPathException e) {
-            e.printStackTrace();
-            fail();
-        }
+                assertNotNull(map.get(new StringValue("abc123")));
+                assertEquals(n, map.size());
+            }
+
+            @Override
+            public int expectedTimeMicroseconds() {
+                return n;
+            }
+
+            @Override
+            public String name() {
+                return "testIncrementalBuild" + n;
+            }
+        });
+
+    }
+
+    public void measureRetrieval(final int n, final int m) {
+
+        measure(new Measurable() {
+
+            @Override
+            public void run() {
+                Random random = new Random();
+                HashTrieMap map = new HashTrieMap();
+                for (int i = 0; i < n; i++) {
+                    map.initialPut(new StringValue("abc" + i), new DoubleValue(random.nextDouble()));
+                }
+                assertNotNull(map.get(new StringValue("abc123")));
+                assertEquals(n, map.size());
+                for (int j = 0; j < m; j++) {
+                    assertNotNull(map.get(new StringValue("abc" + j % n)));
+                }
+            }
+
+            @Override
+            public int expectedTimeMicroseconds() {
+                return m;
+            }
+
+            @Override
+            public String name() {
+                return "testMapRetrieval-" + m + "-of-" + n;
+            }
+        });
+
+    }
+
+    public void measureScan(final int n) {
+
+        measure(new Measurable() {
+
+            @Override
+            public void run() {
+                Random random = new Random();
+                HashTrieMap map = new HashTrieMap();
+                for (int i = 0; i < n; i++) {
+                    map.initialPut(new StringValue("abc" + i), new DoubleValue(random.nextDouble()));
+                }
+                assertNotNull(map.get(new StringValue("abc123")));
+                try {
+                    assertEquals(n, Count.count(map.keys()));
+                } catch (XPathException e) {
+                    fail();
+                }
+            }
+
+            @Override
+            public int expectedTimeMicroseconds() {
+                return n;
+            }
+
+            @Override
+            public String name() {
+                return "testMapScan-" +  n;
+            }
+        });
+
+    }
+
+
+    @Test
+    @Tag("performance")
+    public void testBuild1000() {
+        measureBuild(1000);
     }
 
     @Test
     @Tag("performance")
-    public void testPut1K() {
-        measurePut(500);
+    public void testBuild10K() {
+        measureBuild(10000);
+    }
+
+    @Test
+    @Tag("performance")
+    public void testBuild100K() {
+        measureBuild(100000);
+    }
+
+    @Test
+    @Tag("performance")
+    public void testPut1000() {
+        measureIncrementalBuild(1000);
     }
 
     @Test
     @Tag("performance")
     public void testPut10K() {
-        measurePut(5000);
+        measureIncrementalBuild(10000);
     }
 
     @Test
     @Tag("performance")
     public void testPut100K() {
-        measurePut(50000);
+        measureIncrementalBuild(100000);
     }
 
-//    public void testPut1M() {
-//        measurePut(1000000);
-//    }
+    @Test
+    @Tag("performance")
+    public void testGet1M() {
+        measureRetrieval(1000, 1000000);
+    }
+
+    @Test
+    @Tag("performance")
+    public void testScan100K() {
+        measureScan(100_000);
+    }
+
+
 }
 
