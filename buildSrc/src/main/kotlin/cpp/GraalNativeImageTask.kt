@@ -158,7 +158,7 @@ abstract class GraalNativeImageTask
             listOf("graal_isolate", filename).map { name ->
                 "${name}${suffix}.h"
             }
-        }.flatten().plus(listOf("saxon_error.h"))
+        }.flatten()
     }
 
     @get:InputFiles
@@ -204,12 +204,12 @@ abstract class GraalNativeImageTask
             // we need the header generated as saxonc-core-{edition}.h, or the headers for the debug build
             // don't match the release headers.
             "-o", headerLibName.get(),
-            "--no-fallback", "-H:Path=${outputDir.get().asFile}",
-            "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-            "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-            "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+            "--no-fallback",
             "-H:+ReportExceptionStackTraces",
+            "-H:+UnlockExperimentalVMOptions",
+            "-H:Path=${outputDir.get().asFile}",
             "-H:Log=registerResource:3",
+            "-Dgraal.LogFile=${outputDir.file("native-image.log").get().asFile}",
             "-H:+AddAllCharsets",
             "-Dfile.encoding=UTF-8",
             "-Dlibsaxonc-core.include_path=${layout.projectDirectory.dir("../src/main/c/include").asFile.absolutePath}",

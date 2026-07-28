@@ -120,6 +120,8 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
         inputs.files(generator)
         inputs.files(layout.projectDirectory.dir("../src"))
         inputs.files(layout.projectDirectory.dir("src"))
+        inputs.files(layout.projectDirectory.dir("../test"))
+        inputs.files(layout.projectDirectory.dir("test"))
         inputs.files(layout.projectDirectory.dir("../samples/cppTests"))
         inputs.files(layout.projectDirectory.dir("../samples/cTests"))
 

@@ -85,7 +85,7 @@ dependencies {
     compileOnly("com.ibm.icu:icu4j:${project.findProperty("icu4jVersion")}")
     compileOnly("org.nineml:coffeefilter:${project.findProperty("ninemlVersion")}")
 
-    testImplementation(platform("org.junit:junit-bom:6.1.0"))
+    testImplementation(platform("org.junit:junit-bom:5.12.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.hamcrest:hamcrest:2.2")
@@ -258,7 +258,6 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
     val debugPostfix = DebugPostfix(targetHost)
     val releaseKindLibName = editionLibName.map { if (debug) "${it}${debugPostfix}" else it }
     val libFilenames = releaseKindLibName.map { LibFilenames(it, targetHost) }
-    val extraHeaders = layout.projectDirectory.file("../src/main/c/include/saxon_error.h")
 
     val imageTask = tasks.register<GraalNativeImageTask>("${configTaskName}_graal_image") {
         group = LifecycleBasePlugin.BUILD_GROUP
@@ -269,7 +268,6 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
         graalNativeImage = extension.graal()!!.nativeImage
         libName = releaseKindLibName
         headerLibName = editionLibName
-        extraHeaderFiles.from(extraHeaders)
         version = saxonBuild.version
         majorVersion = saxonBuild.majorVersion
         macosx_min_version = saxonBuild.macosx_min_version
@@ -325,7 +323,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
         majorVersion = saxonBuild.majorVersion
         sharedLibFiles.from(imageTask.map { it.sharedLibFiles })
         importLibFiles.from(imageTask.map { it.importLibFiles })
-        headerFiles.from(imageTask.map { it.headerFiles }).from(extraHeaders)
+        headerFiles.from(imageTask.map { it.headerFiles })
         debugConfig = debug
         packageCMakeFiles.from(install)
         packageDir = configPackageOutputDir.map { it.dir(config) }
