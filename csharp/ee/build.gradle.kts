@@ -233,6 +233,7 @@ testSuites {
 testSuites.configure("expath", "XP31")
 testSuites.configure("expath", "XQ31")
 testSuites.configure("expath", "XQ40")
+testSuites.configure("qt3", "XP20")
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XP31", mapOf("linq" to "on"))
 testSuites.configure("qt3", "XP31", mapOf("unfolded" to "on"))
