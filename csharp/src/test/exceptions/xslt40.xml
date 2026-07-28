@@ -2,6 +2,11 @@
   
   <!-- Exceptions file for Saxon-CS -->
   
+  <exception test-case="number-0807" run="false">
+    <created by="Debbie Lockett" on="2026-06-25"/>
+    <reason>Fix for bug 7070 causes failure. Test fixed 2026-05-05, but skip when running older version</reason>
+  </exception>
+  
   <exception test-case="avt-0901" run="false" report="not-implemented">
     <created by="Michael Kay" on="2021-06-02"/>
     <reason>Collations</reason>
