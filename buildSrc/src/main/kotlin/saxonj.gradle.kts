@@ -170,18 +170,6 @@ dependencies {
     compileOnly("org.graalvm.nativeimage:svm:${findProperty("graalSvmVersion")}")
     compileOnly(libTidyPath.map { files(it.asFile) })
 
-    testImplementation(platform("org.junit:junit-bom:5.9.2"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine")
-    testImplementation("org.apiguardian:apiguardian-api:1.0.0")
-    testImplementation("org.hamcrest:hamcrest:2.2")
-    testImplementation("org.apache.ant:ant:1.10.9")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("com.sparkjava:spark-core:2.9.4")
-    testImplementation("${findProperty("sqlDriverGroup")}:${findProperty("sqlDriverName")}:${findProperty("sqlDriverVersion")}")
-    testImplementation(files(saxonBuild.saxonLicenseDir.get()))
-
     preprocessor("com.igormaznitsa:jcp:7.0.4")
     preprocessor("com.tonicsystems:jarjar:0.6")
     preprocessor("net.sf.saxon:Saxon-HE:12.4")
@@ -293,55 +281,65 @@ tasks.register("allJars") {
 }
 
 testing {
-  suites {
-    val test by getting(JvmTestSuite::class) {
-      useJUnitJupiter()
-    }
-
-    register<JvmTestSuite>("editionTest") {
-      // Keep a record of the suite around so that we can add test sources at plugin configuration time
-      extension.editionTestSuite = this
-      sources {
-        java {
-            srcDir(javaTestSourceRoot)
-        }
-        resources {
-            setSrcDirs(listOf(javaTestResourceRoot))
-        }
-      }
-      dependencies {
-        implementation(editionSourceSet.output)
-        implementation(testImplementationResolvable)
-      }
-
-      targets {
-        val processEditionTestResources = tasks.named<ProcessResources>("processEditionTestResources")
-        val resourceJars = processEditionTestResources.map {
-          files(it.destinationDir).asFileTree.filter { f ->
-            f.extension == "jar"
-          }
-        }
-
-        all {
-          testTask.configure {
-            useJUnitPlatform {
-              excludeTags("performance", "mikeonly")
+    suites {
+        withType<JvmTestSuite> {
+            useJUnitJupiter("${project.findProperty("junitVersion")}")
+            dependencies {
+                implementation("org.hamcrest:hamcrest:2.2")
+                implementation("org.apache.ant:ant:1.10.9")
+                implementation("com.sparkjava:spark-core:2.9.4")
+                implementation("${findProperty("sqlDriverGroup")}:${findProperty("sqlDriverName")}:${findProperty("sqlDriverVersion")}")
+                implementation(files(saxonBuild.saxonLicenseDir.get()))
+                implementation(editionCompileAndTestOnly)
             }
 
-            environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
-            classpath += resourceJars.get()
-          }
-          tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
-            dependsOn(testTask)
-          }
-        }
-      }
-    }
-  }
-}
+            targets {
+                all {
+                    testTask.configure {
+                        useJUnitPlatform {
+                            excludeTags("performance", "mikeonly")
+                        }
 
-tasks.named<Test>("test") {
-    environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
+                        environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
+                    }
+                }
+            }
+        }
+
+        register<JvmTestSuite>("editionTest") {
+            // Keep a record of the suite around so that we can add test sources at plugin configuration time
+            extension.editionTestSuite = this
+            sources {
+                java {
+                    srcDir(javaTestSourceRoot)
+                }
+                resources {
+                    setSrcDirs(listOf(javaTestResourceRoot))
+                }
+            }
+            dependencies {
+                implementation(editionSourceSet.runtimeClasspath)
+            }
+
+            targets {
+                val processEditionTestResources = tasks.named<ProcessResources>("processEditionTestResources")
+                val resourceJars = processEditionTestResources.map {
+                    files(it.destinationDir).asFileTree.filter { f ->
+                        f.extension == "jar"
+                    }
+                }
+
+                all {
+                    testTask.configure {
+                        classpath += resourceJars.get()
+                    }
+                    tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
+                        dependsOn(testTask)
+                    }
+                }
+            }
+        }
+    }
 }
 
 // This is not a <Javadoc> task because the Gradle task is so lame

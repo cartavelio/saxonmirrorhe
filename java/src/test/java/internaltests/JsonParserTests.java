@@ -3,7 +3,6 @@ package internaltests;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import static org.junit.Assert.fail;
 
 public class JsonParserTests {
     private static String unixInput = "{\n" +

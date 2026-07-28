@@ -15,7 +15,6 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

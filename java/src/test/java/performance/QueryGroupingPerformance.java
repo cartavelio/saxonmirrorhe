@@ -1,7 +1,6 @@
 package performance;
 
 import net.sf.saxon.s9api.*;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
