@@ -393,6 +393,10 @@ public class DocumentFn extends SystemFunction implements Callable {
             href = ResolveURI.escapeSpaces(href);
         }
 
+        if (baseURI.isEmpty()) {
+            baseURI = null;
+        }
+
         if (baseURI == null) {
             try {
                 URI uri = new URI(href);
