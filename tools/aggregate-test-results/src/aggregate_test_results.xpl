@@ -167,6 +167,20 @@
 		
 	</p:for-each>
 	
+
+	<p:documentation>
+		<m:desc>Create a simple list of all the result files included in the aggregated data, to aid cross-checking against the gradle inputs list.</m:desc>
+	</p:documentation>
+	<p:group>
+		
+		<p:xslt>
+			<p:with-input port="source" pipe="result@aggregated-test-results" />
+			<p:with-input port="stylesheet" href="xsl/list_aggregated_result_files.xsl" />
+		</p:xslt>
+		
+		<p:store href="{$output-dir}aggregated_test_results.list.html" />
+	</p:group>
+	
 	
 	<p:documentation>
 		<m:desc>List all the files in the output directory.</m:desc>
