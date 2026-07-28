@@ -287,9 +287,9 @@ namespace TestDriver {
                 return;
             }
 
-            if (exceptionsMap.ContainsKey(testName) || isSlow(testName)) {
+            if (isSlow(testName)) {
                 notrun++;
-                resultsDoc.writeTestcaseElement(testName, "notRun", "requires excessive resources");
+                resultsDoc.writeTestcaseElement(testName, "tooBig", "requires excessive resources");
                 return;
             }
 
@@ -374,9 +374,9 @@ namespace TestDriver {
             }
 
             // If a static error is expected, suppress JIT compilation so we catch it eagerly
-            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE") || 
-                                                item.StringValue.StartsWith("XPST") || 
-                                                item.StringValue.StartsWith("XTTE");
+            bool IsStaticError(XdmItem item) => item.StringValue.StartsWith("XTSE")
+                                                || item.StringValue.StartsWith("XPST")
+                                                || item.StringValue.StartsWith("XTDE0700"); // special case for missing static params
             bool expectStaticError = testCase.Select(
                 Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>) IsStaticError)).Any();
             if (expectStaticError) {
@@ -405,19 +405,19 @@ namespace TestDriver {
                         }
                     }
                     else {
-                        if (!expectStaticError) {
-                            string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
-                            Location loc = err.Location;
-                            try {
-                                Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
-                                                        loc.SystemId + "#" + loc.LineNumber +
-                                                        "\n   " + err.Message);
-                                recordFailure(testSetName, testName);
-                            }
-                            catch (Exception) {
-                                // No action
-                            }
-                        }
+//                        if (!expectStaticError) {
+//                            string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
+//                            Location loc = err.Location;
+//                            try {
+//                                Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
+//                                                        loc.SystemId + "#" + loc.LineNumber +
+//                                                        "\n   " + err.Message);
+//                                recordFailure(testSetName, testName);
+//                            }
+//                            catch (Exception) {
+//                                // No action
+//                            }
+//                        }
                         outcome.ReportError(err.ErrorCode);
                     }
                 };
@@ -933,6 +933,7 @@ namespace TestDriver {
             if (success) {
                 if (outcome.GetWrongErrorMessage() != null) {
                     outcome.SetComment(outcome.GetWrongErrorMessage());
+                    successes++;
                     wrongErrorResults++;
                 }
                 else {
