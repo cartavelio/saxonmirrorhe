@@ -55,7 +55,6 @@ import java.util.Objects;
  */
 
 public class SaplingElement extends SaplingNode {
-
     private final StructuredQName nodeName;
     private ImmutableList<SaplingNode> reversedChildren;
     private ImmutableMap<StructuredQName, String> attributes = emptyAttributes();
@@ -130,7 +129,6 @@ public class SaplingElement extends SaplingNode {
      * @throws IllegalArgumentException if any of the nodes supplied as an argument is
      *                                  a document node.
      */
-
     public SaplingElement withChild(SaplingNode... children) {
         SaplingElement e2 = copy();
         for (SaplingNode child : children) {
