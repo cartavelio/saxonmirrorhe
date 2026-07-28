@@ -1231,8 +1231,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
         needsPE.add("feature/Saxon-PE");
         needsPE.add("feature/ICU_spellout");
+        needsPE.add("languages_for_numbering");
 
-        needsEE.add("languages_for_numbering");
         needsEE.add("feature/streaming");
         needsEE.add("feature/schema_aware");
         needsEE.add("feature/Saxon-EE");
