@@ -1,15 +1,12 @@
 package performance;
 
 
-import jaxptest.ConfigTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PerformanceTestCase {
-    protected final ConfigTest configTest = new ConfigTest();
-
     public final static double FAILURE_THRESHOLD = 2.0e0;
 
     public void measure(Measurable test) {

@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,7 +67,6 @@ public class TestChecksums {
     @Test
     public void testExportChecksum() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -75,7 +74,7 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
+            String exportFn = Testdata.pathString("sandpit/export.sef");
             exec.export(new FileOutputStream(exportFn), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,
@@ -117,7 +116,6 @@ public class TestChecksums {
     @Test
     public void testExportDigest() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -125,7 +123,7 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
+            String exportFn = Testdata.pathString("sandpit/export.sef");
             exec.export(new FileOutputStream(exportFn), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,
@@ -167,7 +165,6 @@ public class TestChecksums {
     @Test
     public void testExportDigestRequired() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -175,7 +172,7 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
+            String exportFn = Testdata.pathString("sandpit/export.sef");
             exec.export(new FileOutputStream(exportFn), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,
@@ -216,7 +213,6 @@ public class TestChecksums {
     @Test
     public void testExportDigestReplace() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -224,7 +220,7 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
+            String exportFn = Testdata.pathString("sandpit/export.sef");
             exec.export(new FileOutputStream(exportFn), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,

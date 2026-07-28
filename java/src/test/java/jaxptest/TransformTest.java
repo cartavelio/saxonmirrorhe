@@ -3,6 +3,7 @@ package jaxptest;
 import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.config.StreamingTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.StructuredQName;
@@ -33,8 +34,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TransformTest  {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testStreamingViaJaxp() {
 
@@ -136,8 +135,8 @@ public class TransformTest  {
             StreamingTransformerFactory strf = new StreamingTransformerFactory();
             strf.setAttribute(FeatureKeys.TIMING, true);
             Transformer _transformer = strf.newTransformer(src);
-            _transformer.setParameter("input-uri", new File(configTest.getDataDir() + "books.xml").toURI().toString());
-            InputStream is = new FileInputStream(new File(configTest.getDataDir() + "books.xml"));
+            _transformer.setParameter("input-uri", Testdata.fileUri("books.xml").toString());
+            InputStream is = new FileInputStream(Testdata.file("books.xml"));
             Reader reader = new InputStreamReader(is, "ISO-8859-1");
             OutputStream out = System.out;
             _transformer.transform(new StreamSource(reader), new StreamResult(System.out));

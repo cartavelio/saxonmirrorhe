@@ -1,6 +1,5 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.PackageData;
@@ -9,6 +8,7 @@ import net.sf.saxon.expr.instruct.Bindery;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardOutputResolver;
@@ -50,8 +50,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XsltTransformer
  */
 public class TestXsltTransformer {
-    private final ConfigTest configTest = new ConfigTest();
-    
     /**
      * Simple test
      */
@@ -65,7 +63,7 @@ public class TestXsltTransformer {
 
             // Create a transformer for the stylesheet (note, this gets serially reused).
             XsltTransformer transformer = processor.newXsltCompiler().compile(
-                    new StreamSource(new File(configTest.getDataDir() + "caffo/Transform2.xslt"))).load();
+                    new StreamSource(Testdata.file("caffo/Transform2.xslt"))).load();
 
             // Create a destination for the output (again this gets reused)
             XdmDestination serializer = new XdmDestination();
@@ -76,7 +74,7 @@ public class TestXsltTransformer {
             for (int i = 0; i < 5; i++) {
                 // Load the source document
                 XdmNode input = processor.newDocumentBuilder().build(
-                        new File(configTest.getDataDir() + "caffo/Input.xml"));
+                        Testdata.file("caffo/Input.xml"));
                 // Set the root node of the source document to be the initial context node
                 transformer.setInitialContextNode(input);
                 transformer.transform();
@@ -233,7 +231,7 @@ public class TestXsltTransformer {
             XsltCompiler xqcomp = proc.newXsltCompiler();
 
             sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
-                    "<xsl:import href='file:///" + configTest.getDataDir() + "identity.xsl'/>\n" +
+                    "<xsl:import href='file:///" + Testdata.file("identity.xsl") + "'/>\n" +
                     "<xsl:import href='http://imported'/>\n" +
                     "<xsl:param name='x' select='0'/>\n" +
                     "<xsl:template match='/'>\n" +
@@ -319,7 +317,7 @@ public class TestXsltTransformer {
             XsltCompiler xqcomp = proc.newXsltCompiler();
             xqcomp.setErrorListener(listener);
 
-            XsltTransformer trans = xqcomp.compile(new StreamSource(new File(configTest.getDataDir() + "main.xsl"))).load();
+            XsltTransformer trans = xqcomp.compile(new StreamSource(Testdata.file("main.xsl"))).load();
 
             Serializer serializer = proc.newSerializer();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -520,10 +518,10 @@ public class TestXsltTransformer {
             XsltTransformer transformer = exec.load();
 
             SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            sm.load(new StreamSource(Testdata.file("books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(sm.newSchemaValidator());
-            XdmNode books = builder.build(new File(configTest.getDataDir() + "books.xml"));
+            XdmNode books = builder.build(Testdata.file("books.xml"));
             transformer.setInitialContextNode(books);
             // Create a serializer
             //String outfile = @"C:/MyJava/users/caffo/Output.xml";
@@ -725,10 +723,10 @@ public class TestXsltTransformer {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, Boolean.TRUE);
             processor.getUnderlyingConfiguration().addSchemaSource(
-                    new StreamSource(configTest.getDataDir() + "books.xsd"));
+                    new StreamSource(Testdata.file("books.xsd")));
 
             Serializer serializer = processor.newSerializer();
-            serializer.setOutputFile(new File(configTest.getTempDir() + "validationWarnings.xml"));
+            serializer.setOutputFile(Testdata.temp().file("validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
@@ -775,8 +773,8 @@ public class TestXsltTransformer {
         builder.setDTDValidation(false);
         builder.setLineNumbering(true);
 
-        XdmNode document = builder.build(new File(configTest.getDataDir() + "books.xml"));
-        XdmNode stylesheet = builder.build(new File(configTest.getDataDir() + "books.xsl"));
+        XdmNode document = builder.build(Testdata.file("books.xml"));
+        XdmNode stylesheet = builder.build(Testdata.file("books.xsl"));
 
         XsltCompiler compiler = processor.newXsltCompiler();
         compiler.setSchemaAware(processor.isSchemaAware());
@@ -908,7 +906,7 @@ public class TestXsltTransformer {
 
             // Create a transformer for the stylesheet.
             XsltTransformer transformer = processor.newXsltCompiler().compile(
-                    new StreamSource(new File(configTest.getDataDir() + "next-in-chain/main.xsl"))).load();
+                    new StreamSource(Testdata.file("next-in-chain/main.xsl"))).load();
 
             // Create a destination
             Serializer out = processor.newSerializer();
@@ -917,7 +915,7 @@ public class TestXsltTransformer {
 
             // Load the source document
             XdmNode input = processor.newDocumentBuilder().build(
-                    new File(configTest.getDataDir() + "next-in-chain/test.xml"));
+                    Testdata.file("next-in-chain/test.xml"));
             // Set the root node of the source document to be the initial context node
             transformer.setSource(input.asSource());
             transformer.setDestination(out);

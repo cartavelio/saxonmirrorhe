@@ -1,7 +1,7 @@
 package nativetests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test that use of keys is threadsafe.
  */
 public class ThreadedKeyTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     private static final String keyXsl =
             "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"2.0\">\n" +
             "    <xsl:output method=\"xml\"/>\n" +
@@ -43,7 +41,7 @@ public class ThreadedKeyTest {
     public void testKeyTransformationThreaded() {
         try {
             Configuration config = new Configuration();
-            final NodeInfo doc = config.buildDocumentTree(new StreamSource(configTest.getDataDir() + "othello.xml")).getRootNode();
+            final NodeInfo doc = config.buildDocumentTree(new StreamSource(Testdata.file("othello.xml"))).getRootNode();
             TransformerFactory factory = new net.sf.saxon.TransformerFactoryImpl(config);
             StreamSource styleSource = new StreamSource(new StringReader(keyXsl));
             final Templates templates = factory.newTemplates(styleSource);

@@ -1,5 +1,6 @@
 package modeltests;
 
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 
@@ -18,7 +19,7 @@ public class TinyTreeTests extends ObjectModelTests {
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             DocumentBuilder builder = processor.newDocumentBuilder();
-            return builder.build(new File(configTest.getDataDir() + fileName));
+            return builder.build(Testdata.file(fileName));
         } catch (SaxonApiException e) {
             fail();
             return null;

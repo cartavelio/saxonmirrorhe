@@ -2,7 +2,6 @@ package internaltests;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;

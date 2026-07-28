@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
 import nu.xom.Document;
@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * The effect is tested by comparing the results with the XOM Canonicalizer.
  */
 public class TestCanonicalSerializer {
-    private final ConfigTest configTest = new ConfigTest();
-
     private void compareCanonical(File input) {
         try {
             // Canonicalize using Saxon
@@ -74,16 +72,16 @@ public class TestCanonicalSerializer {
 
     @Test
     public void testCanonicalization1() {
-        compareCanonical(new File(configTest.getDataDir() + "bills.xml"));
-        compareCanonical(new File(configTest.getDataDir() + "categories.xml"));
-        compareCanonical(new File(configTest.getDataDir() + "collection.xml"));
-        compareCanonical(new File(configTest.getDataDir() + "goToWork.xml"));
-        compareCanonical(new File(configTest.getDataDir() + "schema-with-param.xsd"));
+        compareCanonical(Testdata.file("bills.xml"));
+        compareCanonical(Testdata.file("categories.xml"));
+        compareCanonical(Testdata.file("collection.xml"));
+        compareCanonical(Testdata.file("goToWork.xml"));
+        compareCanonical(Testdata.file("schema-with-param.xsd"));
     }
 
     @Test
     public void testCanonicalization2() {
-        File dir = new File (configTest.getDataDir() + "collection");
+        File dir = Testdata.file("collection");
         for (File file : Objects.requireNonNull(dir.listFiles())) {
             if (!file.isDirectory() && !file.getName().endsWith("atrs15.xml") && !file.getName().endsWith(".DS_Store")) {
                 System.err.println("Processing " + file);
@@ -94,12 +92,12 @@ public class TestCanonicalSerializer {
 
     @Test
     public void testCanonicalization3() {
-        compareCanonical(new File(configTest.getDataDir() + "collection/axes268.xml"));
+        compareCanonical(Testdata.file("collection/axes268.xml"));
     }
 
     @Test
     public void testCanonicalization4() {
-        compareCanonical(new File(configTest.getDataDir() + "collection/expr80.xml"));
+        compareCanonical(Testdata.file("collection/expr80.xml"));
     }
 
 

@@ -1,5 +1,6 @@
 package modeltests;
 
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -25,7 +26,7 @@ public class DOM4JTreeTests extends ObjectModelTests {
         try {
             SAXReader dom4jBuilder = new SAXReader();
             dom4jBuilder.setMergeAdjacentText(true);
-            Document doc = dom4jBuilder.read(new File(configTest.getDataDir() + fileName).toURI().toString());
+            Document doc = dom4jBuilder.read(Testdata.file(fileName).toURI().toString());
             DocumentBuilder builder = processor.newDocumentBuilder();
             return builder.wrap(doc);
         } catch (DocumentException e) {

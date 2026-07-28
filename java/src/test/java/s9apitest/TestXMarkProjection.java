@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Tag;
@@ -17,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test the XMark queries with and without document projection, comparing the results
  */
 public class TestXMarkProjection {
-    private final ConfigTest configTest = new ConfigTest();
-
     private void doTest(String query) {
         try {
             Processor proc = new Processor(true);
@@ -27,8 +25,8 @@ public class TestXMarkProjection {
             //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
             //proc.setConfigurationProperty(Feature.DISPLAY_BYTE_CODE, true);
             //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR);
-            File queryFile = new File(configTest.getDataDir() + "../xmark/" + query + ".xq");
-            File source = new File(configTest.getDataDir() + "../xmark/xmark4.xml");
+            File queryFile = Testdata.file("../xmark/" + query + ".xq");
+            File source = Testdata.file("../xmark/xmark4.xml");
             DocumentBuilder b1 = proc.newDocumentBuilder();
             XdmNode fullDoc = b1.build(source);
             XQueryCompiler c1 = proc.newXQueryCompiler();

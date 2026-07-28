@@ -2,8 +2,8 @@ package internaltests;
 
 // Tests for various functions following http 301/302 redirects.
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.junit.TestHttpServer;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
@@ -11,12 +11,11 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RedirectTests {
-    private final Path testDataDirPath = Paths.get(new ConfigTest().getDataDir()).resolve("redirectTests");
+    private final Path testDataDirPath = Testdata.path("redirectTests");
     private TestHttpServer testHttp = new TestHttpServer(testDataDirPath);
 
     @Test

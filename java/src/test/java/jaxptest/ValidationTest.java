@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.EnterpriseTransformerFactory;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.Validation;
 import org.junit.jupiter.api.Test;
@@ -32,15 +33,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for JAXP validation interface
  */
 public class ValidationTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testDefaultErrorHandling() {
         try {
             SchemaFactoryImpl schemaFactory = new com.saxonica.ee.jaxp.SchemaFactoryImpl();
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
             Validator validator = grammar.newValidator();
-            validator.validate(new StreamSource(new File(configTest.getDataDir() + "books-invalid.xml")));
+            validator.validate(new StreamSource(Testdata.file("books-invalid.xml")));
             fail("Unexpected success");
 
         } catch (SAXException e) {
@@ -70,7 +69,7 @@ public class ValidationTest {
         counts.add(0);
         try {
             SchemaFactory schemaFactory = makeSchemaFactory();
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
             Validator validator = grammar.newValidator();
 
             validator.setErrorHandler(new ErrorHandler() {
@@ -89,7 +88,7 @@ public class ValidationTest {
                     counts.set(2, counts.get(2) + 1);
                 }
             });
-            validator.validate(new StreamSource(new File(configTest.getDataDir() + "books-invalid.xml")));
+            validator.validate(new StreamSource(Testdata.file("books-invalid.xml")));
             assertEquals(0, (int) counts.get(0), "warnings");
             assertEquals(3, (int) counts.get(1), "errors");
             assertEquals(0, (int) counts.get(2), "fatals");
@@ -128,11 +127,11 @@ public class ValidationTest {
                     counts.set(2, counts.get(2) + 1);
                 }
             });
-            Schema grammar = schemaFactory.newSchema(new File(configTest.getDataDir() + "books-invalid.xsd"));
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books-invalid.xsd"));
 //            Validator validator = grammar.newValidator();
 //
 //            validator.setErrorHandler(
-//            validator.validate(new StreamSource(new File(configTest.getDataDir() + "books-invalid.xml")));
+//            validator.validate(new StreamSource(Testdata.file("books-invalid.xml")));
 
             fail("Expected exception to be thrown, though we didn't do so in 9.9");
         } catch (SAXException e) {
@@ -146,7 +145,7 @@ public class ValidationTest {
     @Test
     public void testDefaultAttributeHandling() {
         try {
-            File xslFile = new File(configTest.getBugsDir() + "4338/copy_stylesheet.xsl");
+            File xslFile = Testdata.bugs().file("4338/copy_stylesheet.xsl");
             InputSource inputSource = new InputSource(xslFile.toURI().toString());
             Source source = new SAXSource(inputSource);
 
@@ -161,7 +160,7 @@ public class ValidationTest {
             Transformer transformer = transformerFactory.newTransformer(source);
 
             // Create XML SAX source
-            InputSource inputSource2 = new InputSource(new File(configTest.getBugsDir() + "4338/defAttr.xml").toURI().toString());
+            InputSource inputSource2 = new InputSource(Testdata.bugs().file("4338/defAttr.xml").toURI().toString());
             SAXSource xmlSource = new SAXSource(inputSource2);
             XMLReader saxParser = transformerFactory.getConfiguration().getSourceParser();
 

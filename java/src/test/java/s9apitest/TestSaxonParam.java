@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
@@ -18,15 +18,13 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test the use of schemas with the saxon:param extension from a s9api Validator
  */
 public class TestSaxonParam {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testSimpleTypeAssertionOK() {
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             SchemaManager manager = proc.getSchemaManager();
-            manager.load(new StreamSource(new File(configTest.getDataDir() + "schema-with-param.xsd")));
+            manager.load(new StreamSource(Testdata.file("schema-with-param.xsd")));
             SchemaValidator val = manager.newSchemaValidator();
             val.setParameter(new QName("baseLine"), new XdmAtomicValue("2012-12-12", ItemType.DATE));
             val.validate(new StreamSource(new StringReader("<date>2012-10-12</date>")));  //OK
@@ -63,7 +61,7 @@ public class TestSaxonParam {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             SchemaManager manager = proc.getSchemaManager();
-            manager.load(new StreamSource(new File(configTest.getDataDir() + "schema-with-param.xsd")));
+            manager.load(new StreamSource(Testdata.file("schema-with-param.xsd")));
             SchemaValidator val = manager.newSchemaValidator();
             try {
                 // Supply a parameter of the wrong type
@@ -86,7 +84,7 @@ public class TestSaxonParam {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             SchemaManager manager = proc.getSchemaManager();
-            manager.load(new StreamSource(new File(configTest.getDataDir() + "schema-with-param.xsd")));
+            manager.load(new StreamSource(Testdata.file("schema-with-param.xsd")));
             DocumentBuilder b = proc.newDocumentBuilder();
             XdmNode doc = b.build(new StreamSource(new StringReader("<date>2001-10-12</date>")));
             XQueryCompiler c = proc.newXQueryCompiler();

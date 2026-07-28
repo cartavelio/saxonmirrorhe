@@ -6,6 +6,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.*;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
@@ -25,16 +26,15 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TreeModelPerformance extends PerformanceTestCase {
+    private final File INPUT = Testdata.xmark().file("xmark10.xml");
 
-    private final String INPUT = configTest.getXMarkDir() + "xmark10.xml";
-
-    private void build(final TreeModel model, final String fileName, final int expected) {
+    private void build(final TreeModel model, final File file, final int expected) {
         final Configuration config = new EnterpriseConfiguration();
         final ParseOptions options = new ParseOptions().withModel(model);
         Measurable task = new Measurable() {
             @Override
             public void run() {
-                StreamSource source = new StreamSource(new File(fileName));
+                StreamSource source = new StreamSource(file);
                 PipelineConfiguration pipe = config.makePipelineConfiguration();
                 try {
                     config.buildDocumentTree(source, options);
@@ -111,10 +111,10 @@ public class TreeModelPerformance extends PerformanceTestCase {
         build(AxiomObjectModel.getInstance(), INPUT, 130);
     }
 
-    private void sink(final TreeModel model, final String fileName, final int expected) {
+    private void sink(final TreeModel model, final File file, final int expected) {
         final Configuration config = new EnterpriseConfiguration();
         final ParseOptions options = new ParseOptions().withModel(model);
-        StreamSource source = new StreamSource(new File(fileName));
+        StreamSource source = new StreamSource(file);
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         TreeInfo tree = null;
         try {
@@ -203,10 +203,10 @@ public class TreeModelPerformance extends PerformanceTestCase {
         sink(AxiomObjectModel.getInstance(), INPUT, 42);
     }
 
-    private void graft(final TreeModel model, final String fileName, final int expected) {
+    private void graft(final TreeModel model, final File file, final int expected) {
         final Configuration config = new EnterpriseConfiguration();
         final ParseOptions options = new ParseOptions().withModel(model);
-        StreamSource source = new StreamSource(new File(fileName));
+        StreamSource source = new StreamSource(file);
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         TreeInfo tree = null;
         NodeInfo documentElement = null;
@@ -310,10 +310,10 @@ public class TreeModelPerformance extends PerformanceTestCase {
         graft(AxiomObjectModel.getInstance(), INPUT, 500);
     }
 
-    private void graftThenScan(final TreeModel model, final String fileName, final int expected) {
+    private void graftThenScan(final TreeModel model, final File file, final int expected) {
         final Configuration config = new EnterpriseConfiguration();
         final ParseOptions options = new ParseOptions().withModel(model);
-        StreamSource source = new StreamSource(new File(fileName));
+        StreamSource source = new StreamSource(file);
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         TreeInfo tree = null;
         NodeInfo documentElement = null;
@@ -427,11 +427,11 @@ public class TreeModelPerformance extends PerformanceTestCase {
         graftThenScan(AxiomObjectModel.getInstance(), INPUT, 500);
     }
 
-    private void graftThenSearch(final TreeModel model, final String fileName, final int expected) {
+    private void graftThenSearch(final TreeModel model, final File file, final int expected) {
         Processor proc = new Processor(true);
         final Configuration config = proc.getUnderlyingConfiguration();
         final ParseOptions options = new ParseOptions().withModel(model);
-        StreamSource source = new StreamSource(new File(fileName));
+        StreamSource source = new StreamSource(file);
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         TreeInfo tree = null;
         NodeInfo documentElement = null;

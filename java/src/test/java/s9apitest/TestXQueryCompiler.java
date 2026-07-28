@@ -1,12 +1,12 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMNodeWrapper;
 import net.sf.saxon.dom.DocumentWrapper;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
@@ -37,8 +37,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XQueryCompiler
  */
 public class TestXQueryCompiler {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testModuleUriResolverNoBaseUri() {
         try {
@@ -521,7 +519,7 @@ public class TestXQueryCompiler {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
+            StreamSource in = new StreamSource(Testdata.file("books.xml"));
             eval.runStreamed(in, out);
             fail("unexpected success");
         } catch (SaxonApiException e) {

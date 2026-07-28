@@ -1,6 +1,7 @@
 package jaxptest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.OutputURIResolver;
 import org.junit.jupiter.api.Test;
 
@@ -13,15 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class BinarySerializationTest {
-    private final ConfigTest configTest = new ConfigTest();
-    public final String TESTPDF = configTest.getDataDir() + "temp/testfile.pdf";
+    public final File TESTPDF = Testdata.file("temp/testfile.pdf");
 
     @Test
     public void testBase64OutputMethod() throws TransformerException,
             FileNotFoundException {
 
 
-        new File(TESTPDF).delete();
+        TESTPDF.delete();
         TransformerFactory tfactory = new ProfessionalTransformerFactory();
         tfactory.setAttribute("http://saxon.sf.net/feature/outputURIResolver",
                 new MyOutputURIResolver());
@@ -44,11 +44,11 @@ public class BinarySerializationTest {
         Templates xsl = tfactory.newTemplates(xslSource);
         Transformer transformer = xsl.newTransformer();
 
-        StreamSource xmlSource = new StreamSource(new File(configTest.getDataDir() + "base64data.xml"));
+        StreamSource xmlSource = new StreamSource(Testdata.file("base64data.xml"));
 
         transformer.transform(xmlSource, transResult);
 
-        assertTrue(new File(TESTPDF).exists());
+        assertTrue(TESTPDF.exists());
 
     }
 
@@ -60,8 +60,7 @@ public class BinarySerializationTest {
          * Konstruktor
          */
         public MyOutputURIResolver() {
-            ConfigTest ctest = new ConfigTest();
-            String TESTPDF = ctest.getDataDir() + "temp/testfile.pdf";
+            File TESTPDF = Testdata.file("temp/testfile.pdf");
 
             System.out.println("MyOutputURIResolver");
 

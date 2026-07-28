@@ -15,6 +15,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -79,8 +80,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  Tests of transformations with DOM input or output
  */
 public class DOMTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     /**
      * Test that namespaces are copied OK by an identity transform
      */
@@ -1218,11 +1217,11 @@ public class DOMTest {
             DocumentBuilder domBuilder = factory.newDocumentBuilder();
 
             // Process XML source that uses namespace prefixes
-            Document doc = domBuilder.parse(new InputSource(new FileInputStream(configTest.getDataDir() + "books.xml")));
+            Document doc = domBuilder.parse(new InputSource(new FileInputStream(Testdata.file("books.xml"))));
 
             SchemaFactory sf = null; //SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             sf = new SchemaFactoryImpl();
-            Schema s = sf.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema s = sf.newSchema(Testdata.file("books.xsd"));
             Validator v = s.newValidator();
             DOMResult r = new DOMResult();
             v.validate(new DOMSource(doc), r);
@@ -1248,12 +1247,12 @@ public class DOMTest {
             DocumentBuilder domBuilder = factory.newDocumentBuilder();
 
             // Process XML source that uses namespace prefixes
-            Document doc = domBuilder.parse(new InputSource(new FileInputStream(configTest.getDataDir() + "books.xml")));
+            Document doc = domBuilder.parse(new InputSource(new FileInputStream(Testdata.file("books.xml"))));
 
             SchemaFactory sf = null; //SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             sf = new SchemaFactoryImpl();
             sf.setProperty(FeatureKeys.XSD_VERSION, "1.1");
-            Schema s = sf.newSchema(new File(configTest.getDataDir() + "books11.xsd"));
+            Schema s = sf.newSchema(Testdata.file("books11.xsd"));
             Validator v = s.newValidator();
             DOMResult r = new DOMResult();
             v.validate(new DOMSource(doc), r);
@@ -1278,11 +1277,11 @@ public class DOMTest {
             DocumentBuilder domBuilder = factory.newDocumentBuilder();
 
 
-            Document doc = domBuilder.parse(new InputSource(new FileInputStream(configTest.getDataDir() + "books.xml")));
+            Document doc = domBuilder.parse(new InputSource(new FileInputStream(Testdata.file("books.xml"))));
 
             SchemaFactory sf = null; //SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             sf = new SchemaFactoryImpl();
-            Schema s = sf.newSchema(new File(configTest.getDataDir() + "books.xsd"));
+            Schema s = sf.newSchema(Testdata.file("books.xsd"));
             Validator v = s.newValidator();
             DOMResult r = new DOMResult();
             v.validate(new DOMSource(doc), r);

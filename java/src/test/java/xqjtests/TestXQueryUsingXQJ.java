@@ -1,8 +1,8 @@
 package xqjtests;
 
 import com.saxonica.xqj.SaxonXQDataSource;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.IgnorableSpaceStrippingRule;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xquery.*;
 import java.io.*;
+import java.nio.file.Path;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,8 +26,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Some XQJ tests not covered by the XQJ compatibility tests
  */
 public class TestXQueryUsingXQJ {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testBoundarySpace() {
         // This test case demonstrated a problem with the default setting of boundary-space policy under XQJ
@@ -122,7 +121,7 @@ public class TestXQueryUsingXQJ {
 
     @Test
     public void testBindDocument() {
-        String dir = configTest.getDataDir() + "kessel/jan2009/";
+        Path dir = Testdata.path("kessel/jan2009");
         try {
 			// setup common to all XQuery nodes.
 			Configuration config = new Configuration();
@@ -136,19 +135,19 @@ public class TestXQueryUsingXQJ {
 			xqconnection.setStaticContext(context);
 
 			System.out.println("Running node XQueryOne");
-			Reader xqueryReader = new FileReader(new File(dir+"OneXMLParm.xquery"));
+			Reader xqueryReader = new FileReader(dir.resolve("OneXMLParm.xquery").toFile());
 			XQPreparedExpression XQueryOne_xqExpr = xqconnection.prepareExpression(xqueryReader);
 			XQueryOne_xqExpr.bindDocument(new QName("XMLparm"),
-                    new StreamSource(new File(dir+"DefaultInput.fo.xml").toURI().toString()), null);
+                    new StreamSource(dir.resolve("DefaultInput.fo.xml").toFile().toURI().toString()), null);
 			XQSequence XQueryOne_result = XQueryOne_xqExpr.executeQuery();
 			Properties XQueryOne_2_p = new Properties();
 			XQueryOne_2_p.setProperty("omit-xml-declaration", "yes");
 
 			// Create a stream to write the output from node XQueryOne_2 to a file.
-			FileOutputStream output_strm = new FileOutputStream(new File(dir+"out.xml"));
+			FileOutputStream output_strm = new FileOutputStream(dir.resolve("out.xml").toFile());
 
 			System.out.println("Running node XQueryOne_2");
-			xqueryReader = new FileReader(new File(dir+"OneXMLParm.xquery"));
+			xqueryReader = new FileReader(dir.resolve("OneXMLParm.xquery").toFile());
 			XQPreparedExpression XQueryOne_2_xqExpr = xqconnection.prepareExpression(xqueryReader);
 			XQueryOne_2_xqExpr.bindDocument(new QName("XMLparm"), XQueryOne_result.getSequenceAsStream(), null);
 
@@ -186,7 +185,7 @@ public class TestXQueryUsingXQJ {
 
 			System.out.println("xq1");
 			xq1 = xqconnection.prepareExpression(".");
-			StreamSource source = new StreamSource(new FileInputStream(configTest.getDataDir() + "before.xml"));
+			StreamSource source = new StreamSource(new FileInputStream(Testdata.file("before.xml")));
 			xq1.bindDocument(XQConstants.CONTEXT_ITEM, source, null);
 			XQSequence xq1_result = xq1.executeQuery();
 
@@ -231,20 +230,21 @@ public class TestXQueryUsingXQJ {
             XQDataSource ds = new SaxonXQDataSource();
             XQConnection conn = ds.getConnection();
             XQExpression exp = conn.createExpression();
-            exp.getStaticContext().setBaseURI(new File(configTest.getDataDir() + "AbstractType/src/").toURI().toString());
+            // TODO Another URI resolution Q
+            exp.getStaticContext().setBaseURI(Testdata.file("AbstractType/src/").toURI().toString());
 
             //OK - document validation, abstract types
-            exp.bindDocument(XQConstants.CONTEXT_ITEM, new FileReader(configTest.getDataDir() + "AbstractType/src/objDoc.xml"), null, conn.createDocumentType());
-            exp.executeQuery(new FileReader(configTest.getDataDir() + "AbstractType/src/validateDoc.xq"));
+            exp.bindDocument(XQConstants.CONTEXT_ITEM, new FileReader(Testdata.file("AbstractType/src/objDoc.xml")), null, conn.createDocumentType());
+            exp.executeQuery(new FileReader(Testdata.file("AbstractType/src/validateDoc.xq")));
 
             //OK - element validation, no abstract types
-            exp.bindDocument(XQConstants.CONTEXT_ITEM, new FileReader(configTest.getDataDir() + "AbstractType/src/concreteObj.xml"), null, conn.createDocumentType());
-            exp.executeQuery(new FileReader(configTest.getDataDir() + "AbstractType/src/validateElem.xq"));
+            exp.bindDocument(XQConstants.CONTEXT_ITEM, new FileReader(Testdata.file("AbstractType/src/concreteObj.xml")), null, conn.createDocumentType());
+            exp.executeQuery(new FileReader(Testdata.file("AbstractType/src/validateElem.xq")));
 
             //BAD - element validation, abstract types
             try {
-                exp.bindDocument(XQConstants.CONTEXT_ITEM, new FileReader(configTest.getDataDir() + "AbstractType/src/obj.xml"), null, conn.createDocumentType());
-                exp.executeQuery(new FileReader(configTest.getDataDir() + "AbstractType/src/validateElem.xq"));
+                exp.bindDocument(XQConstants.CONTEXT_ITEM, new FileReader(Testdata.file("AbstractType/src/obj.xml")), null, conn.createDocumentType());
+                exp.executeQuery(new FileReader(Testdata.file("AbstractType/src/validateElem.xq")));
             } catch (Exception e) {
                 e.printStackTrace();
                 fail(e.getMessage());
@@ -252,7 +252,7 @@ public class TestXQueryUsingXQJ {
 
             //BAD - inside declaration, abstract types
             try {
-                exp.executeQuery(new FileReader(configTest.getDataDir() + "AbstractType/src/validateVar.xq"));
+                exp.executeQuery(new FileReader(Testdata.file("AbstractType/src/validateVar.xq")));
             } catch (Exception e) {
                 e.printStackTrace();
                 fail(e.getMessage());
@@ -317,8 +317,8 @@ public class TestXQueryUsingXQJ {
         SaxonXQDataSource dataSource = new SaxonXQDataSource();
         dataSource.getConfiguration().setConfigurationProperty(Feature.TIMING, true);
         XQConnection connection = dataSource.getConnection();
-        try (InputStream query = new FileInputStream(configTest.getBugsDir() + "4433/query.xq");
-             InputStream input = new FileInputStream(configTest.getBugsDir() + "4433/input.atom")) {
+        try (InputStream query = new FileInputStream(Testdata.bugs().file("4433/query.xq"));
+             InputStream input = new FileInputStream(Testdata.bugs().file("4433/input.atom"))) {
             XQPreparedExpression expression = connection.prepareExpression(query);
             expression.bindDocument(XQConstants.CONTEXT_ITEM, input, null, null);
             XQResultSequence results = expression.executeQuery();

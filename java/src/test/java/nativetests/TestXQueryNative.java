@@ -4,7 +4,6 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.ee.optim.StaticQueryContextEE;
 import com.saxonica.expr.StaticQueryContextPE;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Expression;
@@ -12,6 +11,7 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.StaticQueryContextFactory;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
@@ -43,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 // Some tests of the "native" XQuery API
 
 public class TestXQueryNative {
-    private final ConfigTest configTest = new ConfigTest();
     private static final SequenceType showTheBug = SequenceType.ATOMIC_SEQUENCE;
 
     private static final String xml =
@@ -295,8 +294,7 @@ public class TestXQueryNative {
     public void testCollationQuery() throws XPathException {
         Configuration config = Configuration.newConfiguration();
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = configTest.getXMarkDir();
-        sqc.setBaseURI(testDir);
+        sqc.setBaseURI(Testdata.xmark().baseURIString());
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);
         dqc.setApplyFunctionConversionRulesToExternalVariables(false);
@@ -318,8 +316,7 @@ public class TestXQueryNative {
     public void testDynamicCollationQuery() throws XPathException {
         Configuration config = Configuration.newConfiguration();
         StaticQueryContext sqc = config.newStaticQueryContext();
-        String testDir = configTest.getXMarkDir();
-        sqc.setBaseURI(testDir);
+        sqc.setBaseURI(Testdata.xmark().baseURIString());
         //sqc.declareDefaultCollation("");
         DynamicQueryContext dqc = new DynamicQueryContext(config);
         dqc.setApplyFunctionConversionRulesToExternalVariables(false);

@@ -1,7 +1,7 @@
 package internaltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.expr.sort.LFUCache;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Predicates;
 import net.sf.saxon.s9api.streams.Steps;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
 import java.util.IdentityHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,8 +19,6 @@ import java.util.concurrent.TimeUnit;
  *  Tests of caching
  */
 public class LFUCacheTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     // Test that compiled XPath expressions are cached
 
     @Test
@@ -53,7 +50,7 @@ public class LFUCacheTest {
         try {
             LFUCache<String, String> cache = new LFUCache<>(1000);
             Processor processor = new Processor(false);
-            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "bible/nt/nt.xml"));
+            StreamSource source = new StreamSource(Testdata.file("bible/nt/nt.xml"));
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode doc = builder.build(source);
             int hits = 0;
@@ -82,7 +79,7 @@ public class LFUCacheTest {
         try {
             LFUCache<String, String> cache = new LFUCache<>(1000, true);
             Processor processor = new Processor(false);
-            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "bible/nt/nt.xml"));
+            StreamSource source = new StreamSource(Testdata.file("bible/nt/nt.xml"));
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode doc = builder.build(source);
 

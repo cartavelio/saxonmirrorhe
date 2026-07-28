@@ -1,9 +1,9 @@
 package s9apitest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
-import jaxptest.ConfigTest;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.jaxp.TransformerImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -31,6 +31,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.file.Path;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,8 +43,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XQueryCompiler
  */
 public class TestSerializer {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testXQuerySerialization() {
         try {
@@ -195,8 +194,8 @@ public class TestSerializer {
     @Test
     public void testSecondaryOutputDestination() {
         try {
-            new File(configTest.getDataDir() + "temp/first.xml").delete();
-            new File(configTest.getDataDir() + "temp/second.xml").delete();
+            Testdata.file("temp/first.xml").delete();
+            Testdata.file("temp/second.xml").delete();
             Processor proc = new Processor(false);
             proc.setConfigurationProperty(Feature.TIMING, true);
             StringReader sr = new StringReader("<doc><e>text</e></doc>");
@@ -215,13 +214,13 @@ public class TestSerializer {
             XsltTransformer trans = xqcomp.compile(style).load();
 
             Serializer serializer = proc.newSerializer();
-            serializer.setOutputFile(new File(configTest.getDataDir() + "temp/first.xml"));
+            serializer.setOutputFile(Testdata.file("temp/first.xml"));
             trans.setSource(node.asSource());
             trans.setDestination(serializer);
             trans.transform();
 
-            assertTrue(new File(configTest.getDataDir() + "temp/first.xml").exists(), "first exists");
-            assertTrue(new File(configTest.getDataDir() + "temp/second.xml").exists(), "second exists");
+            assertTrue(Testdata.file("temp/first.xml").exists(), "first exists");
+            assertTrue(Testdata.file("temp/second.xml").exists(), "second exists");
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
@@ -249,7 +248,7 @@ public class TestSerializer {
 
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            StreamSource xsltSource = new StreamSource(configTest.getDataDir() + "welch-ser/A.xsl");
+            StreamSource xsltSource = new StreamSource(Testdata.file("welch-ser/A.xsl"));
 
             XsltExecutable xsltExecutable = xsltCompiler.compile(xsltSource);
             XsltTransformer xsltTransformer = xsltExecutable.load();
@@ -291,7 +290,7 @@ public class TestSerializer {
                     // no action
                 }
             } );
-            Transformer transformer = factory.newTransformer(new StreamSource(configTest.getDataDir() + "welch-ser/A.xsl"));
+            Transformer transformer = factory.newTransformer(new StreamSource(Testdata.file("welch-ser/A.xsl")));
 
             ((TransformerImpl) transformer).setInitialTemplate("main");
 
@@ -341,9 +340,9 @@ public class TestSerializer {
     @Test
     public void test3631() {
         try {
-            String dir = configTest.getDataDir() + "nadolu3631/";
-            String sourceID = dir + "test.xml";
-            String xslID = dir + "main.xsl";
+            Path dir = Testdata.path("nadolu3631");
+            String sourceID = dir.resolve("test.xml").toString();
+            String xslID = dir.resolve("main.xsl").toString();
 
             // Create a transform factory instance.
             TransformerFactoryImpl tfactory = new ProfessionalTransformerFactory();
@@ -521,7 +520,7 @@ public class TestSerializer {
                     + "  \n"
                     + "</xsl:stylesheet>";
             Processor processor = new Processor(false);
-            XdmNode inputDoc = processor.newDocumentBuilder().build(new File(configTest.getDataDir() + "renvooi.xml"));
+            XdmNode inputDoc = processor.newDocumentBuilder().build(Testdata.file("renvooi.xml"));
             StringWriter sw = new StringWriter();
             Serializer serializer = processor.newSerializer(sw);
             XMLStreamWriter xsw = serializer.getXMLStreamWriter();
@@ -613,7 +612,7 @@ public class TestSerializer {
             XsltCompiler xsltCompiler = processor.newXsltCompiler();
             XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltXmlOutput)));
             Xslt30Transformer xslt30Transformer = xsltExecutable.load30();
-            FileOutputStream stream = new FileOutputStream(configTest.getTempDir() + "xml-fragment-result.xml");
+            FileOutputStream stream = new FileOutputStream(Testdata.temp().file("xml-fragment-result.xml"));
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
             xslt30Transformer = xsltExecutable.load30();
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
@@ -637,7 +636,7 @@ public class TestSerializer {
             xsltCompiler = processor.newXsltCompiler();
             xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltJsonOutput)));
             xslt30Transformer = xsltExecutable.load30();
-            stream = new FileOutputStream(configTest.getTempDir() + "JsonResults.json");
+            stream = new FileOutputStream(Testdata.temp().file("JsonResults.json"));
             FilterOutputStream fos = new FilterOutputStream(stream) {
                 @Override
                 public void close() throws IOException {
@@ -667,7 +666,7 @@ public class TestSerializer {
 
             xsltExecutable = xsltCompiler.compile(new StreamSource(new StringReader(xsltAdaptiveOutput)));
             xslt30Transformer = xsltExecutable.load30();
-            stream = new FileOutputStream(configTest.getTempDir() + "AdaptiveResults.txt");
+            stream = new FileOutputStream(Testdata.temp().file("AdaptiveResults.txt"));
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));
             xslt30Transformer = xsltExecutable.load30();
             xslt30Transformer.callTemplate(null, processor.newSerializer(stream));

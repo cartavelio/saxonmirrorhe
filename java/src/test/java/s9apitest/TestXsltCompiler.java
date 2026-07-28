@@ -9,8 +9,8 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ChainedResourceResolver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -49,8 +49,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XsltCompiler
  */
 public class TestXsltCompiler {
-    private final ConfigTest configTest = new ConfigTest();
-
     private void xpathVersionTest(String label, String expression, int version, boolean expectSuccess) {
         String decimalVersion = version == 40 ? "4.0" : "3.0";
         try {
@@ -1105,7 +1103,7 @@ public class TestXsltCompiler {
             sm.exportComponents(scmOut);
 
             XsltPackage pack = comp.compilePackage(new StreamSource(new StringReader(xsl1)));
-            File sefFile = new File(configTest.getTempDir() + "6969test.sef");
+            File sefFile = Testdata.temp().file("6969test.sef");
             pack.save(sefFile);
 
             Processor proc2 = new Processor(true);

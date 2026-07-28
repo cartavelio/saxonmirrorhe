@@ -1,6 +1,6 @@
 package regextests;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.z.IntIterator;
@@ -8,7 +8,6 @@ import net.sf.saxon.z.IntRangeSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -25,14 +24,12 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class testRegex {
-    private ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testCharacterClasses() {
 
         PrintWriter out;
         try {
-            out = new PrintWriter(new FileWriter(new File(configTest.getTempDir() + "JavaSubCategories.xml")));
+            out = new PrintWriter(new FileWriter(Testdata.temp().file("JavaSubCategories.xml")));
         } catch (IOException e) {
             e.printStackTrace();
             return;

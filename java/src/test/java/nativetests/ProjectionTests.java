@@ -3,7 +3,6 @@ package nativetests;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.optim.XQueryExpressionEE;
 import com.saxonica.ee.stream.Projector;
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.event.Receiver;
@@ -11,6 +10,7 @@ import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.RootExpression;
 import net.sf.saxon.expr.parser.PathMap;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
@@ -35,12 +35,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  Tests for queries using document projection
  */
 public class ProjectionTests {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testProjection001() {
         try {
-            final String fileName = configTest.getDataDir() + "books.xml";
+            final String fileName = Testdata.pathString("books.xml");
 
             Configuration config = new EnterpriseConfiguration();
             StaticQueryContext sqc = config.newStaticQueryContext();
@@ -94,7 +92,7 @@ public class ProjectionTests {
     private void projection(String lang, String expr) {
         try {
 
-            String fileName = configTest.getDataDir() + "books.xml";
+            final String fileName = Testdata.pathString("books.xml");
 
             Processor proc = new Processor(true);
             //Configuration config = new Configuration();

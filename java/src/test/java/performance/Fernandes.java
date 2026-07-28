@@ -1,6 +1,6 @@
 package performance;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -20,9 +20,9 @@ public class Fernandes extends PerformanceTestCase {
         try {
             Processor proc = new Processor(false);
             XsltCompiler comp = proc.newXsltCompiler();
-            XsltExecutable t1 = comp.compile(new StreamSource(new File(configTest.getDataDir() + "fernandes/t1.xsl")));
-            XsltExecutable t2 = comp.compile(new StreamSource(new File(configTest.getDataDir() + "fernandes/t2.xsl")));
-            final XdmNode initial = proc.newDocumentBuilder().build(new File(configTest.getDataDir() + "fernandes/test.xml"));
+            XsltExecutable t1 = comp.compile(new StreamSource(Testdata.file("fernandes/t1.xsl")));
+            XsltExecutable t2 = comp.compile(new StreamSource(Testdata.file("fernandes/t2.xsl")));
+            final XdmNode initial = proc.newDocumentBuilder().build(Testdata.file("fernandes/test.xml"));
             final List<XdmNode> wrapper = new ArrayList<>();
             wrapper.add(initial);
             measure(new Measurable() {

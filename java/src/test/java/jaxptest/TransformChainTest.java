@@ -2,6 +2,7 @@ package jaxptest;
 
 import com.saxonica.config.ProfessionalTransformerFactory;
 import net.sf.saxon.TransformerFactoryImpl;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.StandardOutputResolver;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
@@ -31,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TransformChainTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     private static final String IDENTITY_STYLESHEET
             = "<?xml version=\"1.0\"?> \n" +
             "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
@@ -164,11 +163,11 @@ public class TransformChainTest {
                 }
             });
             Templates templates = factory.newTemplates(
-                    new StreamSource(new File(configTest.getDataDir() + "next-in-chain/main.xsl")));
+                    new StreamSource(Testdata.file("next-in-chain/main.xsl")));
             Transformer transformer = templates.newTransformer();
             StringWriter sw = new StringWriter();
             transformer.transform(
-                    new StreamSource(new File(configTest.getDataDir() + "next-in-chain/test.xml")),
+                    new StreamSource(Testdata.file("next-in-chain/test.xml")),
                     new StreamResult(sw)
             );
             assertTrue(sw.toString().equals("<second>principal</second>"));

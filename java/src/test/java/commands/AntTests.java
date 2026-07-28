@@ -1,6 +1,6 @@
 package commands;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +10,6 @@ import java.io.File;
  * Tests invocation of Saxon via Ant
  */
 public class AntTests {
-    private final ConfigTest configTest = new ConfigTest();
-    
     public static void main(String[] args) {
         org.apache.tools.ant.launch.Launcher.main(args);
     }
@@ -25,7 +23,7 @@ public class AntTests {
 
     @Test
     public void testTransformTask() {
-        runAnt(configTest.getDataDir() + "ant/build1.xml");
+        runAnt(Testdata.file("ant/build1.xml").toString());
     }
 
     //public void testValidateTask() {
@@ -49,7 +47,7 @@ public class AntTests {
 
     @Test
     public void testWalmsleyBug() {
-        runAnt(configTest.getDataDir() + "ant/walmsley/saxonbug/build.xml");
+        runAnt(Testdata.file("ant/walmsley/saxonbug/build.xml").toString());
     }
 
 //    public void testXmlCatalog() {

@@ -1,5 +1,6 @@
 package modeltests;
 
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -25,7 +26,7 @@ public class XOMTreeTests extends ObjectModelTests {
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             Builder xomBuilder = new Builder();
-            Document xomDocument = xomBuilder.build(new File(configTest.getDataDir() + fileName).toURI().toString());
+            Document xomDocument = xomBuilder.build(Testdata.file(fileName).toURI().toString());
             DocumentBuilder builder = processor.newDocumentBuilder();
             return builder.wrap(xomDocument);
         } catch (IOException | ParsingException e) {

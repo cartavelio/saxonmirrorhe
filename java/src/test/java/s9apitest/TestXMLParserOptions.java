@@ -1,8 +1,8 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import jaxptest.ConfigTest;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * test The features and properties of a XML Parser in s9api
  */
 public class TestXMLParserOptions {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testEnableExternalEntityExpansion() {
         try {
@@ -179,9 +177,7 @@ public class TestXMLParserOptions {
         // where the data directory location might begin "C:\...". Note that
         // getDataDir() should always return an absolute location, so I think a
         // Windows drive letter is the only way it can fail to begin with a "/".
-        String localSchemaLocation = configTest.getDataDir().startsWith("/")
-                ? "file://" + configTest.getDataDir() + "catalog-schema.xsd"
-                : "file:///" + configTest.getDataDir() + "catalog-schema.xsd";
+        String localSchemaLocation = Testdata.fileUri("catalog-schema.xsd").toASCIIString();
 
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/validation", true);
@@ -383,12 +379,12 @@ public class TestXMLParserOptions {
             XMLReader xmr = spf.newSAXParser().getXMLReader();
             xmr.setFeature("http://apache.org/xml/features/validation/schema", true);
 
-            XsltExecutable exp = comp.compile(new StreamSource(new File(configTest.getBugsDir() + "/4996/test.xsl")));
+            XsltExecutable exp = comp.compile(new StreamSource(Testdata.bugs().file("4996/test.xsl")));
 
             StringWriter sw = new StringWriter();
             Serializer out = proc.newSerializer(sw);
 
-            File dataFile = new File(configTest.getBugsDir() + "/4996/xmlSchemaDefaultAttributeA.xml");
+            File dataFile = Testdata.bugs().file("4996/xmlSchemaDefaultAttributeA.xml");
             InputSource inputSource = new InputSource(dataFile.toURI().toString());
             SAXSource source1 = new SAXSource(xmr, inputSource);
 
@@ -434,12 +430,12 @@ public class TestXMLParserOptions {
             XMLReader xmr = spf.newSAXParser().getXMLReader();
             xmr.setFeature("http://apache.org/xml/features/validation/schema", false);
 
-            XsltExecutable exp = comp.compile(new StreamSource(new File(configTest.getBugsDir() + "/4996/test.xsl")));
+            XsltExecutable exp = comp.compile(new StreamSource(Testdata.bugs().file("4996/test.xsl")));
 
             StringWriter sw = new StringWriter();
             Serializer out = proc.newSerializer(sw);
 
-            File dataFile = new File(configTest.getBugsDir() + "/4996/xmlSchemaDefaultAttributeA.xml");
+            File dataFile = Testdata.bugs().file("4996/xmlSchemaDefaultAttributeA.xml");
             InputSource inputSource = new InputSource(dataFile.toURI().toString());
             SAXSource source1 = new SAXSource(xmr, inputSource);
             ParseOptions options = new ParseOptions()

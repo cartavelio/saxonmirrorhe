@@ -2,6 +2,7 @@ package jaxptest;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.EmptySource;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardURIResolver;
@@ -23,6 +24,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -41,12 +43,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  * originally created by Scott Boag, but much evolved since.
  */
 public class URIResolverTest {
-    private final ConfigTest configTest = new ConfigTest();
+    private final Path d = Testdata.path("trax");
 
-    private final String d = configTest.getDataDir() + "trax/";
-
-    private final String foo_xml = d + "xml/foo.xml";
-    private final String foo_xsl = d + "xsl/foo.xsl";
+    private final File foo_xml = d.resolve("xml/foo.xml").toFile();
+    private final File foo_xsl = d.resolve("xsl/foo.xsl").toFile();
 
     @Test
     public void testGetURIResolver() {
@@ -287,10 +287,6 @@ public class URIResolverTest {
     }
 
     private static class Resolver2 extends StandardURIResolver {
-        private final ConfigTest configTest = new ConfigTest();
-
-        private final String d = configTest.getDataDir() + "trax/";
-
         public Configuration config;
         public Set<String> history = new HashSet<String>();
         public Map<String, String> mappings = new HashMap<String, String>();
@@ -314,9 +310,9 @@ public class URIResolverTest {
                 SAXBuilder builder = new SAXBuilder();
                 File file;
                 if (href.endsWith("inc1/inc1.xsl")) {
-                    file = new File(configTest.getDataDir() + "/trax/xsl/inc1/inc1.xsl");
+                    file = Testdata.file("/trax/xsl/inc1/inc1.xsl");
                 } else if (href.endsWith("inc2/inc2.xsl")) {
-                    file = new File(configTest.getDataDir() + "/trax/xsl/inc1/inc2/inc2.xsl");
+                    file = Testdata.file("/trax/xsl/inc1/inc2/inc2.xsl");
                 } else {
                     throw new XPathException("Unknown file " + href);
                 }

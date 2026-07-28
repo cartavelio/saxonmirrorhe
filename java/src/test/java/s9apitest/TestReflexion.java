@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -22,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TestReflexion {
-    private final ConfigTest configTest = new ConfigTest();
-
     private XQueryCompiler makeCompiler() {
         Processor p = new Processor(true);
         XQueryCompiler c = p.newXQueryCompiler();
@@ -840,7 +838,6 @@ public class TestReflexion {
     private static void testOverrideFunctionXslt(String xsl, boolean override) {
         // Bug #4111
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
             comp.setJustInTimeCompilation(false);
@@ -849,8 +846,8 @@ public class TestReflexion {
             XsltExecutable exec1 = comp.compile(new StreamSource(sr));
             List<XsltExecutable> execs = new ArrayList<>();
             execs.add(exec1);
-            exec1.export(new FileOutputStream(ctest.getDataDir() + "sandpit/export.sef"));
-            XsltExecutable exec2 = comp.loadExecutablePackage(new File(ctest.getDataDir() + "sandpit/export.sef").toURI());
+            exec1.export(new FileOutputStream(Testdata.file("sandpit/export.sef")));
+            XsltExecutable exec2 = comp.loadExecutablePackage(Testdata.fileUri("sandpit/export.sef"));
             execs.add(exec2);
             for (XsltExecutable exec : execs) {
                 XsltTransformer trans = exec.load();

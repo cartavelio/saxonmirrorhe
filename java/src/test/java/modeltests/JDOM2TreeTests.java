@@ -1,5 +1,6 @@
 package modeltests;
 
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -9,7 +10,6 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -25,7 +25,7 @@ public class JDOM2TreeTests extends ObjectModelTests {
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             SAXBuilder jdomBuilder = new SAXBuilder();
-            Document jdomDocument = jdomBuilder.build(new File(configTest.getDataDir() + fileName).toURI().toString());
+            Document jdomDocument = jdomBuilder.build(Testdata.file(fileName).toURI().toString());
             DocumentBuilder builder = processor.newDocumentBuilder();
             return builder.wrap(jdomDocument);
         } catch (IOException | JDOMException e) {

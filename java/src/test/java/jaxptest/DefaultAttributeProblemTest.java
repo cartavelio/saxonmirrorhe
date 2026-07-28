@@ -1,16 +1,18 @@
 package jaxptest;
 
 
+import net.sf.saxon.junit.Testdata;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Path;
 
 //import org.apache.xerces.parsers.SAXParser;
 
 public class DefaultAttributeProblemTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     private static final ErrorListener errorListener = new ErrorListener() {
         @Override
         public void warning(TransformerException ex) {
@@ -28,10 +30,10 @@ public class DefaultAttributeProblemTest {
         }
     };
 
-    private final String dir = configTest.getDataDir() + "defaultAttTest/";
-    private final String xslPath = dir + "samples/dita_xsd_based/copy_stylesheet.xsl";
-    private final String xmlPath = dir + "samples/dita_xsd_based/defAttr.xml";
-    private final String outPath = dir + "samples/dita_xsd_based/out.xml";
+    private final Path dir = Testdata.path("defaultAttTest");
+    private final File xslFile = dir.resolve("samples/dita_xsd_based/copy_stylesheet.xsl").toFile();
+    private final URI xmlUri = dir.resolve("samples/dita_xsd_based/defAttr.xml").toUri();
+    private final File outFile = dir.resolve("samples/dita_xsd_based/out.xml").toFile();
 
     @Test
     public void testDummyTest() {
@@ -59,7 +61,7 @@ public class DefaultAttributeProblemTest {
 //            transformer.setErrorListener(errorListener);
 //
 //            // Create XML SAX source
-//            SAXSource xmlSource = new SAXSource(new InputSource(new File(xmlPath).toURI().toString()));
+//            SAXSource xmlSource = new SAXSource(new InputSource(xmlUri.toString()));
 //            SAXParser saxParser = new SAXParser();
 //
 //            //EXM-11081 Set this feature so that the default attributes from the schema are reported...
@@ -68,7 +70,6 @@ public class DefaultAttributeProblemTest {
 //            xmlSource.setXMLReader(saxParser);
 //
 //            // Output stream result
-//            File outFile = new File(outPath);
 //            if (outFile.exists()) {
 //                //noinspection ResultOfMethodCallIgnored
 //                outFile.delete();
