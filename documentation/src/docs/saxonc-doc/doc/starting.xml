@@ -432,7 +432,6 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
       with, run the following:</p>
 
     <kbd>cd samples</kbd>
-    <kbd>build-windows.bat</kbd>
     <kbd>cmake .</kbd>
     <kbd>cmake --build . --config Release</kbd>
 
