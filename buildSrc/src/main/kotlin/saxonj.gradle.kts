@@ -553,6 +553,7 @@ val downloadRelease = tasks.register<Zip>("downloadRelease") {
         "Saxon${edition.uppercase()}${saxonBuild.publishVersion.get().replace(".", "-")}J"
     }
 
+    from(downloadSignedDownloadJars)
     destinationDirectory = layout.buildDirectory.dir("releases")
 
     into("lib") {
