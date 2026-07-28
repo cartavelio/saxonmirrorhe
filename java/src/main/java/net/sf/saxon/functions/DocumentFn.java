@@ -406,11 +406,9 @@ public class DocumentFn extends SystemFunction implements Callable {
 
         ResourceRequest request = new ResourceRequest();
         request.relativeUri = href;
+        request.uri = href;
         if (baseURI != null) {
             request.baseUri = baseURI;
-            request.uri = documentKey;
-        } else {
-            request.uri = href;
         }
         request.nature = ResourceRequest.XML_NATURE;
         request.purpose = ResourceRequest.ANY_PURPOSE;
