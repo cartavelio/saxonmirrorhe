@@ -682,6 +682,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             // Add the whole-part grouping separators
 
             if (wholePartGroupingPositions != null) {
+                int newPoint = point;
                 if (regular) {
                     // grouping separators are at regular positions
                     int g = wholePartGroupingPositions[0];
@@ -690,6 +691,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                         ib = insert(ib, ibused++, dfs.getGroupingSeparator(), p);
                         //sb.insert(p, unicodeChar(dfs.groupingSeparator));
                         p -= g;
+                        newPoint++;
                     }
                 } else {
                     // grouping separators are at irregular positions
@@ -698,9 +700,11 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                         if (p > 0) {
                             ib = insert(ib, ibused++, dfs.getGroupingSeparator(), p);
                             //sb.insert(p, unicodeChar(dfs.groupingSeparator));
+                            newPoint++;
                         }
                     }
                 }
+                point = newPoint;
             }
 
             // Add the fractional-part grouping separators
