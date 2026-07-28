@@ -53,11 +53,16 @@ public class ResolveURI extends SystemFunction {
         }
         if (baseArg != null) {
             base = baseArg.getStringValue();
+            // Treat "" the same as null. Justification: "" is technically a same document
+            // reference and that would be the static base URI.
+            if (base.isEmpty()) {
+                base = getStaticBaseUriString();
+            }
         } else {
             base = getStaticBaseUriString();
-            if (base == null) {
-                throw new XPathException("Base URI in static context of resolve-uri() is unknown", "FONS0005", context);
-            }
+        }
+        if (base == null) {
+            throw new XPathException("Base URI in static context of resolve-uri() is unknown", "FONS0005", context);
         }
         return resolve(base, relative, context);
     }
