@@ -55,7 +55,7 @@ public class ProtocolRestrictor {
                     permitted.add(uri -> scheme(uri).equals("jar") &&
                             schemeSpecificPart(uri).toLowerCase().startsWith(subScheme));
                 } else {
-                    permitted.add(uri -> scheme(uri).equals(token));
+                    permitted.add(uri -> token.equals(scheme(uri)));
                 }
             }
             predicate = uri -> {
