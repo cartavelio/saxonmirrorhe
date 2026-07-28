@@ -286,6 +286,8 @@ public class QT3TestDriverHE extends TestDriver {
                 return !inverse;
             } else if ("arbitraryPrecisionDecimal".equals(value)) {
                 return !inverse;
+            } else if ("binary".equals(value)) {
+                return !inverse;
             } else if ("collection-stability".equals(value)) {
                 // SAXON has a problem here - we don't support stable collections
                 return inverse;
