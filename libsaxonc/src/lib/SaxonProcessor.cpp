@@ -798,18 +798,11 @@ void SaxonProcessor::setcwd(const char *dir) {
 const char *SaxonProcessor::getcwd() { return cwd.c_str(); }
 
 const char *SaxonProcessor::getResourcesDirectory() {
-  return ""; //_getResourceDirectory();
+  return nullptr; 
 }
 
 void SaxonProcessor::setResourcesDirectory(const char *dir) {
-  // memset(&resources_dir[0], 0, sizeof(resources_dir));
-#if defined(__linux__) || defined(__APPLE__)
-  strncat(_getResourceDirectory(), dir, strlen(dir));
-#else
-  int destSize = strlen(dir) + strlen(dir);
-  strncat_s(_getResourceDirectory(), destSize, dir, strlen(dir));
 
-#endif
 }
 
 void SaxonProcessor::setCatalog(const char *catalogFile) {

@@ -130,9 +130,16 @@ extern const char *failure;
 
 /**
  * Get resources directory.
+ * @deprecated
  */
 
 char *_getResourceDirectory(void);
+
+/**
+ * Set resources directory.
+ * @deprecated
+ */
+void _setResourceDirectory(const char* s);
 
 /**
  * Load dll using the default setting in SaxonC.

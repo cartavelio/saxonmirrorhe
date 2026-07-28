@@ -25,6 +25,12 @@ char * dllPath =
 
 char *_getResourceDirectory(void) { return resources_dir; }
 
+void _setResourceDirectory(const char* s)
+{
+  resources_dir = strdup(s);
+}
+
+
 /*
  * Load dll.
  */

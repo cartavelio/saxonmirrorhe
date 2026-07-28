@@ -618,12 +618,14 @@ public:
   /**
    * Get the saxon resources directory
    * @return String value of the resources directory. The caller is responsible for deallocation of memory using `delete`.
+   * @deprecated
    */
   const char *getResourcesDirectory();
 
   /**
    * Set the saxon resources directory
    * @param dir - resources directory
+   * @deprecated
    */
   void setResourcesDirectory(const char *dir);
 
