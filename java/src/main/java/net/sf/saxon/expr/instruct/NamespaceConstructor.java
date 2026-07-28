@@ -88,6 +88,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         // See bug 2110. XQuery does not use the function conversion rules here, and disallows xs:anyURI.
         // In XSLT the name is an AVT so we automatically get a string; in XQuery we'll use the standard
         // mechanism to get an atomic value, and then check the type "by hand" at run time.
+        // This changes in XQuery 4.0
         setNameExp(env.getConfiguration().getTypeChecker(false).staticTypeCheck(
                 getNameExp(), SequenceType.OPTIONAL_ATOMIC, role, visitor));
         adoptChildExpression(getNameExp());
@@ -285,7 +286,6 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         @Override
         public ItemEvaluator elaborateForItem() {
             NamespaceConstructor expr = (NamespaceConstructor) getExpression();
-            Location loc = expr.getLocation();
             String literalPrefix = expr.getNameExp() instanceof StringLiteral
                     ? ((StringLiteral) expr.getNameExp()).stringify() : null;
             NamespaceUri literalUri = expr.getSelect() instanceof StringLiteral
