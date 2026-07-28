@@ -18,7 +18,6 @@ import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessExecutionException
 import java.io.ByteArrayOutputStream
-import javax.annotation.Nullable
 import javax.inject.Inject
 
 abstract class ErrorLoggingExecTask @Inject constructor(private val ex: ExecOperations): DefaultTask() {
@@ -208,7 +207,6 @@ abstract class PythonExec @Inject constructor(private val ex: ExecOperations): D
         return workingDir.isPresent()
     }
 
-    @Nullable
     @Optional
     @Input
     fun getArgs(): List<String> {

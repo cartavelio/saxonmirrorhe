@@ -4,11 +4,13 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -19,6 +21,9 @@ import javax.inject.Inject
 abstract class SphinxDoc @Inject constructor(private val ex: ExecOperations): DefaultTask() {
   @get:Internal
   abstract val venv: Property<PythonVenv>
+
+  @get:InputFile
+  abstract val installedWheelDigest : RegularFileProperty
 
   @get:InputDirectory
   abstract val docSrcDir: DirectoryProperty
@@ -32,16 +37,16 @@ abstract class SphinxDoc @Inject constructor(private val ex: ExecOperations): De
   @get:OutputDirectory
   val outputDir: Provider<Directory> = docBuildDir
 
-  private var needsInstallerDependency: Boolean = true
-
-  fun wheelInstaller(installTask: TaskProvider<InstallLocalWheel>) {
-    this.dependsOn(installTask)
-    needsInstallerDependency = false
-  }
+//  private var needsInstallerDependency: Boolean = true
+//
+//  fun wheelInstaller(installTask: TaskProvider<InstallLocalWheel>) {
+//    this.dependsOn(installTask)
+//    needsInstallerDependency = false
+//  }
 
   @TaskAction
   fun build() {
-    if (needsInstallerDependency) throw GradleException("wheel installer dependency is not set. Specify with wheelInstaller().")
+//    if (needsInstallerDependency) throw GradleException("wheel installer dependency is not set. Specify with wheelInstaller().")
 
     ex.exec {
       executable(venv.get().venvBinHostedExe("sphinx-build").get())

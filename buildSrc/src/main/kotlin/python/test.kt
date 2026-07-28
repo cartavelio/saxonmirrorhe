@@ -201,6 +201,14 @@ abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations
         return this
     }
 
+    private val testJitArg = StringArg()
+
+    @Option(option = "jit", description = "set JIT")
+    fun setJit(arg: String): TestSuiteTask {
+        testJitArg.set(arg)
+        return this
+    }
+
     fun wheelInstaller(task: TaskProvider<InstallLocalWheel>): TestSuiteTask {
         this.dependsOn(task)
         return this
@@ -253,6 +261,7 @@ abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations
             args(runner.arguments.get())
             if (testSetArg.isPresent) args("-s", "${testSetArg.get()}")
             if (testPatternArg.isPresent) args("-t", "${testPatternArg.get()}")
+            if (testJitArg.isPresent) args("--jit", "${testJitArg.get()}")
             if (runner.hasEnvironment()) {
                 environment(runner.resolvedEnvironment())
             }
