@@ -171,7 +171,7 @@ EndGlobal
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.7" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.4" />
-        <PackageReference Include="XmlResolver" Version="2.1.2" />
+        <PackageReference Include="XmlResolver" Version="2.1.4" />
         <PackageReference Include="XmlResolverData" Version="1.2.4" />
       </ItemGroup>
 
