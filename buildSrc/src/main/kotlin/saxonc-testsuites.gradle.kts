@@ -34,6 +34,7 @@ fun qtNTestSuite(qtVersion: String, lang: String): TaskProvider<TestSuiteTask> {
         suiteDir = layout.projectDirectory.dir("../../submodules/${qtVersion}")
         outputDir = layout.buildDirectory.dir("test-results/${qtVersion}/${saxonBuild.dateStamp.get()}")
         language = lang
+        edition = saxonC.edition
         wheelInstaller(testsuiteInstallWheel)
         driverRequirements(testsuitesPipInstall)
     }
