@@ -80,29 +80,31 @@ public class DirectResourceResolver implements ResourceResolver {
         }
 
         Source ss;
+        String resolvedSource = null;
         try {
             // Get an input stream from the request URI
             if (request.baseUri != null) {
                 URI base = new URI(request.baseUri);
                 if (request.uri.isEmpty()) {
-                    stream = ResourceLoader.urlStream(config, base.toString());
+                    resolvedSource = base.toString();
                 } else {
                     URI href = new URI(request.uri);
-                    stream = ResourceLoader.urlStream(config, base.resolve(href).toString());
+                    resolvedSource = base.resolve(href).toString();
                 }
             } else {
-                stream = ResourceLoader.urlStream(config, request.uri);
+                resolvedSource = request.uri;
             }
+            stream = ResourceLoader.urlStream(config, resolvedSource);
         } catch (IOException | URISyntaxException e) {
             stream = null; // Carry on, the XML parser might know what to do with it.
         }
 
         if (ResourceRequest.TEXT_NATURE.equals(request.nature)) {
             // Typically happens when using unparsed-text() with an explicit encoding
-            return new StreamSource(stream, request.uri);
+            return new StreamSource(stream, resolvedSource);
         }
 
-        InputSource is = new InputSource(request.uri);
+        InputSource is = new InputSource(resolvedSource);
         is.setByteStream(stream);
         XMLReader parser;
         if (ResourceRequest.XSLT_NATURE.equals(request.nature) || ResourceRequest.XSD_NATURE.equals(request.nature)) {
