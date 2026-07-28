@@ -54,7 +54,7 @@ public class ReceivingContentHandler
     private boolean inDTD = false;    // true while processing the DTD
     private LocalLocator localLocator = new LocalLocator(Loc.NONE);
     private boolean lineNumbering;
-    private Location lastTextNodeLocator;
+    private Location lastTextNodeLocator = Loc.NONE;
 
     // buffer for accumulating character data, until the next markup event is received
 
