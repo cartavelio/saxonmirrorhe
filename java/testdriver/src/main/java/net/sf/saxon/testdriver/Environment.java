@@ -352,17 +352,19 @@ public class Environment implements ResourceResolver {
             }
 
             try {
+                Path source = Paths.get(env.getBaseURI().resolve(path).getPath());
+                String pitname = source.getFileName().toString();
+
                 File tempdir = File.createTempFile(name + ".", ".sandpit");
                 boolean ok = tempdir.delete();
                 ok = ok && tempdir.mkdir();
-                File sandpit = new File(tempdir, "sandpit");
+                File sandpit = new File(tempdir, pitname);
                 ok = ok && sandpit.mkdir();
 
                 if (ok) {
                     environment.initialWorkingDirectory = System.getProperty("user.dir");
                     environment.initialExpathBaseDirectory = System.getProperty("expath.base.directory");
 
-                    Path source = Paths.get(env.getBaseURI().resolve(path).getPath());
                     Path dest = Paths.get(sandpit.getAbsolutePath());
 
                     System.err.println("Copy sandpit: " + source.toAbsolutePath());
