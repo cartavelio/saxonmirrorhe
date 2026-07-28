@@ -167,11 +167,11 @@ EndGlobal
         <PackageReference Include="System.Collections.Immutable" Version="9.0.4" />
         <PackageReference Include="System.IO.Hashing" Version="9.0.4" />
         <PackageReference Include="System.Net.Http" Version="4.3.4" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="9.0.4" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.7" />
         <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.4" />
-        <PackageReference Include="XmlResolver" Version="2.1.1" />
+        <PackageReference Include="XmlResolver" Version="2.1.2" />
         <PackageReference Include="XmlResolverData" Version="1.2.4" />
       </ItemGroup>
 
