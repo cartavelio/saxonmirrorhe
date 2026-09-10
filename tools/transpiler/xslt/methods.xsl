@@ -169,7 +169,7 @@
       <!--<xsl:message>CSharp.{name/@identifier}()</xsl:message>-->
       <xsl:choose>
          <xsl:when test="name/@identifier = 'emitCode'">
-            <xsl:text>{arguments/argument[1]/@value}</xsl:text>
+            <xsl:text>{arguments/argument[1]/@value => translate('\', '')}</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'methodRef'">
             <xsl:apply-templates select="arguments/argument[1]" mode="xml-to-cs"/>
