@@ -35,9 +35,10 @@ public class SquareArrayConstructor extends Expression implements Pingable {
 
 
     private OperandArray operanda;
+
+    // Data used for learning about the dynamic usage of the constructed array
     private double numberOfCalls = 0;
     private double numberOfConversions = 0;
-
 
     /**
      * Create an array constructor with defined members
@@ -94,11 +95,6 @@ public class SquareArrayConstructor extends Expression implements Pingable {
     }
 
 
-    @Override
-    protected int computeSpecialProperties() {
-        return 0;
-    }
-
     /**
      * Is this expression the same as another expression?
      *
@@ -107,10 +103,7 @@ public class SquareArrayConstructor extends Expression implements Pingable {
      */
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof SquareArrayConstructor)) {
-            return false;
-        } else {
-            SquareArrayConstructor ab2 = (SquareArrayConstructor) other;
+        if (other instanceof SquareArrayConstructor ab2) {
             if (ab2.getOperanda().getNumberOfOperands() != getOperanda().getNumberOfOperands()) {
                 return false;
             }
@@ -120,6 +113,8 @@ public class SquareArrayConstructor extends Expression implements Pingable {
                 }
             }
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -252,33 +247,25 @@ public class SquareArrayConstructor extends Expression implements Pingable {
     @Override
     public String toShortString() {
         int n = getOperanda().getNumberOfOperands();
-        switch (n) {
-            case 0:
-                return "[]";
-            case 1:
-                return "[" + getOperanda().getOperand(0).getChildExpression().toShortString() + "]";
-            case 2:
-                return "[" + getOperanda().getOperand(0).getChildExpression().toShortString() + ", " +
-                        getOperanda().getOperand(1).getChildExpression().toShortString() + "]";
-            default:
-                return "[" + getOperanda().getOperand(0).getChildExpression().toShortString() + ", ...]";
-        }
+        return switch (n) {
+            case 0 -> "[]";
+            case 1 -> "[" + getOperanda().getOperand(0).getChildExpression().toShortString() + "]";
+            case 2 -> "[" + getOperanda().getOperand(0).getChildExpression().toShortString() + ", " +
+                    getOperanda().getOperand(1).getChildExpression().toShortString() + "]";
+            default -> "[" + getOperanda().getOperand(0).getChildExpression().toShortString() + ", ...]";
+        };
     }
 
     @Override
     public String toString() {
         int n = getOperanda().getNumberOfOperands();
-        switch (n) {
-            case 0:
-                return "[]";
-            case 1:
-                return "[" + getOperanda().getOperand(0).getChildExpression().toString() + "]";
-            case 2:
-                return "[" + getOperanda().getOperand(0).getChildExpression().toString() + ", " +
-                        getOperanda().getOperand(1).getChildExpression().toString() + "]";
-            default:
-                return "[" + getOperanda().getOperand(0).getChildExpression().toString() + ", ...]";
-        }
+        return switch (n) {
+            case 0 -> "[]";
+            case 1 -> "[" + getOperanda().getOperand(0).getChildExpression().toString() + "]";
+            case 2 -> "[" + getOperanda().getOperand(0).getChildExpression().toString() + ", " +
+                    getOperanda().getOperand(1).getChildExpression().toString() + "]";
+            default -> "[" + getOperanda().getOperand(0).getChildExpression().toString() + ", ...]";
+        };
     }
 
     /**
@@ -292,6 +279,9 @@ public class SquareArrayConstructor extends Expression implements Pingable {
         return EVALUATE_METHOD;
     }
 
+    /**
+     * Notify that an array created using this expression has been converted to an immutable array.
+     */
     @Override
     public void ping() {
         numberOfConversions++;

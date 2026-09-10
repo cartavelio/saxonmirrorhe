@@ -4916,6 +4916,13 @@ public class XPathParser {
     protected Expression parseMapConstructor() throws XPathException {
         checkMapExtensions();
 
+        ItemType entryItemType;
+        if (isAllowXPath40Syntax()) {
+            entryItemType = ChoiceItemType.of(MapType.ANY_MAP_TYPE, AnyJNodeType.getInstance());
+        } else {
+            entryItemType = MapType.ANY_MAP_TYPE;
+        }
+
         // have read the "map {" or bare "{"
         int offset = t.currentTokenStartOffset;
         List<Expression> operands = new ArrayList<>();
@@ -4952,7 +4959,7 @@ public class XPathParser {
                     allStringKeys = false;
                     int finalSeq = seq;
                     Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.MAP_CONSTRUCTOR, "", finalSeq);
-                    key = new ItemChecker(key, MapType.ANY_MAP_TYPE, role);
+                    key = new ItemChecker(key, entryItemType, role);
                     operands.add(key);
                 }
                 if (t.currentToken == Token.RCURLY) {
@@ -4983,13 +4990,14 @@ public class XPathParser {
                             languageVersion);
                     result = Literal.makeLiteral(sem);
                 } else {
-                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
-                    optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
-                    optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
-                    MapItem optionsMap = optionsBuilder.getCompletedMap();
-                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
-                            .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
-                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
+                    result = new MapConstructor(operands);
+//                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
+//                    optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
+//                    optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
+//                    MapItem optionsMap = optionsBuilder.getCompletedMap();
+//                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
+//                            .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
+//                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
 
                 break;
@@ -5038,26 +5046,28 @@ public class XPathParser {
                         result = Literal.makeLiteral(builder.getCompletedMap());
                     }
                 } else {
-                    Expression[] entriesArray = new Expression[operands.size()];
-                    for (int i = 0; i < operands.size(); i++) {
-                        entriesArray[i] = operands.get(i);
-                    }
-                    Block block = new Block(entriesArray);
-                    MapItem optionsMap;
-                    if (allLiteralKeys) {
-                        optionsMap = EmptyMap.getInstance(languageVersion);
-                    } else {
-                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
-                        optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
-                        optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
-                        optionsMap = optionsBuilder.getCompletedMap();
-                    }
-                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
-                            .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
-                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
+                    result = new MapConstructor(operands);
+//                    Expression[] entriesArray = new Expression[operands.size()];
+//                    for (int i = 0; i < operands.size(); i++) {
+//                        entriesArray[i] = operands.get(i);
+//                    }
+//                    Block block = new Block(entriesArray);
+//                    MapItem optionsMap;
+//                    if (allLiteralKeys) {
+//                        optionsMap = EmptyMap.getInstance(languageVersion);
+//                    } else {
+//                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
+//                        optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
+//                        optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
+//                        optionsMap = optionsBuilder.getCompletedMap();
+//                    }
+//                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
+//                            .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
+//                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
                 break;
         }
+        result.setRetainedStaticContext(env.makeRetainedStaticContext());
         setLocation(result, offset);
         return result;
 
