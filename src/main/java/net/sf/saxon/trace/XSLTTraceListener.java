@@ -24,6 +24,9 @@ public class XSLTTraceListener extends AbstractTraceListener {
         if (!super.isApplicable(info)) {
             return false;
         };
+        if (level(info) == TraceLevel.LOW) {
+            return detail != TraceLevel.NONE;
+        }
         if (detail == TraceLevel.HIGH) {
             return true;
         }

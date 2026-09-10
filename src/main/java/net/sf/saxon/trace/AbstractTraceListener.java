@@ -12,6 +12,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
+import net.sf.saxon.expr.instruct.CallTemplate;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
@@ -173,7 +174,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected abstract String tag(Traceable info);
 
     protected int level(Traceable info) {
-        if (info instanceof TraceableComponent || info instanceof ApplyTemplates) {
+        if (info instanceof TraceableComponent || info instanceof ApplyTemplates || info instanceof CallTemplate) {
             return 1;
         } if (info instanceof Expression && ((Expression)info).isInstruction()) {
             return 2;

@@ -10,6 +10,7 @@ package net.sf.saxon.trace;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.ComponentTracer;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.NamespaceUri;
@@ -61,7 +62,7 @@ public class XSLTTraceCodeInjector extends TraceCodeInjector {
         // except in the case where the parent expression is a sequence constructor (`Block`)
         return loc != null
                 && loc.getLineNumber() != -1
-                && !(parent != null && loc == parent.getLocation() && !(parent instanceof Block));
+                && !(parent != null && loc == parent.getLocation() && !(parent instanceof Block || parent instanceof ComponentTracer));
     }
    
 }
