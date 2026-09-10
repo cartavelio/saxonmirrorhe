@@ -1038,10 +1038,8 @@ public class SaxonCAPI {
                 continue;
             }
             if (name.equals("l")) {
-                if (value != null) {
-                    processor.setConfigurationProperty(Feature.LINE_NUMBERING,
+                processor.setConfigurationProperty(Feature.LINE_NUMBERING,
                             "on".equals(value));
-                }
             } else if (name.equals("dtd")) {
                 int validationMode = Validation.DEFAULT;
                 if ("on".equals(value)) {
@@ -1084,13 +1082,19 @@ public class SaxonCAPI {
                     processor.setConfigurationProperty(Feature.XML_VERSION, value);
 
                 } else {
-                    boolean value1 = b;
                     if (name.equals("xi")) {
-                        processor.setConfigurationProperty(Feature.XINCLUDE, value1);
+                        processor.setConfigurationProperty(Feature.XINCLUDE, b);
 
                     } else if (name.equals("xsiloc")) {
-                        processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, value1);
-                    } else if (name.startsWith("http://saxon.sf.net/feature/")) {
+                        processor.setConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION, b);
+                    } else if (name.equals("errorOutputFile") || name.equals("http://saxon.sf.net/feature/standardErrorOutputFile")) {
+                        if(SaxonCAPI.debug) {
+                            System.err.println("JAVA DEBUG: standErrorOutputFile set name=" + value);
+                        }
+                        processor.setConfigurationProperty(Feature.STANDARD_ERROR_OUTPUT_FILE,value);
+                        SaxonCException.errorOutputFile = value;
+
+                    }else if (name.startsWith("http://saxon.sf.net/feature/")) {
                         processor.setConfigurationProperty(name, value);
                     }
                 }

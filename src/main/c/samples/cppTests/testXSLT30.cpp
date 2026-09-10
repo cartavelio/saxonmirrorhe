@@ -14,6 +14,7 @@
 #include <string>
 #include <thread>
 
+
 using namespace std;
 
 #ifdef MEM_DEBUG
@@ -630,7 +631,79 @@ void testTransformFromstring2Err(SaxonProcessor *processor,
     if (systemID != nullptr) {
       cerr << "system ID for Exception =  " << systemID << endl;
     }
+    fflush(stdout);
+    fflush(stderr);
+    std::cout << '\n' << std::flush;
+    return;
+  }
 
+  sresult->failure++;
+  sresult->failureList.push_back("testTransfromFromstring2-Error");
+  delete executable;
+}
+
+
+// Test case has error in the stylesheet and save results in output file
+void testTransformFromstring2Err2(sResultCount *sresult) {
+  fflush(stdout);
+  fflush(stderr);
+  cout << endl << "Test: testTransformFromstring2Err2:" << endl;
+  SaxonProcessor * processor2 = new SaxonProcessor();
+  processor2->setConfigurationProperty("http://saxon.sf.net/feature/standardErrorOutputFile", "SaxonCHE12ErrorOutputFile-Test1.txt");
+  Xslt30Processor *trans = processor2->newXslt30Processor();
+  XsltExecutable *executable = nullptr;
+  try {
+    executable = trans->compileFromString(
+        "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' "
+        "version='2.0'>       <xsl:param name='values' select='(2,3,4)' "
+        "/><xsl:output method='xml' indent='yes' fail='no' /><xsl:template "
+        "match='*'><output><xsl:for-each select1='$values' ><out><xsl:value-of "
+        "select1='. * "
+        "3'/></out></xsl:for-each></output></xsl:template></xsl:stylesheet>");
+
+  } catch (SaxonApiException &e) {
+
+    if (CppTestUtils::exists("SaxonCHE12ErrorOutputFile-Test1.txt")) {
+      cout << "The file SaxonCHE12ErrorOutputFile-Test1.txt exists" << endl;
+      if(CppTestUtils::CheckWord("SaxonCHE12ErrorOutputFile-Test1.txt", "XTSE0090: Attribute @select1 is not allowed on element <xsl:for-each>")) {
+        sresult->success++;
+      } else {
+        sresult->failure++;
+        sresult->failureList.push_back("testTransformFromstring2Err2");
+
+      }
+
+      remove("SaxonCHE12ErrorOutputFile-Test1.txt");
+
+    } else {
+      cout << "The file SaxonCHE12ErrorOutputFile-Test1.txt does not exist" << endl;
+
+      sresult->failure++;
+      sresult->failureList.push_back("testTransformFromstring2Err2");
+    }
+
+    const char *smessages = e.getCombinedStaticErrorMessages();
+    const char *ecmessage = e.getMessageWithErrorCode();
+    cout << "Static Error count: " << e.staticErrorCount() << endl;
+    if (smessages != nullptr) {
+      cout << "Static Error expected: " << smessages << endl;
+      cout << "Test other exception methods: " << e.getMessage() << endl;
+    } else {
+      cerr << "Static Errors is null: " << endl;
+    }
+    if (ecmessage != nullptr) {
+      cout << "Static Error with error code expected: " << ecmessage << endl;
+    } else {
+      cerr << "Static Errors with error code is null: " << endl;
+    }
+
+    const char *systemID = e.getSystemId();
+    if (systemID != nullptr) {
+      cerr << "system ID for Exception =  " << systemID << endl;
+    }
+    //processor2->clearConfigurationProperties();
+    delete processor2;
+    delete trans;
     return;
   }
 
@@ -3183,10 +3256,25 @@ int main(int argc, char *argv[]) {
 
   testTransformFromstring2Err(processor, trans, sresult);
 
+  fflush(stdout);
+  fflush(stderr);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
+
+
+  testTransformFromstring2Err2(sresult);
+
   cout << endl
        << "============================================================="
        << endl
        << endl;
+
+  fflush(stdout);
+  fflush(stderr);
 
   testTrackingOfValueReference(processor, trans, sresult);
 

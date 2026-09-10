@@ -7,6 +7,8 @@
 
 package net.sf.saxon.option.cpp;
 
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XmlProcessingError;
 import org.graalvm.nativeimage.IsolateThread;
@@ -18,8 +20,7 @@ import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 import com.oracle.svm.core.Uninterruptible;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +31,41 @@ public class SaxonCException  {
 
     public static Throwable throwable = null;
     public static List<? super XmlProcessingError> errorList = new ArrayList<>();
-    
+    public static String errorOutputFile = null;
+    //public static String ecwd = null;
+
     @Uninterruptible(reason = "exception handler")
     public SaxonCException(Throwable e) {
         throwable = e;
+
+    }
+
+    @CEntryPoint(name = "j_errorOutputFileCheckAndSave")
+    public static void j_errorOutputFileCheckAndSave(IsolateThread thread){
+        if(errorOutputFile != null) {
+            String message = new String();
+
+            for (Object item : errorList) {
+                XmlProcessingError error = (XmlProcessingError) item;
+                if (error.getErrorCode() == null) {
+                    message += (((XmlProcessingError) item).getMessage() + "\n");
+                } else {
+                    message += (error.getErrorCode().getLocalName() + ": " + ((XmlProcessingError) item).getMessage() + "\n");
+                }
+
+            }
+
+            if (!message.isEmpty()) {
+                try {
+                    PrintStream stream = new PrintStream(new FileOutputStream(errorOutputFile, true), true);
+                    stream.print(message);
+                    stream.close();
+                } catch (FileNotFoundException e) {
+
+                }
+            }
+
+        }
 
     }
     
@@ -163,31 +195,38 @@ public class SaxonCException  {
 
 
     @CEntryPoint(name = "j_getCombinedStaticErrorMessages")
-    public static CCharPointer j_getCombinedStaticErrorMessages(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
+    public static CCharPointer j_getCombinedStaticErrorMessages(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc) {
+
+        if (errorOutputFile != null) {
+            CCharPointer a = SaxonCAPI.stringToNative2(alloc,throwable.getMessage());
+            return a;
+        }
 
         String message = new String();
 
-        for(Object item : errorList) {
-            XmlProcessingError error = (XmlProcessingError)item;
-            if(error.getErrorCode() == null) {
-                message+=(((XmlProcessingError)item).getMessage() + "\n");
+
+        for (Object item : errorList) {
+            XmlProcessingError error = (XmlProcessingError) item;
+            if (error.getErrorCode() == null) {
+                message += (((XmlProcessingError) item).getMessage() + "\n");
             } else {
-                message+=(error.getErrorCode().getLocalName() + ": " +((XmlProcessingError)item).getMessage() + "\n");
+                message += (error.getErrorCode().getLocalName() + ": " + ((XmlProcessingError) item).getMessage() + "\n");
             }
 
         }
 
-        if(SaxonCAPI.debug) {
-            System.err.println("Debug - j_getCombinedStaticErrorMessages errorList.length: "+errorList.size());
-            System.err.println("Debug - j_getCombinedStaticErrorMessages: message length:"+message.length());
+        if (SaxonCAPI.debug) {
+            System.err.println("Debug - j_getCombinedStaticErrorMessages errorList.length: " + errorList.size());
+            System.err.println("Debug - j_getCombinedStaticErrorMessages: message length:" + message.length());
         }
 
-        if(message.isEmpty()) {
+        if (message.isEmpty()) {
             return j_getErrorMessageWithErrorCode(thread, alloc);
-        } else {
-            CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
-            return a;
         }
+
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
+        return a;
+
 
     }
 
@@ -252,6 +291,7 @@ public class SaxonCException  {
     public static void clearException(IsolateThread thread) {
         errorList.clear();
         throwable = null;
+        errorOutputFile = null;
     }
 
 
