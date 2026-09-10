@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<release number="11" date="2021-10-06" xmlns="http://www.saxonica.com/ns/doc/changes">
+<release number="12" date="2022-11-25" xmlns="http://www.saxonica.com/ns/doc/changes">
     
     <category name="documentation">
         
@@ -29,39 +29,47 @@
         when defining extension functions):</p>
         
         <ul>
-            <li><p>Added the method <code>ItemTypeFactory.parseItemType(String)</code> as a convenient way of constructing an item type
-            such as <code>map(xs:string, node()*)</code> from its XPath textual representation.</p>
+            <li><p>Added the method <code java="net.sf.saxon.s9api.ItemTypeFactory#parseItemType">ItemTypeFactory.parseItemType(String)</code> as a
+                convenient way of constructing an item type such as <code>map(xs:string, node()*)</code> from its XPath textual representation.</p>
             </li>
-            <li><p>Added methods to <code>ItemType</code> to construct a <code>SequenceType</code> by adding
-                an occurrence indicator: <code>one()</code>, <code>zeroOrOne()</code>, <code>zeroOrMore()</code>,
-                <code>oneOrMore()</code>. For example <code>ItemType.STRING.zeroOrMore()</code> represents the type
-                <code>xs:string*</code>.</p>
+            <li><p>Added methods to <code java="net.sf.saxon.s9api.ItemType">ItemType</code> to construct a <code>SequenceType</code> by adding
+                an occurrence indicator: <code java="net.sf.saxon.s9api.ItemType#one">one()</code>, <code
+                    java="net.sf.saxon.s9api.ItemType#zeroOrOne">zeroOrOne()</code>, <code java="net.sf.saxon.s9api.ItemType#zeroOrMore">zeroOrMore()</code>,
+                <code java="net.sf.saxon.s9api.ItemType#oneOrMore">oneOrMore()</code>. For example <code>ItemType.STRING.zeroOrMore()</code>
+                represents the type <code>xs:string*</code>.</p>
             </li>
-            <li><p>Added the method <code>SequenceType.matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+            <li><p>Added the method <code java="net.sf.saxon.s9api.SequenceType#matches">SequenceType.matches(XdmValue)</code> to test whether a value
+                matches a sequence type.</p>
             </li>
-            <li><p>The method <code>ItemTypeFactory.getItemType(item)</code>, when applied to a function item, now returns an item type
-        that retains the full function signature, rather than simply returning <code>function(*)</code>. This provides a convenient
-        way to create a function item type by copying the signature of an existing function item.</p>
+            <li><p>The method <code java="net.sf.saxon.s9api.ItemTypeFactory#getItemType">ItemTypeFactory.getItemType(item)</code>, when applied to a
+                function item, now returns an item type that retains the full function signature, rather than simply returning
+                <code>function(*)</code>. This provides a convenient way to create a function item type by copying the signature of an existing
+                function item.</p>
             </li>
-            <li><p>The results of <code>ItemType.toString()</code> have been tidied up and are better documented.</p></li>
+            <li><p>The results of <code java="net.sf.saxon.s9api.ItemType#toString">ItemType.toString()</code> have been tidied up and are better
+                documented.</p></li>
             <li><p>The class <code>ItemType</code> now implements <code>Predicate&lt;XdmItem></code>, so an item type
             can be used wherever a predicate is expected (such as in a call to <code>Step.where()</code>).</p></li>
-            <li><p>A new method <code>XdmValue.where()</code> is provided to filter an <code>XdmValue</code> on any
-            predicate — including an <code>ItemType</code>. For example, <code>value.where(ItemType.INTEGER)</code>
-            selects those items that are instances of <code>xs:integer</code>.</p></li>
-            <li><code>XdmNode</code> has a new method <code>getTypeAnnotationName()</code> which returns the name of the type annotation
-                of the node (defaulting to <code>xs:untyped</code> and <code>xs:untypedAtomic</code> for elements and attributes
-                that have not been schema-validated).</li>
+            <li><p>A new method <code java="net.sf.saxon.s9api.XdmValue#where">XdmValue.where()</code> is provided to filter an <code>XdmValue</code>
+                on any  predicate — including an <code>ItemType</code>. For example, <code>value.where(ItemType.INTEGER)</code> selects those items
+                that are instances of <code>xs:integer</code>.</p></li>
+            <li><code>XdmNode</code> has a new method <code java="net.sf.saxon.s9api.XdmNode#getTypeAnnotationName">getTypeAnnotationName()</code>
+                which returns the name of the type annotation of the node (defaulting to <code>xs:untyped</code> and <code>xs:untypedAtomic</code> for
+                elements and attributes that have not been schema-validated).</li>
         </ul>
         
-        <p>The <code>XsltCompiler</code> has two new convenience methods: the <code>compile()</code> and <code>compilePackage()</code>
-        methods now have overloads that take a <code>java.io.File</code> as their argument.</p>
+        <p>The <code java="net.sf.saxon.s9api.XsltCompiler">XsltCompiler</code> has two new convenience methods: the <code
+            java="net.sf.saxon.s9api.XsltCompiler#compile">compile()</code> and <code
+                java="net.sf.saxon.s9api.XsltCompiler#compilePackage">compilePackage()</code> methods now have overloads that take a
+            <code>java.io.File</code> as their argument.</p>
         
-        <p>The <code>SchemaManager</code> has a new convenience method: the <code>load()</code> 
-            method now has an overload that takes a <code>java.io.File</code> as its argument.</p>
+        <p>The <code java="net.sf.saxon.s9api.SchemaManager">SchemaManager</code> has a new convenience method: the <code
+            java="net.sf.saxon.s9api.SchemaManager#load">load()</code> method now has an overload that takes a <code>java.io.File</code> as its
+            argument.</p>
         
-        <p>The output of <code>XdmNode.toString()</code> has changed so it is now consistent with the output of <code>XdmValue.toString()</code>
-        in the case where the <code>XdmValue</code> comprises a single node. That is, it is now output using the adaptive serialization method.</p>
+        <p>The output of <code java="net.sf.saxon.s9api.XdmNode#toString">XdmNode.toString()</code> has changed so it is now consistent with the
+            output of <code java="net.sf.saxon.s9api.XdmValue#toString">XdmValue.toString()</code> in the case where the <code>XdmValue</code>
+            comprises a single node. That is, it is now output using the adaptive serialization method.</p>
         
         
         
@@ -79,9 +87,10 @@
     
     <category name="dotnet" class="csonly">
         
-        <p>SaxonCS adds support for LINQ documents (<code>XDocument</code> class) alongside DOM support. The <code>DocumentBuilder</code>
-        has new methods to allow building from a LINQ source, or wrapping a LINQ node as an XDM node, and a new <code>LinqDestination</code>
-        class allows the result of a query or transformation to be written to a LINQ tree.</p>
+        <p>SaxonCS adds support for LINQ documents (<code>XDocument</code> class) alongside DOM support. The <code
+            cs="Saxon.Api.DocumentBuilder">DocumentBuilder</code> has new methods to allow building from a LINQ source, or wrapping a LINQ node as an
+            XDM node, and a new <code cs="Saxon.Api.LinqDestination">LinqDestination</code> class allows the result of a query or transformation to be
+            written to a LINQ tree.</p>
         
         <p>With this feature, it becomes possible to run XPath 3.1 queries against LINQ documents, returning nodes in the original LINQ 
             tree.</p>
@@ -90,22 +99,27 @@
             when defining extension functions):</p>
         
         <ul>
-            <li><p>Added the properties <code>XdmItemType.One</code>, <code>XdmItemType.OneOrMore</code>, 
-                <code>XdmItemType.ZeroOrMore</code>, and <code>XdmItemType.ZeroOrOne</code> as a convenient way of constructing a sequence type
-                from an <code>ItemType</code> and an occurrence indicator.</p>
+            <li><p>Added the properties <code cs="Saxon.Api.XdmItemType#One">XdmItemType.One</code>, <code
+                cs="Saxon.Api.XdmItemType#OneOrMore">XdmItemType.OneOrMore</code>, <code
+                    cs="Saxon.Api.XdmItemType#ZeroOrMore">XdmItemType.ZeroOrMore</code>, and <code
+                        cs="Saxon.Api.XdmItemType#ZeroOrOne">XdmItemType.ZeroOrOne</code> as a convenient way of constructing a sequence type from an 
+               <code>ItemType</code> and an occurrence indicator.</p>
             </li>
-            <li><p>Added the method <code>XdmSequenceType.Matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+            <li><p>Added the method <code cs="Saxon.Api.XdmSequenceType#Matches">XdmSequenceType.Matches(XdmValue)</code> to test whether a value
+                matches a sequence type.</p>
             </li>
-            <li><p>Added <code>Equals()</code> and <code>GetHashCode()</code> methods to <code>XdmItemType</code> and <code>XdmSequenceType</code>
+            <li><p>Added <code cs="Saxon.Api.XdmItemType#Equals">Equals()</code> and <code cs="Saxon.Api.XdmItemType#GetHashCode">GetHashCode()</code>
+                methods to <code cs="Saxon.Api.XdmItemType">XdmItemType</code> and <code cs="Saxon.Api.XdmSequenceType">XdmSequenceType</code>
                 so equivalent types compare equal.</p>
             </li>
             <li><p>Cleaned up and documented the behavior of <code>ToString()</code> applied to item types and sequence types.</p>
             </li>
-            <li>Added a static method <code>XdmItemType.ForItem()</code> to get the item type of an item (see the documentation for exactly
-            what this means).</li>
-            <li><code>XdmNode</code> has a new property <code>TypeAnnotationName</code> which returns the name of the type annotation
-            of the node (defaulting to <code>xs:untyped</code> and <code>xs:untypedAtomic</code> for elements and attributes
-            that have not been schema-validated).</li>
+            <li>Added a static method <code cs="Saxon.Api.XdmItemType#ForItem">XdmItemType.ForItem()</code> to get the item type of an item (see the
+                .NET API documentation for exactly what this means).</li>
+            <li><code cs="Saxon.Api.XdmNode">XdmNode</code> has a new property <code
+                cs="Saxon.Api.XdmNode#TypeAnnotationName">TypeAnnotationName</code> which returns the name of the type annotation of the node
+                (defaulting to <code>xs:untyped</code> and <code>xs:untypedAtomic</code> for elements and attributes that have not been
+                schema-validated).</li>
             <li></li>
         </ul>
         
@@ -129,37 +143,42 @@
     
     <category name="spi">
         
-        <p>In a number of internal interfaces, namespace URIs are now represented using the class <code>NamespaceUri</code> rather
-        than <code>String</code>. <code>NamespaceUri</code> objects are pooled (so the same namespace is always represented by
-        the same object), leading to fewer object allocations (and therefore less overhead in the garbage collector), and allowing
-        more efficient comparison - equality testing is the dominant operation on namespace URIs.</p>
+        <p>In a number of internal interfaces, namespace URIs are now represented using the class <code
+            java="net.sf.saxon.om.NamespaceUri">NamespaceUri</code> rather than <code>String</code>. <code>NamespaceUri</code> objects are pooled (so
+            the same namespace is always represented by the same object), leading to fewer object allocations (and therefore less overhead in the
+            garbage collector), and allowing more efficient comparison - equality testing is the dominant operation on namespace URIs.</p>
         
-        <p>Interfaces affected include <code>NodeInfo</code>, <code>Receiver</code>, <code>StructuredQName</code>,
-        <code>NodeName</code>, <code>XPathStaticContext</code>, <code>AttributeMap</code>, and <code>NamespaceMap</code>.
-        In some cases the old interface has been retained for compatibility, but use of a <code>NamespaceUri</code>
-        is preferred.</p>
+        <p>Interfaces affected include <code java="net.sf.saxon.om.NodeInfo">NodeInfo</code>, <code
+            java="net.sf.saxon.event.Receiver">Receiver</code>, <code java="net.sf.saxon.om.StructuredQName">StructuredQName</code>,
+            <code java="net.sf.saxon.om.NodeInfo">NodeName</code>, <code java="net.sf.saxon.sxpath.XPathStaticContext">XPathStaticContext</code>,
+            <code java="net.sf.saxon.om.AttributeMap">AttributeMap</code>, and <code java="net.sf.saxon.om.NodeInfo">NamespaceMap</code>. In some
+            cases the old interface has been retained for compatibility, but use of a <code>NamespaceUri</code> is preferred.</p>
         
-        <p>The change may affect the handling of namespace URIs containing spaces (this is an area that has never been
-        well defined in the W3C specifications, and is best avoided).</p>
+        <p>The change may affect the handling of namespace URIs containing spaces (this is an area that has never been well defined in the W3C
+            specifications, and is best avoided).</p>
         
-        <p>To convert a <code>String</code> to a <code>NamespaceUri</code>, use the static method <code>NamespaceUri.of(String)</code>.
-        For the reverse, use <code>namespaceUri.toString()</code>.</p>
+        <p>To convert a <code>String</code> to a <code>NamespaceUri</code>, use the static method <code
+            java="net.sf.saxon.om.NamespaceUri#of">NamespaceUri.of(String)</code>. For the reverse, use <code
+                java="net.sf.saxon.om.NamespaceUri#toString">NamespaceUri.toString()</code>.</p>
         
-        <p>For SaxonJ, the Java system property <code>SAXON_INITIALIZER</code> may be set to the name of a class that implements
-        <code>net.sf.saxon.lib.Initializer</code>. If the class can be loaded, it will be called during instantiation of a new
-        <code>Configuration</code>. This makes it easier to customize Saxon's behavior when Saxon is deeply embedded in an 
-        application over which the user has no direct control. (Note, applications wishing to suppress this are free to
-        clear the system property.)</p>
+        <p class="javaonly">For SaxonJ, the Java system property <code>SAXON_INITIALIZER</code> may be set to the name of a class that implements
+            <code java="net.sf.saxon.lib.Initializer">net.sf.saxon.lib.Initializer</code>. If the class can be loaded, it will be called during
+            instantiation of a new <code java="net.sf.saxon.Configuration">Configuration</code>. This makes it easier to customize Saxon's behavior
+            when Saxon is deeply embedded in an application over which the user has no direct control. (Note, applications wishing to suppress this
+            are free to clear the system property.)</p>
         
-        <p>Most warning conditions now have specific error codes associated with them, and internal interfaces have been extended
-        so the error code can get through to a user-supplied <code>ErrorReporter</code>. This makes it much easier to suppress
-        warnings selectively. The codes used can be found in the JavaDoc for class <code>net.sf.saxon.trans.SaxonErrorCode</code>
-        (or, of course, in the warning message itself). The <code>StandardErrorReporter</code> now has a method
-        <code>suppressWarning</code> that allows a specific warning condition to be suppressed.</p>
+        <p>Most warning conditions now have specific error codes associated with them, and internal interfaces have been extended so the error code
+            can get through to a user-supplied <code java="net.sf.saxon.lib.ErrorReporter">ErrorReporter</code>. This makes it much easier to suppress
+            warnings selectively. The codes used can be found in the JavaDoc for class <code
+                java="net.sf.saxon.trans.SaxonErrorCode">net.sf.saxon.trans.SaxonErrorCode</code> (or, of course, in the warning message itself). The
+            <code java="net.sf.saxon.lib.StandardErrorReporter">StandardErrorReporter</code> now has a method <code
+                java="net.sf.saxon.lib.StandardErrorReporter#suppressWarning">suppressWarning</code> that allows a specific warning condition to be
+            suppressed.</p>
         
-        <p>The <code>ParseOptions</code> class is now immutable; any calls such as <code>options.setValidationMode(V)</code>
-        must be replaced with <code>options = options.withValidationMode(V)</code>. This change was made for performance reasons;
-        we found that the code was spending a great deal of time creating and copying new <code>ParseOptions</code> objects.</p>
+        <p>The <code java="net.sf.saxon.lib.ParseOptions">ParseOptions</code> class is now immutable; any calls such as
+            <code>options.setValidationMode(V)</code> must be replaced with <code>options = options.withValidationMode(V)</code>. This change was made
+            for performance reasons; we found that the code was spending a great deal of time creating and copying new <code>ParseOptions</code>
+            objects.</p>
         
    
     </category>
@@ -172,17 +191,19 @@
     
     <category name="command-line">
         
-        <p>In the <code>Validate</code> command, there are changes to the separator used for lists of names
+        <p>In the <code>Validate</code> command (see <a class="bodylink"
+            href="/schema-processing/commandline">Validation from the command line</a>), there are
+            changes to the separator used for lists of names 
         supplied in the <code>-s</code> and <code>-xsd</code> options. The separator is now consistently
         semicolon on Windows, colon on MacOS and Linux; except when the <code>-u</code> option is specified,
         in which case URIs are separated by whitespace.</p>
         
-        <p>For SaxonCS, the <code>transform</code>, <code>query</code>, and <code>validate</code> commands
+        <p class="csonly">For SaxonCS, the <code>transform</code>, <code>query</code>, and <code>validate</code> commands
         now accept an option <code>-init:assembly</code>. The value is the filename of an assembly containing
         user-written code to initialize the Saxon configuration. This can be used, for example, to register
         extension functions or collations.</p>
         
-        <p>For SaxonJ, the <code>Transform</code> and <code>Query</code> commands, when used with the <code>-TP</code>
+        <p class="javaonly">For SaxonJ, the <code>Transform</code> and <code>Query</code> commands, when used with the <code>-TP</code>
         option for performance profiling, now accept an additional option <code>-TPxsl:filename</code>; the value is
         the filename or URI of a stylesheet to be used for formatting the result. This allows you, for example, to
         output the results in XML or JSON format, or to filter or reorder the results for analysis.</p>
@@ -193,13 +214,60 @@
     
     <category name="extensions">
         
-        <p>The Saxon extension functions <code>saxon:evaluate</code>, <code>saxon:eval</code>, and <code>saxon:expression</code>
-             have been dropped. (The function <code>saxon:evaluate-node</code> was dropped in Saxon 10). 
-            The same effect (and more) can be achieved using the standard XSLT 3.0 instruction <code>xsl:evaluate</code>.</p>
+        <p>Changes to existing Saxon extensions and new extensions in Saxon 12 are outlined below. This includes
+            extension functions and instructions in the <code>saxon</code> namespace, as well as
+            experimental implementations for version 4.0 extensions to XPath, XSLT, and XQuery. A W3C
+            Community Group is working on these proposals; for more information see the <a
+                href="https://qt4cg.org/">QT4CG Specifications</a>, and documentation about the Saxon
+            implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
+        
+        <!--<h2>Changes to Extension Functions</h2>-->
+        
+        <h2>New Extension Functions</h2>
+        
+        <p>A number of proposed 4.0 functions are implemented (see <a class="bodylink" href="/v4extensions/new-functions">New functions</a>): 
+            <code>fn:all()</code>, <code>fn:all-different()</code>, <code>fn:all-equal()</code>, <code>fn:characters()</code>, 
+            <code>fn:contains-sequence()</code>, <code>fn:ends-with-sequence()</code>, 
+            <code>fn:expanded-QName()</code>, <code>fn:foot()</code>, <code>fn:highest()</code>, <code>fn:identity()</code>, <code>fn:index-where()</code>, 
+            <code>fn:in-scope-namespaces()</code>, <code>fn:intersperse()</code>, <code>fn:is-NaN()</code>, 
+            <code>fn:items-after()</code>, <code>fn:items-at()</code>, <code>fn:items-before()</code>, <code>fn:items-ending-where()</code>, <code>fn:items-starting-where()</code>, 
+            <code>fn:iterate-while()</code>, <code>fn:lowest()</code>, <code>fn:op()</code>, <code>fn:parcel()*</code>, <code>fn:parse-QName()</code>, <code>fn:parts()*</code>, 
+            <code>fn:replicate()</code>, <code>fn:slice()*</code>, <code>fn:some()</code>, <code>fn:starts-with-sequence()</code>,
+            <code>fn:truncate()</code>, and <code>fn:unparcel()*</code>. Specifications of these functions
+            can be found in the <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html">QT4CG draft specification</a>.</p>
+        
+        <aside><p>None of these functions can be regarded as 100% stable, but the
+        ones marked with an asterisk are especially likely to be removed or changed as
+        work on the 4.0 specifications progresses.</p>
+        
+        <p>A few of these functions were already available in Saxon 11, but the specifications
+        (and in some cases the function names) may have changed.</p></aside>
+        
+        <p>The proposed 4.0 functions <code>map:build()</code> and <code>map:filter()</code> are implemented.</p>
+        
+        <p>The proposed 4.0 functions <code>array:foot()</code> and <code>array:truncate()</code> are implemented.</p>
+        
+        <h2>Dropped Extension Functions</h2>
+        
+        <p>The Saxon extension functions <code>saxon:evaluate()</code>, <code>saxon:eval()</code>, and <code>saxon:expression()</code>
+            have been dropped. (The function <code>saxon:evaluate-node()</code> was dropped in Saxon 10). 
+            The same effect (and more) can be achieved using the standard XSLT 3.0 instruction
+            <a class="bodylink code" href="/xsl-elements/evaluate">xsl:evaluate</a>.</p>
+        
+        <!--<h2>Extension Instructions</h2>-->
+        
+        <h2>XPath Syntax Extensions</h2>
+        
+        <p>Some experimental syntax extensions intended for 4.0 have been dropped. "Dot Functions" (written as <code>.{.+1}</code>
+            or <code>fn{.+1}</code>)
+            are now written as <code>->{.+1}</code>. "Underscore functions" (written as <code>_{$1 + $2}</code>) are dropped
+            entirely (write instead <code>->($p1, $p2){$p1 + $p2}</code>).</p>
+        
+        <h2>XSLT extensions</h2>
         
         <p>If XSLT 4.0 extensions are enabled, two new (experimental) values are available for <code>xsl:mode/@on-no-match</code>,
-        namely <code>shallow-copy-all</code> and <code>shallow-skip-all</code>. These have the same effect as <code>shallow-copy</code>
-        and <code>shallow-skip</code> respectively, except when processing maps and arrays</p>
+            namely <code>shallow-copy-all</code> and <code>shallow-skip-all</code>. These have the same effect as <code>shallow-copy</code>
+            and <code>shallow-skip</code> respectively, except when processing maps and arrays.</p>
         
         <p>For <code>shallow-skip-all</code>:</p>
         
@@ -210,12 +278,12 @@
                 <code>"value"</code>, and can be matched using the pattern <code>match="record(value)"</code>. The value of the array
                 member can be extracted from the parcel using the function <code>fn:unparcel()</code>. If a parcel does not match any
                 template rule, then it will not be processed.
-           </li>
+            </li>
             <li>When processing a map that does not match any template rule, the map
-            is split into a set of map entries, one for each key-value pair in the map. These entries are represented
-            as singleton maps, and they are processed by making an implicit call on <code>xsl:apply-templates</code>. However,
-            if a singleton map does not match any template rule, then to prevent infinite recursion 
-            it is not processed at all.</li>
+                is split into a set of map entries, one for each key-value pair in the map. These entries are represented
+                as singleton maps, and they are processed by making an implicit call on <code>xsl:apply-templates</code>. However,
+                if a singleton map does not match any template rule, then to prevent infinite recursion 
+                it is not processed at all.</li>
         </ul>
         
         <p>For <code>shallow-copy-all</code>:</p>
@@ -225,7 +293,7 @@
                 is split into a set of parcels, one for each member of the array, and each parcel is processed by making
                 an implicit call on <code>xsl:apply-templates</code>. A parcel is represented as a single-entry map with the key
                 <code>"value"</code>, and can be matched using the pattern <code>match="record(value)"</code>. The value of the array
-                member can be extracted from the parcel using the function <code>fn:unparcel()</code>. The template 
+                member can be extracted from the parcel using the function <code>fn:unparcel()</code>.
             </li>
             <li>When processing a map that does not match any template rule, a new map is created. The existing map
                 is split into a set of map entries, one for each key-value pair in the map. These entries are represented
@@ -235,54 +303,25 @@
                 to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
         </ul>
         
-       <p>The proposed 4.0 functions fn:all(), fn:all-equal(), fn:all-different(), fn:characters(), 
-           fn:contains-sequence(), fn:ends-with-sequence(), 
-           fn:expanded-QName(), fn:foot(), fn:highest(), fn:identity(), fn:index-where(), 
-           fn:in-scope-namespaces(), fn:intersperse(), fn:is-NaN(), 
-           fn:items-after(), fn:items-at(), fn:items-before(), fn:items-ending-where(), fn:items-starting-where(), 
-           fn:iterate-while(), fn:lowest(), fn:op(), fn:parcel()*, fn:parts()*, fn:parse-QName(), 
-           fn:replicate(), fn:slice()*, fn:some(), fn:starts-with-sequence(),
-           fn:truncate(), and fn:unparcel()*  are implemented. Specifications of these functions
-           can be found in <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html"
-               class="bodylink">the QT4CG draft specification</a>.</p>
+        <p>The experimental <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
+            <code>xsl:for-each-group</code>, and <code>xsl:iterate</code> added in Saxon 11 are dropped. In their place, use
+            <code>select="array:members($array)"</code> or <code>select="map:key-value-pairs($map)"</code>.</p>
         
-        <aside><p>None of these functions can be regarded as 100% stable, but the
-        ones marked with an asterisk are especially likely to be removed or changed as
-        work on the 4.0 specifications progresses.</p>
-        
-        <p>A few of these functions were already available in Saxon 11, but the specifications
-        (and in some cases the function names) may have changed.</p></aside>
-        
-   
-        
-        <p>The proposed 4.0 functions map:build() and map:filter() are implemented</p>
-        
-        <p>The proposed 4.0 functions array:foot() and array:truncate() are implemented</p>
-        
-        <p>The  <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
-            <code>xsl:for-each-group</code>, and <code>xsl:iterate</code> are dropped. In their place, use
-        <code>select="array:members($array)"</code> or <code>select="map:key-value-pairs($map)"</code></p>
-        
-        <p>Some experimental syntax extensions intended for 4.0 have been dropped. "Dot Functions" (written as <code>.{.+1}</code>
-            or <code>fn{.+1}</code>)
-        are now written as <code>->{.+1}</code>. "Underscore functions" (written as <code>_{$1 + $2}</code>) are dropped
-        entirely (write instead <code>->($p1, $p2){$p1 + $p2}</code>).</p>
-        
-        <p>The proposed instruction <code>xsl:match</code> has been dropped.</p>
+        <p>The proposed instruction <code>xsl:match</code> added in Saxon 11 has been dropped.</p>
  
 
     
     </category>
     
     <category name="extensibility">
-        <p class="javaonly">In the <code>IntegratedFunctionCall</code> class, there is no longer any need to implement the
-            <code>copyLocalData</code> method, and if it is implemented, the method will never be called. The method definition
-        is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
-        <p class="csonly">In the <code>ExtensionFunctionCall</code> class, there is no longer any need to implement the
-            <code>CopyLocalData</code> method, and if it is implemented, the method will never be called. The method definition
+        <p class="javaonly">In the <code java="net.sf.saxon.functions.IntegratedFunctionCall">IntegratedFunctionCall</code> class, there is no longer
+            any need to implement the <code>copyLocalData</code> method, and if it is implemented, the method will never be called. The method
+            definition is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
+        <p class="csonly">In the <code cs="Saxon.Api.ExtensionFunctionCall">ExtensionFunctionCall</code> class, there is no longer any need to
+            implement the <code>CopyLocalData</code> method, and if it is implemented, the method will never be called. The method definition
             is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
-        <p>The reason for this change is that the object is no longer copied during operations such as function inlining; since it is
-        no longer implemented as a node in the expression tree, this copying was found to be unnecessary.</p>
+        <p>The reason for this change is that the object is no longer copied during operations such as function inlining; since it is no longer
+            implemented as a node in the expression tree, this copying was found to be unnecessary.</p>
     </category>
     
     <category name="sql" class="javaonly">
@@ -298,7 +337,7 @@
        
     </category>
     
-    <category name="performance">
+    <category name="optimization">
         
         <p>The strategy for lazy evaluation of variables has changed. In the past, Saxon made a compile-time decision whether to evaluate
         variables eagerly or lazily. The problem with this is that it's hard to get the decision right: lazy evaluation imposes
@@ -339,22 +378,22 @@
             and were instantiated 
             using <code>newInstance()</code>; they are now registered as a <code>Supplier&lt;? extends SystemFunction></code>,
         with a lambda function of the form <code>() -> new Replace()</code>, and are instantiated by invoking this factory
-        method. (A consequence is that the same class can now implement several closely-related functions, such as <code>fn:true</code>
-            and <code>fn:false</code>, or <code>fn:exists</code> and <code>fn:empty</code>).</p>
+        method. (A consequence is that the same class can now implement several closely-related functions, such as <code>fn:true()</code>
+            and <code>fn:false()</code>, or <code>fn:exists()</code> and <code>fn:empty()</code>.)</p>
         
         <p>There are two significant changes in the implementation of XDM arrays:</p>
         
         <ul>
-            <li>Saxon uses two main implementations of arrays: <code>SimpleArrayItem</code> is a wrapper over a Java list of
-            <code>GroundedValue</code> objects representing its members, and <code>ImmutableArrayItem</code> is a structure
-            that allows efficient modification (operations such as put, remove, and append do not require copying all the
-            existing data).</li>
-            <li>The <code>ImmutableArrayItem</code> implementation has been rewritten to use Saxon's <code>ZenoChain</code>
-            internally: this is a completely different data structure. (This change was actually made in 11.4 to fix bugs.)</li>
-            <li>The choice between the two structures is now in many cases made dynamically, based on accumulated experience.
-            Specifically, if an expression or function delivers arrays which tend to be frequently modified by addition or removal
-            of members, then Saxon will learn to use an <code>ImmutableArrayItem</code> for future evaluation of the same
-            expression or function.</li>
+            <li>Saxon uses two main implementations of arrays: <code java="net.sf.saxon.ma.arrays.SimpleArrayItem">SimpleArrayItem</code> is a wrapper
+                over a Java list of <code java="net.sf.saxon.om.GroundedValue">GroundedValue</code> objects representing its members; and <code
+                    java="net.sf.saxon.ma.arrays.ImmutableArrayItem">ImmutableArrayItem</code> is a structure that allows efficient modification
+                (operations such as put, remove, and append do not require copying all the existing data).</li>
+            <li>The <code>ImmutableArrayItem</code> implementation has been rewritten to use Saxon's <code
+                java="net.sf.saxon.ma.zeno.ZenoChain">ZenoChain</code> internally: this is a completely different data structure. (This change was
+                actually made in 11.4 to fix bugs.)</li>
+            <li>The choice between the two structures is now in many cases made dynamically, based on accumulated experience. Specifically, if an
+                expression or function delivers arrays which tend to be frequently modified by addition or removal of members, then Saxon will learn
+                to use an <code>ImmutableArrayItem</code> for future evaluation of the same expression or function.</li>
         </ul>
         
         

@@ -51,6 +51,8 @@
       <cat name="applet" title="Using Saxon as a Java applet"/>
    </categories>
    
+   <xi:include href="changes/changes-12.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   
    <xi:include href="changes/changes-11.1.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
    
    <xi:include href="changes/changes-11.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
@@ -3804,7 +3806,7 @@ a factor of four or five faster.</p>
          <p xmlns="">It is hoped to extend this capability to XSLT in a subsequent release. Compiling for .NET is
 still under consideration, as is direct generation of bytecode rather than Java source code.</p>
 
-         <p xmlns="">For more details see <xref section="using-xquery" page="querycompilation">Compiling Queries to Java code</xref>.</p>
+         <p xmlns="">For more details see "Compiling Queries to Java code".</p>
          </change>
          
          
