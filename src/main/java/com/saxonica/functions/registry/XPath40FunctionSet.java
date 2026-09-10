@@ -175,6 +175,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(CsvToXml.OPTION_DETAILS));
 
+        register("deep-equal", 2, 4, e -> e.populate(DeepEqual.makeDeepEqual(40), BuiltInAtomicType.BOOLEAN, ONE, BASE)
+                .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
+                .arg(1, Type.ITEM_TYPE, STAR | ABS, null)
+                .arg(2, BuiltInAtomicType.STRING, OPT | ABS, null)
+                .arg(3, MapType.ANY_MAP_TYPE, OPT | ABS, null));
+
         register("decode-from-uri", 1, 1, e -> e.populate(DecodeFromURI::new, BuiltInAtomicType.STRING, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
         //#endif

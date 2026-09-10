@@ -106,7 +106,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
             Expression optionsArg = exp.getArg(3);
             MapItem suppliedOptions = (MapItem)optionsArg.evaluateItem(context);
             try {
-                options = new DeepEqual.DeepEqualOptions(suppliedOptions, collationName, context);
+                options = new DeepEqual.DeepEqualOptions(suppliedOptions, collationName, context, 31);
             } catch (XPathException e) {
                 dynamicError(e);
             }
