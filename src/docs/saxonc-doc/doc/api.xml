@@ -301,7 +301,9 @@
                <td>
                   <span class="signature">SaxonProcessor()</span>
                   <div class="fcomment">Default Constructor. Create an unlicensed Saxon
-                     Processor.</div>
+                     Processor. The current working directory in the SaxonProcessor is defaulted
+                     to the PHP getcwd() function. The cwd length is 256 bytes as default.
+                  But this limit does not apply to the SaxonProcessor.setcwd() method when used.</div>
                </td>
             </tr>
             <tr>
@@ -312,7 +314,10 @@
                      features of Saxon that need a license file. If false, the method will create a
                      Configuration appropriate for Saxon-HE (Home edition). If true, the method will
                      create a Configuration appropriate to the version of the software that is
-                     running, i.e. Saxon-PE or Saxon-EE.</div>
+                     running, i.e. Saxon-PE or Saxon-EE. The current working directory in the
+                     SaxonProcessor is defaulted to the PHP getcwd() function. The cwd
+                     length is 256 bytes as default. But this limit does not apply to the
+                     SaxonProcessor.setcwd() method when used.</div>
                </td>
             </tr>
             <tr>
