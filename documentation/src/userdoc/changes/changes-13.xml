@@ -850,7 +850,8 @@ TODO: rethink redefines and override
         
         <p>Some further PRs have been implemented:</p>
         <ul>
-            <li><p>PR2492 - The <code>fn:collation-available</code> function IS implemented, and the $usage parameter has been dropped.</p></li>           
+            <li><p>PR2492 - The <code>fn:collation-available</code> function IS implemented, and the $usage parameter has been dropped.</p></li> 
+            <li><p>PR2492 - Renamed <code>jnode-selector</code> and <code>jnode-content</code> as <code>jkey</code> and <code>jvalue</code>.</p></li> 
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
