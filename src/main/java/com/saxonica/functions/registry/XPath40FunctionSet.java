@@ -127,6 +127,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
+        register("duplicate-values", 1, e -> e.populate(DuplicateValues::new, BuiltInAtomicType.ANY_ATOMIC, STAR, DCOLL | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
+
+        register("duplicate-values", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, STAR, BASE | UO)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
         register("ends-with", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, BooleanValue.TRUE)
