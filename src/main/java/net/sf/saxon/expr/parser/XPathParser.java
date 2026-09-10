@@ -2582,12 +2582,14 @@ public class XPathParser {
 
             default:
                 if (t.currentToken == Token.NAME &&
+                        t.peekAhead() != Token.LPAREN &&
                         (t.currentTokenValue.equals("true") || t.currentTokenValue.equals("false"))) {
                     warning("The expression is looking for a child element named '" + t.currentTokenValue +
                             "' - perhaps " + t.currentTokenValue + "() was intended? To avoid this warning, use child::" +
                             t.currentTokenValue + " or ./" + t.currentTokenValue + ".", SaxonErrorCode.SXWN9040);
                 }
-                if (t.currentToken == Token.NAME && t.getBinaryOp(t.currentTokenValue) != Token.UNKNOWN &&
+                if (t.currentToken == Token.NAME && t.peekAhead() != Token.LPAREN &&
+                        t.getBinaryOp(t.currentTokenValue) != Token.UNKNOWN &&
                         language != ParsedLanguage.XSLT_PATTERN && (offset > 0 || t.peekAhead() != Token.EOF)) {
                     String s = t.currentTokenValue;
                     warning("The keyword '" + s + "' in this context means 'child::" + s +
@@ -3548,7 +3550,7 @@ public class XPathParser {
             checkLanguageVersion40();
         }
         int offset = t.currentTokenStartOffset;
-        t.setState(Tokenizer.BARE_NAME_STATE); // Prevent mis-recognition of x?f(2)
+        //t.setState(Tokenizer.BARE_NAME_STATE); // Prevent mis-recognition of x?f(2)
         t.currentToken = Token.LPAREN;  // Hack to force following symbol to be recognised in post-operator mode
         nextToken();
         int token = t.currentToken;
@@ -3556,28 +3558,28 @@ public class XPathParser {
 
         Expression result;
         LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
-//        if (token == Token.NAME && t.peekAhead() == Token.COLONCOLON) {
-//            switch (t.currentTokenValue) {
-//                case "content":
-//                    //modifier = LookupExpression.LookupModifier.CONTENT;
-//                    break;
-//                case "key":
-//                    modifier = LookupExpression.Modifier.KEY;
-//                    break;
-//                case "value":
-//                    modifier = LookupExpression.Modifier.VALUE;
-//                    break;
-//                case "entry":
-//                    modifier = LookupExpression.Modifier.ENTRY;
-//                    break;
-//                default:
-//                    grumble("Unknown modifier after '?' operator: " + t.currentTokenValue);
-//            }
-//
-//            nextToken(); // swallow the '::'
-//            nextToken();
-//        }
-        //token = t.currentToken;
+        if (token == Token.AXIS) {
+            switch (t.currentTokenValue) {
+                case "content":
+                    //modifier = LookupExpression.LookupModifier.CONTENT;
+                    break;
+                case "key":
+                    modifier = LookupExpression.Modifier.KEY;
+                    break;
+                case "value":
+                    modifier = LookupExpression.Modifier.VALUE;
+                    break;
+                case "entry":
+                    modifier = LookupExpression.Modifier.ENTRY;
+                    break;
+                default:
+                    grumble("Unknown modifier after '?' operator: " + t.currentTokenValue);
+            }
+
+            //nextToken(); // swallow the '::'
+            nextToken();
+            token = t.currentToken;
+        }
         if (token == Token.NAME) {
             String name = t.currentTokenValue;
             if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
@@ -3589,8 +3591,7 @@ public class XPathParser {
                 SequenceType requiredType = parseSequenceType();
                 expect(Token.RPAREN);
                 nextToken();
-                // only handle item types for now
-                result = lookupStar(lhs, requiredType.getPrimaryType(), deep);
+                result = lookupStar(lhs, modifier, requiredType, deep);
             } else {
                 result = lookupName(lhs, modifier, name, deep);
             }
@@ -3601,19 +3602,11 @@ public class XPathParser {
             }
             nextToken();
             result = makeLookupExpression(lhs, modifier, Literal.makeLiteral(number), deep);
-        } else if (token == Token.MULT || token == Token.STAR) {
+        } else if (token == Token.STAR || token == Token.MULT) {
             nextToken();
-            ItemType itemType = AnyItemType.getInstance();
-            if (t.currentToken == Token.COLONCOLON) {
-                checkLanguageVersion40();
-                nextToken();
-                itemType = parseItemType();  // See QT4 spec bug #859
-            }
-            result = lookupStar(lhs, itemType, deep);
-
+            result = lookupStar(lhs, modifier, SequenceType.ANY_SEQUENCE, deep);
         } else if (token == Token.LPAREN) {
             t.setState(Tokenizer.DEFAULT_STATE);
-
             result = makeLookupExpression(lhs, modifier, parseParenthesizedExpression(), deep);
         } else if (token == Token.STRING_LITERAL) {
             checkLanguageVersion40();
@@ -3665,12 +3658,14 @@ public class XPathParser {
      * @return the result of parsing the expression
      */
 
-    private static Expression lookupStar(Expression lhs, ItemType type, boolean deep) {
-        // Only handle ItemTypes for the time being
+    private static Expression lookupStar(Expression lhs,
+                                         LookupExpression.Modifier modifier,
+                                         SequenceType type,
+                                         boolean deep) {
         if (deep) {
             return new DeepLookupAllExpression(lhs, type);
         } else {
-            return new LookupAllExpression(lhs, type);
+            return new LookupAllExpression(lhs, modifier, type);
         }
     }
 

@@ -21,6 +21,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +41,9 @@ public class DeepLookupAllExpression extends UnaryExpression {
      * @param start The left hand operand.
      */
 
-    public DeepLookupAllExpression(Expression start, ItemType type) {
+    public DeepLookupAllExpression(Expression start, SequenceType type) {
         super(start);
-        requiredType = type;
+        requiredType = type.getPrimaryType(); // TODO: implement sequence types
     }
 
     @Override
@@ -140,7 +141,7 @@ public class DeepLookupAllExpression extends UnaryExpression {
     @Override
     public DeepLookupAllExpression copy(RebindingMap rebindings) {
         DeepLookupAllExpression exp =
-                new DeepLookupAllExpression(getBaseExpression().copy(rebindings), requiredType);
+                new DeepLookupAllExpression(getBaseExpression().copy(rebindings), SequenceType.makeSequenceType(requiredType, StaticProperty.EXACTLY_ONE));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }

@@ -122,7 +122,8 @@ public class ShapedMap extends StringMap {
     /**
      * Get the set of all key values in the map.
      *
-     * @return a set containing all the key values present in the map, in unpredictable order
+     * @return a set containing all the key values present in the map. Normally the order
+     * is unpredictable, but for a {@code ShapedMap} the order is defined by the {@link Shape}.
      */
     @Override
     public AtomicIterator keys() {

@@ -18,11 +18,9 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.RecordType;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -32,7 +30,10 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,12 +41,15 @@ import java.util.List;
 
 
 /**
- * A lookup expression is an expression of the form A?*, where A must be a map or an array
+ * The {@code LookupAllExpression} handles lookup expressions of the form {@code expr?*} (which
+ * returns all entries in a map or array) and {@code expr?type(T)} (which returns all entries
+ * whose value matches a given sequence type).
  */
 
 public class LookupAllExpression extends UnaryExpression {
 
-    ItemType requiredType;
+    private SequenceType requiredType;
+    private LookupExpression.Modifier modifier;
 
     /**
      * Constructor
@@ -53,9 +57,10 @@ public class LookupAllExpression extends UnaryExpression {
      * @param lhs The left hand operand (which must always select a sequence of maps or arrays).
      */
 
-    public LookupAllExpression(Expression lhs, ItemType requiredType) {
+    public LookupAllExpression(Expression lhs, LookupExpression.Modifier modifier, SequenceType requiredType) {
         super(lhs);
         this.requiredType = requiredType;
+        this.modifier = modifier;
     }
 
     @Override
@@ -73,7 +78,7 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public final ItemType getItemType() {
-        if (requiredType == AnyItemType.getInstance()) {
+        if (requiredType.getPrimaryType() == AnyItemType.getInstance()) {
             ItemType lhs = getBaseExpression().getItemType();
             if (lhs instanceof MapType) {
                 return ((MapType) lhs).getValueType().getPrimaryType();
@@ -83,7 +88,7 @@ public class LookupAllExpression extends UnaryExpression {
                 return AnyItemType.getInstance();
             }
         } else {
-            return requiredType;
+            return requiredType.getPrimaryType();
         }
     }
 
@@ -210,7 +215,7 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public LookupAllExpression copy(RebindingMap rebindings) {
-        return new LookupAllExpression(getBaseExpression().copy(rebindings), requiredType);
+        return new LookupAllExpression(getBaseExpression().copy(rebindings), modifier, requiredType);
     }
 
     /**
@@ -263,8 +268,8 @@ public class LookupAllExpression extends UnaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("lookupAll", this);
-        if (requiredType != AnyItemType.getInstance()) {
-            destination.emitAttribute("type", AlphaCode.fromItemType(requiredType));
+        if (requiredType != SequenceType.ANY_SEQUENCE) {
+            destination.emitAttribute("type", AlphaCode.fromSequenceType(requiredType));
         }
         getBaseExpression().export(destination);
         destination.endElement();
@@ -297,88 +302,92 @@ public class LookupAllExpression extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             LookupAllExpression expr = (LookupAllExpression) getExpression();
             PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
-            if (expr.requiredType == AnyItemType.getInstance()) {
-                return (context) -> new LookupAllIterator(expr, baseEval.iterate(context));
-            } else {
-                TypeHierarchy th = expr.getConfiguration().getTypeHierarchy();
-                ItemMapper fn = ItemMapper.of((item) -> expr.requiredType.matches(item, th) ? item : null);
-                return (context) -> new ItemMappingIterator(
-                        new LookupAllIterator(expr, baseEval.iterate(context)), fn);
-            }
+            SequenceType req = expr.requiredType;
+            TypeHierarchy th = getConfiguration().getTypeHierarchy();
+            return context -> {
+                SequenceIterator lhs = baseEval.iterate(context);
+                SequenceIterator entries = new MappingIterator(lhs, item -> {
+                    if (item instanceof ArrayItem) {
+                        return new ArrayEntriesIterator((ArrayItem)item);
+                    } else if (item instanceof MapItem) {
+                        return new MapEntriesIterator((MapItem)item);
+                    } else {
+                        return net.sf.saxon.tree.iter.EmptyIterator.getInstance();
+                    }
+                });
+                if (req != SequenceType.ANY_SEQUENCE) {
+                    entries = new ItemMappingIterator(entries, entry ->
+                        req.matches(((ShapedMap)entry).get("value"), th) ? entry : null
+                    );
+                }
+                switch (expr.modifier) {
+                    case ENTRY:
+                        return entries;
+                    case KEY:
+                        return new ItemMappingIterator(entries, item ->
+                                (AtomicValue)((ShapedMap)item).get("key"));
+                    case VALUE:
+                        return new ItemMappingIterator(entries, item ->
+                                SimpleArrayItem.makeSimpleArrayItem(((ShapedMap) item).get("value").iterate()));
+                    case CONTENT:
+                    default:
+                        return new MappingIterator(entries, item ->
+                                ((ShapedMap) item).get("value").iterate());
+                }
+            };
         }
     }
 
-    private static class LookupAllIterator implements SequenceIterator {
+    /**
+     * Iterator over a sequence of entries in an array, delivering them in the form
+     * required by $array?entry::*
+     */
+    private static class ArrayEntriesIterator implements SequenceIterator {
 
-        final LookupAllExpression expr;
-        final SequenceIterator level0;
-        Iterator<GroundedValue> level1forArrays;
-        Iterator<KeyValuePair> level1forMaps;
-        // delivers GroundedValue in the case of an array, or KeyValuePair in the case of a map
-        SequenceIterator level2;
+        final ArrayItem container;
+        final Iterator<GroundedValue> baseIterator;
+        int index = 0;
 
-        public LookupAllIterator(LookupAllExpression expr, SequenceIterator baseIterator) {
-            level0 = baseIterator;
-            level1forArrays = null;
-            level1forMaps = null;
-            level2 = null;
-            this.expr = expr;
+        public ArrayEntriesIterator(ArrayItem arrayItem) {
+            baseIterator = arrayItem.members().iterator();
+            container = arrayItem;
         }
 
         @Override
         public Item next() {
-            if (level2 == null) {
-                if (level1forArrays == null && level1forMaps == null) {
-                    Item lhs = level0.next();
-                    if (lhs == null) {
-                        return null;
-                    } else if (lhs instanceof ArrayItem) {
-                        level1forArrays = ((ArrayItem)lhs).members().iterator();
-                        return next();
-                    } else if (lhs instanceof MapItem) {
-                        level1forMaps = ((MapItem)lhs).keyValuePairs().iterator();
-                        return next();
-                    } else {
-                        try {
-                            LookupExpression.mustBeArrayOrMap(expr, lhs);
-                        } catch (XPathException e) {
-                            throw new UncheckedXPathException(e);
-                        }
-                        return null;
-                    }
-                } else if (level1forArrays != null && level1forArrays.hasNext()) {
-                    GroundedValue nextEntry = level1forArrays.next();
-                    level2 = nextEntry.iterate();
-                } else if (level1forMaps != null && level1forMaps.hasNext()) {
-                    KeyValuePair nextEntry = level1forMaps.next();
-                    GroundedValue value = nextEntry.value;
-                    level2 = value.iterate();
-                } else {
-                    level1forMaps = null;
-                    level1forArrays = null;
-                }
-                return next();
+            if (baseIterator.hasNext()) {
+                GroundedValue value = baseIterator.next();
+                Int64Value key = Int64Value.makeIntegerValue(++index);
+                return LookupExpression.makeEntry(key, value, container);
             } else {
-                Item nextItem = level2.next();
-                if (nextItem == null) {
-                    level2 = null;
-                    return next();
-                } else {
-                    return nextItem;
-                }
+                return null;
             }
+        }
+    }
+
+    /**
+     * Iterator over a sequence of entries in a map, delivering them in the form
+     * required by $map?entry::*
+     */
+    private static class MapEntriesIterator implements SequenceIterator {
+
+        final MapItem container;
+        final Iterator<KeyValuePair> baseIterator;
+
+        public MapEntriesIterator(MapItem mapItem) {
+            baseIterator = mapItem.keyValuePairs().iterator();
+            container = mapItem;
         }
 
         @Override
-        public void close() {
-            if (level0 != null) {
-                level0.close();
-            }
-            if (level2 != null) {
-                level2.close();
+        public Item next() {
+            if (baseIterator.hasNext()) {
+                KeyValuePair kvp = baseIterator.next();
+                return LookupExpression.makeEntry(kvp.key, kvp.value, container);
+            } else {
+                return null;
             }
         }
-
     }
 }
 

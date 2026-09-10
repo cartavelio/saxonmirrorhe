@@ -23,7 +23,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -160,7 +160,6 @@ public class FilterExpressionAM extends BinaryExpression
         SequenceType optionalMapOrArray = SequenceType.makeSequenceType(mapOrArray, StaticProperty.ALLOWS_ZERO_OR_ONE);
         setStart(tc.staticTypeCheck(getStart(), optionalMapOrArray, roleSupplier, visitor));
 
-        // The second operand must be of type xs:boolean?
 
         ItemType startType = getStart().getItemType();
         if (startType == ErrorType.getInstance()) {
@@ -186,7 +185,7 @@ public class FilterExpressionAM extends BinaryExpression
 
         Supplier<RoleDiagnostic> roleSupplier1 =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?[]", 1, "XPTY0004");
-        setStep(tc.staticTypeCheck(getRhsExpression(), SequenceType.OPTIONAL_BOOLEAN, roleSupplier1, visitor));
+        //setStep(tc.staticTypeCheck(getRhsExpression(), SequenceType.OPTIONAL_BOOLEAN, roleSupplier1, visitor));
         // TODO: no, this will invoke coercion which we don't want
 
         return this;
@@ -332,8 +331,6 @@ public class FilterExpressionAM extends BinaryExpression
 
     public static class FilterExprAMElaborator extends ItemElaborator {
 
-        // TODO: combine ForEach and SlashExpression
-
         @Override
         public ItemEvaluator elaborateForItem() {
             FilterExpressionAM expr = (FilterExpressionAM) getExpression();
@@ -360,12 +357,18 @@ public class FilterExpressionAM extends BinaryExpression
             XPathContext c2 = context.newMinorContext();
             c2.setCurrentIterator(focus);
             focus.setLengthFinder(() -> size);
+            int position = 0;
             for (KeyValuePair pair : input.keyValuePairs()) {
+                position++;
                 ShapedMap kvp = new ShapedMap(Shape.KEY_VALUE_PAIR, pair.key, pair.value);
                 focus.setContextItem(kvp);
                 focus.incrementPosition();
                 Item predicateValue = predicate.eval(c2);
-                if (predicateValue != null && ((BooleanValue)predicateValue).getBooleanValue()) {
+                if (predicateValue instanceof NumericValue) {
+                    if (((NumericValue) predicateValue).isWholeNumber() && ((NumericValue) predicateValue).longValue() == position) {
+                        result = result.addEntry(pair.key, pair.value);
+                    }
+                } else if (predicateValue != null && predicateValue.effectiveBooleanValue()) {
                     result = result.addEntry(pair.key, pair.value);
                 }
             }
@@ -379,12 +382,18 @@ public class FilterExpressionAM extends BinaryExpression
             XPathContext c2 = context.newMinorContext();
             c2.setCurrentIterator(focus);
             focus.setLengthFinder(() -> size);
+            int position = 0;
             for (GroundedValue member : input.members()) {
+                position++;
                 Item contextItem = member.getLength() == 1 ? member.head() : new Parcel(member);
                 focus.setContextItem(contextItem);
                 focus.incrementPosition();
                 Item predicateValue = predicate.eval(c2);
-                if (predicateValue != null && ((BooleanValue) predicateValue).getBooleanValue()) {
+                if (predicateValue instanceof NumericValue) {
+                    if (((NumericValue) predicateValue).isWholeNumber() && ((NumericValue) predicateValue).longValue() == position) {
+                        result = result.append(member);
+                    }
+                } else if (predicateValue != null && predicateValue.effectiveBooleanValue()) {
                     result = result.append(member);
                 }
             }

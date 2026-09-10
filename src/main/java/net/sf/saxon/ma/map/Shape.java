@@ -1,5 +1,6 @@
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -11,7 +12,8 @@ import java.util.HashMap;
 /**
  * A {@code Shape} represents the common structure of a set of {@code ShapedMap} objects,
  * each being a map with the same set of keys but different values. A {@code Shape} is essentially
- * a mapping from keys to integer slot positions.}
+ * a mapping from keys to integer slot positions.} An instance of a {@code Shape} is represented
+ * by a {@link ShapedMap}.
  */
 public class Shape {
 
@@ -60,6 +62,14 @@ public class Shape {
      */
     public AtomicIterator iterateKeys() {
         return new KeyIterator(keys);
+    }
+
+    /**
+     * Make an instance of this Shape
+     */
+
+    public ShapedMap make(GroundedValue... values) {
+        return new ShapedMap(this, values);
     }
 
     /**
