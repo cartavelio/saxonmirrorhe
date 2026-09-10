@@ -328,7 +328,7 @@ public class TypeChecker {
             }
         // Function coercion
 
-        } else if (!itemTypeOK && reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
+        } else if (/*!itemTypeOK && */ reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
                 && !((FunctionItemType) reqItemType).isArrayType()) {
             Affinity r = th.relationship(suppliedItemType, th.getGenericFunctionItemType());
             if (r != DISJOINT) {

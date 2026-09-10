@@ -182,10 +182,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(3, opFnType, ONE, null));
 
             ItemType filterFunctionType = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                    new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
                     SequenceType.SINGLE_BOOLEAN);
 
-            register("keys", 2, e -> e.populate(MapKeys::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
+            register("keys-where", 2, e -> e.populate(MapKeysWhere::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
 
@@ -194,6 +194,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(1, AnyItemType.getInstance(), STAR | INS, null));
 
             register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_INEXTENSIBLE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
+            register("empty", 1, e -> e.populate(MapEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("entries", 1, e -> e.populate(MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
@@ -536,6 +539,18 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
+     * Implementation of the proposed 4.0 function map:empty(Map) =&gt; boolean
+     */
+    public static class MapEmpty extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem map = (MapItem) arguments[0].head();
+            return BooleanValue.get(map.isEmpty());
+        }
+    }
+
+    /**
      * Implementation of the proposed 4.0 function map:pairs(Map) =&gt; record(key, value)*
      */
     public static class MapPairs extends SystemFunction {
@@ -638,19 +653,42 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             assert map != null;
-            if (arguments.length == 1) {
+            //if (arguments.length == 1) {
                 return SequenceTool.toLazySequence(map.keys());
-            } else {
-                FunctionItem fn = (FunctionItem) arguments[1].head();
-                ZenoSequence results = new ZenoSequence();
-                for (KeyValuePair pair : map.keyValuePairs()) {
-                    BooleanValue selected = (BooleanValue)fn.call(context, new Sequence[]{pair.value}).head();
-                    if (selected.getBooleanValue()) {
-                        results = results.append(pair.key);
-                    }
+//            } else {
+//                FunctionItem fn = (FunctionItem) arguments[1].head();
+//                ZenoSequence results = new ZenoSequence();
+//                for (KeyValuePair pair : map.keyValuePairs()) {
+//                    BooleanValue selected = (BooleanValue)fn.call(context, new Sequence[]{pair.value}).head();
+//                    if (selected.getBooleanValue()) {
+//                        results = results.append(pair.key);
+//                    }
+//                }
+//                return results;
+//            }
+        }
+    }
+
+    /**
+     * Implementation of the XPath 4.0 function map:keys-where(Map, predicate) =&gt; atomicValue*
+     */
+    public static class MapKeysWhere extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem map = (MapItem) arguments[0].head();
+            assert map != null;
+
+            FunctionItem fn = (FunctionItem) arguments[1].head();
+            ZenoSequence results = new ZenoSequence();
+            for (KeyValuePair pair : map.keyValuePairs()) {
+                BooleanValue selected = (BooleanValue) fn.call(context, new Sequence[]{pair.key, pair.value}).head();
+                if (selected.getBooleanValue()) {
+                    results = results.append(pair.key);
                 }
-                return results;
             }
+            return results;
+
         }
     }
 

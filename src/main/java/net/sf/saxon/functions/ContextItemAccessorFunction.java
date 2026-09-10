@@ -7,17 +7,15 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.ContextItemExpression;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.type.FunctionItemType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -43,12 +41,12 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     public FunctionItem bindContext(XPathContext context) throws XPathException {
         final Item ci = context.getContextItem();
         if (ci == null) {
-            Callable callable = new CallableDelegate((context1, arguments) -> {
+            //Callable callable = new CallableDelegate((context1, arguments) -> {
                 throw new XPathException("Context item for " +
                     getFunctionName().getDisplayName() + " is absent", "XPDY0002");
-            });
-            FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
-            return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
+            //});
+            //FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
+            //return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
         }
         return new ConstantFunction(getFunctionName(), evaluate(ci, context), getFunctionItemType().getResultType());
     }

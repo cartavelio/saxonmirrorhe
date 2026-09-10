@@ -44,6 +44,7 @@ public class ParamKeywords {
         arrayParamNames.put("from-sequence", "input|action");
         arrayParamNames.put("get", "array|position|fallback");
         arrayParamNames.put("head", "array");
+        arrayParamNames.put("index-of", "input|search|collation");
         arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
         arrayParamNames.put("join", "arrays");
@@ -88,7 +89,7 @@ public class ParamKeywords {
         fnParamNames.put("compare", "value1|value2|collation");
         fnParamNames.put("concat", "value1|value2|...");
         fnParamNames.put("contains", "value|substring|collation");
-        fnParamNames.put("contains-sequence", "input|subsequence|compare");
+        fnParamNames.put("contains-subsequence", "input|subsequence|compare");
         fnParamNames.put("contains-token", "value|token|collation");
         fnParamNames.put("count", "input");
         fnParamNames.put("current-date", "");
@@ -114,7 +115,7 @@ public class ParamKeywords {
         fnParamNames.put("empty", "input");
         fnParamNames.put("encode-for-uri", "value");
         fnParamNames.put("ends-with", "value|substring|collation");
-        fnParamNames.put("ends-with-sequence", "input|subsequence|compare");
+        fnParamNames.put("ends-with-subsequence", "input|subsequence|compare");
         fnParamNames.put("environment-variable", "name");
         fnParamNames.put("error", "code|description|error-object");
         fnParamNames.put("escape-html-uri", "value");
@@ -133,13 +134,14 @@ public class ParamKeywords {
         fnParamNames.put("format-date", "value|picture|language|calendar|place");
         fnParamNames.put("format-dateTime", "value|picture|language|calendar|place");
         fnParamNames.put("format-integer", "value|picture|language");
-        fnParamNames.put("format-number", "value|picture|decimal-format-name");
+        fnParamNames.put("format-number", "value|picture|format-name|format");
         fnParamNames.put("format-time", "value|picture|language|calendar|place");
         fnParamNames.put("function-arity", "function");
         fnParamNames.put("function-lookup", "name|arity");
         fnParamNames.put("function-name", "function");
         fnParamNames.put("generate-id", "node");
         fnParamNames.put("has-children", "node");
+        fnParamNames.put("hash", "value|options");
         fnParamNames.put("head", "input");
         fnParamNames.put("highest", "input|collation|key");
         fnParamNames.put("hours-from-dateTime", "value");
@@ -167,6 +169,7 @@ public class ParamKeywords {
         fnParamNames.put("json", "input|options");
         fnParamNames.put("json-doc", "href|options");
         fnParamNames.put("json-to-xml", "value|options");
+        fnParamNames.put("label", "input");
         fnParamNames.put("lang", "language|node");
         fnParamNames.put("last", "");
         fnParamNames.put("load-xquery-module", "module-uri|options");
@@ -208,6 +211,7 @@ public class ParamKeywords {
         fnParamNames.put("partition", "input|split-when");
         fnParamNames.put("parts", "");
         fnParamNames.put("path", "node");
+        fnParamNames.put("pin", "input");
         fnParamNames.put("position", "");
         fnParamNames.put("prefix-from-QName", "value");
         fnParamNames.put("random-number-generator", "seed");
@@ -220,6 +224,8 @@ public class ParamKeywords {
         fnParamNames.put("root", "node");
         fnParamNames.put("round", "value|precision");
         fnParamNames.put("round-half-to-even", "value|precision");
+        fnParamNames.put("scan-left", "input|zero|action");
+        fnParamNames.put("scan-right", "input|zero|action");
         fnParamNames.put("seconds", "value");
         fnParamNames.put("seconds-from-dateTime", "value");
         fnParamNames.put("seconds-from-duration", "value");
@@ -228,9 +234,10 @@ public class ParamKeywords {
         fnParamNames.put("slice", "input|start|end|step");
         fnParamNames.put("some", "input|predicate");
         fnParamNames.put("sort", "input|collation|key");
+        fnParamNames.put("sort-with", "input|comparators");
         fnParamNames.put("stack-trace", "");
         fnParamNames.put("starts-with", "value|substring|collation");
-        fnParamNames.put("starts-with-sequence", "input|subsequence|compare");
+        fnParamNames.put("starts-with-subsequence", "input|subsequence|compare");
         fnParamNames.put("static-base-uri", "");
         fnParamNames.put("string", "value");
         fnParamNames.put("string-join", "values|separator");
@@ -243,6 +250,7 @@ public class ParamKeywords {
         fnParamNames.put("substring-before", "value|substring|collation");
         fnParamNames.put("sum", "values|zero");
         fnParamNames.put("tail", "input");
+        fnParamNames.put("take-while", "input|predicate");
         fnParamNames.put("timezone-from-date", "value");
         fnParamNames.put("timezone-from-dateTime", "value");
         fnParamNames.put("timezone-from-time", "value");
@@ -264,8 +272,9 @@ public class ParamKeywords {
         fnParamNames.put("year-from-dateTime", "value");
         fnParamNames.put("years-from-duration", "value");
         fnParamNames.put("zero-or-one", "input");
-        mapParamNames.put("build", "input|key|value|combine");
+        mapParamNames.put("build", "input|keys|value|combine");
         mapParamNames.put("contains", "map|key");
+        mapParamNames.put("empty", "map");
         mapParamNames.put("entries", "map");
         mapParamNames.put("entry", "key|value");
         mapParamNames.put("filter", "map|predicate");
@@ -273,7 +282,8 @@ public class ParamKeywords {
         mapParamNames.put("for-each", "map|action");
         mapParamNames.put("get", "map|key|fallback");
         mapParamNames.put("group-by", "input|key");
-        mapParamNames.put("keys", "map|predicate");
+        mapParamNames.put("keys", "map");
+        mapParamNames.put("keys-where", "map|predicate");
         mapParamNames.put("merge", "maps|options");
         mapParamNames.put("of", "pairs|combine");
         mapParamNames.put("pair", "key|value");

@@ -127,8 +127,13 @@
         
         <p>The functions <code>map:values</code> and <code>array:values</code> are implemented.</p>
         
+        <p>The functions <code>map:empty</code> and <code>map:keys-where</code> are implemented.</p>
+        
         <p>The function <code>map:build</code> allows multiple index entries to be created for a single
         input item.</p>
+        
+        <p>The functions <code>fn:csv-to-arrays</code>, <code>fn:parse-csv</code>, and <code>fn:csv-to-xml</code>
+        are implemented.</p>
         
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         

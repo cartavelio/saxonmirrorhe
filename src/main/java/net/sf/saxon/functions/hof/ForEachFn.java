@@ -24,7 +24,7 @@ import net.sf.saxon.value.Int64Value;
 import java.util.function.BiFunction;
 
 /**
- * This class implements the function fn:for-each() (formerly fn:map), which is a standard function in XQuery 3.0
+ * This class implements the function fn:for-each() which is a standard function from XQuery 3.0
  */
 
 public class ForEachFn extends SystemFunction {

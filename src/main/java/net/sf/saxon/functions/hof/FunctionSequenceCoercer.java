@@ -21,6 +21,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -95,7 +96,13 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
         final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        if (th.isSubType(getBaseExpression().getItemType(), requiredItemType)) {
+        // We can't dispense with function coercion just because the supplied function is an instance
+        // of the required type, because it might not perform enough checking of arguments: see test VarDecl066.
+        // We can only dispense with it if the argument checking and result checking is at least
+        // as strict as the required type. For now, do coercion unless the type signatures are identical
+
+        //if (th.isSubType(getBaseExpression().getItemType(), requiredItemType)) {
+        if (th.relationship(getBaseExpression().getItemType(), requiredItemType) == Affinity.SAME_TYPE) {
             return getBaseExpression();
         } else {
             return this;

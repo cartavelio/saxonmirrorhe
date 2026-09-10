@@ -58,7 +58,7 @@ public class CoercionRules {
             throws XPathException {
         CoercionPlan plan = requiredType.getPrimaryType().getCoercionPlan(version);
         CoercionRequest request = new CoercionRequest(
-                value, requiredType,knownType, config, roleSupplier, locator);
+                value, requiredType, knownType, config, roleSupplier, locator);
         return plan.coerce(request);
     }
     

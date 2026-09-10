@@ -14,7 +14,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 public class FunctionItemCoercionPlan extends CoercionPlan {
 
     private final static FunctionItemCoercionPlan INSTANCE31 = new FunctionItemCoercionPlan(31);
-    private final static FunctionItemCoercionPlan INSTANCE40 = new FunctionItemCoercionPlan(31);
+    private final static FunctionItemCoercionPlan INSTANCE40 = new FunctionItemCoercionPlan(40);
 
     private final int version;
 

@@ -518,7 +518,7 @@ public class SpecificFunctionType extends AnyFunctionType {
      * Get the coercion plan for use when this type is the required type for (say) coercion
      * of arguments in a function call
      *
-     * @param version the XPath langauge version (40 or 31)
+     * @param version the XPath language version (40 or 31)
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
