@@ -215,7 +215,8 @@ dependencies {
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-dom', version: '1.4.0'],
     [group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: '1.4.0'],
     [group: 'com.ibm.icu', name: 'icu4j', version: icu4jVersion ],
-    [group: 'io.vavr', name: 'vavr', version: vavrVersion],
+    //[group: 'io.vavr', name: 'vavr', version: vavrVersion],
+    [group: 'ch.randelshofer', name: 'vavr-champ', version: '0.10.5'],
     [group: 'jline', name: 'jline', version: jlineVersion ],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion, classifier: 'data'],
@@ -541,7 +542,7 @@ icu4jJar = "${fileSeparator}icu4j-${icu4jVersion}.jar"
 tagsoupJar = "${fileSeparator}tagsoup-${tagsoupVersion}.jar"
 mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
 jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
-vavrJar = "${fileSeparator}vavr-${vavrVersion}.jar"
+vavrJar = "${fileSeparator}vavr-champ-${vavrVersion}.jar"
 vavrMatchJar = "${fileSeparator}vavr-match-${vavrVersion}.jar"
 resolverJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}.jar"
 resolverDataJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}-data.jar"
