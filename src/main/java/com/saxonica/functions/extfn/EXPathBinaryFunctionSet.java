@@ -300,9 +300,13 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 len = (int) ((NumericValue) arguments[3].head()).longValue();
             }
             checkIndexInclusive(value, offset, len);
-//            if (len == 0) {
-//                return StringValue.EMPTY_STRING;
-//            }
+            if (encoding.equalsIgnoreCase("utf-16") && len > 1) {
+                if (value.getBinaryValue()[0] == (byte)0xfe && value.getBinaryValue()[1] == (byte)0xff) {
+                    encoding = "utf-16be";
+                } else if (value.getBinaryValue()[0] == (byte) 0xff && value.getBinaryValue()[1] == (byte) 0xfe) {
+                    encoding = "utf-16le";
+                }
+            }
             try {
                 String result = BinaryResource.decode(value.getBinaryValue(), offset, len, encoding);
                 return new StringValue(result);
