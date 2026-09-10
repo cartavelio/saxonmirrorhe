@@ -168,9 +168,10 @@
                <p>-explain[:filename]</p>
             </td>
             <td>
-               <p>Display a query execution plan. This is a representation of the expression tree
-                  after rewriting by the optimizer. If no file name is specified the output is sent
-                  to the standard error stream. The output is a tree in XML format.</p>
+               <p>Traces expression rewrites made by the optimizer, followed by
+                  a representation of the final expression tree after optimization.
+                  If no file name is specified the output is sent to the standard error stream. The
+                  output is in XML format.</p>
             </td>
          </tr>
          <tr class="javaonly">

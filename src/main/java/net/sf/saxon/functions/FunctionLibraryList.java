@@ -123,9 +123,10 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs,
                            Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons)
     throws XPathException {
-        boolean debug = env.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
+        boolean debug = env.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)
+                && !NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri());
         Logger err = env.getConfiguration().getLogger();
-        if (debug && !NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri())) {
+        if (debug) {
             err.info("Looking for function " + functionName.getComponentName().getEQName() + "#" + functionName.getArity());
         }
         for (FunctionLibrary lib : libraryList) {
@@ -137,7 +138,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
                 return func;
             }
         }
-        if (debug && !NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri())) {
+        if (debug) {
             err.info("Function " + functionName.getComponentName().getEQName() + " not found!");
         }
         return null;

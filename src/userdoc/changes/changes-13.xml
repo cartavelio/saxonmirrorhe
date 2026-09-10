@@ -2,6 +2,54 @@
 
 <release number="13" date="2024-01-12" xmlns="http://www.saxonica.com/ns/doc/changes">
     
+    <!-- 
+    Schema Processing API Changes
+
+Processor.getSchemaManager() has an optional name parameter. The default name is "#global" which registers a global schema with the configuration. The special name "#local" creates a schema which is standalone, and is not registered with the configuration. Other schema names should be unique within a Processor/Configuration. It is possible for SchemaManager.load() to accept more than one Source, but once a schema has been loaded, it is not possible to add to it. The schema must be loaded before a SchemaValidator is created,
+
+-- No, now moved to using XsdCompiler
+
+When multiple calls on SchemaManager.load() are made, each schema must be valid in its own right, as well as the union of the schemas being valid. This means that one call must not load a schema that has "dangling references" to components in another.
+If such dependencies exist, the two schema documents must be loaded in a single call of the load() method.
+
+The DocumentBuilder in the past did validation using the global schema if the Configuration option SCHEMA_VALIDATION_MODE was set to strict or lax. This is no longer the case. The DocumentBuilder needs to be explicitly supplied with a SchemaValidator.
+
+In order to allow components to belong to more than one schema, Wildcards no longer belong to a specific schema, which means that validation against a wildcard always needs to pass the schema as an extra parameter. This is because interpretation of "strict" and "lax", and of ##notDefined, depends on examining the entire schema.
+
+NodeTests such as schema-element(E) and schema-attribute(A) are now meaningful only in the context of a specific schema.
+They can therefore no longer be created using an ItemTypeFactory constructed directly from the Processor; new methods are available to construct an ItemTypeFactory that is associated with a specific XsdSchema.
+
+You need to validate documents with the same schema that you import statically into the query or stylesheet. One way to do this is to compile the schema using a s9api SchemaManager, then call useSchema() on the XQueryCompiler, XPathCompiler, or XsltCompiler. TODO: alternatively, compile the stylesheet or query, then call getSchema() to get the schema and use this to validate source documents.
+
+When constructing schema-specific item types, the two-argument constructor for class ItemTypeFactory must be used; the second argument identifies a particular schema.
+
+When using low-level interfaces that control validation using a `ParseOptions` object, the parse options must now identify the schema to be used for validation.
+
+The static context now has a schema, so it no longer needs a set of imported namespaces. If a name is present in the schema, that's enough of a check.
+
+
+TODO: we aren't type-checking the XPath expressions for identity constraints
+
+Saxon will no longer read user-defined variants of standard W3C-defined schema namespaces such as the XML and XSI namespaces. Any schemaLocation on an xs:import for these namespaces is ignored, and the W3C definition is used instead. XSD 1.1 is explicit that this is expected behaviour; XSD 1.0 has nothing to say on the subject, but it is a reasonable interpretation of the intent of the spec.
+
+JAXP SchemaFactory - the newSchema() method with no arguments now returns an empty schema. Previously it returned the global configuration schema.
+
+Test attribute-1501 assumes that attribute definitions from the XML namespace are present in every schema. This ain't so! Changed the test to import the xml namespace.
+
+TODO: we can get rid of namespace sealing -- certainly at configuration level (DONE). Similarly much of the handling of namespace status.
+
+TODO: package export and import
+
+TODO: command line, -scmin, -xsd
+
+TODO: configuration file, schemaDocument, schemaComponentModel
+
+TODO: rethink redefines and override
+
+    
+    -->
+    
+    
     <category name="installation">
         
        <p>The XPath parser and tokenizer have changed beyond all recognition in the 25 years since they were
@@ -59,7 +107,7 @@
         remains limited to 2^31.</p>
  
         
-    </category>-->
+    </category>
     
     <category name="xslt30">
        <p>The value returned from the function call <code>system-property('xsl:vendor-url')</code> has been changed
@@ -97,6 +145,9 @@
         
         <p>Add information regarding schema processing....</p>
         
+        <p>The handling of a schema referenced from a source document using <code>xsi:schemaLocation</code>
+        has changed. </p>
+        
         <p>The callback for xsl:message processing can now request (by calling a method on the supplied
         <code>Message</code> object) that the message is to be treated as a dynamic error.</p>
         
@@ -110,7 +161,7 @@
     <category name="JAXP" class="javaonly">
         
         <p>The classes ProfessionalXPathFactory and EnterpriseXPathFactory are dropped. It seems there
-        were no tests referencing these classes, and JAXP XPath has gradually been deprecated. <b>Need to
+        were no tests referencing these classes, and JAXP XPath has gradually been deprecated. <b>TODO: Need to
         drop the mention in the XPath documentation.</b></p>
         
    

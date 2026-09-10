@@ -3515,8 +3515,14 @@
         </proto>
       </signatures>
       <status>
-        <p>The two-argument form of this function is specified in XPath 3.0, and is available since
-          Saxon 9.3, provided XPath 3.0 is enabled.</p>
+        <p>The two-argument form of this function was introduced in XPath 3.0, and has been available since
+          Saxon 9.3.</p>
+        <p>Saxon 12.6 fixed a long-standing bug (6537), whereby negative "midway" <code>xs:decimal</code> 
+          values were rounded away from zero rather than towards zero. For example 
+          <code>round(-0.125e0, 2)</code> returned <code>-0.13</code> rather than <code>-0.12</code>.</p>
+        <p>XPath 4.0 introduces a 3-argument form of this function in which the rounding mode can
+        be specified explicitly. This is implemented in Saxon 12.6 and Saxon 13.0; for details see
+        the XPath 4.0 specification.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
     </function>

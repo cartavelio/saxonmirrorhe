@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
@@ -1436,8 +1437,8 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      * Output a statistical summary to System.err
      */
 
-    public void showSize() {
-        System.err.println("Tree size: " + numberOfNodes + " nodes, " + textBuffer.length() + " characters, " +
+    public void showSize(Logger logger) {
+        logger.info("Tree size: " + numberOfNodes + " nodes, " + textBuffer.length() + " characters, " +
                                    numberOfAttributes + " attributes");
     }
 

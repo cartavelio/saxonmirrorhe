@@ -8,6 +8,7 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
@@ -269,10 +270,10 @@ public abstract class Builder implements Receiver {
     public void close() throws XPathException {
         if (timing && opened) {
             long endTime = System.nanoTime();
-            getConfiguration().getLogger().info(
-                    "Tree built in " + Timer.showExecutionTimeNano(endTime - startTime));
+            Logger logger = getConfiguration().getLogger();
+            logger.info("Tree built in " + Timer.showExecutionTimeNano(endTime - startTime));
             if (currentRoot instanceof TinyDocumentImpl) {
-                ((TinyDocumentImpl) currentRoot).showSize();
+                ((TinyDocumentImpl) currentRoot).showSize(logger);
             }
             startTime = endTime;
         }

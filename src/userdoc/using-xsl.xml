@@ -174,11 +174,13 @@
                <p>-explain[:filename]</p>
             </td>
             <td>
-               <p>Display an execution plan and other diagnostic information for the stylesheet.
-                  This is a representation of the expression tree after rewriting by the optimizer.
-                  It combines the XSLT instructions and the XPath expressions into a single tree. If
+               <p>Traces expression rewrites made by the optimizer, followed by
+                  a representation of the final expression tree after optimization.
+                  This combines the XSLT instructions and the XPath expressions into a single tree. If
                   no file name is specified the output is sent to the standard error stream. The
                   output is in XML format.</p>
+               <p>Equivalent to setting the configuration option <code>http://saxon.sf.net/feature/trace-optimizer-decisions</code>
+               and then calling the <code>explain</code> method of the <code>XsltExecutable</code>.</p>
             </td>
          </tr>
          <tr>
@@ -642,6 +644,11 @@
                <p>Display version and timing information to the standard error output. The output
                   also traces the files that are read and written, and extension modules that are
                   loaded.</p>
+               <p>More specifically, the command-line option <code>-t</code> has two effects: firstly, it sets
+               the configuration option <code>http://saxon.sf.net/feature/timing</code>,
+               and secondly, it outputs various messages that are specific to command-line
+               invocation, including the full names of input and output files, and the
+               time spent compiling and executing the stylesheet.</p>
             </td>
          </tr>
          <tr>

@@ -9,6 +9,7 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.CopyOptions;
@@ -306,8 +307,8 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
         out.endDocument();
     }
 
-    public void showSize() {
-        tree.showSize();
+    public void showSize(Logger logger) {
+        tree.showSize(logger);
     }
 
     /**
