@@ -27,16 +27,16 @@ Or, with PowerShell on Windows:
     PS > $env:SAXONC_EDITION = "@edition@"
     PS > pytest --import-mode=importlib --data-dir=../samples/data test 
 
-Full documentation for SaxonC 12 Python is available. The [SaxonC Python 12
+Full documentation for SaxonC 13 Python is available. The [SaxonC 13 Python API
 documentation][1] contains information specific to SaxonC Python, and the
-[SaxonC 12 documentation][2] includes instructions for installing and configuring
+[SaxonC 13 documentation][2] includes instructions for installing and configuring
 the product, details of the SaxonC C/C++ API, PHP API, and sample code.
-Meanwhile, the main [Saxon 12 documentation][3] contains further information
+Meanwhile, the main [Saxon 13 documentation][3] contains further information
 relevant to SaxonC.
 
-[1]: https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_python_api
-[2]: https://www.saxonica.com/saxon-c/documentation12/index.html
-[3]: https://www.saxonica.com/documentation12/index.html
+[1]: https://www.saxonica.com/saxon-c/doc13/python/index.html
+[2]: https://www.saxonica.com/saxon-c/documentation13/index.html
+[3]: https://www.saxonica.com/documentation13/index.html
 
 For further information, see the [SaxonC web page][4]. For bug reporting, 
 lists of known bugs, and help forums, please visit the SaxonC bug issue project:

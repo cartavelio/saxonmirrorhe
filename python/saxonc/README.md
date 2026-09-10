@@ -18,7 +18,7 @@ is available free of charge. By downloading the software, you are agreeing to ou
 [terms and conditions](https://www.saxonica.com/license/terms.xml).
 
 For full documentation for the latest SaxonC release, see the
-[SaxonC 12 documentation](https://www.saxonica.com/saxon-c/documentation12/index.html).
+[SaxonC 13 documentation](https://www.saxonica.com/saxon-c/documentation13/index.html).
 
 ## Why choose SaxonC?
 
@@ -69,7 +69,7 @@ from saxonc@edition@ import PySaxonProcessor
 
 The SaxonC API includes classes for constructing XDM data models
 and for a variety of processors. For full details see the [SaxonC Python API 
-documentation](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api).
+documentation](https://www.saxonica.com/saxon-c/documentation/saxon-c/doc13/python/index.html).
 
 The following short example shows how to get the Saxon version from
 the `PySaxonProcessor`:
@@ -121,7 +121,7 @@ print(output)
 ```
 
 For more Python examples, and further details about installing and configuring the product, 
-see the [SaxonC 12 documentation](https://www.saxonica.com/saxon-c/documentation12/index.html).
+see the [SaxonC 13 documentation](https://www.saxonica.com/saxon-c/documentation13/index.html).
 
 ## Using `pylint` on a project which uses `saxonc@edition@`
 

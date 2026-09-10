@@ -10,9 +10,9 @@ This download contains the source files used to build SaxonC-@EDITION@, along
 with the source for the Python package.
 
 PHP sources are included as part of the main SaxonC download, available from the
-[SaxonC 12 download page][]
+[SaxonC download page][]
 
-[SaxonC 12 download page]: https://www.saxonica.com/download/c.xml
+[SaxonC download page]: https://www.saxonica.com/download/c.xml
 
 ## What’s included
 
@@ -33,15 +33,15 @@ repository.
 
 [saxonc-resources]: https://github.com/Saxonica/saxonc-resources
 
-Full documentation for SaxonC 12 is available. The [SaxonC 12  documentation][]
+Full documentation for SaxonC 13 is available. The [SaxonC 13 documentation][]
 contains information specific to SaxonC - including instructions for installing
 and configuring the product, details of the SaxonC C/C++ API, PHP API and
-Python3 API, and sample code. Meanwhile, the main [Saxon 12 documentation][]
+Python3 API, and sample code. Meanwhile, the main [Saxon 13 documentation][]
 contains further information relevant to SaxonC.
 
-[SaxonC 12 documentation]: https://www.saxonica.com/saxon-c/documentation12/index.html
+[SaxonC 13 documentation]: https://www.saxonica.com/saxon-c/documentation13/index.html
 
-[Saxon 12 documentation]: https://www.saxonica.com/documentation12/index.html
+[Saxon 13 documentation]: https://www.saxonica.com/documentation13/index.html
 
 For further information, see the [SaxonC web page][]. For bug reporting,
 lists of known bugs, and help forums, please visit

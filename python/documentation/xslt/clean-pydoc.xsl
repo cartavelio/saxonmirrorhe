@@ -23,7 +23,7 @@
   <!-- rewrite the <a> that links to the doc index -->
   <xsl:template match="*:a[@href = '.' and . = 'index']" mode="top-bar">
     <xsl:copy>
-      <xsl:attribute name="href" select="'/saxon-c/documentation12/index.html#!api/saxon_c_python_api'"/>
+      <xsl:attribute name="href" select="'/saxon-c/documentation13/index.html#!api/saxon_c_python_api'"/>
       <xsl:text>index</xsl:text>
     </xsl:copy>
   </xsl:template>

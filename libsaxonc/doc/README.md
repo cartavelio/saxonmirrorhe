@@ -26,5 +26,5 @@ SaxonCProcessor.h, SaxonCXPath.h
 ## Other documentation
 
 For further information about using SaxonC, see the
-[SaxonC 12 Documentation](https://www.saxonica.com/saxon-c/documentation12/index.html),
+[SaxonC 13 Documentation](https://www.saxonica.com/saxon-c/documentation13/index.html),
 or [SaxonC web page](https://www.saxonica.com/saxon-c/index.xml).

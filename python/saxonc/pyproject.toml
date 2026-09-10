@@ -14,7 +14,7 @@ content-type = "text/markdown"
 
 [project.urls]
 Homepage = "https://www.saxonica.com/saxon-c/index.xml"
-Documentation = "https://www.saxonica.com/saxon-c/documentation12/index.html"
+Documentation = "https://www.saxonica.com/saxon-c/documentation13/index.html"
 Issues = "https://saxonica.plan.io/projects/saxon-c"
 
 [build-system]

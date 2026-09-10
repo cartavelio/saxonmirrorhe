@@ -20,12 +20,12 @@ The main classes in the SaxonC C API are as follows:
 SaxonCGlue.h, SaxonCProcessor.h, SaxonCXPath.h
 
 
-Full documentation for SaxonC 12 is available. The [SaxonC 12
-documentation](https://www.saxonica.com/saxon-c/documentation12/index.html)
+Full documentation for SaxonC 13 is available. The [SaxonC 13
+documentation](https://www.saxonica.com/saxon-c/documentation13/index.html)
 contains information specific to SaxonC - including instructions for
 installing and configuring the product, details of the SaxonC C/C++
 API, PHP API and Python3 API, and sample code. Meanwhile, the main
-[Saxon 12 documentation](https://www.saxonica.com/documentation12/index.html)
+[Saxon 13 documentation](https://www.saxonica.com/documentation13/index.html)
 contains further information relevant to SaxonC.
 
 For further information, see the [SaxonC web
