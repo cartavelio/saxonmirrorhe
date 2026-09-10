@@ -15,6 +15,7 @@ import com.saxonica.functions.registry.XQUpdate10FunctionSet;
 import com.saxonica.serialize.SerializerFactoryPE;
 import com.saxonica.trans.ModePE;
 import com.saxonica.trans.PackageLoaderPE;
+import com.saxonica.xsltextn.ExtensionElementCreator;
 import com.saxonica.xsltextn.ExtensionElementFactory;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import com.saxonica.xsltextn.style.SaxonElementFactory;
@@ -111,7 +112,7 @@ public class ProfessionalConfiguration extends Configuration {
     private boolean licenseNotFound = false;
 
     private transient Verifier verifier;
-    private transient HashMap<String, ExtensionElementFactory> xsltExtensionElementNamespaceMap;
+    private transient HashMap<String, ExtensionElementCreator> xsltExtensionElementNamespaceMap;
     protected BuiltInFunctionSet vendorFunctionSet;
     // Static cache of JavaExternalObjectType objects representing Java classes
     private final HashMap<Class, JavaExternalObjectType> externalObjectTypeCache = new HashMap<>();
@@ -842,14 +843,15 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     public void setExtensionElementNamespace(String namespace, ExtensionElementFactory factory) throws XPathException {
-        if (NamespaceConstant.isReserved(namespace)) {
-            throw new XPathException("Namespace " + namespace +
-                                             " is reserved: it cannot be used for extension instructions");
-        }
-        if (xsltExtensionElementNamespaceMap == null) {
-            xsltExtensionElementNamespaceMap = new HashMap<>(4);
-        }
-        xsltExtensionElementNamespaceMap.put(namespace, factory);
+        setExtensionElementCreator(namespace,
+                                     (localName) -> {
+                                         try {
+                                             return factory.getExtensionClass(localName).newInstance();
+                                         } catch (InstantiationException | IllegalAccessException e) {
+                                             throw new RuntimeException(e);
+                                         }
+                                     });
+
     }
 
     //#if CSHARP==false
@@ -871,6 +873,28 @@ public class ProfessionalConfiguration extends Configuration {
         }
         setExtensionElementNamespace(namespace, (ExtensionElementFactory)o);
     }
+
+    /**
+     * Set a namespace used to refer to a library of XSLT extension elements
+     *
+     * @param namespace the namespace used for the extension elements
+     * @param creator the an instance of {}@link ExtensionElementCreator}
+     *                  that instantiates extension elements in this namespace
+     * @throws net.sf.saxon.trans.XPathException if (for example) the supplied class does not implement
+     *                                           the ExtensionElementFactory interface
+     * @since 9.2
+     */
+
+    public void setExtensionElementCreator(String namespace, ExtensionElementCreator creator) throws XPathException {
+        if (NamespaceConstant.isReserved(namespace)) {
+            throw new XPathException("Namespace " + namespace +
+                                             " is reserved: it cannot be used for extension instructions");
+        }
+        if (xsltExtensionElementNamespaceMap == null) {
+            xsltExtensionElementNamespaceMap = new HashMap<>(4);
+        }
+        xsltExtensionElementNamespaceMap.put(namespace, creator);
+    }
     //#endif
 
     /**
@@ -879,10 +903,10 @@ public class ProfessionalConfiguration extends Configuration {
      * @param namespace the namespace URI of the extension element
      * @return the corresponding extension element factory if one has been registered,
      *         or null otherwise
-     * @since 9.2
+     * @since 11. Replaces {@code getExtensionElementNamespace}.
      */
 
-    public ExtensionElementFactory getExtensionElementFactory(String namespace) {
+    public ExtensionElementCreator getExtensionElementCreator(String namespace) {
         if (xsltExtensionElementNamespaceMap == null) {
             return null;
         }
@@ -897,8 +921,8 @@ public class ProfessionalConfiguration extends Configuration {
 
     @Override
     public boolean isExtensionElementAvailable(StructuredQName qName) {
-        ExtensionElementFactory eef = getExtensionElementFactory(qName.getURI());
-        return eef != null && eef.getExtensionClass(qName.getLocalPart()) != null;
+        ExtensionElementCreator eef = getExtensionElementCreator(qName.getURI());
+        return eef != null && eef.createExtensionElement(qName.getLocalPart()) != null;
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.saxonica.config.pe;
 
 import com.saxonica.config.ProfessionalConfiguration;
-import com.saxonica.xsltextn.ExtensionElementFactory;
+import com.saxonica.xsltextn.ExtensionElementCreator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -70,15 +70,15 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
                     pipe, location, sequence);
         }
 
-        Class<? extends StyleElement> extensionClass = null;
+        StyleElement extensionElement = null;
         String uri = elementName.getURI();
-        ExtensionElementFactory eef = ((ProfessionalConfiguration) config).getExtensionElementFactory(uri);
+        ExtensionElementCreator eef = ((ProfessionalConfiguration) config).getExtensionElementCreator(uri);
         if (eef != null) {
             String localName = elementName.getLocalPart();
-            extensionClass = eef.getExtensionClass(localName);
+            extensionElement = eef.createExtensionElement(localName);
         }
 
-        if (extensionClass == null) {
+        if (extensionElement == null) {
             ElementImpl instr = super.makeElementNode(parent, elementName, elementType, isNilled, attlist, namespaces,
                     pipe, location, sequence);
             if (instr instanceof StyleElement) {
@@ -102,19 +102,17 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
 
         String localname = elementName.getLocalPart();
         StyleElement temp;
-        Class<? extends StyleElement> requiredClass = extensionClass;
 
         if (allowExtensions) {
             // We can't work out the final class of the node until we've examined its attributes
             // such as version and extension-element-prefixes; but we can have a good guess, and
             // change it later if need be.
-            temp = super.makeStyleElement(extensionClass);
+            temp = extensionElement;
             temp.setCompilation(getCompilation());
         } else {
             temp = new AbsentExtensionElement();
             XmlProcessingIncident reason = new XmlProcessingIncident("Extension instructions are disabled");
             temp.setValidationError(reason, StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
-            requiredClass = AbsentExtensionElement.class;
         }
 
         temp.setNamespaceMap(namespaces);
@@ -128,24 +126,17 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
             if (!(toplevel || temp.isExtensionNamespace(NamespaceConstant.SAXON))) {
                 // We've got an element such as saxon:call-template but the
                 // user didn't declare the Saxon namespace as an extension element
-                // namespace. Chances are he just forgot.
+                // namespace. Chances are they just forgot.
                 XmlProcessingIncident te = new XmlProcessingIncident("saxon:" + localname +
                         " is not being treated as an extension instruction because the namespace " +
                         " http://saxon.sf.net/ has not been declared in extension-element-prefixes",
                                                                      SaxonErrorCode.SXWN9008, temp).asWarning();
                 pipe.getErrorReporter().report(te);
-                requiredClass = LiteralResultElement.class;
+                temp = new LiteralResultElement();
             }
         }
 
-        StyleElement node;
-        if (requiredClass.equals(temp.getClass())) {
-            node = temp;    // the original element will do the job
-        } else {
-            node = makeStyleElement(requiredClass);
-            node.substituteFor(temp);   // replace temporary node with the new one
-        }
-        return node;
+        return temp;
     }
 
     /**
@@ -167,13 +158,12 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
         if (!allowExtensions) {
             return false;
         }
-        ExtensionElementFactory factory = ((ProfessionalConfiguration) config).getExtensionElementFactory(uri);
+        ExtensionElementCreator factory = ((ProfessionalConfiguration) config).getExtensionElementCreator(uri);
         if (factory == null) {
             return false;
         }
         try {
-            Class actualClass = factory.getExtensionClass(localName);
-            StyleElement s = (StyleElement) actualClass.newInstance();
+            StyleElement s = factory.createExtensionElement(localName);
             return !instructionsOnly || s.isInstruction();
         } catch (Exception e) {
             return false;
