@@ -306,7 +306,7 @@ public class ResultDocument extends Instruction
                 getHref() == null ? null : getHref().copy(rebindings),
                 getFormatExpression() == null ? null : getFormatExpression().copy(rebindings),
                 getValidationAction(),
-                validationOptions.getSchema(),
+                validationOptions == null ? null : validationOptions.getSchema(),
                 getSchemaType(),
                 map,
                 characterMapIndex);

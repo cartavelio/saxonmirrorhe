@@ -7,7 +7,6 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.str.*;
 import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
@@ -20,9 +19,6 @@ import java.util.regex.Pattern;
  * This class provides helper methods and constants for handling whitespace
  */
 public class Whitespace {
-
-    private final static ARegularExpression anyWhitespace =
-            ARegularExpression.compile(StringTool.fromLatin1("[ \\n\\r\\t]+"), "");
 
     private final static Pattern J_oneWhitespace = Pattern.compile("[ \\n\\r\\t]");
     private final static Pattern J_anyWhitespace = Pattern.compile("[ \\n\\r\\t]+");

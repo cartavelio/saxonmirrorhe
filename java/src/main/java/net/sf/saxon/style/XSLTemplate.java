@@ -356,7 +356,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             }
         }
 
-        if (matchAtt != null) {
+        if (matchAtt != null && match == null) {
             match = makePattern(matchAtt, "match");
             if (diagnosticId == null) {
                 diagnosticId = "match=\"" + matchAtt + '\"';
@@ -823,10 +823,10 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
         Configuration config = getConfiguration();
 
-        if (getTemplateName() != null) {
-            // If this is both a named template and a template rule, treat both as separate
-            body = body.copy(new RebindingMap());
-        }
+//        if (getTemplateName() != null) {
+//            // If this is both a named template and a template rule, treat both as separate
+//            body = body.copy(new RebindingMap());
+//        }
 
 
         boolean first = true;
@@ -840,27 +840,28 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 contextItemType = AnyItemType.INSTANCE;
             }
             cisi = config.makeContextItemStaticInfo(contextItemType, contextItemOptionality);
-            body = refineTemplateBody(body, cisi);
+            Expression refinedBody = body.copy(new RebindingMap());
+            refinedBody = refineTemplateBody(refinedBody, cisi);
 
             if (first) {
                 //rule.setMatchPattern(match);
-                rule.setBody(body);
+                rule.setBody(refinedBody);
                 if (compilation.getCompilerInfo().getCodeInjector() != null) {
                     compilation.getCompilerInfo().getCodeInjector().process(rule);
-                    body = rule.getBody();
+                    refinedBody = rule.getBody();
                 }
                 first = false;
             } else {
                 if (rule.getBody() == null) {
-                    body = body.copy(new RebindingMap());
-                    if (body instanceof ComponentTracer) {
-                        ((ComponentTracer) body).setProperty("match", rule.getMatchPattern());
+                    refinedBody = body.copy(new RebindingMap());
+                    if (refinedBody instanceof ComponentTracer) {
+                        ((ComponentTracer) refinedBody).setProperty("match", rule.getMatchPattern());
                     }
                 } else {
-                    body = rule.getBody();
+                    refinedBody = rule.getBody();
                 }
             }
-            setCompiledTemplateRuleProperties(rule, body);
+            setCompiledTemplateRuleProperties(rule, refinedBody);
         }
     }
 

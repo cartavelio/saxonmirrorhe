@@ -26,8 +26,8 @@ import net.sf.saxon.value.*;
 
 public class PatternParser extends XPathParser {
 
-    int inPredicate = 0;
-    int inXNodePattern = 0;
+    private int inPredicate = 0;
+    private int inXNodePattern = 0;
 
     public PatternParser(StaticContext env) {
         super(env);
@@ -121,35 +121,6 @@ public class PatternParser extends XPathParser {
     }
 
 
-//    public Pattern parsePrimaryPattern(boolean topLevel, StaticContext env) throws XPathException {
-//        if (t.currentToken == Token.LPAREN) {
-//            nextToken();
-//            Pattern result = parseUnionPattern(false, env);
-//            readToken(Token.RPAREN);
-//            while (t.currentToken == Token.LSQB) {
-//                nextToken();
-//                Expression predicate = parsePredicate();
-//                readToken(Token.RSQB);
-//                result = new BasePatternWithPredicate(result, predicate);
-//            }
-//            return result;
-//        }
-//        if (t.currentToken == Token.DOT) {
-//            if (topLevel || isAllowXPath40Syntax()) {
-//                return parsePredicatePattern();
-//            } else {
-//                grumble("Predicate patterns cannot be used within parentheses unless 4.0 is enabled");
-//            }
-//        }
-//        if (isTypeKeyword() && isAllowXPath40Syntax()) {
-//            return parseTypePattern();
-//        } else if (isKeyword("jnode") && t.peekAhead() == Token.LPAREN && isAllowXPath40Syntax()) {
-//            return parseJNodePattern();
-//        } else {
-//            return parseXNodePattern();
-//        }
-//    }
-
     public Pattern parsePredicatePattern() throws XPathException {
         readToken(Token.DOT);
         if (t.currentToken == Token.LSQB) {
@@ -201,12 +172,6 @@ public class PatternParser extends XPathParser {
             return new UniversalPattern();
         }
     }
-
-//    private boolean isTypeKeyword() {
-//        return t.peekAhead() == Token.LPAREN &&
-//                (isKeyword("type") || isKeyword("item") || isKeyword("function") || isKeyword("record")
-//                || isKeyword("map") || isKeyword("array") || isKeyword("enum"));
-//    }
 
     private Pattern parseTypePattern() throws XPathException {
         Pattern result;

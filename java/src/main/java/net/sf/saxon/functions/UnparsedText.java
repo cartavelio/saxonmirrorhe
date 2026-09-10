@@ -166,7 +166,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                         content = StringView.tidy((char)errorValue + e.getMessage());
                     }
                     if (normalizeNewlines) {
-                        content = StringView.of(content.toString().replace("\r\n", "\n").replace("\r", "\n"));
+                        content = StringView.of(content.toString().replace("\r\n", "\n").replace('\r', '\n'));
                     }
                     if (cache == null) {
                         cache = new HashMap<>();
@@ -182,7 +182,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                 readFile(absoluteURI, encoding, consumer, context);
                 content = consumer.toUnicodeString();
                 if (normalizeNewlines) {
-                    content = StringView.of(content.toString().replace("\r\n", "\n").replace("\r", "\n"));
+                    content = StringView.of(content.toString().replace("\r\n", "\n").replace('\r', '\n'));
                 }
                 return new StringValue(content);
             }

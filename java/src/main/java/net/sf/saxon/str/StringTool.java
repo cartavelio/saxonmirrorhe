@@ -438,7 +438,8 @@ public class StringTool {
     }
 
     /**
-     * Copy from an array of 16-bit characters to an array holding 16-bit characters.
+     * Copy from an array of 16-bit characters to an array holding 24-bit characters,
+     * organised as three bytes per character
      * The caller is responsible for ensuring that the offsets are in range and that the
      * destination array is large enough.
      *
@@ -474,5 +475,6 @@ public class StringTool {
         }
         return h;
     }
+
 }
 

@@ -792,12 +792,13 @@ public class SlashExpression extends BinaryExpression
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config      the Saxon configuration
+     * @param firstInPath true if an axis step in this expression is to be treated as an initial step in the pattern
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
         Expression head = getLeadingSteps();
         if (head instanceof SequenceCoercer
                 && ((SequenceCoercer)head).getRequiredType().getPrimaryType() == AnyGNodeType.getInstance()) {
@@ -807,7 +808,7 @@ public class SlashExpression extends BinaryExpression
         if (head instanceof ItemChecker checker) {
             // No need to type check the context item
             if (checker.getBaseExpression() instanceof ContextItemExpression) {
-                return tail.toPattern(config);
+                return tail.toPattern(config, firstInPath);
             }
         } else if (tail instanceof VennExpression ve) {
             // Bug 4645. Rewrite a/(b|c) as (a/b union a/c). Note this rewrite isn't safe for
@@ -819,11 +820,11 @@ public class SlashExpression extends BinaryExpression
                         head.copy(new RebindingMap()), ve.getRhsExpression());
                 VennExpression topExpansion = new VennExpression(
                         lhExpansion, ve.operator, rhExpansion);
-                return topExpansion.toPattern(config);
+                return topExpansion.toPattern(config, firstInPath);
             }
         }
 
-        Pattern tailPattern = tail.toPattern(config);
+        Pattern tailPattern = tail.toPattern(config, false);
         if (tailPattern instanceof NodeTestPattern) {
             if (tailPattern.getItemType() instanceof ErrorType) {
                 return tailPattern;
@@ -839,7 +840,7 @@ public class SlashExpression extends BinaryExpression
                 if (mid.getAxis() == AxisInfo.DESCENDANT_OR_SELF &&
                         (mid.getNodeTest() == null || mid.getNodeTest() == AnyGNodeType.getInstance())) {
                     axis = AxisInfo.ANCESTOR;
-                    headPattern = start.getSelectExpression().toPattern(config);
+                    headPattern = start.getSelectExpression().toPattern(config, firstInPath);
                 }
             }
         }
@@ -848,7 +849,7 @@ public class SlashExpression extends BinaryExpression
             if (head instanceof ContextItemExpression) {
                 headPattern = AnchorPattern.getInstance();
             } else {
-                headPattern = head.toPattern(config);
+                headPattern = head.toPattern(config, firstInPath);
             }
         }
         return new AncestorQualifiedPattern(tailPattern, headPattern, axis);

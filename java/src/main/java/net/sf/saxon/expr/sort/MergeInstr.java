@@ -145,6 +145,7 @@ public class MergeInstr extends Instruction {
             ms.schemaType = schemaType;
             ms.streamable = streamable;
             ms.location = location;
+            ms.accumulators = accumulators;
             return ms;
         }
 

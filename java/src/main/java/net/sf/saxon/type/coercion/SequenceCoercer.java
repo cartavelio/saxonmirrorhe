@@ -65,7 +65,7 @@ public class SequenceCoercer extends UnaryExpression {
         // we use an ItemChecker and/or CardinalityChecker.
 
         // TODO: where the required type is GNode or JNode, we're currently coercing a map or array
-        //   to a root JNode. This conversion should happen only on the LHS of the "/" operator.
+        //   to a root JNode. This conversion should happen for the context item of an AxisExpression.
 
         ItemType requiredItemType = requiredType.getPrimaryType();
         Genre supplied = sequence.getItemType().getGenre();
@@ -181,11 +181,11 @@ public class SequenceCoercer extends UnaryExpression {
         return fsc2;
     }
 
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
         if (requiredType.equals(SequenceType.GNODE_SEQUENCE) || requiredType.equals(SequenceType.NODE_SEQUENCE)) {
-            return getBaseExpression().toPattern(config);
+            return getBaseExpression().toPattern(config, firstInPath);
         } else {
-            return super.toPattern(config);
+            return super.toPattern(config, firstInPath);
         }
     }
 

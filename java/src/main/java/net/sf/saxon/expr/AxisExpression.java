@@ -33,7 +33,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.GNodeType;
@@ -159,7 +158,8 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             if (!th.isSubType(contextItemType, AnyGNodeType.getInstance())) {
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(
                         RoleDiagnostic.AXIS_STEP, "", axis);
-                Expression coercer = SequenceCoercer.makeSequenceCoercer(new ContextItemExpression(), AnyGNodeType.getInstance().zeroOrMore(), role, true);
+                //Expression coercer = SequenceCoercer.makeSequenceCoercer(new ContextItemExpression(), AnyGNodeType.getInstance().zeroOrMore(), role, true);
+                Expression coercer = new ItemChecker(new ContextItemExpression(), AnyGNodeType.getInstance(), role);
                 return new SimpleStepExpression(coercer, this).typeCheck(visitor, contextInfo);
             }
         }
@@ -737,12 +737,13 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config      the Saxon configuration
+     * @param firstInPath true if this is the first or only step in a relative path
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
 
         NodeTest test = getNodeTest();
         Pattern pat;
@@ -750,9 +751,9 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         if (test == null) {
             test = AnyGNodeType.getInstance();
         }
-//        if (test instanceof SelectorTest) {
-//            test = ((SelectorTest)test).asXNodeTest(config);
-//        }
+        if (test instanceof SelectorTest && firstInPath) {
+            test = ((SelectorTest)test).asXNodeTest(config);
+        }
         if (test instanceof AnyXNodeType
                 && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
             test = MultipleNodeKindTest.CHILD_NODE;

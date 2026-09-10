@@ -88,13 +88,14 @@ public final class FirstItemExpression extends SingleItemFilter {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config      the Saxon configuration
+     * @param firstInPath
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
-        Pattern basePattern = getBaseExpression().toPattern(config);
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
+        Pattern basePattern = getBaseExpression().toPattern(config, firstInPath);
         Expression baseExpr = getBaseExpression();
         if (baseExpr instanceof AxisExpression &&
                 ((AxisExpression) baseExpr).getAxis() == AxisInfo.CHILD && basePattern instanceof NodeTestPattern ntp) {

@@ -3659,10 +3659,10 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         pMap.put("p.genPos", (loader, element) -> {
-            NodeTest type = (NodeTest) loader.parseAlphaCodeForItemType(element, "test");
+            ItemType type = loader.parseAlphaCodeForItemType(element, "test");
             Expression exp = loader.getFirstChildExpression(element);
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
-            GeneralPositionalPattern gpp = new GeneralPositionalPattern(type, exp);
+            GeneralPositionalPattern gpp = new GeneralPositionalPattern((NodeTest)type, exp);
             gpp.setUsesPosition(!"P".equals(flags));
             return gpp;
         });

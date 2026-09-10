@@ -366,12 +366,13 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config      the Saxon configuration
+     * @param firstInPath
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
         SystemFunction fn = getTargetFunction();
         if (fn instanceof Root_1) {
             if (getArg(0) instanceof ContextItemExpression ||
@@ -380,7 +381,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 return new NodeSetPattern(this);
             }
         }
-        return super.toPattern(config);
+        return super.toPattern(config, firstInPath);
     }
 
 //    @Override

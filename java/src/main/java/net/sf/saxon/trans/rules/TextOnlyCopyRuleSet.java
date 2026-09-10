@@ -64,8 +64,7 @@ public class TextOnlyCopyRuleSet implements BuiltInRuleSet {
     public void process(Item item, ParameterSet parameters,
                         ParameterSet tunnelParams, /*@NotNull*/ Outputter output, XPathContext context,
                         Location locationId) throws XPathException {
-        if (item instanceof NodeInfo) {
-            NodeInfo node = (NodeInfo) item;
+        if (item instanceof NodeInfo node) {
             switch (node.getNodeKind()) {
                 case Type.DOCUMENT:
                 case Type.ELEMENT:
@@ -89,8 +88,8 @@ public class TextOnlyCopyRuleSet implements BuiltInRuleSet {
                 case Type.NAMESPACE:
                     // no action
             }
-        } else if (item instanceof ArrayItem) {
-            Sequence seq = ArrayFunctionSet.ArrayToSequence.toSequence((ArrayItem)item);
+        } else if (item instanceof ArrayItem array) {
+            Sequence seq = ArrayFunctionSet.ArrayToSequence.toSequence(array);
             SequenceIterator members = seq.iterate();
             XPathContextMajor c2 = context.newContext();
             c2.setOrigin(this);

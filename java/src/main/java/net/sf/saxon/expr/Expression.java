@@ -1391,12 +1391,14 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config      the Saxon configuration
+     * @param firstInPath true if an axis step in this expression is to be treated
+     *                    as an initial step of the pattern
      * @return the equivalent pattern
      * @throws XPathException if conversion is not possible
      */
 
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
         ItemType type = getItemType();
         if (((getDependencies() & StaticProperty.DEPENDS_ON_NON_DOCUMENT_FOCUS) == 0) &&
                 (type instanceof XNodeType || this instanceof VariableReference)) {

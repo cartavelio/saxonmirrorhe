@@ -113,15 +113,13 @@ public class VennExpression extends BinaryExpression {
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
-        switch (operator) {
-            case UNION:
-                return getLhsExpression().getStaticUType(contextItemType).union(getRhsExpression().getStaticUType(contextItemType));
-            case INTERSECT:
-                return getLhsExpression().getStaticUType(contextItemType).intersection(getRhsExpression().getStaticUType(contextItemType));
-            case EXCEPT:
-            default:
-                return getLhsExpression().getStaticUType(contextItemType);
-        }
+        return switch (operator) {
+            case UNION ->
+                    getLhsExpression().getStaticUType(contextItemType).union(getRhsExpression().getStaticUType(contextItemType));
+            case INTERSECT ->
+                    getLhsExpression().getStaticUType(contextItemType).intersection(getRhsExpression().getStaticUType(contextItemType));
+            default -> getLhsExpression().getStaticUType(contextItemType);
+        };
     }
 
 
@@ -198,15 +196,12 @@ public class VennExpression extends BinaryExpression {
      */
 
     private boolean testContextDocumentNodeSet(final int prop0, final int prop1) {
-        switch (operator) {
-            case UNION:
-                return (prop0 & prop1 & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
-            case INTERSECT:
-                return ((prop0 | prop1) & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
-            case EXCEPT:
-                return (prop0 & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
-        }
-        return false;
+        return switch (operator) {
+            case UNION -> (prop0 & prop1 & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
+            case INTERSECT -> ((prop0 | prop1) & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
+            case EXCEPT -> (prop0 & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
+            default -> false;
+        };
     }
 
     /**
@@ -241,15 +236,12 @@ public class VennExpression extends BinaryExpression {
      */
 
     private boolean testSubTree(final int prop0, final int prop1) {
-        switch (operator) {
-            case UNION:
-                return (prop0 & prop1 & StaticProperty.SUBTREE_NODESET) != 0;
-            case INTERSECT:
-                return ((prop0 | prop1) & StaticProperty.SUBTREE_NODESET) != 0;
-            case EXCEPT:
-                return (prop0 & StaticProperty.SUBTREE_NODESET) != 0;
-        }
-        return false;
+        return switch (operator) {
+            case UNION -> (prop0 & prop1 & StaticProperty.SUBTREE_NODESET) != 0;
+            case INTERSECT -> ((prop0 | prop1) & StaticProperty.SUBTREE_NODESET) != 0;
+            case EXCEPT -> (prop0 & StaticProperty.SUBTREE_NODESET) != 0;
+            default -> false;
+        };
     }
 
     /**
@@ -278,14 +270,26 @@ public class VennExpression extends BinaryExpression {
         getLhs().typeCheck(visitor, contextInfo);
         getRhs().typeCheck(visitor, contextInfo);
 
+        Expression lhs2 = null;
         if (!(getLhsExpression() instanceof Pattern)) {
             Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 0);
-            setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.GNODE_SEQUENCE, role0, visitor));
+            lhs2 = tc.staticTypeCheck(getLhsExpression(), SequenceType.GNODE_SEQUENCE, role0, visitor);
         }
 
+        Expression rhs2 = null;
         if (!(getRhsExpression() instanceof Pattern)) {
             Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, operator.toString(), 1);
-            setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.GNODE_SEQUENCE, role1, visitor));
+            rhs2 = tc.staticTypeCheck(getRhsExpression(), SequenceType.GNODE_SEQUENCE, role1, visitor);
+        }
+
+        if (lhs2 != null || rhs2 != null) {
+            if (Literal.isEmptySequence(lhs2)) {
+                return lhs2;
+            } else if (Literal.isEmptySequence(rhs2)) {
+                return operator == OperatorSymbol.INTERSECT ? rhs2 : lhs2;
+            } else {
+                return new VennExpression(lhs2, operator, rhs2);
+            }
         }
 
         // For the intersect and except operators, if the types are disjoint then we can simplify
@@ -627,12 +631,13 @@ public class VennExpression extends BinaryExpression {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config      the Saxon configuration
+     * @param firstInPath
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean firstInPath) throws XPathException {
         if (isPredicatePattern(getLhsExpression()) || isPredicatePattern(getRhsExpression())) {
             throw new XPathException(
                     "Cannot use a predicate pattern as an operand of a union, intersect, or except operator",
@@ -640,8 +645,8 @@ public class VennExpression extends BinaryExpression {
         }
         if (operator == OperatorSymbol.UNION) {
             return new UnionPattern(
-                    getLhsExpression().toPattern(config),
-                    getRhsExpression().toPattern(config));
+                    getLhsExpression().toPattern(config, firstInPath),
+                    getRhsExpression().toPattern(config, firstInPath));
         } else {
             // Bug #5368 means it's dangerous to assume that the expression (A except B) can be translated
             // into a pattern that matches a node if A matches and B does not. We can only do this in special
@@ -654,12 +659,12 @@ public class VennExpression extends BinaryExpression {
                     || independentOfContextItem(getRhsExpression())) {
                 if (operator == OperatorSymbol.EXCEPT) {
                     return new ExceptPattern(
-                            getLhsExpression().toPattern(config),
-                            getRhsExpression().toPattern(config));
+                            getLhsExpression().toPattern(config, firstInPath),
+                            getRhsExpression().toPattern(config, firstInPath));
                 } else {
                     return new IntersectPattern(
-                            getLhsExpression().toPattern(config),
-                            getRhsExpression().toPattern(config));
+                            getLhsExpression().toPattern(config, firstInPath),
+                            getRhsExpression().toPattern(config, firstInPath));
                 }
             }
             return new GeneralNodePattern(this, getItemType());
