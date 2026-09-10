@@ -331,6 +331,15 @@
             <li><p>The functions <code>fn:build-uri()</code>and <code>fn:parse-uri()</code> are implemented.</p></li>
         </ul>
         
+        <p>From Saxon 12.2:</p>
+        <ul>
+            <li><p>The <code>fn:char()</code> function is implemented</p></li>
+            <li><p>The <code>array:members()</code> and <code>array:of()</code> functions are implemented (previously
+            array:members() was available but not fully documented</p></li>
+            <li><p>The <code>array:build()</code> function is implemented (previously partly available but undocumented
+            as <code>array:_from_sequence</code>)</p></li>
+        </ul>
+        
       
         <h2>Dropped or Changed Extension Functions</h2>
         
