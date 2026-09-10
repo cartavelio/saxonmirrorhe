@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                exclude-result-prefixes="xs"
+                xmlns:f="http://saxonica.com/ns/functions"
+                exclude-result-prefixes="f xs"
                 expand-text="yes"
                 version="3.0">
 
@@ -26,6 +27,24 @@
 <xsl:param name="uuid2" as="xs:string" select="'fake-uuid-2'"/>
 <xsl:param name="uuid3" as="xs:string" select="'fake-uuid-3'"/>
 <xsl:param name="uuid4" as="xs:string" select="'fake-uuid-4'"/>
+
+<xsl:variable name="common-packages" as="element()*"
+              select="f:package-reference(('AngleSharp',
+                                           'ICU4N',
+                                           'ICU4N.Resources',
+                                           'NSec.Cryptography',
+                                           'Microsoft.AspNetCore.StaticFiles',
+                                           'Singulink.Numerics.BigDecimal',
+                                           'Singulink.Numerics.BigIntegerExtensions',
+                                           'System.Collections.Immutable',
+                                           'System.IO.Hashing',
+                                           'System.Net.Http',
+                                           'Microsoft.Extensions.Configuration',
+                                           'Microsoft.Extensions.Configuration.Json',
+                                           'Microsoft.Extensions.Configuration.Xml',
+                                           'System.Text.Encoding.CodePages',
+                                           'XmlResolver',
+                                           'XmlResolverData'))"/>
 
 <xsl:template name="xsl:initial-template">
   <xsl:variable name="outputPath" select="current-output-uri()"/>
@@ -134,7 +153,7 @@ EndGlobal
       </xsl:if>
 
       <ItemGroup>
-        <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
+        <xsl:sequence select="f:package-reference('DotNet.Bundle')"/>
       </ItemGroup>
 
       <ItemGroup>
@@ -158,22 +177,7 @@ EndGlobal
       </ItemGroup>
 
       <ItemGroup>
-        <PackageReference Include="AngleSharp" Version="1.2.0" />
-        <PackageReference Include="ICU4N" Version="60.1.0-alpha.436" />
-        <PackageReference Include="ICU4N.Resources" Version="60.1.0-alpha.436" />
-        <PackageReference Include="NSec.Cryptography" Version="24.4.0" />
-        <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.8" />
-        <PackageReference Include="Singulink.Numerics.BigDecimal" Version="3.4.0" />
-        <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.3.2" />
-        <PackageReference Include="System.Collections.Immutable" Version="10.0.1" />
-        <PackageReference Include="System.IO.Hashing" Version="10.0.1" />
-        <PackageReference Include="System.Net.Http" Version="4.3.4" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.1" />
-        <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.1" />
-        <PackageReference Include="XmlResolver" Version="6.0.20" />
-        <PackageReference Include="XmlResolverData" Version="6.0.20" />
+        <xsl:sequence select="$common-packages"/>
       </ItemGroup>
 
       <xsl:if test="$edition != 'ee'">
@@ -205,11 +209,12 @@ EndGlobal
             </Reference>
           </ItemGroup>
           <ItemGroup>
-            <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-            <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
-            <PackageReference Include="NUnit" Version="4.3.2"/>
-            <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
-            <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+            <xsl:sequence select="f:package-reference(('coverlet.collector',
+                                                       'Microsoft.NET.Test.Sdk',
+                                                       'NUnit',
+                                                       'NUnit.Analyzers',
+                                                       'NUnit3TestAdapter'))"/>
+            <xsl:sequence select="$common-packages"/>
           </ItemGroup>
           <ItemGroup>
             <Using Include="NUnit.Framework"/>
@@ -232,11 +237,12 @@ EndGlobal
             <IsTestProject>true</IsTestProject>
           </PropertyGroup>
           <ItemGroup>
-            <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-            <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
-            <PackageReference Include="NUnit" Version="4.3.2"/>
-            <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
-            <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+            <xsl:sequence select="f:package-reference(('coverlet.collector',
+                                                       'Microsoft.NET.Test.Sdk',
+                                                       'NUnit',
+                                                       'NUnit.Analyzers',
+                                                       'NUnit3TestAdapter'))"/>
+            <xsl:sequence select="$common-packages"/>
           </ItemGroup>
           <ItemGroup>
             <Using Include="NUnit.Framework"/>
@@ -386,11 +392,12 @@ EndGlobal
      <Compile Remove="{translate($relative-src-path, '/', '\')}src\test\nunit\SaxonCS-NUnit\**\.DS_Store"/>
    </ItemGroup>
    <ItemGroup>
-      <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
-      <PackageReference Include="NUnit" Version="4.3.2"/>
-      <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
-      <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+     <xsl:sequence select="f:package-reference(('coverlet.collector',
+                                                'Microsoft.NET.Test.Sdk',
+                                                'NUnit',
+                                                'NUnit.Analyzers',
+                                                'NUnit3TestAdapter'))"/>
+      <xsl:sequence select="$common-packages"/>
    </ItemGroup>
    <ItemGroup>
       <Using Include="NUnit.Framework"/>
@@ -399,8 +406,85 @@ EndGlobal
       <ProjectReference Include="SaxonCS.csproj"/>
    </ItemGroup>
 </Project>
-
-
 </xsl:template>
+
+<!-- This seems like a bit of a hack, but we want a single point of definition
+     so that we get consistent references. -->
+<xsl:function name="f:package-reference" as="element(PackageReference)+">
+  <xsl:param name="package" as="xs:string+"/>
+  <xsl:for-each select="$package">
+    <xsl:choose>
+      <xsl:when test=". = 'AngleSharp'">
+        <PackageReference Include="AngleSharp" Version="1.2.0" />
+      </xsl:when>
+      <xsl:when test=". = 'DotNet.Bundle'">
+        <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
+      </xsl:when>
+      <xsl:when test=". = 'ICU4N'">
+        <PackageReference Include="ICU4N" Version="60.1.0-alpha.436" />
+      </xsl:when>
+      <xsl:when test=". = 'ICU4N.Resources'">
+        <PackageReference Include="ICU4N.Resources" Version="60.1.0-alpha.436" />
+      </xsl:when>
+      <xsl:when test=". = 'Microsoft.AspNetCore.StaticFiles'">
+        <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.8" />
+      </xsl:when>
+      <xsl:when test=". = 'Microsoft.Extensions.Configuration'">
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.2" />
+      </xsl:when>
+      <xsl:when test=". = 'Microsoft.Extensions.Configuration.Json'">
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
+      </xsl:when>
+      <xsl:when test=". = 'Microsoft.Extensions.Configuration.Xml'">
+        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.2" />
+      </xsl:when>
+      <xsl:when test=". = 'Microsoft.NET.Test.Sdk'">
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+      </xsl:when>
+      <xsl:when test=". = 'NSec.Cryptography'">
+        <PackageReference Include="NSec.Cryptography" Version="24.4.0" />
+      </xsl:when>
+      <xsl:when test=". = 'NUnit'">
+        <PackageReference Include="NUnit" Version="4.3.2"/>
+      </xsl:when>
+      <xsl:when test=". = 'NUnit.Analyzers'">
+        <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
+      </xsl:when>
+      <xsl:when test=". = 'NUnit3TestAdapter'">
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+      </xsl:when>
+      <xsl:when test=". = 'Singulink.Numerics.BigDecimal'">
+        <PackageReference Include="Singulink.Numerics.BigDecimal" Version="3.4.0" />
+      </xsl:when>
+      <xsl:when test=". = 'Singulink.Numerics.BigIntegerExtensions'">
+        <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.3.2" />
+      </xsl:when>
+      <xsl:when test=". = 'System.Collections.Immutable'">
+        <PackageReference Include="System.Collections.Immutable" Version="10.0.2" />
+      </xsl:when>
+      <xsl:when test=". = 'System.IO.Hashing'">
+        <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
+      </xsl:when>
+      <xsl:when test=". = 'System.Net.Http'">
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
+      </xsl:when>
+      <xsl:when test=". = 'System.Text.Encoding.CodePages'">
+        <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.2" />
+      </xsl:when>
+      <xsl:when test=". = 'XmlResolver'">
+        <PackageReference Include="XmlResolver" Version="6.0.21" />
+      </xsl:when>
+      <xsl:when test=". = 'XmlResolverData'">
+        <PackageReference Include="XmlResolverData" Version="6.0.21" />
+      </xsl:when>
+      <xsl:when test=". = 'coverlet.collector'">
+        <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:message terminate="yes" select="'Unknown package:', ."/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:for-each>
+</xsl:function>
 
 </xsl:stylesheet>
