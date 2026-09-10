@@ -28,12 +28,12 @@ public class MapSearch extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         List<Item> result = new ArrayList<>();
         AtomicValue key = (AtomicValue)arguments[1].head();
-        Function tester = arguments.length > 2 ? (Function) arguments[2].head() : null;
+        FunctionItem tester = arguments.length > 2 ? (FunctionItem) arguments[2].head() : null;
         processSequence(arguments[0].materialize(), key, tester, context, result);
         return SequenceExtent.makeSequenceExtent(result);
     }
 
-    private void processSequence(GroundedValue seq, AtomicValue key, Function tester, XPathContext context, List<Item> result) throws XPathException {
+    private void processSequence(GroundedValue seq, AtomicValue key, FunctionItem tester, XPathContext context, List<Item> result) throws XPathException {
         GroundedValue in = ((Sequence) seq).materialize();
         SequenceIterator iter = in.iterate();
         for (Item item; (item = iter.next()) != null; ) {

@@ -3,7 +3,7 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -216,7 +216,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         TypeAlternative thisTypeAlternative = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();

@@ -530,7 +530,7 @@ public final class AttributeDecl extends SchemaStructure
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         AttributeDecl thisAttributeDecl = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();

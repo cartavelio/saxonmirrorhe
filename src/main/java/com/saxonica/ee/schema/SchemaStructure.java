@@ -3,7 +3,7 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NodeInfo;
@@ -209,7 +209,7 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         return null;
     }
 
@@ -360,7 +360,7 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
      * @return a function that delivers the information in this component
      */
 
-    protected static Function makeXPathExpressionPropertyRecord(
+    protected static FunctionItem makeXPathExpressionPropertyRecord(
             final String conditionText,
             final NamespaceResolver nsResolver,
             final String baseURI) {

@@ -4,7 +4,7 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.SchemaException;
@@ -120,7 +120,7 @@ public class OrderFacet extends Facet {
     }
 
     @Override
-    public Function getFacetAsFunctionItem() {
+    public FunctionItem getFacetAsFunctionItem() {
         OrderFacet facet = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();

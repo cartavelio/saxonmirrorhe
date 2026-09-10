@@ -53,8 +53,8 @@ public class CallableFeed extends ItemFeed {
         if (!hasFailed()) {
             if (done) {
                 String msg = "A sequence of more than one item must not be supplied as the streaming argument";
-                if (function instanceof Function) {
-                    StructuredQName fName = ((Function)function).getFunctionName();
+                if (function instanceof FunctionItem) {
+                    StructuredQName fName = ((FunctionItem)function).getFunctionName();
                     if (fName != null) {
                         msg += " of function " + fName.getDisplayName();
                     }

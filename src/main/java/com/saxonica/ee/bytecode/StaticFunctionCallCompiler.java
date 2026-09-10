@@ -5,7 +5,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.StaticFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -24,7 +24,7 @@ public class StaticFunctionCallCompiler extends ToIteratorCompiler {
     public IteratorDetails compileToIterator(CompilerService compiler,
                                   /*@NotNull*/ Expression expression) throws CannotCompileException {
         StaticFunctionCall call = (StaticFunctionCall)expression;
-        Function function = call.getTargetFunction();
+        FunctionItem function = call.getTargetFunction();
         List<Expression> subExpressions = new ArrayList<Expression>(5);
         for (Operand o: expression.operands()) {
             subExpressions.add(o.getChildExpression());
@@ -39,7 +39,7 @@ public class StaticFunctionCallCompiler extends ToIteratorCompiler {
         allocateStatic(compiler, function);
         compiler.generateGetContext();
         ga.loadLocal(arrVar);
-        ga.invokeInstanceMethod(Function.class, "call", XPathContext.class, Sequence[].class);
+        ga.invokeInstanceMethod(FunctionItem.class, "call", XPathContext.class, Sequence[].class);
         ga.invokeInstanceMethod(Sequence.class, "iterate");
         visitAnnotation(compiler, "StaticFunctionCallCompiler-Done");
 

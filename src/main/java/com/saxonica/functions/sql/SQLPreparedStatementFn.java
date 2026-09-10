@@ -4,7 +4,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -34,7 +34,7 @@ import java.sql.SQLException;
 public class SQLPreparedStatementFn extends SystemFunction {
 
     @Override
-    public Function call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public FunctionItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         Connection connection = SQLFunctionSet.expectConnection(arguments[0], context);
         String statement = arguments[1].head().getStringValue();
 

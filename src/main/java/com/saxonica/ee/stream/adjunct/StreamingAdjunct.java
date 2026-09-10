@@ -13,7 +13,7 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.ContextItemAccessorFunction;
 import net.sf.saxon.functions.IntegratedFunctionCall;
 import net.sf.saxon.functions.Reverse;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.FunctionStreamability;
@@ -411,7 +411,7 @@ public class StreamingAdjunct {
         }
 
         if (getExpression() instanceof StaticFunctionCall && !allowsMany) {
-            final Function fn = ((StaticFunctionCall)getExpression()).getTargetFunction();
+            final FunctionItem fn = ((StaticFunctionCall)getExpression()).getTargetFunction();
             final Expression[] args = ((StaticFunctionCall) getExpression()).getArguments();
             return new FeedMakerDelegate((watchManager, out, context) -> new CallableFeed(fn, out, context, args));
         }

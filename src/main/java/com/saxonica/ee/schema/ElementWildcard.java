@@ -2,7 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntHashSet;
@@ -211,7 +211,7 @@ public class ElementWildcard extends Particle {
         serializer.endElement();
     }
 
-    public Function getTermComponentAsFunction() {
+    public FunctionItem getTermComponentAsFunction() {
         return wildcard.getComponentAsFunction();
     }
 }

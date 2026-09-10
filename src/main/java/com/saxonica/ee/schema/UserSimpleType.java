@@ -803,7 +803,7 @@ public abstract class UserSimpleType extends UserDefinedType
     protected abstract void serializeVariety(SchemaModelSerializer serializer) throws XPathException;
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         return getComponentAsFunction(this);
     }
 
@@ -815,7 +815,7 @@ public abstract class UserSimpleType extends UserDefinedType
      *         name and whose result is the value of that property
      */
 
-    public static Function getComponentAsFunction(final SimpleType type) {
+    public static FunctionItem getComponentAsFunction(final SimpleType type) {
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {

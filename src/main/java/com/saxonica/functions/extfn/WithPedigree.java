@@ -6,6 +6,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -28,7 +29,7 @@ public class WithPedigree extends SystemFunction {
         return out == null ? in : out;
     }
 
-    public static net.sf.saxon.om.Function makeRootWithPedigree(Item root) {
+    public static FunctionItem makeRootWithPedigree(Item root) {
         if (root instanceof MapItem) {
             return new PedigreeMapItem((MapItem) root);
         } else if (root instanceof ArrayItem) {

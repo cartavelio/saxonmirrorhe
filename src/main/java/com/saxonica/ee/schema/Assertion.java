@@ -349,7 +349,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         Assertion thisAssertion = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();

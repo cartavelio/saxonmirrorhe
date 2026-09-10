@@ -12,7 +12,7 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
@@ -101,7 +101,7 @@ public class FilterFnStreamer extends FilteringAdjunct {
      */
     @Override
     public FilteringFeed.Filter makeFilter(final XPathContext context, ItemFeed out) throws XPathException {
-        final Function function = (Function) ((SystemFunctionCall)getExpression()).getArg(1).evaluateItem(context);
+        final FunctionItem function = (FunctionItem) ((SystemFunctionCall)getExpression()).getArg(1).evaluateItem(context);
         final Sequence[] args = SequenceTool.makeSequenceArray(1);
         return new FilteringFeed.FilterLambda((item, position) -> {
             args[0] = item;

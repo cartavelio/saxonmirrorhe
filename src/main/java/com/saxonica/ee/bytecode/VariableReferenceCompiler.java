@@ -158,7 +158,7 @@ public class VariableReferenceCompiler extends ToIteratorCompiler {
             case NODE:
                 return NodeInfo.class;
             case FUNCTION:
-                return Function.class;
+                return FunctionItem.class;
             case ATOMIC:
                 switch (type.getPrimitiveType()) {
                     case StandardNames.XS_STRING:

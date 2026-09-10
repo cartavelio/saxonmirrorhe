@@ -7,7 +7,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
@@ -448,7 +448,7 @@ public final class AttributeUse extends SimpleComponentReference
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         AttributeUse thisAttributeUse = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();

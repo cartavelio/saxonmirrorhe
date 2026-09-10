@@ -33,8 +33,8 @@ public class Index extends SystemFunction {
             Item arg1 = arguments[1].head();
             if (arg1 instanceof AnyExternalObject && ((AnyExternalObject) arg1).getWrappedObject() instanceof Evaluate.PreparedExpression) {
                 throw new XPathException("The function saxon:index() has changed to expect a function as its second argument");
-            } else if (arg1 instanceof Function) {
-                Function function = (Function) arg1;
+            } else if (arg1 instanceof FunctionItem) {
+                FunctionItem function = (FunctionItem) arg1;
                 HashTrieMap imap = new HashTrieMap();
                 Sequence[] functionArgs = SequenceTool.makeSequenceArray(1);
                 SequenceIterator iter = arguments[0].iterate();

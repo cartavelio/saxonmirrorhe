@@ -4,7 +4,7 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -131,7 +131,7 @@ public class AssertionFacet extends Facet {
     }
 
     @Override
-    public Function getFacetAsFunctionItem() {
+    public FunctionItem getFacetAsFunctionItem() {
         // Contrary to the W3C SCM model, each assertion is delivered as a separate schema component
         AssertionFacet facet = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {

@@ -3,7 +3,7 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -261,7 +261,7 @@ public abstract class Facet {
      * Get a function item that represents this Facet schema component.
      */
 
-    public abstract Function getFacetAsFunctionItem();
+    public abstract FunctionItem getFacetAsFunctionItem();
 
     /**
      * Factory method: creates a new Facet with the given name

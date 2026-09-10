@@ -2,7 +2,7 @@ package com.saxonica.ee.schema;
 
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -156,7 +156,7 @@ public class EnumerationFacet extends Facet {
     }
 
     @Override
-    public Function getFacetAsFunctionItem() {
+    public FunctionItem getFacetAsFunctionItem() {
         throw new UnsupportedOperationException();
     }
 

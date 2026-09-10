@@ -174,9 +174,9 @@ public class ForEachGroupCompiler extends ToPushCompiler {
                 ga.dup();
                 allocateStatic(compiler, instr.getSelectExpression());
                 Class<? extends Item> keyClass = compiler.compileToItem(instr.getGroupingKey());
-                ga.downCast(keyClass, Function.class, true);
+                ga.downCast(keyClass, FunctionItem.class, true);
                 compiler.generateGetContext();
-                ga.invokeConstructor(GroupBreakingIterator.class, Expression.class, Function.class, XPathContext.class);
+                ga.invokeConstructor(GroupBreakingIterator.class, Expression.class, FunctionItem.class, XPathContext.class);
                 break;
 
             default:

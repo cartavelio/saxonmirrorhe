@@ -329,7 +329,7 @@ public class CompileXPath extends SystemFunction {
         }
 
         @Override
-        public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
+        public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) {
             return lib.get(functionName);
         }
     }

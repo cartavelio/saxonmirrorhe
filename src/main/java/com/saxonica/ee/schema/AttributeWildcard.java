@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaValidationStatus;
@@ -80,7 +80,7 @@ public class AttributeWildcard extends SchemaStructure implements UserSchemaComp
      * @return the schema component represented as a function from property names to property values.
      */
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         return wildcard.getComponentAsFunction();
     }
 

@@ -3,7 +3,7 @@ package com.saxonica.ee.schema;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
@@ -280,7 +280,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
     public abstract void serializeParticle(SchemaModelSerializer serializer) throws XPathException, MissingComponentException;
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         Particle thisParticle = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
                 String key = arguments[0].head().getStringValue();

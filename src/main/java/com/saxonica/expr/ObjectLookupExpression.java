@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 public class ObjectLookupExpression extends LookupExpression {
 
-    private Function reflexiveFunction = null;
+    private FunctionItem reflexiveFunction = null;
 
     public ObjectLookupExpression(Expression start, Expression step) {
         super(start, step);
@@ -33,9 +33,9 @@ public class ObjectLookupExpression extends LookupExpression {
         ItemType objectType = getLhsExpression().getItemType();
         if (objectType instanceof JavaExternalObjectType && getRhsExpression() instanceof StringLiteral) {
             String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-            Map<String, Function> methodMap =
+            Map<String, FunctionItem> methodMap =
                     getConfiguration().makeMethodMap(((JavaExternalObjectType) objectType).getJavaClass(), fieldName);
-            Function f = methodMap.get(fieldName);
+            FunctionItem f = methodMap.get(fieldName);
             if (f != null) {
                 return f.getFunctionItemType();
             } else {
@@ -73,8 +73,8 @@ public class ObjectLookupExpression extends LookupExpression {
                 // test case QT3extra reflex-055; we should optimize this
                 return this;
             }
-            Map<String, Function> methodMap = ObjectMap.makeMethodMap(config, theClass, methodName);
-            Function f = methodMap.get(methodName);
+            Map<String, FunctionItem> methodMap = ObjectMap.makeMethodMap(config, theClass, methodName);
+            FunctionItem f = methodMap.get(methodName);
             if (f == null) {
                 XPathException err = new XPathException("No unique method " + methodName + " found in class " + theClass, "XPTY0004");
                 err.setIsTypeError(true);

@@ -4,7 +4,7 @@ import com.saxonica.ee.bytecode.util.CannotCompileException;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.functions.hof.FunctionLiteral;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 
 /**
@@ -16,7 +16,7 @@ public class FunctionLiteralCompiler extends ToItemCompiler {
     public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         allocateStatic(compiler, ((FunctionLiteral) expression).getGroundedValue());
-        return Function.class;
+        return FunctionItem.class;
     }
 }
 

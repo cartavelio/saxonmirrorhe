@@ -6,7 +6,7 @@ import net.sf.saxon.functions.hof.CoercedFunction;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.type.ItemType;
@@ -74,7 +74,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         ga.ifNull(end.label());
         ga.dup();
         LabelInfo isFunctionLab = mi.newLabel("isFunctionLab");
-        ga.ifInstance(Function.class, isFunctionLab);
+        ga.ifInstance(FunctionItem.class, isFunctionLab);
         // stack: item
         allocateStatic(compiler, functionCoercer.getRoleSupplier());
         // stack: item role
@@ -91,7 +91,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         ga.goTo(end);
         mi.placeLabel(isFunctionLab);
         // stack: item
-        ga.checkClass(Function.class);
+        ga.checkClass(FunctionItem.class);
         ga.newInstance(CoercedFunction.class);
         // stack: item CoercedFunction
         ga.dupX1();
@@ -100,7 +100,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         // stack: CoercedFunction CoercedFunction item
         allocateStatic(compiler, functionCoercer.getItemType());
         // stack: CoercedFunction CoercedFunction item reqItemType
-        ga.invokeConstructor(CoercedFunction.class, Function.class, SpecificFunctionType.class);
+        ga.invokeConstructor(CoercedFunction.class, FunctionItem.class, SpecificFunctionType.class);
         // stack: CoercedFunction
 
 
@@ -153,11 +153,11 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         FunctionSequenceCoercer expr = (FunctionSequenceCoercer) expression;
         visitLineNumber(compiler, ga, expr);
         ga.loadArg(0);
-        ga.checkCast(Type.getType(Function.class));
+        ga.checkCast(Type.getType(FunctionItem.class));
         allocateStatic(compiler, expr.getItemType());
         allocateStatic(compiler, expr.getRoleSupplier());
-        ga.invokeStaticMethod(CoercedFunction.class, "coerce", Function.class, SpecificFunctionType.class,
-                RoleDiagnostic.class);
+        ga.invokeStaticMethod(CoercedFunction.class, "coerce", FunctionItem.class, SpecificFunctionType.class,
+                              RoleDiagnostic.class);
         ga.returnValue();
         ga.endMethod();
         compiler.popCurrentMethodInfo();

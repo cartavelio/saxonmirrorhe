@@ -4,7 +4,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -587,7 +587,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         ModelGroup thisModelGroup = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
                 String key = arguments[0].head().getStringValue();

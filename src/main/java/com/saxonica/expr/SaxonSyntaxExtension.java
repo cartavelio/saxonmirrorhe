@@ -6,7 +6,7 @@ import net.sf.saxon.expr.parser.ParserExtension;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.query.QueryModule;
@@ -56,7 +56,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
         if (!qenv.getFunctionLibrary().isAvailable(fName, qenv.getXPathVersion())) {
             p.grumble("External function " + fName + " is not available", "XPST0017");
         }
-        Function ext = qenv.getFunctionLibrary().getFunctionItem(fName, qenv);
+        FunctionItem ext = qenv.getFunctionLibrary().getFunctionItem(fName, qenv);
         if (ext == null) {
             p.grumble("External function " + fName + " is not available", "XPST0017");
         } else {

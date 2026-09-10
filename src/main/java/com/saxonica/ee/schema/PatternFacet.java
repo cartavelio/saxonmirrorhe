@@ -3,7 +3,7 @@ package com.saxonica.ee.schema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -143,7 +143,7 @@ public class PatternFacet extends Facet {
     }
 
     @Override
-    public Function getFacetAsFunctionItem() {
+    public FunctionItem getFacetAsFunctionItem() {
         // Contrary to the W3C SCM specification, multiple pattern facets are not merged into a single component
         PatternFacet facet = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {

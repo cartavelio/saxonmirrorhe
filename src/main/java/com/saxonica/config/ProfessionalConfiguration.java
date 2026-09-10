@@ -34,7 +34,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.PatternParser;
@@ -725,7 +725,7 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    public Function getSystemFunction(StructuredQName name, int arity) {
+    public FunctionItem getSystemFunction(StructuredQName name, int arity) {
         try {
             if (staticContextForSystemFunctions == null) {
                 staticContextForSystemFunctions = new IndependentContext(this);
@@ -931,7 +931,7 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    public Map<String, Function> makeMethodMap(Class javaClass, String required) {
+    public Map<String, FunctionItem> makeMethodMap(Class javaClass, String required) {
         return ObjectMap.makeMethodMap(this, javaClass, required);
     }
     //#endif

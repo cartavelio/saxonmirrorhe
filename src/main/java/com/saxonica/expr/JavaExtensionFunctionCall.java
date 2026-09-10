@@ -109,7 +109,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @throws net.sf.saxon.trans.XPathException if the target function cannot be determined
      */
     @Override
-    public Function getTargetFunction(XPathContext context) throws XPathException {
+    public FunctionItem getTargetFunction(XPathContext context) throws XPathException {
         return null;
     }
 

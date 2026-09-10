@@ -1345,7 +1345,7 @@ public class ElementDecl extends SchemaStructure
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         ElementDecl thisDecl = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();

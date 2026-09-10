@@ -7,7 +7,7 @@ import net.sf.saxon.expr.sort.DescendingComparer;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -50,9 +50,9 @@ public class HighestOrLowest extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Configuration config = context.getConfiguration();
-        Function function;
+        FunctionItem function;
         if (arguments.length == 2) {
-            function = (Function) arguments[1].head();
+            function = (FunctionItem) arguments[1].head();
         } else {
             function = config.makeSystemFunction("data", 1);
         }

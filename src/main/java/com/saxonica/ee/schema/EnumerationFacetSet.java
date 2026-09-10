@@ -183,7 +183,7 @@ public class EnumerationFacetSet extends Facet {
     }
 
     @Override
-    public Function getFacetAsFunctionItem() {
+    public FunctionItem getFacetAsFunctionItem() {
         EnumerationFacetSet facet = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();

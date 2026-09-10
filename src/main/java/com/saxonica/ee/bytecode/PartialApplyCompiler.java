@@ -26,7 +26,7 @@ public class PartialApplyCompiler extends ToItemCompiler {
         PartialApply pa = (PartialApply) expression;
 
         compiler.compileToItem(pa.getBaseExpression());
-        ga.checkClass(Function.class);
+        ga.checkClass(FunctionItem.class);
 //        ga.dup();
 //        // assert f != null;
 //        ga.ifNonNull(notNullLab.label());
@@ -71,7 +71,7 @@ public class PartialApplyCompiler extends ToItemCompiler {
         // stack: CurriedFunction CurriedFunction functionItem
         ga.loadLocal(valuesVar);
         // stack: CurriedFunction CurriedFunction functionItem sequence[]
-        ga.invokeConstructor(CurriedFunction.class, Function.class, Sequence[].class);
+        ga.invokeConstructor(CurriedFunction.class, FunctionItem.class, Sequence[].class);
         // stack: CurriedFunction
         methodInfo.placeLabel(L1);
         ga.goTo(end.label());
@@ -88,7 +88,7 @@ public class PartialApplyCompiler extends ToItemCompiler {
         ga.throwException();
         methodInfo.placeLabel(end);
         methodInfo.releaseLocal(valuesVar);
-        return Function.class;
+        return FunctionItem.class;
     }
 }
 

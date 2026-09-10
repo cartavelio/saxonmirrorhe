@@ -5,7 +5,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.AtomicArray;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.Annotation;
@@ -35,7 +35,7 @@ public class FunctionAnnotations extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Function fn = (Function) arguments[0].head();
+        FunctionItem fn = (FunctionItem) arguments[0].head();
         AnnotationList annotations = fn.getAnnotations();
 
         List<Item> result = new ArrayList<>();

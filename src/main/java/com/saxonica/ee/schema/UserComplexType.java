@@ -3246,11 +3246,11 @@ public class UserComplexType extends UserDefinedType
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         return getComponentAsFunction(this);
     }
 
-    public static Function getComponentAsFunction(final ComplexType type) {
+    public static FunctionItem getComponentAsFunction(final ComplexType type) {
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {

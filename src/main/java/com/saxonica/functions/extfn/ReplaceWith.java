@@ -2,7 +2,7 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.RegexFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.UnicodeString;
@@ -43,7 +43,7 @@ public class ReplaceWith extends RegexFunction  {
             extra[3] = StringValue.EMPTY_STRING;
             arguments = extra;
         }
-        Function arg2 = (Function) arguments[2].head();
+        FunctionItem arg2 = (FunctionItem) arguments[2].head();
         java.util.function.Function<UnicodeString, UnicodeString> fn = in -> {
                 try {
                     Sequence result = arg2.call(context, new Sequence[]{new StringValue(in)});

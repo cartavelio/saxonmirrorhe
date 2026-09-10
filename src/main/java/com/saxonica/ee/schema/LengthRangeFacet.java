@@ -3,7 +3,7 @@ package com.saxonica.ee.schema;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
@@ -97,7 +97,7 @@ public abstract class LengthRangeFacet extends Facet {
     public abstract boolean testLength(int actualLength);
 
     @Override
-    public Function getFacetAsFunctionItem() {
+    public FunctionItem getFacetAsFunctionItem() {
         Callable callable = new Callable() {
             @Override
             public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {

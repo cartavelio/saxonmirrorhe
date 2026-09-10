@@ -6,7 +6,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.InstanceOfExpression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
@@ -113,7 +113,7 @@ public class InstanceOfCompiler extends ToBooleanCompiler {
                     ga.instanceOf(Type.getType(AtomicValue.class));
                     ga.ifZCmp(GeneratorAdapter.EQ, closeAndReturnFalse.label());
                 } else if (anyFunction) {
-                    ga.instanceOf(Type.getType(Function.class));
+                    ga.instanceOf(Type.getType(FunctionItem.class));
                     ga.ifZCmp(GeneratorAdapter.EQ, closeAndReturnFalse.label());
                 } else if (specificType) {
                     ga.loadLocal(itemTypeVar);
@@ -186,7 +186,7 @@ public class InstanceOfCompiler extends ToBooleanCompiler {
                     ga.instanceOf(Type.getType(AtomicValue.class));
                     ga.ifZCmp(GeneratorAdapter.EQ, returnFalse.label());
                 } else if (anyFunction) {
-                    ga.instanceOf(Type.getType(Function.class));
+                    ga.instanceOf(Type.getType(FunctionItem.class));
                     ga.ifZCmp(GeneratorAdapter.EQ, returnFalse.label());
                 } else if (specificType) {
                     ga.loadLocal(itemTypeVar);

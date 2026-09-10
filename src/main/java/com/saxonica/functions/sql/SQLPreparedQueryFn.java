@@ -7,7 +7,7 @@ import net.sf.saxon.functions.NotFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.ZeroOrMore;
@@ -39,7 +39,7 @@ import java.util.List;
 public class SQLPreparedQueryFn extends SystemFunction {
 
     @Override
-    public Function call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public FunctionItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         Connection connection = SQLFunctionSet.expectConnection(arguments[0], context);
         String query = arguments[1].head().getStringValue();
 

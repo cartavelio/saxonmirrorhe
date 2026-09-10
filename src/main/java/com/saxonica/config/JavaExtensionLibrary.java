@@ -140,7 +140,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      *                                           that is private
      */
     @Override
-    public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
+    public FunctionItem getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
         Configuration config = staticContext.getConfiguration();
         int arity = functionName.getArity();
         SuppliedParameterReference[] params = new SuppliedParameterReference[arity];
@@ -1226,7 +1226,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
          * @return the target function
          */
         @Override
-        public Function getTargetFunction(XPathContext context) {
+        public FunctionItem getTargetFunction(XPathContext context) {
             SequenceType[] argTypes = new SequenceType[getArity()];
             Arrays.fill(argTypes, SequenceType.ANY_SEQUENCE);
             net.sf.saxon.type.SpecificFunctionType ftype =

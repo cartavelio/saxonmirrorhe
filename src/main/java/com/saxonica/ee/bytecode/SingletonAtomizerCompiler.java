@@ -139,7 +139,7 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
                 LabelInfo notFnItemLab = methodInfo.newLabel("notFnItemLab");
                 if (!alwaysFunction) {
                     ga.loadLocal(itemVar);
-                    ga.ifNotInstance(Function.class, notFnItemLab);
+                    ga.ifNotInstance(FunctionItem.class, notFnItemLab);
                 }
 
                 // Throw error - function item not allowed

@@ -13,7 +13,7 @@ import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -84,9 +84,9 @@ public class ObjectMap extends SystemFunction {
             return mapView; // empty map; method calls not available
         }
 
-        Map<String, Function> methodMap = makeMethodMap(config, obj.getClass(), required);
+        Map<String, FunctionItem> methodMap = makeMethodMap(config, obj.getClass(), required);
         for (String key : methodMap.keySet()) {
-            Function method = methodMap.get(key);
+            FunctionItem method = methodMap.get(key);
             Sequence[] boundArgs = new Sequence[method.getArity()];
             boundArgs[0] = value;
             CurriedFunction fn = new CurriedFunction(method, boundArgs);
@@ -111,8 +111,8 @@ public class ObjectMap extends SystemFunction {
      * to the extent that these methods have unique names.
      */
 
-    public static Map<String, Function> makeMethodMap(Configuration config, Class javaClass, String required) {
-        HashMap<String, Function> methodMap = new HashMap<>();
+    public static Map<String, FunctionItem> makeMethodMap(Configuration config, Class javaClass, String required) {
+        HashMap<String, FunctionItem> methodMap = new HashMap<>();
 
         Set<String> methodsFound = new HashSet<>();
         Map<String, Method> retainedMethods = new HashMap<>();
@@ -143,7 +143,7 @@ public class ObjectMap extends SystemFunction {
         StaticContext env = new IndependentContext(config);
 
         for (Map.Entry<String, Method> entry : retainedMethods.entrySet()) {
-            Function fn = makeFunction(lib, env, javaClass, entry.getValue());
+            FunctionItem fn = makeFunction(lib, env, javaClass, entry.getValue());
             if (fn != null) {
                 methodMap.put(entry.getKey(), fn);
             }
@@ -151,7 +151,7 @@ public class ObjectMap extends SystemFunction {
         return methodMap;
     }
 
-    private static Function makeFunction(JavaExtensionLibrary library, StaticContext env, Class javaClass, Method theMethod) {
+    private static FunctionItem makeFunction(JavaExtensionLibrary library, StaticContext env, Class javaClass, Method theMethod) {
         try {
             StructuredQName functionName =
                     new StructuredQName("java", NamespaceUri.of("java:" + javaClass.getName() + "?void=this"), theMethod.getName());
@@ -173,9 +173,9 @@ public class ObjectMap extends SystemFunction {
      * @param field the name of the field
      * @return the type of the field if it is defined, or null otherwise
      */
-    private static SequenceType getFieldType(Map<String, Function> methodMap, String field) {
+    private static SequenceType getFieldType(Map<String, FunctionItem> methodMap, String field) {
 
-        Function fn = methodMap.get(field);
+        FunctionItem fn = methodMap.get(field);
         if (fn == null) {
             return null;
         }

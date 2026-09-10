@@ -45,19 +45,19 @@ public class GroupStarting extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
-        Function function = (Function) arguments[1].head();
+        FunctionItem function = (FunctionItem) arguments[1].head();
         return new LazySequence(new GroupStartingFunctionIterator(input.iterate(), function, context));
     }
 
     private static class GroupStartingFunctionIterator implements SequenceIterator {
 
         private final SequenceIterator baseIterator;
-        private final Function function;
+        private final FunctionItem function;
         private final XPathContext context;
         private Item pending = null;
         private boolean finished = false;
 
-        public GroupStartingFunctionIterator(SequenceIterator in, Function f, XPathContext context) {
+        public GroupStartingFunctionIterator(SequenceIterator in, FunctionItem f, XPathContext context) {
             this.baseIterator = in;
             this.function = f;
             this.context = context;

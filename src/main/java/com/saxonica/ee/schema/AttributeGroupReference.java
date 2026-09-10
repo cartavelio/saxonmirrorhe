@@ -2,7 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.Function;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
@@ -283,7 +283,7 @@ public final class AttributeGroupReference extends SchemaStructure
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         // Not supported, because an attribute group reference is not a "true" schema component and is never exported
         throw new UnsupportedOperationException();
     }

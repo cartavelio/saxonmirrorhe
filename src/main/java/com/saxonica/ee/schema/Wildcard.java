@@ -845,7 +845,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
     }
 
     @Override
-    public Function getComponentAsFunction() {
+    public FunctionItem getComponentAsFunction() {
         Wildcard thisWildcard = this;
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
