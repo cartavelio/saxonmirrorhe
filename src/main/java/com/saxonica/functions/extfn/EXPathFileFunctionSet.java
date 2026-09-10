@@ -899,7 +899,14 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     public static class FileTempDir extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return new StringValue(System.getProperty("java.io.tmpdir"));
+            // The java.io.tmpdir property does not necessarily end with a file separator,
+            // but the EXPath file test suite suggests that it is supposed to.
+            String fs = System.getProperty("file.separator");
+            String tmp = System.getProperty("java.io.tmpdir");
+            if (!tmp.endsWith(fs)) {
+                tmp += fs;
+            }
+            return new StringValue(tmp);
         }
     }
 
