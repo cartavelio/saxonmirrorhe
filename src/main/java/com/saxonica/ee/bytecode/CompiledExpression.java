@@ -2,7 +2,6 @@ package com.saxonica.ee.bytecode;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.PendingUpdateList;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -97,10 +96,10 @@ public class CompiledExpression extends Expression {
         }
     }
 
-    @Override
-    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        getInterpretedExpression().evaluatePendingUpdates(context, pul);
-    }
+//    @Override
+//    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
+//        getInterpretedExpression().evaluatePendingUpdates(context, pul);
+//    }
 
     @Override
     public String toString() {

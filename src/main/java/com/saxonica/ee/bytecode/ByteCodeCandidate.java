@@ -4,7 +4,6 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.TailCallReturner;
 import net.sf.saxon.expr.parser.*;
@@ -29,8 +28,7 @@ import net.sf.saxon.trans.XPathException;
  * a reference to the tree.</p>
  */
 public class ByteCodeCandidate extends UnaryExpression implements TailCallReturner {
-    public static int GENERATED_COUNTER = 0;
-    public static long GENERATION_TIMER = 0;
+
     private final String objectName;
     private long countDown = 100;
     private final ExpressionOwner owner;
@@ -41,11 +39,6 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
     private static int nextId = 0;
     private final int requiredEvaluationModes;
     public int compiledMode;
-
-    private BooleanEvaluator booleanEvaluator = null;
-    private ItemEvaluator itemEvaluator = null;
-    private PullEvaluator pullEvaluator = null;
-    private PushEvaluator pushEvaluator = null;
 
     public ByteCodeCandidate(ExpressionOwner owner, Expression child, String objectName, int requiredEvaluationModes) {
         super(child);
@@ -108,10 +101,10 @@ public class ByteCodeCandidate extends UnaryExpression implements TailCallReturn
         return getBaseExpression().isUpdatingExpression();
     }
 
-    @Override
-    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        getBaseExpression().evaluatePendingUpdates(context, pul);
-    }
+//    @Override
+//    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
+//        getBaseExpression().evaluatePendingUpdates(context, pul);
+//    }
 
     @Override
     public int getImplementationMethod() {

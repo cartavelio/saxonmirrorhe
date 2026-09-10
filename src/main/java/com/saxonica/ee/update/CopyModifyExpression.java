@@ -264,7 +264,7 @@ public class CopyModifyExpression extends Expression {
 
     private void doUpdates(XPathContext context) throws XPathException {
         PendingUpdateList pul = context.getConfiguration().newPendingUpdateList();
-        getUpdateExp().evaluatePendingUpdates(context, pul);
+        getUpdateExp().makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
         pul.apply(context, validationMode);
         // The set of updated trees must be a subset of the set of nodes created during the copy phase
         Set<NodeInfo> copiedNodes = new HashSet<>();
