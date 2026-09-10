@@ -119,22 +119,21 @@ task buildCWrappers (
 }
 
 task check_codesign_dylib(
-  type: Exec,
   description: "Check to see if we can and should sign the .dylib file"
 ) {
   def identities = new ByteArrayOutputStream();
 
   if (systemOs.isMacOsX()) {
-    commandLine "security", "find-identity", "-p", "codesigning", "-v"
-  } else {
-    commandLine "echo", "Code signing only applies to macOS"
+    exec {
+      standardOutput = identities
+      commandLine "security", "find-identity", "-p", "codesigning", "-v"
+    }
   }
-
-  standardOutput = identities
 
   doLast {
     // 2RW84ZZ739 is the ID of the Saxonica Limited signing certificate
     codesign_dylib = identities.toString("utf-8").contains('2RW84ZZ739')
+    //print("Code sign ${codesign_dylib ? 'enabled' : 'disabled'}")
   }
 }
 
@@ -926,7 +925,7 @@ task all_saxonc_releases() {
                        ? "${pypiDir}/libs/darwin"
                        : (systemOs.isLinux()
                           ? "${pypiDir}/libs/nix"
-                          : "libs/win"))
+                          : "${pypiDir}/libs/win"))
 
     doLast {
       if (SAXONC_HOME == null) {
