@@ -3889,13 +3889,7 @@ public class XPathParser {
             }
             if (t.currentToken == Token.COMMA) {
                 nextToken();
-                SequenceType contentType;
-                if (t.currentToken == Token.STAR) {
-                    contentType = SequenceType.ANY_SEQUENCE;
-                    nextToken();
-                } else {
-                    contentType = parseSequenceType();
-                }
+                SequenceType contentType = parseSequenceType(); // PR2515
                 readToken(Token.RPAREN);
                 return firstArg == Token.LPAREN
                         ? new RootJNodeType(contentType)
