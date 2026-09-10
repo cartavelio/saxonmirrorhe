@@ -183,13 +183,13 @@ public class ParamKeywords {
         fnParamNames.put("items-before", "input|predicate");
         fnParamNames.put("items-ending-where", "input|predicate");
         fnParamNames.put("items-starting-where", "input|predicate");
-        fnParamNames.put("jnode-content", "input");
-        fnParamNames.put("jnode-position", "input");
-        fnParamNames.put("jnode-selector", "input");
+        fnParamNames.put("jkey", "input");
+        fnParamNames.put("jposition", "input");
         fnParamNames.put("json", "input|options");
         fnParamNames.put("json-doc", "source|options");
         fnParamNames.put("json-to-xml", "value|options");
         fnParamNames.put("jtree", "input");
+        fnParamNames.put("jvalue", "input");
         fnParamNames.put("lang", "language|node");
         fnParamNames.put("last", "");
         fnParamNames.put("load-xquery-module", "module-uri|options");
