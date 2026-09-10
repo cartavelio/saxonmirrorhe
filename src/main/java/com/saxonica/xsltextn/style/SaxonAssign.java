@@ -68,7 +68,7 @@ public class SaxonAssign extends XSLGeneralVariable {
         StructuredQName name = getSourceBinding().getVariableQName();
         SourceBinding globalVariable;
         try {
-            globalVariable = bindVariable(name);
+            globalVariable = bindVariable(name, getNodeName().getStructuredQName());
             if (globalVariable == null) {
                 throw new XPathException("Variable " + name.getDisplayName() +
                         " has not been declared")
