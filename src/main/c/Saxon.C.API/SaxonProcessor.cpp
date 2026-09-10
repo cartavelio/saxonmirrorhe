@@ -951,6 +951,27 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
     return value;
 }
 
+
+XdmAtomicValue *SaxonProcessor::makeStringValue2(std::string str) {
+
+    jclass xdmAtomicClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
+
+    jobject obj = getJavaStringValue(SaxonProcessor::sxn_environ, str.c_str());
+    static jmethodID msID_atomic = nullptr;
+    if (msID_atomic == nullptr) {
+        msID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>",
+                                                                                 "(Ljava/lang/String;)V"));
+    }
+    if (!msID_atomic) {
+        std::cerr << "XdmAtomic constructor (String)" << std::endl;
+        return nullptr;
+    }
+    jobject obj3 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, msID_atomic, obj));
+    XdmAtomicValue *value = new XdmAtomicValue(obj3, "xs:string");
+    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+    return value;
+}
+
 XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str) {
     jobject obj = getJavaStringValue(SaxonProcessor::sxn_environ, str.c_str());
     static jmethodID msID_atomic = nullptr;
@@ -1396,7 +1417,8 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
         atomicArray = new XdmAtomicValue*[size];
         for (std::map<std::string, XdmValue *>::iterator iter =
                 dataMap.begin(); iter != dataMap.end(); ++iter, i++) {
-                atomicArray[i] = this->makeStringValue((iter->first));
+
+                atomicArray[i] = SaxonProcessor::makeStringValue2((iter->first));
             SaxonProcessor::sxn_environ->env->SetObjectArrayElement(keyArray, i,
                                                                     atomicArray[i]->getUnderlyingValue());
 
@@ -1421,8 +1443,8 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
             delete atomicArray[j];
         }
         delete [] atomicArray;
-        if (exceptionOccurred() || !results) {
-            checkAndCreateException(saxonCAPIClass);
+        if (/*exceptionOccurred() || */ !results) {
+            return nullptr;//checkAndCreateException(saxonCAPIClass);
         } else {
             return new XdmMap(results);
         }

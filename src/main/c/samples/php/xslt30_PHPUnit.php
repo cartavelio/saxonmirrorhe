@@ -25,10 +25,10 @@ final class XSLT30Test extends TestCase
     public function testVersion(): void
     {
         $this->assertStringContainsString(
-            'SaxonC 1.2.1 running',
+            'SaxonC 11.1 running',
             self::$saxonProc->version()
         );
-        $this->assertStringContainsString('9.9.1.5C from Saxonica', self::$saxonProc->version());
+        $this->assertStringContainsString('11.0 from Saxonica', self::$saxonProc->version());
     }
     public function testSchemaAware(): void
     {
@@ -45,7 +45,7 @@ final class XSLT30Test extends TestCase
     {
         $trans = self::$saxonProc->newXslt30Processor();
         $node = self::$saxonProc->parseXmlFromString("<doc><e>text</e></doc>");
-        $trans->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template match='e'>[<xsl:value-of select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
+        $executable = $trans->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template match='e'>[<xsl:value-of select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
         $this->assertNotNull($node);
         $this->assertInstanceOf(
             Saxon\XdmNode::class,
@@ -55,16 +55,16 @@ final class XSLT30Test extends TestCase
         $this->assertNotNull($node);
         $eNode = $node->getChildNode(0)->getChildNode(0);
         $this->assertNotNull($eNode);
-        $trans->setGlobalContextItem($node);
-        $trans->setInitialMatchSelection($eNode);
-        $result = $trans->applyTemplatesReturningString();
+        $executable->setGlobalContextItem($node);
+        $executable->setInitialMatchSelection($eNode);
+        $result = $executable->applyTemplatesReturningString();
         $this->assertStringContainsString("[", $result);
     }
     public function testResolveUri(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString("<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='\$uri'/><xsl:result-document href='{\$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'\$err:code: ' || \$err:code  || ', \$err:description: ' || \$err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>");
-        $value = $transformer->callTemplateReturningValue("go");
+        $executable = $transformer->compileFromString("<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template name='go'><xsl:try><xsl:variable name='uri' as='xs:anyURI' select=\"resolve-uri('notice trailing space /out.xml')\"/> <xsl:message select='\$uri'/><xsl:result-document href='{\$uri}'><out/></xsl:result-document><xsl:catch><xsl:sequence select=\"'\$err:code: ' || \$err:code  || ', \$err:description: ' || \$err:description\"/></xsl:catch></xsl:try></xsl:template></xsl:stylesheet>");
+        $value = $executable->callTemplateReturningValue("go");
         $item = $value->getHead();
         $this->assertStringContainsString("code", $item->getStringValue());
     }
@@ -89,36 +89,31 @@ final class XSLT30Test extends TestCase
         $href = $hrefval->getAtomicValue()->getStringValue();
         $this->assertNotEquals($href, "");
         // The stylesheet is embedded in the source document and identified by a URI of the form "#id"
-        $transformer->compileFromFile("../styles/".$href);
+        $executable = $transformer->compileFromFile("../styles/".$href);
         $this->assertInstanceOf(Saxon\XdmNode::class, $input);
         // Run it
-        $node = $transformer->transformToValue($input);
-        if ($transformer->getExceptionCount() > 0) {
-            echo $transformer->getErrorMessage(0);
-        }
+        $node = $executable->transformToValue($input);
+        echo $executable->getErrorMessage();
+
         $this->assertNotNull($node);
-        if ($transformer->getExceptionCount() > 0) {
-            echo $transformer->getErrorMessage(0);
-        }
+            echo $executable->getErrorMessage();
     }
     public function testContextNotRootNamedTemplate(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
         $node = self::$saxonProc->parseXmlFromString("<doc><e>text</e></doc>");
-        $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
-        $transformer->setGlobalContextItem($node);
-        $result = $transformer->callTemplateReturningValue("main");
-        if ($transformer->getExceptionCount() > 0) {
-            echo $transformer->getErrorMessage(0);
-        }
+        $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
+        $executable->setGlobalContextItem($node);
+        $result = $executable->callTemplateReturningValue("main");
+        echo $executable->getErrorMessage();
+
         $this->assertNotNull($result);
         if ($result->getHead() != NULL) {
             $this->assertStringContainsString("[]", $result->getHead()->getStringValue());
         }
-        $result2 = $transformer->callTemplateReturningString("main");
-        if ($transformer->getExceptionCount() > 0) {
-            echo $transformer->getErrorMessage(0);
-        }
+        $result2 = $executable->callTemplateReturningString("main");
+        echo $executable->getErrorMessage();
+
         $this->assertNotNull($result2);
         $this->assertStringContainsString("[]", $result2);
     }
@@ -126,27 +121,27 @@ final class XSLT30Test extends TestCase
     {
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
-        $transformer->compileFromAssociatedFile($foo_xml);
-        $transformer->setInitialMatchSelectionAsFile($foo_xml);
-        $result = $transformer->applyTemplatesReturningString();
+        $executable = $transformer->compileFromAssociatedFile($foo_xml);
+        $executable->setInitialMatchSelectionAsFile($foo_xml);
+        $result = $executable->applyTemplatesReturningString();
         $this->assertNotNull($result);
     }
     public function testTransformWithoutArgument1(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
-        $transformer->compileFromAssociatedFile($foo_xml);
-        $transformer->setInitialMatchSelectionAsFile($foo_xml);
-        $result = $transformer->transformToString();
+        $executable = $transformer->compileFromAssociatedFile($foo_xml);
+        $executable->setInitialMatchSelectionAsFile($foo_xml);
+        $result = $executable->transformToString();
         $this->assertNotNull($result);
     }
     public function testTransformWithoutArgument2(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
-        $transformer->compileFromAssociatedFile($foo_xml);
-        $transformer->setInitialMatchSelectionAsFile($foo_xml);
-        $resultValue = $transformer->transformToValue();
+        $executable = $transformer->compileFromAssociatedFile($foo_xml);
+        $executable->setInitialMatchSelectionAsFile($foo_xml);
+        $resultValue = $executable->transformToValue();
         $this->assertNotNull($resultValue);
         $resultItem = $resultValue->getHead();
         $this->assertNotNull($resultItem);
@@ -157,28 +152,23 @@ final class XSLT30Test extends TestCase
     {
         $transformer = self::$saxonProc->newXslt30Processor();
         $foo_xml = "trax/xml/foo.xml";
-        $transformer->compileFromAssociatedFile($foo_xml);
-        $transformer->setInitialMatchSelectionAsFile($foo_xml);
-        $transformer->setOutputFile("resultForTransformWithoutArgument.xml");
-        $transformer->transformToFile();
+        $executable = $transformer->compileFromAssociatedFile($foo_xml);
+        $executable->setInitialMatchSelectionAsFile($foo_xml);
+        $executable->setOutputFile("resultForTransformWithoutArgument.xml");
+        $executable->transformToFile();
         $this->assertTrue(file_exists("resultForTransformWithoutArgument.xml"));
                 if (file_exists("resultForTransformWithoutArgument.xml")) {
                     unlink("resultForTransformWithoutArgument.xml");
                 }
     }
-    public function testNullStylesheet(): void
-    {
-        $transformer = self::$saxonProc->newXslt30Processor();
-        $result = $transformer->applyTemplatesReturningString();
-        $this->assertNull($result);
-    }
+
     public function testXdmDestination(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
+        $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template name='go'><a/></xsl:template>" .
             "</xsl:stylesheet>");
-        $root = $transformer->callTemplateReturningValue("go");
+        $root = $executable->callTemplateReturningValue("go");
         $this->assertNotNull($root);
         $this->assertNotNull($root->getHead());
         $node = $root->getHead()->getNodeValue();
@@ -187,11 +177,11 @@ final class XSLT30Test extends TestCase
     public function testXdmDestinationWithItemSeparator(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
+        $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template>" .
             "<xsl:output method='xml' item-separator='§'/>" .
             "</xsl:stylesheet>");
-        $root = $transformer->callTemplateReturningValue("go");
+        $root = $executable->callTemplateReturningValue("go");
         $node = $root->getHead()->getNodeValue();
         $this->assertEquals("<!--A-->§<out/>§<!--Z-->", $node);
         $this->assertTrue($node->getNodeKind() == 9, "result is document node");
@@ -203,24 +193,25 @@ final class XSLT30Test extends TestCase
             "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" .
             "</xsl:stylesheet>";
         $xml = "<z/>";
-        $stage1 = self::$saxonProc->newXslt30Processor();
-        $stage1->compileFromString($xsl);
+        $xsltProc = self::$saxonProc->newXslt30Processor();
+
         $in = self::$saxonProc->parseXmlFromString($xml);
-        $stage2 = self::$saxonProc->newXslt30Processor();
-        $stage2->compileFromString($xsl);
-        $stage3 = self::$saxonProc->newXslt30Processor();
-        $stage3->compileFromString($xsl);
-        $stage4 = self::$saxonProc->newXslt30Processor();
-        $stage4->compileFromString($xsl);
-        $stage5 = self::$saxonProc->newXslt30Processor();
-        $stage5->compileFromString($xsl);
+
+        $stage1 = $xsltProc->compileFromString($xsl);
+        $stage2 = $xsltProc->compileFromString($xsl);
+
+        $stage3 = $xsltProc->compileFromString($xsl);
+
+        $stage4 = $xsltProc->compileFromString($xsl);
+
+        $stage5 = $xsltProc->compileFromString($xsl);
         $this->assertNotNull($xsl, "\$xsl check");
         $this->assertNotNull($in, "\$in check");
         $stage1->setProperty("!omit-xml-declaration", "yes");
         $stage1->setProperty("!indent", "no");
         $stage1->setInitialMatchSelection($in);
         $d1 = $stage1->applyTemplatesReturningValue();
-        if ($stage1->getExceptionCount() > 0) {
+        if ($stage1->exceptionOccurred()) {
             echo $stage1->getErrorMessage(0);
         }
         $this->assertNotNull($d1, "\$d1 check");
@@ -253,10 +244,11 @@ final class XSLT30Test extends TestCase
             "<xsl:template match='/'><a><xsl:copy-of select='.'/></a></xsl:template>" .
             "</xsl:stylesheet>";
         $xml = "<z/>";
-        $stage1 = self::$saxonProc->newXslt30Processor();
-        $stage2 = self::$saxonProc->newXslt30Processor();
-        $stage1->compileFromString($xsl);
-        $stage2->compileFromString($xsl);
+
+        $xsltProc = self::$saxonProc->newXslt30Processor();
+
+        $stage1 = $xsltProc->compileFromString($xsl);
+        $stage2 = $xsltProc->compileFromString($xsl);
         $this->assertNotNull($xsl);
         $stage1->setProperty("!omit-xml-declaration", "yes");
         $stage2->setProperty("!omit-xml-declaration", "yes");
@@ -311,9 +303,9 @@ final class XSLT30Test extends TestCase
             "                  <xsl:sequence select='\$a + \$b'/></xsl:function>" .
             "                </xsl:stylesheet>";
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString($source);
+        $executable = $transformer->compileFromString($source);
         $paramArr = array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3));
-        $v = $transformer->callFunctionReturningValue("{http://localhost/}add", $paramArr);
+        $v = $executable->callFunctionReturningValue("{http://localhost/}add", $paramArr);
         $this->assertInstanceOf(Saxon\XdmItem::class, $v->getHead());
         $this->assertTrue($v->getHead()->isAtomic());
         $this->assertEquals($v->getHead()->getAtomicValue()->getLongValue(), 5);
@@ -332,8 +324,8 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='\$a + \$b'/>" .
             "                </xsl:function>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $v = $transformer->callFunctionReturningValue("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
+        $executable = $transformer->compileFromString($source);
+        $v = $executable->callFunctionReturningValue("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
         $this->assertInstanceOf(Saxon\XdmItem::class, $v->getHead());
         $this->assertTrue($v->getHead()->isAtomic());
         $this->assertEquals($v->getHead()->getAtomicValue()->getDoubleValue(), 5.0e0);
@@ -355,11 +347,11 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='\$a + \$b + \$x + \$y'/>" .
             "                </xsl:function>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $transformer->setProperty("!omit-xml-declaration", "yes");
-        $transformer->setParameter("x", self::$saxonProc->createAtomicValue(30));
-        $transformer->setGlobalContextItem(self::$saxonProc->createAtomicValue(20));
-        $sw = $transformer->callFunctionReturningString("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
+        $executable = $transformer->compileFromString($source);
+        $executable->setProperty("!omit-xml-declaration", "yes");
+        $executable->setParameter("x", self::$saxonProc->createAtomicValue(30));
+        $executable->setGlobalContextItem(self::$saxonProc->createAtomicValue(20));
+        $sw = $executable->callFunctionReturningString("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
         $this->assertEquals("57", $sw);
     }
     public function testCallFunctionArgInvalid()
@@ -376,10 +368,10 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='\$a + \$b'/>" .
             "                </xsl:function>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $v = $transformer->callFunctionReturningValue("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
-        $this->assertTrue($transformer->getExceptionCount() == 1);
-        $this->assertStringContainsString("Cannot invoke function add#2 externally", $transformer->getErrorMessage(0));
+        $executable = $transformer->compileFromString($source);
+        $v = $executable->callFunctionReturningValue("{http://localhost/}add", array(self::$saxonProc->createAtomicValue(2), self::$saxonProc->createAtomicValue(3)));
+        $this->assertTrue($transformer->exceptionOccurred());
+        $this->assertStringContainsString("Cannot invoke function add#2 externally", $executable->getErrorMessage());
         $this->assertNull($v);
     }
     public function testCallNamedTemplateWithTunnelParams()
@@ -398,11 +390,11 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='\$a + \$b'/>" .
             "                </xsl:template>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $transformer->setProperty("!omit-xml-declaration", "yes");
-        $transformer->setProperty("tunnel", "true");
-        $transformer->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
-        $sw = $transformer->callTemplateReturningString("t");
+        $executable = $transformer->compileFromString($source);
+        $executable->setProperty("!omit-xml-declaration", "yes");
+        $executable->setProperty("tunnel", "true");
+        $executable->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
+        $sw = $executable->callTemplateReturningString("t");
         $this->assertNotNull($sw);
         $this->assertEquals("17", $sw);
     }
@@ -419,12 +411,12 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='name(.), \$a + \$b'/>" .
             "                </xsl:template>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $transformer->setProperty("!omit-xml-declaration", "yes");
-        $transformer->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
+        $executable = $transformer->compileFromString($source);
+        $executable->setProperty("!omit-xml-declaration", "yes");
+        $executable->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
         $in = self::$saxonProc->parseXmlFromString("<e/>");
-        $transformer->setInitialMatchSelection($in);
-        $sw = $transformer->applyTemplatesReturningString();
+        $executable->setInitialMatchSelection($in);
+        $sw = $executable->applyTemplatesReturningString();
         $this->assertEquals("e 17", $sw);
     }
     public function testApplyTemplatesToXdm()
@@ -440,13 +432,13 @@ final class XSLT30Test extends TestCase
             "                </xsl:template>" .
             "                </xsl:stylesheet>";
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString($source);
-        $transformer->setProperty("!omit-xml-declaration", "yes");
-        $transformer->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
-        $transformer->setResultAsRawValue(True);
+        $executable = $transformer->compileFromString($source);
+        $executable->setProperty("!omit-xml-declaration", "yes");
+        $executable->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
+        $executable->setResultAsRawValue(True);
         $input = self::$saxonProc->parseXmlFromString("<e/>");
-        $transformer->setInitialMatchSelection($input);
-        $result = $transformer->applyTemplatesReturningValue();
+        $executable->setInitialMatchSelection($input);
+        $result = $executable->applyTemplatesReturningValue();
         $this->assertNotNull($result);
         $this->assertEquals(2, $result->size());
         $first = $result->itemAt(0);
@@ -474,10 +466,10 @@ final class XSLT30Test extends TestCase
             "\n" .
             "</xsl:stylesheet>";
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString($xsl);
+        $executable = $transformer->compileFromString($xsl);
         $input = self::$saxonProc->parseXmlFromString("<a>b</a>");
-        $transformer->setInitialMatchSelection($input);
-        $xdmValue = $transformer->applyTemplatesReturningValue();
+        $executable->setInitialMatchSelection($input);
+        $xdmValue = $executable->applyTemplatesReturningValue();
         $this->assertEquals(1, $xdmValue->size());
     }
     public function testApplyTemplatesToFile()
@@ -490,11 +482,11 @@ final class XSLT30Test extends TestCase
             "  </xsl:template>\n" .
             "</xsl:stylesheet>";
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString($xsl);
+        $executable = $transformer->compileFromString($xsl);
         $input = self::$saxonProc->parseXmlFromString("<a>b</a>");
-        $transformer->setOutputFile("output123.xml");
-        $transformer->setInitialMatchSelection($input);
-        $transformer->applyTemplatesReturningFile("output123.xml");
+        $executable->setOutputFile("output123.xml");
+        $executable->setInitialMatchSelection($input);
+        $executable->applyTemplatesReturningFile("output123.xml");
         $this->assertTrue(file_exists("output123.xml"));
         if (file_exists("output123.xml")) {
             unlink("output123.xml");
@@ -516,9 +508,9 @@ final class XSLT30Test extends TestCase
             "                   </xsl:result-document>" .
             "                </xsl:template>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $transformer->setProperty("!omit-xml-declaration", "yes");
-        $sw = $transformer->callTemplateReturningString("main");
+        $executable = $transformer->compileFromString($source);
+        $executable->setProperty("!omit-xml-declaration", "yes");
+        $sw = $executable->callTemplateReturningString("main");
         $this->assertNotNull($sw);
         $this->assertEquals($sw, "<x>3</x>");
     }
@@ -555,11 +547,11 @@ final class XSLT30Test extends TestCase
     public function testCallTemplateNoParamsRaw(): void
     {
         $transformer = self::$saxonProc->newXslt30Processor();
-        $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
+        $executable = $transformer->compileFromString("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" .
             "<xsl:template name='xsl:initial-template'><xsl:sequence select='42'/></xsl:template>" .
             "</xsl:stylesheet>");
-        $transformer->setResultAsRawValue(True);
-        $result = $transformer->callTemplateReturningValue();
+        $executable->setResultAsRawValue(True);
+        $result = $executable->callTemplateReturningValue();
         $this->assertNotNull($result);
         $this->assertNotNull($result->getHead());
         $this->assertTrue($result->getHead()->isAtomic());
@@ -578,10 +570,10 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='\$a+1, \$b+1'/>" .
             "                </xsl:template>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $transformer->setResultAsRawValue(True);
-        $transformer->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
-        $val = $transformer->callTemplateReturningValue("t");
+        $executable = $transformer->compileFromString($source);
+        $executable->setResultAsRawValue(True);
+        $executable->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
+        $val = $executable->callTemplateReturningValue("t");
         $this->assertNotNull($val);
         $this->assertEquals(2, $val->size());
         $this->assertTrue($val->itemAt(0)->isAtomic());
@@ -624,12 +616,12 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='., \$a + \$b'/>" .
             "                </xsl:template>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
+        $executable = $transformer->compileFromString($source);
         $node = self::$saxonProc->parseXmlFromString("<e/>");
-        $transformer->setResultAsRawValue(True);
-        $transformer->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
-        $transformer->setInitialMatchSelection($node);
-        $result = $transformer->applyTemplatesReturningValue();
+        $executable->setResultAsRawValue(True);
+        $executable->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
+        $executable->setInitialMatchSelection($node);
+        $result = $executable->applyTemplatesReturningValue();
         $this->assertEquals(2, $result->size());
         $first = $result->itemAt(0);
         $this->assertNotNull($first);
@@ -654,12 +646,12 @@ final class XSLT30Test extends TestCase
             "                   <xsl:sequence select='., \$a + \$b'/>" .
             "                </xsl:template>" .
             "                </xsl:stylesheet>";
-        $transformer->compileFromString($source);
-        $transformer->setProperty("!omit-xml-declaration", "yes");
-        $transformer->setResultAsRawValue(True);
-        $transformer->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
-        $transformer->setInitialMatchSelection(self::$saxonProc->createAtomicValue(16));
-        $sw = $transformer->applyTemplatesReturningString();
+        $executable = $transformer->compileFromString($source);
+        $executable->setProperty("!omit-xml-declaration", "yes");
+        $executable->setResultAsRawValue(True);
+        $executable->setInitialTemplateParameters(array("a" => self::$saxonProc->createAtomicValue(12), "b" => self::$saxonProc->createAtomicValue(5)));
+        $executable->setInitialMatchSelection(self::$saxonProc->createAtomicValue(16));
+        $sw = $executable->applyTemplatesReturningString();
         $this->assertEquals("16~~17", $sw);
     }
     /*  public function testItemSeparatorToSerializer(): void {

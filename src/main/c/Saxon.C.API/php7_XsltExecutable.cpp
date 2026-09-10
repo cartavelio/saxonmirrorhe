@@ -117,18 +117,35 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
             RETURN_NULL();
         }
         //array_init(return_value);
-        //XdmMap rValues = new XdmMap();
-        /*for (std::map::iterator i = cpp_resultDocMap.begin(); i != cpp_resultDocMap.end(); ++i) {
-                        zval * nodei_Val;
+        //XdmMap result = SaxonProcessor::makeMap2(cpp_resultDocMap);
+        std::map<std::string,XdmValue*>cpp_resultDocMap2;
+        for (auto i = cpp_resultDocMap.begin(); i != cpp_resultDocMap.end(); ++i) {
+            cpp_resultDocMap2[i->first] = (XdmValue *)i->second;
+                       /* zval * nodei_Val;
                         struct xdmNode_object* nodei_obj = (struct xdmNode_object *)Z_OBJ_P(nodei_Val);
                         zend_object *vvobj =  Z_OBJ_P(nodei_Val);
                         xdmNode_object* vobj  = (xdmNode_object *)((char *)vvobj - XtOffsetOf(xdmNode_object, std));
 
                         n = (node_object*) zend_object_store_get_object(php_resultDocArr TSRMLS_CC);
                         n->node = i->second;
-                        add_index_zval(return_value, i->first, php_resultDocArr);
-        }  */
-        
+                        add_index_zval(return_value, i->first, php_resultDocArr);*/
+        }
+        XdmMap * result = SaxonProcessor::makeMap2(cpp_resultDocMap2);
+              if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmMap_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmMap_object* vobj  = (xdmMap_object *)((char *)vvobj - XtOffsetOf(xdmMap_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmMap = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
 
         } else if(xsltExecutable->exceptionOccurred()){
             SaxonApiException * exception = xsltExecutable->getException();
@@ -1402,6 +1419,40 @@ PHP_METHOD(XsltExecutable, setParameter)
     }
 }
 
+PHP_METHOD(XsltExecutable, clone) {
+
+    XsltExecutable *xsltExecutable;
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
+    xsltExecutable = obj->xsltExecutable;
+if (xsltExecutable != nullptr) {
+        XsltExecutable * executable = xsltExecutable->clone();
+        if(executable != nullptr) {
+            if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
+                RETURN_NULL();
+            } else {
+                zend_object *ooth = Z_OBJ_P(return_value);
+                xsltExecutable_object *vobj = (xsltExecutable_object * )((char *) ooth - XtOffsetOf(xsltExecutable_object, std));
+                assert (vobj!= nullptr);
+                vobj->xsltExecutable = executable;
+            }
+
+        } else if(xslt30Processor->exceptionOccurred()){
+            SaxonApiException * exception = xslt30Processor->getException();
+            if(exception != nullptr) {
+                zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+            }
+
+        }
+        } else {
+        RETURN_NULL();
+    }
+}
+
 PHP_METHOD(XsltExecutable, clearParameters)
 {
     XsltExecutable *xsltExecutable;
@@ -1631,6 +1682,7 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable,  getErrorCode, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  checkForException, nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getErrorMessage, nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XsltExecutable,  setCaptureResultDocuments,  nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XsltExecutable,  getResultDocuments, nullptr, ZEND_ACC_PUBLIC)
 {nullptr, nullptr, nullptr}
 };

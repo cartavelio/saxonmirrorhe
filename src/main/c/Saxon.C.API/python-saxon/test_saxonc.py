@@ -152,6 +152,84 @@ def test_version():
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
 
+
+def test_icu_lib():
+    saxonproc = PySaxonProcessor(license=True)
+    print(saxonproc.version)
+    xqc = saxonproc.new_xquery_processor()
+    xqc.set_query_content("format-date(current-date(),'[FNn]','de',(),())")
+    result = xqc.run_query_to_value()
+    print("format-date(current-date(),'[FNn]','de',(),()) => " + str(result))
+
+    xqc.set_query_content("format-integer(33,'[Ww]')")
+    result2 = xqc.run_query_to_value()
+    print("format-integer(33,'[Ww]') => " + str(result2))
+
+
+    xqc.set_query_content("compare('Strasse','Straße')")
+    result4 = xqc.run_query_to_value()
+    print("compare('Strasse','Straße') => "+str(result4))
+
+    xqc.set_query_content("format-integer(33,'Ww')")
+    result5 = xqc.run_query_to_value()
+    print("format-integer(33,'Ww') => "+str(result5))
+
+
+    xqc.set_query_content("format-integer(33,'Ww','de')")
+    result6 = xqc.run_query_to_value()
+    print("format-integer(33,'Ww','de') => "+str(result6))
+
+    xqc.set_query_content("format-integer(33,'Ww','cs')")
+    result7 = xqc.run_query_to_value()
+    print("format-integer(33,'Ww','cs') => "+str(result7))
+
+
+    xqc.set_query_content("compare('Strasse','Straße','http://www.w3.org/2013/collation/UCA?lang=de;strength=primary')")
+    result3 = xqc.run_query_to_value()
+    print("compare('Strasse','Straße','http://www.w3.org/2013/collation/UCA?lang=de;strength=primary') => " + str(result3))
+
+    assert 'xx' in result
+
+
+def test_icu_lib_HE():
+    saxonproc = PySaxonProcessor()
+    print(saxonproc.version)
+    xqc = saxonproc.new_xquery_processor()
+    xqc.set_query_content("format-date(current-date(),'[FNn]','de',(),())")
+    result = xqc.run_query_to_value()
+    print("format-date(current-date(),'[FNn]','de',(),()) => " + str(result))
+
+    xqc.set_query_content("format-integer(33,'[Ww]')")
+    result2 = xqc.run_query_to_value()
+    print("format-integer(33,'[Ww]') => " + str(result2))
+
+
+    xqc.set_query_content("compare('Strasse','Straße')")
+    result4 = xqc.run_query_to_value()
+    print("compare('Strasse','Straße') => "+str(result4))
+
+    xqc.set_query_content("format-integer(33,'Ww')")
+    result5 = xqc.run_query_to_value()
+    print("format-integer(33,'Ww') => "+str(result5))
+
+
+    xqc.set_query_content("format-integer(33,'Ww','de')")
+    result6 = xqc.run_query_to_value()
+    print("format-integer(33,'Ww','de') => "+str(result6))
+
+
+    xqc.set_query_content("format-integer(33,'Ww','cs')")
+    result7 = xqc.run_query_to_value()
+    print("format-integer(33,'Ww','cs') => "+str(result7))
+
+
+    xqc.set_query_content("compare('Strasse','Straße','http://www.w3.org/2013/collation/UCA?lang=de;strength=primary')")
+    result3 = xqc.run_query_to_value()
+    print("compare('Strasse','Straße','http://www.w3.org/2013/collation/UCA?lang=de;strength=primary') => " + str(result3))
+
+    assert 'xx' in result
+
+
 def test_schema_aware2():
     ''' This unit test requires a valid license - Saxon-EE/C '''
     sp = PySaxonProcessor(license=True)

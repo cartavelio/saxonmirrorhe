@@ -241,6 +241,8 @@ public:
      */
     XdmAtomicValue *makeStringValue(const char *str);
 
+    static XdmAtomicValue *makeStringValue2(std::string str);
+
     /*!
      * Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
      *
@@ -347,7 +349,7 @@ public:
 
     XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
 
-    XdmMap *makeMap2(std::map<std::string, XdmValue *> dataMap);
+    static XdmMap *makeMap2(std::map<std::string, XdmValue *> dataMap);
 
 
     XdmMap *makeMap3(XdmAtomicValue **, XdmValue **, int len);
