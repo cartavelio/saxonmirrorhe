@@ -1243,7 +1243,7 @@
          
          <ol>
             <li>Create a <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySaxonProcessor" >PySaxonProcessor</a>
+               href="https://www.saxonica.com/saxon-c/doc13/python/processor.html" >PySaxonProcessor</a>
                and set any global configuration options on the <code>PySaxonProcessor</code> object. If your
                query uses any features that require saxoncpe or saxoncee, be sure to use the constructor
                <code>proc = PySaxonProcessor(license=True)</code>.
@@ -1252,13 +1252,13 @@
                <p>Optionally, build the source document by calling <code>new_document_builder()</code> to create
                   a document builder, setting appropriate options, and then calling the
                   <code>parse_xml()</code> method. This returns a <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmNode">PyXdmNode</a> which can
+                     href="https://www.saxonica.com/saxon-c/doc13/python/xdm/node.html">PyXdmNode</a> which can
                   be supplied as input to the query either as the context item, or as the value of an external
                   variable.</p>
             </li>
             <li>
                <p>Call <code>new_xquery_processor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXQueryProcessor"
+                  href="https://www.saxonica.com/saxon-c/doc13/python/xquery/processor.html"
                   >PyXQueryProcessor</a>. Then set any options required for the specific query execution (for
                   example, the initial context item, the base URI, the values of external variables and the
                   parameters of the query). The query can be supplied as a string using the

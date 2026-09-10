@@ -171,7 +171,7 @@
                href="https://www.saxonica.com/saxon-c/doc13/html/classXdmValue.html">XdmValue</a> in C++,
          <a href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_xdmvalue"
             class="bodylink code">XdmValue</a> in PHP,
-         <a href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmValue" class="bodylink
+         <a href="https://www.saxonica.com/saxon-c/doc13/python/xdm/value.html" class="bodylink
             code">PyXdmValue</a> in Python.
          The <code>XdmValue</code> class is also used to supply parameters to stylesheets and transformations,
          and to return the results of XSLT or XQuery evaluation.</p>
@@ -842,7 +842,7 @@ XPath xpath = xpathFactory.newXPath();
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySaxonProcessor"
+                  href="https://www.saxonica.com/saxon-c/doc13/python/processor.html"
                   >PySaxonProcessor</a> and set any global configuration options on the
                   <code>PySaxonProcessor</code>.</p>
             </li>
@@ -850,12 +850,12 @@ XPath xpath = xpathFactory.newXPath();
                <p>Build the source document by calling <code>new_document_builder()</code> to create
                   a <code>DocumentBuilder</code>, setting appropriate options, and then calling the
                   <code>parse_xml()</code> method. This returns a <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmNode" >PyXdmNode</a>
+                     href="https://www.saxonica.com/saxon-c/doc13/python/xdm/node.html" >PyXdmNode</a>
                   which can be supplied as the context item to the XPath expression.</p>
             </li>
             <li>
                <p>Call <code>new_xpath_processor()</code> to create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXPathProcessor"
+                  href="https://www.saxonica.com/saxon-c/doc13/python/xpath_processor.html"
                   >PyXPathProcessor</a>, and set any options required for the specific XPath execution (for
                   example, declaring namespace prefixes that are used in the XPath expression, the initial
                   context node, and the values of any variables referenced in the expression).</p>
@@ -867,14 +867,14 @@ XPath xpath = xpathFactory.newXPath();
             </li>
             <li>
                <p>The result of an XPath expression is in general a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmValue">PyXdmValue</a>,
+                  href="https://www.saxonica.com/saxon-c/doc12/python/xdm/value.html">PyXdmValue</a>,
                   representing a value as defined in the XDM data model (that is, a sequence of nodes and/or
-                  atomic items). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmItem" >PyXdmItem</a>, <a
+                  atomic values). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc13/python/xdm/item.html" >PyXdmItem</a>, <a
                         class="bodylink code"
-                        href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmNode" >PyXdmNode</a>, and
+                        href="https://www.saxonica.com/saxon-c/doc13/python/xdm/node.html" >PyXdmNode</a>, and
                   <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmAtomicValue"
+                     href="https://www.saxonica.com/saxon-c/doc13/python/xdm/atomic_value.html"
                      >PyXdmAtomicValue</a>, and these relate directly to the corresponding concepts in XDM.
                   Various methods are available to translate between this model and native Python data types.</p>
             </li>
@@ -986,7 +986,7 @@ XPath xpath = xpathFactory.newXPath();
             <li>C++ API: <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc13/html/classXdmNode.html">XdmNode</a></li>
             <li>Python API: <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmNode">PyXdmNode</a></li>
+               href="https://www.saxonica.com/saxon-c/doc13/python/xdm/node.html">PyXdmNode</a></li>
             <li>PHP API: <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_xdmnode">XdmNode</a></li>
          </ul>

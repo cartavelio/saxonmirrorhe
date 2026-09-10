@@ -1326,7 +1326,7 @@
         <li>In C++, <a href="https://www.saxonica.com/saxon-c/doc13/html/classDocumentBuilder.html"
           class="bodylink code">DocumentBuilder</a> provides the methods: <code>parseXmlFromFile()</code>,
           <code>parseXmlFromUri()</code>, and <code>parseXmlFromString()</code>.</li>
-        <li>In Python, <a href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyDocumentBuilder"
+        <li>In Python, <a href="https://www.saxonica.com/saxon-c/doc13/python/document_builder.html"
           class="bodylink code">PyDocumentBuilder</a> provides the method <code>parse_xml()</code> with
           which different keywords are used to supply the input from file, URI or lexical string.</li>
         <li>In PHP, <a href="https://www.saxonica.com/saxon-c/documentation13/index.html#!api/saxon_c_php_api/saxon_c_php_documentBuilder"
@@ -1939,7 +1939,7 @@ documentBuilder.build(as);]]></code></pre>
         the C++ interface, the <a class="bodylink code"
           href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a>
         in the PHP interface, or the <a class="bodylink code"
-          href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a>
+          href="https://www.saxonica.com/saxon-c/doc13/python/document_builder.html">PyDocumentBuilder</a>
         in the Python interface.</p>
       
       <p class="javaonly">On Java interfaces that expect a JAXP <code>Source</code> object it is possible to request

@@ -944,7 +944,7 @@
             validation you will need to install saxoncee.</p>
          
          <p>The Python interface allows schemas to be loaded into a <a class="bodylink code"
-            href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySchemaValidator"
+            href="https://www.saxonica.com/saxon-c/doc13/python/schema_validator.html"
             >PySchemaValidator</a>, and then to be used for validating instances, or for schema-aware XSLT and
             XQuery processing.</p>
          
@@ -953,11 +953,11 @@
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySaxonProcessor"
+                  href="https://www.saxonica.com/saxon-c/doc13/python/processor.html"
                   >PySaxonProcessor</a> using the constructor <code>proc =
                      PySaxonProcessor(license=True)</code> (schema processing requires SaxonC-EE). Then call
                   the method <code>new_schema_validator()</code> to create a new <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySchemaValidator"
+                     href="https://www.saxonica.com/saxon-c/doc13/python/schema_validator.html"
                      >PySchemaValidator</a>.</p>
             </li>
             <li>
