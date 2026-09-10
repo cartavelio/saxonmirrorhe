@@ -391,8 +391,8 @@ namespace TestDriver {
                             results.WriteAttributeString("group", testGroupName);
                             results.WriteAttributeString("test", testName);
                             if (queried) {
-                                results.WriteAttributeString("saxon", "queried", "true");
-                                results.WriteAttributeString("saxon", "bugzilla", bugzillaRef);
+                                results.WriteAttributeString("saxon", "queried", NamespaceConstant.SAXON, "true");
+                                results.WriteAttributeString("saxon", "bugzilla", NamespaceConstant.SAXON, bugzillaRef);
                             }
                             results.WriteAttributeString("validity", (schemaOK ? "valid" : "invalid"));
                             results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, (ok ? "same" : "different"));
@@ -481,8 +481,8 @@ namespace TestDriver {
                                 results.WriteAttributeString("test", testName);
                                 results.WriteAttributeString("validity", (success ? "valid" : "invalid"));
                                 if (queried) {
-                                    results.WriteAttributeString("saxon", "queried", "true");
-                                    results.WriteAttributeString("saxon", "bugzilla", bugzillaRef);
+                                    results.WriteAttributeString("saxon", "queried", NamespaceConstant.SAXON, "true");
+                                    results.WriteAttributeString("saxon", "bugzilla", NamespaceConstant.SAXON, bugzillaRef);
                                 }
                                 results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, (success == expectedSuccess ? "same" : "different"));
                                 results.WriteEndElement();
