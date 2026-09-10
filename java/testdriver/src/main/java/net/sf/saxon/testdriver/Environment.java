@@ -927,6 +927,7 @@ public class Environment implements ResourceResolver {
             String rawUri = source.attribute("uri");
             String role = source.attribute("role");
             boolean mutable = isTrue("mutable").test(source);
+            builder.setLineNumbering(isTrue("retain-location").test(source));
             if (rawUri != null) {
                 res.uri = envNode.getBaseURI().resolve(rawUri).toString();
                 environment.catalogResources.put(res.uri, res);
