@@ -44,6 +44,7 @@ namespace TestDriver {
         protected bool useXslt30Transformer = true; // Temporary for controlling test processor
         protected bool strict = false;
         protected bool jitFlag = false;
+        protected HashSet<string> exceptionPredicates = new();
 #if EE        
         public string edition = "EE";
 #else
@@ -112,8 +113,8 @@ namespace TestDriver {
             set => treeModel = value;
         }
 
-        public static void Main(string[] args) {
-            
+        public static void Main(string[] args)
+        {
             string language = "XQ";
             foreach (string a in args)
             {
@@ -150,7 +151,8 @@ namespace TestDriver {
             }
         }
 
-        protected void go(string[] args) {
+        protected void go(string[] args)
+        {
             try {
                 driverSerializer = driverProc.NewSerializer();
                 //testSuiteDir = args[0];
@@ -247,6 +249,10 @@ namespace TestDriver {
                         }
                     }
                 }
+
+                exceptionPredicates.Add(edition.ToLowerInvariant());
+                exceptionPredicates.Add(driverProc.ProductVersion); 
+
 
                 string catalog = testSuiteDir + "/" + catalogFile;
 
@@ -386,6 +392,7 @@ namespace TestDriver {
             DocumentBuilder exceptBuilder = driverProc.NewDocumentBuilder();
             QName testSet = new QName("", "test-set");
             QName testCase = new QName("", "test-case");
+            QName whenName = new QName("", "when");
             QName run = new QName("", "run");
             QName editionAtt = new QName("", "edition");
             string saxonEdition = driverProc.Edition;
@@ -405,6 +412,21 @@ namespace TestDriver {
                 XdmNode exceptionsDoc = exceptBuilder.Build(exceptionsFile);
                 
                 foreach(XdmNode entry in exceptionsDoc.Select(Steps.Descendant("exception"))) {
+                    string whenExpr = entry.GetAttributeValue(whenName);
+                    if (whenExpr != null)
+                    {
+                        var applyThisException = false;
+                        foreach (var token in Regex.Split(whenExpr, "\\s+"))
+                        {
+                            applyThisException = applyThisException || exceptionPredicates.Contains(token);
+                        }
+
+                        if (!applyThisException)
+                        {
+                            continue;
+                        }
+                    }
+                    
                     string testName = entry.GetAttributeValue(testCase);
                     if (testName == null) {
                         testName = "$" + entry.GetAttributeValue(testSet);
