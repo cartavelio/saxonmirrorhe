@@ -1861,9 +1861,6 @@ public class XPathParser {
                     break;
                 case "type":
                     checkLanguageVersion40();
-                    if (language != ParsedLanguage.XSLT_PATTERN) {
-                        grumble("The type() construct is allowed only in XSLT patterns");
-                    }
                     nextToken();
                     if (t.currentToken == Token.NAME) {
                         StructuredQName qName = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
@@ -1874,6 +1871,9 @@ public class XPathParser {
                             nextToken();
                             return realType;
                         }
+                    }
+                    if (language != ParsedLanguage.XSLT_PATTERN) {
+                        grumble("In an XPath expression (as distinct from an XSLT pattern), type(N) must refer to a named item type");
                     }
                     ItemType it = parseItemType();
                     expect(Token.RPAR);
