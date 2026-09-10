@@ -14,7 +14,8 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * Implement the XSLT current() function
+ * Implement the XSLT current() function. A static call on current() is converted at compile time to a variable
+ * reference.
  */
 
 public class Current extends SystemFunction {
@@ -37,7 +38,7 @@ public class Current extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        throw new XPathException("Dynamic evaluation of the current() function is not supported", "XTDE1360");
+        throw new XPathException("Dynamic evaluation of the current() function is not allowed", "XTDE1360");
     }
 }
 
