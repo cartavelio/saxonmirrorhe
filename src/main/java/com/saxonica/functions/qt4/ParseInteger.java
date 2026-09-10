@@ -6,6 +6,7 @@ import net.sf.saxon.functions.Translate;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
 
@@ -33,6 +34,9 @@ public class ParseInteger extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue s = (StringValue) arguments[0].head();
+        if (s == null) {
+            return EmptySequence.getInstance();
+        }
         int radix = 10;
         if (arguments.length == 2) {
             IntegerValue r = (IntegerValue) arguments[1].head();
