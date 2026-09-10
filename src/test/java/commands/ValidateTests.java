@@ -55,8 +55,7 @@ public class ValidateTests {
         }
     }
 
-    @Test
-    public void testExportSCM() {
+    private void testExportSCM() {
 
         String[] args = {
                 "-xsd:" + ConfigTest.DATA_DIR + "books.xsd",
@@ -71,8 +70,8 @@ public class ValidateTests {
         }
     }
 
-    @Test
-    public void testImportSCM() {
+
+    private void testImportSCM() {
 
         String[] args = {
                 "-scmin:" + TEMPDIR + "books.scm",
@@ -85,6 +84,12 @@ public class ValidateTests {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @Test
+    public void exportThenImport() {
+        testExportSCM();
+        testImportSCM();
     }
 
     @Test
