@@ -55,4 +55,21 @@ public class StandardURIResolverTest {
         }
     }
 
+    @Test
+    public void withConfigurationWithSpaces() {
+        Configuration config = new Configuration();
+        StandardURIResolver resolver = new StandardURIResolver(config);
+
+        String cwd = System.getProperty("user.dir").replaceAll("\\\\", "/"); // Windows
+        if (!cwd.endsWith("/")) {
+            cwd += "/";
+        }
+        URI baseURI = URI.create("file://" + cwd);
+        try {
+            Source source = resolver.resolve("src/test/testdata/my dir/Transform3.xsl", baseURI.toString());
+            Assert.assertNotNull(source);
+        } catch (Exception ex) {
+            fail();
+        }
+    }
 }
