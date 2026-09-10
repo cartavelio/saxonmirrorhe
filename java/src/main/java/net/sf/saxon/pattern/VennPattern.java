@@ -7,11 +7,13 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.LocalBinding;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.om.Genre;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -95,7 +97,7 @@ public abstract class VennPattern extends Pattern {
     private void mustBeNodePattern(Pattern p) throws XPathException {
         if (p instanceof NodeTestPattern) {
             ItemType it = p.getItemType();
-            if (!(it instanceof NodeTest)) {
+            if (it.getGenre() != Genre.XNODE) {
                 XPathException err = new XPathException("The operands of a union, intersect, or except pattern " +
                         "must be patterns that match nodes", "XPTY0004");
                 err.setIsTypeError(true);

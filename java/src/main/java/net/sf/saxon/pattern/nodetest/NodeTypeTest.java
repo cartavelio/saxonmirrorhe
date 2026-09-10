@@ -83,8 +83,15 @@ public class NodeTypeTest extends NodeTest {
         int nodeKind = nodeType.getPrimitiveType();
 
         if (nodeType instanceof NodeKindType) {
-            return IntPredicateLambda.of(
-                    nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind);
+            if (nodeKind == Type.TEXT) {
+                return IntPredicateLambda.of(nodeNr -> {
+                    int k = nodeKindArray[nodeNr];
+                    return k == Type.TEXT || k == Type.WHITESPACE_TEXT;
+                });
+            } else {
+                return IntPredicateLambda.of(
+                        nodeNr -> (nodeKindArray[nodeNr] & 0x0f) == nodeKind);
+            }
         }
 
         if (nodeType instanceof NamedXNodeType) {

@@ -407,7 +407,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         if (parent == null) {
             return EmptyIterator.getInstance();
         } else {
-            return new StrippingIterator(node.iterateFollowingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
+            return new StrippingIterator(node.iteratePrecedingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
         }
     }
 

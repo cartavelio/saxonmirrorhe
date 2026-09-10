@@ -121,7 +121,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
     @Override
     public boolean isPlainType() {
-        return true;
+        return false;
     }
 
 

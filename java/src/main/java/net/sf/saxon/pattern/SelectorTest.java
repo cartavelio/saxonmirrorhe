@@ -8,18 +8,20 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NamedXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
@@ -61,14 +63,7 @@ public class SelectorTest extends NodeTest {
      * @return an equivalent node test for XNodes
      */
     public NodeTest asXNodeTest(Configuration config) {
-//        if ( instanceof QNameValue) {
-//            return NamedXNodeType.make(
-//                    nodeKind,
-//                    ((QNameValue) value).getNamespaceURI(),
-//                    ((QNameValue) value).getLocalName(),
-//                    config);
-//        }
-        return this;
+        return new NodeTypeTest(new NamedXNodeType(nodeKind, getQNameTest(), config));
     }
 
     /**
@@ -140,6 +135,15 @@ public class SelectorTest extends NodeTest {
         }
     }
 
+    /**
+     * Get an item type that all matching nodes must satisfy
+     *
+     * @return an item type
+     */
+    @Override
+    public ItemType getItemType() {
+        return ChoiceItemType.of(AnyJNodeType.getInstance(), NodeKindType.of(this.nodeKind));
+    }
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative

@@ -35,6 +35,7 @@ import net.sf.saxon.tree.tiny.TinyTextualElement;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.GNodeType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1149,7 +1150,9 @@ public final class Navigator {
             return NodeTypeTest.GNODE;
         }
         if (predicate instanceof NodeTest) {
-            return (NodeTest)predicate;
+            return (NodeTest) predicate;
+        } else if (predicate instanceof GNodeType) {
+            return new NodeTypeTest((GNodeType)predicate);
         } else {
             return NodeSelector.of(predicate::test);
         }

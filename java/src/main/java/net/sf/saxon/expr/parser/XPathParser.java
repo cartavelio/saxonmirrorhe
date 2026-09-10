@@ -2156,7 +2156,7 @@ public class XPathParser {
                 return parseArrayItemType();
             case "fn":
                 checkLanguageVersion40();
-                CSharp.emitCode("goto \"fn\""); // drop through
+                CSharp.emitCode("goto case \"function\";"); // drop through
             case "function":
                 checkLanguageVersion30();
                 AnnotationList annotations = AnnotationList.EMPTY;
@@ -3023,6 +3023,9 @@ public class XPathParser {
                     case "text": {
                         NodeTest nodeTest = parseNodeTest(Type.ELEMENT);
                         int defaultAxis = (firstInPattern && name.equals("document-node")) ? AxisInfo.SELF : AxisInfo.CHILD;
+                        if (firstInPattern && defaultAxis == AxisInfo.CHILD && name.equals("node")) {
+                            nodeTest = MultipleNodeKindTest.CHILD_NODE;
+                        }
                         AxisExpression ae = new AxisExpression(defaultAxis, nodeTest);
                         setLocation(ae);
                         return ae;

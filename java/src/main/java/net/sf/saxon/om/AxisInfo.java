@@ -403,7 +403,9 @@ public final class AxisInfo {
      */
 
     public static boolean containsNodeKind(int axis, int nodeKind) {
-        return nodeKind == Type.XNODE || (nodeKindTable[axis] & (1 << nodeKind)) != 0;
+        return nodeKind == Type.XNODE
+                || nodeKind == Type.GNODE
+                || (nodeKindTable[axis] & (1 << nodeKind)) != 0;
     }
 
     /**

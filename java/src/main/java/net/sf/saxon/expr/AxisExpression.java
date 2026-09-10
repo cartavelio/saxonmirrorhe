@@ -19,6 +19,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.SelectorTest;
 import net.sf.saxon.pattern.nodetest.*;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -198,6 +199,8 @@ public final class AxisExpression extends Expression {
             } else if (test instanceof NodeTestStar) {
                 NodeKindType kind = NodeKindType.of(((NodeTestStar)test).getDefaultNodeKind());
                 return new AxisExpression(axis, new NodeTypeTest(kind));
+            } else if (test instanceof SelectorTest) {
+                return new AxisExpression(axis, ((SelectorTest)test).asXNodeTest(config));
             }
         } else if (contextItemType instanceof JNodeType) {
             // An axis step starting at a JNode will always return JNodes
@@ -740,7 +743,7 @@ public final class AxisExpression extends Expression {
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) {
-            if (kind != Type.XNODE && !AxisInfo.containsNodeKind(axis, kind)) {
+            if (!AxisInfo.containsNodeKind(axis, kind)) {
                 pat = new NodeTestPattern(NodeRejector.getInstance());
             } else {
                 pat = new NodeTestPattern(test);

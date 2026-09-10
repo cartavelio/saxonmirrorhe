@@ -83,6 +83,8 @@ public abstract class NodeTest implements NodePredicate {
         return AnyGNodeType.getInstance();
     }
 
+
+
     /**
      * Get a UType that all matching nodes must satisfy
      * @return a UType

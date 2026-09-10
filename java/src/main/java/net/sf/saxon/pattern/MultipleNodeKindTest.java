@@ -11,12 +11,11 @@ import net.sf.saxon.om.GNode;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.PrimitiveUType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -67,6 +66,20 @@ public final class MultipleNodeKindTest extends NodeTest {
         if (UType.JNODE.overlaps(u)) {
             nodeKindMask |= 1 << Type.JNODE;
         }
+    }
+
+    /**
+     * Get an item type that all matching nodes must satisfy
+     *
+     * @return an item type
+     */
+    @Override
+    public ItemType getItemType() {
+        List<ItemType> memberTypes = new ArrayList<>();
+        for (PrimitiveUType u : uType.decompose()) {
+            memberTypes.add(u.toItemType());
+        }
+        return new ChoiceItemType(memberTypes);
     }
 
     /**
