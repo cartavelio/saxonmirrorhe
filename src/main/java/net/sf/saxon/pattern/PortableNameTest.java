@@ -30,8 +30,8 @@ public class PortableNameTest extends NodeTest {
 
     private final int nodeKind;
     private final UType uType;
-    /*@Nullable*/ private NamespaceUri uri = null;  // the URI corresponding to the fingerprint - computed lazily
-    /*@Nullable*/ private String localName = null; //the local name corresponding to the fingerprint - computed lazily
+    private final NamespaceUri uri;
+    private final String localName;
 
     /**
      * Create a NameTest to match nodes by name
