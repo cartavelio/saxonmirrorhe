@@ -1551,6 +1551,8 @@ public class OptimizerEE extends Optimizer {
         if (isInlineable) {
             functionCall.setBeingInlined(true);
             function.markAsInlined();
+            boolean wasInlining = visitor.isInliningFunctions();
+            visitor.setInliningFunctions(true);
             Expression newBody;
 
             //function.getBody().verifyParentPointers("OptimizerEE, before function inline of " + function.getFunctionName());
@@ -1587,6 +1589,8 @@ public class OptimizerEE extends Optimizer {
                 return newBody;
             } catch (XPathException e) {
                 return functionCall;
+            } finally {
+                visitor.setInliningFunctions(wasInlining);
             }
         } else {
             return functionCall;

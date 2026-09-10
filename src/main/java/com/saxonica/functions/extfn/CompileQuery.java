@@ -6,7 +6,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 
@@ -35,7 +34,7 @@ public class CompileQuery extends SystemFunction {
      */
 
     @Override
-    public ExternalObject<XQueryExpression> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public ObjectValue<XQueryExpression> call(XPathContext context, Sequence[] arguments) throws XPathException {
         String query = arguments[0].head().getStringValue();
         StaticQueryContext sqc = context.getConfiguration().newStaticQueryContext();
         //sqc.setLanguageVersion(31);

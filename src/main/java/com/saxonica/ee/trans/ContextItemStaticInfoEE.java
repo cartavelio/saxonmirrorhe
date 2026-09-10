@@ -16,7 +16,7 @@ import net.sf.saxon.type.ItemType;
  */
 public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
 
-    private Posture explicitPosture;
+    private Posture explicitPosture = Posture.UNKNOWN;
     private boolean strictStreamabilityRules;
     private Actor container;
     private AccumulatorFn.Phase accumulatorPhase = AccumulatorFn.Phase.UNSPECIFIED;
@@ -45,7 +45,7 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
 
     public ContextItemStaticInfoEE(ItemType itemType, boolean maybeUndefined, Posture contextItemPosture) {
         super(itemType, maybeUndefined);
-        this.explicitPosture = contextItemPosture;
+        this.explicitPosture = contextItemPosture == null ? Posture.UNKNOWN : contextItemPosture;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ContextItemStaticInfoEE extends ContextItemStaticInfo {
      */
 
     public Posture getContextItemPosture() {
-        if (explicitPosture == null) {
+        if (explicitPosture == Posture.UNKNOWN) {
             Expression contextSetter = getContextSettingExpression();
             if (contextSetter != null) {
                 return Streamability.getPosture(contextSetter);

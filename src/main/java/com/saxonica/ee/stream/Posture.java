@@ -8,7 +8,7 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
  */
 @CSharpSimpleEnum
 public enum Posture {
-
+    UNKNOWN,
     GROUNDED,
     CLIMBING,
     STRIDING,

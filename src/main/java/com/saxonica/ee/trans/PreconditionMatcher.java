@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class PreconditionMatcher extends RuleSearchState {
     private final XPathContext context;
-    private Boolean[] preconditionState;  // This must be a Boolean[] object as null is a valid value.
+    private int[] preconditionState;  // Values are true, false, or unknown, with 0 meaning unknown
     private Object[] characteristics;
 
     /**
@@ -32,7 +32,7 @@ public class PreconditionMatcher extends RuleSearchState {
         this.context = context;
         if (chain.optimizationData != null) {
             ModeEE.RuleChainOptimizationData data = (ModeEE.RuleChainOptimizationData)chain.optimizationData;
-            preconditionState = new Boolean[data.preconditions.size()];
+            preconditionState = new int[data.preconditions.size()];
             characteristics = new Object[data.characteristics.size()];
         }
     }
@@ -40,11 +40,12 @@ public class PreconditionMatcher extends RuleSearchState {
     /**
      * Get the state of a given precondition.
      * @param slot the slot number allocated to the precondition
-     * @return true if the precondition is known to be true for the item being matched;
-     * false if it is known to be false; or null if its value is not known
+     * @return {@link Precondition#PRECONDITION_TRUE} if the precondition is known to be true
+     * for the item being matched; {@link Precondition#PRECONDITION_FALSE} if it is known to be false;
+     * or {@link Precondition#PRECONDITION_UNKNOWN} if its value is not known
      */
 
-    public Boolean getPreconditionState(int slot) {
+    public int getPreconditionState(int slot) {
         return preconditionState[slot];
     }
 
@@ -56,7 +57,7 @@ public class PreconditionMatcher extends RuleSearchState {
      */
 
     public void setPreconditionState(int slot, boolean value) {
-        preconditionState[slot] = value;
+        preconditionState[slot] = value ? Precondition.PRECONDITION_TRUE : Precondition.PRECONDITION_FALSE;
     }
 
     /**

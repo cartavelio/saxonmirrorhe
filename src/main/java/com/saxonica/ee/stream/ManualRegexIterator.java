@@ -2,6 +2,8 @@ package com.saxonica.ee.stream;
 
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegexMatchHandler;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.value.StringValue;
 
@@ -15,11 +17,11 @@ import net.sf.saxon.value.StringValue;
 public class ManualRegexIterator extends ManualIterator implements RegexIterator {
 
     private final boolean currentItemMatches;
-    private final String[] groups;
+    private final UnicodeString[] groups;
 
     public ManualRegexIterator(RegexIterator base) {
         currentItemMatches = base.isMatching();
-        groups = new String[base.getNumberOfGroups()+1];
+        groups = new UnicodeString[base.getNumberOfGroups()+1];
         for (int i=0; i<groups.length; i++) {
             groups[i] = base.getRegexGroup(i);
         }
@@ -56,11 +58,11 @@ public class ManualRegexIterator extends ManualIterator implements RegexIterator
      * within the regular expression
      */
     @Override
-    public String getRegexGroup(int number) {
+    public UnicodeString getRegexGroup(int number) {
         if (number >= 0 && number < groups.length) {
             return groups[number];
         } else {
-            return "";
+            return EmptyUnicodeString.getInstance();
         }
     }
 

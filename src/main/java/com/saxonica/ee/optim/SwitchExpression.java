@@ -323,12 +323,16 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
             return getOtherwiseExpression().evaluateItem(context);
         }
         AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        Integer selection = map.get(key);
-        if (selection == null) {
+        int selection = getIndex(key);
+        if (selection == -1) {
             return getOtherwiseExpression().evaluateItem(context);
         } else {
             return actions.get(selection).getChildExpression().evaluateItem(context);
         }
+    }
+
+    private int getIndex(AtomicMatchKey key) {
+        return map.getOrDefault(key, -1);
     }
 
     /**
@@ -354,8 +358,8 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
             return getOtherwiseExpression().iterate(context);
         }
         AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        Integer selection = map.get(key);
-        if (selection == null) {
+        int selection = getIndex(key);
+        if (selection == -1) {
             return getOtherwiseExpression().iterate(context);
         } else {
             return actions.get(selection).getChildExpression().iterate(context);
@@ -377,8 +381,8 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
             return;
         }
         AtomicMatchKey key = subjectValue.getXPathMatchKey(collation, context.getImplicitTimezone());
-        Integer selection = map.get(key);
-        if (selection == null) {
+        int selection = getIndex(key);
+        if (selection == -1) {
             getOtherwiseExpression().process(output, context);
         } else {
             actions.get(selection).getChildExpression().process(output, context);

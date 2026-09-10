@@ -12,6 +12,7 @@ import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 
@@ -71,6 +72,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
         if (isSimpleText) {
             return new AbstractUniStringConsumer() {
                 @Override
+                @CSharpModifiers(code={"public", "override"})
                 public UniStringConsumer accept(CodePoints chars) throws XPathException {
                     try {
                         getNextOutputter().characters(chars, Loc.NONE, ReceiverOption.NONE);

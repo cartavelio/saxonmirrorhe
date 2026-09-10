@@ -21,7 +21,8 @@ import java.util.List;
  * http://expath.org/spec/binary
  */
 
-public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
+public class
+EXPathBinaryFunctionSet extends BuiltInFunctionSet {
 
     private static final EXPathBinaryFunctionSet THE_INSTANCE = new EXPathBinaryFunctionSet();
 
@@ -786,7 +787,7 @@ public class EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                                                             bigEnd, false));
                 return new BigIntegerValue(big);
             } else {
-                long signExt = negative ? -(1l << (8 * len)) : 0;
+                long signExt = negative ? -(1L << (8 * len)) : 0;
                 long result = unpack(in, offset, len, bigEnd);
                 return new Int64Value(result | signExt);
             }

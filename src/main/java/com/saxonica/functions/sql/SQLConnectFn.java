@@ -9,7 +9,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringValue;
 
@@ -29,7 +28,7 @@ import java.sql.SQLException;
 public class SQLConnectFn extends SystemFunction {
 
     @Override
-    public ExternalObject<Connection> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public ObjectValue<Connection> call(XPathContext context, Sequence[] arguments) throws XPathException {
 
         if (context.getConfiguration().getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
             context.getController().getErrorReporter().report(

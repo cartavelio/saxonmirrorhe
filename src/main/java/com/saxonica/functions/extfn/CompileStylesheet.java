@@ -9,7 +9,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 
@@ -31,7 +30,7 @@ public class CompileStylesheet extends SystemFunction {
      */
 
     @Override
-    public ExternalObject<PreparedStylesheet> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public ObjectValue<PreparedStylesheet> call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo doc = (NodeInfo) arguments[0].head();
         Configuration config = context.getConfiguration();
         CompilerInfo compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());

@@ -17,6 +17,7 @@ import net.sf.saxon.om.Action;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
+import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -678,6 +679,11 @@ public class SchemaValidatorImpl extends SchemaValidator {
             }
             invalidityHandler.startReporting(source.getSystemId());
             Sender.send(source, receiver, receiver.getPipelineConfiguration().getParseOptions());
+        } catch (QuitParsingException qpe) {
+            // This happens when the result of validation is fed into a streaming transformer, and the transformer
+            // decides it doesn't need the whole input. Although we haven't actually validated the whole input, we
+            // report success: the transformer will already have emitted a warning.
+            // NO ACTION
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         } finally {

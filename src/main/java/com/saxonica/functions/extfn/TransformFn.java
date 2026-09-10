@@ -49,11 +49,11 @@ public class TransformFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         try {
-            ExternalObject<PreparedStylesheet> templatesObject = (ExternalObject<PreparedStylesheet>) arguments[0].head();
+            AnyExternalObject templatesObject = (AnyExternalObject) arguments[0].head();
             if (templatesObject == null) {
                 return EmptySequence.getInstance(); // Should not happen
             }
-            PreparedStylesheet pss = templatesObject.getObject();
+            PreparedStylesheet pss = (PreparedStylesheet) templatesObject.getWrappedObject();
 
             NodeInfo source = (NodeInfo) arguments[1].head();
             if (source == null) {

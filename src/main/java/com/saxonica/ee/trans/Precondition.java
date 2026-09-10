@@ -21,6 +21,11 @@ import net.sf.saxon.z.IntSet;
  */
 public abstract class Precondition {
 
+
+    public static final int PRECONDITION_UNKNOWN = 0;
+    public static final int PRECONDITION_FALSE = -1;
+    public static final int PRECONDITION_TRUE = 1;
+
     int slotNumber;
 
     /**
@@ -45,12 +50,12 @@ public abstract class Precondition {
      */
 
     public final boolean isSatisfied(PreconditionMatcher matcher) throws XPathException {
-        Boolean b = matcher.getPreconditionState(slotNumber);
-        if (b == null) {
-            b = testPrecondition(matcher);
+        int state = matcher.getPreconditionState(slotNumber);
+        if (state == PRECONDITION_UNKNOWN) {
+            boolean b = testPrecondition(matcher);
             matcher.setPreconditionState(slotNumber, b);
         }
-        return b;
+        return state == PRECONDITION_TRUE;
     }
 
     /**

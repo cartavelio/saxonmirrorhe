@@ -201,7 +201,7 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
                 if (v.compareTo(current) > 0 && fallbackError) {
                     error("requesting UCA version " + v.toString() + ", implementation supports UCA version " + current.toString());
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 if (fallbackError) {
                     error("version number format incorrect:" + version);
                 }

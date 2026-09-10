@@ -62,11 +62,11 @@ public class SwitchAdjunct extends TransmissionAdjunct {
                 selected = exp.getOtherwiseOperand();
             } else {
                 AtomicMatchKey key = subjectValue.getXPathMatchKey(exp.getCollation(), context.getImplicitTimezone());
-                Integer index = exp.getCaseMap().get(key);
-                if (index == null) {
-                    selected = exp.getOtherwiseOperand();
+                Map<AtomicMatchKey, Integer> caseMap = exp.getCaseMap();
+                if (caseMap.containsKey(key)) {
+                    selected = exp.getAction(caseMap.get(key));
                 } else {
-                    selected = exp.getAction(index);
+                    selected = exp.getOtherwiseOperand();
                 }
             }
             Expression action = selected.getChildExpression();

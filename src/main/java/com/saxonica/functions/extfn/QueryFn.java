@@ -8,7 +8,7 @@ import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.ExternalObject;
+import net.sf.saxon.value.AnyExternalObject;
 
 /**
  * This class implements the saxon:query() extension function
@@ -39,11 +39,11 @@ public class QueryFn extends SystemFunction {
         /*@Nullable*/
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ExternalObject<XQueryExpression> queryExpression = (ExternalObject<XQueryExpression>) arguments[0].head();
+           AnyExternalObject queryExpression = (AnyExternalObject) arguments[0].head();
             if (queryExpression == null) {
                 return null;
             }
-            XQueryExpression exp = queryExpression.getObject();
+            XQueryExpression exp = (XQueryExpression) queryExpression.getWrappedObject();
             DynamicQueryContext dqc = new DynamicQueryContext(context.getConfiguration());
 
             if (arguments.length >= 2) {

@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 public class SchemaTestSuiteDriver {
 
     public final static String testNS = "http://www.w3.org/XML/2004/xml-schema-test-suite/";
-    public String scmSchemaLocation = "c:/MyJava/samples/scm/scmschema.scm";
+    public String scmSchemaLocation;
     private final Licensor licensor = new Licensor();
     private String exceptionFilename = null;
     private String reportFilename = null;
@@ -155,7 +155,7 @@ public class SchemaTestSuiteDriver {
         Pattern testSetPattern = null;
         Pattern testGroupPattern = null;
         String contributor = null;
-        HashMap<String, String> exceptions = new HashMap<String, String>();
+        HashMap<String, String> exceptions = new HashMap<>();
         String bytecode = "on";
 
         for (int i = 1; i < args.length; i++) {

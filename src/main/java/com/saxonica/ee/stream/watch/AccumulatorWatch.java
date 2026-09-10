@@ -32,7 +32,7 @@ import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.ExternalObject;
+import net.sf.saxon.value.AnyExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 import java.util.Stack;
@@ -169,14 +169,13 @@ public class AccumulatorWatch extends PatternWatch {
     }
 
     private static boolean valueIsException(Sequence value) {
-        return value instanceof Item
-                && ((Item) value).getGenre() == Genre.EXTERNAL
-                && ((ExternalObject<?>) value).getObject() instanceof XPathException;
+        return value instanceof AnyExternalObject
+                && ((AnyExternalObject) value).getWrappedObject() instanceof XPathException;
     }
 
-    private void detectErrorValue(Sequence value) throws XPathException {
+    private static void detectErrorValue(Sequence value) throws XPathException {
         if (valueIsException(value)) {
-            throw (XPathException) ((ExternalObject<?>) value).getObject();
+            throw (XPathException) ((AnyExternalObject) value).getWrappedObject();
         }
     }
 

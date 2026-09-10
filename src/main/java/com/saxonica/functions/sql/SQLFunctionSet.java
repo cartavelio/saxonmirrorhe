@@ -19,10 +19,7 @@ import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.JavaExternalObjectType;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -156,10 +153,10 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
 
     public static Connection expectConnection(Sequence arg, XPathContext context) throws XPathException {
         Item conn = arg.head();
-        if (!(conn instanceof ExternalObject && ((ExternalObject) conn).getObject() instanceof Connection)) {
+        if (!(conn instanceof AnyExternalObject && ((AnyExternalObject) conn).getWrappedObject() instanceof Connection)) {
             throw new XPathException("Value of connection argument is not a JDBC Connection", SaxonErrorCode.SXSQ0001, context);
         }
-        return(Connection) ((ExternalObject) conn).getObject();
+        return(Connection) ((AnyExternalObject) conn).getWrappedObject();
     }
 
     private void init() {

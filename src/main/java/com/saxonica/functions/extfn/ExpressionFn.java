@@ -5,7 +5,6 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 /**
@@ -15,7 +14,7 @@ import net.sf.saxon.value.ObjectValue;
 public class ExpressionFn extends Evaluate {
 
     @Override
-    public ExternalObject<PreparedExpression> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public ObjectValue<PreparedExpression> call(XPathContext context, Sequence[] arguments) throws XPathException {
         XPathContextMajor c2 = context.newCleanContext();
         String exprText = arguments[0].head().getStringValue();
         NodeInfo namespaceOrigin = null;

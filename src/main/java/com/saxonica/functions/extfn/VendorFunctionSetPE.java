@@ -986,7 +986,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 return new QNameValue(type.getStructuredQName(), BuiltInAtomicType.QNAME);
             } else if (item.getGenre() == Genre.EXTERNAL) {
                 return new QNameValue(JavaExternalObjectType.classNameToQName(
-                        ((ExternalObject<?>) item).getObject().getClass().getName()), BuiltInAtomicType.QNAME);
+                        ((AnyExternalObject) item).getWrappedObject().getClass().getName()), BuiltInAtomicType.QNAME);
             } else {
                 return EmptySequence.getInstance();
             }

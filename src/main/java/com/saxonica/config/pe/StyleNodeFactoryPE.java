@@ -109,6 +109,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
             // such as version and extension-element-prefixes; but we can have a good guess, and
             // change it later if need be.
             temp = super.makeStyleElement(extensionClass);
+            temp.setCompilation(getCompilation());
         } else {
             temp = new AbsentExtensionElement();
             XmlProcessingIncident reason = new XmlProcessingIncident("Extension instructions are disabled");

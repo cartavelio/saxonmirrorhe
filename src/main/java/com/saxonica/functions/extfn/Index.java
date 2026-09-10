@@ -7,8 +7,8 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
+import net.sf.saxon.value.AnyExternalObject;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
 
 /**
  * This class supports the extension function saxon:index, which returns an indexed sequence
@@ -31,7 +31,7 @@ public class Index extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             Item arg1 = arguments[1].head();
-            if (arg1.getGenre() == Genre.EXTERNAL && ((ExternalObject<?>) arg1).getObject() instanceof Evaluate.PreparedExpression) {
+            if (arg1 instanceof AnyExternalObject && ((AnyExternalObject) arg1).getWrappedObject() instanceof Evaluate.PreparedExpression) {
                 throw new XPathException("The function saxon:index() has changed to expect a function as its second argument");
             } else if (arg1 instanceof Function) {
                 Function function = (Function) arg1;
