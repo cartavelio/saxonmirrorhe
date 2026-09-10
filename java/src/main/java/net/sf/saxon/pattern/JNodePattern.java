@@ -42,7 +42,8 @@ public class JNodePattern extends Pattern {
 
     @Override
     public void export(ExpressionPresenter presenter) throws XPathException {
-        throw new UnsupportedOperationException(); // TODO: implement this
+        presenter.startElement("JNODE-PATTERN");   // TODO
+        presenter.endElement();
     }
 
     @Override
