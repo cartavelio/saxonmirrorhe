@@ -1561,8 +1561,8 @@ cdef class PyXslt30Processor:
                 the string (if not specified then the platform default encoding is used).
 
         Returns:
-            PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is not thread-safe;
-            therefore to run it in multiple transformations, in series or concurrently you must clone the object for each thread using
+            PyXsltExecutable: The compiled stylesheet. The PyXsltExecutable is not thread-safe; so to run it in
+            multiple transformations, in series or concurrently, you must clone the object for each thread using
             the clone() method.
 
         Raises:
@@ -1888,8 +1888,8 @@ cdef class PyXslt30Processor:
 cdef class PyXsltExecutable:
     """A PyXsltExecutable represents the compiled form of a stylesheet.
     A PyXsltExecutable is created by using one of the compile methods on the PyXslt30Processor class.
-    This class is not thread-safe; therefore to run it in multiple transformations, in series or
-    concurrently you must clone the object for each thread using the clone() method."""
+    The PyXsltExecutable is not thread-safe; so to run it in multiple transformations, in series or
+    concurrently, you must clone the object for each thread using the clone() method."""
     cdef PySaxonProcessor processor
     cdef saxoncClasses.XsltExecutable *thisxptr  # hold a C++ instance which we're wrapping
     cdef PyXdmItem __global_context_item

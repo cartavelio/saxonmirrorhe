@@ -79,9 +79,11 @@
                </p>
             </td>
             <td>
-               <p>An <code>XsltExecutable</code> represents the compiled form of a stylesheet.
-                  An <code>XsltExecutable</code> is created using one of the compile methods
-                  on the <code>Xslt30Processor</code> class.</p>
+               <p>An <code>XsltExecutable</code> represents the compiled form of a stylesheet. An
+                  <code>XsltExecutable</code> is created using one of the compile methods on the
+                  <code>Xslt30Processor</code> class. The <code>XsltExecutable</code> is not thread-safe; so
+                  to run it in multiple transformations, in series or concurrently, you must clone the object
+                  for each thread using the <code>clone()</code> method.</p>
             </td>
             <td>
                <p>
@@ -1092,9 +1094,12 @@
          <h1>Saxon\XsltExecutable</h1>
 
          <p>An <code>XsltExecutable</code> represents the compiled form of a stylesheet. An
-            <code>XsltExecutable</code> is created by using one of the <code>compile</code>
-            methods on the <a class="bodylink code" href="../saxon_c_php_xslt30processor"
-            >Xslt30Processor</a> class.</p>
+            <code>XsltExecutable</code> is created by using one of the <code>compile</code> methods
+            on the <a class="bodylink code"
+               href="../saxon_c_php_xslt30processor">Xslt30Processor</a> class. The
+            <code>XsltExecutable</code> is not thread-safe; so to run it in multiple transformations, in
+            series or concurrently, you must clone the object for each thread using the <code>clone()</code>
+            method.</p>
 
          <table>
             <thead>

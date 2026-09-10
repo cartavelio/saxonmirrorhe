@@ -319,8 +319,9 @@ public:
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
    * @param stylesheet - the file name of the stylesheet document
    * @return An XsltExecutable, which represents the compiled stylesheet. The
-   * XsltExecutable class is not thread-safe; therefore to run it in multiple transformations,
-   * in series or concurrently you must clone the object for each thread using the clone() method.
+   * XsltExecutable is not thread-safe; so to run it in multiple transformations,
+   * in series or concurrently, you must clone the object for each thread using
+   * the <code>clone()</code> method.
    * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
@@ -335,8 +336,9 @@ public:
    * @param encoding - the encoding of the stylesheet string. If not specified
    * then the platform default encoding is used.
    * @return An XsltExecutable, which represents the compiled stylesheet. The
-   * XsltExecutable class is not thread-safe; therefore to run it in multiple transformations,
-   * in series or concurrently you must clone the object for each thread using the clone() method.
+   * XsltExecutable is not thread-safe; so to run it in multiple transformations,
+   * in series or concurrently, you must clone the object for each thread using
+   * the <code>clone()</code> method.
    * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
@@ -350,8 +352,9 @@ public:
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
    * @param sourceFile - the file name of the XML document
    * @return An XsltExecutable, which represents the compiled stylesheet. The
-   * XsltExecutable class is not thread-safe; therefore to run it in multiple transformations,
-   * in series or concurrently you must clone the object for each thread using the clone() method.
+   * XsltExecutable is not thread-safe; so to run it in multiple transformations,
+   * in series or concurrently, you must clone the object for each thread using
+   * the <code>clone()</code> method.
    * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
@@ -393,8 +396,9 @@ public:
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
    * @param node - the XdmNode object for the stylesheet
    * @return An XsltExecutable, which represents the compiled stylesheet. The
-   * XsltExecutable is immutable and thread-safe; it may be used to run multiple
-   * transformations, in series or concurrently.
+   * XsltExecutable is not thread-safe; so to run it in multiple transformations,
+   * in series or concurrently, you must clone the object for each thread using
+   * the <code>clone()</code> method.
    * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
