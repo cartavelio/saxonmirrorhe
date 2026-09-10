@@ -112,6 +112,9 @@
             <code>xs:double</code> and <code>xs:decimal</code> are compared by converting both values to
             decimals, not to doubles.</p>
         
+        <p>The functions <code>fn:min</code> and <code>fn:max</code> now return one of the items from
+        the input sequence <emph>as is</emph>, rather than converting it to <code>xs:double</code>.</p>
+        
         <p>The functions <code>fn:seconds</code>, <code>fn:subsequence-where</code> are implemented.</p>
         
         <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function

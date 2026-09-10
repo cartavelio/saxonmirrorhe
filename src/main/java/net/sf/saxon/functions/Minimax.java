@@ -173,13 +173,18 @@ public abstract class Minimax extends CollatingFunctionFixed {
      * @param isMaxFunction  true for the max() function, false for min()
      * @param atomicComparer an AtomicComparer used to compare values
      * @param ignoreNaN      true if NaN values are to be ignored
+     * @param isXPath40      true if using XPath 4.0 or later
      * @param context        dynamic evaluation context
      * @return the min or max value in the sequence, according to the rules of the fn:min() or fn:max() functions
      * @throws XPathException typically if non-comparable values are found in the sequence
      */
     /*@Nullable*/
-    public static AtomicValue minimax(SequenceIterator iter, boolean isMaxFunction,
-                                      AtomicComparer atomicComparer, boolean ignoreNaN, XPathContext context)
+    public static AtomicValue minimax(SequenceIterator iter,
+                                      boolean isMaxFunction,
+                                      AtomicComparer atomicComparer,
+                                      boolean ignoreNaN,
+                                      boolean isXPath40,
+                                      XPathContext context)
             throws XPathException {
 
         ConversionRules rules = context.getConfiguration().getConversionRules();
@@ -232,7 +237,11 @@ public abstract class Minimax extends CollatingFunctionFixed {
                 // if there's a NaN in the sequence, return NaN, unless ignoreNaN is set
                 if (ignoreNaN) {
                     //continue;   // ignore the NaN and treat the next item as the first real one
+                } else if (isXPath40) {
+                    iter.close();
+                    return prim;
                 } else if (prim instanceof DoubleValue) {
+                    iter.close();
                     return min; // return double NaN
                 } else {
                     // we can't ignore a float NaN, because we might need to promote it to a double NaN
@@ -260,6 +269,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
                 try {
                     test2 = new DoubleValue(converter.stringToNumber(test.getUnicodeStringValue()));
                     if (foundNaN) {
+                        iter.close();
                         return DoubleValue.NaN;
                     }
                     prim = test2;
@@ -271,6 +281,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
             } else {
                 if (prim instanceof DoubleValue) {
                     if (foundNaN) {
+                        iter.close();
                         return DoubleValue.NaN;
                     }
                     foundDouble = true;
@@ -284,7 +295,11 @@ public abstract class Minimax extends CollatingFunctionFixed {
                 // if there's a double NaN in the sequence, return NaN, unless ignoreNaN is set
                 if (ignoreNaN) {
                     //continue;
+                } else if (isXPath40) {
+                    iter.close();
+                    return prim;
                 } else if (foundDouble) {
+                    iter.close();
                     return DoubleValue.NaN;
                 } else {
                     // can't return float NaN until we know whether to promote it
@@ -306,19 +321,21 @@ public abstract class Minimax extends CollatingFunctionFixed {
                 }
             }
         }
-        if (foundNaN) {
-            return FloatValue.NaN;
-        }
-        if (foundDouble) {
-            if (!(min instanceof DoubleValue)) {
-                min = Converter.convert(min, BuiltInAtomicType.DOUBLE, rules);
+        if (!isXPath40) {
+            if (foundNaN) {
+                return FloatValue.NaN;
             }
-        } else if (foundFloat) {
-            if (!(min instanceof FloatValue)) {
-                min = Converter.convert(min, BuiltInAtomicType.FLOAT, rules);
+            if (foundDouble) {
+                if (!(min instanceof DoubleValue)) {
+                    min = Converter.convert(min, BuiltInAtomicType.DOUBLE, rules);
+                }
+            } else if (foundFloat) {
+                if (!(min instanceof FloatValue)) {
+                    min = Converter.convert(min, BuiltInAtomicType.FLOAT, rules);
+                }
+            } else if (min instanceof AnyURIValue && foundString) {
+                min = Converter.convert(min, BuiltInAtomicType.STRING, rules);
             }
-        } else if (min instanceof AnyURIValue && foundString) {
-            min = Converter.convert(min, BuiltInAtomicType.STRING, rules);
         }
         return min;
 
@@ -339,6 +356,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
                         isMaxFunction(),
                         getAtomicComparer(context),
                         ignoreNaN,
+                        getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40,
                         context));
     }
 
