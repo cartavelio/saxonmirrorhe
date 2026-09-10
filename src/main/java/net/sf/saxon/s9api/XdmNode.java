@@ -20,6 +20,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
 import javax.xml.transform.Source;
@@ -175,6 +176,31 @@ public class XdmNode extends XdmItem {
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
+    }
+
+    /**
+     * Get the name of the type annotation of this node.
+     *
+     * <p>If the node is an element or attribute node that has been validated against a schema,
+     * the result will be the name of the schema type (complex or simple type) against which it
+     * was validated. If this is an anonymous type, a system-generated name is returned,
+     * having the namespace <code>http://ns.saxonica.com/anonymous-type</code>.</p>
+     *
+     * <p>If the node is an element or attribute node that has not been validated against
+     * a schema, the result will be <code>xs:untyped</code> or <code>xs:untypedAtomic</code>
+     * respectively.</p>
+     *
+     * <p>For a document node, the method returns <code>xs:anyType</code> if the document
+     * has been validated, or <code>xs:untyped</code> otherwise.</p>
+     *
+     * <p>If the node is any other kind of node, the result will be null.</p>
+     *
+     * @return the type annotation of the node, or null
+     */
+
+    public QName getTypeAnnotationName() {
+        SchemaType type = getUnderlyingNode().getSchemaType();
+        return type == null ? null : new QName(type.getStructuredQName());
     }
 
     /**
