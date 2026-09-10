@@ -12,17 +12,24 @@ import net.sf.saxon.test.xdmfixtures.DslLambda;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.test.xdmfixtures.MapBuilder;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.saxonica.functions.qt4.csv.TestHelpers.expectedRows;
+import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
+import static net.sf.saxon.test.matchers.IsDeepEqualTo.deepEquals;
 import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
 
 class CsvToXdmTest {
     MapItem options = MapBuilder.empty();
     Configuration configuration = new Configuration();
+
+    public MapItem actual;
+    public MapItem expectedColumns;
 
     public SystemFunction subject() throws XPathException {
         return XPath40FunctionSet.getInstance().makeFunction("csv-to-xdm", 2);
@@ -40,73 +47,32 @@ class CsvToXdmTest {
         return FixtureBuilder.map(optionsBuilder);
     }
 
-    @Nested
-    class OptionTypePreconditions {
-        @Nested
-        class PositiveIntegers {
-            @Test
-            @DisplayName("column-names maps cannot use zero as a value")
-            void columnNamesMapsZeroErrors() {
-                options = makeOptions(opts -> {
-                    opts.put("column-names", FixtureBuilder.map(map -> {
-                        map.put("First", 0);
-                    }));
-                });
 
-                assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
-            }
+    @Test
+    @DisplayName("everything should be wired up correctly")
+    void everythingIsWiredUpCorrectly() throws XPathException {
+        options = makeOptions(opts -> {
+            opts.put("column-names", BooleanValue.TRUE);
+        });
+        expectedColumns = FixtureBuilder.map(cols -> {
+                cols.put("names", cols.map(names -> names.put("a", 1).put("b", 2)));
+                cols.put("fields", cols.sequence("a", "b"));
+            });
 
-            @Test
-            @DisplayName("column-names maps cannot use negative integers as a value")
-            void columnNamesMapsNegativeErrors() {
-                options = makeOptions(opts -> {
-                    opts.put("column-names", FixtureBuilder.map(map -> {
-                        map.put("First", -1);
-                    }));
-                });
+        actual = (MapItem) subject().call(ctxt(), args("a,b\nf1,f2", options)).head();
 
-                assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
-            }
+        assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> r.row("f1", "f2"))));
+    }
 
-            @Test
-            @DisplayName("number-of-columns cannot be set to zero")
-            void numberOfColumnsZeroErrors()  {
-                options = makeOptions(opts -> {
-                    opts.put("number-of-columns", 0);
-                });
+    @Test
+    @DisplayName("option parameter validation is validating things")
+    void columnNamesMapsZeroErrors() {
+        options = makeOptions(opts -> {
+            opts.put("column-names", FixtureBuilder.map(map -> {
+                map.put("First", 0);
+            }));
+        });
 
-                assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
-            }
-
-            @Test
-            @DisplayName("number-of-columns cannot be set to a negative integer")
-            void negativeNumberOfColumnsErrors()  {
-                options = makeOptions(opts -> {
-                    opts.put("number-of-columns", -1);
-                });
-
-                assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
-            }
-
-            @Test
-            @DisplayName("filter-columns cannot contain zero")
-            void filterColumnsZero()  {
-                options = makeOptions(opts -> {
-                    opts.put("filter-columns", 0);
-                });
-
-                assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
-            }
-
-            @Test
-            @DisplayName("filter-columns cannot contain a negative integer")
-            void filterColumnsNegative()  {
-                options = makeOptions(opts -> {
-                    opts.put("filter-columns", -1);
-                });
-
-                assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
-            }
-        }
+        assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
     }
 }

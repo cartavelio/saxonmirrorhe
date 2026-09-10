@@ -1,6 +1,8 @@
 package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
+import com.saxonica.functions.qt4.csv.CsvToXml;
+import com.saxonica.functions.qt4.csv.CsvFetchFieldByColumn;
 import com.saxonica.functions.qt4.csv.CsvToXdm;
 import com.saxonica.functions.qt4.csv.ParseCsv;
 import net.sf.saxon.functions.Error;
@@ -146,6 +148,21 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(CsvToXdm.OPTION_DETAILS));
+
+        register("csv-fetch-field-by-column", 3, e -> e.populate(CsvFetchFieldByColumn::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, STAR, null)
+                .arg(2, new LocalUnionType(BuiltInAtomicType.STRING, BuiltInAtomicType.INTEGER), ONE, null)
+                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
+
+        register("csv-to-xml", 1, e -> e.populate(CsvToXml::new, AnyItemType.getInstance(), ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .setOptionDetails(CsvToXml.OPTION_DETAILS));
+
+        register("csv-to-xml", 2, e -> e.populate(CsvToXml::new, AnyItemType.getInstance(), ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                .setOptionDetails(CsvToXml.OPTION_DETAILS));
 
         register("decode-from-uri", 1, 1, e -> e.populate(DecodeFromURI::new, BuiltInAtomicType.STRING, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
