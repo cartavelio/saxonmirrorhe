@@ -42,6 +42,7 @@ public class JsonReceiver implements Receiver {
     private final Stack<NodeName> stack = new Stack<>();
     private boolean atStart = true;
     private boolean indenting = false;
+    private boolean escapeSolidus = true;
     private boolean escaped = false;
     private boolean retainNumberFormat = false;
     private final Stack<Set<String>> keyChecker = new Stack<>();
@@ -76,6 +77,14 @@ public class JsonReceiver implements Receiver {
 
     public boolean isIndenting() {
         return indenting;
+    }
+
+    public void setEscapeSolidus(boolean escape) {
+        this.escapeSolidus = escape;
+    }
+
+    public boolean isEscapeSolidus() {
+        return this.escapeSolidus;
     }
 
     public void setRetainNumberFormat(boolean flag) {
@@ -178,7 +187,7 @@ public class JsonReceiver implements Receiver {
                                                      "' is not a valid xs:boolean", ERR_INPUT);
                 }
             }
-            key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, false, isControlChar));
+            key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, !escapeSolidus, isControlChar));
 
             String normalizedKey = alreadyEscaped ? unescape(key) : key;
             boolean added = keyChecker.peek().add(normalizedKey);
@@ -325,7 +334,7 @@ public class JsonReceiver implements Receiver {
             if (escaped) {
                 output.accept(StringView.of(handleEscapedString(content)));
             } else {
-                output.accept(StringView.of(escape(content, false, false, isControlChar)));
+                output.accept(StringView.of(escape(content, false, !escapeSolidus, isControlChar)));
             }
             output.accept(BMPString.of("\""));
         } else if (!Whitespace.isAllWhite(uContent)) {

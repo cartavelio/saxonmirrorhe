@@ -40,11 +40,13 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter xmlToJsonOptions = new OptionsParameter(version);
         xmlToJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        xmlToJsonOptions.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         return xmlToJsonOptions;
     }
 
     private static class Options {
         public boolean indent;
+        public boolean escapeSolidus = true;
         public boolean retainNumberFormat;
     }
 
@@ -74,6 +76,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
             }
             Map<String, GroundedValue> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
+            o.escapeSolidus = ((BooleanValue) options.get("escape-solidus").head()).getBooleanValue();
             return o;
         } else {
             return o;
@@ -97,6 +100,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
         JsonReceiver receiver = new JsonReceiver(pipe, context, output);
         receiver.setIndenting(options.indent);
         receiver.setRetainNumberFormat(options.retainNumberFormat);
+        receiver.setEscapeSolidus(options.escapeSolidus);
         Receiver r = receiver;
         if (xml.getNodeKind() == Type.DOCUMENT) {
             r = new DocumentValidator(r, "FOJS0006");

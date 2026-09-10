@@ -269,6 +269,9 @@
         output using exponential notation. The <code>number-formatter</code> option, which was a previous
         attempt to solve this problem, has been dropped.</p>
         
+        <p>The <code>escape-solidus</code> option of <code>xml-to-json</code> is implemented. (This is available
+        whether or not 4.0 is enabled).</p>
+        
         <p>In decimal format properties, it is now possible to set composite values for some properties,
         for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
         in the picture string, but the value "pc" will appear in the output.</p>
