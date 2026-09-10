@@ -16,6 +16,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class XSLAnalyzeString extends StyleElement {
                 pattern = getConfiguration().compileRegularExpression(
                         regex, flagstr, getEffectiveVersion() >= 30 ? "XP30" : "XP20", warnings);
                 for (String w : warnings) {
-                    issueWarning(w, this);
+                    issueWarning(w, SaxonErrorCode.SXWN9022, this);
                 }
             } catch (XPathException err) {
                 if ("FORX0001".equals(err.getErrorCodeLocalPart())) {

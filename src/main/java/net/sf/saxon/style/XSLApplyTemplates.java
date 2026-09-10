@@ -15,10 +15,7 @@ import net.sf.saxon.expr.sort.SortKeyDefinitionList;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.Mode;
-import net.sf.saxon.trans.SymbolicName;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
@@ -107,7 +104,8 @@ public class XSLApplyTemplates extends StyleElement {
         if (useCurrentMode) {
             // give a warning if we're not inside an xsl:template
             if (iterateAxis(AxisInfo.ANCESTOR, new NameTest(Type.ELEMENT, StandardNames.XSL_TEMPLATE, getNamePool())).next() == null) {
-                issueWarning("Specifying mode=\"#current\" when not inside an xsl:template serves no useful purpose", this);
+                issueWarning("Specifying mode=\"#current\" when not inside an xsl:template serves no useful purpose",
+                             SaxonErrorCode.SXWN9023, this);
             }
         } else {
             PrincipalStylesheetModule psm = getPrincipalStylesheetModule();

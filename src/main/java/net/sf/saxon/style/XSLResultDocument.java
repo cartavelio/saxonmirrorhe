@@ -232,7 +232,7 @@ public class XSLResultDocument extends StyleElement {
         while ((node = ai.next()) != null) {
             if (node instanceof XSLGeneralVariable || node instanceof XSLFunction) {
                 issueWarning("An xsl:result-document instruction inside " + node.getDisplayName() +
-                        " will always fail at run-time", this);
+                        " will always fail at run-time", "XTDE1480", this);
                 return new ErrorExpression("Call to xsl:result-document while in temporary output state", "XTDE1480", false);
             }
         }
