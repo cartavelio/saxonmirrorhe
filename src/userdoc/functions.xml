@@ -7473,7 +7473,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
       <signatures>
         <proto return-type="xs:integer"/>
         <proto return-type="xs:integer?">
-          <arg name="node?" type="node()" desc="The node whose line number is required"/>
+          <arg name="node" type="node()?" desc="The node whose line number is required"/>
         </proto>
       </signatures>
       <status>
