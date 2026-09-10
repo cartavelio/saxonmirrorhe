@@ -304,15 +304,11 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
 
     private static ItemType combinedItemType(TypeHierarchy th, ItemType commonItemType, ItemType thisItemType) {
         Affinity affinity = th.relationship(commonItemType, thisItemType);
-        switch (affinity) {
-            case SAME_TYPE:
-            case SUBSUMES:
-                return commonItemType;
-            case SUBSUMED_BY:
-                return thisItemType;
-            default:
-                return Type.getCommonSuperType(commonItemType, thisItemType, th);
-        }
+        return switch (affinity) {
+            case SAME_TYPE, SUBSUMES -> commonItemType;
+            case SUBSUMED_BY -> thisItemType;
+            default -> Type.getCommonSuperType(commonItemType, thisItemType, th);
+        };
     }
 
     /**
