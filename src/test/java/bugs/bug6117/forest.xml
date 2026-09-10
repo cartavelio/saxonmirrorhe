@@ -1,0 +1,168 @@
+<sppf>
+  <u0 id='id0' label="'d'" type='terminal' leftExtent='0' rightExtent='1' priority='0'/>
+  <u1 id='id1' label="'u'" type='terminal' leftExtent='1' rightExtent='2' priority='0'/>
+  <u2 id='id2' label="deadline ⇒ 'd' 'u' • 'e' $1_L0x20-plus date" type='state' leftExtent='0' rightExtent='2' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id0'/>
+      <link target='id1'/>
+    </pair>
+  </u2>
+  <u3 id='id3' label="'e'" type='terminal' leftExtent='2' rightExtent='3' priority='0'/>
+  <u4 id='id4' label="deadline ⇒ 'd' 'u' 'e' • $1_L0x20-plus date" type='state' leftExtent='0' rightExtent='3' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id2'/>
+      <link target='id3'/>
+    </pair>
+  </u4>
+  <u5 id='id5' label="' '" type='terminal' leftExtent='3' rightExtent='4' priority='0'/>
+  <u6 id='id6' label="$1_L0x20-plus" state="$1_L0x20-plus ⇒ ' ' •" type='nonterminal' leftExtent='3' rightExtent='4' priority='0' trees='1'>
+    <link target='id5'/>
+  </u6>
+  <u7 id='id7' label="deadline ⇒ 'd' 'u' 'e' $1_L0x20-plus • date" type='state' leftExtent='0' rightExtent='4' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id4'/>
+      <link target='id6'/>
+    </pair>
+  </u7>
+  <u8 id='id8' label="$2_L0-optionⁿ" type='nonterminal' leftExtent='4' rightExtent='4' priority='0' trees='1'>
+    <epsilon/>
+  </u8>
+  <u9 id='id9' label="$3_optionⁿ" type='nonterminal' leftExtent='4' rightExtent='4' priority='0' trees='1'>
+    <epsilon/>
+  </u9>
+  <u10 id='id10' label="'1'" type='terminal' leftExtent='4' rightExtent='5' priority='0'/>
+  <u11 id='id12' label="d" state="d ⇒ ['0'-'9'] •" type='nonterminal' leftExtent='4' rightExtent='5' priority='0' trees='1'>
+    <link target='id10'/>
+  </u11>
+  <u12 id='id13' label="month" state="month ⇒ $2_L0-optionⁿ d •" type='nonterminal' leftExtent='4' rightExtent='5' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id8'/>
+      <link target='id12'/>
+    </pair>
+  </u12>
+  <u13 id='id14' label="day" state="day ⇒ $3_optionⁿ d •" type='nonterminal' leftExtent='4' rightExtent='5' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id9'/>
+      <link target='id12'/>
+    </pair>
+  </u13>
+  <u14 id='id15' label="'/'" type='terminal' leftExtent='5' rightExtent='6' priority='0'/>
+  <u15 id='id16' label="usdate ⇒ month '/' • day '/' year" type='state' leftExtent='4' rightExtent='6' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id13'/>
+      <link target='id15'/>
+    </pair>
+  </u15>
+  <u16 id='id17' label="eudate ⇒ day '/' • month '/' year" type='state' leftExtent='4' rightExtent='6' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id14'/>
+      <link target='id15'/>
+    </pair>
+  </u16>
+  <u17 id='id18' label="$3_optionⁿ" type='nonterminal' leftExtent='6' rightExtent='6' priority='0' trees='1'>
+    <epsilon/>
+  </u17>
+  <u18 id='id19' label="$2_L0-optionⁿ" type='nonterminal' leftExtent='6' rightExtent='6' priority='0' trees='1'>
+    <epsilon/>
+  </u18>
+  <u19 id='id20' label="'8'" type='terminal' leftExtent='6' rightExtent='7' priority='0'/>
+  <u20 id='id21' label="d" state="d ⇒ ['0'-'9'] •" type='nonterminal' leftExtent='6' rightExtent='7' priority='0' trees='1'>
+    <link target='id20'/>
+  </u20>
+  <u21 id='id22' label="day" state="day ⇒ $3_optionⁿ d •" type='nonterminal' leftExtent='6' rightExtent='7' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id18'/>
+      <link target='id21'/>
+    </pair>
+  </u21>
+  <u22 id='id23' label="month" state="month ⇒ $2_L0-optionⁿ d •" type='nonterminal' leftExtent='6' rightExtent='7' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id19'/>
+      <link target='id21'/>
+    </pair>
+  </u22>
+  <u23 id='id24' label="usdate ⇒ month '/' day • '/' year" type='state' leftExtent='4' rightExtent='7' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id16'/>
+      <link target='id22'/>
+    </pair>
+  </u23>
+  <u24 id='id25' label="eudate ⇒ day '/' month • '/' year" type='state' leftExtent='4' rightExtent='7' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id17'/>
+      <link target='id23'/>
+    </pair>
+  </u24>
+  <u25 id='id26' label="'/'" type='terminal' leftExtent='7' rightExtent='8' priority='0'/>
+  <u26 id='id27' label="usdate ⇒ month '/' day '/' • year" type='state' leftExtent='4' rightExtent='8' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id24'/>
+      <link target='id26'/>
+    </pair>
+  </u26>
+  <u27 id='id28' label="eudate ⇒ day '/' month '/' • year" type='state' leftExtent='4' rightExtent='8' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id25'/>
+      <link target='id26'/>
+    </pair>
+  </u27>
+  <u28 id='id29' label="'2'" type='terminal' leftExtent='8' rightExtent='9' priority='0'/>
+  <u29 id='id30' label="d" state="d ⇒ ['0'-'9'] •" type='nonterminal' leftExtent='8' rightExtent='9' priority='0' trees='1'>
+    <link target='id29'/>
+  </u29>
+  <u30 id='id31' label="'0'" type='terminal' leftExtent='9' rightExtent='10' priority='0'/>
+  <u31 id='id32' label="d" state="d ⇒ ['0'-'9'] •" type='nonterminal' leftExtent='9' rightExtent='10' priority='0' trees='1'>
+    <link target='id31'/>
+  </u31>
+  <u32 id='id33' label="year ⇒ d d • d d" type='state' leftExtent='8' rightExtent='10' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id30'/>
+      <link target='id32'/>
+    </pair>
+  </u32>
+  <u33 id='id34' label="'2'" type='terminal' leftExtent='10' rightExtent='11' priority='0'/>
+  <u34 id='id35' label="d" state="d ⇒ ['0'-'9'] •" type='nonterminal' leftExtent='10' rightExtent='11' priority='0' trees='1'>
+    <link target='id34'/>
+  </u34>
+  <u35 id='id36' label="year ⇒ d d d • d" type='state' leftExtent='8' rightExtent='11' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id33'/>
+      <link target='id35'/>
+    </pair>
+  </u35>
+  <u36 id='id37' label="'3'" type='terminal' leftExtent='11' rightExtent='12' priority='0'/>
+  <u37 id='id38' label="d" state="d ⇒ ['0'-'9'] •" type='nonterminal' leftExtent='11' rightExtent='12' priority='0' trees='1'>
+    <link target='id37'/>
+  </u37>
+  <u38 id='id39' label="year" state="year ⇒ d d d d •" type='nonterminal' leftExtent='8' rightExtent='12' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id36'/>
+      <link target='id38'/>
+    </pair>
+  </u38>
+  <u39 id='id40' label="usdate" state="usdate ⇒ month '/' day '/' year •" type='nonterminal' leftExtent='4' rightExtent='12' priority='2' trees='1'>
+    <pair priority='0'>
+      <link target='id27'/>
+      <link target='id39'/>
+    </pair>
+  </u39>
+  <u40 id='id41' label="eudate" state="eudate ⇒ day '/' month '/' year •" type='nonterminal' leftExtent='4' rightExtent='12' priority='0' trees='1'>
+    <pair priority='0'>
+      <link target='id28'/>
+      <link target='id39'/>
+    </pair>
+  </u40>
+  <u41 id='id42' label="date" state="date ⇒ usdate •" type='nonterminal' leftExtent='4' rightExtent='12' priority='2' trees='2'>
+    <link target='id40'/>
+    <link target='id41'/>
+  </u41>
+  <u42 id='id43' label="deadline" state="deadline ⇒ 'd' 'u' 'e' $1_L0x20-plus date •" type='nonterminal' leftExtent='0' rightExtent='12' priority='2' trees='1'>
+    <pair priority='2'>
+      <link target='id7'/>
+      <link target='id42'/>
+    </pair>
+  </u42>
+  <u43 id='id44' label="$$" state="$$ ⇒ deadline •" type='nonterminal' leftExtent='0' rightExtent='12' priority='2' trees='1'>
+    <link target='id43'/>
+  </u43>
+</sppf>
