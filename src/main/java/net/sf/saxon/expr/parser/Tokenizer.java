@@ -1175,6 +1175,8 @@ public final class Tokenizer {
                 return Token.OR;
             case "otherwise":
                 return Token.OTHERWISE;
+            case "replace":
+                return Token.REPLACE;
             case "return":
                 return Token.RETURN;
             case "satisfies":

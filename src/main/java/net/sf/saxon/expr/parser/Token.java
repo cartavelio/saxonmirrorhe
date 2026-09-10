@@ -387,6 +387,13 @@ public abstract class Token {
      */
     public static final int MAPPING_ARROW = 86;
 
+    /**
+     * Keyword "replace" as used in 4.0 "update map|array EXPR replace EXPR with EXPR"; needs
+     * disambiguating from its use in XQuery Update
+     */
+
+    public static final int REPLACE = 87;
+
 
     // The following tokens are used only in the query prolog. They are categorized
     // as operators on the basis that a following name is treated as a name rather than
@@ -732,6 +739,7 @@ public abstract class Token {
         tokens[WITH] = "with";
         tokens[MODIFY] = "modify";
         tokens[AS] = "as";
+        tokens[REPLACE] = "replace";
 
         tokens[COLON] = ":";
         tokens[FAT_ARROW] = "=>";

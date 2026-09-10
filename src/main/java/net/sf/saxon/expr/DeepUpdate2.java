@@ -184,7 +184,14 @@ public class DeepUpdate2 extends Instruction {
                     Item pinnedRoot = makePinnedRoot(root);
                     XPathContext c2 = context.newMinorContext();
                     c2.setCurrentIterator(new ManualIterator(pinnedRoot));
-                    IdentityHashMap<Item, Item> substitutions = new IdentityHashMap<>();
+                    // ContainerSubstitutions is a mapping from maps/arrays in the original tree to
+                    // maps/arrays in the updated tree
+                    IdentityHashMap<Item, Item> containerSubstitutions = new IdentityHashMap<>();
+                    // SequenceSubstitutions is used to track multiple updates to the same sequence.
+                    // The key is the object identity of the sequence in the original tree; the
+                    // corresponding value is a list of pairs of integers; the first integer in a pair
+                    // is the position of a replaced item in the input sequence, the second integer
+                    // is the number of items in its replacement.
                     XPathContext c3 = c2.newMinorContext();
                     FocusIterator selectIterator = new FocusTrackingIterator(selectPuller.iterate(c2));
                     c3.setCurrentIterator(selectIterator);
@@ -198,16 +205,16 @@ public class DeepUpdate2 extends Instruction {
                                             " is not a labeled item", "XXXX9999");
                         }
                         // TODO: test if it belongs to the right tree
-                        GroundedValue actionVal = actionEval.evaluate(c3).materialize();
+                        GroundedValue replacementValue = actionEval.evaluate(c3).materialize();
                         Item parent = (Item)label.get(LabelTool.PARENT_KEY);
-                        GroundedValue val = actionVal;
+                        GroundedValue val = replacementValue;
                         while (parent != null) {
                             Item latestParent = parent;
                             // If two updates affect the same parent/ancestor at some level in the
                             // tree, then the updates need to be cumulative, so we keep track of a mapping
                             // from items in the original tree to the items that replace them in the new tree
-                            if (substitutions.containsKey(parent)) {
-                                latestParent = substitutions.get(parent);
+                            if (containerSubstitutions.containsKey(parent)) {
+                                latestParent = containerSubstitutions.get(parent);
                             }
                             if (latestParent instanceof ArrayItem) {
                                 val = ((ArrayItem) latestParent).put(
@@ -218,8 +225,8 @@ public class DeepUpdate2 extends Instruction {
                             } else {
                                 assert false;
                             }
-                            substitutions.put(parent, (Item) val);
-                            substitutions.put(latestParent, (Item) val);
+                            containerSubstitutions.put(parent, (Item) val);
+                            containerSubstitutions.put(latestParent, (Item) val);
                             label = parent.getLabel();
                             parent = (Item)label.get(LabelTool.PARENT_KEY);
                             finalRoot = (Item)val;

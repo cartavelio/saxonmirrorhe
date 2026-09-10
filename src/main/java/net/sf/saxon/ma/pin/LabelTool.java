@@ -6,7 +6,9 @@ import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.Twine8;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 
@@ -39,21 +41,22 @@ public class LabelTool {
                     item = ((LabeledMapItem)item).getSubject();
                 }
                 return new LabeledMapItem((MapItem)item, label);
+            case NODE:
+                return new LabeledNode((NodeInfo)item, label);
+            case FUNCTION:
+            case EXTERNAL:
+            case ANY:
+            default:
+                throw new UncheckedXPathException("Not-yet-implemented labeling operation", "ZZZZ9999");
+
             case ARRAY:
                 if (item instanceof LabeledArrayItem) {
                     item = ((LabeledArrayItem) item).getSubject();
                 }
                 return new LabeledArrayItem((ArrayItem) item, label);
-
             case ATOMIC:
                 return ((AtomicValue)item).withMetadata(
                         new TypeAndLabel(((AtomicValue)item).getItemType(), label));
-            case FUNCTION:
-            case NODE:
-            case EXTERNAL:
-            case ANY:
-            default:
-                throw new UnsupportedOperationException();
         }
     }
 

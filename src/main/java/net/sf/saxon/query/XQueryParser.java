@@ -3507,7 +3507,7 @@ public class XQueryParser extends XPathParser {
         int operation = t.currentToken;
         nextToken();
         Expression rootExpr = parseExprSingle();
-        if (!isKeyword("replace")) {
+        if (t.currentToken != Token.REPLACE && !isKeyword("replace")) {
             grumble("expected keyword 'replace'");
         }
         nextToken();
