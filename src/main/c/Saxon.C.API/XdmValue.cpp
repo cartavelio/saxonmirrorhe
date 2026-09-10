@@ -80,14 +80,16 @@ XdmValue::XdmValue(int64_t val, bool arr){
         return;
     }
 
-    xdmSize = results[0];
-    std::cerr<<"xdmSize="<<xdmSize<<std::endl;
+    int xdmSizei = results[0];
+    std::cerr<<"xdmSize="<<xdmSizei<<std::endl;
     int  typeRef = 0;
 
-    for (int p=1; p <= xdmSize; ++p){
+    for (int p=1; p <= xdmSizei; ++p){
         std::cerr<<"results-x["<<p<<"]:="<<results[p]<<std::endl;
     }
-    for (int p=1; p <= xdmSize; ++p){
+
+    for (int p=1; p <= xdmSizei; ++p){
+
         std::cerr<<"results["<<p<<"]:="<<results[p]<<std::endl;
         typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results[p]);
          if(typeRef == -2) {
