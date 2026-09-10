@@ -24,15 +24,15 @@ public class BuildURI extends URIFunctions {
     private static final MapType STRING_MAP_TYPE = new MapType(BuiltInAtomicType.STRING, SequenceType.STRING_SEQUENCE);
 
     public static RecordTest uriStructureRecord = RecordTest.extensible(
-            f("uri", SequenceType.SINGLE_STRING, true),
-            f("scheme", SequenceType.SINGLE_STRING, true),
-            f("authority", SequenceType.SINGLE_STRING, true),
-            f("userinfo", SequenceType.SINGLE_STRING, true),
-            f("host", SequenceType.SINGLE_STRING, true),
-            f("port", SequenceType.SINGLE_STRING, true),
-            f("path", SequenceType.SINGLE_STRING, true),
-            f("query", SequenceType.SINGLE_STRING, true),
-            f("fragment", SequenceType.SINGLE_STRING, true),
+            f("uri", SequenceType.OPTIONAL_STRING, true),
+            f("scheme", SequenceType.OPTIONAL_STRING, true),
+            f("authority", SequenceType.OPTIONAL_STRING, true),
+            f("userinfo", SequenceType.OPTIONAL_STRING, true),
+            f("host", SequenceType.OPTIONAL_STRING, true),
+            f("port", SequenceType.OPTIONAL_STRING, true),
+            f("path", SequenceType.OPTIONAL_STRING, true),
+            f("query", SequenceType.OPTIONAL_STRING, true),
+            f("fragment", SequenceType.OPTIONAL_STRING, true),
             f("path-segments", SequenceType.STRING_SEQUENCE, true),
             f("query-parameters", SequenceType.one(STRING_MAP_TYPE), true));
 
