@@ -21,7 +21,7 @@ namespace Saxon.Api {
         }
         
         /// <summary>
-        /// The <c>ResourceUri</c> of a <c>NodeResource<c> is the document URI of the node, if it exists
+        /// The <c>ResourceUri</c> of a <c>NodeResource</c> is the document URI of the node, if it exists
         /// </summary>
         /// <remarks>
         /// <para>For many nodes, (including all non-document nodes) the <c>ResourceUri</c> will be null.</para> 

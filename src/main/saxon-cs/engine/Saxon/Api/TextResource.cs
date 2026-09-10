@@ -195,7 +195,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>If an input stream is available, it is returned.</para>
         /// <para>If a reader is available, or if the string content is available,
-        /// then the content is read and a <c>MemoryStream<c/> is returned delivering the content
+        /// then the content is read and a <c>MemoryStream</c> is returned delivering the content
         /// in UTF-8 encoding.
         /// </para>
         /// </remarks>
