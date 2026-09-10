@@ -792,7 +792,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String asAtt = modeElement.getAttributeValue(NamespaceUri.NULL, "as");
             SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, pack.getImportedSchema(""));
             boolean copyNamespaces = !flags.contains("n");
-            base = mode.getBuiltInRuleSetForCode(onNoMatch, requiredType, copyNamespaces);
+            base = Mode.getBuiltInRuleSetForCode(onNoMatch, requiredType, copyNamespaces);
             mode.setBuiltInRuleSet(base);
         }
 

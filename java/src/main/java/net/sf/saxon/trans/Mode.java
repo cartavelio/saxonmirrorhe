@@ -518,9 +518,9 @@ public abstract class Mode extends Actor {
                 getBuiltInRuleSet().process(item, parameters, tunnelParameters, output, context, locationId);
 
             } else {
-                Object[] result = handleRuleNotNull(rule, traceListener, context, item, previousTemplate, parameters, tunnelParameters, output);
-                tc = (TailCall) result[0];
-                previousTemplate = (TemplateRule) result[1];
+                RuleInfo result = handleRuleNotNull(rule, traceListener, context, item, previousTemplate, parameters, tunnelParameters, output);
+                tc = result.tc();
+                previousTemplate = result.rule();
             }
             if (modeTracing) {
                 ruleTraceListener.leave();
@@ -530,6 +530,9 @@ public abstract class Mode extends Actor {
         // return the TailCall returned from the last node processed
         return tc;
     }
+
+    
+    private record RuleInfo (TailCall tc, TemplateRule rule) {}
 
     private void checkMustBeTyped(Item item) throws XPathException
     {
@@ -557,7 +560,7 @@ public abstract class Mode extends Actor {
         }
     }
 
-    private Object[] handleRuleNotNull(Rule rule, TraceListener traceListener, XPathContextMajor context, Item item, TemplateRule previousTemplate, ParameterSet parameters,
+    private RuleInfo handleRuleNotNull(Rule rule, TraceListener traceListener, XPathContextMajor context, Item item, TemplateRule previousTemplate, ParameterSet parameters,
             ParameterSet tunnelParameters, Outputter output) throws XPathException
     {
         TemplateRule template = (TemplateRule) rule.getAction();
@@ -587,10 +590,10 @@ public abstract class Mode extends Actor {
             tc = template.applyLeavingTail(output, context);
         }
 
-        return new Object[]{tc, previousTemplate};
+        return new RuleInfo(tc, previousTemplate);
     }
 
-    private TemplateRuleTraceListener handleRuleTraceListener(TemplateRuleTraceListener ruleTraceListener, Controller controller, Location locationId, Item item, Rule rule)
+    private static TemplateRuleTraceListener handleRuleTraceListener(TemplateRuleTraceListener ruleTraceListener, Controller controller, Location locationId, Item item, Rule rule)
     {
         ruleTraceListener = ((XsltController)controller).getTemplateRuleTraceListener();
         if (ruleTraceListener == null) {
@@ -620,7 +623,7 @@ public abstract class Mode extends Actor {
      * @param builtInRuleSet the rule set to get a code
      * @return a simple string code or "???" if the ruleset is unknown
      */
-    public String getCodeForBuiltInRuleSet(BuiltInRuleSet builtInRuleSet) {
+    public static String getCodeForBuiltInRuleSet(BuiltInRuleSet builtInRuleSet) {
         if (builtInRuleSet instanceof ShallowCopyAllRuleSet) {
             return "CA";
         } else if (builtInRuleSet instanceof ShallowCopyRuleSet) {
@@ -650,7 +653,7 @@ public abstract class Mode extends Actor {
      * @param code the code used in export
      * @return a suitable ruleset
      */
-    public BuiltInRuleSet getBuiltInRuleSetForCode(String code, SequenceType requiredType, boolean copyNamespaces) {
+    public static BuiltInRuleSet getBuiltInRuleSetForCode(String code, SequenceType requiredType, boolean copyNamespaces) {
         BuiltInRuleSet base;
         if (code.startsWith("SC")) {
             base = ShallowCopyRuleSet.getInstance(copyNamespaces);

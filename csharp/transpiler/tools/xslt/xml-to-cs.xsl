@@ -242,6 +242,19 @@
       </xsl:if>
    </xsl:template>
    
+   <xsl:template match="*[@nodeType = 'RecordDeclaration']" priority="20">
+      <xsl:call-template name="indent"/>
+      <xsl:call-template name="modifiers"/>
+      <xsl:text>record {name/@identifier} (</xsl:text>
+      <xsl:for-each select="parameters/parameter">
+         <xsl:apply-templates select="type"/>
+         <xsl:text> </xsl:text>
+         <xsl:apply-templates select="name"/>
+         <xsl:if test="position() ne last()">, </xsl:if>
+      </xsl:for-each>
+      <xsl:text>);{$NL}</xsl:text>
+   </xsl:template>
+   
    <!-- Code to inject an implementation of IEnumerable to a class that already supports Iterable -->
    <xsl:template name="addEnumeratorMethods">
       <xsl:param name="deliveredType" as="xs:string"/>
@@ -1727,6 +1740,12 @@
       <xsl:text> is </xsl:text>
       <xsl:apply-templates select="type"/>
       <xsl:text>)</xsl:text>
+   </xsl:template>
+   
+   <!-- Handle a method call to a field in a record. `record.field()` in Java becomes `record.field` in C# -->
+   <xsl:template match="*[@nodeType='MethodCallExpr'][key('digestClassKey', @RESOLVED_TYPE, $digest)[self::record]]" priority="18">
+      <xsl:apply-templates select="scope"/>
+      <xsl:text>.{f:renameMethod(name/@identifier, .)}</xsl:text>
    </xsl:template>
    
    <!-- Convert a method reference (MyClass::toExportString).

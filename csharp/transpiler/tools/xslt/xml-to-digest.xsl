@@ -92,6 +92,7 @@
          <xsl:apply-templates select="typeParameters/typeParameter" />
          <xsl:apply-templates select="members/member[@nodeType='ConstructorDeclaration']"/>
          <xsl:apply-templates select="members/member[@nodeType='FieldDeclaration']"/>
+         <xsl:apply-templates select="members/member[@nodeType='RecordDeclaration']"/>
          <xsl:apply-templates select="members/member[@nodeType='MethodDeclaration']">
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
          </xsl:apply-templates>
@@ -102,6 +103,17 @@
             <xsl:with-param name="isInterface" select="false()" tunnel="yes"/>
          </xsl:apply-templates>
       </class>
+   </xsl:template>
+   
+   <xsl:template match="*[@nodeType='RecordDeclaration']">
+      <record name="{f:degenerify(name/@identifier)}">
+         <xsl:if test="modifiers/modifier[@keyword='ABSTRACT']">
+            <xsl:attribute name="abstract" select="1"/>
+         </xsl:if>
+         <xsl:for-each select="parameters/parameter">
+            <field name="{name/@identifier}" type="{type/@RESOLVED_TYPE}"/>
+         </xsl:for-each>
+      </record>
    </xsl:template>
    
    <xsl:template match="typeParameter">

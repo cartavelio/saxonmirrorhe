@@ -1,5 +1,7 @@
 import com.github.javaparser.ParseProblemException;
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -151,6 +153,7 @@ public class ToXml {
             throw new IllegalArgumentException("No input supplied (-f, -xml, -j)");
         }
 
+        StaticJavaParser.getConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
         JavaSymbolSolver symbolSolver = getJavaSymbolSolver();
 
         if (singleInputFile != null) {

@@ -16,8 +16,8 @@
       It also contains a mapping table from Java class names to C# class names.
    -->
    
-   <xsl:key name="digestClassKey" match="class | interface | enum" 
-      use="string-join((ancestor::module/@package, ancestor-or-self::*[self::class or self::interface or self::enum]/@name), '.')"/>
+   <xsl:key name="digestClassKey" match="class | interface | record | enum" 
+      use="string-join((ancestor::module/@package, ancestor-or-self::*[self::class or self::interface or self::enum or self::record]/@name), '.')"/>
    
    <!-- The key for finding a method by name and signature is of the form 'net.sf.saxon.om.NodeInfo#iterateAxis!INT,NodeTest' -->
    <xsl:key name="digestMethodKey" match="method"
