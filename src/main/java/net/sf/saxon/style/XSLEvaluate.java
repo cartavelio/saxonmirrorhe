@@ -10,14 +10,12 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
-
 import net.sf.saxon.expr.instruct.EvaluateInstr;
 import net.sf.saxon.expr.instruct.WithParam;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.TypeChecker;
-
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;

@@ -222,18 +222,15 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
      * <p>This supports the function-available() function in XSLT.</p>
      *
      * @param functionName  the qualified name of the function being called
-     * @param schema
+     * @param schema the schema in question (constructor functions are available
+     *               in some schemas and not others)
      * @param languageLevel the XPath language level times 10 (31 = XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
     @Override
 
     public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
-        return functions.get(functionName) != null;
-//=======
-//    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
-//        return getDeclarationByKey(functionName) != null;
-//>>>>>>> main
+        return getDeclarationByKey(functionName) != null;
     }
 
     public Iterable<NamespaceUri> getNamespaces() {

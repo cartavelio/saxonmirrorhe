@@ -27,7 +27,6 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;

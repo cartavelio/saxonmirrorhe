@@ -30,7 +30,6 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import org.xmlresolver.ResolverFeature;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;

@@ -3179,7 +3179,7 @@ public class XQueryParser extends XPathParser {
             if (!NameChecker.isQName(StringTool.codePoints(typeName))) {
                 grumble("Schema type name expected after 'validate type");
             }
-            requiredType = env.getConfiguration().getSchemaType(
+            requiredType = env.getPackageData().getImportedSchema().getSchemaType(
                     makeStructuredQName(typeName, env.getDefaultElementNamespace()));
             if (requiredType == null) {
                 grumble("Unknown schema type " + typeName, "XQST0104");
