@@ -77,28 +77,16 @@ abstract class DotNetImplementation: DefaultTask() {
 
 abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOperations): DotNetImplementation() {
   @get:Internal
-  val generateAppCsProj = project.layout.projectDirectory.file("../tools/generateCSProj.xsl")
-
-  @get:Internal
-  val appCsProj = this.arch.map { project.layout.buildDirectory.file("${it}/SaxonCS/core.csproj").get() }
-
-  @get:Internal
-  val generateTestCsProj = project.layout.projectDirectory.file("../tools/generateTestDriverCSProj.xsl")
-
-  @get:Internal
-  val generateNUnitCsProj = project.layout.projectDirectory.file("../tools/generateNUnitCSProj.xsl")
-
-  @get:Internal
-  val testCsProj = this.arch.map { project.layout.buildDirectory.file("${it}/TestDrivers/core.csproj").get() }
-
-  @get:Internal
-  val nunitCsProj = this.arch.map { project.layout.buildDirectory.file("${it}/NUnitTests/NUnitTests.csproj").get() }
+  val generateCsProjFiles = project.layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")
 
   @get:Internal
   val appSlnFile = this.arch.map { project.layout.buildDirectory.file("${it}/SaxonCS/SaxonCS.sln").get() }
 
   @get:Internal
   val testSlnFile = this.arch.map { project.layout.buildDirectory.file("${it}/TestDrivers/TestDrivers.sln").get()  }
+
+  @get:Internal
+  val nunitSlnFile = this.arch.map { project.layout.buildDirectory.file("${it}/NUnitTests/NUnitTests.sln").get()  }
 
   @TaskAction
   fun makeCSProj() {
@@ -114,92 +102,53 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
       throw GradleException("Could not find 'saxoncs' extension")
     }
 
-    val arch = this.arch.get()
-
-    val platform = this.platform.get()
-    val csrid = "${platform}-${arch}"
-
     ex.javaexec {
       classpath = saxonCS.classpath.get()
       mainClass.set("net.sf.saxon.Transform") // .set() WTF?
       args("-it",
-           "-xsl:${generateAppCsProj}",
-           "-o:${appCsProj.get()}",
-           "saxonVersion=${saxonBuild.version.get()}",
+           "-xsl:${generateCsProjFiles}",
+           "-o:${appSlnFile.get()}",
+           "releaseBuild=SaxonCS",
+           "platform=${saxonCS.platform.get()}",
+           "arch=${saxonCS.arch.get()}",
            "edition=${saxonCS.edition.get()}",
-           "optimize=true",
-           "csrid=${csrid}")
-
+           "framework=net${saxonBuild.dotnetversion.get()}",
+           "saxonVersion=${saxonBuild.version.get()}",
+           "uuid1=${UUID.randomUUID()}",
+           "uuid2=${UUID.randomUUID()}")
     }
 
     ex.javaexec {
       classpath = saxonCS.classpath.get()
       mainClass.set("net.sf.saxon.Transform") // .set() WTF?
       args("-it",
-           "-xsl:${generateTestCsProj}",
-           "-o:${testCsProj.get()}",
-           "saxonVersion=${saxonBuild.version.get()}",
-           "configuration=${configuration.get()}",
+           "-xsl:${generateCsProjFiles}",
+           "-o:${testSlnFile.get()}",
+           "releaseBuild=TestDrivers",
+           "platform=${saxonCS.platform.get()}",
+           "arch=${saxonCS.arch.get()}",
            "edition=${saxonCS.edition.get()}",
-           "optimize=true",
-           "csrid=${csrid}")
+           "framework=net${saxonBuild.dotnetversion.get()}",
+           "saxonVersion=${saxonBuild.version.get()}",
+           "uuid1=${UUID.randomUUID()}",
+           "uuid2=${UUID.randomUUID()}")
     }
 
     ex.javaexec {
       classpath = saxonCS.classpath.get()
       mainClass.set("net.sf.saxon.Transform") // .set() WTF?
       args("-it",
-           "-xsl:${generateNUnitCsProj}",
-           "-o:${nunitCsProj.get()}",
-           "saxonVersion=${saxonBuild.version.get()}",
+           "-xsl:${generateCsProjFiles}",
+           "-o:${nunitSlnFile.get()}",
+           "releaseBuild=NUnitTests",
+           "platform=${saxonCS.platform.get()}",
+           "arch=${saxonCS.arch.get()}",
            "edition=${saxonCS.edition.get()}",
-           "configuration=${configuration.get()}",
-           "optimize=true",
-           "csrid=${csrid}")
+           "framework=net${saxonBuild.dotnetversion.get()}",
+           "saxonVersion=${saxonBuild.version.get()}",
+           "uuid1=${UUID.randomUUID()}",
+           "uuid2=${UUID.randomUUID()}")
     }
-
-    var uuid1 = UUID.randomUUID()
-    var uuid2 = UUID.randomUUID()
-
-    File("${appSlnFile.get()}").writeText("""
-Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{${uuid1}}") = "SaxonCS", "SaxonCS.csproj", "{${uuid2}}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{${uuid2}}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{${uuid2}}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{${uuid2}}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{${uuid2}}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-EndGlobal
-""")
-
-    uuid1 = UUID.randomUUID()
-    uuid2 = UUID.randomUUID()
-
-    File("${testSlnFile.get()}").writeText("""
-Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{${uuid1}}") = "TestDrivers", "TestDrivers.csproj", "{${uuid2}}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{${uuid2}}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{${uuid2}}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{${uuid2}}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{${uuid2}}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-EndGlobal
-""")
-
   }
 }
 
