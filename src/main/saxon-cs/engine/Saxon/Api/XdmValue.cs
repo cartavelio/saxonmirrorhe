@@ -180,7 +180,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <typeparam name="T">The types of object to enumerate. The object must be an <c>XdmItem</c> or a derived type.</typeparam>
         /// <param name="predicate">The predicate to be applied</param>
-        /// <returns>An enumerable of items that satisfy the suppplied <c>Predicate</c>.</returns>
+        /// <returns>An enumerable of items that satisfy the supplied <c>Predicate</c>.</returns>
         public IEnumerable<T> Where<T>(Predicate<T> predicate)
             where T : XdmItem {
             if (predicate == null) {
@@ -512,6 +512,33 @@ namespace Saxon.Api {
 
         // Indexer declaration
         public XdmItem this[int index] => ItemAt(index);
+        
+        /// <summary>
+        /// Get a subsequence of the value.
+        /// </summary>
+        /// <remarks>
+        /// Gets an XdmValue containing a contiguous subsequence of this value, starting at the given
+        /// index and containing <c>count</c> items. Throws <c>IndexOutOfRangeException</c> if the <c>index</c>
+        /// or <c>count</c> are out of range. 
+        /// </remarks>
+        /// <param name="index">The index of the first item to be included.</param>
+        /// <param name="count">The number of items to be included.</param>
+        /// <returns>The i'th item in the sequence making up the value, counting from zero.</returns>
+        
+        public XdmValue GetRange(int index, int count) {
+            if (index < 0 || index >= this.Count) {
+                throw new IndexOutOfRangeException("Invalid start index " + index);
+            }
+            if (count < 0 || index + count > this.Count) {
+                throw new IndexOutOfRangeException("Invalid count " + count);
+            }
+            try {
+                return new XdmValue(value.subsequence(index, count));
+            }
+            catch (Saxon.Hej.trans.XPathException e) {
+                throw new Saxon.Api.SaxonApiException(e);
+            }
+        }
 
         /// <summary>
         /// Create a string representation of the value. The is the result of serializing
