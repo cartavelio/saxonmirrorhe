@@ -42,40 +42,33 @@ public class FilterFn extends SystemFunction {
 
     private SequenceIterator evalFilter(
             final FunctionItem function, SequenceIterator basis, final XPathContext context) throws XPathException {
-        switch (function.getArity()) {
-            case 0: {
+        return switch (function.getArity()) {
+            case 0 -> {
                 final BooleanValue head = (BooleanValue) dynamicCall(function, context).head();
-                if (head != null && head.getBooleanValue()) {
-                    return basis;
-                } else {
-                    return EmptyIterator.INSTANCE;
-                }
+                yield head != null && head.getBooleanValue() ? basis : EmptyIterator.INSTANCE;
             }
-            case 1: {
-                return ItemMappingIterator.filter(
-                        basis,
-                        item -> {
-                            final BooleanValue head = (BooleanValue) dynamicCall(function, context, item).head();
-                            return head != null && head.getBooleanValue();
-                        });
-            }
-            case 2: {
+            case 1 -> ItemMappingIterator.filter(
+                    basis,
+                    item -> {
+                        final BooleanValue head = (BooleanValue) dynamicCall(function, context, item).head();
+                        return head != null && head.getBooleanValue();
+                    });
+            case 2 ->
                 // New in 4.0, position() as a second argument
-                return new PositionalFilterIterator(
-                        basis,
-                        (item, pos) -> {
-                            try {
-                                Int64Value position = Int64Value.makeIntegerValue(pos);
-                                BooleanValue head = (BooleanValue) dynamicCall(function, context, item, position).head();
-                                return head != null && head.getBooleanValue();
-                            } catch (XPathException err) {
-                                throw new UncheckedXPathException(err);
-                            }
-                        });
-            }
-            default:
-                throw new XPathException("Unsupported arity " + function.getArity() + " in fn:filter callback");
-        }
+                    new PositionalFilterIterator(
+                            basis,
+                            (item, pos) -> {
+                                try {
+                                    Int64Value position = Int64Value.makeIntegerValue(pos);
+                                    BooleanValue head = (BooleanValue) dynamicCall(function, context, item, position).head();
+                                    return head != null && head.getBooleanValue();
+                                } catch (XPathException err) {
+                                    throw new UncheckedXPathException(err);
+                                }
+                            });
+
+            default -> throw new XPathException("Unsupported arity " + function.getArity() + " in fn:filter callback");
+        };
     }
 
     @Override
