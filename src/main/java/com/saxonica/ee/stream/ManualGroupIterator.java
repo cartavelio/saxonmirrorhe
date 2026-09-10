@@ -3,8 +3,8 @@ package com.saxonica.ee.stream;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.value.SequenceExtent;
@@ -67,7 +67,7 @@ public class ManualGroupIterator extends ManualIterator implements GroupIterator
     }
 
     @Override
-    public Sequence currentGroup() throws XPathException {
+    public GroundedValue currentGroup() throws XPathException {
         return SequenceExtent.makeSequenceExtent(currentGroupItems);
     }
 
