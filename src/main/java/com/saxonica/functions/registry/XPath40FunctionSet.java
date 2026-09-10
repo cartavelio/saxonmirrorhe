@@ -417,6 +417,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
+        // Result type of void() is deliberately mis-declared to prevent unwanted optimisations
+        register("void", 1, e -> e.populate(VoidFn::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("xdm-to-json", 1, e -> e.populate(XdmToJsonFn::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
