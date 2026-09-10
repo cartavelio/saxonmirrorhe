@@ -17,7 +17,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
 
 import java.util.HashSet;
 import java.util.List;
@@ -97,7 +96,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
             }
         }
         if (namespaces.contains(uri)) {
-            return baseLibrary.bind(symbolicName, staticArgs, null, env, reasons);
+            return baseLibrary.bind(symbolicName, staticArgs, keywords, env, reasons);
         } else {
             return null;
         }
@@ -190,15 +189,14 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      * Test whether a function with a given name and arity is available
      * <p>This supports the function-available() function in XSLT.</p>
      *
-     * @param functionName  the qualified name of the function being called
-     * @param schema
+     * @param functionName the qualified name of the function being called
      * @param languageLevel the XPath language level times 10 (31 = XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         return namespaces.contains(functionName.getComponentName().getNamespaceUri())
-                && baseLibrary.isAvailable(functionName, schema, languageLevel);
+                && baseLibrary.isAvailable(functionName, languageLevel);
     }
 }
 
