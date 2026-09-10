@@ -689,6 +689,13 @@ public class SaxonErrorCode {
     public static final String SXWN9054 = "SXWN9054";
 
     /**
+     * SXWN9054: saxon:composite is ignored and deprecated in Saxon 13
+     */
+
+    public static final String SXWN9055 = "SXWN9055";
+
+
+    /**
      * SXSD1000: unknown attribute group
      */
     public static final String SXSD1000 = "SXSD1000";
