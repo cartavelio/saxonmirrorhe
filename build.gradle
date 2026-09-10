@@ -172,6 +172,7 @@ dependencies {
     files("src/main/resources"),
     files("lib/Tidy.jar"),
     files(saxonLicenseDir),
+    files("${projectDir}/tools/xqj/tck/classes"),
     fileTree("${buildDir}/lib/asm")
   )
   testRuntimeOnly (
@@ -225,6 +226,13 @@ test {
     // FIXME: how do I make this dynamic from junitExcludeTagList???
     excludeTags 'missingfiles', 'mikeonly', 'bytecode', 'expectedtofail', 'performance'
   }
+}
+
+// Make sure we pass these properties through to forked tests...
+tasks.withType(Test) {
+  systemProperties = [
+    'com.oracle.xqj.tck.datasource': "${projectDir}/tools/xqj/tck/examples/saxon.properties"
+  ]
 }
 
 docker_container.configure {
