@@ -136,6 +136,12 @@ public class Literal extends Expression {
             return false;
         }
         ItemType requiredType = req.getPrimaryType();
+        if (requiredType == AnyItemType.getInstance()) {
+            return true;
+        }
+        if (value instanceof IntegerRange) {
+            return th.isSubType(BuiltInAtomicType.INTEGER, requiredType);
+        }
         for (Item item : value.asIterable()) {
             if (!requiredType.matches(item, th)) {
                 return false;
