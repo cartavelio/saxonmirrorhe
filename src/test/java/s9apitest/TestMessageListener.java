@@ -289,4 +289,46 @@ public class TestMessageListener {
         }
     }
 
+
+    @Test
+    public void testBug6464() {
+        try {
+            String xsl =
+                    "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"2.0\">\n"
+                            + "  <xsl:template match=\"/\">\n"
+                            + "    <xsl:message terminate=\"true\">\n"
+                            + "      Whoooo\n"
+                            + "    </xsl:message>\n"
+                            + "  </xsl:template>\n"
+                            + "</xsl:stylesheet>";
+            Processor proc = new Processor(true);
+            XdmNode in = proc.newDocumentBuilder().build(new StreamSource(new StringReader("<doc/>")));
+            XsltCompiler compiler = proc.newXsltCompiler();
+
+            RealtaMessageListener listener = new RealtaMessageListener();
+            XsltExecutable executable = compiler.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer transformer = executable.load();
+
+            transformer.setMessageListener(listener);
+
+            transformer.setSource(in.asSource());
+            transformer.setDestination(proc.newSerializer(System.out));
+            transformer.transform();
+        } catch (SaxonApiException e1) {
+            if (!e1.getErrorCode().getLocalName().equals("XTMM9000")) {
+                e1.printStackTrace();
+                fail();
+            }
+        }
+    }
+
+    public static class RealtaMessageListener implements MessageListener2 {
+        public void message(XdmNode content, QName errorCode, boolean terminate,
+                            SourceLocator locator) {
+            throw new RuntimeException("Transform aborted by xsl:message #1");
+        }
+
+    }
+
+
 }
