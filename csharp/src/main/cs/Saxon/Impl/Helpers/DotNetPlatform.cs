@@ -277,6 +277,10 @@ namespace Saxon.Impl.Helpers {
                 if (options != null && options.getDTDValidationMode() == Validation.STRICT) {
                     settings.ValidationType = ValidationType.DTD;
                 }
+
+                if (!options.isTrusted()) {
+                    settings.XmlResolver = System.Xml.XmlResolver.ThrowingResolver;
+                }
             
                 // if (source.getSystemId() != null) {
                 //     settings.XmlResolver =
