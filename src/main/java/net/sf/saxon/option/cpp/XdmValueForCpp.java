@@ -207,6 +207,10 @@ public class XdmValueForCpp {
         } catch(SaxonApiException ex) {
             SaxonCException.throwable = ex;
             return -2;
+        } catch (Exception ex) {
+            System.err.println("getLongValue exception found!!");
+            SaxonCException.throwable = ex;
+            return -2;
         }
     }
 
@@ -218,12 +222,18 @@ public class XdmValueForCpp {
      * @param thread - Graalvm runtime data structure for the thread
      * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
      * @return  the result of converting to a double - reference to XdmAtomicValue given as long
-     * @throws SaxonApiException
+     * @throws SaxonApiException - we catch the exception and return a
+     * spurious value. We must check in C++ that the exception was thrown
      */
-    @CEntryPoint(name = "j_getDoubleValue", exceptionHandler = SaxonCExceptionDoubleHandler.class)
+    @CEntryPoint(name = "j_getDoubleValue")
     public static double getDoubleValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
             XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
-            return value.getDoubleValue();
+            try {
+                return value.getDoubleValue();
+            } catch (Exception ex) {
+                SaxonCException.throwable = ex;
+                return -0.9999999;
+            }
     }
 
     /**
@@ -231,12 +241,19 @@ public class XdmValueForCpp {
      * @param thread - Graalvm runtime data structure for the thread
      * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
      * @return  long value as reference for the XdmAtomicValue - the result of converting to an integer
-     * @throws SaxonApiException
+     * @throws SaxonApiException - we catch the exception and return a
+     * spurious value. We must check in C++ that the exception was thrown
      */
-    @CEntryPoint(name = "j_getLongValue", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_getLongValue")
     public static long getLongValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
-        return value.getLongValue();
+        try {
+            return value.getLongValue();
+        } catch (Exception ex) {
+            System.err.println("getLongValue exception found!!");
+            SaxonCException.throwable = ex;
+            return -9999999;
+        }
     }
 
     /**

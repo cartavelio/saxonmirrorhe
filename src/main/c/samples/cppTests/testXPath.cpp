@@ -518,6 +518,8 @@ void testGetDoubleFromString(SaxonProcessor* processor, sResultCount *sresult) {
   try {
     XdmAtomicValue *v = processor->makeStringValue("Hello");
     double d = v->getDoubleValue();
+
+    cout<<"getDoubleFromString('hello') value = "<<d<<endl;
     sresult->failure++;
     sresult->failureList.push_back("testgetDoubleFromString");
   } catch (SaxonApiException &e) {
@@ -526,6 +528,43 @@ void testGetDoubleFromString(SaxonProcessor* processor, sResultCount *sresult) {
     cout << "Error Message = " << message << endl;
 
     sresult->success++;
+
+  }
+}
+
+
+void testGetLongErrFromString(SaxonProcessor* processor, sResultCount *sresult) {
+  cout << endl << " testGetLongErrFromString" << endl;
+  try {
+    XdmAtomicValue *v = processor->makeStringValue("Hello");
+    long d = v->getLongValue();
+    cout<<"getLongErrFromString('hello') value = "<<d<<endl;
+    sresult->failure++;
+    sresult->failureList.push_back("testGetLongFromString");
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->success++;
+
+  }
+}
+
+void testGetBooleanErrFromString(SaxonProcessor* processor, sResultCount *sresult) {
+  cout << endl << " testGetBooleanErrFromString" << endl;
+  try {
+    XdmAtomicValue *v = processor->makeStringValue("Hello");
+    bool b = v->getBooleanValue();
+    sresult->success++;
+
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testGetBooleanFromString");
 
   }
 }
@@ -834,6 +873,20 @@ int main() {
        << endl;
 
   testGetDoubleFromString(processor, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
+  testGetLongErrFromString(processor, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
+  testGetBooleanErrFromString(processor, sresult);
 
   cout << endl
      << "============================================================="
