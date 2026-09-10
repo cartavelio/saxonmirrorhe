@@ -11,7 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.functions.DeepEqual40;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -75,7 +75,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
         AtomicComparer comparer;
         boolean done;
         boolean closed;
-        DeepEqual40.DeepEqualOptions options;
+        DeepEqual.DeepEqualOptions options;
 
         public GroundedDeepEqualFeed(WatchManager watchManager, SystemFunctionCall exp,
                                      ItemFeed result, XPathContext context, int consumingArg) throws XPathException {
@@ -106,7 +106,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
             Expression optionsArg = exp.getArg(3);
             MapItem suppliedOptions = (MapItem)optionsArg.evaluateItem(context);
             try {
-                options = new DeepEqual40.DeepEqualOptions(suppliedOptions, collationName, context);
+                options = new DeepEqual.DeepEqualOptions(suppliedOptions, collationName, context);
             } catch (XPathException e) {
                 dynamicError(e);
             }
@@ -128,7 +128,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
                 Item otherItem = other.next();
                 try {
                     if (otherItem == null ||
-                            !DeepEqual40.deepEqual(
+                            !DeepEqual.deepEqual(
                                 SingletonIterator.makeIterator(item),
                                 SingletonIterator.makeIterator(otherItem),
                                 getContext(), options)) {
