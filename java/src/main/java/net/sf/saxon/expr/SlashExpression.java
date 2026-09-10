@@ -877,22 +877,22 @@ public class SlashExpression extends BinaryExpression
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-
+        return makeElaborator().elaborateForPull().iterate(context);
         // This class delivers the result of the path expression in unsorted order,
         // without removal of duplicates. If sorting and deduplication are needed,
         // this is achieved by wrapping the path expression in a DocumentSorter
 
-        Expression step = getStep();
-        if (contextFree && step instanceof AxisExpression) {
-            // See bug 4730: the step might have been changed to something else
-            return MappingIterator.map(
-                    getStart().iterate(context),
-                    item -> ((AxisExpression) step).iterate((NodeInfo)item));
-        }
-
-        XPathContext context2 = context.newMinorContext();
-        context2.trackFocus(getStart().iterate(context));
-        return new ContextMappingIterator(c1 -> getStep().iterate(c1), context2);
+//        Expression step = getStep();
+//        if (contextFree && step instanceof AxisExpression) {
+//            // See bug 4730: the step might have been changed to something else
+//            return MappingIterator.map(
+//                    getStart().iterate(context),
+//                    item -> ((AxisExpression) step).iterate((NodeInfo)item));
+//        }
+//
+//        XPathContext context2 = context.newMinorContext();
+//        context2.trackFocus(getStart().iterate(context));
+//        return new ContextMappingIterator(c1 -> getStep().iterate(c1), context2);
     }
 
     /**
