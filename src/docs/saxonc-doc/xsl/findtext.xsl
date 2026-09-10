@@ -11,12 +11,6 @@
     exclude-result-prefixes="xs fnd ch"
     extension-element-prefixes="ixsl"
     version="3.0">
-    
-    <!-- Modified 2017-07-07 
-        - sort out use of ixsl:schedule wait, etc, so that found results count is right
-        - This no longer works with Saxon-JS 1.0.0, since we rely on lazy evaluation fix to bug
-        #3335, for mechanism to check if all documents have been searched.
-    -->
 
     <xsl:template match="p[@class eq 'search']" mode="ixsl:onclick">
         <xsl:call-template name="run-search"/>
@@ -27,20 +21,25 @@
             select="lower-case(normalize-space(ixsl:get($navlist/div/input,'value')))"/>
         <!--<xsl:message>Search input : <xsl:value-of select="$search"/></xsl:message>-->
         
+        <!-- Note: catalog.xml is fetched asynchronously when app is first opened -->
+        <xsl:variable name="catSectionNames" select="doc(concat($location,
+            '/catalog.xml'))/cat:catalog/cat:section/string(@ref)" as="xs:string*"/>
+        
         <xsl:if test="string-length($search) gt 0">
             <xsl:for-each select="ixsl:page()/html/body/div[@id = 'wrap']/div[@class eq 'found']">
                 <ixsl:set-style name="display" select="'block'"/>
             </xsl:for-each>
+            <xsl:result-document href="#findstatus" method="ixsl:replace-content"> searching... </xsl:result-document>
             <xsl:result-document href="#foundPaths" method="ixsl:replace-content">
                 <p><i>Search result links:</i></p>
-                <xsl:for-each select="doc(f:doc-uri(concat($location, '/catalog.xml')))/cat:catalog/cat:section">
-                    <div id="{@ref}" class="foundP" _searching="true"></div>
+                <xsl:for-each select="$catSectionNames">
+                    <div ref="{.}" class="foundP" _searching="true"></div>
                 </xsl:for-each>
             </xsl:result-document>
-            <xsl:result-document href="#findstatus" method="ixsl:replace-content"> searching... </xsl:result-document>
             
             <xsl:call-template name="searching">
                 <xsl:with-param name="search" select="$search"/>
+                <xsl:with-param name="catSectionNames" select="$catSectionNames"/>
             </xsl:call-template>
         </xsl:if>
     </xsl:template>
@@ -92,19 +91,20 @@
 
     <xsl:template name="searching">
         <xsl:param name="search" as="xs:string"/>
+        <xsl:param name="catSectionNames" as="xs:string*"/>
         <!--<xsl:message>searching for <xsl:value-of select="$search"/></xsl:message>-->
         <!--<xsl:message>searching $location: <xsl:value-of select="$location"/> </xsl:message>-->
-        <xsl:for-each select="$navlist/ul/li">
-            <xsl:variable name="docName" select="f:doc-uri(concat($location, '/', @id,'.xml'))"/>
+        <xsl:for-each select="$catSectionNames">
+            <!--<xsl:message>cat section <xsl:value-of select="."/></xsl:message>-->
+            <xsl:variable name="docName" select="concat($location, '/', .,'.xml')"/>
             <ixsl:schedule-action document="{$docName}">
                 <xsl:call-template name="search-doc">
                     <xsl:with-param name="search" select="$search"/>
                     <xsl:with-param name="docName" select="$docName"/>
-                    <xsl:with-param name="docID" select="string(@id)"/> <!-- trace(string(@id),  concat('id-for-document ', $docName)) -->
+                    <xsl:with-param name="docID" select="."/>
                 </xsl:call-template>
             </ixsl:schedule-action>
         </xsl:for-each>
-        
     </xsl:template>
     
     <xsl:template name="search-doc">
@@ -120,7 +120,7 @@
         <!-- After every doc search, mark that this one is done, and then check if they are all done.
             If all done, then do display-results-->
         <xsl:for-each select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id eq
-            'foundPaths']/div[@id=$docID]">
+            'foundPaths']/div[@ref=$docID]">
             <!--<xsl:message>setting @searching to false</xsl:message>-->
             <ixsl:set-attribute name="_searching" select="'false'"/>
         </xsl:for-each>
@@ -164,7 +164,7 @@
     
     <xsl:template match="*" mode="check-text"/>
     
-    <!--<xsl:template match="ch:changes" mode="check-text">
+    <xsl:template match="ch:changes" mode="check-text">
         <xsl:param name="search"/>
         <xsl:apply-templates select="ch:release/ch:category" mode="check-text">
             <xsl:with-param name="search" select="$search"/>
@@ -173,22 +173,35 @@
     
     <xsl:template match="ch:category" mode="check-text">
         <xsl:param name="search"/>
-        <xsl:variable name="newpath" select="concat('changes/', @name, '/', ../following-sibling::*[1]/@number, '-', ../@number)"/>
+        <xsl:variable name="newpath" select="concat('changes/', @name, '/', 
+            (../following-sibling::*[1]/@number, '1.0')[1], '-', ../@number)"/>
         <xsl:variable name="text" select="lower-case(.)"/>
-        <xsl:sequence select="if (contains($text, $search)) then $newpath else ()"/>
-    </xsl:template>-->
+        <xsl:if test="contains($text, $search)">
+            <xsl:call-template name="foundPaths">
+                <xsl:with-param name="newPath" select="$newpath"/>
+            </xsl:call-template>
+        </xsl:if>
+    </xsl:template>
     
     <xsl:template name="foundPaths">
         <xsl:param name="newPath"/>
-        <xsl:param name="section"/>
+        <xsl:param name="section" select="()"/>
         <xsl:variable name="path-parts" select="tokenize($newPath,'/')"/>
         <xsl:variable name="start" select="$path-parts[1]"/>
         <!--<xsl:message>Found in page: <xsl:value-of select="$newPath"/></xsl:message>-->
-        <xsl:for-each select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id eq 'foundPaths']/div[@id=$start]">
+        <xsl:for-each select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id eq
+            'foundPaths']/div[@ref=$start]">
             <xsl:result-document href="?." method="ixsl:append-content">
                 <p path="{$newPath}" class="link">
-                    <xsl:value-of select="if ($section/fnd:name) then f:fn-name($section)
-                        else if ($section/@title) then $section/@title else $section/@id"/>
+                    <xsl:choose>
+                        <xsl:when test="exists($section)">
+                            <xsl:value-of select="if ($section/fnd:name) then f:fn-name($section)
+                                else if ($section/@title) then $section/@title else $section/@id"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="$newPath"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </p>
             </xsl:result-document>
         </xsl:for-each>
@@ -233,14 +246,6 @@
         
     </xsl:template>
     
-    <!--<xsl:function name="f:highlight-finds">
-        <xsl:variable name="findtext" select="ixsl:get($navlist/div/input, 'value')"/>
-        <!-\-<xsl:message>findtext <xsl:value-of select="$findtext"/></xsl:message>-\->
-        <xsl:sequence select="js:findit($findtext)"/>
-    </xsl:function>-->
-    
-    <!-- Replace use of js:findit with XSLT solution -->
-    
     <xsl:template name="highlighting">
         <xsl:variable name="search" 
             select="lower-case(normalize-space(ixsl:get($navlist/div/input,'value')))"/>
@@ -274,8 +279,6 @@
     <xsl:template name="scrollToHighlight">
         <xsl:variable name="el" select="ixsl:page()/html/body/div/div[@id eq 'main']/descendant::span[@class='highlight'][1]"/>
         <xsl:choose>
-            <!-- TODO will this break for browsers which don't support scrollIntoView? 
-                Maybe add condition xsl:if test="ixsl:get($el, 'scrollIntoView')"-->
             <xsl:when test="exists($el)">
                 <xsl:sequence select="ixsl:call($el, 'scrollIntoView', [true()])"/>
             </xsl:when>
@@ -289,7 +292,7 @@
     <!-- Check if all sections have been searched -->
     <xsl:function name="f:allSectionsSearched" as="xs:boolean">
         <!--<xsl:message>allSectionsSearched function</xsl:message>-->
-        <!-- if there is a foundpaths div with _searching='true' then return false() -->
+        <!-- If there is a foundpaths div with _searching='true' then return false() -->
         <xsl:variable name="foundPathDivs" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id
             eq 'foundPaths']/div"/>
         <xsl:sequence select="if (exists($foundPathDivs[@_searching eq 'true'])) then false() else true()"/>

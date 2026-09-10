@@ -704,7 +704,7 @@
 
     <xsl:function name="f:set-hash">
         <xsl:param name="hash"/>
-        <xsl:message>f:set-hash {$hash}</xsl:message>
+        <!--<xsl:message>f:set-hash {$hash}</xsl:message>-->
         <ixsl:set-property name="location.hash" select="concat('!',$hash)"/>
     </xsl:function>
 
