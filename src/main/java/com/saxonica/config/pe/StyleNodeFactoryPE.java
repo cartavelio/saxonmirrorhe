@@ -1,6 +1,8 @@
 package com.saxonica.config.pe;
 
 import com.saxonica.config.ProfessionalConfiguration;
+import com.saxonica.trans.XSLArray;
+import com.saxonica.trans.XSLArrayMember;
 import com.saxonica.xsltextn.ExtensionElementCreator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -13,6 +15,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeFactory;
+import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.type.SchemaType;
 
 
@@ -133,6 +136,28 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
         }
 
         return temp;
+    }
+
+    /**
+     * Make an XSL element node
+     *
+     * @param f      the fingerprint of the node name
+     * @param parent the parent node
+     * @return the constructed element node
+     */
+    @Override
+    protected StyleElement makeXSLElement(int f, NodeImpl parent) {
+        if (getCompilation().getCompilerInfo().getXsltVersion() >= 40) {
+            switch (f) {
+                case StandardNames.XSL_ARRAY:
+                    return new XSLArray();
+                case StandardNames.XSL_ARRAY_MEMBER:
+                    return new XSLArrayMember();
+                case StandardNames.XSL_SWITCH:
+                    return new XSLSwitch();
+            }
+        }
+        return super.makeXSLElement(f, parent);
     }
 
     /**

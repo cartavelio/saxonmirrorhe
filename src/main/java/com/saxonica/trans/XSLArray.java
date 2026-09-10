@@ -8,19 +8,21 @@
 package com.saxonica.trans;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.SequenceEvaluator;
+import net.sf.saxon.expr.ContextItemExpression;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.XSLSequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ManualIterator;
 
 /**
  * xsl:array element in stylesheet - proposed XSLT 4.0 instruction
@@ -68,35 +70,9 @@ public class XSLArray extends XSLSequence {
                     break;
             }
         }
-//        if (useExpression != null) {
-//            try {
-//                // Set the "use" function to map:get(?, "value")
-//                SystemFunction mapGet = MapFunctionSet.getInstance(40).makeFunction("get", 2);
-//                use = new CurriedFunction(mapGet, new Sequence[]{null, new StringValue("value")});
-//            } catch (XPathException e) {
-//                throw new AssertionError(e);
-//            }
-//            use = new CallableFunction(1, new FocusFunction(useExpression),
-//                                       new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ITEM},
-//                                                                SequenceType.ANY_SEQUENCE));
-//        }
     }
 
-    private static class FocusFunction implements Callable {
 
-        SequenceEvaluator evaluator;
-
-        public FocusFunction(Expression expression) {
-            this.evaluator = expression.makeElaborator().eagerly();
-        }
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            Item current = arguments[0].head();
-            XPathContextMinor c2 = context.newMinorContext();
-            c2.setCurrentIterator(new ManualIterator(current));
-            return evaluator.evaluate(c2);
-        }
-    }
 
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
