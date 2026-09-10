@@ -194,13 +194,10 @@ namespace Saxon.Impl.Dom {
                 uri = "";
             }
             else {
-                AxisIterator nsIter = element.iterateAxis(AxisInfo.NAMESPACE);
-                NodeInfo ns;
-                while (((ns = ((NodeInfo) nsIter.next())) != null)) {
-                    if (ns.getLocalPart().Equals(parts[0])) {
-                        uri = ns.getStringValue();
-                        break;
-                    }
+                NamespaceMap nsMap = getAllNamespaces();
+                NamespaceUri declaredNs = nsMap.getNamespaceUri(parts[0]);
+                if (declaredNs != null) {
+                    uri = declaredNs.ToString();
                 }
 
                 if ((uri == null)) {
@@ -426,8 +423,8 @@ namespace Saxon.Impl.Dom {
                         : NamespaceMap.emptyMap();
                     XmlElement elem = (XmlElement) node;
                     XmlAttributeCollection atts = elem.Attributes;
- 
-                    int attsLen = atts.Count;
+
+                    bool namespacedAtt = false;
                     foreach (XmlAttribute att in atts) {
                         string attName = att.Name;
                         if (attName.StartsWith("xmlns")) {
@@ -435,6 +432,32 @@ namespace Saxon.Impl.Dom {
                                 nsMap = nsMap.bind("", NamespaceUri.of(att.Value));
                             } else if (attName[5] == ':') {
                                 nsMap = nsMap.bind(attName.Substring(6), NamespaceUri.of(att.Value));
+                            }
+                        } else if (attName.Contains(':')) {
+                            namespacedAtt = true;
+                        }
+                    }
+                    
+                    // if the element name or an attribute name uses a namespace that's not declared, declare it
+                    // now. This can happen with a programmatically-created DOM
+
+                    string ns = node.NamespaceURI;  
+                    if (ns != "") {
+                        NamespaceUri declaredNs = nsMap.getNamespaceUri(node.Prefix);
+                        if (declaredNs != NamespaceUri.of(ns)) {
+                            nsMap = nsMap.put(node.Prefix, NamespaceUri.of(ns));
+                        }
+                    }
+
+                    if (namespacedAtt) {
+                        foreach (XmlAttribute att in atts) {
+                            string attName = att.Name;
+                            if (attName.Contains(':')) {
+                                string prefix = att.Prefix;
+                                string uri = att.NamespaceURI;
+                                if (nsMap.getNamespaceUri(prefix) != NamespaceUri.of(uri)) {
+                                    nsMap = nsMap.put(prefix, NamespaceUri.of(uri));
+                                }
                             }
                         }
                     }

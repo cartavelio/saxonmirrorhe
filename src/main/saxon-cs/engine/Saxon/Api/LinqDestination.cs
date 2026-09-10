@@ -1,11 +1,9 @@
-using System.Xml;
 using System.Xml.Linq;
-using Saxon.Impl.Dom;
 using Saxon.Impl.XDoc;
 
 namespace Saxon.Api {
     /// <summary>
-    /// A <c>LinqDestination</c> represents an <c>System.Xml.Linq.XDocument</c> that is constructed to hold the
+    /// A <c>LinqDestination</c> represents a LINQ-for-XML <c>XDocument</c> that is constructed to hold the
     /// output of a query or transformation.
     /// </summary>
     /// <remarks>
@@ -30,33 +28,10 @@ namespace Saxon.Api {
             builder = new XDocBuilder();
             destination = new LinqDestinationImpl(builder);
         }
+        
+        /// <summary>After construction, retrieve the newly constructed document node.</summary>
 
-        /// <summary>Construct a <c>LinqDestination</c> based on an existing document
-        /// or element node.</summary>
-        /// <remarks>
-        /// <para>The new data will be added as a child of the supplied node, after
-        /// any existing children.</para>
-        /// <para>A failure occurs if you try to add an element node to an <c>XDocument</c>
-        /// that already has an element node among its children
-        /// </para></remarks>
-        /// <param name="attachmentPoint">The document node to which new contents will
-        /// be attached. </param>
-
-        public LinqDestination(XContainer attachmentPoint)
-        {
-            builder = new XDocBuilder();
-            builder.setAttachmentPoint(attachmentPoint);
-            destination = new LinqDestinationImpl(builder);
-        }
-
-        /// <summary>After construction, retrieve the constructed document node.</summary>
-        /// <remarks>If the zero-argument constructor was used, this will be a newly
-        /// constructed document node. If the constructor supplied a document node, the
-        /// same document node will be returned. If the constructor supplied a document fragment
-        /// node or an element node, this method returns the <c>OwnerDocument</c> property of 
-        /// that node.</remarks>
-
-        public System.Xml.Linq.XDocument XDocument => builder.getDocumentNode();
+        public XDocument XDocument => builder.getDocumentNode();
 
 
         /// <summary>
@@ -91,8 +66,6 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <value>The underlying Destination object</value>
-        public Saxon.Hej.s9api.Destination UnderlyingDestination {
-            get { return destination; }
-        }
+        public Saxon.Hej.s9api.Destination UnderlyingDestination => destination;
     }
 }

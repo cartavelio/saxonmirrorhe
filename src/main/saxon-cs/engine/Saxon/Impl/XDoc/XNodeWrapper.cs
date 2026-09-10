@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using Saxon.Hej.@event;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
 using Saxon.Hej.str;
@@ -158,6 +159,10 @@ namespace Saxon.Impl.XDoc {
             }
 
             return "";
+        }
+
+        public override NamespaceUri getNamespaceUri() {
+            return NamespaceUri.of(getURI());
         }
 
         public override string getPrefix() {
@@ -330,6 +335,7 @@ namespace Saxon.Impl.XDoc {
                     ? parent.getAllNamespaces()
                     : NamespaceMap.emptyMap();
 
+                bool namespacedAtts = false;
                 foreach (XAttribute att in elem.Attributes()) {
                     if (att.IsNamespaceDeclaration) {
                         if (att.Name.LocalName == "xmlns") {
@@ -338,7 +344,34 @@ namespace Saxon.Impl.XDoc {
                             nsMap = nsMap.bind(att.Name.LocalName, NamespaceUri.of(att.Value));
                         }
                     }
+
+                    if (att.Name.Namespace != XNamespace.None) {
+                        namespacedAtts = true;
+                    }
                 }
+
+                XNamespace ns = elem.Name.Namespace;
+                if (ns != XNamespace.None) {
+                    string prefix = elem.GetPrefixOfNamespace(ns);
+                    if (prefix == null) {
+                        prefix = "";
+                    }
+                    if (nsMap.getNamespaceUri(prefix) != NamespaceUri.of(ns.NamespaceName)) {
+                        nsMap = nsMap.put(prefix, NamespaceUri.of(ns.NamespaceName));
+                    }
+                }
+
+                if (namespacedAtts) {
+                    foreach (XAttribute att in elem.Attributes()) {
+                        if (att.Name.Namespace != XNamespace.None && !att.IsNamespaceDeclaration) {
+                            string prefix = elem.GetPrefixOfNamespace(att.Name.Namespace);
+                            if (nsMap.getNamespaceUri(prefix) != NamespaceUri.of(att.Name.Namespace.NamespaceName)) {
+                                nsMap = nsMap.put(prefix, NamespaceUri.of(att.Name.Namespace.NamespaceName));
+                            }
+                        }
+                    }
+                }
+
                 return inScopeNamespaces = nsMap;
             }
 
