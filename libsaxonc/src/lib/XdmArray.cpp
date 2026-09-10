@@ -30,7 +30,7 @@ int XdmArray::arrayLength() {
 
 XdmValue *XdmArray::get(int n) {
   if (n < 0 || value == SXN_UNSET) {
-    return nullptr;
+    throw SaxonApiException("Array index out of bounds.");
   }
   int64_t result =
       j_xdmArray_get(SaxonProcessor::sxn_environ->thread, (void *)value, n);

@@ -981,7 +981,6 @@ void testEmptyXdmArray(SaxonProcessor * processor, sResultCount *sresult) {
     }
   try {
     XdmValue * value1 = d->get(0);
-
       sresult->failure++;
       sresult->failureList.push_back("testEmptyXdmArray1");
 

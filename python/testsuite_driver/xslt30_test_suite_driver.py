@@ -684,6 +684,15 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
                 output_file = (file_name[-4] + "_created_from_test_driver.sef")
                 environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file)
                 environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file)
+                print("Checking the output file " + str(os.path.join(environment.xslt_proc.cwd, output_file)) +": ")
+                try:
+                    output_file1 = str(os.path.join(environment.xslt_proc.cwd, output_file))
+                    if os.path.exists(output_file1):
+                        os.remove(output_file1)
+                    else:
+                        print("The output file " + output_file1 + " does not exist")
+                except Exception as ex:
+                    print(ex)
 
         if environment.sheet is None:
             print("Environment not is a clean state")

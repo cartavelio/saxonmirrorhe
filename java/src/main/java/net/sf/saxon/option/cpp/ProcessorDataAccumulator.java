@@ -82,28 +82,37 @@ public class ProcessorDataAccumulator {
     @CEntryPoint(name = "addProcessorDataPair")
     public static void addProcessorDataPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, ObjectHandle objectRef){
 
-        ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
-        String paramNamei = null;
         try {
-            paramNamei = SaxonCAPI.toJavaString(cparamName, WordFactory.nullPointer());
-        } catch(SaxonApiException ex) {
-            if(SaxonCAPI.debug) {
+            ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
+            String paramNamei = null;
+            try {
+                paramNamei = SaxonCAPI.toJavaString(cparamName, WordFactory.nullPointer());
+            } catch (SaxonApiException ex) {
+                if (SaxonCAPI.debug) {
+                    System.err.println(ex.getMessage());
+                }
+                return;
+            }
+            if (SaxonCAPI.debug && objectRef == WordFactory.nullPointer()) {
+                System.err.println("Null found in the ProcessorDataAccumulator - data-pair - addProcessor paramName= " + paramNamei);
+            }
+            Object object = null;
+            if (objectRef != WordFactory.nullPointer()) {
+                object = SaxonCAPI.objectHandles.get(objectRef);
+                if (SaxonCAPI.debug) {
+                    System.err.println("ProcessorDataAccumulator - data-pair - addProcessor paramName= " + paramNamei);
+                    System.err.println("ProcessorDataAccumulator - data-pair - addProcessorValue= " + object.getClass().getName());
+                }
+
+                processorData.paramNames.add(paramNamei);
+                processorData.values.add(object);
+            }
+
+        } catch (Exception ex) {
+            if (SaxonCAPI.debug) {
                 System.err.println(ex.getMessage());
             }
-            return;
         }
-        if(SaxonCAPI.debug && objectRef == WordFactory.nullPointer()) {
-            System.err.println("Null found in the ProcessorDataAccumulator - data-pair - addProcessor paramName= " + paramNamei);
-        }
-        Object object = SaxonCAPI.objectHandles.get(objectRef);
-
-        if(SaxonCAPI.debug) {
-            System.err.println("ProcessorDataAccumulator - data-pair - addProcessor paramName= " + paramNamei);
-            System.err.println("ProcessorDataAccumulator - data-pair - addProcessorValue= " +object.getClass().getName());
-        }
-
-        processorData.paramNames.add(paramNamei);
-        processorData.values.add(object);
 
     }
 
