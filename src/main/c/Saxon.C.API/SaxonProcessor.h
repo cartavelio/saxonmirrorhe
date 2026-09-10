@@ -44,7 +44,10 @@
 #include "XQueryProcessor.h"
 #include "Xslt30Processor.h"
 #include "XsltExecutable.h"
+
+#if defined PYTHON_SAXONC_API
 #include "CythonUserFunctionHandler.h"
+#endif
 //#include "com_saxonica_functions_extfn_PhpCall.h"
 //#include "com_saxonica_functions_extfn_PhpCall_PhpFunctionCall.h"
 //#define MEM_DEBUG

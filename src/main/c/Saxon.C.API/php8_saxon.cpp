@@ -1326,18 +1326,23 @@ PHP_METHOD(SaxonProcessor, clearConfigurationProperties) {
     saxonProcessor->clearConfigurationProperties();
   }
 }
-/*
-PHP_METHOD(SaxonProcessor, registerPHPFunctions)
+
+PHP_METHOD(SaxonProcessor, registerUserFunction)
 {
+
+    //char * functionName, void * proc, void * func,  int useNativeTypes, int numOfArguments, void ** arguments
     SaxonProcessor *saxonProcessor;
-    char * libName = nullptr;
-    size_t len1;
- //std::cerr<<"checkpoint in registerPHPFunction start"<<std::endl;
+    char * namespacei = nullptr;
+    char * functionName = nullptr;
+    char * signature = nullptr;
+    bool useNativeTypes = true;
+    size_t len1, len2, len3;
+ std::cerr<<"checkpoint in registerPHPFunction start"<<std::endl;
     if (ZEND_NUM_ARGS()!= 1) {
         WRONG_PARAM_COUNT;
     }
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &libName, &len1) ==
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "sssb", &namespacei, &len1, &functionName, &len2, &signature, &len3, &useNativeTypes) ==
 FAILURE) { RETURN_NULL();
     }
 
@@ -1346,14 +1351,12 @@ FAILURE) { RETURN_NULL();
 XtOffsetOf(saxonProcessor_object, std));
 
     saxonProcessor = obj->saxonProcessor;
-    if (saxonProcessor != nullptr && libName != nullptr) {
-        saxonProcessor->setConfigurationProperty("extc", libName);
-    }
-saxonProcessor->registerNativeMethods(SaxonProcessor::sxn_environ->env,
-"com/saxonica/functions/extfn/cpp/PHPFunctionSet$PHPFunction", phpMethods,
-sizeof(phpMethods) / sizeof(phpMethods[0]));
 
-} */
+saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, functionName, nullptr, signature, useNativeTypes);
+//"com/saxonica/functions/extfn/cpp/PHPFunctionSet$PHPFunction", phpMethods,
+//sizeof(phpMethods) / sizeof(phpMethods[0]));
+
+}
 
 /*enum saxonTypeEnum
 {
@@ -1367,9 +1370,14 @@ sizeof(phpMethods) / sizeof(phpMethods[0]));
 };*/
 
 
-jobject JNICALL phpNativeCall
-        (JNIEnv *env, jobject object, jstring funcName, jobjectArray arguments,
-jobjectArray argTypes){ JNIEnv *senv = SaxonProcessor::sxn_environ->env; char
+void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
+{
+
+    std::cerr<<"inside phpNativeCall"<<std::endl;
+
+    return nullptr;
+
+    /*JNIEnv *senv = SaxonProcessor::sxn_environ->env; char
 *nativeString = (char *)senv->GetStringUTFChars(funcName, NULL);
     //std::string nativeString2 = std::string(nativeString);
     if(nativeString == NULL) {
@@ -1426,8 +1434,8 @@ SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmValueForCppClass,
             switch (it->second)
             {
                 case enumNode:
-                    //std::cerr<<"enumNode path - cp0 -
-phpNtiveCall"<<std::endl; if(!nprocessor->proc){ nprocessor->proc =
+
+if(!nprocessor->proc){ nprocessor->proc =
 (jobject)SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmValueForCppClass,
 procForNodeMID, argObj);
                     }
@@ -1566,7 +1574,7 @@ extension function", 0);
 
     delete nprocessor;
     zval_ptr_dtor(&retval);
-    return obj;
+    return obj;*/
 }
 
 /*     ============== PHP Interface of   XdmValue =============== */
@@ -3701,8 +3709,7 @@ zend_function_entry SaxonProcessor_methods[] = {
                                         setConfigurationProperty,
                                         arginfo_saxonc_setConfigurationProperty,
                                         ZEND_ACC_PUBLIC)
-    // PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr,
-    // ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor,  registerUserFunction,   arginfo_saxonc_registerUserFunction, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor, version, arginfo_saxonc_version, ZEND_ACC_PUBLIC)
         PHP_ME(SaxonProcessor, isSchemaAware, arginfo_saxonc_isSchemaAware,
                ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, EQNameToClarkName,

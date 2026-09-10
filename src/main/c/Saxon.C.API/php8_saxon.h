@@ -25,6 +25,8 @@ extern "C" { // remove comment
 #include "zend_ini.h"
 #include "zend_interfaces.h"
 #include "zend_types.h"
+
+//#define PHP_SAXONC_API
 #ifdef PHP_WIN32
 #define _ALLOW_KEYWORD_MACROS
 #endif
@@ -214,7 +216,7 @@ PHP_METHOD(SaxonProcessor, detachCurrentThread);
 
 PHP_METHOD(SaxonProcessor, setCatalog);
 PHP_METHOD(SaxonProcessor, setCatalogFiles);
-PHP_METHOD(SaxonProcessor, registerPHPFunctions);
+PHP_METHOD(SaxonProcessor, registerUserFunction);
 PHP_METHOD(SaxonProcessor, getErrorMessage);
 PHP_METHOD(SaxonProcessor, exceptionOccurred);
 PHP_METHOD(SaxonProcessor, setConfigurationProperty);

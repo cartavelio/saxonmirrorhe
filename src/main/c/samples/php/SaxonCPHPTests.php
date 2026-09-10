@@ -907,6 +907,17 @@ public function testSingle()
     $this->assertEquals($item, "<person>text1</person>");
     }
 
+
+// define an extension function
+function userFunction($param , $param2)
+{
+  if(is_numeric($param2)){
+    echo("userspace function called cp1\n");
+    $result = $param2*2;
+    return $result;
+  }
+}
+
     public function testUserDefinedFunction(): void
      {
          if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -914,7 +925,7 @@ public function testSingle()
          }
          $saxonProc1 = new Saxon\SaxonProcessor(True);
 
-         $saxonProc1->registerUserFunction("http://www.example.com", "myFunc", user_function, "{ \"myFunc\": {".
+         $saxonProc1->registerUserFunction("http://www.example.com", "UserFunction", "{ \"myFunc\": {".
                                                         "      \"as\": \"xs:integer?\"," .
                                                         "      \"param\": [" .
                                                         "        \"xs:integer\"" .
