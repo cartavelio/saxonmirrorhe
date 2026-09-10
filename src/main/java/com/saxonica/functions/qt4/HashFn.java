@@ -71,16 +71,21 @@ public class HashFn extends SystemFunction {
                     getDetails().optionDetails.processSuppliedOptions(options, context);
             String algorithm = checkedOptions.get("algorithm").getStringValue().trim().toUpperCase();
             if (algorithm.equals("CRC-32")) {
-                CRC32 hasher = new CRC32();
-                hasher.update(binaryInput);
-                long hash = hasher.getValue();
-                return new HexBinaryValue(Arrays.copyOfRange(longToBytes(hash), 4, 8));
+                return getCRC32Algorithm(binaryInput);
             }
             byte[] hash = MessageDigest.getInstance(algorithm).digest(binaryInput);
             return new HexBinaryValue(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new XPathException(e.getMessage(), "FOHA0001");
         }
+    }
+
+    @CSharpReplaceBody(code="return new Saxon.Hej.value.HexBinaryValue(System.IO.Hashing.Crc32.Hash(binaryInput));")
+    private static HexBinaryValue getCRC32Algorithm(byte[] binaryInput) {
+        CRC32 hasher = new CRC32();
+        hasher.update(binaryInput);
+        long hash = hasher.getValue();
+        return new HexBinaryValue(Arrays.copyOfRange(longToBytes(hash), 4, 8));
     }
 
     @CSharpReplaceBody(code="return System.BitConverter.GetBytes(l);")
