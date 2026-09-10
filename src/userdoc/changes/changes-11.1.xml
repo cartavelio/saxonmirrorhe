@@ -53,7 +53,9 @@
  
     <category name="dotnet">
         <div class="csonly">
- 
+          <p>The <code>Feature</code> class in the .NET API is no longer generic. This means that a call such as 
+              <code>p.SetProperty(Feature&lt;boolean>.ALLOW_MULTITHREADING, false)</code> needs to be changed to
+              <code>p.SetProperty(Feature.ALLOW_MULTITHREADING, false)</code>. For the rationale, see bug 5183.</p>
         </div>
             
     </category>
