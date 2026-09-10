@@ -7,7 +7,7 @@
    default-mode="constructors"
    version="3.0">
    
-   <xsl:mode name="constructors" on-no-match="fail" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/"/>
+   <xsl:mode name="constructors" on-no-match="fail"/>
    
    <!-- This module is concerned with constructors (object creation expressions), 
       especially rules for 

@@ -8,7 +8,7 @@
    default-mode="diamond"
    version="3.0">
    
-   <xsl:mode name="diamond" on-no-match="fail" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/"/>
+   <xsl:mode name="diamond" on-no-match="fail"/>
    
    <!-- This module is concerned with expanding the diamond operator found in Java constructs like
         new ArrayList<>(). When generating the C# equivalent code, we need to add explicit type

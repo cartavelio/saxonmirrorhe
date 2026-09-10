@@ -8,7 +8,7 @@
    default-mode="methods"
    version="3.0">
    
-   <xsl:mode name="methods" on-no-match="fail" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/"/>
+   <xsl:mode name="methods" on-no-match="fail"/>
    
    <!-- This module is concerned with method calls, especially rules for method
       calls that are specific to particular classes. All the rules in this 

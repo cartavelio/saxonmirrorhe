@@ -31,7 +31,7 @@
    <xsl:strip-space elements="*"/>
    <xsl:variable name="NL" select="'&#xa;'" as="xs:string"/>
    
-   <xsl:mode name="xml-to-cs" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/"/>
+   <xsl:mode name="xml-to-cs"/>
    
    <xsl:template name="indent">
       <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>

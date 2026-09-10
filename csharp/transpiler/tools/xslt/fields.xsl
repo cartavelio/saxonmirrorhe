@@ -7,7 +7,7 @@
    default-mode="fields"
    version="3.0">
    
-   <xsl:mode name="fields" saxon:trace="no" xmlns:saxon="http://saxon.sf.net/" on-no-match="fail"/>
+   <xsl:mode name="fields" on-no-match="fail"/>
    
    <!-- This module is concerned with field access expressions, especially rules for 
       properties that are specific to particular classes. All the rules in this 
