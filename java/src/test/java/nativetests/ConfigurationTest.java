@@ -6,15 +6,18 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.lib.LocalizerFactory;
 import net.sf.saxon.lib.Numberer;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XPathCompiler;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -61,6 +64,56 @@ public class ConfigurationTest {
         assertNotNull(props.getProperty("Email"));
         assertNotNull(props.getProperty("Issued"));
         assertNotNull(props.getProperty("Signature"));
+    }
+
+    @Test
+    public void testDisableFunctionXPath() {
+
+        Processor proc = new Processor();
+        proc.getUnderlyingConfiguration().disableFunction(new StructuredQName("fn", NamespaceUri.FN, "contains"));
+        XPathCompiler compiler = proc.newXPathCompiler();
+        try {
+            compiler.compile("contains('banana', 'anan')");
+            fail("function not disabled");
+        } catch (SaxonApiException e) {
+            assertTrue(e.getMessage().contains("disabled"));
+        }
+        try {
+            compiler.compile("contains#2('banana', 'anan')");
+            fail("function not disabled");
+        } catch (SaxonApiException e) {
+            assertTrue(e.getMessage().contains("disabled"));
+        }
+        try {
+            compiler.declareNamespace("fn", NamespaceUri.FN.toString());
+            XPathExecutable exec =
+                    compiler.compile("function-lookup(xs:QName('fn:contains'), 2) => empty()");
+            XdmItem result = exec.load().evaluateSingle();
+            assertTrue(((XdmAtomicValue)result).getBooleanValue());
+        } catch (SaxonApiException e) {
+            fail();
+        }
+
+    }
+
+    @Test
+    public void testDisableFunctionXSLT() {
+
+        String xsl = "<a b='{starts-with(string(current-date()), string(current-time()))}' "
+                + "xsl:version='4.0' "
+                + "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'/>";
+
+        Processor proc = new Processor();
+        proc.getUnderlyingConfiguration().disableFunction(new StructuredQName("fn", NamespaceUri.FN, "starts-with"));
+        XsltCompiler compiler = proc.newXsltCompiler();
+        compiler.setJustInTimeCompilation(false);
+        try {
+            compiler.compile(new StreamSource(new StringReader(xsl)));
+            fail("function not disabled");
+        } catch (SaxonApiException e) {
+            //OK
+        }
+
     }
 
 
