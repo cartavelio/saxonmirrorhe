@@ -3131,7 +3131,7 @@ public class XPathParser {
                         readToken(Token.LPAREN);
                         Expression selector = parseExprSingle();
                         readToken(Token.RPAREN);
-                        AxisGetExpression getExpr = new AxisGetExpression(AxisInfo.CHILD, selector);
+                        DynamicNodeTestExpr getExpr = new DynamicNodeTestExpr(AxisInfo.CHILD, selector);
                         setLocation(getExpr);
                         return getExpr;
                     }
@@ -3212,13 +3212,17 @@ public class XPathParser {
                 short principalNodeType = AxisInfo.principalNodeType[axis];
                 nextToken();
                 readToken(Token.COLON_COLON);
-                if (isKeyword("get") && t.peekAhead() == Token.LPAREN) {
-                    checkLanguageVersion40("nodeTest get()");
+                if (t.currentToken == Token.LCURLY) {
+                    checkLanguageVersion40("dynamic nodeTest");
                     nextToken();
-                    readToken(Token.LPAREN);
-                    Expression selector = parseExpression();
-                    readToken(Token.RPAREN);
-                    AxisGetExpression axisGetExpr = new AxisGetExpression(axis, selector);
+                    Expression selector;
+                    if (t.currentToken == Token.RCURLY) {
+                        selector = Literal.makeEmptySequence();
+                    } else {
+                        selector = parseExpression();
+                        readToken(Token.RCURLY);
+                    }
+                    DynamicNodeTestExpr axisGetExpr = new DynamicNodeTestExpr(axis, selector);
                     setLocation(axisGetExpr);
                     return axisGetExpr;
                 }

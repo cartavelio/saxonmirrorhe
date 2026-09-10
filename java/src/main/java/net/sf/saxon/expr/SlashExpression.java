@@ -332,8 +332,8 @@ public class SlashExpression extends BinaryExpression
             if (underlyingStep instanceof AxisExpression) {
                 newStep = new AxisExpression(newAxis,
                                              ((AxisExpression) underlyingStep).getNodeTest());
-            } else if (underlyingStep instanceof AxisGetExpression) {
-                newStep = new AxisGetExpression(newAxis, ((AxisGetExpression)underlyingStep).getBaseExpression());
+            } else if (underlyingStep instanceof DynamicNodeTestExpr) {
+                newStep = new DynamicNodeTestExpr(newAxis, ((DynamicNodeTestExpr)underlyingStep).getBaseExpression());
             } else {
                 throw new IllegalStateException();
             }

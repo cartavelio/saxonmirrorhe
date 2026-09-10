@@ -20,7 +20,6 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -29,7 +28,6 @@ import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.type.gnode.AnyGNodeType;
@@ -44,18 +42,18 @@ import java.util.function.Supplier;
 
 
 /**
- * An AxisGetExpression represents a step such as child::get(XYZ)
- * or descendant::get(XYZ), where XYZ is an expression that evaluates
- * to a selector
+ * A DynamicNodeTestExpr represents a step such as <code>child::{XYZ}</code>
+ * or <code>descendant::{XYZ}</code>, where XYZ is an expression that evaluates
+ * to a selector. Introduced in 4.0 PR 2667
  */
 
-public final class AxisGetExpression extends UnaryExpression implements GeneralizedAxisExpression {
+public final class DynamicNodeTestExpr extends UnaryExpression implements GeneralizedAxisExpression {
 
     private final int axis;
     private ItemType itemType = AnyGNodeType.getInstance();
 
     /**
-     * Constructor for an AxisExpression whose origin is the context item
+     * Constructor for a DynamicNodeTestExpr whose origin is the context item
      *
      * @param axis     The axis to be used in this AxisExpression: relevant constants are defined
      *                 in class {@link AxisInfo}.
@@ -63,7 +61,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
      * @see AxisInfo
      */
 
-    public AxisGetExpression(int axis, Expression selector) {
+    public DynamicNodeTestExpr(int axis, Expression selector) {
         super(selector);
         this.axis = axis;
     }
@@ -103,7 +101,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
         } else if (contextInfo.getItemType() instanceof XNodeType) {
             itemType = AnyXNodeType.getInstance();
         }
-        ContextItemStaticInfo noFocus = new ContextItemStaticInfo(ErrorType.getInstance(), Optionality.PROHIBITED);
+        ContextItemStaticInfo noFocus = ContextItemStaticInfo.ABSENT;
         getOperand().typeCheck(visitor, noFocus);
         Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "get()", 1);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
@@ -114,18 +112,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
 
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        getOperand().optimize(visitor, contextInfo);
-//        // if the operand value is known, pre-evaluate the expression
-//        Expression base = getBaseExpression();
-//        try {
-//            if (base instanceof Literal) {
-//                return Literal.makeLiteral(
-//                        SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
-//            }
-//        } catch (XPathException | UncheckedXPathException err) {
-//            // if early evaluation fails, suppress the error: the value might
-//            // not be needed at run-time
-//        }
+        getOperand().optimize(visitor, ContextItemStaticInfo.ABSENT);
         return this;
     }
 
@@ -141,20 +128,12 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
      */
     @Override
     public double getCost() {
-        switch (axis) {
-            case AxisInfo.SELF:
-            case AxisInfo.PARENT:
-            case AxisInfo.ATTRIBUTE:
-                return 1;
-            case AxisInfo.CHILD:
-            case AxisInfo.FOLLOWING_SIBLING:
-            case AxisInfo.PRECEDING_SIBLING:
-            case AxisInfo.ANCESTOR:
-            case AxisInfo.ANCESTOR_OR_SELF:
-                return 5;
-            default:
-                return 20;
-        }
+        return switch (axis) {
+            case AxisInfo.SELF, AxisInfo.PARENT, AxisInfo.ATTRIBUTE -> 1;
+            case AxisInfo.CHILD, AxisInfo.FOLLOWING_SIBLING, AxisInfo.PRECEDING_SIBLING, AxisInfo.ANCESTOR,
+                 AxisInfo.ANCESTOR_OR_SELF -> 5;
+            default -> 20;
+        };
     }
 
     /**
@@ -162,9 +141,9 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
      */
 
     public boolean equals(Object other) {
-        return other instanceof AxisGetExpression &&
-                axis == ((AxisGetExpression) other).axis &&
-                Objects.equals(getBaseExpression(), ((AxisGetExpression) other).getBaseExpression());
+        return other instanceof DynamicNodeTestExpr &&
+                axis == ((DynamicNodeTestExpr) other).axis &&
+                Objects.equals(getBaseExpression(), ((DynamicNodeTestExpr) other).getBaseExpression());
     }
 
     /**
@@ -189,7 +168,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        return new AxisGetExpression(axis, getBaseExpression().copy(rebindings));
+        return new DynamicNodeTestExpr(axis, getBaseExpression().copy(rebindings));
     }
 
     /**
@@ -207,30 +186,6 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                 (AxisInfo.isPeerAxis[axis] ? StaticProperty.PEER_NODESET : 0) |
                 (AxisInfo.isSubtreeAxis[axis] ? StaticProperty.SUBTREE_NODESET : 0) |
                 (axis == AxisInfo.ATTRIBUTE || axis == AxisInfo.NAMESPACE ? StaticProperty.ATTRIBUTE_NS_NODESET : 0);
-    }
-
-    /**
-     * Determine whether a node test is a peer node test. A peer node test is one that, if it
-     * matches a node, cannot match any of its descendants. For example, text() is a peer node-test.
-     *
-     * @param test the node test
-     * @return true if nodes selected by this node-test will never contain each other as descendants
-     */
-
-    private static boolean isPeerNodeTest(NodeTest test) {
-        if (test == null) {
-            return false;
-        }
-        UType uType = test.getUType();
-        if (uType.overlaps(UType.ELEMENT)) {
-            // can match elements; for the moment, assume these can contain each other
-            return false;
-        } else if (uType.overlaps(UType.DOCUMENT)) {
-            // can match documents; return false if we can also match non-documents
-            return uType.equals(UType.DOCUMENT);
-        } else {
-            return true;
-        }
     }
 
     /**
@@ -285,61 +240,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
     @Override
     protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
-//        ItemType originNodeType = staticInfo.getItemType();
-//        if (!(originNodeType instanceof GNodeType)) {
-//            // context item not a node - we'll report a type error somewhere along the line
-//            return StaticProperty.ALLOWS_ZERO_OR_MORE;
-//        }
-//        if (test == null) {
-//            return StaticProperty.ALLOWS_ZERO_OR_MORE;
-//        }
-//        GNodeType gNodeType = (GNodeType)originNodeType;
-//        int attFingerprint = test.getRequiredFingerprint(Type.ATTRIBUTE);
-//        int elemFingerprint = test.getRequiredFingerprint(Type.ELEMENT);
-//        if (axis == AxisInfo.ATTRIBUTE && attFingerprint != -1) {
-//            StructuredQName attName = getConfiguration().getNamePool().getStructuredQName(attFingerprint);
-//            Schema schema = getRetainedStaticContext().getImportedSchema();
-//            SchemaType contentType = gNodeType.getContentType();
-//            if (contentType instanceof ComplexType) {
-//                try {
-//                    return ((ComplexType) contentType).getAttributeUseCardinality(attName, schema);
-//                } catch (SchemaException err) {
-//                    // shouldn't happen; play safe
-//                    return StaticProperty.ALLOWS_ZERO_OR_ONE;
-//                }
-//            } else if (contentType instanceof SimpleType) {
-//                return StaticProperty.EMPTY;
-//            }
-//            return StaticProperty.ALLOWS_ZERO_OR_ONE;
-//        } else if (axis == AxisInfo.CHILD && elemFingerprint != -1) {
-//            Schema schema = getRetainedStaticContext().getImportedSchema();
-//            SchemaType contentType = gNodeType.getContentType();
-//            if (contentType instanceof ComplexType) {
-//                return ((ComplexType) contentType).getElementParticleCardinality(elemFingerprint, schema, true);
-//            } else {
-//                return StaticProperty.EMPTY;
-//            }
-//        } else if (axis == AxisInfo.DESCENDANT && elemFingerprint != -1) {
-//            Schema schema = getRetainedStaticContext().getImportedSchema();
-//            SchemaType contentType = gNodeType.getContentType();
-//            if (contentType instanceof ComplexType) {
-//                try {
-//                    return ((ComplexType) contentType).getDescendantElementCardinality(schema, elemFingerprint);
-//                } catch (SchemaException err) {
-//                    // shouldn't happen; play safe
-//                    return StaticProperty.ALLOWS_ZERO_OR_MORE;
-//                }
-//            } else {
-//                return StaticProperty.EMPTY;
-//            }
-//
-//        } else if (axis == AxisInfo.SELF) {
-//            return StaticProperty.ALLOWS_ZERO_OR_ONE;
-//        } else {
-//            return StaticProperty.ALLOWS_ZERO_OR_MORE;
-//        }
-//        // the parent axis isn't handled by this class
-    }
+   }
 
     /**
      * Determine whether the expression can be evaluated without reference to the part of the context
@@ -365,31 +266,6 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
         return axis;
     }
 
-//    /**
-//     * Get the NodeTest. Returns null if the AxisExpression can return any node.
-//     *
-//     * @return the node test, or null if all nodes are returned
-//     */
-//
-//    public NodeTest getNodeTest() {
-//        return test;
-//    }
-
-
-//    /**
-//     * Ask whether there is a possibility that the context item will be undefined
-//     *
-//     * @return true if this is a possibility
-//     */
-//
-//    public boolean isContextPossiblyUndefined() {
-//        return staticInfo.getOptionality() != Optionality.REQUIRED;
-//    }
-//
-//    public ContextItemStaticInfo getContextItemStaticInfo() {
-//        return staticInfo;
-//    }
-
 
     @Override
     public int getImplementationMethod() {
@@ -406,34 +282,6 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         return makeElaborator().elaborateForPull().iterate(context);
-//        Item item = context.getContextItem();
-//        if (item == null) {
-//            // Might as well do the test anyway, whether or not contextMaybeUndefined is set
-//            throw new XPathException("The context item for axis step " + this + " is absent")
-//                    .withErrorCode("XPDY0002")
-//                    .withXPathContext(context)
-//                    .withLocation(getLocation())
-//                    .asTypeError();
-//        }
-//        try {
-//            return Navigator.iterateAxis(((NodeInfo)item), axis, test);
-//        } catch (ClassCastException cce) {
-//            throw new XPathException("The context item for axis step " + this + " is not a node")
-//                    .withErrorCode("XPTY0020")
-//                    .withXPathContext(context)
-//                    .withLocation(getLocation())
-//                    .asTypeError();
-//        } catch (UnsupportedOperationException err) {
-//            if (err.getCause() instanceof XPathException) {
-//                throw ((XPathException) err.getCause())
-//                    .maybeWithLocation(getLocation())
-//                    .maybeWithContext(context);
-//            } else {
-//                // the namespace axis is not supported for all tree implementations
-//                dynamicError(err.getMessage(), "XPST0010", context);
-//                return null;
-//            }
-//        }
     }
 
     /**
@@ -540,7 +388,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
         @SuppressWarnings("DuplicatedCode")
         @Override
         public PullEvaluator elaborateForPull() {
-            AxisGetExpression axisExpression = (AxisGetExpression) getExpression();
+            DynamicNodeTestExpr axisExpression = (DynamicNodeTestExpr) getExpression();
             Expression getter = axisExpression.getBaseExpression();
             int axis = axisExpression.getAxis();
             EagerPullEvaluator getEvaluator = new EagerPullEvaluator(getter.makeElaborator().elaborateForPull());

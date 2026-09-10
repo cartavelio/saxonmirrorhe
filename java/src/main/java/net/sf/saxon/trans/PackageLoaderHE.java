@@ -1924,7 +1924,7 @@ public class PackageLoaderHE implements IPackageLoader {
             String axisName = element.getAttributeValue(NamespaceUri.NULL, "name");
             int axis = AxisInfo.getAxisNumber(axisName);
             Expression selector = loader.getFirstChildExpression(element);
-            return new AxisGetExpression(axis, selector);
+            return new DynamicNodeTestExpr(axis, selector);
         });
 
         eMap.put("break", (loader, element) -> new BreakInstr());
