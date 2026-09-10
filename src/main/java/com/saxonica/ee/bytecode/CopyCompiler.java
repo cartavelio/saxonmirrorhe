@@ -567,7 +567,7 @@ public class CopyCompiler extends ToPushCompiler {
         LabelInfo nonEmptyFi = mi.newLabel("nonEmptyFi");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "characters", UnicodeString.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "characters", CodePoints.class, Location.class, Integer.TYPE);
 
     }
 
@@ -581,7 +581,7 @@ public class CopyCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "comment", UnicodeString.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "comment", CodePoints.class, Location.class, Integer.TYPE);
 
     }
 

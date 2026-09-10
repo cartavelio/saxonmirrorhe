@@ -205,7 +205,7 @@ public class AtomicTypeValidatorCompiler {
                     RegularExpression regex = ((PatternFacet) f).getRegularExpression();
                     ExpressionCompiler.allocateStatic(compiler, regex);
                     ga.loadArg(0);
-                    ga.invokeInstanceMethod(RegularExpression.class, "matches", CharSequence.class);
+                    ga.invokeInstanceMethod(RegularExpression.class, "matches", UnicodeString.class);
                     LabelInfo ok = mi.newLabel("patternOK");
                     ga.ifTrue(ok);
                     ExpressionCompiler.allocateStatic(compiler, f);

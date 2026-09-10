@@ -97,11 +97,10 @@ public class SwitchExpressionCompiler extends ToIteratorCompiler {
 //        }
 
         ga.checkClass(AtomicValue.class);
-        ga.push(false);
         allocateStatic(compiler, switcher.getCollation());
         compiler.generateGetContext();
         ga.invokeInstanceMethod(XPathContext.class, "getImplicitTimezone");
-        ga.invokeInstanceMethod(AtomicValue.class, "getXPathComparable", Boolean.TYPE, StringCollator.class, Integer.TYPE);
+        ga.invokeInstanceMethod(AtomicValue.class, "getXPathMatchKey", StringCollator.class, Integer.TYPE);
 
         // Compile the branches (cases) of the switch expression as separate free-standing compiled expression objects,
         // holding these in a map, which we then use at run-time to identify the appropriate expression to evaluate

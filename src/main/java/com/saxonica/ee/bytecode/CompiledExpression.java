@@ -89,6 +89,11 @@ public class CompiledExpression extends Expression {
             e.maybeSetContext(context);
             e.maybeSetLocation(getInterpretedExpression().getLocation());
             throw e;
+        } catch (UncheckedXPathException uxe) {
+            XPathException e = uxe.getXPathException();
+            e.maybeSetContext(context);
+            e.maybeSetLocation(getInterpretedExpression().getLocation());
+            throw e;
         }
     }
 

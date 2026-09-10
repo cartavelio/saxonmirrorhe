@@ -56,7 +56,6 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
         this.map = new HashMap<>(switchCaseInfo.index.size());
         this.actions = new ArrayList<>(switchCaseInfo.index.size());
         for (Map.Entry<AtomicMatchKey, Expression> entry : switchCaseInfo.index.entrySet()) {
-            AtomicMatchKey key = entry.getKey();
             Expression action = entry.getValue();
             int actionNumber = -1;
             for (int i=0; i<actions.size(); i++) {

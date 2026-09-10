@@ -246,8 +246,9 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 ga.newInstance(IntegerRange.class);
                 ga.dup();
                 ga.loadLocal(startVar);
+                ga.push(1L);
                 ga.loadLocal(endVar);
-                ga.invokeConstructor(IntegerRange.class, Long.TYPE, Long.TYPE);
+                ga.invokeConstructor(IntegerRange.class, Long.TYPE, Long.TYPE, Long.TYPE);
                 ga.goTo(end);
 
                 methodInfo.releaseLocal(startVar);
@@ -533,7 +534,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 if (ps == null || ps.getPosture() == Posture.GROUNDED) {
                     visitLineNumber(compiler, ga, exp);
                     compiler.compileToIterator(exp);
-                    ga.invokeStaticMethod(SequenceExtent.class, "makeSequenceExtent", SequenceIterator.class);
+                    ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
                 } else {
                     allocateStatic(compiler, EmptySequence.getInstance());
                 }

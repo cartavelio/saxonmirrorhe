@@ -1126,7 +1126,7 @@ public class CompilerService implements ICompilerService {
             ga.endMethod();
 
 
-            m = Method.getMethod("net.sf.saxon.type.ValidationFailure validate(java.lang.CharSequence)");
+            m = Method.getMethod("net.sf.saxon.type.ValidationFailure validate(net.sf.saxon.str.CodePoints)");
             ga = new Generator(Opcodes.ACC_PUBLIC, m, true, cv);
             pushNewMethodInfo(ga, false, 0, -1);
             try {
