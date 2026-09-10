@@ -2420,7 +2420,7 @@ int main(int argc, char* argv[]) {
     }
 
     SaxonProcessor *processor = new SaxonProcessor(true);
-    processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
+    //processor->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLocation", "/usr/local/lib/saxon-license.lic");
     cout << "Test: Xslt30Processor with Saxon version=" << processor->version() << endl << endl;
 
     char buff[FILENAME_MAX]; //create string buffer to hold path

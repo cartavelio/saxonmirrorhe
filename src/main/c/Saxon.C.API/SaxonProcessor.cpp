@@ -478,7 +478,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
 
 
     int size = parameters.size() + properties.size() + additions;
-    int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, size);
+
 
 
 #ifdef DEBUG
@@ -486,7 +486,7 @@ int64_t SaxonProcessor::createParameterJArray(std::map<std::string, XdmValue *> 
     std::cerr<<"Parameter size: "<<parameters.size()<<std::endl;
 #endif
     if (size > 0) {
-
+        int64_t processorDataRef = createProcessorDataWithCapacity(SaxonProcessor::sxn_environ->thread, size);
 
         int i = 0;
         for (std::map<std::string, XdmValue *>::iterator iter =
@@ -675,7 +675,7 @@ const char *SaxonProcessor::getcwd() {
 
 
 const char * SaxonProcessor::getResourcesDirectory(){
-	return _getResourceDirectory();
+	return "";//_getResourceDirectory();
 }
 
 

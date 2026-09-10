@@ -25,6 +25,7 @@ import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.word.WordFactory;
 
 
 /**
@@ -315,7 +316,13 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+         if (processorDataAccumulatorRef != WordFactory.nullPointer()) {
+             System.err.println("processorDataAccumulatorRef is not null");
+
+             setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+         }  else {
+             System.err.println("processorDataAccumulatorRef is null");
+         }
         boolean jit = CTypeConversion.toBoolean(cjit);
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
@@ -381,6 +388,10 @@ public class Xslt30Processor extends SaxonCAPI {
 
     private static void setStaticParametersFromArray(XsltCompiler compiler, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator= objectHandles.get(processorDataAccumulatorRef);
+        if(processorDataAccumulator == null) {
+            System.err.println("processorDataAcc is null");
+            return;
+        }
         String[] sparams = null;
         Object[] values = null;
         if(processorDataAccumulator != null) {

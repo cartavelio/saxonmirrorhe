@@ -229,9 +229,11 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 
 XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-        std::cout<<"compileFromString-cp2 processorDataRef:"<<processorDataRef<<std::endl;
-	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (int)jitCompilation, (void *)processorDataRef);
-        XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
+
+	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    std::cout<<"compileFromString-cp2 objRef:"<<objRef<<std::endl;
+	    XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
+    std::cerr<<"compileFromString-cp3"<<std::endl;
 		return executable;
 
 
