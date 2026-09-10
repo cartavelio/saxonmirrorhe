@@ -28,45 +28,45 @@ void testxQuery1(SaxonProcessor * processor, XQueryProcessor * queryProc, sResul
 
     queryProc->setProperty("qs", "<out>{count(/out/person)}</out>");
 
-    const char * result = queryProc->runQueryToString();
-    if(result != nullptr){
-    	cout<<"Result :"<<result<<endl;
-    	sresult->success++;
-    	delete result;
-    } else {
-        sresult->failure++;
-        sresult->failureList.push_back("testXQuery1");
-        if(queryProc->exceptionOccurred()) {
-            SaxonApiException *exception = queryProc->getException();
-            if(exception != nullptr) {
-                cerr << "Error: " << exception->getMessage() << endl;
-            }
-            queryProc->exceptionClear();
-        }
+    const char * result = nullptr;
 
-	
-    }
-
-    queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
-
-    if(queryProc->exceptionOccurred()) {
-        SaxonApiException *exception = queryProc->getException();
-        if(exception != nullptr) {
-            cerr << "Error: " << exception->getMessage() << endl;
-        }
-        queryProc->exceptionClear();
-    }
-
-    if (CppTestUtils::exists("catOutput.xml")) {
-        cout<<"The file $filename exists"<<endl;
+    try {
+        result = queryProc->runQueryToString();
+        cout<<"Result :"<<result<<endl;
         sresult->success++;
-        remove("catOutput.xml");
-    } else {
+        delete result;
+    } catch(SaxonApiException &e) {
         sresult->failure++;
         sresult->failureList.push_back("testXQuery1");
-        cout<<"The file $filename does not exist"<<endl;
+        const char * emessage = e.getMessage();
+            if(emessage != nullptr) {
+                cerr << "Error: " << emessage << endl;
+            }
+
+
 
     }
+
+    try {
+        queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
+        if (CppTestUtils::exists("catOutput.xml")) {
+            cout<<"The file $filename exists"<<endl;
+            sresult->success++;
+            remove("catOutput.xml");
+        } else {
+            sresult->failure++;
+            sresult->failureList.push_back("testXQuery1");
+            cout<<"The file $filename does not exist"<<endl;
+        }
+    } catch(SaxonApiException &e){
+        sresult->failure++;
+        sresult->failureList.push_back("testXQuery1");
+        cout<<"Exception throw = "<<e.what()<<endl;
+    }
+
+
+
+
     queryProc->clearParameters();
     queryProc->clearProperties();
 
@@ -82,25 +82,22 @@ void testxQuery_ICU(SaxonProcessor * processor, XQueryProcessor * queryProc, sRe
 
     queryProc->setProperty("qs", "format-integer(33,'Ww','cs')");
 
-    const char * result = queryProc->runQueryToString();
-    if(result != nullptr){
+
+    const char * result = nullptr;
+    try{
+        result = queryProc->runQueryToString();
         cout<<"Result :"<<result<<endl;
         sresult->success++;
         delete result;
-    } else {
+
+    } catch(SaxonApiException &e){
         sresult->failure++;
         sresult->failureList.push_back("testXQuery_ICU");
-        if(queryProc->exceptionOccurred()) {
-            SaxonApiException *exception = queryProc->getException();
-            if(exception != nullptr) {
-                cerr << "Error: " << exception->getMessage() << endl;
-            }
-            queryProc->exceptionClear();
-        }
 
+        cerr << "Error: " << e.getMessage() << endl;
+        cerr << "Error code: " << e.getErrorCode() << endl;
 
     }
-
 
     queryProc->clearParameters();
     queryProc->clearProperties();
@@ -114,24 +111,19 @@ void testxQueryError(XQueryProcessor * queryProc, sResultCount *sresult){
     //queryProc->setProperty("s", "cat.xml");
 
     queryProc->setProperty("qs", "<out>{count(/out/person)}</out>");
-
-     queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
-
-		if (queryProc->exceptionOccurred()) {
-            cout << "Exception found. " << endl;
-            SaxonApiException * exception = queryProc->getException();
-            if(exception != nullptr) {
-                sresult->success++;
-                const char *message = exception->getMessage();
+     try{
+        queryProc->executeQueryToFile(nullptr, "catOutput.xml", nullptr);
+        sresult->failure++;
+        sresult->failureList.push_back("testXQueryError");
+     } catch(SaxonApiException &e){
+         cout << "Test success " << endl;
+               sresult->success++;
+                const char *message = e.getMessage();
                 cout << "Error Message = " << message << endl;
-            }
-            queryProc->exceptionClear();
-		} else {
 
-            sresult->failure++;
-            sresult->failureList.push_back("testXQueryError");
+     }
 
-		}
+
     queryProc->clearParameters();
     queryProc->clearProperties();
 }
@@ -144,34 +136,20 @@ void testXQueryError2(SaxonProcessor * processor, XQueryProcessor * queryProc, s
 
     queryProc->setProperty("qs", "<out>{count(/out/person)}<out>");
 
-    const char * result = queryProc->runQueryToString();
-   if(result != nullptr){
+    const char * result = nullptr;
+     try{
+        result = queryProc->runQueryToString();
     	cout<<"Result :"<<result<<endl;
     	delete result;
        sresult->failure++;
        sresult->failureList.push_back("testXQueryError2");
-    } else {
-
-       if (queryProc->exceptionOccurred()) {
-           SaxonApiException * exception = queryProc->getException();
-           if(exception != nullptr) {
-               sresult->success++;
-               cout << "Exception found. " << endl;
-               const char *message = queryProc->getErrorMessage();
-               cout << "Error Message = " << message << endl;
-
-           } else {
-               cout << "Exception obj is NULL !!!!. " << endl;
-
-           }
-           queryProc->exceptionClear();
-       } else {
-
-           sresult->failure++;
-           sresult->failureList.push_back("testXQueryError2");
-       }
-
+    } catch(SaxonApiException &e) {
+           sresult->success++;
+           cout << "Exception found. " << endl;
+           const char *message = e.getMessage();
+           cout << "Error Message = " << message << endl;
     }
+
     queryProc->clearProperties();
     queryProc->clearParameters();
 
@@ -183,13 +161,12 @@ void testDefaultNamespace(SaxonProcessor * processor, XQueryProcessor * queryPro
 	queryProc->clearProperties();
 	queryProc->clearParameters();
 	queryProc->declareNamespace("", "http://one.uri/");
+
+
 	 XdmNode * input = processor->parseXmlFromString("<foo xmlns='http://one.uri/'><bar/></foo>");
 
     if(input == nullptr) {
         cout << "Source document is null." << endl;
-        if(processor->exceptionOccurred()) {
-            cerr<<processor->getErrorMessage()<<endl;
-        }
         sresult->failure++;
         sresult->failureList.push_back("testDefaultNamespace");
         return;
@@ -199,24 +176,26 @@ void testDefaultNamespace(SaxonProcessor * processor, XQueryProcessor * queryPro
 	queryProc->setContextItem((XdmItem *)input);
 	queryProc->setQueryContent("/foo");
 
-	XdmValue * value = queryProc->runQueryToValue();
-
-	if(value != nullptr && value->size() == 1) {
-	    sresult->success++;
-		cout<<"Test1: Result is ok size is "<<value->size()<<endl;
-        delete value;
-	} else {
-        if (queryProc->exceptionOccurred()) {
+	XdmValue * value = nullptr;
+    try {
+	    value = queryProc->runQueryToValue();
+	    if(value != nullptr && value->size() == 1) {
+	     sresult->success++;
+		    cout<<"Test1: Result is ok size is "<<value->size()<<endl;
+            delete value;
+	    } else {
             sresult->failure++;
             sresult->failureList.push_back("testDefaultNamespace");
-            SaxonApiException * exception = queryProc->getException();
-            if(exception != nullptr) {
-                cout << "Exception found. " << endl;
-                const char *message = queryProc->getErrorMessage();
-                cout << "Error Message = " << message << endl;
-                queryProc->exceptionClear();
-            }
-        }
+
+	    }
+	}catch(SaxonApiException &e) {
+            sresult->failure++;
+            sresult->failureList.push_back("testDefaultNamespace");
+            cout << "Exception found. " << endl;
+            const char *message = e.getMessage();
+            cout << "Error Message = " << message << endl;
+
+	        return;
 	}
     queryProc->clearProperties();
     queryProc->clearParameters();
@@ -354,11 +333,7 @@ void testXQueryLineNumberError(const char * cwd, sResultCount *sresult){
     XQueryProcessor * queryProc = processor->newXQueryProcessor();
     if(queryProc == nullptr) {
         cout<<"Test testXQueryLineNumberError failed to create XQueryProcessor"<<endl;
-        if(processor->exceptionOccurred()) {
-            const char *message = processor->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            queryProc->exceptionClear();
-        }
+
         sresult->failure++;
         sresult->failureList.push_back("testXQueryLineNumberError");
         return;
@@ -371,39 +346,37 @@ void testXQueryLineNumberError(const char * cwd, sResultCount *sresult){
    queryProc->setProperty("s", "../data/cat.xml");
 
     queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
-    const char * result = queryProc->runQueryToString();
-    if(result != nullptr){
-        sresult->failure++;
-        sresult->failureList.push_back("testXQueryLineNumberError");
+    const char * result = nullptr;
+    try{
+        result = queryProc->runQueryToString();
+        if(result != nullptr){
+            sresult->failure++;
+            sresult->failureList.push_back("testXQueryLineNumberError");
 
-    	cout<<"Result :"<<result<<endl;
-    	delete result;
-    } else {
-	if (queryProc->exceptionOccurred()) {
-        sresult->success++;
-		    cout<<"Exception found. "<<endl;
-        SaxonApiException * exception = queryProc->getException();
-        if(exception != nullptr) {
-            const char *message = exception->getMessage();
-            cout << "Error Message = " << message << endl;
-            queryProc->exceptionClear();
+        	cout<<"Result :"<<result<<endl;
+        	delete result;
         }
-		
-		}
-	
+    } catch(SaxonApiException &e) {
+        sresult->success++;
+		cout<<"Exception found. "<<endl;
+        const char *message = e.getMessage();
+        cout << "Error Message = " << message << endl;
+
     }
+
     queryProc->clearProperties();
     queryProc->clearParameters();
 
 }
 
 //Test requirement of license file - Test should succeed
-void testXQueryLineNumber(const char * cwd, SaxonProcessor * processor, sResultCount *sresult){
-  //SaxonProcessor * processor = new SaxonProcessor(true);
+void testXQueryLineNumber(const char * cwd, sResultCount *sresult){
+  SaxonProcessor * processor = new SaxonProcessor(true);
+  processor->setcwd(cwd);
   processor->setConfigurationProperty("l", "on");
   XQueryProcessor * queryProc = processor->newXQueryProcessor();
  cout<<endl<<"testXQueryLineNumber:"<<endl;
-
+                                cout<<"cwd = "<<processor->getcwd()<<endl;
     string baseURI = string("file://")+processor->getcwd()+string("/");
     cerr<<" BaseURI="<<baseURI.c_str()<<endl;
     queryProc->setQueryBaseURI(baseURI.c_str());
@@ -412,28 +385,24 @@ void testXQueryLineNumber(const char * cwd, SaxonProcessor * processor, sResultC
    queryProc->declareNamespace("saxon","http://saxon.sf.net/");
 
     queryProc->setProperty("qs", "saxon:line-number(doc('../data/cat.xml')/out/person[1])"); ///out/person[1]
-
-    const char * result = queryProc->runQueryToString();
-    if(result != nullptr){
+    try {
+         const char * result = queryProc->runQueryToString();
     	cout<<"Result :"<<result<<endl;
     	sresult->success++;
-    } else {
-	if (queryProc->exceptionOccurred()) {
-        sresult->failure++;
+
+    } catch(SaxonApiException &e) {
+       sresult->failure++;
         sresult->failureList.push_back("testXQueryLineNumber");
-		    cout<<"Exception found."<<endl;
-				const char * message = queryProc->getErrorMessage();
-				if(message != nullptr) {
-					cout<<"Error Message = "<<message<<endl;		
-				}
+		cout<<"Exception found."<<endl;
+		const char * message = e.getMessage();
+        if(message != nullptr) {
+            cout<<"Error Message = "<<message<<endl;
+        }
 
-				queryProc->exceptionClear();
-
-		
-		}
-	
     }
+
     delete queryProc;
+    delete processor;
 
 }
 
@@ -456,6 +425,7 @@ int main(int argc, char* argv[])
         processor->setcwd(cwd); //set to the current working directory
     } else {
         processor->setcwd(buff);
+        cwd = (const char *)buff;
     }
 
 
@@ -481,7 +451,7 @@ int main(int argc, char* argv[])
     cout<<endl<<"============================================================="<<endl<<endl;
     testXQueryLineNumberError(cwd, sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
-    testXQueryLineNumber(cwd, processor, sresult);
+    testXQueryLineNumber(cwd, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
     testxQuery_ICU(processor, query, sresult);

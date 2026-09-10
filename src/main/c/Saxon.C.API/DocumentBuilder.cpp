@@ -25,9 +25,9 @@
            cwdDB = cwd;
            proc = p;
            exception = nullptr;
-           if(!cwd.empty()) {
+           /*if(!cwd.empty()) {
                 setBaseUri(cwd.c_str());
-           }
+           }  */
 
     }
 
@@ -124,9 +124,7 @@
             throw SaxonApiException();
         }
 
-
-    return nullptr;
-
+        return nullptr;
 
     }
 
