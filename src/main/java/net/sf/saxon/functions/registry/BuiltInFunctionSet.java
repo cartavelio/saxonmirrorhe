@@ -28,9 +28,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -163,6 +161,8 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      *                     example, the result of f(4) is expected to be the same as f(2+2). The actual expression is supplied
      *                     here to enable the binding mechanism to select the most efficient possible implementation (including
      *                     compile-time pre-evaluation where appropriate).</p>
+     * @param keywords     Keywords used in keyword parameters, with the 0-based integer position of the argument they are used
+     *                     on.
      * @param env          The static context of the function call
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
@@ -171,7 +171,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * null if no function was found matching the required name and arity.
      */
     @Override
-    public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs,
+                           Map<StructuredQName, Integer> keywords,
+                           StaticContext env, List<String> reasons)
+    throws XPathException {
         StructuredQName functionName = symbolicName.getComponentName();
         int arity = symbolicName.getArity();
         String localName = functionName.getLocalPart();
@@ -216,6 +219,8 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 }
                 staticArgs = newArgs;
 
+            } else if (keywords != null && ! keywords.isEmpty()) {
+                staticArgs = DeclaredFunction.makeExpandedArgumentArray(staticArgs, keywords, entry);
             }
             RetainedStaticContext rsc = new RetainedStaticContext(env);
             try {
@@ -358,10 +363,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      *
      * @param name                the function name
      * @param arity               the function arity (-1 is treated specially)
-     * @param functionFactory     a function to instantiate the implementation of the function
-     * @param itemType            the item type of the result of the function
-     * @param cardinality         the cardinality of the result of the function
-     * @param properties          bitwise properties of the function
+
      * @return the entry describing the function. The entry is incomplete, it does not yet contain information
      * about the function arguments.
      */
@@ -447,7 +449,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     /**
      * An entry in the table describing the properties of a function
      */
-    public static class Entry {
+    public static class Entry extends DeclaredFunction {
         /**
          * The name of the function as a QName
          */
@@ -479,9 +481,13 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
         public OperandUsage[] usage;
         /**
-         * An array holding the types of the arguments to the function
+         * An array holding the names of the parameters to the function
          */
-        public SequenceType[] argumentTypes;
+        public String[] paramNames;
+        /**
+         * An array holding the types of the parameters to the function
+         */
+        public SequenceType[] paramTypes;
         /**
          * An array holding, for each declared argument, the value that is to be returned if an empty sequence
          * as the value of this argument allows the result to be determined irrespective of the values of the
@@ -515,17 +521,35 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             this.properties = properties;
             if (this.arity == -1) {
                 // special case for concat()
-                this.argumentTypes = new SequenceType[1];
+                this.paramTypes = new SequenceType[1];
                 this.resultIfEmpty = new AtomicValue[1];
                 this.usage = new OperandUsage[1];
             } else {
-                this.argumentTypes = new SequenceType[arity];
+                this.paramTypes = new SequenceType[arity];
                 this.resultIfEmpty = new Sequence[arity];
                 this.usage = new OperandUsage[arity];
             }
             if ((properties & SEQV) != 0) {
                 this.functionSet.sequenceVariadicFunctions.put(name.getLocalPart(), this.arity - 1);
             }
+            NamespaceUri ns = name.getNamespaceUri();
+            Map<String, String> paramNameMap;
+            if (ns == NamespaceUri.FN) {
+                paramNameMap = ParamKeywords.fnParamNames;
+            } else if (ns == NamespaceUri.MAP_FUNCTIONS) {
+                paramNameMap = ParamKeywords.mapParamNames;
+            } else if (ns == NamespaceUri.ARRAY_FUNCTIONS) {
+                paramNameMap = ParamKeywords.arrayParamNames;
+            } else if (ns == NamespaceUri.MATH) {
+                paramNameMap = ParamKeywords.mathParamNames;
+            } else {
+                paramNameMap = Collections.emptyMap();
+            }
+            String keywords = paramNameMap.get(name.getLocalPart());
+            if (keywords == null) {
+                keywords = "a|b|c|d|e|f";
+            }
+            this.paramNames = keywords.split("\\|");
             return this;
         }
 
@@ -554,7 +578,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 usage = OperandUsage.ABSORPTION;
             }
             try {
-                this.argumentTypes[a] = SequenceType.makeSequenceType(type, cardinality);
+                this.paramTypes[a] = SequenceType.makeSequenceType(type, cardinality);
                 this.resultIfEmpty[a] = resultIfEmpty;
                 this.usage[a] = usage;
             } catch (ArrayIndexOutOfBoundsException err) {
@@ -572,6 +596,58 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             return this;
         }
 
+        /**
+         * Get the name of the function
+         *
+         * @return the function name
+         */
+        @Override
+        public StructuredQName getFunctionName() {
+            return name;
+        }
+
+        @Override
+        public int getNumberOfArguments() {
+            return arity;
+        }
+
+        /**
+         * Get the name (keyword) of the Nth parameter
+         *
+         * @param i
+         * @return the expression for computing the value of the Nth parameter
+         */
+        @Override
+        public StructuredQName getParameterName(int i) {
+            return new StructuredQName("", "", paramNames[i]);
+        }
+
+        /**
+         * Get the default value expression of the Nth parameter, if any
+         *
+         * @param i
+         * @return the expression for computing the value of the Nth parameter, or null if there is none
+         */
+        @Override
+        public Expression getDefaultValueExpression(int i) {
+            return null;  // for now
+        }
+
+        /**
+         * Get the position in the parameter list of a given parameter name
+         *
+         * @param name the name of the required parameter
+         * @return the position of the parameter in the parameter list, or -1 if absent
+         */
+        @Override
+        public int getPositionOfParameter(StructuredQName name) {
+            for (int i=0; i<arity; i++) {
+                if (paramNames[i].equals(name.getLocalPart())) {
+                    return i;
+                }
+            }
+            return -1;
+        }
     }
 
 

@@ -1950,6 +1950,7 @@ public class XQueryParser extends XPathParser {
         nextToken();
         HashSet<StructuredQName> paramNames = new HashSet<>(8);
         boolean external = false;
+        boolean foundDefault = false;
         if (t.currentToken != Token.RPAR) {
             while (true) {
                 //     ParamList   ::=     Param ("," Param)*
@@ -1972,7 +1973,19 @@ public class XQueryParser extends XPathParser {
                 UserFunctionParameter arg = new UserFunctionParameter();
                 arg.setRequiredType(paramType);
                 arg.setVariableQName(argQName);
-                func.addArgument(arg);
+                if (t.currentToken == Token.ASSIGN) {
+                    if (!allowXPath40Syntax) {
+                        grumble("Default values for function parameters require XQuery 4.0 to be enabled");
+                    }
+                    foundDefault = true;
+                    nextToken();
+                    Expression defaultValue = parseExprSingle();
+                    arg.setDefaultValueExpression(defaultValue);
+                } else if (foundDefault) {
+                    grumble("If a parameter in a function declaration has a default value, "
+                                    + "all subsequent parameters must also have default values");
+                }
+                func.addParameter(arg);
                 declareRangeVariable(arg);
                 if (t.currentToken == Token.RPAR) {
                     break;
@@ -2617,7 +2630,7 @@ public class XQueryParser extends XPathParser {
             }
             if (t.currentToken == Token.ASSIGN) {
                 LetClause letClause = new LetClause();
-
+                setLocation(clause, t.currentTokenStartOffset);
                 clauseList.add(letClause);
                 nextToken();
 

@@ -9,6 +9,7 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.Function;
@@ -20,6 +21,7 @@ import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A FunctionLibraryList is a list of FunctionLibraries. It is also a FunctionLibrary in its own right.
@@ -105,6 +107,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality() may
      *                     be used as part of the binding algorithm. In some cases it may be possible for the function
      *                     to be pre-evaluated at compile time, for example if these expressions are all constant values.
+     * @param keywords
      * @param env          The static context
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
@@ -114,7 +117,9 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
      */
 
     @Override
-    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs,
+                           Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons)
+    throws XPathException {
         boolean debug = env.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
         Logger err = env.getConfiguration().getLogger();
         if (debug) {
@@ -124,7 +129,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
             if (debug) {
                 err.info("Trying " + lib.getClass().getName());
             }
-            Expression func = lib.bind(functionName, staticArgs, env, reasons);
+            Expression func = lib.bind(functionName, staticArgs, keywords, env, reasons);
             if (func != null) {
                 return func;
             }
@@ -152,6 +157,19 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean bindUnboundFunctionCall(UserFunctionCall call, List<String> reasons) {
+        for (FunctionLibrary lib : libraryList) {
+            if (lib instanceof XQueryFunctionBinder) {
+                boolean found = ((XQueryFunctionBinder) lib).bindUnboundFunctionCall(call, reasons);
+                if (found) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

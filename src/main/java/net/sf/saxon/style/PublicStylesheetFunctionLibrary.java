@@ -14,11 +14,13 @@ import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -50,6 +52,7 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
      * @param staticArgs   The expressions supplied statically in the function call. The intention is
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality() may
      *                     be used as part of the binding algorithm.
+     * @param keywords
      * @param env          The static context
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
@@ -59,8 +62,10 @@ public class PublicStylesheetFunctionLibrary implements FunctionLibrary {
      */
 
     @Override
-    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
-        Expression baseCall = base.bind(functionName, staticArgs, env, reasons);
+    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs,
+                           Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons)
+    throws XPathException {
+        Expression baseCall = base.bind(functionName, staticArgs, null, env, reasons);
         if (baseCall instanceof UserFunctionCall) {
             Component target = ((UserFunctionCall)baseCall).getTarget();
             Visibility v = target.getVisibility();

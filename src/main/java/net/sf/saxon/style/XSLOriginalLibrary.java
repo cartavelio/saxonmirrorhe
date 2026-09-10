@@ -18,6 +18,7 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A function library that recognizes the function name "xsl:original", which may appear within xsl:override
@@ -35,7 +36,7 @@ public class XSLOriginalLibrary implements FunctionLibrary {
     private XSLOriginalLibrary() {}
 
     @Override
-    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         try {
             Function target = getFunctionItem(functionName, env);
             if (target == null) {

@@ -15,10 +15,12 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -75,6 +77,7 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
      * @param staticArgs   The expressions supplied statically in the function call. The intention is
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality() may
      *                     be used as part of the binding algorithm.
+     * @param keywords
      * @param env          The static context
      * @param reasons In the event that a function cannot be bound, this output parameter may be populated with one
      *                or more diagnostic messages indicating possible reasons why no function binding was possible.
@@ -83,7 +86,7 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
      */
 
     @Override
-    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         UserFunction fn = pack.getFunction(functionName);
         if (fn == null) {
             return null;

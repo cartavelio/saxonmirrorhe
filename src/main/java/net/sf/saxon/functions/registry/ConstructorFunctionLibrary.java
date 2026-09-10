@@ -24,6 +24,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The ConstructorFunctionLibrary represents the collection of constructor functions for atomic types. These
@@ -113,6 +114,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
      * @param arguments    The expressions supplied statically in the function call. The intention is
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality() may
      *                     be used as part of the binding algorithm.
+     * @param keywords
      * @param env          The static context
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
@@ -122,7 +124,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
      */
 
     @Override
-    public Expression bind(SymbolicName.F functionName, Expression[] arguments, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F functionName, Expression[] arguments, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
         final String localName = functionName.getComponentName().getLocalPart();
         boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);

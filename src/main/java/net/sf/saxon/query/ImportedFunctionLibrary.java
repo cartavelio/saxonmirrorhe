@@ -9,6 +9,7 @@ package net.sf.saxon.query;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.Function;
@@ -19,6 +20,7 @@ import net.sf.saxon.trans.XPathException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This implementation of FunctionLibrary contains all the functions imported into a Query Module.
@@ -70,6 +72,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      *                     example, the result of f(4) is expected to be the same as f(2+2). The actual expression is supplied
      *                     here to enable the binding mechanism to select the most efficient possible implementation (including
      *                     compile-time pre-evaluation where appropriate).</p>
+     * @param keywords
      * @param env          The static context of the function call
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
@@ -80,7 +83,9 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
 
     /*@Nullable*/
     @Override
-    public Expression bind(/*@NotNull*/ SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(/*@NotNull*/ SymbolicName.F symbolicName, Expression[] staticArgs,
+                                        Map<StructuredQName, Integer> keywords, StaticContext env,
+                                        List<String> reasons) throws XPathException {
         final StructuredQName functionName = symbolicName.getComponentName();
         final NamespaceUri uri = functionName.getNamespaceUri();
         RetainedStaticContext rsc = new RetainedStaticContext(env);
@@ -90,7 +95,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
             }
         }
         if (namespaces.contains(uri)) {
-            return baseLibrary.bind(symbolicName, staticArgs, env, reasons);
+            return baseLibrary.bind(symbolicName, staticArgs, null, env, reasons);
         } else {
             return null;
         }
@@ -111,6 +116,11 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
         } else {
             return null;
         }
+    }
+
+    @Override
+    public boolean bindUnboundFunctionCall(UserFunctionCall call, List<String> reasons) {
+        return false;  // TODO: implement me
     }
 
     /**

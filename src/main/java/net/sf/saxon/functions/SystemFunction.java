@@ -353,7 +353,7 @@ public abstract class SystemFunction extends AbstractFunction {
         if (details == null) {
             return SequenceType.ANY_SEQUENCE;
         }
-        return details.argumentTypes[arg];
+        return details.paramTypes[arg];
         // this is overridden for concat()
     }
 
@@ -374,7 +374,7 @@ public abstract class SystemFunction extends AbstractFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType resultType = SequenceType.makeSequenceType(getResultItemType(), details.cardinality);
-        return new SpecificFunctionType(details.argumentTypes, resultType);
+        return new SpecificFunctionType(details.paramTypes, resultType);
     }
 
     /**

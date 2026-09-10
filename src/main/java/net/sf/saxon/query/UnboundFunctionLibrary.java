@@ -24,6 +24,7 @@ import net.sf.saxon.type.AnyFunctionType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An UnboundFunctionLibrary is not a real function library; rather, it is used to keep track of function calls
@@ -64,7 +65,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
 
     /*@Nullable*/
     @Override
-    public Expression bind(SymbolicName.F functionName, /*@NotNull*/  Expression[] arguments, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F functionName, /*@NotNull*/  Expression[] arguments, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
         if (resolving) {
             return null;
         }
@@ -72,9 +73,8 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
             // The function call matched a private function in another module; don't attempt a late binding
             return null;
         }
-        UserFunctionCall ufc = new UserFunctionCall();
-        ufc.setFunctionName(functionName.getComponentName());
-        ufc.setArguments(arguments);
+        UnboundFunctionCallDetails details = new UnboundFunctionCallDetails(functionName, arguments, keywords, env);
+        UserFunctionCall ufc = new UserFunctionCall(details);
         unboundFunctionReferences.add(ufc);
         correspondingStaticContext.add(env);
         correspondingReasons.add(reasons);
@@ -145,22 +145,19 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
                 correspondingStaticContext.set(i, null);    // for garbage collection purposes
                 // The original UserFunctionCall is effectively a dummy: we weren't able to find a function
                 // definition at the time. So we try again.
-                final StructuredQName q = ufc.getFunctionName();
-                final int arity = ufc.getArity();
-
-                XQueryFunction fd = lib.getDeclaration(q, arity);
-                if (fd != null) {
-                    fd.registerReference(ufc);
-                    ufc.setStaticType(fd.getResultType());
+                UnboundFunctionCallDetails details = ufc.getUnboundCallDetails();
+                boolean success = lib.bindUnboundFunctionCall(ufc, new ArrayList<>());
+                if (success) {
+                    // all done
                 } else {
-                    StringBuilder sb = new StringBuilder("Cannot find a " + arity +
-                            "-argument function named " + q.getEQName() + "()");
+                    StringBuilder sb = new StringBuilder("Cannot find a " + details.arguments.length +
+                                                                 "-argument function named " + details.functionName.getComponentName().getEQName() + "()");
                     List<String> reasons = correspondingReasons.get(i);
                     for (String reason : reasons) {
                         sb.append(". ").append(reason);
                     }
                     if (reasons.isEmpty()) {
-                        String supplementary = XPathParser.getMissingFunctionExplanation(q, config);
+                        String supplementary = XPathParser.getMissingFunctionExplanation(details.functionName.getComponentName(), config);
                         if (supplementary != null) {
                             sb.append(". ").append(supplementary);
                         }
@@ -212,6 +209,23 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
         qfl.correspondingStaticContext = new ArrayList<>(correspondingStaticContext);
         qfl.resolving = resolving;
         return qfl;
+    }
+
+    public static class UnboundFunctionCallDetails  {
+
+        public SymbolicName.F functionName;
+        public Expression[] arguments;
+        public Map<StructuredQName, Integer> keywords;
+        public StaticContext env;
+
+        public UnboundFunctionCallDetails(SymbolicName.F functionName, Expression[] arguments, Map<StructuredQName, Integer> keywords, StaticContext env) {
+            this.functionName = functionName;
+            this.arguments = arguments;
+            this.keywords = keywords;
+            this.env = env;
+
+        }
+
     }
 
 }

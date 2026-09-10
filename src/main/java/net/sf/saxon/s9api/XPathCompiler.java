@@ -689,6 +689,9 @@ public class XPathCompiler {
      * @since 9.4
      */
     public void setDecimalFormatProperty(QName format, String property, String value) throws SaxonApiException {
+        Objects.requireNonNull(format);
+        Objects.requireNonNull(property);
+        Objects.requireNonNull(value);
         DecimalFormatManager dfm = env.getDecimalFormatManager();
         if (dfm == null) {
             dfm = new DecimalFormatManager(HostLanguage.XPATH, env.getXPathVersion());

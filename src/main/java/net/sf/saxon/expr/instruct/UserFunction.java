@@ -7,8 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-//import com.saxonica.expr.MemoFunction;
-
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
@@ -66,6 +64,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     private FunctionStreamability declaredStreamability = FunctionStreamability.UNCLASSIFIED;
     private Determinism determinism = Determinism.PROACTIVE;
     private int refCount = 0;
+    private int minimumArity = 0;
 
 
     /**
@@ -366,6 +365,12 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
 
     public void setParameterDefinitions(UserFunctionParameter[] params) {
         parameterDefinitions = params;
+        minimumArity = 0;
+        for (UserFunctionParameter param : params) {
+            if (param.getDefaultValueExpression() == null) {
+                minimumArity++;
+            }
+        }
     }
 
     /**
@@ -376,6 +381,15 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
 
     public UserFunctionParameter[] getParameterDefinitions() {
         return parameterDefinitions;
+    }
+
+    /**
+     * Get the minumum arity of this function, that is, the number of mandatory parameters
+     * @return the minimum arity
+     */
+
+    public int getMinimumArity() {
+        return minimumArity;
     }
 
     /**

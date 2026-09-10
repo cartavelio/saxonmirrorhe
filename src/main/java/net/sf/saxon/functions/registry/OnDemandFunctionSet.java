@@ -13,10 +13,12 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The <tt>OnDemandFunctionSet</tt> represents a function library where the implementation classes
@@ -87,10 +89,12 @@ public class OnDemandFunctionSet implements FunctionLibrary {
     }
 
     @Override
-    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
+    public Expression bind(SymbolicName.F functionName, Expression[] staticArgs,
+                           Map<StructuredQName, Integer> keywords, StaticContext env,
+                           List<String> reasons) throws XPathException {
         boolean match = load(functionName, reasons);
         if (match) {
-            return library.bind(functionName, staticArgs, env, reasons);
+            return library.bind(functionName, staticArgs, null, env, reasons);
         } else {
             return null;
         }

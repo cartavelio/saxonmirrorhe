@@ -13,11 +13,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.functions.ApplyFn;
 import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -25,7 +23,10 @@ import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.NumericType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.SourceLocator;
@@ -62,9 +63,9 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         // saxon:apply is the same as fn:apply, but does not require the HOF feature
-        register("apply", 2, e -> e.populate(ApplyFn::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyFunctionType.getInstance(), ONE, null)
-                .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+//        register("apply", 2, e -> e.populate(ApplyFn::new, AnyItemType.getInstance(), STAR, LATE)
+//                .arg(0, AnyFunctionType.getInstance(), ONE, null)
+//                .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
         // Create a map according to the semantics of the XPath map constructor and XSLT xsl:map instruction
         register("create-map", 1, e -> e.populate(MapCreate::new, MapType.ANY_MAP_TYPE, ONE, 0)
