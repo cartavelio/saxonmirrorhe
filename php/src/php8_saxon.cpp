@@ -64,6 +64,8 @@ void _decrementRefCountForValue(XdmValue * value){
 #include "php8_XQueryProcessor.cpp"
 #include "php8_Xslt30Processor.cpp"
 #include "php8_XsltExecutable.cpp"
+#include "php8_XsdCompiler.cpp"
+#include "php8_XsdSchema.cpp"
 
 void SaxonProcessor_free_storage(zend_object *object) {
 
@@ -4605,7 +4607,7 @@ PHP_MINIT_FUNCTION(saxon) {
   documentBuilder_object_handlers.free_obj = DocumentBuilder_free_storage;
   documentBuilder_object_handlers.dtor_obj = DocumentBuilder_destroy_storage;
 
-  INIT_CLASS_ENTRY(ce, "Saxon\\XSLT30Processor", Xslt30Processor_methods);
+  INIT_CLASS_ENTRY(ce, "Saxon\\Xslt30Processor", Xslt30Processor_methods);
   xslt30Processor_ce = zend_register_internal_class(&ce);
   xslt30Processor_ce->create_object = xslt30Processor_create_handler;
   memcpy(&xslt30Processor_object_handlers, zend_get_std_object_handlers(),
@@ -4615,7 +4617,7 @@ PHP_MINIT_FUNCTION(saxon) {
   xslt30Processor_object_handlers.free_obj = Xslt30Processor_free_storage;
   xslt30Processor_object_handlers.dtor_obj = Xslt30Processor_destroy_storage;
 
-  INIT_CLASS_ENTRY(ce, "Saxon\\XSLTExecutable", XsltExecutable_methods);
+  INIT_CLASS_ENTRY(ce, "Saxon\\XsltExecutable", XsltExecutable_methods);
   xsltExecutable_ce = zend_register_internal_class(&ce);
   xsltExecutable_ce->create_object = xslt30Processor_create_handler;
   memcpy(&xsltExecutable_object_handlers, zend_get_std_object_handlers(),
@@ -4658,6 +4660,26 @@ PHP_MINIT_FUNCTION(saxon) {
   schemaValidator_object_handlers.free_obj = schemaValidator_free_storage;
   schemaValidator_object_handlers.dtor_obj = schemaValidator_destroy_storage;
   // schemaValidator_object_handlers.clone_obj = nullptr;
+
+    INIT_CLASS_ENTRY(ce, "Saxon\\XsdCompiler", XsdCompiler_methods);
+    xsdCompiler_ce = zend_register_internal_class(&ce);
+    xsdCompiler_ce->create_object = xsdCompiler_create_handler;
+    memcpy(&xsdCompiler_object_handlers, zend_get_std_object_handlers(),
+           sizeof(xsdCompiler_object_handlers));
+    xsdCompiler_object_handlers.offset =
+        XtOffsetOf(xsdCompiler_object, std);
+    xsdCompiler_object_handlers.free_obj = xsdCompiler_free_storage;
+    xsdCompiler_object_handlers.dtor_obj = xsdCompiler_destroy_storage;
+
+    INIT_CLASS_ENTRY(ce, "Saxon\\XsdSchema", XsdSchema_methods);
+    xsdSchema_ce = zend_register_internal_class(&ce);
+    xsdSchema_ce->create_object = xsdSchema_create_handler;
+    memcpy(&xsdSchema_object_handlers, zend_get_std_object_handlers(),
+           sizeof(xsdSchema_object_handlers));
+    xsdSchema_object_handlers.offset =
+        XtOffsetOf(xsdSchema_object, std);
+    xsdSchema_object_handlers.free_obj = xsdSchema_free_storage;
+    xsdSchema_object_handlers.dtor_obj = xsdSchema_destroy_storage;
 
   INIT_CLASS_ENTRY(ce, "Saxon\\XdmValue", xdmValue_methods);
   xdmValue_ce = zend_register_internal_class(&ce);

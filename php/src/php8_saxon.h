@@ -179,8 +179,23 @@ struct xsltExecutable_object {
   zend_object std;
 };
 
+
+struct xsdSchema_object {
+
+  XsdSchema *xsdSchema;
+  zend_object std;
+};
+
+struct xsdCompiler_object {
+
+  XsdCompiler * xsdCompiler;
+  zend_object std;
+};
+
+
+
 #define PHP_SAXON_EXTNAME "saxonc"
-#define PHP_SAXON_EXTVER "12.5"
+#define PHP_SAXON_EXTVER "13.0"
 
 void _decrementRefCount(std::map<std::string, XdmValue *>);
 
@@ -227,6 +242,7 @@ PHP_METHOD(SaxonProcessor, newXslt30Processor);
 PHP_METHOD(SaxonProcessor, newXQueryProcessor);
 PHP_METHOD(SaxonProcessor, newXPathProcessor);
 PHP_METHOD(SaxonProcessor, newSchemaValidator);
+PHP_METHOD(SaxonProcessor, newXsdSchema);
 PHP_METHOD(SaxonProcessor, newDocumentBuilder);
 PHP_METHOD(SaxonProcessor, version);
 PHP_METHOD(SaxonProcessor, isSchemaAware);
@@ -356,6 +372,32 @@ PHP_METHOD(XPathProcessor, setcwd);
 PHP_METHOD(XPathProcessor, getcwd);
 
 
+PHP_METHOD(XsdCompiler, __destruct);
+PHP_METHOD(XsdCompiler, setXsdVersion);
+PHP_METHOD(XsdCompiler, getXsdVersion);
+PHP_METHOD(XsdCompiler, getOutputFile);
+PHP_METHOD(XsdCompiler, compileFromString);
+PHP_METHOD(XsdCompiler, compileFromFile);
+PHP_METHOD(XsdCompiler, compileFromNode);
+PHP_METHOD(XsdCompiler, combine);
+PHP_METHOD(XsdCompiler, emptySchema);
+PHP_METHOD(XsdCompiler, importComponents);
+PHP_METHOD(XsdCompiler, importComponentsFromNode);
+PHP_METHOD(XsdCompiler, setProperty);
+PHP_METHOD(XsdCompiler, clearProperties);
+PHP_METHOD(XsdCompiler, setcwd);
+PHP_METHOD(XsdCompiler, getcwd);
+
+
+
+PHP_METHOD(XsdSchema, __destruct);
+PHP_METHOD(XsdSchema, newValidator);
+PHP_METHOD(XsdSchema, combine);
+PHP_METHOD(XsdSchema, exportComponents);
+
+
+
+
 // PHP_METHOD(SchemaValidator,  __construct);
 PHP_METHOD(SchemaValidator, __destruct);
 PHP_METHOD(SchemaValidator, setSourceNode);  // checks for old values, then add new one, increment refCount
@@ -365,9 +407,18 @@ PHP_METHOD(SchemaValidator, exportSchema);
 PHP_METHOD(SchemaValidator, registerSchemaFromFile);
 PHP_METHOD(SchemaValidator, registerSchemaFromString);
 PHP_METHOD(SchemaValidator, validate);
+PHP_METHOD(SchemaValidator, validateMultiple); //new
 PHP_METHOD(SchemaValidator, validateToNode);
 PHP_METHOD(SchemaValidator, getValidationReport);
 PHP_METHOD(SchemaValidator, setLax);
+PHP_METHOD(SchemaValidator, isLax); //new
+PHP_METHOD(SchemaValidator, getSchema); //new
+PHP_METHOD(SchemaValidator, setUseXsiSchemaLocation); //new
+PHP_METHOD(SchemaValidator, isUseXsiSchemaLocation); //new
+PHP_METHOD(SchemaValidator, setDocumentElementName); //new
+PHP_METHOD(SchemaValidator, getDocumentElementName); //new
+PHP_METHOD(SchemaValidator, isExpandAttributeDefaults); //new
+PHP_METHOD(SchemaValidator, setExpandAttributeDefaults); //new
 PHP_METHOD(SchemaValidator, registerSchemaFromNode);
 PHP_METHOD(SchemaValidator, setParameter);         // checks for old values, then add new one, increment refCount
 PHP_METHOD(SchemaValidator, setProperty);
