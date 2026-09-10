@@ -180,6 +180,9 @@ namespace TestDriver {
             }
         }
 
+        public void AddReportedError(QName errorCode) {
+            errorsReported.Add(errorCode);
+        }
 
         public void SetErrorQNameReported(SysCollGen.IList<QName> errors) {
             foreach (QName err in errors) {

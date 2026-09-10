@@ -13,6 +13,7 @@ using JVersion = Saxon.Hej.Version;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Saxon.Eej.functions.registry;
 using Saxon.Hej.trans;
 
 
@@ -111,6 +112,7 @@ namespace TestDriver {
         public override bool EnsureDependencySatisfied(XdmNode dependency, Environment env) {
             string type = dependency.GetAttributeValue(new QName("type"));
             string value = dependency.GetAttributeValue(new QName("value"));
+            string edition = env.processor.Edition;
             bool inverse = "false".Equals(dependency.GetAttributeValue(new QName("satisfied")));
             switch (type) {
                 case "xml-version": {
@@ -204,6 +206,17 @@ namespace TestDriver {
                 case "unicode-normalization-form": {
                     return value.Equals("FULLY-NORMALIZED", StringComparison.OrdinalIgnoreCase) ? inverse : !inverse;
                 }
+                case "unicode-version": {
+                    return !inverse;
+                }
+                case "put": {
+                    return ("comment" == value || "text" == value
+                                                    || "processing-instruction" == value
+                                                    || "attribute" == value) == inverse;
+                }
+                case "revalidation": {
+                    return !inverse;
+                }
                 case "saxon:config": {
                     string name = dependency.GetAttributeValue("name");
                     if (name != null) {
@@ -271,20 +284,24 @@ namespace TestDriver {
                         return !inverse;
                     }
                     else if ("fn-transform-XSLT30".Equals(value)) {
-                        String edition = env.processor.Edition;
                         return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
                     }
                     else if ("fn-format-integer-CLDR".Equals(value)) {
-                        String edition = env.processor.Edition;
                         return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
                     }
                     else if ("simple-uca-fallback".Equals(value)) {
                         return !inverse;
                     }
                     else if ("advanced-uca-fallback".Equals(value)) {
-                        String edition = env.processor.Edition;
                         return (edition.Equals("PE") || edition.Equals("EE")) ^ inverse;
                     }
+                    else if ("XQUpdate" == value) {
+                        if (edition == "EE" && !inverse) {
+                            env.xqueryCompiler.UpdatingEnabled = true;
+                        }
+                        return edition == "EE" && !inverse;
+                    }
+                    
                     else {
                         println("**** feature = " + value + "  ????");
                         return false;
@@ -297,7 +314,7 @@ namespace TestDriver {
             }
         }
         
-        private static bool isApplicableToSpecVersion(String value, Spec spec) {
+        private static bool isApplicableToSpecVersion(string value, Spec spec) {
             bool applicable = false;
             string tag = SpecAttr.ShortNameAndVersionOf(spec);
             if (!value.Contains(SpecAttr.ShortNameOf(spec))) {
@@ -367,7 +384,7 @@ namespace TestDriver {
             return true;
         }
 
-        private bool isSlow(String name) {
+        private bool isSlow(string name) {
             return name == "RangeExpr-409d" || name.StartsWith("unicode90");
         }
 
@@ -449,10 +466,15 @@ namespace TestDriver {
 			Console.WriteLine ("ICUCol: " + (icuColCheck ? "true" : "false"));
 			Console.WriteLine ("ICUNum: " + (icuNumCheck ? "true" : "false"));*/
             //end of test
+            
+            // List<XdmNode> dependencies = testCase.getParent().select(child("dependency")).asList();
+            // dependencies.addAll(testCase.select(child("dependency")).asList());
+
+            
             SysCollGen.IList<XdmNode> dependencies =
                 new SysCollGen.List<XdmNode>(testCase.Select(Child("dependency")));
-            dependencies.Concat(testCase.Select(Child("dependency")));
-            foreach (XdmNode dependency in dependencies) {
+            SysCollGen.IEnumerable<XdmNode> allDeps = dependencies.Concat(testCase.Parent.Select(Child("dependency")));
+            foreach (XdmNode dependency in allDeps) {
                 string type = dependency.GetAttributeValue("type");
                 if (type == null) {
                     // throw new IllegalStateException("dependency/@type is missing"); //TODO
@@ -472,8 +494,9 @@ namespace TestDriver {
                         applicable = true;
                     }
                     else if ((((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XQ30") ||
-                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XQ31")) &&
-                             (value.Contains("XQ10+") || value.Contains("XQ30+"))) {
+                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XQ31")||
+                              ((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XQ40")) &&
+                             (value.Contains("XQ10+") || value.Contains("XQ30+") || value.Contains("XQ31+"))) {
                         applicable = true;
                     }
                     else if ((((SpecAttr) requestedSpec.GetAttr()).svname.Equals("XP30") ||
@@ -494,20 +517,7 @@ namespace TestDriver {
                         new EnvironmentVariableResolver());
                 }
 
-                /*if (type.Equals("feature") && value.Equals("xpath-1.0-compatibility"))
-                {
-                    hostLang = "XP";
-                    langVersion = "3.0";
-                    xpDependency = true;
-                    specOpt = Spec.XP30;
-                }
-                if (type.Equals("feature") && value.Equals("namespace-axis"))
-                {
-                    hostLang = "XP";
-                    langVersion = "3.0";
-                    xpDependency = true;
-                    specOpt = Spec.XP30;
-                }*/
+ 
                 if (!EnsureDependencySatisfied((XdmNode) dependency, env)) {
                     println("*** Dependency not satisfied: " +
                             ((XdmNode) dependency).GetAttributeValue(new QName("type")));
@@ -558,177 +568,237 @@ namespace TestDriver {
             }
 
             if (run && (specOpt == Spec.NULL || specOpt == requestedSpec)) {
+
+                XdmValue previousResult = null;
                 TestOutcome outcome = new TestOutcome(this);
-                string exp = null;
-                try {
-                    exp = xpc.Evaluate(
-                        "if (test/@file) then unparsed-text(resolve-uri(test/@file, base-uri(.))) else string(test)",
-                        testCase).ToString();
-                }
-                catch (Exception err) {
-                    println("*** Failed to read query: " + err.Message);
-                    outcome.SetException((SaxonApiException) err);
-                }
-
-                //noinspection ThrowableResultOfMethodCallIgnored
-                if (outcome.GetException() == null) {
-                    if (hostLang.Equals("XP") || hostLang.Equals("XT")) {
-                        XPathCompiler testXpc = env.xpathCompiler;
-                        testXpc.XPathLanguageVersion = langVersion;
-                        testXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
-                        testXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
-                        testXpc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
-                        testXpc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
-                        //testXpc.DeclareNamespace("math", NamespaceConstant.MATH);
-                        //testXpc.DeclareNamespace("Dictionary", NamespaceConstant.Dictionary_FUNCTIONS);
-
-                        try {
-                            XPathSelector selector = testXpc.Compile(exp).Load();
-
-                            foreach (QName varName in env.params1.Keys) {
-                                selector.SetVariable(varName, env.params1[varName]);
-                            }
-
-                            if (env.contextItem != null) {
-                                selector.ContextItem = env.contextItem;
-                            }
-
-                            selector.InputXmlResolver = env;
-
-                            if (env.unparsedTextResolver != null) {
-                                selector.Implementation.setUnparsedTextURIResolver(
-                                    (uri, enc, config) => {
-                                        Encoding encoding;
-                                        try {
-                                            encoding = enc == null ? null : Encoding.GetEncoding(enc);
-                                        }
-                                        catch (System.ArgumentException e) {
-                                            throw new XPathException("Unknown encoding " + enc, "FOUT1170");
-                                        }
-                                        return env.unparsedTextResolver(uri, encoding);
-                                    });
-                            }
-
-                            XdmValue result = selector.Evaluate();
-                            outcome.SetPrincipalResult(result);
+                foreach (XdmItem testQuery in testCase.Children("test")) {
+                    string exp = null;
+                    try {
+                        exp = xpc.Evaluate(
+                                "if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)",
+                                testQuery)
+                            .ToString();
+                    }
+                    catch (SaxonApiException err) {
+                        println("*** Failed to read query: " + err.Message);
+                        if (err.ErrorCode.LocalName.Equals("FOUT1190")) {
+                            outcome.AddReportedError(new QName("XPST0003"));
                         }
-                        catch (Exception err) {
-                            println(err.Message);
-
+                        else {
                             outcome.SetException(err);
                         }
+
+                        break;
                     }
-                    else if (hostLang.Equals("XQ")) {
-                        XQueryCompiler testXqc = env.xqueryCompiler;
-                        testXqc.XQueryLanguageVersion = langVersion;
-                        testXqc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
-                        testXqc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
-                        //testXqc.DeclareNamespace("math", NamespaceConstant.MATH);
-                        testXqc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
-                        testXqc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
-                        SysCollGen.List<Error> errorList = new SysCollGen.List<Error>();
-                        testXqc.ErrorReporter = err => errorList.Add(err);
-                        string decVars = env.paramDecimalDeclarations.ToString();
-                        if (decVars.Length != 0) {
-                            int x = (exp.IndexOf("(:%DECL%:)", StringComparison.Ordinal));
-                            if (x < 0) {
-                                exp = decVars + exp;
+
+
+
+                    //noinspection ThrowableResultOfMethodCallIgnored
+                    if (outcome.GetException() == null) {
+                        if (hostLang.Equals("XP") || hostLang.Equals("XT")) {
+                            XPathCompiler testXpc = env.xpathCompiler;
+                            testXpc.XPathLanguageVersion = langVersion;
+                            testXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
+                            testXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
+                            testXpc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
+                            testXpc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
+                            //testXpc.DeclareNamespace("math", NamespaceConstant.MATH);
+                            //testXpc.DeclareNamespace("Dictionary", NamespaceConstant.Dictionary_FUNCTIONS);
+
+                            try {
+                                XPathSelector selector = testXpc.Compile(exp).Load();
+
+                                foreach (QName varName in env.params1.Keys) {
+                                    selector.SetVariable(varName, env.params1[varName]);
+                                }
+
+                                if (env.contextItem != null) {
+                                    selector.ContextItem = env.contextItem;
+                                }
+
+                                selector.InputXmlResolver = env;
+
+                                if (env.unparsedTextResolver != null) {
+                                    selector.Implementation.setUnparsedTextURIResolver(
+                                        (uri, enc, config) => {
+                                            Encoding encoding;
+                                            try {
+                                                encoding = enc == null ? null : Encoding.GetEncoding(enc);
+                                            }
+                                            catch (System.ArgumentException e) {
+                                                throw new XPathException("Unknown encoding " + enc, "FOUT1170");
+                                            }
+
+                                            return env.unparsedTextResolver(uri, encoding);
+                                        });
+                                }
+
+                                XdmValue result = selector.Evaluate();
+                                outcome.SetPrincipalResult(result);
                             }
-                            else {
-                                exp = exp[..x] + decVars + exp[(x + 13)..];
+                            catch (Exception err) {
+                                println(err.Message);
+
+                                outcome.SetException(err);
                             }
                         }
-
-                        string vars = env.paramDeclarations.ToString();
-                        if (vars.Length != 0) {
-                            // ReSharper disable once StringLiteralTypo
-                            int x = (exp.IndexOf("(:%VARDECL%:)", StringComparison.Ordinal));
-                            if (x < 0) {
-                                exp = vars + exp;
-                            }
-                            else {
-                                exp = exp[..x] + vars + exp[(x + 13)..];
-                            }
-                        }
-
-                        try {
-                            XQueryExecutable q = testXqc.Compile(exp);
-                            if (optimization != null) {
-                                // Test whether required optimizations have been performed
-                                XdmDestination expDest = new XdmDestination();
-                                JConfiguration config = driverProc.Implementation;
-                                //ExpressionPresenter presenter = new ExpressionPresenter(config, expDest.getReceiver(config));
-                                //q.getUnderlyingCompiledQuery().explain(presenter);
-                                //presenter.close();
-                                XdmNode explanation = expDest.XdmNode;
-                                XdmItem optResult =
-                                    xpc.EvaluateSingle(optimization.GetAttributeValue(new QName("assert")),
-                                        explanation);
-                                if (((XdmAtomicValue) optResult).AsBoolean()) {
-                                    println("Optimization result OK");
+                        else if (hostLang.Equals("XQ")) {
+                            XQueryCompiler testXqc = env.xqueryCompiler;
+                            testXqc.XQueryLanguageVersion = langVersion;
+                            testXqc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
+                            testXqc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
+                            //testXqc.DeclareNamespace("math", NamespaceConstant.MATH);
+                            testXqc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
+                            testXqc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
+                            SysCollGen.List<Error> errorList = new SysCollGen.List<Error>();
+                            testXqc.ErrorReporter = err => errorList.Add(err);
+                            string decVars = env.paramDecimalDeclarations.ToString();
+                            if (decVars.Length != 0) {
+                                int x = (exp.IndexOf("(:%DECL%:)", StringComparison.Ordinal));
+                                if (x < 0) {
+                                    exp = decVars + exp;
                                 }
                                 else {
-                                    println("Failed optimization test");
-                                    Serializer ser = env.processor.NewSerializer();
-                                    ser.OutputStream = System.Console.OpenStandardError();
-                                    driverProc.WriteXdmValue(explanation, ser);
-                                    writeTestcaseElement(testCaseName, "fail", "Failed optimization assertions", requestedSpec);
-                                    recordFailure(testSetName, testCaseName);
-                                    return;
+                                    exp = exp[..x] + decVars + exp[(x + 13)..];
                                 }
                             }
 
-                            XQueryEvaluator selector = q.Load();
-                            foreach (QName varName in env.params1.Keys) {
-                                selector.SetExternalVariable(varName, env.params1[varName]);
-                            }
-
-                            if (env.contextItem != null) {
-                                selector.ContextItem = env.contextItem;
-                            }
-
-                            selector.XmlResolver = env;
-                            if (env.unparsedTextResolver != null) {
-                                selector.TextResolver = env.unparsedTextResolver; 
-                            }
-
-                            if (needSerializedResult) {
-                                StringWriter sw = new StringWriter();
-                                Serializer serializer = env.processor.NewSerializer();
-                                serializer.OutputWriter= sw;
-                                selector.Run(serializer);
-                                outcome.SetPrincipalSerializedResult(sw.ToString());
-                            }
-
-                            if (needResultValue) {
-                                try {
-                                    XdmValue result = selector.Evaluate();
-
-                                    outcome.SetPrincipalResult(result);
+                            string vars = env.paramDeclarations.ToString();
+                            if (vars.Length != 0) {
+                                // ReSharper disable once StringLiteralTypo
+                                int x = (exp.IndexOf("(:%VARDECL%:)", StringComparison.Ordinal));
+                                if (x < 0) {
+                                    exp = vars + exp;
                                 }
-                                catch (StackOverflowException err) {
-                                    println("in TestSet " + testSetName);
-                                    println(err.Message);
-                                    outcome.SetException(err);
+                                else {
+                                    exp = exp[..x] + vars + exp[(x + 13)..];
                                 }
                             }
+
+                            try {
+                                XQueryExecutable q = testXqc.Compile(exp);
+                                if (optimization != null) {
+                                    // Test whether required optimizations have been performed
+                                    XdmDestination expDest = new XdmDestination();
+                                    JConfiguration config = driverProc.Implementation;
+                                    //ExpressionPresenter presenter = new ExpressionPresenter(config, expDest.getReceiver(config));
+                                    //q.getUnderlyingCompiledQuery().explain(presenter);
+                                    //presenter.close();
+                                    XdmNode explanation = expDest.XdmNode;
+                                    XdmItem optResult =
+                                        xpc.EvaluateSingle(optimization.GetAttributeValue(new QName("assert")),
+                                            explanation);
+                                    if (((XdmAtomicValue)optResult).AsBoolean()) {
+                                        println("Optimization result OK");
+                                    }
+                                    else {
+                                        println("Failed optimization test");
+                                        Serializer ser = env.processor.NewSerializer();
+                                        ser.OutputStream = System.Console.OpenStandardError();
+                                        driverProc.WriteXdmValue(explanation, ser);
+                                        writeTestcaseElement(testCaseName, "fail", "Failed optimization assertions",
+                                            requestedSpec);
+                                        recordFailure(testSetName, testCaseName);
+                                        return;
+                                    }
+                                }
+
+                                XQueryEvaluator selector = q.Load();
+                                foreach (QName varName in env.params1.Keys) {
+                                    selector.SetExternalVariable(varName, env.params1[varName]);
+                                }
+                                
+                                if (previousResult != null) {
+                                    if (previousResult is XdmItem) {
+                                        selector.ContextItem = (XdmItem) previousResult;
+                                    } else {
+                                        selector.ContextItem = null;
+                                    }
+                                } else  if (env.contextItem != null) {
+                                    selector.ContextItem = env.contextItem;
+                                }
+
+                                selector.XmlResolver = env;
+                                if (env.unparsedTextResolver != null) {
+                                    selector.TextResolver = env.unparsedTextResolver;
+                                }
+
+                                if (Environment.isTrue("update")(testQuery) && q.IsUpdateQuery) {
+                                    XdmNode[] updatedDocs = selector.RunUpdate();
+                                    XdmNode resultDoc = null;
+                                    int numberOfUpdatedDocs = 0;
+                                    foreach (XdmNode n in updatedDocs) {
+                                        numberOfUpdatedDocs++;
+                                        resultDoc = n;
+                                    }
+
+                                    if (resultDoc == null) {
+                                        // Some test queries don't actually update anything, in which case
+                                        // getUpdatedDocuments() returns nothing. The tests are written on
+                                        // the assumption that we process the "main input" of the previous
+                                        // step, which is either the context item or the value of the
+                                        // variable $input-context. Very pragmatic code here...
+                                        if (previousResult == null) {
+                                            QName key = new QName("input-context");
+                                            resultDoc = env.params1.ContainsKey(key) ? (XdmNode)env.params1[key] : null;
+                                        }
+                                        else {
+                                            resultDoc = (XdmNode)previousResult;
+                                        }
+
+                                        if (resultDoc == null) {
+                                            outcome.SetPrincipalResult(XdmEmptySequence.Instance);
+                                        }
+                                        else {
+                                            outcome.SetPrincipalResult(resultDoc);
+                                        }
+                                    }
+
+                                    if (numberOfUpdatedDocs == 1) {
+                                        previousResult = resultDoc;
+                                        outcome.SetPrincipalResult(resultDoc);
+                                    }
+                                } else {
+
+                                    if (needSerializedResult) {
+                                        StringWriter sw = new StringWriter();
+                                        Serializer serializer = env.processor.NewSerializer();
+                                        serializer.OutputWriter = sw;
+                                        selector.Run(serializer);
+                                        outcome.SetPrincipalSerializedResult(sw.ToString());
+                                    }
+
+                                    if (needResultValue) {
+                                        try {
+                                            XdmValue result = selector.Evaluate();
+
+                                            outcome.SetPrincipalResult(result);
+                                        }
+                                        catch (StackOverflowException err) {
+                                            println("in TestSet " + testSetName);
+                                            println(err.Message);
+                                            outcome.SetException(err);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (StackOverflowException err) {
+                                println("in TestSet " + testSetName);
+                                println(err.Message);
+                                outcome.SetException(err);
+                            }
+                            catch (Exception err) {
+                                println("in TestSet " + testSetName);
+                                println(err.ToString());
+                                outcome.SetException(err);
+                                //	outcome.SetErrorsReported(testXqc.ErrorList); //TODO
+                            }
                         }
-                        catch (StackOverflowException err) {
-                            println("in TestSet " + testSetName);
-                            println(err.Message);
-                            outcome.SetException(err);
+                        else {
+                            writeTestcaseElement(testCaseName, "notRun", "No processor found", requestedSpec);
+                            notrun++;
+                            return;
                         }
-                        catch (Exception err) {
-                            println("in TestSet " + testSetName);
-                            println(err.ToString());
-                            outcome.SetException(err);
-                            //	outcome.SetErrorsReported(testXqc.ErrorList); //TODO
-                        }
-                    }
-                    else {
-                        writeTestcaseElement(testCaseName, "notRun", "No processor found", requestedSpec);
-                        notrun++;
-                        return;
                     }
                 }
 
@@ -791,9 +861,9 @@ namespace TestDriver {
                             recordFailure(testSetName, testCaseName);
                         }
                         else {
-                            String exceptionMessage =
+                            string exceptionMessage =
                                 outcome.GetException() == null ? outcome.GetException().Message : "";
-                            String errorCode = (outcome.GetErrorCode() == null
+                            string errorCode = (outcome.GetErrorCode() == null
                                 ? "unknown - " + exceptionMessage
                                 : outcome.GetErrorCode().LocalName);
                             writeTestcaseElement(testCaseName, "wrongError",
