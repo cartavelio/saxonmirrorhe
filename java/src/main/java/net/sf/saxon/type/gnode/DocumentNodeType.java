@@ -159,7 +159,7 @@ public class DocumentNodeType extends XNodeType {
             return new DocumentNodeType(x2);
         }
         if (t2 instanceof ChoiceItemType c2) {
-            List<ItemType> members = new ArrayList<ItemType>();
+            List<ItemType> members = new ArrayList<>();
             for (ItemType it : c2.getMemberTypes()) {
                 members.add(new DocumentNodeType((XNodeType)it));
             }
