@@ -263,6 +263,20 @@ val preprocessJava = tasks.register<JavaExec>("preprocessJava") {
        "/p:EE=false", "/p:PE=false",
        "/p:SAXONC=false", "/p:BYTECODE=false", "/p:HOF=true",
        "/p:STREAM=false", "/p:SCHEMA=false", "/p:CSHARP=true")
+
+  doLast {
+    saxonBuild.patchReleaseInfo(
+        layout.buildDirectory.file("src/main/java/net/sf/saxon/Version.java").get().asFile,
+        "${findProperty("saxonVersion")!!}",
+        "${findProperty("saxonMajorReleaseDate")!!}")
+    val verifier = layout.buildDirectory.file("src/main/java/com/saxonica/config/JavaVerifier.java").get().asFile
+    val dsaPublicKey = findProperty("dsaPublicKey")?.toString()
+    val ed25519PublicKey = findProperty("ed25519PublicKey")?.toString()
+    if (verifier.exists()) {
+      saxonBuild.patchKey(verifier, "dsa", dsaPublicKey)
+      saxonBuild.patchKey(verifier, "ed25519", ed25519PublicKey)
+    }
+  }
 }
 
 val jarFinder = JarFinder(configurations.named("transpiler").get())
