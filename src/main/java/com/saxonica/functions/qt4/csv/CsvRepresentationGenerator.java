@@ -110,7 +110,9 @@ public abstract class CsvRepresentationGenerator {
         if (_shouldFilterColumns) {
             List<GroundedValue> filteredRowList = new ArrayList<>();
             IterationUtils.forEach(getColumnIndexes(row), oneBasedIndex -> {
-                filteredRowList.add(row.get(oneBasedIndex - 1));
+                filteredRowList.add(oneBasedIndex <= row.arrayLength()
+                                            ? row.get(oneBasedIndex - 1)
+                                            : StringValue.EMPTY_STRING);
             });
             filteredRow = filteredRowList;
         } else {
