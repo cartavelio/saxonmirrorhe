@@ -139,13 +139,13 @@ public class ComplexContentValidator extends AttributeValidator {
         foundChildren = true;
 
         final int fingerprint = elemName.obtainFingerprint(getNamePool());
-        final Edge edge = state.getTransition(fingerprint, type);
+        final Edge edge = state.getTransition(fingerprint, type, getValidationContext().getSchema());
         if (edge == null) {
 
             FiniteStateMachine machine = type.getFiniteStateMachine();
             Wildcard openContentWildcard = machine.getOpenContentWildcard();
             if (openContentWildcard != null &&
-                    openContentWildcard.matches(elemName, true, getConfiguration(), type)) {
+                    openContentWildcard.matches(elemName, true, getValidationContext().getSchema(), type)) {
                 if (machine.isOpenContentInterleaved()) {
                     // interleaved open content: leave the state unchanged
                     childValidator = new LaxValidator(getNextReceiver());
@@ -162,7 +162,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 }
             }
 
-            String message = supplyReasonForNonMatch(elemName);
+            String message = supplyReasonForNonMatch(elemName, getValidationContext().getSchema());
             ValidationFailure ve = new ValidationFailure(message);
             ve.setConstraintReference(1, "cvc-complex-type", "2.4");
             ve.setSchemaType(type);
@@ -214,7 +214,7 @@ public class ComplexContentValidator extends AttributeValidator {
      * starting with a capital letter and ending with a full stop and trailing space.
      */
 
-    private String supplyReasonForNonMatch(NodeName nodeName) {
+    private String supplyReasonForNonMatch(NodeName nodeName, PreparedSchema schema) {
         int fingerprint = nodeName == null ? -1 : nodeName.obtainFingerprint(getNamePool());
         StringBuilder fsb = new StringBuilder(64);
 
@@ -238,7 +238,7 @@ public class ComplexContentValidator extends AttributeValidator {
                         if (e.getParticle() instanceof ElementParticle) {
                             omission = e.getParticle().getTargetComponentName();
                             int omittedfp = ((ElementParticle) e.getParticle()).getDeclaration().getFingerprint();
-                            AutomatonState s = state.getTransition(omittedfp, type).getTargetState();
+                            AutomatonState s = state.getTransition(omittedfp, type, getValidationContext().getSchema()).getTargetState();
                             if (s.isFinalState()) {
                                 possibleOmissions.add(omission);
                                 if (firstOmission == null) {
@@ -284,7 +284,7 @@ public class ComplexContentValidator extends AttributeValidator {
                     fsb.append(" to appear as the first child. ");
                 } else if (previousElement == fingerprint) {
                     try {
-                        if (Cardinality.allowsMany(type.getElementParticleCardinality(fingerprint, false))) {
+                        if (Cardinality.allowsMany(type.getElementParticleCardinality(fingerprint, schema, false))) {
                             fsb.append(" to appear this many times. ");
                         } else {
                             fsb.append(" to appear more than once. ");
@@ -300,7 +300,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 }
 
                 try {
-                    if (!explained && type.getElementParticleType(fingerprint, false) != null) {
+                    if (!explained && type.getElementParticleType(fingerprint, schema, false) != null) {
                         // The element is allowed by the content model, but not here
                         // See if the error can be attributed to the absence of an element
                         StructuredQName omission;
@@ -310,8 +310,8 @@ public class ComplexContentValidator extends AttributeValidator {
                             if (e.getParticle() instanceof ElementParticle) {
                                 omission = e.getParticle().getTargetComponentName();
                                 int omittedfp = ((ElementParticle) e.getParticle()).getDeclaration().getFingerprint();
-                                AutomatonState s = state.getTransition(omittedfp, type).getTargetState();
-                                if (s.getTransition(fingerprint, type) != null) {
+                                AutomatonState s = state.getTransition(omittedfp, type, schema).getTargetState();
+                                if (s.getTransition(fingerprint, type, schema) != null) {
                                     possibleOmissions.add(omission);
                                     if (firstOmission == null) {
                                         firstOmission = omission;
@@ -371,7 +371,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 if (!explained) {
                     Wildcard openContentWildcard = type.getOpenContentWildcard();
                     if (openContentWildcard != null) {
-                        String s = openContentWildcard.reasonForNonMatch(nodeName, true, getConfiguration(), type);
+                        String s = openContentWildcard.reasonForNonMatch(nodeName, true, schema, type);
                         if (s != null) {
                             fsb.append("It does not match the open content wildcard: ");
                             fsb.append(s);
@@ -468,7 +468,7 @@ public class ComplexContentValidator extends AttributeValidator {
                     if (wildcards.size() == 1) {
                         for (Wildcard w : wildcards) {
                             fsb.append("There is an <xs:any> wildcard, but it does not match: ");
-                            fsb.append(w.reasonForNonMatch(nodeName, true, getConfiguration(), type));
+                            fsb.append(w.reasonForNonMatch(nodeName, true, schema, type));
                         }
                     } else if (wildcards.size() > 1) {
                         fsb.append("There are several <xs:any> wildcards, but none of them match. ");
@@ -585,7 +585,7 @@ public class ComplexContentValidator extends AttributeValidator {
             }
         }
         if (!state.isFinalState() && !isNilled() && !locallyInvalid) {
-            String message = supplyReasonForNonMatch(null);
+            String message = supplyReasonForNonMatch(null, getValidationContext().getSchema());
             ValidationFailure ve = new ValidationFailure(message);
             ve.setSchemaType(type);
             ve.setConstraintReference(1, "cvc-complex-type", "2.4");

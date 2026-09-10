@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema.fsa;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.UserComplexType;
 
 /**
@@ -12,13 +13,14 @@ public interface State {
      * Find the edge representing the transition from this state to another state, that is
      * triggered by a given input token
      *
-     * @param token the input token, specifically the fingerprint of an element name
-     * @param type  the complex type whose content model we are validating against
+     * @param token  the input token, specifically the fingerprint of an element name
+     * @param type   the complex type whose content model we are validating against
+     * @param schema
      * @return the Edge representing the selected transition of the finite state machine,
-     *         or null if this token is not accepted when in this State (which implies a validation error).
+     * or null if this token is not accepted when in this State (which implies a validation error).
      */
 
-    Edge getTransition(int token, UserComplexType type);
+    Edge getTransition(int token, UserComplexType type, PreparedSchema schema);
 
     /**
      * Ask whether this state is a valid final state, that is, no further transitions are needed

@@ -551,7 +551,7 @@ public final class AttributeGroupDecl extends SchemaStructure
                             " is " + (baseAtt == null ? "not defined" : "prohibited") + " in the base type", this);
                     result = false;
                 } else {
-                    if (!baseWildCard.getWildcard().matches(att.getTargetComponentName(), false, getConfiguration(), null)) {
+                    if (!baseWildCard.getWildcard().matches(att.getTargetComponentName(), false, compiler.getPreparedSchema(), null)) {
                         compiler.error("Invalid restriction: attribute " + Err.wrap(att.getDisplayName(), Err.ATTRIBUTE) +
                                 " is " + (baseAtt == null ? "not defined" : "prohibited") + " in the base type", this);
                         result = false;

@@ -1209,7 +1209,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                     particle = new ElementParticle(config, null);
                     break;
                 case "elementWildcard":
-                    particle = new ElementWildcard(loader.getSchema());
+                    particle = new ElementWildcard(config);
                     break;
                 case "modelGroupParticle":
                     particle = new ModelGroupParticle(config, null);
@@ -1456,7 +1456,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            AttributeWildcard awc = new AttributeWildcard(loader.getSchema());
+            AttributeWildcard awc = new AttributeWildcard((EnterpriseConfiguration) loader.getConfiguration());
             if (container instanceof AttributeGroupDecl) {
                 ((AttributeGroupDecl) container).setAnyAttribute(awc);
             } else if (container instanceof UserComplexType) {
@@ -1591,7 +1591,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
 
-            Wildcard wildcard = new Wildcard(loader.getSchema());
+            Wildcard wildcard = new Wildcard((EnterpriseConfiguration) loader.getConfiguration());
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             if (id != null) {
                 loader.components.put(id, wildcard);

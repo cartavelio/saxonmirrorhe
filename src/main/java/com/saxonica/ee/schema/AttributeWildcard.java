@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
@@ -13,10 +14,9 @@ public class AttributeWildcard extends SchemaStructure implements UserSchemaComp
 
     private Wildcard wildcard;
 
-    public AttributeWildcard(PreparedSchema schema) {
-        wildcard = new Wildcard(schema);
-        wildcard.setConfiguration(schema.getConfiguration());
-        setConfiguration(schema.getConfiguration());
+    public AttributeWildcard(EnterpriseConfiguration config) {
+        wildcard = new Wildcard(config);
+        setConfiguration(config);
     }
 
     public AttributeWildcard(Wildcard wc) {

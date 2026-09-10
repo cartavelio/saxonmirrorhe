@@ -125,7 +125,7 @@ public class AllElementValidator extends AttributeValidator {
             List<ElementWildcard> wildcards = allGroup.getWildcards();
             int w = 0;
             for (ElementWildcard wildcard : wildcards) {
-                if (wildcard.getWildcard().matches(elemName, true, config, type)) {
+                if (wildcard.getWildcard().matches(elemName, true, getValidationContext().getSchema(), type)) {
                     if (inOpenSuffix) {
                         reportNotAllowedInSuffix(elemName, location);
                     }
@@ -144,7 +144,7 @@ public class AllElementValidator extends AttributeValidator {
                 // No matching wildcard found; try open content
                 Wildcard openWildcard = type.getOpenContentWildcard();
                 if (openWildcard != null) {
-                    if (openWildcard.matches(elemName, true, config, type)) {
+                    if (openWildcard.matches(elemName, true, getValidationContext().getSchema(), type)) {
                         annotation = processWildcardTerm(openWildcard, elemName, location);
                         inOpenSuffix = type.getOpenContentMode() == OpenContentVariety.SUFFIX;
                     }
@@ -159,7 +159,7 @@ public class AllElementValidator extends AttributeValidator {
                     if (wildcards.size() == 1) {
                         Iterator<ElementWildcard> it = wildcards.iterator();
                         ElementWildcard wildcard = it.next();
-                        reason = ". " + wildcard.getWildcard().reasonForNonMatch(elemName, true, config, type);
+                        reason = ". " + wildcard.getWildcard().reasonForNonMatch(elemName, true, getValidationContext().getSchema(), type);
                     }
                     reportNotAllowed(elemName, location, reason);
                 }

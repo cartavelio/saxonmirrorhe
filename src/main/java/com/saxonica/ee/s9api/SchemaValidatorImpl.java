@@ -22,6 +22,7 @@ import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.type.ValidationParams;
@@ -31,6 +32,7 @@ import javax.xml.transform.Source;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -74,11 +76,21 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
     @CSharpModifiers(code = {"internal"})
     public SchemaValidatorImpl(Processor processor, PreparedSchema schema) {
-        this.processor = processor;
-        this.schema = schema;
+        this.processor = Objects.requireNonNull(processor);
+        this.schema = Objects.requireNonNull(schema);
         this.useXsiSchemaLocation = processor.getConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION);
         this.invalidityHandler = new InvalidityHandlerWrappingErrorReporter(
                 processor.getUnderlyingConfiguration().makeErrorReporter());
+    }
+
+    /**
+     * Get the schema used by this schema validator
+     *
+     * @return the relevant schema
+     */
+    @Override
+    public Schema getSchema() {
+        return schema;
     }
 
     /**

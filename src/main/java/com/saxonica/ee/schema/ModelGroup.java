@@ -422,7 +422,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
                     for (ElementWildcard wild : wildcards) {
                         Wildcard card = wild.getWildcard();
                         if (!card.getProcessContents().equals("skip") &&
-                                card.matches(global.getComponentName(), true, getConfiguration(), null)) {
+                                card.matches(global.getComponentName(), true, compiler.getPreparedSchema(), null)) {
                             if (!local.hasSameTypeTable(global)) {
                                 String err = "A local element " + Err.wrap(local.getDisplayName(), Err.ELEMENT) +
                                         " appears in the content model that has the same name as a global element " +
@@ -453,9 +453,9 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      */
 
     /*@Nullable*/
-    public SchemaType getElementParticleType(int elementName) throws MissingComponentException {
+    public SchemaType getElementParticleType(int elementName, PreparedSchema schema) throws MissingComponentException {
         for (Particle p : getParticles()) {
-            SchemaType t = p.getElementParticleType(elementName);
+            SchemaType t = p.getElementParticleType(elementName, schema);
             if (t != null) {
                 return t;
             }
@@ -475,10 +475,10 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
      * @return the cardinality of the element particle within this content model
      */
 
-    public int getElementParticleCardinality(int elementName) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException {
         int card = StaticProperty.EMPTY;
         for (Particle p : getParticles()) {
-            int t = p.getElementParticleCardinality(elementName);
+            int t = p.getElementParticleCardinality(elementName, schema);
             if (t != StaticProperty.EMPTY) {
                 if (this instanceof SequenceModelGroup) {
                     card = Cardinality.sum(card, t);

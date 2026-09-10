@@ -434,7 +434,7 @@ public class FiniteStateMachine {
                 Edge baseEdge = null;
                 if (derivedEdge.getTerm() instanceof ElementDecl) {
                     baseEdge = baseState.getTransition(((ElementDecl) derivedEdge.getTerm()).getFingerprint(),
-                            base.complexType);
+                            base.complexType, compiler.getPreparedSchema());
                     String s = "No match";
                     if (baseEdge != null) {
                         try {

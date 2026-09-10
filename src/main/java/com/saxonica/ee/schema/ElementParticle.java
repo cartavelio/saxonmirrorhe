@@ -263,7 +263,7 @@ public class ElementParticle extends Particle {
      */
 
     @Override
-    public SchemaType getElementParticleType(int elementFingerprint) {
+    public SchemaType getElementParticleType(int elementFingerprint, PreparedSchema schema) {
         try {
             ElementDecl decl = (ElementDecl) getTarget();
             if (elementFingerprint == getTargetFingerprint()) {
@@ -294,7 +294,7 @@ public class ElementParticle extends Particle {
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException {
         if (elementName == getTargetFingerprint()) {
             return Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
         }

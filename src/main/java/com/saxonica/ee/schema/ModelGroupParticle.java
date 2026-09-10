@@ -187,8 +187,8 @@ public class ModelGroupParticle extends Particle {
 
     /*@Nullable*/
     @Override
-    public SchemaType getElementParticleType(int elementName) throws MissingComponentException {
-        return getGroup().getElementParticleType(elementName);
+    public SchemaType getElementParticleType(int elementName, PreparedSchema schema) throws MissingComponentException {
+        return getGroup().getElementParticleType(elementName, schema);
     }
 
     /**
@@ -203,8 +203,8 @@ public class ModelGroupParticle extends Particle {
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName) throws MissingComponentException {
-        int card = getGroup().getElementParticleCardinality(elementName);
+    public int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException {
+        int card = getGroup().getElementParticleCardinality(elementName, schema);
         return Cardinality.multiply(card,
                 computeParticleCardinality(getMinOccurs(), getMaxOccurs()));
     }

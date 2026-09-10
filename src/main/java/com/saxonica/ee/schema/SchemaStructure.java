@@ -57,12 +57,6 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
     private EnterpriseConfiguration config;
 
     /**
-     * The schema under which this component was created
-     */
-
-    private PreparedSchema schema;
-
-    /**
      * The redefinition level of this component
      */
 

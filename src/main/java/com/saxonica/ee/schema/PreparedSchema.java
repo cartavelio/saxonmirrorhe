@@ -57,6 +57,8 @@ public class PreparedSchema implements Schema, NotationSet {
 
     private EnterpriseConfiguration config;
 
+    private int xsdVersion;
+
     /**
      * The set of all target namespaces of components in this schema
      */
@@ -177,7 +179,7 @@ public class PreparedSchema implements Schema, NotationSet {
     public PreparedSchema(EnterpriseConfiguration config) {
         namePool = config.getNamePool();
         this.config = config;
-
+        this.xsdVersion = config.getXsdVersion();
         attributesByName = new HashMap<>(10);
         attributesByFingerprint = new IntHashMap<>(10);
         attributeGroups = new HashMap<>(20);
@@ -203,6 +205,27 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public EnterpriseConfiguration getConfiguration() {
         return config;
+    }
+
+    /**
+     * Set the version of XSD used to create this schema
+     * @param version {@link Configuration#XSD10} or {@link Configuration#XSD11}
+     */
+
+    public void setXsdVersion(int version) {
+        if (version != Configuration.XSD10 && version != Configuration.XSD11) {
+            throw new IllegalArgumentException();
+        }
+        xsdVersion = version;
+    }
+
+    /**
+     * Get the version of XSD used to create this schema
+     * @return {@link Configuration#XSD10} or {@link Configuration#XSD11}
+     */
+
+    public int getXsdVersion() {
+        return xsdVersion;
     }
 
     /**

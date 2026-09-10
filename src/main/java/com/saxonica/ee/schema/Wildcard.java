@@ -1,6 +1,6 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.Configuration;
+import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
@@ -22,7 +22,6 @@ import java.util.*;
  */
 public class Wildcard extends SchemaStructure implements UserSchemaComponent, SerializableSchemaComponent, Term {
 
-    private final PreparedSchema schema;
     /**
      * The set of permitted namespaces. The value "" represents the no-namespace, referred to as
      * "absent" in the specifications. The set may be empty, indicating that no namespaces are
@@ -59,13 +58,8 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
     private IntSet disallowedQNames;
 
-    public Wildcard(PreparedSchema schema) {
-        this.schema = schema;
-        setConfiguration(schema.getConfiguration());
-    }
-
-    public PreparedSchema getSchema() {
-        return schema;
+    public Wildcard(EnterpriseConfiguration config) {
+        setConfiguration(config);
     }
 
     /**
@@ -161,21 +155,21 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      *
      * @param name        the name to be tested
      * @param isElement   true if looking for an element, false if looking for an attribute
-     * @param config      the Saxon configuration
+     * @param schema      the schema against which we are validating
      * @param parentType  the governing type definition of the parent element, used to assess whether
      *                    the ##definedSibling constraint prevents an element from matching. May be null, in which case
      *                    ##definedSibling is ignored.
      * @return true if the wildcard allows this name, false if not.
      */
 
-    public boolean matches(StructuredQName name, boolean isElement, Configuration config, /*@Nullable*/ UserComplexType parentType) {
-        NodeName nn = new FingerprintedQName(name, config.getNamePool());
-        return matches(nn, isElement, config, parentType);
+    public boolean matches(StructuredQName name, boolean isElement, PreparedSchema schema, /*@Nullable*/ UserComplexType parentType) {
+        NodeName nn = new FingerprintedQName(name, schema.getNamePool());
+        return matches(nn, isElement, schema, parentType);
     }
 
-    public boolean matches(int fp, boolean isElement, Configuration config, /*@Nullable*/ UserComplexType parentType) {
-        NodeName nn = new CodedName(fp, "", config.getNamePool());
-        return matches(nn, isElement, config, parentType);
+    public boolean matches(int fp, boolean isElement, PreparedSchema schema, /*@Nullable*/ UserComplexType parentType) {
+        NodeName nn = new CodedName(fp, "", schema.getNamePool());
+        return matches(nn, isElement, schema, parentType);
     }
 
     /**
@@ -184,27 +178,28 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      *
      * @param name        the name to be tested
      * @param isElement   true if looking for an element, false if looking for an attribute
-     * @param config      the Saxon configuration
+     * @param schema      the schema against which we are validating
      * @param parentType  the governing type definition of the parent element, used to assess whether
      *                    the ##definedSibling constraint prevents an element from matching. May be null, in which case
      *                    ##definedSibling is ignored.
      * @return true if the wildcard allows this name, false if not.
      */
 
-    public boolean matches(NodeName name, boolean isElement, Configuration config, /*@Nullable*/ UserComplexType parentType) {
+    public boolean matches(NodeName name, boolean isElement, PreparedSchema schema, /*@Nullable*/ UserComplexType parentType) {
         int fingerprint = -1;
+        NamePool namePool = schema.getNamePool();
         if (disallowedQNames != null && disallowedQNames.contains(fingerprint)) {
             return false;
         }
         if (disallowedQNames != null) {
-            fingerprint = name.obtainFingerprint(config.getNamePool());
+            fingerprint = name.obtainFingerprint(namePool);
             if (disallowedQNames.contains(fingerprint)) {
                 return false;
             }
         }
         if (disallowsDefinedNames) {
             if (fingerprint == -1) {
-                fingerprint = name.obtainFingerprint(config.getNamePool());
+                fingerprint = name.obtainFingerprint(namePool);
             }
             if ((isElement ?
                          schema.getElementDecl(fingerprint) :
@@ -235,7 +230,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      *
      * @param nn          the name of the node that does not match the wildcard
      * @param isElement   true if looking for an element, false if looking for an attribute
-     * @param config      the Saxon configuration
+     * @param schema      the schema we are validating against
      * @param parentType  the governing type definition of the parent element, used to assess whether
      *                    the ##definedSibling constraint prevents an element from matching. May be null, in which case
      *                    ##definedSibling is ignored.
@@ -243,8 +238,8 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      *         of one or more complete English sentences terminated by a full stop and trailing space.
      */
 
-    public String reasonForNonMatch(NodeName nn, boolean isElement, Configuration config, /*@Nullable*/ UserComplexType parentType) {
-        int fingerprint = nn.obtainFingerprint(config.getNamePool());
+    public String reasonForNonMatch(NodeName nn, boolean isElement, PreparedSchema schema, /*@Nullable*/ UserComplexType parentType) {
+        int fingerprint = nn.obtainFingerprint(schema.getNamePool());
         if (disallowedQNames != null && disallowedQNames.contains(fingerprint)) {
             return "The name is in the list of disallowed QNames for the wildcard. ";
         }
@@ -610,15 +605,14 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public static Wildcard makeIntersection(Wildcard wat1, Wildcard wat2, NamePool pool) {
-        if (wat1.getSchema() != wat2.getSchema()) {
-            throw new IllegalArgumentException("Cannot combine wildcards from different schemas");
+        if (wat1.getConfiguration() != wat2.getConfiguration()) {
+            throw new IllegalArgumentException("Cannot combine wildcards from different configurations");
         }
         Set<NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
         Set<NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
         Set<NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
         Set<NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
-        Wildcard result = new Wildcard(wat1.getSchema());
-        result.setConfiguration(wat1.getConfiguration());
+        Wildcard result = new Wildcard(wat1.getConfiguration());
         result.setProcessContents(wat1.getProcessContents());
         result.setLocator(wat1);
 
@@ -683,14 +677,14 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public static Wildcard makeUnion(Wildcard wat1, Wildcard wat2, NamePool pool) {
-        if (wat1.getSchema() != wat2.getSchema()) {
-            throw new IllegalArgumentException("Cannot combine wildcards from different schemas");
+        if (wat1.getConfiguration() != wat2.getConfiguration()) {
+            throw new IllegalArgumentException("Cannot combine wildcards from different configurations");
         }
         Set<NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
         Set<NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
         Set<NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
         Set<NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
-        Wildcard result = new Wildcard(wat1.getSchema());
+        Wildcard result = new Wildcard(wat1.getConfiguration());
         result.setConfiguration(wat1.getConfiguration());
         result.setProcessContents(wat1.getProcessContents());
         result.setLocator(wat1);

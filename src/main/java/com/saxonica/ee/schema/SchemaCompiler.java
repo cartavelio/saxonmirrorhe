@@ -49,7 +49,7 @@ public class SchemaCompiler {
     private ErrorReporter errorReporter;
     private HashMap<IdentityConstraintReference, SchemaType> identityConstraintsAwaitingTypeChecking = null;
     private int errorCount = 0;
-    private int xsdlVersion = Configuration.XSD10;
+    private int xsdVersion;
     private final boolean allowDanglingReferences;
 
 
@@ -74,6 +74,7 @@ public class SchemaCompiler {
         schemaURIResolver = config.getSchemaURIResolver();
         occurrenceLimits = config.getOccurrenceLimits();
         allowDanglingReferences = config.getBooleanProperty(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS);
+        xsdVersion = config.getXsdVersion();
     }
 
     /**
@@ -99,23 +100,25 @@ public class SchemaCompiler {
     /**
      * Set the XSD language version allowed.
      *
-     * @param version the language version allowed. Default is {@link Configuration#XSD10};
-     *                to use facilities in XML Schema 1.1, the value must be set to {@link Configuration#XSD11}
+     * @param version the language version allowed. Set to 10 for XSD 1.0, 11 for XSD 1.1. The default is
+     *                taken from the Saxon Configuration properties. Symbolic constants {@link net.sf.saxon.Configuration#XSD10}
+     *                and {@link net.sf.saxon.Configuration#XSD11} are available.
      */
 
     public void setLanguageVersion(int version) {
-        xsdlVersion = version;
+        xsdVersion = version;
     }
 
     /**
-     * Get the XSD langauge version allowed
+     * Get the XSD language version allowed
      *
-     * @return the XSD language version. Default is {@link Configuration#XSD10}; to use facilities in XML Schema 1.1, the
-     *         value must be set to {@link Configuration#XSD11}
+     * @return the XSD language version. Returns 10 for XSD 1.0, 11 for XSD 1.1.
+     * Symbolic constants {@link net.sf.saxon.Configuration#XSD10}
+     * and {@link net.sf.saxon.Configuration#XSD11} are available.
      */
 
     public int getLanguageVersion() {
-        return xsdlVersion;
+        return xsdVersion;
     }
 
     /**
@@ -155,7 +158,8 @@ public class SchemaCompiler {
 
     /**
      * Set the ErrorReporter to be used in this compiler. The ErrorReporter
-     * is informed of all errors detected during schema processing.
+     * is informed of all errors detected during schema processing. The default
+     * is the error reporter created by a call on {@link Configuration#makeErrorReporter()}.
      *
      * @param reporter the ErrorReporter to be used
      * @since 8.9. Changed in 10.0 to use ErrorReporter rather than ErrorListener

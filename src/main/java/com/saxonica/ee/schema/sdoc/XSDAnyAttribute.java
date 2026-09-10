@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema.sdoc;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.AttributeWildcard;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
@@ -32,7 +33,7 @@ public class XSDAnyAttribute extends AnnotationParent {
     @Override
     protected void prepareAttributes() throws SchemaException {
 
-        wildcard = new AttributeWildcard(getSchema());
+        wildcard = new AttributeWildcard((EnterpriseConfiguration) getConfiguration());
         wildcard.setLocator(this);
 
         AttributeMap atts = attributes();

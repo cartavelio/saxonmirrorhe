@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema.fsa;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
@@ -52,8 +53,8 @@ public class CountingState implements State {
 
     /*@Nullable*/
     @Override
-    public Edge getTransition(int token, UserComplexType type) {
-        return automatonState.getTransition(token, type);
+    public Edge getTransition(int token, UserComplexType type, PreparedSchema schema) {
+        return automatonState.getTransition(token, type, schema);
     }
 
 

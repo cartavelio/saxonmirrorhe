@@ -145,8 +145,9 @@ public abstract class AttributeValidator extends ContentValidator {
                 if (!implicitlyAllowed) {
                     if (attributeWildcard != null) {
                         // See if the attribute matches a wildcard
-                        if (!attributeWildcard.getWildcard().matches(attName, false, getConfiguration(), null)) {
-                            attributeDoesNotMatchWildcard(attName, location);
+                        PreparedSchema schema = getValidationContext().getSchema();
+                        if (!attributeWildcard.getWildcard().matches(attName, false, schema, null)) {
+                            attributeDoesNotMatchWildcard(attName, schema, location);
                         }
                         String process = attributeWildcard.getWildcard().getProcessContents();
                         if (process.equals("skip")) {
@@ -403,9 +404,9 @@ public abstract class AttributeValidator extends ContentValidator {
         reportValidationError(ve, false, makeAttributeLocation(attName, location));
     }
 
-    private void attributeDoesNotMatchWildcard(NodeName attName, Location location) throws XPathException {
+    private void attributeDoesNotMatchWildcard(NodeName attName, PreparedSchema schema, Location location) throws XPathException {
         String reason = attributeWildcard.getWildcard().reasonForNonMatch(
-                attName, false, getConfiguration(), null);
+                attName, false, schema, null);
         String message = "Attribute " +
                 Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
                 " is not allowed on " + getContainingElementName() + ". " + reason;
@@ -555,7 +556,7 @@ public abstract class AttributeValidator extends ContentValidator {
             // In XSD 1.1, the governing type declaration must be a subtype of the context-determined type
             // See rule 5 of Element Locally Valid (Complex Type)
             UserComplexType containingType = (UserComplexType) getSchemaType();
-            if (containingType.getLanguageVersion() != Configuration.XSD10) {
+            if (getValidationContext().getSchema().getXsdVersion() != Configuration.XSD10) {
                 SchemaType contextDeterminedType = containingType.getContextDeterminedTypeForElement(elementQName);
                 SchemaType governingType = childValidator.getSchemaType();
                 if (contextDeterminedType != null && governingType != null) {

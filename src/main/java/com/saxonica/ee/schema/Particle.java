@@ -199,7 +199,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      * @return the computed cardinality of this child element within the complex type
      */
 
-    public abstract int getElementParticleCardinality(int elementName) throws MissingComponentException;
+    public abstract int getElementParticleCardinality(int elementName, PreparedSchema schema) throws MissingComponentException;
 
     /**
      * Determine if empty content is allowed
@@ -224,7 +224,7 @@ public abstract class Particle extends SimpleComponentReference implements UserS
      */
 
     /*@Nullable*/
-    public abstract SchemaType getElementParticleType(int fingerprint) throws MissingComponentException;
+    public abstract SchemaType getElementParticleType(int fingerprint, PreparedSchema schema) throws MissingComponentException;
 
     /**
      * Check references from this component to other components

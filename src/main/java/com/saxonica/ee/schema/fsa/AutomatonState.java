@@ -269,14 +269,15 @@ public abstract class AutomatonState implements State {
      * Find the edge representing the transition from this state to another state, that is
      * triggered by a given input token
      *
-     * @param token the input token, specifically the fingerprint of an element name
-     * @param type  the complex type we are validating against
+     * @param token  the input token, specifically the fingerprint of an element name
+     * @param type   the complex type we are validating against
+     * @param schema
      * @return the Edge representing the selected transition of the finite state machine,
-     *         or null if this token is not accepted when in this State (which implies a validation error).
+     * or null if this token is not accepted when in this State (which implies a validation error).
      */
 
     @Override
-    public Edge getTransition(int token, UserComplexType type) {
+    public Edge getTransition(int token, UserComplexType type, PreparedSchema schema) {
         // assert determinized;
 
         // First see if there is a specific transition for this token
@@ -290,7 +291,7 @@ public abstract class AutomatonState implements State {
         if (wildcardEdges != null && wildcardEdges.length > 0) {
             NodeName name = new CodedName(token, "", config.getNamePool());
             for (final Edge wedge : wildcardEdges) {
-                if (((Wildcard) wedge.getTerm()).matches(name, true, config, type)) {
+                if (((Wildcard) wedge.getTerm()).matches(name, true, schema, type)) {
                     return wedge;
                 }
             }

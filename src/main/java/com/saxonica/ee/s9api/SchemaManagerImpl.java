@@ -3,11 +3,9 @@ package com.saxonica.ee.s9api;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
-import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -17,8 +15,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
 /**
- * The SchemaManager is used to load schema documents, and to set options for the way in which they are loaded.
- * At present all the resulting schema components are held in a single pool owned by the Processor object.
+ * A SchemaManager is used to load schema documents, and to set options for the way in which they are loaded.
  */
 @CSharpModifiers(code = {"internal"})
 public class SchemaManagerImpl extends SchemaManager {
@@ -26,18 +23,23 @@ public class SchemaManagerImpl extends SchemaManager {
     private final Processor processor;
     private ErrorReporter errorReporter;
     private PreparedSchema schema;
+    private String schemaName;
+    private int xsdVersion;
+    private boolean sealed = false;
 
-    public SchemaManagerImpl(Processor processor) {
+    public SchemaManagerImpl(Processor processor, String name) {
         this.processor = processor;
+        this.schemaName = name;
         errorReporter = processor.getUnderlyingConfiguration().makeErrorReporter();
         if (errorReporter instanceof StandardErrorReporter) {
             ((StandardErrorReporter) errorReporter).setOutputErrorCodes(false);
         }
+        xsdVersion = processor.getUnderlyingConfiguration().getXsdVersion();
     }
 
 
     /**
-     * Set the version of XSD in use. The value must be "1.0" or "1.1". The default is currently "1.0",
+     * Set the version of XSD in use for this schema. The value must be "1.0" or "1.1". The default is currently "1.0",
      * but this may change in a future release.
      *
      * @param version the version of the XSD specification/language: either "1.0" or "1.1".
@@ -46,7 +48,7 @@ public class SchemaManagerImpl extends SchemaManager {
     @Override
     public void setXsdVersion(String version) {
         if (version.equals("1.0") || version.equals("1.1")) {
-            processor.setConfigurationProperty(Feature.XSD_VERSION, version);
+            this.xsdVersion = version.equals("1.0") ? Configuration.XSD10 : Configuration.XSD11;
         } else {
             throw new IllegalArgumentException("XsdVersion");
         }
@@ -60,7 +62,7 @@ public class SchemaManagerImpl extends SchemaManager {
 
     @Override
     public String getXsdVersion() {
-        return processor.getUnderlyingConfiguration().getXsdVersion() == Configuration.XSD10 ? "1.0" : "1.1";
+        return xsdVersion == Configuration.XSD10 ? "1.0" : "1.1";
     }
 
     //#if CSHARP==false
@@ -134,7 +136,7 @@ public class SchemaManagerImpl extends SchemaManager {
     }
 
     /**
-     * Load a schema document from a given Source. The schema components derived from this schema
+     * Load schema documents from given Sources. The schema components derived from this schema
      * document are added to the cache of schema components maintained by this SchemaManager.
      *
      * <p>If the source is a {@link StreamSource} containing a systemId but no {@link java.io.InputStream}
@@ -142,7 +144,7 @@ public class SchemaManagerImpl extends SchemaManager {
      * resolver registered with the {@code Configuration}. It is NOT resolved using the {@link SchemaURIResolver} (this
      * is used only for included and imported modules).</p>
      *
-     * @param source the document containing the schema. The getSystemId() method applied to this Source
+     * @param sources the documents containing the schema. The getSystemId() method applied to each Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
      *               directives. The document may be either a schema document in source XSD format, or a compiled
      *               schema in Saxon-defined SCM format (as produced using the -export option)
@@ -151,35 +153,35 @@ public class SchemaManagerImpl extends SchemaManager {
      */
 
     @Override
-    public void load(Source source) throws SaxonApiException {
+    public synchronized void load(Source... sources) throws SaxonApiException {
+        if (sealed) {
+            throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
+        }
+        sealed = true;
         try {
-            if (source instanceof StreamSource) {
-                if (((StreamSource) source).getInputStream() == null &&
-                        ((StreamSource) source).getReader() == null &&
-                        source.getSystemId() != null) {
-                    ResourceRequest request = new ResourceRequest();
-                    request.uri = source.getSystemId();
-                    request.nature = ResourceRequest.XSD_NATURE;
-                    Source s2 = processor.getUnderlyingConfiguration().getResourceResolver().resolve(request);
-                    if (s2 != null) {
-                        source = s2;
+            final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
+            schema = new PreparedSchema(config);
+            schema.setXsdVersion(xsdVersion);
+            SchemaCompiler compiler = new SchemaCompiler(config);
+            compiler.setLanguageVersion(xsdVersion);
+            for (Source source : sources) {
+                if (source instanceof StreamSource) {
+                    if (((StreamSource) source).getInputStream() == null &&
+                            ((StreamSource) source).getReader() == null &&
+                            source.getSystemId() != null) {
+                        ResourceRequest request = new ResourceRequest();
+                        request.uri = source.getSystemId();
+                        request.nature = ResourceRequest.XSD_NATURE;
+                        Source s2 = processor.getUnderlyingConfiguration().getResourceResolver().resolve(request);
+                        if (s2 != null) {
+                            source = s2;
+                        }
                     }
                 }
+                schema.addSchemaSource(source, errorReporter, compiler);
             }
-            final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
-            if (schema == null) {
-                schema = new PreparedSchema(config);
-            }
-            //PreparedSchema schema = config.getUnnamedSchema();
-            schema.addSchemaSource(source, errorReporter, new SchemaCompiler(config));
-            if (schema instanceof SingleNamespaceSchema) {
-                config.registerSchemaForNamespace(((SingleNamespaceSchema)schema).getTargetNamespace(), schema);
-            }
-            // TODO: handle multiple namespaces properly
-            else {
-                for (NamespaceUri uri : schema.getTargetNamespaces()) {
-                    config.registerSchemaForNamespace(uri, schema);
-                }
+            if (!schemaName.equals("#local")) {
+                config.registerNamedSchema(schemaName, schema);
             }
         } catch (XPathException e) {
             throw new SaxonApiException(e);
@@ -195,7 +197,11 @@ public class SchemaManagerImpl extends SchemaManager {
      */
 
     @Override
-    public void importComponents(Source source) throws SaxonApiException {
+    public synchronized void importComponents(Source source) throws SaxonApiException {
+        if (sealed) {
+            throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
+        }
+        sealed = true;
         try {
             processor.getUnderlyingConfiguration().importComponents(source);
         } catch (XPathException err) {
@@ -236,7 +242,12 @@ public class SchemaManagerImpl extends SchemaManager {
 
     @Override
     public SchemaValidator newSchemaValidator() {
-        return new SchemaValidatorImpl(processor, schema);
+        PreparedSchema ps = schema;
+        if (ps == null) {
+            ps = new PreparedSchema((EnterpriseConfiguration) processor.getUnderlyingConfiguration());
+            ps.setXsdVersion(xsdVersion);
+        }
+        return new SchemaValidatorImpl(processor, ps);
     }
 
 

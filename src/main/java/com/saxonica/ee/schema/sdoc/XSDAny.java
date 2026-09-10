@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema.sdoc;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.ElementWildcard;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
@@ -30,7 +31,7 @@ public class XSDAny extends AnnotationParent {
 
     @Override
     protected void prepareAttributes() throws SchemaException {
-        wildcard = new ElementWildcard(getSchema());
+        wildcard = new ElementWildcard((EnterpriseConfiguration)getConfiguration());
         wildcard.setLocator(this);
 
         AttributeMap atts = attributes();

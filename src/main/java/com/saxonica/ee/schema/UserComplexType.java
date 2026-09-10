@@ -160,12 +160,6 @@ public class UserComplexType extends UserDefinedType
     private Map<StructuredQName, SimpleType> contextDeterminedTypesForAttributes;
 
     /**
-     * Version of XML Schema specification in use
-     */
-
-    private int xsdVersion = Configuration.XSD10;
-
-    /**
      * Creates a new user-defined Complextype
      *
      * @param config  the Configuration to which this user-defined complex type belongs
@@ -211,16 +205,6 @@ public class UserComplexType extends UserDefinedType
 
     public void setSaxonDebug(boolean debug) {
         this.debug = debug;
-    }
-
-    /**
-     * Get the XML Schema language version
-     *
-     * @return {@link Configuration#XSD10} or {@link Configuration#XSD11}
-     */
-
-    public int getLanguageVersion() {
-        return xsdVersion;
     }
 
     /**
@@ -977,7 +961,6 @@ public class UserComplexType extends UserDefinedType
             return true;
         }
         setValidationStatus(VALIDATING);
-        xsdVersion = compiler.getLanguageVersion();
 
         //-- check content model
         if (particle != null) {
@@ -1121,6 +1104,8 @@ public class UserComplexType extends UserDefinedType
      */
 
     private boolean validateExtension(SchemaCompiler compiler, SchemaType base) throws SchemaException {
+
+        PreparedSchema schema = compiler.getPreparedSchema();
 
         // If the base type already has an extension identical to this one, then we can make a quick
         // exit. This can happen when the same schema is processed more than once.
@@ -1435,9 +1420,9 @@ public class UserComplexType extends UserDefinedType
                             int derivation = particleBaseType.getDerivationMethod();
                             SchemaType g = particleBaseType.getBaseType();
                             if (g instanceof UserComplexType && derivation == Derivation.DERIVATION_RESTRICTION) {
-                                SchemaType original = ((UserComplexType) g).getElementParticleType(fp, false);
+                                SchemaType original = ((UserComplexType) g).getElementParticleType(fp, null, false);
                                 if (original != null) {
-                                    SchemaType derived = particle.getElementParticleType(fp);
+                                    SchemaType derived = particle.getElementParticleType(fp, schema);
                                     try {
                                         derived.checkTypeDerivationIsOK(original, 0);
                                     } catch (SchemaException se) {
@@ -1779,8 +1764,9 @@ public class UserComplexType extends UserDefinedType
             }
         }
         makeCombinedAttributeGroup(compiler);
-        makeContextDeterminedTypeMapForAttributes();
-        makeContextDeterminedTypeMapForElements();
+        PreparedSchema schema = compiler.getPreparedSchema();
+        makeContextDeterminedTypeMapForAttributes(schema);
+        makeContextDeterminedTypeMapForElements(schema);
     }
 
     protected void makeAutomaton(SchemaCompiler compiler) throws SchemaException {
@@ -1964,7 +1950,7 @@ public class UserComplexType extends UserDefinedType
                 // weird thing to do, and it doesn't make sense unless the extension is empty.
                 if (isLocallyEmpty()) {
                     // this is equivalent to a content model of xs:any namespace="##any"
-                    ElementWildcard any = new ElementWildcard(compiler.getPreparedSchema());
+                    ElementWildcard any = new ElementWildcard(compiler.getConfiguration());
                     any.setMinOccurs(0);
                     any.setMaxOccurs(-1);
                     any.getWildcard().setProcessContents("lax");
@@ -2049,26 +2035,28 @@ public class UserComplexType extends UserDefinedType
      * If there is no such particle, return null. If the fingerprint matches an element wildcard,
      * return the type of the global element declaration with the given name if one exists, or AnyType
      * if none exists and lax validation is permitted by the wildcard.
+     *
      * @param elementName        Identifies the name of the child element within this content model
+     * @param schema
      * @param considerExtensions if true, and if the element particle is not defined within this type itself,
      *                           try to find it within the types derived by extension from this type, and/or within the open content
      *                           model permitted by the type. If there is one extension that defines the particle, return
      */
 
     @Override
-    public SchemaType getElementParticleType(int elementName, boolean considerExtensions) throws MissingComponentException {
+    public SchemaType getElementParticleType(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException {
         Particle p = getParticle();
-        SchemaType child = p == null ? null : p.getElementParticleType(elementName);
+        SchemaType child = p == null ? null : p.getElementParticleType(elementName, schema);
         if (child != null) {
             return child;
         } else if (considerExtensions) {
             if (openContentWildcard != null &&
-                    openContentWildcard.matches(elementName, true, getConfiguration(), this)) {
+                    openContentWildcard.matches(elementName, true, schema, this)) {
                 return AnyType.getInstance();
             }
             for (UserComplexType ext : getExtensionTypes()) {
                 // No need to consider further extensions, as iterateExtensionTypes() returns the transitive set
-                SchemaType st = ext.getElementParticleType(elementName, false);
+                SchemaType st = ext.getElementParticleType(elementName, null, false);
                 if (st != null) {
                     if (child == null) {
                         child = st;
@@ -2095,22 +2083,23 @@ public class UserComplexType extends UserDefinedType
      * for wildcard particles, element particles in extension types, and wildcards defined as open content.
      *
      * @param elementName        Identifies the name of the child element within this content model
+     * @param schema
      * @param considerExtensions if true, types derived by extension from this type should be taken into account
      * @return the cardinality of the requested element within this complex type
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName, boolean considerExtensions) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException {
         int baseCardinality;
         Particle p = getParticle();
         if (p == null) {
             baseCardinality = StaticProperty.EMPTY;
         } else {
-            baseCardinality = p.getElementParticleCardinality(elementName);
+            baseCardinality = p.getElementParticleCardinality(elementName, schema);
         }
         // See if it matches open content
         if (openContentWildcard != null &&
-                openContentWildcard.matches(elementName, true, getConfiguration(), this)) {
+                openContentWildcard.matches(elementName, true, schema, this)) {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
         // Now we need to look in all complex types derived from this type by extension. These might allow
@@ -2122,7 +2111,7 @@ public class UserComplexType extends UserDefinedType
                     return baseCardinality;
                 }
                 // No need to consider extensions recursively, since iterateExtensionTypes() is already transitive
-                int extCardinality = ext.getElementParticleCardinality(elementName, false);
+                int extCardinality = ext.getElementParticleCardinality(elementName, schema, false);
                 baseCardinality = Cardinality.union(baseCardinality, extCardinality);
             }
         }
@@ -2137,10 +2126,11 @@ public class UserComplexType extends UserDefinedType
      * if none exists and lax validation is permitted by the wildcard.
      *
      * @param attributeName Identifies the name of the required attribute use within this content model
+     * @param schema
      */
 
     @Override
-    public SimpleType getAttributeUseType(StructuredQName attributeName) throws SchemaException {
+    public SimpleType getAttributeUseType(StructuredQName attributeName, Schema schema) throws SchemaException {
         AttributeGroupDecl ag = getCombinedAttributeGroup();
         AttributeUse use = ag.getAttributeUse(attributeName);
         if (use != null && !use.isProhibited()) {
@@ -2148,7 +2138,7 @@ public class UserComplexType extends UserDefinedType
         }
         SimpleType attType = null;
         for (UserComplexType ext : getExtensionTypes()) {
-            SimpleType st = ext.getAttributeUseType(attributeName);
+            SimpleType st = ext.getAttributeUseType(attributeName, schema);
             if (st != null) {
                 if (attType == null) {
                     attType = st;
@@ -2168,12 +2158,12 @@ public class UserComplexType extends UserDefinedType
             return null;
         }
         Wildcard wild = awild.getWildcard();
-        if (wild.matches(attributeName, false, getConfiguration(), null)) {
+        if (wild.matches(attributeName, false, (PreparedSchema)schema, null)) {
             switch (wild.getProcessContents()) {
                 case "skip":
                     return AnySimpleType.getInstance();
                 case "strict": {
-                    AttributeDecl decl = getConfiguration().getUnnamedSchema().getAttributeDecl(attributeName);
+                    AttributeDecl decl = (AttributeDecl)schema.getAttributeDecl(attributeName);
                     if (decl != null) {
                         return decl.getType();
                     } else {
@@ -2181,7 +2171,7 @@ public class UserComplexType extends UserDefinedType
                     }
                 }
                 default: { // processContents() = lax
-                    AttributeDecl decl = getConfiguration().getUnnamedSchema().getAttributeDecl(attributeName);
+                    AttributeDecl decl = (AttributeDecl)schema.getAttributeDecl(attributeName);
                     if (decl != null) {
                         return decl.getType();
                     } else {
@@ -2202,6 +2192,7 @@ public class UserComplexType extends UserDefinedType
      * <p>If there are types derived from this type by extension, search those too.</p>
      *
      * @param attributeName Identifies the name of the required attribute within this content model
+     * @param schema
      * @return the cardinality associated with the attribute use identified by the fingerprint.
      * If the attribute is optional but either the attribute use or the corresponding attribute
      * declaration defines a default or fixed value, then it is treated as optional (zero-or-one),
@@ -2210,7 +2201,7 @@ public class UserComplexType extends UserDefinedType
      */
 
     @Override
-    public int getAttributeUseCardinality(StructuredQName attributeName) throws SchemaException {
+    public int getAttributeUseCardinality(StructuredQName attributeName, Schema schema) throws SchemaException {
         AttributeGroupDecl ag = getCombinedAttributeGroup();
         AttributeUse use = ag.getAttributeUse(attributeName);
         if (use != null) {
@@ -2218,7 +2209,7 @@ public class UserComplexType extends UserDefinedType
         }
         int card = 0;
         for (UserComplexType ext : getExtensionTypes()) {
-            int c = ext.getAttributeUseCardinality(attributeName);
+            int c = ext.getAttributeUseCardinality(attributeName, schema);
             card |= c;
         }
         if (card != 0) {
@@ -2229,7 +2220,7 @@ public class UserComplexType extends UserDefinedType
             return StaticProperty.EMPTY;
         }
         Wildcard wild = awild.getWildcard();
-        if (wild.matches(attributeName, false, getConfiguration(), null)) {
+        if (wild.matches(attributeName, false, (PreparedSchema)schema, null)) {
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         }
         return StaticProperty.EMPTY;
@@ -2286,19 +2277,19 @@ public class UserComplexType extends UserDefinedType
      * @throws SchemaException if an error is encountered
      */
 
-    public void makeContextDeterminedTypeMapForElements() throws SchemaException {
+    public void makeContextDeterminedTypeMapForElements(PreparedSchema schema) throws SchemaException {
         if (contextDeterminedTypesForElements != null) {
             return;
         }
         contextDeterminedTypesForElements = new HashMap<>();
-        gatherContextDeterminedTypesForElements(contextDeterminedTypesForElements);
+        gatherContextDeterminedTypesForElements(contextDeterminedTypesForElements, schema);
     }
 
-    private void gatherContextDeterminedTypesForElements(Map<StructuredQName, SchemaType> map) throws SchemaException {
+    private void gatherContextDeterminedTypesForElements(Map<StructuredQName, SchemaType> map, PreparedSchema schema) throws SchemaException {
         // Gather from the base type first, so that the subtype wins if the type is redefined
         SchemaType base = getBaseType();
         if (base instanceof UserComplexType) {
-            ((UserComplexType) base).gatherContextDeterminedTypesForElements(map);
+            ((UserComplexType) base).gatherContextDeterminedTypesForElements(map, schema);
         }
         Particle p = getParticle();
         if (p != null) {
@@ -2308,7 +2299,7 @@ public class UserComplexType extends UserDefinedType
             IntIterator kids = children.iterator();
             while (kids.hasNext()) {
                 int fp = kids.next();
-                SchemaType type = getElementParticleType(fp, false);
+                SchemaType type = getElementParticleType(fp, schema, false);
                 map.put(getNamePool().getStructuredQName(fp), type);
             }
         }
@@ -2336,24 +2327,24 @@ public class UserComplexType extends UserDefinedType
      *          if an error is encountered
      */
 
-    public void makeContextDeterminedTypeMapForAttributes() throws SchemaException {
+    public void makeContextDeterminedTypeMapForAttributes(PreparedSchema schema) throws SchemaException {
         if (contextDeterminedTypesForAttributes != null) {
             return;
         }
         contextDeterminedTypesForAttributes = new HashMap<>();
-        gatherContextDeterminedTypesForAttributes(contextDeterminedTypesForAttributes);
+        gatherContextDeterminedTypesForAttributes(contextDeterminedTypesForAttributes, schema);
     }
 
-    private void gatherContextDeterminedTypesForAttributes(Map<StructuredQName, SimpleType> map) throws SchemaException {
+    private void gatherContextDeterminedTypesForAttributes(Map<StructuredQName, SimpleType> map, PreparedSchema schema) throws SchemaException {
         // Gather from the base type first, so that the subtype wins if the type is redefined
         SchemaType base = getBaseType();
         if (base instanceof UserComplexType) {
-            ((UserComplexType) base).gatherContextDeterminedTypesForAttributes(map);
+            ((UserComplexType) base).gatherContextDeterminedTypesForAttributes(map, schema);
         }
         for (AttributeUse use : getAttributeGroup().getAttributeUses()) {
             if (!use.isProhibited()) {
                 StructuredQName fp = use.getTargetComponentName();
-                SimpleType type = getAttributeUseType(fp);
+                SimpleType type = getAttributeUseType(fp, schema);
                 map.put(fp, type);
             }
         }
@@ -2431,7 +2422,7 @@ public class UserComplexType extends UserDefinedType
         while (kids.hasNext()) {
             int c = kids.next();
             if (descendants.add(c)) {
-                SchemaType childType = getElementParticleType(c, true);
+                SchemaType childType = getElementParticleType(c, null, true);
                 if (childType == null) {
                     throw new AssertionError("Child particle " + c + " not found");
                 }
@@ -2483,7 +2474,7 @@ public class UserComplexType extends UserDefinedType
         }
 
         // See if the requested element can appear as a child
-        SchemaType targetType = getElementParticleType(elementName, true);
+        SchemaType targetType = getElementParticleType(elementName, null, true);
         if (targetType != null) {
             foundTypes.add(targetType);
             if (targetType == AnyType.getInstance()) {
@@ -2501,7 +2492,7 @@ public class UserComplexType extends UserDefinedType
         IntIterator kids = permittedChildren.iterator();
         while (kids.hasNext()) {
             int c = kids.next();
-            SchemaType childType = getElementParticleType(c, true);
+            SchemaType childType = getElementParticleType(c, null, true);
             if (childType == null) {
                 throw new AssertionError("Child particle " + c + " not found");
             }
@@ -2537,7 +2528,7 @@ public class UserComplexType extends UserDefinedType
         IntIterator kids = children.iterator();
         while (kids.hasNext()) {
             int child = kids.next();
-            int childCard = getElementParticleCardinality(child, true);
+            int childCard = getElementParticleCardinality(child, null, true);
             if (child == elementFingerprint) {
                 cardinality = Cardinality.sum(cardinality, childCard);
                 if (Cardinality.allowsMany(cardinality)) {
@@ -2545,7 +2536,7 @@ public class UserComplexType extends UserDefinedType
                     return cardinality;
                 }
             }
-            SchemaType childType = getElementParticleType(child, true);
+            SchemaType childType = getElementParticleType(child, null, true);
             if (childType != null && childType.isComplexType()) {
                 IntHashSet childDescendants = new IntHashSet();
                 ((ComplexType) childType).gatherAllPermittedDescendants(childDescendants);
@@ -2827,7 +2818,7 @@ public class UserComplexType extends UserDefinedType
             for (Particle p : subAll.getParticles()) {
                 min += p.getMinOccurs();
                 max += p.getMaxOccurs();
-                if (!((ElementWildcard) base).getWildcard().matches(p.getTargetComponentName(), true, config, this)) {
+                if (!((ElementWildcard) base).getWildcard().matches(p.getTargetComponentName(), true, compiler.getPreparedSchema(), this)) {
                     NamespaceUri uri = p.getTargetComponentName().getNamespaceUri();
                     return "The base type does not allow elements in " +
                             (uri.isEmpty() ? "no namespace" : "namespace " + uri);
@@ -2848,7 +2839,7 @@ public class UserComplexType extends UserDefinedType
     }
 
     /**
-     * Analyze an expression to see whether the expression is capable of delivering a value of this
+     * Analyze an XPath expression to see whether the expression is capable of delivering a value of this
      * type.
      *
      * @param expression the expression that delivers the content. If this is a Block, the sequence of
@@ -2857,12 +2848,12 @@ public class UserComplexType extends UserDefinedType
      *                   the analysis onto other expressions.
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
      *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the expression will never deliver a value of the correct type (that is, of this type)
+     * @param schema
+     * @throws net.sf.saxon.trans.XPathException if the expression will never deliver a value of the correct type (that is, of this type)
      */
 
     @Override
-    public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
+    public void analyzeContentExpression(Expression expression, int kind, Schema schema) throws XPathException {
         Configuration config = getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
 
@@ -2928,12 +2919,12 @@ public class UserComplexType extends UserDefinedType
                     if (child instanceof FixedElement) {
                         NodeName elementName = ((FixedElement) child).getFixedElementName();
                         int fingerprint = ((FixedElement) child).getFixedElementName().getFingerprint();
-                        final Edge edge = state.getTransition(fingerprint, this);
+                        final Edge edge = state.getTransition(fingerprint, this, (PreparedSchema)schema);
                         if (edge == null) {
                             FiniteStateMachine machine = getFiniteStateMachine();
                             Wildcard openContentWildcard = machine.getOpenContentWildcard();
                             if (openContentWildcard != null &&
-                                    openContentWildcard.matches(elementName, true, getConfiguration(), this)) {
+                                    openContentWildcard.matches(elementName, true, (PreparedSchema)schema, this)) {
                                 if (machine.isOpenContentInterleaved()) {
                                     // interleaved open content: leave the state unchanged
                                     continue;
@@ -3120,7 +3111,6 @@ public class UserComplexType extends UserDefinedType
             if (base instanceof UserComplexType) {
                 ((UserComplexType) base).elaborate(compiler);
             }
-            xsdVersion = compiler.getLanguageVersion();
             extendedParticle = particle;
             if (particle != null) {
                 particle.elaborate(compiler);
@@ -3131,8 +3121,9 @@ public class UserComplexType extends UserDefinedType
             for (AttributeUse att : extendedAttributes.getAttributeUses()) {
                 att.elaborate(compiler);
             }
-            makeContextDeterminedTypeMapForAttributes();
-            makeContextDeterminedTypeMapForElements();
+            PreparedSchema schema = compiler.getPreparedSchema();
+            makeContextDeterminedTypeMapForAttributes(schema);
+            makeContextDeterminedTypeMapForElements(schema);
             setValidationStatus(VALIDATED);
         }
     }
@@ -3433,7 +3424,7 @@ public class UserComplexType extends UserDefinedType
                 IntIterator iter = children.iterator();
                 iter.hasNext();
                 int fp = iter.next();
-                int card = getElementParticleCardinality(fp, true);
+                int card = getElementParticleCardinality(fp, null, true);
                 if (Cardinality.allowsMany(card)) {
                     return (allowsAttributes() ? "list-plus" : "list") + "/" + fp;
                 } else {

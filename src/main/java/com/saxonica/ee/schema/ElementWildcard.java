@@ -20,17 +20,14 @@ public class ElementWildcard extends Particle {
      */
 
     private Wildcard wildcard;
-    private final PreparedSchema schema;
 
-    public ElementWildcard(PreparedSchema schema) {
-        this.schema = schema;
-        wildcard = new Wildcard(schema);
-        wildcard.setConfiguration(schema.getConfiguration());
-        setConfiguration(schema.getConfiguration());
+    public ElementWildcard(EnterpriseConfiguration config) {
+        wildcard = new Wildcard(config);
+        setConfiguration(config);
     }
 
     public ElementWildcard copy() {
-        ElementWildcard e = new ElementWildcard(schema);
+        ElementWildcard e = new ElementWildcard(getConfiguration());
         e.wildcard = wildcard;
         e.setMinOccurs(getMinOccurs());
         e.setMaxOccurs(getMaxOccurs());
@@ -39,7 +36,7 @@ public class ElementWildcard extends Particle {
 
     public ElementWildcard(Wildcard wc) {
         wildcard = wc;
-        schema = wc.getSchema();
+        setConfiguration(wc.getConfiguration());
     }
 
     public void setWildcard(Wildcard wildcard) {
@@ -108,13 +105,12 @@ public class ElementWildcard extends Particle {
 
     /*@Nullable*/
     @Override
-    public SchemaType getElementParticleType(int elementName) {
-        EnterpriseConfiguration config = getConfiguration();
-        if (wildcard.matches(elementName, true, config, null)) {
+    public SchemaType getElementParticleType(int elementName, PreparedSchema schema) {
+        if (wildcard.matches(elementName, true, schema, null)) {
             if (wildcard.getProcessContents().equals("skip")) {
                 return AnyType.getInstance();
             } else if (wildcard.getProcessContents().equals("strict")) {
-                ElementDecl decl = getConfiguration().getUnnamedSchema().getElementDecl(elementName);
+                ElementDecl decl = schema.getElementDecl(elementName);
                 if (decl == null) {
                     return null;
                 } else {
@@ -125,7 +121,7 @@ public class ElementWildcard extends Particle {
                     }
                 }
             } else { // processContents = "lax"
-                ElementDecl decl = getConfiguration().getUnnamedSchema().getElementDecl(elementName);
+                ElementDecl decl = schema.getElementDecl(elementName);
                 if (decl == null) {
                     return AnyType.getInstance();
                 } else {
@@ -152,9 +148,9 @@ public class ElementWildcard extends Particle {
      */
 
     @Override
-    public int getElementParticleCardinality(int elementName) {
+    public int getElementParticleCardinality(int elementName, PreparedSchema schema) {
         EnterpriseConfiguration config = getConfiguration();
-        if (wildcard.matches(elementName, true, config, null)) {
+        if (wildcard.matches(elementName, true, schema, null)) {
             return Particle.computeParticleCardinality(getMinOccurs(), getMaxOccurs());
         }
         return StaticProperty.ALLOWS_ZERO;

@@ -87,6 +87,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private int licensedFeatures = 0;
     private HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
     private ConcurrentHashMap<NamespaceUri, Schema> schemaCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Schema> namedSchemaCache = new ConcurrentHashMap<>();
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
     private final SchemaURIResolver standardSchemaResolver;
@@ -879,11 +880,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type) {
+    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type, Schema schema) {
         if (type instanceof UserDefinedType) {
             return ((UserDefinedType) type).getExtensionTypes();
         } else {
-            return getUnnamedSchema().getExtensionsOfBuiltInType(type.getFingerprint());
+            return ((PreparedSchema)schema).getExtensionsOfBuiltInType(type.getFingerprint());
         }
     }
 
@@ -935,6 +936,12 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     public void registerSchemaForNamespace(NamespaceUri uri, Schema schema) {
         schemaCache.put(uri, schema);
     }
+
+    public void registerNamedSchema(String name, Schema schema) {
+        namedSchemaCache.put(name, schema);
+    }
+
+
 
     /**
      * Make a union type with a given list of member types

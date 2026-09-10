@@ -6,9 +6,7 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.InvalidityHandler;
-import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
@@ -19,6 +17,7 @@ import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 
+import javax.xml.transform.Source;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -303,15 +302,18 @@ public class XSIAttributeHandler extends ValidatingFilter {
     /**
      * Load a schema identified in an xsi:schemaLocation or xsi:noNamespaceSchemaLocation attribute
      *
-     * @param value    The absolute URI of the location hint
+     * @param locationHint    The absolute URI of the location hint
      * @param targetNS The required target namespace
      * @throws XPathException If the schema is invalid for any reason
      */
-    private void loadSchema(URI value, NamespaceUri targetNS) throws XPathException {
+    private void loadSchema(URI locationHint, NamespaceUri targetNS) throws XPathException {
+
+        PreparedSchema schema = getValidationContext().getSchema();
+        EnterpriseConfiguration config = schema.getConfiguration();
 
         // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
 
-        int status = ((EnterpriseConfiguration) getConfiguration()).getNamespaceStatus(targetNS);
+        int status = schema.getNamespaceStatus(targetNS);
 
         // There are three possibilities. Either this schema is previously
         // unknown, and we carry on to load it. Or it was a normal PreparedSchema, in which case we can
@@ -332,15 +334,20 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 ErrorReporter listener = ((InvalidityHandlerWrappingErrorReporter) handler).getErrorReporter();
                 pipe.setErrorReporter(listener);
             }
-            EnterpriseConfiguration config = (EnterpriseConfiguration) pipe.getConfiguration();
-            config.readSchema(pipe, null, value.toString(), targetNS);
+
+            ResourceRequest request = new ResourceRequest();
+            request.uri = locationHint.toString();
+            request.nature = ResourceRequest.XSD_NATURE;
+            Source s2 = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+            SchemaCompiler compiler = new SchemaCompiler(config);
+            schema.addSchemaSource(s2, getValidationContext().getController().getErrorReporter(), compiler);
+
         } catch (SchemaException e) {
             // Recovery path. At this point we MAY have added components to the schema pool that have not
             // been fully validated/compiled. This is unfortunate, because it means that the whole
             // Configuration needs to be brought down. We'll attempt to validate what's been added.
             try {
                 pipe = new PipelineConfiguration(getPipelineConfiguration());
-                EnterpriseConfiguration config = (EnterpriseConfiguration) pipe.getConfiguration();
                 SchemaCompiler compiler = config.newSchemaCompiler();
                 compiler.setPreparedSchema(config.getUnnamedSchema());
                 config.getUnnamedSchema().validate(compiler);
@@ -348,7 +355,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 ErrorReporter reporter = pipe.getErrorReporter();
                 reporter.report(new XmlProcessingException(e).asWarning());
                 reporter.report(
-                        new XmlProcessingIncident("Validation will continue without the schema at " + value).asWarning());
+                        new XmlProcessingIncident("Validation will continue without the schema at " + locationHint).asWarning());
             } catch (SchemaException err) {
                 // Revalidation failed
                 throw XPathException.makeXPathException(e);

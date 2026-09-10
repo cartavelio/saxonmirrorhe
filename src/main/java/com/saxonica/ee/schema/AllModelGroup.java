@@ -472,6 +472,7 @@ public class AllModelGroup extends ModelGroup {
     }
 
     private String subsumesAllOrSequence(ModelGroup subg, SchemaCompiler compiler) throws MissingComponentException {
+        PreparedSchema schema = compiler.getPreparedSchema();
         List<Particle> baseParticles = getSimplifiedContentModel();
         IntHashMap<ElementParticle> baseElements = new IntHashMap<ElementParticle>(baseParticles.size());
         int[] minCounters = new int[getMinima().length];
@@ -583,7 +584,7 @@ public class AllModelGroup extends ModelGroup {
                         // if the wildcard imposes fewer constraints than the element particle, then the type
                         // derivation is not valid.
                         ElementParticle ep = (ElementParticle) baseParticle;
-                        if (wp.getWildcard().matches(ep.getTargetComponentName(), true, getConfiguration(), null)) {
+                        if (wp.getWildcard().matches(ep.getTargetComponentName(), true, schema, null)) {
                             boolean found = false;
                             for (Particle derivedParticle : derivedParticles) {
                                 if (derivedParticle instanceof ElementParticle &&
