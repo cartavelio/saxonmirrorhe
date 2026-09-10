@@ -988,11 +988,10 @@ XdmValue *XsltExecutable::getXslMessages() {
 
     if (results != nullptr) {
       int sizex = results[0];
-      // std::cerr<<"getXslMessages cp0 size= "<<sizex<<std::endl;
+      //std::cerr<<"getXslMessages cp0 size= "<<sizex<<std::endl;
       XdmValue *value = new XdmValue();
       for (int i = 1; i <= sizex; i++) {
         XdmItem *item = nullptr;
-
         item = SaxonProcessor::makeXdmItemFromRef(results[i]);
         if (value != nullptr) {
           value->addXdmItem(item);
