@@ -228,7 +228,7 @@ void setProperty(sxnc_property **properties, int *propLen, int *propCap,
 void clearSettings(sxnc_parameter **parameters, int *parLen,
                    sxnc_property **properties, int *propLen) {
   free(*parameters);
-  free(*parameters);
+  free(*properties);
 
   *parameters = (sxnc_parameter *)calloc(10, sizeof(sxnc_parameter));
   *properties = (sxnc_property *)calloc(10, sizeof(sxnc_property));
