@@ -193,7 +193,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             }
             Sequence[] args = new Sequence[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                args[i] = SequenceTool.toGroundedValue(arguments[i].iterate());
+                args[i] = arguments[i].materialize(); // TODO: is the copy needed?
             }
             return function.call(context.newCleanContext(), args);
         }
