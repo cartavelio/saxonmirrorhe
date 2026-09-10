@@ -1,0 +1,385 @@
+package net.sf.saxon.type;
+
+
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.value.*;
+
+import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.util.function.Function;
+
+public class AtomicComponent {
+
+
+
+    private static class ComponentDetails {
+        SequenceType componentType;
+        Function<AtomicValue, UnfailingIterator> supplier;
+    }
+
+    private static Map<AtomicType, Map<String, ComponentDetails>> componentMap = new HashMap<>();
+
+    private static void register(BuiltInAtomicType type, String fieldName, SequenceType componentType,
+                                 Function<AtomicValue, UnfailingIterator> supplier) {
+        Map<String, ComponentDetails> typeData = componentMap.computeIfAbsent(type, k -> new HashMap<>());
+        ComponentDetails details = new ComponentDetails();
+        details.componentType = componentType;
+        details.supplier = supplier;
+        typeData.put(fieldName, details);
+    }
+
+    static UnfailingIterator oneInt(long x) {
+        return SingletonIterator.makeIterator(Int64Value.makeIntegerValue(x));
+    }
+
+    static UnfailingIterator oneDec(BigDecimal x) {
+        return SingletonIterator.makeIterator(new BigDecimalValue(x));
+    }
+
+    static UnfailingIterator timezone(CalendarValue a) {
+        if (a.hasTimezone()) {
+            try {
+                return SingletonIterator.makeIterator(
+                        DayTimeDurationValue.fromMilliseconds(60000L * a.getTimezoneInMinutes()));
+            } catch (ValidationException e) {
+                return EmptyIterator.ofAtomic();
+            }
+        } else {
+            return EmptyIterator.ofAtomic();
+        }
+    }
+
+
+    static {
+        register(BuiltInAtomicType.DATE_TIME, "year", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateTimeValue) a).getYear())
+        );
+        register(BuiltInAtomicType.DATE_TIME, "month", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateTimeValue) a).getMonth())
+        );
+        register(BuiltInAtomicType.DATE_TIME, "day", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateTimeValue) a).getDay())
+        );
+        register(BuiltInAtomicType.DATE_TIME, "hours", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateTimeValue) a).getHour())
+        );
+        register(BuiltInAtomicType.DATE_TIME, "minutes", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateTimeValue) a).getMinute())
+        );
+        register(BuiltInAtomicType.DATE_TIME, "seconds", SequenceType.SINGLE_INTEGER,
+                 a -> {
+                     BigDecimal d = BigDecimal.valueOf(((DateTimeValue)a).getNanosecond());
+                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, BigDecimal.ROUND_HALF_UP);
+                     d = d.add(BigDecimal.valueOf(((DateTimeValue) a).getSecond()));
+                     return oneDec(d);
+                 }
+        );
+        register(BuiltInAtomicType.DATE_TIME, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((DateTimeValue) a)
+        );
+        
+        register(BuiltInAtomicType.DATE, "year", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateValue) a).getYear())
+        );
+        register(BuiltInAtomicType.DATE, "month", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateValue) a).getMonth())
+        );
+        register(BuiltInAtomicType.DATE, "day", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DateValue) a).getDay())
+        );
+        register(BuiltInAtomicType.DATE, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((DateValue) a)
+        );
+
+        register(BuiltInAtomicType.TIME, "hours", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((TimeValue) a).getHour())
+        );
+        register(BuiltInAtomicType.TIME, "minutes", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((TimeValue) a).getMinute())
+        );
+        register(BuiltInAtomicType.TIME, "seconds", SequenceType.SINGLE_INTEGER,
+                 a -> {
+                     BigDecimal d = BigDecimal.valueOf(((TimeValue) a).getNanosecond());
+                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, BigDecimal.ROUND_HALF_UP);
+                     d = d.add(BigDecimal.valueOf(((TimeValue) a).getSecond()));
+                     return oneDec(d);
+                 }
+        );
+        register(BuiltInAtomicType.TIME, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((TimeValue) a)
+        );
+
+        register(BuiltInAtomicType.G_YEAR, "year", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((GDateValue) a).getYear())
+        );
+        register(BuiltInAtomicType.G_YEAR, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((GDateValue) a)
+        );
+
+        register(BuiltInAtomicType.G_YEAR_MONTH, "year", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((GDateValue) a).getYear())
+        );
+        register(BuiltInAtomicType.G_YEAR_MONTH, "month", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((GDateValue) a).getMonth())
+        );
+        register(BuiltInAtomicType.G_YEAR_MONTH, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((GDateValue) a)
+        );
+
+        register(BuiltInAtomicType.G_MONTH, "month", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((GDateValue) a).getMonth())
+        );
+        register(BuiltInAtomicType.G_MONTH, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((GDateValue) a)
+        );
+
+        register(BuiltInAtomicType.G_MONTH_DAY, "month", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((GDateValue) a).getMonth())
+        );
+        register(BuiltInAtomicType.G_MONTH_DAY, "day", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((GDateValue) a).getDay())
+        );
+        register(BuiltInAtomicType.G_MONTH_DAY, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((GDateValue) a)
+        );
+
+        register(BuiltInAtomicType.G_DAY, "day", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((GDateValue) a).getDay())
+        );
+        register(BuiltInAtomicType.G_DAY, "timezone", SequenceType.OPTIONAL_DAY_TIME_DURATION,
+                 a -> timezone((GDateValue) a)
+        );
+
+        register(BuiltInAtomicType.DURATION, "years", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DurationValue) a).getYears() * ((DurationValue) a).signum())
+        );
+        register(BuiltInAtomicType.DURATION, "months", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DurationValue) a).getMonths() * ((DurationValue) a).signum())
+        );
+        register(BuiltInAtomicType.DURATION, "days", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DurationValue) a).getDays() * ((DurationValue) a).signum())
+        );
+        register(BuiltInAtomicType.DURATION, "hours", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DurationValue) a).getHours() * ((DurationValue) a).signum())
+        );
+        register(BuiltInAtomicType.DURATION, "minutes", SequenceType.SINGLE_INTEGER,
+                 a -> oneInt(((DurationValue) a).getMinutes() * ((DurationValue) a).signum())
+        );
+        register(BuiltInAtomicType.DURATION, "seconds", SequenceType.SINGLE_INTEGER,
+                 a -> SingletonIterator.makeIterator(((DurationValue) a).getComponent(AccessorFn.Component.SECONDS))
+        );
+
+        register(BuiltInAtomicType.HEX_BINARY, "octets", SequenceType.makeSequenceType(BuiltInAtomicType.UNSIGNED_BYTE, StaticProperty.ALLOWS_ZERO_OR_MORE),
+                 a -> {
+                     List<IntegerValue> result = new ArrayList<>();
+                     for (byte b : ((HexBinaryValue)a).getBinaryValue()) {
+                         result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
+                     }
+                     return new ListIterator<>(result);
+                 }
+        );
+
+        register(BuiltInAtomicType.BASE64_BINARY, "octets", SequenceType.makeSequenceType(BuiltInAtomicType.UNSIGNED_BYTE, StaticProperty.ALLOWS_ZERO_OR_MORE),
+                 a -> {
+                     List<IntegerValue> result = new ArrayList<>();
+                     for (byte b : ((Base64BinaryValue) a).getBinaryValue()) {
+                         result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
+                     }
+                     return new ListIterator<>(result);
+                 }
+        );
+
+        register(BuiltInAtomicType.QNAME, "prefix", SequenceType.OPTIONAL_STRING,
+                 a -> {
+                    String prefix = ((QNameValue) a).getStructuredQName().getPrefix();
+                    return prefix.isEmpty()
+                            ? EmptyIterator.ofAtomic()
+                            : SingletonIterator.makeIterator(new StringItem(prefix, BuiltInAtomicType.NCNAME));
+                 }
+        );
+        register(BuiltInAtomicType.QNAME, "namespace-uri", SequenceType.OPTIONAL_STRING,
+                 a -> {
+                     String uri = ((QNameValue) a).getStructuredQName().getURI();
+                     return uri.isEmpty()
+                             ? EmptyIterator.ofAtomic()
+                             : SingletonIterator.makeIterator(new StringItem(uri, BuiltInAtomicType.ANY_URI));
+                 }
+        );
+        register(BuiltInAtomicType.QNAME, "local-name", SequenceType.SINGLE_STRING,
+                 a -> {
+                     String local = ((QNameValue) a).getStructuredQName().getLocalPart();
+                     return SingletonIterator.makeIterator(new StringItem(local, BuiltInAtomicType.NCNAME));
+                 }
+        );
+        register(BuiltInAtomicType.ANY_URI, "scheme", SequenceType.OPTIONAL_STRING,
+                 a -> {
+                     MapItem map = uriComponents(a.getStringValue());
+                     return SingletonIterator.makeIterator((StringItem)map.get(new StringItem("scheme")));
+                 }
+        );
+        register(BuiltInAtomicType.ANY_URI, "authority", SequenceType.OPTIONAL_STRING,
+                 a -> {
+                     MapItem map = uriComponents(a.getStringValue());
+                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("authority")));
+                 }
+        );
+        register(BuiltInAtomicType.ANY_URI, "path", SequenceType.OPTIONAL_STRING,
+                 a -> {
+                     MapItem map = uriComponents(a.getStringValue());
+                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("path")));
+                 }
+        );
+        register(BuiltInAtomicType.ANY_URI, "query", SequenceType.OPTIONAL_STRING,
+                 a -> {
+                     MapItem map = uriComponents(a.getStringValue());
+                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("query")));
+                 }
+        );
+        register(BuiltInAtomicType.ANY_URI, "fragment", SequenceType.OPTIONAL_STRING,
+                 a -> {
+                     MapItem map = uriComponents(a.getStringValue());
+                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("fragment")));
+                 }
+        );
+        register(BuiltInAtomicType.ANY_URI, "query-parameters", MapType.SINGLE_MAP_ITEM,
+                 a -> {
+                     MapItem map = uriComponents(a.getStringValue());
+                     return SingletonIterator.makeIterator((MapItem) map.get(new StringItem("queryParams")));
+                 }
+        );
+
+    }
+
+    public static SequenceType getComponentType(BuiltInAtomicType type, String componentName) {
+        if (type == BuiltInAtomicType.DAY_TIME_DURATION || type == BuiltInAtomicType.YEAR_MONTH_DURATION) {
+            type = BuiltInAtomicType.DURATION;
+        }
+        Map<String, ComponentDetails> typeData = componentMap.get(type);
+        if (typeData == null) {
+            return null;
+        } else {
+            ComponentDetails details = typeData.get(componentName);
+            return details == null ? null : details.componentType;
+        }
+    }
+
+    public static SequenceIterator getComponentValue(AtomicValue value, String componentName) {
+        AtomicType type = value.getPrimitiveType();
+        if (type == BuiltInAtomicType.DAY_TIME_DURATION || type == BuiltInAtomicType.YEAR_MONTH_DURATION) {
+            type = BuiltInAtomicType.DURATION;
+        }
+        Map<String, ComponentDetails> typeData = componentMap.get(type);
+        if (typeData == null) {
+            return EmptyIterator.ofAtomic();
+        }
+        Function<AtomicValue, UnfailingIterator> supplier = typeData.get(componentName).supplier;
+        return supplier.apply(value);
+    }
+
+    public static DictionaryMap uriComponents(String arg) {
+        DictionaryMap dict = new DictionaryMap();
+        try {
+            URI uri = new URI(arg);
+            dict.initialPut("isValid", BooleanValue.TRUE);
+            boolean test = uri.isAbsolute();
+            dict.initialPut("isAbsolute", BooleanValue.get(test));
+            test = uri.isOpaque();
+            dict.initialPut("isOpaque", BooleanValue.get(test));
+            String val = uri.getAuthority();
+            if (val != null) {
+                dict.initialPut("authority", new StringItem(val));
+            }
+            val = uri.getRawAuthority();
+            if (val != null) {
+                dict.initialPut("rawAuthority", new StringItem(val));
+            }
+            val = uri.getUserInfo();
+            if (val != null) {
+                dict.initialPut("userInfo", new StringItem(val));
+            }
+            val = uri.getRawUserInfo();
+            if (val != null) {
+                dict.initialPut("rawUserInfo", new StringItem(val));
+            }
+            val = uri.getScheme();
+            if (val != null) {
+                dict.initialPut("scheme", new StringItem(val));
+            }
+            val = uri.getHost();
+            if (val != null) {
+                dict.initialPut("host", new StringItem(val));
+            }
+            val = uri.getSchemeSpecificPart();
+            if (val != null) {
+                dict.initialPut("schemeSpecificPart", new StringItem(val));
+            }
+            val = uri.getRawSchemeSpecificPart();
+            if (val != null) {
+                dict.initialPut("rawSchemeSpecificPart", new StringItem(val));
+            }
+            int port = uri.getPort();
+            if (port >= 0) {
+                dict.initialPut("port", new Int64Value(port));
+            }
+            val = uri.getPath();
+            if (val != null) {
+                dict.initialPut("path", new StringItem(val));
+            }
+            val = uri.getRawPath();
+            if (val != null) {
+                dict.initialPut("rawPath", new StringItem(val));
+            }
+            val = uri.getRawQuery();
+            if (val != null) {
+                dict.initialPut("rawQuery", new StringItem(val));
+            }
+            val = uri.getQuery();
+            if (val != null) {
+                dict.initialPut("query", new StringItem(val));
+                DictionaryMap params = new DictionaryMap();
+                StringTokenizer t = new StringTokenizer(val, ";&");
+                while (t.hasMoreTokens()) {
+                    String tok = t.nextToken();
+                    int eq = tok.indexOf('=');
+                    if (eq >= 0) {
+                        String keyword = tok.substring(0, eq);
+                        String value = tok.substring(eq + 1);
+                        params.initialAppend(keyword, new StringItem(value));
+                    } else {
+                        params.initialAppend(tok, BooleanValue.TRUE);
+                    }
+                }
+                dict.initialPut("queryParams", params);
+            }
+            val = uri.getRawFragment();
+            if (val != null) {
+                dict.initialPut("rawFragment", new StringItem(val));
+            }
+            val = uri.getFragment();
+            if (val != null) {
+                dict.initialPut("fragment", new StringItem(val));
+            }
+            val = uri.toASCIIString();
+            if (val != null) {
+                dict.initialPut("asciiString", new StringItem(val));
+            }
+            return dict;
+        } catch (URISyntaxException e) {
+            dict.initialPut("isValid", BooleanValue.FALSE);
+            dict.initialPut("error", new StringItem(e.getMessage()));
+            return dict;
+        }
+    }
+}
+

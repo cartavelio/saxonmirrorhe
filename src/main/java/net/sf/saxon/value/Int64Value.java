@@ -89,6 +89,17 @@ public final class Int64Value extends IntegerValue {
     }
 
     /**
+     * Constructor supplying a long, with a specific type annotation
+     * @param value the value of the IntegerValue
+     * @param type the type annotation (trusted to be correct)
+     */
+
+    public Int64Value(long value, AtomicType type) {
+        this.value = value;
+        this.typeLabel = type;
+    }
+
+    /**
      * Constructor for a subtype, supplying a long and a type label.
      *
      * @param val   The supplied value, as an integer
