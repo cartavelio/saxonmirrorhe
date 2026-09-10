@@ -508,11 +508,9 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
       for namespaces, you need to set the configuration property 
       <a class="feature" href="ALLOW_OLD_JAVA_URI_FORMAT"/>.</aside>
 
-    <p>The Saxon namespace URI <code>http://saxon.sf.net/</code> is recognised as a special case. In
-      most cases it causes the function to be loaded from the class
-      <a class="javalink" href="com.saxonica.functions.extfn">com.saxonica.functions.extfn</a> but in a few cases, such as
-        <code>saxon:evaluate</code>, the function is recognized by the compiler as if it were a
-      built-in function. The various EXSLT and EXpath namespaces are also recognized specially.</p>
+    <p>The Saxon namespace URI <code>http://saxon.sf.net/</code> is recognised as a special case: it identifies
+      a built-in vendor extension function supplied in the Saxon product.
+      The various EXSLT and EXpath namespaces are also recognized specially.</p>
 
     <p>In XSLT, the system function <a class="bodylink code" href="/functions/fn/function-available">function-available(String name)</a> returns true if
       there appears to be a method available with the right name. The function also has an optional
