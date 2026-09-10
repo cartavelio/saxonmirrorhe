@@ -19,15 +19,15 @@ configure access to these items.
   `$SAXON_EXTRA_TEST_SUITE_DIR/data/xmark`.
 * `W3C_EXPATH_TEST_SUITE_DIR`, the `tests/qt3` directory of the XPath test suite
   from `git@github.com:expath/expath-cg.git`.
-* `W3C_QT3_TEST_SUITE_DIR`, the `qt3tests` directory of the QT3 test suite
-  from `git@github.com:w3c/qt3tests.git`.
-* `W3C_QT4_TEST_SUITE_DIR`, the `qt4cg/tests` directory of the QT4 test suite
-  from `git@github.com:qt4cg/qt4tests.git`.
-* `W3C_XSD_TEST_SUITE_DIR` the `xsdtests` directory of the XSD test suite
+* `W3C_QT3_TEST_SUITE_DIR`, the path to a local clone of the QT3 test suite repo from
+  `git@github.com:w3c/qt3tests.git`.
+* `W3C_QT4_TEST_SUITE_DIR`, the path to a local clone of the QT4 test suite repo from
+  `git@github.com:qt4cg/qt4tests.git`.
+* `W3C_XSD_TEST_SUITE_DIR` the path to a local clone of the XSD test suite repo
   from `git@github.com:w3c/xsdtests.git`.
-* `W3C_XSLT30_TEST_SUITE_DIR`, the XSLT 3.0 test suite from
+* `W3C_XSLT30_TEST_SUITE_DIR`, the path to a local clone of the XSLT 3.0 test suite repo from
   `git@github.com:w3c/xslt30-test.git`.
-* `W3C_XSLT40_TEST_SUITE_DIR`, the XSLT 4.0 test suite from
+* `W3C_XSLT40_TEST_SUITE_DIR`, the path to a local clone of the XSLT 4.0 test suite repo from
   `git@github.com:qt4cg/xslt40-test.git`.
 
 
