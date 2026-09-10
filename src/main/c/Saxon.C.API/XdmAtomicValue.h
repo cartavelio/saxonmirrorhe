@@ -17,9 +17,9 @@
 
 
 /**
- * The class XdmAtomicValue represents an item in an XPath 2.0 sequence that is an atomic value.
+ * The class XdmAtomicValue represents an item in an XPath sequence that is an atomic value.
  * The value may belong to any of the 19 primitive types defined in XML Schema, or to a type
- * derived from these primitive types, or the XPath 2.0 type xs:untypedAtomic. The type may
+ * derived from these primitive types, or the XPath type xs:untypedAtomic. The type may
  * be either a built-in type or a user-defined type.
  * <p>An <code>XdmAtomicValue</code> is immutable.</p>
  */

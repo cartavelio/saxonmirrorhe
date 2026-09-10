@@ -104,7 +104,7 @@ class SaxonApiException;
 //==========================================
 
 
-//! The <code>SaxonProcessor</code> class acts as a factory for generating XQuery, XPath, Schema and XSLT compilers
+//! The <code>SaxonProcessor</code> class acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
 /*! The <code>SaxonProcessor</code> class not only generates XQuery, XPath, Schema and XSLT Processors, but is used to create Xdm objects from primitive types.
  */
 class SaxonProcessor {

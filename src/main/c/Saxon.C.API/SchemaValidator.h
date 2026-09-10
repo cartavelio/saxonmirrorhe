@@ -18,8 +18,7 @@ class XdmValue;
 class XdmNode;
 class XdmItem;
 
-/*! The <code>SchemaValidator</code> represents factory for validating instance documents against a schema.
- * <p/>
+/*! A <code>SchemaValidator</code> represents a factory for validating instance documents against a schema.
  */
 class SchemaValidator {
 public:

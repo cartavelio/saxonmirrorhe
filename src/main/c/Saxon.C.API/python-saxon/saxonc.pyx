@@ -860,7 +860,7 @@ parametersDict = None
 
 
 cdef class PyXslt30Processor:
-     """A PyXslt30Processor represents a factory to compile, load and execute a stylesheet.
+     """A PyXslt30Processor represents a factory to compile, load and execute stylesheets.
      It is possible to cache the context and the stylesheet in the PyXslt30Processor. """
      cdef saxoncClasses.Xslt30Processor *thisxptr      # hold a C++ instance which we're wrapping
 
@@ -1297,7 +1297,7 @@ cdef class PyXslt30Processor:
 
 cdef class PyXsltExecutable:
      """A PyXsltExecutable represents the compiled form of a stylesheet.
-     A PyXsltExecutable is created by using one of the compile methods on the PyXsltProcessor. """
+     A PyXsltExecutable is created by using one of the compile methods on the PyXslt30Processor class. """
      cdef saxoncClasses.XsltExecutable *thisxptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """Default constructor """
@@ -1600,7 +1600,7 @@ cdef class PyXsltExecutable:
             name (str): The name of the property
             value (str): The value of the property
         Example:
-            XsltProcessor: set serialization properties (names start with '!' e.g. name "!method" -> "xml")\r
+            PyXsltExecutable: set serialization properties (names start with '!' e.g. name "!method" -> "xml")\r
             'o': output file name,\r
             'it': initial template,\r
             'im': initial mode,\r
@@ -2699,7 +2699,7 @@ cdef class PyXsltExecutable:
         return ustring"""
 
 cdef class PyXQueryProcessor:
-     """A PyXQueryProcessor object represents a factory to compile, load and execute a query. """
+     """A PyXQueryProcessor represents a factory to compile, load and execute queries. """
      cdef saxoncClasses.XQueryProcessor *thisxqptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
@@ -3062,7 +3062,7 @@ cdef class PyXQueryProcessor:
         return make_py_str(self.thisxqptr.getErrorCode())
 
 cdef class PyXPathProcessor:
-     """A PyXPathProcessor represents a factory to compile, load and execute an XPath expression. """
+     """A PyXPathProcessor represents a factory to compile, load and execute XPath expressions. """
      cdef saxoncClasses.XPathProcessor *thisxpptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
@@ -3692,8 +3692,8 @@ cdef class PySchemaValidator:
         """
         self.thissvptr.setLax(lax)
 cdef class PyXdmValue:
-     """Value in the XDM data model. A value is a sequence of zero or more items, each item being an atomic value,
-      a node, or a function item. """
+     """A PyXdmValue represents a value in the XDM data model. A value is a sequence of zero or more items, each
+     item being an atomic value, a node, or a function item. """
      cdef saxoncClasses.XdmValue *thisvptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):
         """
@@ -4802,7 +4802,7 @@ cdef class PyXdmMap(PyXdmFunctionItem):
 cdef class PyXdmArray(PyXdmFunctionItem):
      """
      The class PyXdmArray represents an array in the XDM data model. An array is a list of zero or more members,
-     each of which is an arbitrary XDM value. The array itself is an XDM item.
+     each of which is an arbitrary XDM value. The array itself is an XDM item. A PyXdmArray is immutable.
      """
      cdef saxoncClasses.XdmArray *derivedaaptr      # hold a C++ instance which we're wrapping
      def __cinit__(self):

@@ -43,8 +43,9 @@ typedef enum saxonTypeEnum
 } PRIMITIVE_TYPE;
 
 
-/*! <code>XdmValue</code>. Value in the XDM data model. A value is a sequence of zero or more items,
- * each item being either an atomic value or a node. This class is a wrapper of the the XdmValue object created in Java.
+/*! An <code>XdmValue</code> represents a value in the XDM data model. A value is a sequence of zero or more items,
+ * each item being an atomic value, a node, or a function item. This class is a wrapper of the XdmValue object
+ * created in Java.
  * <p/>
  */
 class XdmValue {
