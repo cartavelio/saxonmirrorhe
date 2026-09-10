@@ -1925,6 +1925,17 @@ task sqlServerStop(dependsOn: ["docker-sql-up"]) {
       }
     }
   }
+  doLast {
+    try {
+      exec {
+        commandLine DockerContainer.docker(), "volume", "rm", "${sqlServer}-data"
+      }
+    } catch (Exception e) {
+      println("***************************************************************")
+      println("Failed to remove sqldata volume.")
+      println("***************************************************************")
+    }
+  }
 }
 
 // ============================================================
