@@ -101,6 +101,8 @@ ext {
   scp = null
   csver = null
   csrid = null
+  csbuildarch = null
+  csarcarch = null
   csconfiguration = findProperty("csConfiguration") ?: "Release"
   csoptimize = findProperty("csOptimize") ?: "false"
   csplatform = null
