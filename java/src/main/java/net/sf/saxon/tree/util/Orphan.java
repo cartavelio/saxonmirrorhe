@@ -259,7 +259,7 @@ public final class Orphan implements MutableNodeInfo {
             case Type.DOCUMENT:
                 return StringValue.makeUntypedAtomic(getUnicodeStringValue());
             default:
-                if (typeAnnotation == null || typeAnnotation == Untyped.getInstance() ||
+                if (typeAnnotation == null || typeAnnotation == Untyped.INSTANCE ||
                         typeAnnotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
                     return StringValue.makeUntypedAtomic(getUnicodeStringValue());
                 } else {
@@ -284,7 +284,7 @@ public final class Orphan implements MutableNodeInfo {
     public SchemaType getSchemaType() {
         if (typeAnnotation == null) {
             if (kind == Type.ELEMENT) {
-                return Untyped.getInstance();
+                return Untyped.INSTANCE;
             } else if (kind == Type.ATTRIBUTE) {
                 return BuiltInAtomicType.UNTYPED_ATOMIC;
             }

@@ -278,7 +278,7 @@ public class FixedElement extends ElementCreator {
                 // we know the result will be an untyped element
                 itemType = new NamedXNodeType(Type.ELEMENT,
                                               elementNameTest,
-                                              Untyped.getInstance(), false, config);
+                                              Untyped.INSTANCE, false, config);
             }
         } else {
             itemType = new NamedXNodeType(Type.ELEMENT,
@@ -596,7 +596,7 @@ public class FixedElement extends ElementCreator {
                     expr.getContentExpression().makeElaborator().elaborateForPush();
 
             SchemaType typeCode;
-            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.getInstance();
+            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.INSTANCE;
 
             Schema schema = expr.getRetainedStaticContext().getImportedSchema();
 

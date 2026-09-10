@@ -259,7 +259,7 @@ public class SaplingElement extends SaplingNode {
                 ns = ns.put(qName.getPrefix(), qName.getNamespaceUri());
             }
         }
-        receiver.startElement(new FingerprintedQName(nodeName, namePool), Untyped.getInstance(),
+        receiver.startElement(new FingerprintedQName(nodeName, namePool), Untyped.INSTANCE,
                               atts, ns,
                               Loc.NONE, ReceiverOption.NONE);
 

@@ -303,7 +303,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     TypeHierarchy th = config.getTypeHierarchy();
                     Affinity e = th.relationship(in, NodeKindType.ELEMENT);
                     if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
+                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.INSTANCE, false, config);
                     }
                     Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
                     if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {

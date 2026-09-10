@@ -443,7 +443,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
             return Optional.of("The node name does not match");
         }
         if (!matchesAnnotation(((NodeInfo)item).getSchemaType())) {
-            if (node.getSchemaType() == Untyped.getInstance()) {
+            if (node.getSchemaType() == Untyped.INSTANCE) {
                 return Optional.of("The supplied node has not been schema-validated");
             }
             if (node.getSchemaType() == BuiltInAtomicType.UNTYPED_ATOMIC) {

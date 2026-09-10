@@ -84,7 +84,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
     @Override
     public SchemaType getSchemaType() {
-        return Untyped.getInstance();
+        return Untyped.INSTANCE;
     }
 
 

@@ -78,7 +78,7 @@ public class VirtualUntypedCopy extends VirtualCopy {
     public SchemaType getSchemaType() {
         switch (getNodeKind()) {
             case Type.ELEMENT:
-                return Untyped.getInstance();
+                return Untyped.INSTANCE;
             case Type.ATTRIBUTE:
                 return BuiltInAtomicType.UNTYPED_ATOMIC;
             default:

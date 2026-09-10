@@ -36,7 +36,7 @@ public enum IgnorableSpaceStrippingRule implements SpaceStrippingRule {
 
     @Override
     public int isSpacePreserving(NodeName name, SchemaType schemaType) {
-        if (schemaType != Untyped.getInstance() && schemaType.isComplexType() &&
+        if (schemaType != Untyped.INSTANCE && schemaType.isComplexType() &&
                     !((ComplexType) schemaType).isSimpleContent() &&
                     !((ComplexType) schemaType).isMixedContent()) {
             return Stripper.ALWAYS_STRIP;

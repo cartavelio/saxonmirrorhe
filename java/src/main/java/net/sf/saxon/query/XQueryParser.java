@@ -3318,7 +3318,7 @@ public class XQueryParser extends XPathParser {
             if (requiredType == null) {
                 grumble("Unknown schema type " + typeName, "XQST0104");
             }
-            if (requiredType == Untyped.getInstance()) {
+            if (requiredType == Untyped.INSTANCE) {
                 mode = Validation.STRIP;
                 requiredType = null;
             }

@@ -324,7 +324,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      */
     @Override
     public SchemaType getSchemaType() {
-        return Untyped.getInstance();
+        return Untyped.INSTANCE;
     }
 
     /**

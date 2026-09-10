@@ -314,8 +314,8 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
     public SchemaType getSchemaType() {
         SequenceIterator children = iterateChildAxis(NodeKindType.ELEMENT);
         NodeInfo node = (NodeInfo)children.next();
-        if (node == null || node.getSchemaType() == Untyped.getInstance()) {
-            return Untyped.getInstance();
+        if (node == null || node.getSchemaType() == Untyped.INSTANCE) {
+            return Untyped.INSTANCE;
         } else {
             return AnyType.INSTANCE;
         }

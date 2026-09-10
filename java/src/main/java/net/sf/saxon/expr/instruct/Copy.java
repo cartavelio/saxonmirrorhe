@@ -273,7 +273,7 @@ public class Copy extends ElementCreator {
                 case Validation.STRIP: {
                     Affinity e = th.relationship(selectItemType, NodeKindType.ELEMENT);
                     if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
+                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.INSTANCE, false, config);
                     }
                     Affinity a = th.relationship(selectItemType, NodeKindType.ATTRIBUTE);
                     if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
@@ -532,7 +532,7 @@ public class Copy extends ElementCreator {
             PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
 
             SchemaType typeCode;
-            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.getInstance();
+            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.INSTANCE;
 
             int properties = ReceiverOption.NONE;
             if (!expr.bequeathNamespacesToChildren) {

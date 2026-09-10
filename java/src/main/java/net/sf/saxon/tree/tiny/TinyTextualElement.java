@@ -69,7 +69,8 @@ public class TinyTextualElement extends TinyElementImpl {
     @Override
     public void copy(Receiver receiver, int copyOptions, Location location) throws XPathException {
         boolean typed = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
-        SchemaType type = typed ? getSchemaType() : Untyped.getInstance();
+        SchemaType type;
+        type = typed ? getSchemaType() : Untyped.INSTANCE;
         boolean disallowNamespaceSensitiveContent =
                 ((copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0) &&
                         ((copyOptions & CopyOptions.ALL_NAMESPACES) == 0);

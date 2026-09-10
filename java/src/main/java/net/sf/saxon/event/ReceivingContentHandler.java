@@ -412,7 +412,7 @@ public class ReceivingContentHandler
                 attributes = makeAttributeMap(atts, localLocator);
             }
 
-            receiver.startElement(elementName, Untyped.getInstance(),
+            receiver.startElement(elementName, Untyped.INSTANCE,
                                   attributes, currentNamespaceMap,
                                   localLocator, options);
 

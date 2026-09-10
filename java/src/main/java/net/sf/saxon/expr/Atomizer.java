@@ -225,7 +225,7 @@ public final class Atomizer extends UnaryExpression {
     }
 
     private boolean isSingleValuedSchemaType(SchemaType st) {
-        if (st == Untyped.getInstance()) {
+        if (st == Untyped.INSTANCE) {
             return true;
         }
         if (st.isSimpleType()) {

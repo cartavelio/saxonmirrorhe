@@ -136,11 +136,13 @@ public class XMLIndenter extends ProxyReceiver {
         if (suppressedElements != null && suppressedAtLevel == -1 && suppressedElements.contains(nameCode)) {
             suppressedAtLevel = level;
         }
-        if (type != AnyType.INSTANCE && type != Untyped.getInstance() && suppressedAtLevel < 0
-            && type.isComplexType() && ((ComplexType) type).isMixedContent()) {
-            // suppress indentation for elements with mixed content. (Note this also suppresses
-            // indentation for all descendants of such elements. We could be smarter than this.)
-            suppressedAtLevel = level;
+        if (type != AnyType.INSTANCE) {
+            if (type != Untyped.INSTANCE && suppressedAtLevel < 0
+                    && type.isComplexType() && ((ComplexType) type).isMixedContent()) {
+                // suppress indentation for elements with mixed content. (Note this also suppresses
+                // indentation for all descendants of such elements. We could be smarter than this.)
+                suppressedAtLevel = level;
+            }
         }
 
         // Calculate indentation to be applied to attributes/namespaces

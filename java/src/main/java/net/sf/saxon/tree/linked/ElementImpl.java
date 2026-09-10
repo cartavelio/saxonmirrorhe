@@ -38,7 +38,7 @@ import java.util.Objects;
 public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     private NodeName nodeName;
-    private SchemaType type = Untyped.getInstance();
+    private SchemaType type = Untyped.INSTANCE;
     private AttributeMap attributeMap;      // this excludes namespace attributes
     private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
 
@@ -299,8 +299,8 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
         final boolean copyTypes = CopyOptions.includes(copyOptions, CopyOptions.TYPE_ANNOTATIONS);
         final boolean copyForUpdate = CopyOptions.includes(copyOptions, CopyOptions.FOR_UPDATE);
-        SchemaType typeCode = copyTypes ?
-                getSchemaType() : Untyped.getInstance();
+        SchemaType typeCode;
+        typeCode = copyTypes ? getSchemaType() : Untyped.INSTANCE;
         java.util.function.Function<NodeInfo, Object> informee = out.getPipelineConfiguration().getCopyInformee();
         if (informee != null) {
             Object o = informee.apply(this);
@@ -676,7 +676,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
 
     @Override
     public void removeTypeAnnotation() {
-        if (getSchemaType() != Untyped.getInstance()) {
+        if (getSchemaType() != Untyped.INSTANCE) {
             type = AnyType.INSTANCE;
             getRawParent().removeTypeAnnotation();
         }

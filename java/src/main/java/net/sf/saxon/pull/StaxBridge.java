@@ -573,7 +573,7 @@ public class StaxBridge implements PullProvider {
     @Override
     public SchemaType getSchemaType() {
         if (currentEvent == PullEvent.START_ELEMENT) {
-            return Untyped.getInstance();
+            return Untyped.INSTANCE;
         } else if (currentEvent == PullEvent.ATTRIBUTE) {
             return BuiltInAtomicType.UNTYPED_ATOMIC;
         } else {

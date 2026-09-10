@@ -321,7 +321,7 @@ public class DOMSender {
                 }
             }
         }
-        receiver.startElement(name, Untyped.getInstance(), attributes, namespaces.peek(), loc, ReceiverOption.NONE);
+        receiver.startElement(name, Untyped.INSTANCE, attributes, namespaces.peek(), loc, ReceiverOption.NONE);
         walkNode(element);
         receiver.endElement();
     }

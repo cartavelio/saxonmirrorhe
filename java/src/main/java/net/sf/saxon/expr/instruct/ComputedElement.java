@@ -146,7 +146,7 @@ public class ComputedElement extends ElementCreator {
             itemType = new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), schemaType, false, config);
             schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT, getRetainedStaticContext().getImportedSchema());
         } else if (getValidationAction() == Validation.STRIP || !schemaAware) {
-            itemType = new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.getInstance(), false, config);
+            itemType = new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), Untyped.INSTANCE, false, config);
         } else {
             // paradoxically, we know less about the type if validation="strict" is specified!
             // We know that it won't be untyped, but we have no way of representing that.
@@ -617,7 +617,7 @@ public class ComputedElement extends ElementCreator {
             };
 
             SchemaType typeCode;
-            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.getInstance();
+            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.INSTANCE;
             Schema schema = expr.getRetainedStaticContext().getImportedSchema();
             return (out, context) -> {
                 try {

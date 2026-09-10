@@ -539,7 +539,7 @@ public abstract class Mode extends Actor {
             int kind = node.getNodeKind();
             if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
                 SchemaType annotation = node.getSchemaType();
-                if (annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
+                if (annotation == Untyped.INSTANCE || annotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
                     throw new XPathException(getModeTitle(true) + " requires typed nodes, but the input is untyped", "XTTE3100");
                 }
             }
@@ -552,7 +552,7 @@ public abstract class Mode extends Actor {
             int kind = node.getNodeKind();
             if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
                 SchemaType annotation = node.getSchemaType();
-                if (!(annotation == Untyped.getInstance() || annotation == BuiltInAtomicType.UNTYPED_ATOMIC)) {
+                if (!(annotation == Untyped.INSTANCE || annotation == BuiltInAtomicType.UNTYPED_ATOMIC)) {
                     throw new XPathException(getModeTitle(true) + " requires untyped nodes, but the input is typed", "XTTE3110");
                 }
             }

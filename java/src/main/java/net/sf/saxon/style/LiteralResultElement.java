@@ -466,14 +466,14 @@ public class LiteralResultElement extends StyleElement {
                         new NoNamespaceName("expand-text"), BuiltInAtomicType.UNTYPED_ATOMIC, "yes", loc, ReceiverOption.NONE));
             }
             int st = StandardNames.XSL_STYLESHEET;
-            builder.startElement(new CodedName(st, "xsl", getNamePool()), Untyped.getInstance(),
+            builder.startElement(new CodedName(st, "xsl", getNamePool()), Untyped.INSTANCE,
                                  atts, map, loc, ReceiverOption.NONE);
 
             atts = EmptyAttributeMap.INSTANCE;
             atts = atts.put(new AttributeInfo(new NoNamespaceName("match"), BuiltInAtomicType.UNTYPED_ATOMIC, "/", loc, ReceiverOption.NONE));
 
             int te = StandardNames.XSL_TEMPLATE;
-            builder.startElement(new CodedName(te, "xsl", getNamePool()), Untyped.getInstance(),
+            builder.startElement(new CodedName(te, "xsl", getNamePool()), Untyped.INSTANCE,
                                  atts, map, loc, ReceiverOption.NONE);
 
             builder.graftElement(this);

@@ -183,7 +183,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
     @Override
     public boolean isTyped() {
-        return documentElement != null && documentElement.getSchemaType() != Untyped.getInstance();
+        return documentElement != null && documentElement.getSchemaType() != Untyped.INSTANCE;
     }
 
     /**
@@ -711,8 +711,8 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
 
     @Override
     public SchemaType getSchemaType() {
-        if (documentElement == null || documentElement.getSchemaType() == Untyped.getInstance()) {
-            return Untyped.getInstance();
+        if (documentElement == null || documentElement.getSchemaType() == Untyped.INSTANCE) {
+            return Untyped.INSTANCE;
         } else {
             return AnyType.INSTANCE;
         }

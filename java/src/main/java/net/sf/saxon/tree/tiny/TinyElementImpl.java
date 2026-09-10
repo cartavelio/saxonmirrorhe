@@ -306,7 +306,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         int next = nodeNr;
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
         java.util.function.Function<NodeInfo, Object> informee = pipe.getCopyInformee();
-        SchemaType elementType = Untyped.getInstance();
+        SchemaType elementType = Untyped.INSTANCE;
         SimpleType attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
         AttributeMap emptyAttributes = EmptyAttributeMap.INSTANCE;
 

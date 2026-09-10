@@ -425,7 +425,7 @@ public class ExpressionPresenter {
             } else {
                 nodeName = new FingerprintedQName("", defaultNamespace, name);
             }
-            cco.startElement(nodeName, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
+            cco.startElement(nodeName, Untyped.INSTANCE, Loc.NONE, ReceiverOption.NONE);
             if (nextRole != null) {
                 emitAttribute("role", nextRole);
                 nextRole = null;

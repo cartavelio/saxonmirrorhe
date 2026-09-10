@@ -378,7 +378,7 @@ public interface NodeInfo extends GNode, Location
      *         For document nodes, either xs:untyped if the document has not been validated, or
      *         xs:anyType if it has.
      *         <p>The default implementation returns {@link BuiltInAtomicType#UNTYPED_ATOMIC} for attribute
-     *         nodes, {@link Untyped#getInstance} for element and document nodes, and null otherwise</p>
+     *         nodes, {@link Untyped#INSTANCE} for element and document nodes, and null otherwise</p>
      * @since 9.4
      */
 
@@ -388,7 +388,7 @@ public interface NodeInfo extends GNode, Location
                 return BuiltInAtomicType.UNTYPED_ATOMIC;
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                return Untyped.getInstance();
+                return Untyped.INSTANCE;
             default:
                 return null;
         }

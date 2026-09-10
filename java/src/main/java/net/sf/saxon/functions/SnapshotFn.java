@@ -114,7 +114,7 @@ public class SnapshotFn extends SystemFunction {
         if (context.getController().getExecutable().isSchemaAware()) {
             ancestorType = AnyType.INSTANCE;
         } else {
-            ancestorType = Untyped.getInstance();
+            ancestorType = Untyped.INSTANCE;
         }
         for (int i = ancestors.size() - 1; i >= 0; i--) {
             NodeInfo anc = ancestors.get(i);

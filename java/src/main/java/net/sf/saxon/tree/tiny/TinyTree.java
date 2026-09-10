@@ -359,7 +359,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         next[numberOfNodes] = -1;      // safety precaution
 
         if (typeArray != null) {
-            typeArray[numberOfNodes] = Untyped.getInstance();
+            typeArray[numberOfNodes] = Untyped.INSTANCE;
         }
 
         if (numberOfNodes == 0) {
@@ -454,10 +454,10 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     void setElementAnnotation(int nodeNr, SchemaType type) {
-        if (!type.equals(Untyped.getInstance())) {
+        if (!type.equals(Untyped.INSTANCE)) {
             if (typeArray == null) {
                 typeArray = new SchemaType[nodeKind.length];
-                Arrays.fill(typeArray, 0, nodeKind.length, Untyped.getInstance());
+                Arrays.fill(typeArray, 0, nodeKind.length, Untyped.INSTANCE);
             }
             assert typeArray != null;
             typeArray[nodeNr] = type;
@@ -489,7 +489,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     public SchemaType getSchemaType(int nodeNr) {
         if (typeArray == null) {
-            return Untyped.getInstance();
+            return Untyped.INSTANCE;
         }
         return typeArray[nodeNr];
     }

@@ -712,9 +712,8 @@ public final class Navigator {
                 break;
             }
             case Type.ELEMENT: {
-                SchemaType annotation = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0 ?
-                        node.getSchemaType() :
-                        Untyped.getInstance();
+                SchemaType annotation;
+                annotation = (copyOptions & CopyOptions.TYPE_ANNOTATIONS) != 0 ? node.getSchemaType() : Untyped.INSTANCE;
 
                 NodeName elementName = NameOfNode.makeName(node);
                 NamespaceMap nsMap;
@@ -812,7 +811,8 @@ public final class Navigator {
                 break;
             }
             case Type.ELEMENT: {
-                SchemaType annotation = keepTypes ? node.getSchemaType() : Untyped.getInstance();
+                SchemaType annotation;
+                annotation = keepTypes ? node.getSchemaType() : Untyped.INSTANCE;
 
                 out.startElement(NameOfNode.makeName(node), annotation,
                                  locationId, ReceiverOption.DISINHERIT_NAMESPACES | ReceiverOption.NAMESPACE_OK);
