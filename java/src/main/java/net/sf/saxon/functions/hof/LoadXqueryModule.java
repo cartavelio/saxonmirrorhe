@@ -89,11 +89,12 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             if (suppliedOptions == null) {
                 suppliedOptions = EmptyMap.getInstance();
             }
-            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, 40);
+            int hostVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, hostVersion);
             xqueryVersionOption = checkedOptions.get("xquery-version");
             if (xqueryVersionOption != null) {
                 double vn = ((DecimalValue) xqueryVersionOption.head()).getDoubleValue();
-                if (vn * 10 > 31) {
+                if (vn * 10 > 40) {
                     throw new XPathException("No XQuery version " + vn + " processor is available", "FOQM0006");
                 }
             }
@@ -108,7 +109,10 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         int qv = 31;
         if (xqueryVersionOption != null) {
             BigDecimal decimalVn = ((DecimalValue) xqueryVersionOption.head()).getDecimalValue();
-            if (decimalVn.equals(new BigDecimal("1.0")) || decimalVn.equals(new BigDecimal("3.0")) || decimalVn.equals(new BigDecimal("3.1"))) {
+            if (decimalVn.compareTo(new BigDecimal("1.0")) == 0
+                    || decimalVn.compareTo(new BigDecimal("3.0")) == 0
+                    || decimalVn.compareTo(new BigDecimal("3.1")) == 0
+                    || decimalVn.compareTo(new BigDecimal("4.0")) == 0) {
                 qv = decimalVn.multiply(BigDecimal.TEN).intValue();
             } else {
                 throw new XPathException("Unsupported XQuery version " + decimalVn, "FOQM0006");
