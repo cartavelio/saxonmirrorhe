@@ -76,24 +76,21 @@ public class DirectResourceResolver implements ResourceResolver {
             request = request.copy();
             request.relativeUri = relativeURI.substring(0, hash);
             id = relativeURI.substring(hash + 1);
-            // System.err.println("StandardURIResolver, href=" + href + ", id=" + id);
         }
 
         InputStream stream;
-        if (request.nature == ResourceRequest.BINARY_NATURE) {
+        if (ResourceRequest.BINARY_NATURE.equals(request.nature)) {
+            // This path is used by the unparsed-text resolver when no encoding is supplied;
+            // it returns (where possible) a TypedStreamSource containing the binary input
+            // stream, together with the content type from the HTTP headers.
             try {
                 return ResourceLoader.typedStreamSource(config, request.uri);
-//                AugmentedSource as = AugmentedSource.makeAugmentedSource(ss);
-//                as.setPleaseCloseAfterUse(true);
-//                return as;
             } catch (IOException e) {
-                System.err.println(e.getMessage());
+                throw new XPathException("Cannot read " + request.uri, e);
             }
         }
 
         Source ss;
-
-
         try {
             stream = ResourceLoader.urlStream(config, request.uri);
         } catch (IOException e) {
