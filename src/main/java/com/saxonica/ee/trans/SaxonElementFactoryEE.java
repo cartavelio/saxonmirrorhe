@@ -2,10 +2,7 @@ package com.saxonica.ee.trans;
 
 import com.saxonica.ee.xtupdate.*;
 import com.saxonica.xsltextn.style.*;
-import net.sf.saxon.style.StyleElement;
-import net.sf.saxon.style.XSLArray;
-import net.sf.saxon.style.XSLArrayMember;
-import net.sf.saxon.style.XSLItemType;
+import net.sf.saxon.style.*;
 
 /**
  * A Factory for Saxon extension nodes in the stylesheet tree. <br>
@@ -52,7 +49,7 @@ public class SaxonElementFactoryEE extends SaxonElementFactory {
             return SaxonEntityRef.class;
         }
         if (localname.equals("for-each-member")) {
-            return SaxonForEachMember.class;
+            return XSLForEachMember.class;
         }
         if (localname.equals("import-query")) {
             return SaxonImportQuery.class;
@@ -61,7 +58,7 @@ public class SaxonElementFactoryEE extends SaxonElementFactory {
             return SaxonInsert.class;
         }
         if (localname.equals("item-type")) {
-            return XSLItemType.class;
+            return net.sf.saxon.style.XSLItemType.class;
         }
         if (localname.equals("rename")) {
             return SaxonRename.class;
