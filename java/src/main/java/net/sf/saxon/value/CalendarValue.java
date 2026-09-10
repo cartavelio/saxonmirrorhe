@@ -416,56 +416,272 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         }
     }
 
+
+    public static void validateDate(int year, int month, int day) throws XPathException {
+        validateGYear(year);
+        validateGMonthDay(month, day);
+
+        if (month == 2 && day > 28 && !(CalendarValue.isLeapYear(year))) {
+            throw new XPathException("There are only 28 days in February " + year + ", as it is not a leap year.", "FODT0006");
+        }
+    }
+
+    public static void validateDate(IntegerValue year, IntegerValue month, IntegerValue day) throws XPathException {
+        validateDate((int) year.longValue(), (int) month.longValue(), (int) day.longValue());
+    }
+
+    /**
+     * Checks whether a gYear value is valid per the rules specified
+     * in XPath and XQuery Functions and Operators 4.0.
+     *
+     * @param year - year number
+     * @return true if the value in abides by the rules, otherwise throw an XPathException
+     * @throws XPathException
+     */
+    public static void validateGYear(int year) throws XPathException {
+        // "0000" is an illegal year value per XSD 1.0 (https://www.w3.org/TR/xmlschema-2/#truncatedformats)
+        // but legal per XSD 1.1.
+        // Internally, dates are stored per XSD 1.1 and adjusted to match XSD 1.0 on request.
+
+        // Nothing extra to check.
+    }
+
+    public static void validateGYear(IntegerValue year) throws XPathException {
+        validateGYear((int) year.longValue());
+    }
+
+    /**
+     * Checks whether a gYearMonth value is valid per the rules specified
+     * in XPath and XQuery Functions and Operators 4.0.
+     *
+     * @param year - a Gregorian year number
+     * @param month - month number within the year
+     * @return true if the value in abides by the rules, otherwise throw an XPathException
+     * @throws XPathException
+     */
+    public static void validateGYearMonth(int year, int month) throws XPathException {
+        validateGYear(year);
+        validateGMonth(month);
+    }
+
+    /**
+     * Checks whether a gMonth value is valid per the rules specified
+     * in XPath and XQuery Functions and Operators 4.0.
+     *
+     * @param month - number of the month within an arbitrary year
+     * @return true if the value in abides by the rules, otherwise throw an XPathException
+     * @throws XPathException
+     */
+    public static void validateGMonth(int month) throws XPathException {
+        if (month < 1 || month > 12) {
+            throw new XPathException("The month must be between 1 and 12 (inclusive).", "FODT0006");
+        }
+    }
+
+    public static void validateGMonth(IntegerValue month) throws XPathException {
+        validateGMonth((int) month.longValue());
+    }
+
+    /**
+     * Checks whether a gMonthDay value is valid per the rules specified
+     * in XPath and XQuery Functions and Operators 4.0.
+     *
+     * @param month - month within an arbitrary year
+     * @param day - day number within the month
+     * @return true if the value in abides by the rules, otherwise throw an XPathException
+     * @throws XPathException
+     */
+    public static void validateGMonthDay(int month, int day) throws XPathException {
+
+        validateGDay(day);
+        validateGMonth(month);
+
+        switch (month) {
+            case 2: // Feb, the day must be no more than 29
+                if (day > 29) {
+                    throw new XPathException("The day must be no more than 29 when the month is 2.", "FODT0006");
+                }
+                break;
+            case 4: // Apr
+            case 6: // Jun
+            case 9: // Sep
+            case 11: // Nov
+                if (day > 30) {
+                    throw new XPathException("The day must be no more than 30 when the month is " + month + ".", "FODT0006");
+                }
+        }
+    }
+
+    public static void validateGMonthDay(IntegerValue month, IntegerValue day) throws XPathException {
+        validateGMonthDay((int) month.longValue(), (int) day.longValue());
+    }
+
+    /**
+     * Checks whether a gDay value is valid per the rules specified
+     * in XPath and XQuery Functions and Operators 4.0.
+     *
+     * @param day - number of a day within an arbitrary month
+     * @return true if the value in abides by the rules, otherwise throw an XPathException
+     * @throws XPathException
+     */
+    public static void validateGDay(int day) throws XPathException {
+        if (day < 1 || day > 31) {
+            throw new XPathException("The day must be between 1 and 31 (inclusive).", "FODT0006");
+        }
+    }
+
+    public static void validateGDay(IntegerValue day) throws XPathException {
+        validateGDay((int) day.longValue());
+    }
+
     /**
      * Checks whether a time value is valid per the rules for time specified
-     * in XPath and XQuery Functions 4.0.
+     * in XPath and XQuery Functions and Operators 4.0.
      *
-     * @param iHours - number of hours
-     * @param iMinutes - number of minutes
-     * @param iSeconds - number of seconds
-     * @param iNanoseconds - number of nanoseconds, if second is fractional
-     * @return true if the time abides by the rules, otherwise throw an XPathException.
+     * @param hour - number of hour
+     * @param minute - number of minute
+     * @param second - whole number value of second
+     * @param nanosecond - fractional value of second, in nanoseconds
+     * @throws XPathException
      */
-    public static boolean isValidTime(int iHours, int iMinutes, int iSeconds, int iNanoseconds) throws XPathException {
+    public static void validateTime(int hour, int minute, int second, int nanosecond) throws XPathException {
 
-      // The hour must be positive
-        if (iHours < 0) {
-            throw new XPathException("The hour must be between 0 and 23 (inclusive).", "FODT0006");
-        }
+       validateHour(hour);
+       validateMinute(minute);
+       validateSecond(second);
+       validateNanosecond(nanosecond);
 
-        // XSD 1.0 stated that "24" was an invalid hour
-        // but XSD 1.1 equates "24" to "00", so
-        // the hour must be less than 25
-        if (iHours >= 25) {
-            throw new XPathException("The hour must be less than 25.", "FODT0006");
-        }
-
-       // The minutes must be positive
-        if (iMinutes < 0) {
-            throw new XPathException("The minute must be between 0 and 59 (inclusive).", "FODT0006");
-        }
-
-        // The minutes must be less than 60
-        if (iMinutes > 59) {
-            throw new XPathException("The minute must be less than 60.", "FODT0006");
-        }
-
-        // The seconds must be positive
-        if (iSeconds < 0) {
-            throw new XPathException("The second must be between 0 and 59 (inclusive).", "FODT0006");
-        }
-
-        // The seconds must be less than 60
-        if (iSeconds > 59) {
-            throw new XPathException("The second must be less than 60.", "FODT0006");
-        }
-
-        // If hour is 24, minutes and seconds may only be 0
-        if (iHours == 24 && (iMinutes > 0 || iSeconds > 0 || iNanoseconds > 0)) {
+        // If hour is 24, minute and second may only be 0
+        if (hour == 24 && (minute > 0 || second > 0 || nanosecond > 0)) {
             throw new XPathException("The time may not be greater than '24:00:00'.");
         }
+    }
 
-        return true;
+    public static void validateTime(IntegerValue hour, IntegerValue minute, DecimalValue second) throws XPathException {
+        validateTime((int) hour.longValue(), (int) minute.longValue(), (BigDecimal) second.getDecimalValue());
+    }
+
+    public static void validateTime(int hour, int minute, BigDecimal second) throws XPathException {
+        validateTime(hour, minute, second.intValue(), nanosecondFromSecond(second));
+    }
+
+    /**
+     * Check whether the hour component of a time falls within
+     * the range specified in XSD 1.1 and XPath F&O 4.0.
+     *
+     * @param hour - the hour component of an arbitrary time value
+     * @throws XPathException
+     */
+    public static void validateHour(int hour) throws XPathException {
+        // XSD 1.0 stated that "24" was an invalid hour
+        // but XSD 1.1 equates "24" to "00",
+        // so the hour must be less than 25
+        if (hour < 0 || hour > 24) {
+            throw new XPathException("The hour component of a time must be between 0 and 24 (inclusive).", "FODT0006");
+        }
+    }
+
+    public static void validateHour(IntegerValue hour) throws XPathException {
+        validateHour((int) hour.longValue());
+    }
+
+    /**
+     * Check whether the minute component of a time falls within
+     * the range specified in XSD 1.1 and XPath F&O 4.0.
+     *
+     * @param minute - the minute component of an arbitrary time value
+     * @throws XPathException
+     */
+    public static void validateMinute(int minute) throws XPathException {
+        if (minute < 0 || minute > 59) {
+            throw new XPathException("The minute component of a time must be between 0 and 59 (inclusive).", "FODT0006");
+        }
+    }
+
+    public static void validateMinute(IntegerValue minute) throws XPathException {
+        validateMinute((int) minute.longValue());
+    }
+
+    /**
+     * Check whether the minute component of a time falls within
+     * the range specified in XSD 1.1 and XPath F&O 4.0.
+     *
+     * @param second - the minute component of an arbitrary time value
+     * @throws XPathException
+     */
+    public static void validateSecond(int second) throws XPathException {
+        if (second < 0 || second > 59) {
+            throw new XPathException("The second must be between 0 and 59 (inclusive).", "FODT0006");
+        }
+    }
+
+    public static void validateSecond(DecimalValue second) throws XPathException {
+        int[] partsOfSecond = splitSecond(second);
+        validateSecond(partsOfSecond[0]);
+        validateNanosecond(partsOfSecond[1]);
+    }
+
+    /**
+     * Split a decimal second value into its component parts.
+     *
+     * @param second
+     * @return the whole number; and the fractional value in nanoseconds
+     */
+    public static int[] splitSecond(DecimalValue second) {
+        BigDecimal dSecond = (BigDecimal) second.getDecimalValue();
+        return new int[]{dSecond.intValue(), nanosecondFromSecond(dSecond)};
+    }
+
+    /**
+     * Check whether the nanosecond component of a time falls within
+     * the range specified in XSD 1.1 and XPath F&O 4.0.
+     *
+     * @param nanosecond - the fractional value of an arbitrary second, in nanoseconds
+     * @throws XPathException
+     */
+    public static void validateNanosecond(int nanosecond) throws XPathException {
+        if (nanosecond < 0 || nanosecond > 999999999) {
+            throw new XPathException("The nanosecond must be between 0 and 999999999 (inclusive)", "FODT0006");
+        }
+    }
+
+    /**
+     * Extract the fractional second (to the right of the decimal point)
+     * from a decimal second value and return their value in nanosecond.
+     *
+     * @param second - a decimal number
+     * @return the fractional value of a second, in nanosecond
+     */
+    public static int nanosecondFromSecond(BigDecimal second) {
+        BigDecimal fractionalsecond = second.remainder(BigDecimal.ONE);
+        return (fractionalsecond.multiply(BigDecimal.valueOf(1_000_000_000))).intValue();
+    }
+
+    /**
+     * Checks whether a year value represents a leap year
+     * in the Gregorian calendar, per XSD 1.1.
+     *
+     * @param year - the number of the year to check
+     * @return true if year is a leap year, else false
+     */
+    public static boolean isLeapYear(int year) {
+        if ((year % 4) == 0) {
+            // Divisible by 4
+            if ((year % 100) == 0) {
+                // Divisible by 4 and 100
+                if ((year % 400) == 0) {
+                    // Divisible by 4, 100 and 400
+                    return true;
+                } else {
+                    // Divisible by 4 and 100 but not 400
+                    return false;
+                }
+            } else {
+                // Divisible by 4 but not 100
+                return true;
+            }
+        }
+        return false;
     }
 }
 
