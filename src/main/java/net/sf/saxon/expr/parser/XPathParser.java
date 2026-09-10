@@ -3446,7 +3446,16 @@ public class XPathParser {
                 grumble("The name following '" + (deep ? "??" : "?") + "' must be a valid NCName");
             }
             nextToken();
-            result = lookupName(lhs, name, deep);
+            if (name.equals("type") && t.currentToken == Token.LPAR) {
+                nextToken();
+                SequenceType requiredType = parseSequenceType();
+                expect(Token.RPAR);
+                nextToken();
+                // only handle item types for now
+                result = lookupStar(lhs, requiredType.getPrimaryType(), deep);
+            } else {
+                result = lookupName(lhs, name, deep);
+            }
         } else if (token == Token.NUMBER) {
             NumericValue number = NumericValue.parseNumber(t.currentTokenValue);
             if (!(number instanceof IntegerValue)) {
@@ -3519,6 +3528,7 @@ public class XPathParser {
      */
 
     private static Expression lookupStar(Expression lhs, ItemType type, boolean deep) {
+        // Only handle ItemTypes for the time being
         if (deep) {
             return new DeepLookupAllExpression(lhs, type);
         } else {

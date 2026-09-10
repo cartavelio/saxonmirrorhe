@@ -252,7 +252,7 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-        return new LookupAllIterator(this, getBaseExpression().iterate(context));
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -297,7 +297,14 @@ public class LookupAllExpression extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             LookupAllExpression expr = (LookupAllExpression) getExpression();
             PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
-            return (context) -> new LookupAllIterator(expr, baseEval.iterate(context));
+            if (expr.requiredType == AnyItemType.getInstance()) {
+                return (context) -> new LookupAllIterator(expr, baseEval.iterate(context));
+            } else {
+                TypeHierarchy th = expr.getConfiguration().getTypeHierarchy();
+                ItemMappingFunction fn = (item) -> expr.requiredType.matches(item, th) ? item : null;
+                return (context) -> new ItemMappingIterator(
+                        new LookupAllIterator(expr, baseEval.iterate(context)), fn);
+            }
         }
     }
 
@@ -327,19 +334,9 @@ public class LookupAllExpression extends UnaryExpression {
                         return null;
                     } else if (lhs instanceof ArrayItem) {
                         level1forArrays = ((ArrayItem)lhs).members().iterator();
-//                        if (expr.requiredType != AnyItemType.getInstance()) {
-//                            TypeHierarchy th = expr.getConfiguration().getTypeHierarchy();
-//                            level1forArrays = new FilteringJavaIterator<>(
-//                                    level1forArrays, val -> expr.requiredType.matches(val, th));
-//                        }
                         return next();
                     } else if (lhs instanceof MapItem) {
                         level1forMaps = ((MapItem)lhs).keyValuePairs().iterator();
-//                        if (expr.requiredType != AnyItemType.getInstance()) {
-//                            TypeHierarchy th = expr.getConfiguration().getTypeHierarchy();
-//                            level1forMaps = new FilteringJavaIterator<>(
-//                                    level1forMaps, kvp -> expr.requiredType.matches(kvp.value, th));
-//                        }
                         return next();
                     } else {
                         try {
