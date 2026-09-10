@@ -59,7 +59,7 @@ public class XSLContextItem extends StyleElement {
                 compileErrorInAttribute(e, "as");
             }
             if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {
-                compileError("The xsl:context-item/@use attribute must be an item type (no occurrence indicator allowed)", "XTSE0020");
+                compileError("The xsl:context-item/@as attribute must be an item type (no occurrence indicator allowed)", "XTSE0020");
                 return;
             }
             requiredType = st.getPrimaryType();
