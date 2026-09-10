@@ -101,6 +101,71 @@ safe to completely delete the build directory before executing a task.
 This ensures that _everything_ necessary to execute the task will be
 rebuilt from the current sources.
 
+### Building wheels
+
+Building wheels is complicated. There are three different Saxon
+products each with five different flavors of wheel and each for
+several different versions of Python:
+
+* Mac for x86 and aarch64
+* Linux for x86 and arm64
+* Windows for x86 (and someday, maybe also arm64)
+
+We rely on `cibuildwheel` to create relocatable shared libraries. That
+requires building the Linux wheel versions of SaxonC with particular
+(and slightly older) versions of the C++ toolchain.
+
+* Mac for x86 can be built on an Intel Mac
+* Mac for aarch64 be built on an Apple Silicon Mac
+* Linux for x86 is built in a [Docker container](https://saxonica.plan.io/projects/ci-tools/repository/33/revisions/main/show/docker/saxondev)
+* Linux for Arm64 is built in a VMWare container on an Apple Silicon
+  Mac. The `cibuildwheel` process runs in that container because there
+  is no Arm64 host available on GitHub.
+* Windows for x86 is built on a Windows machine
+
+The `cibuildwheel` for all of the platforms except Linux/arm64 runs in
+the [BuildWheels](https://github.com/Saxonica/BuildWheels/) repository
+on GitHub. Because we don’t have the sources for SaxonC available on
+GitHub, a yet even more complicated process is used.
+
+1. Build SaxonC for Python wheels using the `saxonc_stage_wheels`
+   target in the appropriate environment.
+2. Copy the staged wheels from the `build/distributions/` directory to
+   the staging area on `dev.saxonica.com`. The staging area is
+   `/var/www/html/dev.saxonica.com/github-wheel-sources/USER/`, where
+   USER is your login id.
+3. Update the `config.json` file in the `BuildWheels` project.
+4. Push the change to `config.json` to trigger a build.
+
+The `config.json` file has several properties:
+
+```
+{
+  "user": "norm",
+  "macx86_64": true,
+  "macaarch64": true,
+  "macpath": "/Volumes/Saxonica/src/saxonica/saxondev",
+  "linux": false,
+  "windows": false,
+  "date": "2023-05-02T19-00-00"
+}
+```
+
+* `user` identifies the user and determines which staged libraries will be retrieved.
+* `macx86_64` and `macaarch64` determine whether the Mac wheels should be built.
+* `macpath` is the absolute path to the `saxondev` repository on the
+  machine where you built the Mac release. This is required by the Mac version of the
+  tool that builds relocatable shared libraries.
+* `linux` determines whether the (x86) Linux wheels should be built.
+* `windows` determines whether the Windows wheels should be built.
+* `date` is actually irrelevant, but gives you something to change if
+  you need to trigger new build for the same configuration.
+
+The `saxonc_build_wheels` target will automate all of this for you on
+a Mac. It doesn’t work for Linux because you have to build in a
+container anyway. It doesn’t work for Windows because it relies on
+`scp` and other tools that aren’t typically installed.
+
 ## Signing jars
 
 If your environment is configured to sign jars, running the release
