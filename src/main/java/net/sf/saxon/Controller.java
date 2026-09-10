@@ -396,6 +396,10 @@ public class Controller implements ContextOriginator {
     public PipelineConfiguration makePipelineConfiguration() {
         PipelineConfiguration pipe = new PipelineConfiguration(getConfiguration());
         pipe.setController(this);
+        ParseOptions options = new ParseOptions(getConfiguration().getParseOptions());
+        options.setSchemaValidationMode(validationMode);
+        options.setErrorReporter(errorReporter);
+        pipe.setParseOptions(options);
         return pipe;
         //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
 //        pipe.getParseOptions().setSchemaValidationMode(validationMode); // added in 9.7
