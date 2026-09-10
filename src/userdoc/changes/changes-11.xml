@@ -404,7 +404,6 @@
             been dropped. (The underlying methods in the <code java="net.sf.saxon.Controller">Controller</code> class remain
             available if required).</p>
         
-        <!-- TODO check the following restrictions are noted in the function documentation-->
         <p class="csonly">A number of extension functions in the Saxon namespace have not been carried forward to the Saxon-CS
             product, either because they are obsolete, or because implementation is non-trivial. These include
             <code>saxon:compile-query</code>, <code>saxon:is-defaulted</code>, <code>saxon:key-map</code>,

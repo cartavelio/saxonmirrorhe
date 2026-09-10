@@ -161,7 +161,7 @@
     </xsl:if>
     <xsl:value-of
      select="
-      fc:edition((fc:saxon-edition,
+     fc:edition((string-join((fc:saxon-edition, fc:saxon-edition/@platform), ' '),
       $default.saxon,
       'default')[1])"/>
    </aside>

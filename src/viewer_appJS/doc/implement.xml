@@ -11,11 +11,13 @@
     <default id='exslt-math' saxon="PE/EE"/>
     <default id='exslt-random' saxon="PE/EE"/>
     <default id='exslt-sets' saxon="PE/EE"/>
-    <default id='exslt-dates-and-times' saxon="PE/EE"/>
+    <default id='exslt-dates-and-times' saxon="PE/EE J"/>
     
-    <default id='expath-archive' saxon="9.6 PE/EE" xpath="2.0"/> 
+    <default id='expath-archive' saxon="9.6 PE/EE J" xpath="2.0"/> 
     <default id='expath-binary' saxon="9.6 PE/EE" xpath="2.0"/>
-    <default id='expath-file' saxon="9.5 PE/EE" xpath="2.0"/>    
+    <default id='expath-file' saxon="9.5 PE/EE" xpath="2.0"/>
+    
+    <default id='sql' saxon="PE/EE J"/> <!-- saxon SQL functions -->
     
     <default id='xsl-elements' saxon="PE/EE"/> 
     <default id='instructions' saxon="PE/EE"/> <!-- saxon extension instructions -->
@@ -38,7 +40,8 @@
     <saxon version="ALL_SINCE_9.8"> From Saxon 9.8, available in all editions.</saxon>
     <saxon version="ALL_SINCE_9.7"> From Saxon 9.7, available in all editions.</saxon>
     <saxon version="ALL_SINCE_9.6"> From Saxon 9.6, available in all editions.</saxon>
-    <saxon version="REMOVED_SINCE_10"> From Saxon 10, no longer available.</saxon> 
+    <saxon version="REMOVED_SINCE_10"> From Saxon 10, no longer available.</saxon>
+    <saxon version="REMOVED_SINCE_11"> From Saxon 11, no longer available.</saxon>
     
     <saxon version="ALL_9.8_RESTRICTIONS_HE"> From Saxon 9.8, available in all editions, but restricted use in Saxon-HE.</saxon>
     <saxon version="RESTRICTIONS_9.6"> Implemented with restrictions in Saxon 9.6.</saxon>
@@ -56,6 +59,7 @@
     
     <saxon version="J"> Not available on the .NET platform.</saxon>
     
+    <saxon version="11"> Implemented since Saxon 11.</saxon>
     <saxon version="10"> Implemented since Saxon 10.</saxon>
     <saxon version="9.9"> Implemented since Saxon 9.9.</saxon>
     <saxon version="9.8"> Implemented since Saxon 9.8.</saxon>
