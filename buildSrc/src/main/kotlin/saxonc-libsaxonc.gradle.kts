@@ -100,6 +100,7 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
         cMakeInputFiles.from(layout.projectDirectory.dir("../cmake").asFileTree)
         version = saxonBuild.version
         platformIsWindows = saxonBuild.targetHost.map { it.isWindows }
+        macosMinVersion = saxonBuild.macosx_min_version
         buildPath = cmakeBuildDir
         cmakeFilenames = listOf("saxonc_version.c")
         extraCMakeArgs = { ->

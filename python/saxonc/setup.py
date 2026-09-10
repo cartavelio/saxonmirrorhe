@@ -11,10 +11,27 @@ from platform import system
 
 extra_link_args = []
 
+class SaxonCLibLocation:
+    def __init__(self, base_path):
+        self.base_path = base_path
+
+    @property
+    def include(self):
+        return self.base_path / 'include'
+
+    @property
+    def dll(self):
+        return self.base_path / 'bin'
+
+    @property
+    def lib(self):
+        return self.base_path / 'lib'
+
+libsaxonc_core_path = Path(os.environ.get('LIBSAXONCCORE_PATH'))
 libsaxonc_path = Path(os.environ.get('LIBSAXONC_PATH'))
-saxonc_include_location = libsaxonc_path / 'include'
-saxonc_dll_location = libsaxonc_path / 'bin'
-saxonc_built_libs_location = libsaxonc_path / 'lib'
+saxonc_locations = [SaxonCLibLocation(libsaxonc_core_path), SaxonCLibLocation(libsaxonc_path)]
+
+print([(x.include, x.lib, x.dll) for x in saxonc_locations])
 
 def is_debug_build():
     if 'BUILD_DEBUG' in os.environ:
@@ -39,10 +56,10 @@ saxonc_core_libname = f'saxonc-core-{saxonc_edition}{debug_postfix}'
 saxonc_libname = f'saxonc-{saxonc_edition}{debug_postfix}'
 
 if system() == 'Windows':
-    extra_link_args.append(f'/LIBPATH:{saxonc_built_libs_location}')
-    extra_link_args.append(f'/LIBPATH:{saxonc_dll_location}')
+    extra_link_args.extend([f'/LIBPATH:{loc.lib}' for loc in saxonc_locations])
+    extra_link_args.extend([f'/LIBPATH:{loc.dll}' for loc in saxonc_locations])
 else:
-    extra_link_args.append(f'-L{saxonc_built_libs_location}')
+    extra_link_args.extend([f'-L{loc.lib}' for loc in saxonc_locations])
 
 saxonc_api_sources = []
 
@@ -52,7 +69,7 @@ saxonc_ext = Extension(
     f'saxonc{saxonc_edition}',
     sources = all_sources,
     language = 'c++',
-    include_dirs = ['src/cpp/include', str(saxonc_include_location)],
+    include_dirs = ['src/cpp/include'] + [str(loc.include) for loc in saxonc_locations],
     extra_link_args = extra_link_args,
     libraries = [saxonc_core_libname, saxonc_libname]
 )

@@ -24,6 +24,10 @@ abstract class CMakeGeneratorTask @Inject constructor(private val ex: ExecOperat
   abstract val platformIsWindows: Property<Boolean>
 
   @get:Input
+  @get:Optional
+  abstract val macosMinVersion: Property<String>
+
+  @get:Input
   abstract val version: Property<String>
 
   @get:InputFiles
@@ -44,6 +48,9 @@ abstract class CMakeGeneratorTask @Inject constructor(private val ex: ExecOperat
       workingDir = layout.projectDirectory.asFile
       executable = "cmake"
       args("-G", generatorName.get(), "-B", buildPath.map { it.asFile.toString() }.get(), "-D", version.map { "SAXON_VERSION:STRING=${it}" }.get())
+      if (macosMinVersion.isPresent) {
+        args("-D", "CMAKE_OSX_DEPLOYMENT_TARGET=${macosMinVersion.get()}")
+      }
       if (extraCMakeArgs.isPresent) args(extraCMakeArgs.get().invoke())
     }
   }

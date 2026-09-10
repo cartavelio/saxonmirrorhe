@@ -182,6 +182,9 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
     @get:InputDirectory
     abstract val libsaxoncDir: DirectoryProperty
 
+    @get:InputDirectory
+    abstract val libsaxoncCoreDir: DirectoryProperty
+
     @get:Internal
     abstract val outputDir: DirectoryProperty
 
@@ -243,6 +246,7 @@ abstract class BuildWheel @Inject constructor(private val ex: ExecOperations): D
                 environment("MACOSX_DEPLOYMENT_TARGET", macosxDeploymentTarget.get())
             }
 
+            environment("LIBSAXONCCORE_PATH", libsaxoncCoreDir.get())
             environment("LIBSAXONC_PATH", libsaxoncDir.get())
             environment("SAXONC_BUILD_EDITION", productEdition.get())
             environment("SAXONC_BUILD_VERSION", productVersion.get())
@@ -411,6 +415,13 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
             libsaxoncDirVal = value
         }
 
+    private var libsaxoncCoreDirVal: Provider<Set<FileSystemLocation>>?  = null
+    var libsaxoncCoreDir: Provider<Set<FileSystemLocation>>
+        get() = libsaxoncCoreDirVal!!
+        set(value) {
+            libsaxoncCoreDirVal = value
+        }
+
     val debug: Property<Boolean> = project.objects.property(false.javaClass).convention(false)
 
     var prefix: String? = null
@@ -428,15 +439,21 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
             macosxDeploymentTarget = platformTagTask.flatMap { it.macosxDeploymentTarget }
             sourceDir = builder.sourceDir
             libsaxoncDir = project.layout.dir(builder.libsaxoncDir.map { it.first().asFile })
+            libsaxoncCoreDir = project.layout.dir(builder.libsaxoncCoreDir.map { it.first().asFile })
             outputDir = builder.buildDir.dir("wheel")
         }
 
         val libLocations: Provider<List<String>> = saxonBuild.systemOsName.map { os -> if (os == "windows") listOf("lib", "bin") else listOf("lib") }
         val libDirs = libsaxoncDir.map { dirs ->
             val dirPath = dirs.first().asFile.toString()
+            val coreDirPath = libsaxoncCoreDir.get().first().asFile.toString()
+
             libLocations.map { dirnames ->
-                dirnames.map { dirname ->
-                    project.layout.projectDirectory.dir(dirPath).dir(dirname)
+                dirnames.flatMap { dirname ->
+                    listOf(
+                        project.layout.projectDirectory.dir(coreDirPath).dir(dirname),
+                        project.layout.projectDirectory.dir(dirPath).dir(dirname),
+                    )
                 }
             }.get()
         }
