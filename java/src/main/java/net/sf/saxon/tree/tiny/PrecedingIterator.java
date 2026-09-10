@@ -9,6 +9,7 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
@@ -85,6 +86,10 @@ final public class PrecedingIterator implements SequenceIterator {
             if (matchesTextNodes && tree.nodeKind[nextNodeNr] == Type.TEXTUAL_ELEMENT) {
                 TinyTextualElement element = (TinyTextualElement)tree.getNode(nextNodeNr);
                 TinyTextualElement.TinyTextualElementText text = element.getTextNode();
+                if (predicate == null || predicate == AnyGNode.TEST) {
+                    pending = element;
+                    return current = text;
+                }
                 if (predicate.test(text)) {
                     if (predicate.test(element)) {
                         pending = element;

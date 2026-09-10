@@ -12,7 +12,10 @@ import net.sf.saxon.tree.tiny.NodeVectorTree;
 
 import java.util.function.IntPredicate;
 
-public class AnyGNode implements NodePredicate, NodeVectorMatchMaker {
+/**
+ * A node test that matches everything (in particular, any XNode and any JNode)
+ */
+public final class AnyGNode implements NodePredicate, NodeVectorMatchMaker {
 
     private AnyGNode(){};
 
