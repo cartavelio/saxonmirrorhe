@@ -295,7 +295,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                     SequenceType.SINGLE_INTEGER);
 
-            register("sort-with", 2, e -> e.populate(ArraySortWith::new, AnyItemType.INSTANCE, STAR, LATE)
+            register("sort-with", 2, e -> e.populate(ArraySortWith::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, LATE)
                         .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                         .arg(1, comparator, PLUS, null));
             //		$comparators	as (fn(item()*, item()*) as xs:integer)+

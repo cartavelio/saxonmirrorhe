@@ -15,6 +15,7 @@ import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.XNodeType;
 
 import java.util.Optional;
@@ -193,10 +194,14 @@ public class PortableNamedXNodeType extends XNodeType {
      * Determines whether two NameTests are equal
      */
 
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     public boolean equals(Object other) {
+        if (other instanceof NamedXNodeType t2) {
+            return t2.equals(this);
+        }
         return other instanceof PortableNamedXNodeType &&
                 ((PortableNamedXNodeType) other).qNameTest.equals(qNameTest) &&
-                ((PortableNamedXNodeType) other).nodeKind == nodeKind ;
+                ((PortableNamedXNodeType) other).nodeKind == nodeKind;
     }
 
 //    @Override

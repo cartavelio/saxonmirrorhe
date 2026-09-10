@@ -86,7 +86,13 @@ public class SpecificQNameTest implements QNameTest {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof SpecificQNameTest && ((SpecificQNameTest)obj).fingerprint == fingerprint;
+        if (obj instanceof SpecificQNameTest t2) {
+            return t2.fingerprint == fingerprint;
+        }
+        if (obj instanceof PortableQNameTest t2) {
+            return getStructuredQName().equals(t2.getStructuredQName());
+        }
+        return false;
     }
 }
 

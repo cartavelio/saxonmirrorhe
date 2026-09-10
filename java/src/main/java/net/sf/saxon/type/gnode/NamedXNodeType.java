@@ -469,6 +469,10 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
                     t2.schemaType == schemaType &&
                     t2.nillable == nillable;
         }
+        if (other instanceof PortableNamedXNodeType p2) {
+            return p2.getNodeKind() == kind &&
+                    p2.getAllowedNodeNames().equals(nameTest);
+        }
         return false;
     }
 

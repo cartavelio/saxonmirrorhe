@@ -98,6 +98,7 @@ public class ParamKeywords {
         fnParamNames.put("contains-subsequence", "input|subsequence|compare");
         fnParamNames.put("contains-token", "value|token|collation");
         fnParamNames.put("count", "input");
+        fnParamNames.put("csv-doc", "source|options");
         fnParamNames.put("csv-to-arrays", "value|options");
         fnParamNames.put("csv-to-xml", "value|options");
         fnParamNames.put("current-date", "");
