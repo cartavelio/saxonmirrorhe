@@ -817,7 +817,7 @@ public class QT3TestDriverHE extends TestDriver {
                 return;
             }
             XPathCompiler assertXpc = env.processor.newXPathCompiler();
-            assertXpc.setLanguageVersion("3.1");
+            assertXpc.setLanguageVersion("4.0");
             assertXpc.declareNamespace("fn", NamespaceConstant.FN);
             assertXpc.declareNamespace("xs", NamespaceConstant.SCHEMA);
             assertXpc.declareNamespace("math", NamespaceConstant.MATH);
