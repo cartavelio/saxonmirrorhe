@@ -9,9 +9,9 @@ package net.sf.saxon.trans.packages;
 
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.Source;
 import java.util.Map;
@@ -20,5 +20,5 @@ public interface IPackageLoader {
 
     StylesheetPackage loadPackageDoc(NodeInfo doc) throws XPathException;
 
-    StylesheetPackage loadPackage(Source source, Map<String, XsdSchema> usedSchemata) throws XPathException;
+    StylesheetPackage loadPackage(Source source, Map<String, Schema> usedSchemata) throws XPathException;
 }

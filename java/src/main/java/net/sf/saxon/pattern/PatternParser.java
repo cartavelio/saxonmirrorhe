@@ -188,8 +188,8 @@ public class PatternParser extends XPathParser {
                 nextToken();
             } else if (t.currentToken == Token.MINUS) {
                 nextToken();
-                if (t.currentToken instanceof Token.NumericLiteral num) {
-                    key = num.getValue().negate();
+                if (t.currentToken instanceof Token.NumericLiteral negativeNum) {
+                    key = negativeNum.getValue().negate();
                     nextToken();
                 } else {
                     grumble("In a JNode pattern, expected a numeric literal after a minus sign");

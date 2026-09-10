@@ -479,11 +479,11 @@ public class IndependentContext extends AbstractStaticContext
 
     /**
      * Get the imported schema for this static context, if any
-     * @return the imported schema, or null if no schema has been imported
+     * @return the imported schema, or the MinimalSchema if no schema has been imported
      */
 
     public Schema getImportedSchema() {
-         return importedSchema;
+         return importedSchema==null ? getConfiguration().emptySchema() : importedSchema;
     }
 
     /**

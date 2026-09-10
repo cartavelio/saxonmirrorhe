@@ -47,7 +47,6 @@ import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.str.StringView;
@@ -112,7 +111,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private final Map<Component, String> externalReferences = new HashMap<>();
     private String relocatableBase = null;
     private NestedIntegerValue originalVersion = null;
-    private Map<String, XsdSchema> usedSchemata = null;
+    private Map<String, Schema> usedSchemata = null;
 
     public PackageLoaderHE(Configuration config) {
         this.config = config;
@@ -181,7 +180,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     @Override
-    public StylesheetPackage loadPackage(Source source, Map<String, XsdSchema> usedSchemata) throws XPathException {
+    public StylesheetPackage loadPackage(Source source, Map<String, Schema> usedSchemata) throws XPathException {
         this.usedSchemata = usedSchemata;
         ParseOptions options = new ParseOptions()
                 .withSpaceStrippingRule(AllElementsSpaceStrippingRule.INSTANCE)
@@ -403,7 +402,7 @@ public class PackageLoaderHE implements IPackageLoader {
         // No action in Saxon-HE
     }
 
-    protected void readSchemata(NodeInfo packageElement, Map<String, XsdSchema> usedSchemata) throws XPathException {
+    protected void readSchemata(NodeInfo packageElement, Map<String, Schema> usedSchemata) throws XPathException {
         // No action in Saxon-HE
     }
 

@@ -18,8 +18,8 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
-import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.trans.packages.PackageLibrary;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
@@ -61,7 +61,7 @@ public class CompilerInfo {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private int languageVersion = 30;
-    private Map<String, XsdSchema> preLoadedSchemata = new HashMap<>();
+    private Map<String, Schema> preLoadedSchemata = new HashMap<>();
 
     private FunctionLibrary stubFunctionLibrary = null;
 
@@ -655,15 +655,15 @@ public class CompilerInfo {
         return queryLibraries;
     }
 
-    public void preLoadSchema(String role, XsdSchema schema) {
+    public void preLoadSchema(String role, Schema schema) {
         preLoadedSchemata.put(role, schema);
     }
 
-    public XsdSchema getPreLoadedSchema(String role) {
+    public Schema getPreLoadedSchema(String role) {
         return preLoadedSchemata.get(role);
     }
 
-    public Map<String, XsdSchema> getPreLoadedSchemata() {
+    public Map<String, Schema> getPreLoadedSchemata() {
         return preLoadedSchemata;
     }
 

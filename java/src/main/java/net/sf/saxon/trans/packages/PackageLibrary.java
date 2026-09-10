@@ -11,11 +11,11 @@ package net.sf.saxon.trans.packages;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.Source;
 import java.io.File;
@@ -284,7 +284,7 @@ public class PackageLibrary {
 
     public StylesheetPackage obtainLoadedPackage(PackageDetails details,
                                                  List<VersionedPackageName> disallowed,
-                                                 Map<String, XsdSchema> usedSchemata
+                                                 Map<String, Schema> usedSchemata
     ) throws XPathException {
         if (details.loadedPackage != null) {
             return details.loadedPackage;

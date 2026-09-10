@@ -32,6 +32,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.ElementImpl;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -77,7 +78,8 @@ public class XsltCompiler {
     private final Processor processor;
     private final Configuration config;
     private final CompilerInfo compilerInfo;
-    private Map<String, XsdSchema> usedSchemata;
+    private Map<String, XsdSchema> usedXsdSchemata;
+    private Map<String, Schema> usedSchemata;
 
 
     /**
@@ -129,11 +131,13 @@ public class XsltCompiler {
 
     public void useSchema(String role, XsdSchema schema) {
         compilerInfo.setSchemaAware(true);
-        compilerInfo.preLoadSchema(role, schema);
-        if (usedSchemata == null) {
+        compilerInfo.preLoadSchema(role, schema.getUnderlyingSchema());
+        if (usedXsdSchemata == null) {
+            usedXsdSchemata = new HashMap<>();
             usedSchemata = new HashMap<>();
         }
-        usedSchemata.put(role,  schema);
+        usedXsdSchemata.put(role, schema);
+        usedSchemata.put(role,  schema.getUnderlyingSchema());
     }
 
     /**
@@ -148,10 +152,10 @@ public class XsltCompiler {
         if (role == null) {
             role = "";
         }
-        if (usedSchemata == null) {
+        if (usedXsdSchemata == null) {
             return null;
         }
-        return usedSchemata.get(role);
+        return usedXsdSchemata.get(role);
     }
 
     /**
