@@ -721,7 +721,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
             throws XPathException {
         context.setStackFrame(getStackFrameMap(), actualArgs);
         try {
-            getBody().evaluatePendingUpdates(context, pul);
+            getBody().makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());
             throw err;

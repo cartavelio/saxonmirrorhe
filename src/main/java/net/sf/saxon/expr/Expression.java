@@ -976,26 +976,6 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     }
 
     /**
-     * Evaluate an updating expression, adding the results to a Pending Update List.
-     * The default implementation of this method, which is used for non-updating expressions,
-     * throws an UnsupportedOperationException
-     *
-     * @param context the XPath dynamic evaluation context
-     * @param pul     the pending update list to which the results should be written
-     * @throws net.sf.saxon.trans.XPathException
-     *                                       if evaluation fails
-     * @throws UnsupportedOperationException if the expression is not an updating expression
-     */
-
-    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        if (isVacuousExpression()) {
-            iterate(context).next(); // typically, a call on fn:error
-        } else {
-            throw new UnsupportedOperationException("Expression " + getClass() + " is not an updating expression");
-        }
-    }
-
-    /**
      * <p>The toString() method for an expression attempts to give a representation of the expression
      * in an XPath-like form.</p>
      * <p>For subclasses of Expression that represent XPath expressions, the result should always be a string that

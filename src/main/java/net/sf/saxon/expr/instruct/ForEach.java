@@ -580,22 +580,6 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
     }
 
     /**
-     * Evaluate an updating expression, adding the results to a Pending Update List.
-     * The default implementation of this method, which is used for non-updating expressions,
-     * throws an UnsupportedOperationException
-     *
-     * @param context the XPath dynamic evaluation context
-     * @param pul     the pending update list to which the results should be written
-     * @throws net.sf.saxon.trans.XPathException if evaluation fails
-     * @throws UnsupportedOperationException     if the expression is not an updating expression
-     */
-
-    @Override
-    public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
-    }
-
-    /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.
      */
