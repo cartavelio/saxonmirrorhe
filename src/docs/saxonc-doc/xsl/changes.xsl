@@ -38,6 +38,10 @@
                 href="https://www.saxonica.com/saxon-c/release-notes.xml">Release notes</a>, and for
             details of bug fixes see the <a href="https://saxonica.plan.io/projects/saxon-c">SaxonC
                 project</a> at the Saxonica community site.</p>
+        
+        <aside>For other changes in the main Saxon release, from which SaxonC is built, please also see the <a
+            class="bodylink" href="https://www.saxonica.com/documentation/index.html#!changes">Change
+            history</a> section in the main Saxon documentation.</aside>
 
         <p>Show changes between version <select id="fromList">
                 <xsl:for-each select="subsequence($saxonVersions0, 2)">

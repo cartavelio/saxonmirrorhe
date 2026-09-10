@@ -38,6 +38,11 @@
         <xsl:variable name="selectedCat" select="($selectedCategory, ch:changes/ch:categories/ch:cat[1]/@name)[1]" as="xs:string"/>
 
         <p>Details of changes in all Saxon releases since 7.0 are available here.</p>
+        
+        <p class="conly">For changes specific to the SaxonC product, please also see the <a
+            href="https://www.saxonica.com/saxon-c/documentation12/index.html#!changes" class="bodylink">SaxonC Change history</a>
+            documentation.</p>
+        
 
         <p>Show changes between version <select id="fromList">
                 <xsl:for-each select="subsequence($saxonVersions0, 2)">
