@@ -41,7 +41,10 @@
     <xsl:param name="product" select="'SaxonC'" as="xs:string"/>
     <xsl:param name="showStatusMessage" select="false()" as="xs:boolean"/>
 
-    <xsl:variable name="location" select="resolve-uri('doc', ixsl:location())"/>
+    <xsl:variable name="current-location" select="ixsl:location()"/>
+    <xsl:variable name="base-location" select="if (contains($current-location, '#')) then
+        substring-before($current-location, '#') else $current-location"/>
+    <xsl:variable name="location" select="resolve-uri('doc', $base-location)"/>
     <xsl:variable name="implement-doc" select="f:doc-uri(concat($location, '/implement.xml'))"/>
     
     <!--<xsl:variable name="docChanges" select="doc(concat($location, '/changes.xml'))"
