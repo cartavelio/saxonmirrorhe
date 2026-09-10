@@ -16,18 +16,22 @@ import net.sf.saxon.expr.sort.NumericComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerRange;
 import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.NumericValue;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-public class ChainTest {
+public class ZenoSequenceTest {
 
     @Test
     public void testAppend() {
@@ -38,7 +42,7 @@ public class ChainTest {
             initial.add(new IntegerRange(41, 1, 60));
             ZenoSequence chain = ZenoSequence.join(initial);
             for (int i=61; i<=100; i++) {
-                chain.append(new Int64Value(i));
+                chain = chain.append(new Int64Value(i));
             }
             assertEquals(100, chain.getLength());
             assertEquals(1, ((IntegerValue) chain.itemAt(0)).longValue());
@@ -59,13 +63,43 @@ public class ChainTest {
             initial.add(new IntegerRange(41, 1, 60));
             ZenoSequence chain = ZenoSequence.join(initial);
             for (int i=61; i<=100; i++) {
-                chain.append(new Int64Value(i));
+                chain = chain.append(new Int64Value(i));
             }
             AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
             assertTrue(DeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
             assertEquals(51, ((IntegerValue)chain.itemAt(50)).longValue());
+        } catch (XPathException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testHead() {
+        try {
+            List<GroundedValue> initial = new ArrayList<>();
+            initial.add(new IntegerRange(1, 1, 20));
+            initial.add(new IntegerRange(21, 1, 40));
+            initial.add(new IntegerRange(41, 1, 60));
+            ZenoSequence chain = ZenoSequence.join(initial);
+            Item head = chain.head();
+            assertEquals(1L, ((NumericValue) head).longValue());
+        } catch (XPathException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testItemAt() {
+        try {
+            List<GroundedValue> initial = new ArrayList<>();
+            initial.add(new IntegerRange(1, 1, 20));
+            initial.add(new IntegerRange(21, 1, 40));
+            initial.add(new IntegerRange(41, 1, 60));
+            ZenoSequence chain = ZenoSequence.join(initial);
+            Item i25 = chain.itemAt(25);
+            assertEquals(26L, ((NumericValue) i25).longValue());
         } catch (XPathException e) {
             fail();
         }
