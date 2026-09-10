@@ -2546,22 +2546,6 @@ public class Configuration implements SourceResolver {
      */
 
     public void setSchemaValidationMode(int validationMode) {
-//        switch (validationMode) {
-//            case Validation.STRIP:
-//            case Validation.PRESERVE:
-//                break;
-//            case Validation.LAX:
-//                if (!isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
-//                    // if schema processing isn't supported, then there's never a schema, so lax validation is a no-op.
-//                    validationMode = Validation.STRIP;
-//                }
-//                break;
-//            case Validation.STRICT:
-//                checkLicensedFeature(LicenseFeature.SCHEMA_VALIDATION, "strict validation", -1);
-//                break;
-//            default:
-//                throw new IllegalArgumentException("Unsupported validation mode " + validationMode);
-//        }
         defaultParseOptions = defaultParseOptions.withSchemaValidationMode(validationMode);
     }
 
@@ -3008,10 +2992,6 @@ public class Configuration implements SourceResolver {
         }
     }
     //#endif
-
-    public Schema getSchemaForNamespace(NamespaceUri uri) {
-        return null;
-    }
 
     /**
      * Simple interface to load a schema document. This is a factory method that has no effect
@@ -5333,6 +5313,7 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
+    @CSharpModifiers(code={"virtual", "internal"})
     public XsdCompiler makeXsdCompiler(Processor proc) {
         return new XsdCompiler();
     }

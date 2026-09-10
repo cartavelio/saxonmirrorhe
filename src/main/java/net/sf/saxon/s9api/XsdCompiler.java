@@ -157,6 +157,19 @@ public class XsdCompiler {
     }
 
     /**
+     * Combine a set of schemas into one
+     * @param schemas the input schemas. These are not modified.
+     * @return the combined schema
+     * @throws SaxonApiException if the schemas are not compatible, for example if they contain
+     * duplicate names.
+     * @since 13.0
+     */
+
+    public XsdSchema combine(XsdSchema... schemas) throws SaxonApiException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Return an empty schema. This may be useful for validating instance documents when all
      * the actual schema definitions are linked from the instance document using {@code xsi:schemaLocation}
      * and {@code xsi:noNamespaceSchemaLocation} attributes
