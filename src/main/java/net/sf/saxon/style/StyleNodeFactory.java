@@ -287,7 +287,7 @@ public class StyleNodeFactory implements NodeFactory {
 
     @NotNull
     @CSharpReplaceBody(code = "return (net.sf.saxon.style.StyleElement)System.Activator.CreateInstance(actualClass);")
-    private StyleElement makeStyleElement(Class<? extends StyleElement> actualClass) {
+    protected StyleElement makeStyleElement(Class<? extends StyleElement> actualClass) {
         StyleElement node;
         try {
             node = actualClass.newInstance();

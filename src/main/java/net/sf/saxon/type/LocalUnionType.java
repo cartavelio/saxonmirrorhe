@@ -27,7 +27,7 @@ import java.util.function.Predicate;
 
 public class LocalUnionType implements PlainType, UnionType {
 
-    private final List<AtomicType> memberTypes;
+    private final List<? extends AtomicType> memberTypes;
 
     /**
      * Get the genre of this item
@@ -50,11 +50,11 @@ public class LocalUnionType implements PlainType, UnionType {
      * @param memberTypes the atomic member types of the union
      */
 
-    public LocalUnionType(List<AtomicType> memberTypes) {
+    public LocalUnionType(List<? extends AtomicType> memberTypes) {
         this.memberTypes = memberTypes;
     }
 
-    public List<AtomicType> getMemberTypes() {
+    public List<? extends AtomicType> getMemberTypes() {
         return memberTypes;
     }
 

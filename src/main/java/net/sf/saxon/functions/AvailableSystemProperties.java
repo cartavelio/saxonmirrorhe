@@ -56,7 +56,9 @@ public class AvailableSystemProperties extends SystemFunction {
 //#if EE==true || PE==true
         myList.add(new QNameValue("bin", EXPathBinaryFunctionSet.NAMESPACE, "version"));
         myList.add(new QNameValue("file", EXPathFileFunctionSet.NAMESPACE, "version"));
+        //#if CSHARP==false
         myList.add(new QNameValue("archive", Archive.NAMESPACE, "version"));
+        //#endif
 //#endif
 
         if (context.getConfiguration().getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {

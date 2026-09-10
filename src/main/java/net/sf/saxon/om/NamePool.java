@@ -176,10 +176,11 @@ public final class NamePool {
         if (existing >= 0) {
             return existing;
         }
-        int next = unique.getAndIncrement();
-        if (next > MAX_FINGERPRINT) {
+        long nextUnique = unique.getAndIncrement();
+        if (nextUnique > MAX_FINGERPRINT) {
             throw new NamePoolLimitException("Too many distinct names in NamePool");
         }
+        int next = (int)nextUnique;
         Integer existing2 = qNameToInteger.putIfAbsent(qName, next);
         if (keyWasAbsent(existing2)) {
             integerToQName.put(next, qName);

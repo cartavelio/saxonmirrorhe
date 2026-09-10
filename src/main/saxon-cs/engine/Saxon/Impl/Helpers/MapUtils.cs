@@ -7,10 +7,18 @@ namespace Saxon.Impl.Helpers {
             bool present = map.TryGetValue(key, out var value);
             return present ? value : default(V);
         }
+        public static V Put<K,V>(SysCollGen.IDictionary<K, V> map, K key, V value) /*where V : class*/ {
+            V existing = Get(map, key);
+            map[key] = value;
+            return existing;
+        }
         public static void PutAll<K,V>(SysCollGen.IDictionary<K, V> map, SysCollGen.IDictionary<K, V> other)  {
             foreach (SysCollGen.KeyValuePair<K, V> pair in other) {
                 map[pair.Key] = pair.Value;
             }
+        }
+        public static void Merge<K,V>(SysCollGen.IDictionary<K, V> map, K key, V value, Func<V, V, V> function) {
+            throw new NotImplementedException();
         }
         public static SysCollGen.ISet<K> KeySet<K,V>(SysCollGen.IDictionary<K, V> map) {
             return new SysCollGen.HashSet<K>(map.Keys);
