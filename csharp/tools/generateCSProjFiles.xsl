@@ -455,19 +455,19 @@ EndGlobal
         <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.8" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration'">
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.4" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration.Json'">
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.4" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration.Xml'">
-        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.4" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.NET.Test.Sdk'">
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
       </xsl:when>
       <xsl:when test=". = 'NSec.Cryptography'">
-        <PackageReference Include="NSec.Cryptography" Version="24.4.0" />
+        <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
       </xsl:when>
       <xsl:when test=". = 'NUnit'">
         <PackageReference Include="NUnit" Version="4.3.2"/>
