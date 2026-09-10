@@ -647,7 +647,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
             if (invalidityHandler instanceof InvalidityReportGenerator) {
                 ((InvalidityReportGenerator) invalidityHandler).setXsdVersion(config.getXsdVersion() == Configuration.XSD11 ? "1.1" : "1.0");
             }
-            invalidityHandler.startReporting(source.getSystemId());
+            //invalidityHandler.startReporting(source.getSystemId());
             ParseOptions options = new ParseOptions().withSchema(schema.getUnderlyingSchema());
             Sender.send(source, receiver, options);
         } catch (QuitParsingException qpe) {
@@ -658,13 +658,13 @@ public class SchemaValidatorImpl extends SchemaValidator {
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         } finally {
-            if (invalidityHandler != null) {
-                try {
-                    invalidityHandler.endReporting();
-                } catch (XPathException e1) {
-                    // no action
-                }
-            }
+//            if (invalidityHandler != null) {
+//                try {
+//                    invalidityHandler.endReporting();
+//                } catch (XPathException e1) {
+//                    // no action
+//                }
+//            }
         }
     }
 
