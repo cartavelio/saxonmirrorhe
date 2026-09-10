@@ -626,17 +626,31 @@ task graal_eec_jar(
     inputs.files fileTree(dir: "${projectDir}/src/main/c")
     outputs.files fileTree(dir: saxoncReleaseDir, exclude: "dist/**")
 
+    def libdir = (systemOs.isMacOsX()
+                        ? "libs/darwin"
+                        : (systemOs.isLinux()
+                           ? "libs/nix"
+                           : "libs/win"))
+
+    def libpath = ''
+    def saxonc_lib = ''
+    if (systemOs.isLinux()) {
+      libpath = "../libs/nix"
+      saxonc_lib = "libsaxon-${edition}c-*.so"
+      saxonc_lib = ''
+    } else if (systemOs.isMacOsX()) {
+      libpath = "../libs/darwin"
+      saxonc_lib = "libsaxon-${edition}c-*.dylib"
+    } else {
+      libpath = "..\\\\libs\\\\win\\\\"
+      saxonc_lib = "libsaxon-${edition}c-*.*"
+    }
+
     doLast {
       copy {
-        into "${saxoncReleaseDir}"
+        into "${saxoncReleaseDir}/${libdir}"
         from "${buildDir}/c"
-        include "libsaxon-${edition}c-*.so"
-        include "libsaxon-${edition}c-*.dylib"
-        include "libsaxon-${edition}c-*.dll"
-        if(systemOs.isWindows()) {
-          include "libsaxon-${edition}c-*.lib"
-          include "libsaxon-${edition}c-*.exp"
-        }
+        include "${saxonc_lib}"
       }
     }
 
@@ -660,12 +674,14 @@ task graal_eec_jar(
 
     doLast {
       copy {
-        from "${projectDir}/src/main/c/Saxon.C.API/python-saxon"
-        into "${saxoncReleaseDir}/Saxon.C.API/python_saxon"
-        include "saxonc.pyx"
-        include "saxoncClasses.pxd"
-        include "readme.txt"
-        include "*.py"
+        from "${projectDir}/src/main/c/pypi"
+        into "${saxoncReleaseDir}/pypi"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+                  .replace('@@edition@@', edition)
+                  .replace('@@EDITION@@', edition.toUpperCase())
+                  .replace('@@libpath@@', libpath)
+        }
       }
     }
     doLast {
