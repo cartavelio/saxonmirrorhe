@@ -2,6 +2,7 @@ using System;
 using SysCollGen = System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.XPath;
 using Saxon.Hej.str;
 using Saxon.Api;
 using Saxon.Hej.@event;
@@ -10,6 +11,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
 using WSP = Saxon.Api.WhitespacePolicy;
+using XPathException = Saxon.Hej.trans.XPathException;
 
 #nullable enable
 
@@ -21,6 +23,8 @@ namespace System.Impl.Helpers {
         private bool isEmptyElement = false;
         private Saxon.Hej.pull.PullEvent? currentEvent = Saxon.Hej.pull.PullEvent.START_OF_INPUT;
         private bool expandDefaults = true;
+        public bool DocTypeOk = true; // true indicates either that no DocType is required, or
+        // that a DocType is required and has been found
 
         private readonly SysCollGen.Stack<Saxon.Hej.om.NamespaceMap> namespaceStack = new();
 
@@ -268,6 +272,10 @@ namespace System.Impl.Helpers {
                         currentEvent = null;
                     }
                     else if ((currentEvent == Saxon.Hej.pull.PullEvent.START_ELEMENT)) {
+                        if (!DocTypeOk) {
+                            throw new XPathException(
+                                "DTD validation was requested, but no DOCTYPE declaration was found", "FODC0007");
+                        }
                         Saxon.Hej.om.NamespaceMap nsMap = namespaceStack.Peek();
                         if (parser.HasAttributes) {
                             int limit = parser.AttributeCount;
@@ -322,7 +330,9 @@ namespace System.Impl.Helpers {
                     return Saxon.Hej.pull.PullEvent.TEXT;
                 case XmlNodeType.Whitespace:
                     return IgnoreIgnorableWhitespace ? null : Saxon.Hej.pull.PullEvent.TEXT;
-
+                case XmlNodeType.DocumentType:
+                    DocTypeOk = true;
+                    return null;
                 case XmlNodeType.EntityReference:
                     //Console.WriteLine("Found entity reference " + parser.Name);
 

@@ -24,7 +24,6 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpInnerClass;
-import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.*;
@@ -205,9 +204,12 @@ public class Doc extends SystemFunction implements Callable {
         return item;
     }
 
-    @CSharpReplaceBody(code="return new Saxon.Hej.lib.ParseOptions();")
+    //@CSharpReplaceBody(code="return new Saxon.Hej.lib.ParseOptions();")
     public static ParseOptions processOptions(Map<String, GroundedValue> checkedOptions, RetainedStaticContext retainedStaticContext) throws XPathException {
-        // TODO: (a) reuse the factory, (b) avoid Java 13 dependency
+        ParseOptions parseOptions = new ParseOptions();
+
+        //#if CSHARP==false
+        // TODO: reuse the factory
         SAXParserFactory factory = SAXParserFactory.newDefaultNSInstance();
         XMLReader parser;
         try {
@@ -215,17 +217,20 @@ public class Doc extends SystemFunction implements Callable {
         } catch (SAXException | ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        ParseOptions parseOptions = new ParseOptions();
         parseOptions = parseOptions.withXMLReader(parser);
+        //#endif
 
         GroundedValue val = checkedOptions.get("dtd-validation");
         boolean dtdValidating = val != null && val.effectiveBooleanValue();
         if (dtdValidating) {
+            //#if CSHARP==false
             try {
                 parser.setFeature("http://xml.org/sax/features/validation", true);
             } catch (SAXException e) {
                 throw new RuntimeException(e);
             }
+            //#endif
+            parseOptions = parseOptions.withDTDValidationMode(Validation.STRICT);
         }
 
         val = checkedOptions.get("stable");

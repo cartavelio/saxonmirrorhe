@@ -7,6 +7,8 @@
 
 package net.sf.saxon.event;
 
+import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.lib.*;
@@ -14,6 +16,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.type.MinimalSchema;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
 
@@ -170,6 +173,9 @@ public abstract class Sender {
             Schema schema = options.getSchema();
             if (schema == null && sv == Validation.STRICT && !options.isUseXsiSchemaLocation()) {
                 throw new XPathException("Cannot perform strict schema validation; no schema supplied");
+            }
+            if (schema instanceof MinimalSchema) {
+                schema = new PreparedSchema((EnterpriseConfiguration) config);
             }
             if (schema != null && !(receiver instanceof DocumentValidator)) {
                 receiver = schema.getDocumentValidator(receiver, systemId, options, null);

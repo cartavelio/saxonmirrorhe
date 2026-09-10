@@ -312,6 +312,10 @@ namespace Saxon.Impl.Helpers {
             
                 DotNetPullProvider provider = new DotNetPullProvider(xmlReader);
                 provider.setBaseURI(source.getSystemId());
+                if (options.getDTDValidationMode() == Validation.STRICT) {
+                    provider.IgnoreIgnorableWhitespace = true;
+                    provider.DocTypeOk = false; // Need to check manually that there is a DOCTYPE declaration
+                } 
                 PullSource pullSource = new PullSource(provider);
                 pullSource.setSystemId(source.getSystemId());
                 return pullSource;

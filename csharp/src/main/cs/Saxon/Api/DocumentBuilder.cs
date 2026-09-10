@@ -30,7 +30,6 @@ namespace Saxon.Api {
     /// </summary>
     [Serializable]
     public class DocumentBuilder {
-        private Processor processor;
         private Configuration config;
         private SchemaValidationMode validation;
         private SchemaValidator schemaValidator;
@@ -43,7 +42,6 @@ namespace Saxon.Api {
         private Saxon.Hej.s9api.DocumentBuilder s9Builder;
         
         internal DocumentBuilder(Processor processor) {
-            this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
         }

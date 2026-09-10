@@ -46,7 +46,6 @@ import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.CollationKey;
 import java.text.Collator;
@@ -60,8 +59,6 @@ import java.util.Properties;
  * (as distinct from .NET). This is a singleton class with no instance data.
  */
 public class JavaPlatform implements Platform {
-
-    static boolean tryJdk9 = true;
 
     /**
      * The constructor is called during the static initialization of the Configuration
@@ -137,11 +134,9 @@ public class JavaPlatform implements Platform {
                 } catch (IOException ioe) {
                     messages.add("IO error " + ioe.getMessage() +
                                          " reading " + filename + " located using getSystemResource(): using defaults");
-                    in = null;
                 }
             }
         }
-        //loaders.add(loader);
         return in;
 
     }
@@ -260,7 +255,8 @@ public class JavaPlatform implements Platform {
     }
 
     /**
-     * Get a parser by instantiating the SAXParserFactory
+     * Get a parser by instantiating the SAXParserFactory. This returns whatever parser is found
+     * on the classpath.
      *
      * @return the parser (XMLReader)
      */
@@ -289,46 +285,19 @@ public class JavaPlatform implements Platform {
      * in use, the JAXP system properties may be set so that JAXP returns a custom XMLReader supplied
      * by the catalog resolver, and that XMLReader ignores any attempt to set an EntityResolver. So
      * we bypass JAXP and try to load the built-in parser within the JDK, which we know we can trust;
-     * only if this fails (presumably because this is not the Oracle JDK) do we fall back to using a
-     * JAXP-supplied parser. And if this turns out to ignore {@code setEntityResolver()} calls, we're
-     * hosed.
+     * (on the assumption that we are using the Oracle JDK). And if this turns out to ignore
+     * {@code setEntityResolver()} calls, we're hosed.
      * </p>
      *
      * @return the parser (XMLReader)
      */
     @Override
     public XMLReader loadParserForXmlFragments() {
-        SAXParserFactory factory = null;
-        if (tryJdk9) {
-            try {
-                // Try the JDK 9 approach (unless we know it ain't gonna work)
-                @SuppressWarnings("JavaReflectionMemberAccess")
-                Method method = SAXParserFactory.class.getMethod("newDefaultInstance");
-                Object result = method.invoke(null);
-                factory = (SAXParserFactory)result;
-            } catch (Exception e) {
-                tryJdk9 = false;
-                // keep trying
-            }
+        try {
+            return SAXParserFactory.newDefaultNSInstance().newSAXParser().getXMLReader();
+        } catch (ParserConfigurationException | SAXException err) {
+            throw new TransformerFactoryConfigurationError(err);
         }
-        if (factory == null) {
-            // Try the JDK 8 approach (causes problems in JDK 9 with illegal access warnings)
-            try {
-                Class<?> factoryClass = Class.forName("com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
-                factory = (SAXParserFactory) factoryClass.newInstance();
-            } catch (Exception e2) {
-                // keep trying
-            }
-        }
-        if (factory != null) {
-            try {
-                return factory.newSAXParser().getXMLReader();
-            } catch (Exception e) {
-                // keep trying
-            }
-        }
-        // Fallback - use whatever parser we can find
-        return loadParser();
     }
 
     /**
