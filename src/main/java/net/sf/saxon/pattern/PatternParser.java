@@ -142,8 +142,7 @@ public class PatternParser extends XPathParser {
             while (t.currentToken == Token.LSQB) {
                 nextToken();
                 Expression predicate = parsePredicate();
-                expect(Token.RSQB);
-                nextToken();
+                readToken(Token.RSQB);
                 result = new BasePatternWithPredicate(result, predicate);
             }
             expect(Token.EOF);
@@ -254,11 +253,9 @@ public class PatternParser extends XPathParser {
         } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
                 t.currentTokenValue.equals("atomic")) {
             nextToken();
-            String name = expectName();
+            String name = readName();
             StructuredQName typeName = makeStructuredQName(name, env.getDefaultElementNamespace());
-            nextToken();
-            expect(Token.RPAREN);
-            nextToken();
+            readToken(Token.RPAREN);
             SchemaType type = env.getConfiguration().getSchemaType(typeName);
             if (type == null || !type.isAtomicType()) {
                 grumble("Unknown atomic type " + typeName);

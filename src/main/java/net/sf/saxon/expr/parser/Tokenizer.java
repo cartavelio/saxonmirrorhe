@@ -15,10 +15,7 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
-import net.sf.saxon.value.BigIntegerValue;
-import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.value.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -248,8 +245,7 @@ public final class Tokenizer {
             char c = input.charAt(inputOffset++);
             switch (c) {
                 case '/':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '/') {
+                    if (isFollowedBy('/')) {
                         inputOffset++;
                         nextToken = Token.SLASH_SLASH;
                         return;
@@ -257,35 +253,32 @@ public final class Tokenizer {
                     nextToken = Token.SLASH;
                     return;
                 case ':':
-                    if (inputOffset < inputLength) {
-                        if (input.charAt(inputOffset) == ':') {
-                            inputOffset++;
-                            nextToken = Token.COLON_COLON;
-                            return;
-                        } else if (input.charAt(inputOffset) == '=') {
-                            nextToken = Token.COLON_EQUALS;
-                            inputOffset++;
-                            return;
-                        } else {     // if (input.charAt(inputOffset) == ' ') ??
-                            nextToken = Token.COLON;
-                            return;
-                        }
+                    if (isFollowedBy(':')) {
+                        inputOffset++;
+                        nextToken = Token.COLON_COLON;
+                        return;
                     }
-                    throw new XPathException("Unexpected colon at start of token");
+                    if (isFollowedBy('=')) {
+                        nextToken = Token.COLON_EQUALS;
+                        inputOffset++;
+                        return;
+                    }
+                    nextToken = Token.COLON;
+                    return;
+
                 case '@':
                     nextToken = Token.AT;
                     return;
                 case '?':
-                    if (inputOffset < inputLength) {
-                        if (input.charAt(inputOffset) == '?') {
-                            inputOffset++;
-                            nextToken = Token.QMARK_QMARK;
-                            return;
-                        } else if (input.charAt(inputOffset) == '[') {
-                            inputOffset++;
-                            nextToken = Token.QMARK_LSQB;
-                            return;
-                        }
+                    if (isFollowedBy('?')) {
+                        inputOffset++;
+                        nextToken = Token.QMARK_QMARK;
+                        return;
+                    }
+                    if (isFollowedBy('[')) {
+                        inputOffset++;
+                        nextToken = Token.QMARK_LSQB;
+                        return;
                     }
                     nextToken = Token.QMARK;
                     return;
@@ -308,7 +301,7 @@ public final class Tokenizer {
                     nextToken = Token.PERCENT;
                     return;
                 case '(':
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == '#') {
+                    if (isFollowedBy('#')) {
                         inputOffset++;
                         int pragmaStart = inputOffset;
                         int nestingDepth = 1;
@@ -333,7 +326,7 @@ public final class Tokenizer {
                         nextTokenValue = input.substring(pragmaStart, inputOffset - 2);
                         return;
                     }
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == ':') {
+                    if (isFollowedBy(':')) {
                         // XPath comment syntax is (: .... :)
                         // Comments may be nested, and may now be empty
                         inputOffset++;
@@ -375,9 +368,7 @@ public final class Tokenizer {
                         nextToken = Token.FAT_ARROW;
                         return;
                     }
-                    if (inputOffset < inputLength - 1
-                            && input.charAt(inputOffset) == '!'
-                            && isGreaterThanChar(input.charAt(inputOffset+1))) {
+                    if (isFollowedBy("!>")) {
                         inputOffset+=2;
                         nextToken = Token.MAPPING_ARROW;  // Accepted in 4.0 only
                         return;
@@ -385,22 +376,15 @@ public final class Tokenizer {
                     nextToken = Token.EQUALS;
                     return;
                 case '!':
-                    if (inputOffset < inputLength) {
-                        if (input.charAt(inputOffset) == '=') {
-                            inputOffset++;
-                            nextToken = Token.NE;
-                            return;
-                        } else if (input.charAt(inputOffset) == '!') {
-                            inputOffset++;
-                            nextToken = Token.BANG_BANG;
-                            return;
-                        }
+                    if (isFollowedBy('=')) {
+                        inputOffset++;
+                        nextToken = Token.NE;
+                        return;
                     }
                     nextToken = Token.BANG;
                     return;
                 case '*':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == ':'
+                    if (isFollowedBy(':')
                             && inputOffset + 1 < inputLength
                             && (NameChecker.isNCNameStartChar(input.charAt(inputOffset + 1)))) {
                         inputOffset++;
@@ -441,13 +425,12 @@ public final class Tokenizer {
                     if (languageLevel < 40) {
                         throw new XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
                     }
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '=') {
+                    if (isFollowedBy('=')) {
                         inputOffset++;
                         nextToken = Token.GE;
                         return;
                     }
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_GT) {
+                    if (isFollowedBy(FULL_WIDTH_GT)) {
                         inputOffset++;
                         nextToken = Token.FOLLOWS;
                         return;
@@ -455,13 +438,12 @@ public final class Tokenizer {
                     nextToken = Token.GT;
                     return;
                 case '>':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '=') {
+                    if (isFollowedBy('=')) {
                         inputOffset++;
                         nextToken = Token.GE;
                         return;
                     }
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == '>') {
+                    if (isFollowedBy('>')) {
                         inputOffset++;
                         nextToken = Token.FOLLOWS;
                         return;
@@ -506,8 +488,7 @@ public final class Tokenizer {
                     if (languageLevel < 40) {
                         throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
                     }
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '=') {
+                    if (isFollowedBy('=')) {
                         inputOffset++;
                         nextToken = Token.LE;
                         return;
@@ -521,7 +502,7 @@ public final class Tokenizer {
                     nextTokenValue = c + "";  // The parser needs to know which character was used
                     return;
                 case '|':
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == '|') {
+                    if (isFollowedBy('|')) {
                         inputOffset++;
                         nextToken = Token.CONCAT;
                         return;
@@ -532,8 +513,7 @@ public final class Tokenizer {
                     nextToken = Token.HASH;
                     return;
                 case '.':
-                    if (inputOffset < inputLength
-                            && input.charAt(inputOffset) == '.') {
+                    if (isFollowedBy('.')) {
                         inputOffset++;
                         nextToken = Token.DOT_DOT;
                         return;
@@ -670,7 +650,8 @@ public final class Tokenizer {
                         c = input.charAt(inputOffset++);
                     }
                     nextTokenValue = input.substring(nextTokenStartOffset, inputOffset).replace("_", "");
-                    nextToken = new Token.NumericLiteral(nextTokenValue, Int64Value.makeIntegerValue(0x12345678)); // TODO: fixme
+                    NumericValue value = NumericValue.parseNumber(nextTokenValue);
+                    nextToken = new Token.NumericLiteral(nextTokenValue, value); 
                     return;
                 case '"':
                 case '\'':
@@ -710,43 +691,43 @@ public final class Tokenizer {
                     nextToken = new Token.StringLiteral(nextTokenValue);
                     return;
                 case '`':
-                    if (inputOffset < inputLength - 1
-                            && input.charAt(inputOffset) == '`'
-                            && input.charAt(inputOffset + 1) == '[') {
+                    if (isFollowedBy("`[")) {
                         if (!isXQuery) {
                             throw new XPathException("String constructors (starting '``[') are allowed only in XQuery, not XPath");
                         }
-                        inputOffset += 2;
-                        int j = inputOffset;
-                        int newlines = 0;
-                        while (true) {
-                            if (j >= inputLength) {
-                                throw new XPathException("Unclosed string template in expression");
-                            }
-                            if (input.charAt(j) == '\n') {
-                                newlines++;
-                            } else if (input.charAt(j) == '`' && j + 1 < inputLength && input.charAt(j + 1) == '{') {
-                                //nextToken = Token.STRING_CONSTRUCTOR_INITIAL;  // TODO: fix me
-                                nextToken = new Token.StringLiteral(input.substring(inputOffset, j));
-                                nextTokenValue = input.substring(inputOffset, j);
-                                inputOffset = j + 2;
-                                incrementLineNumber(newlines);
-                                return;
-                            } else if (input.charAt(j) == ']' && j + 2 < inputLength
-                                    && input.charAt(j + 1) == '`' && input.charAt(j + 2) == '`') {
-                                //nextToken = Token.STRING_LITERAL_BACKTICKED;    // TODO: fix me
-                                nextToken = new Token.StringLiteral(input.substring(inputOffset, j));
-                                // Can't return STRING_LITERAL because it's not accepted everywhere that a string literal is, and
-                                // because it doesn't get unescaped (bug 5647)
-                                nextTokenValue = input.substring(inputOffset, j);
-                                inputOffset = j + 3;
-                                incrementLineNumber(newlines);
-                                return;
-                            }
-                            j++;
-                        }
+                        nextToken = new Token.StringConstructor(this, input, inputOffset);
+                        return;
+//                        inputOffset += 2;
+//                        int j = inputOffset;
+//                        int newlines = 0;
+//                        while (true) {
+//                            if (j >= inputLength) {
+//                                throw new XPathException("Unclosed string template in expression");
+//                            }
+//                            if (input.charAt(j) == '\n') {
+//                                newlines++;
+//                            } else if (input.charAt(j) == '`' && j + 1 < inputLength && input.charAt(j + 1) == '{') {
+//                                //nextToken = Token.STRING_CONSTRUCTOR_INITIAL;  // TODO: fix me
+//                                nextToken = new Token.StringLiteral(input.substring(inputOffset, j));
+//                                nextTokenValue = input.substring(inputOffset, j);
+//                                inputOffset = j + 2;
+//                                incrementLineNumber(newlines);
+//                                return;
+//                            } else if (input.charAt(j) == ']' && j + 2 < inputLength
+//                                    && input.charAt(j + 1) == '`' && input.charAt(j + 2) == '`') {
+//                                //nextToken = Token.STRING_LITERAL_BACKTICKED;    // TODO: fix me
+//                                nextToken = new Token.StringLiteral(input.substring(inputOffset, j));
+//                                // Can't return STRING_LITERAL because it's not accepted everywhere that a string literal is, and
+//                                // because it doesn't get unescaped (bug 5647)
+//                                nextTokenValue = input.substring(inputOffset, j);
+//                                inputOffset = j + 3;
+//                                incrementLineNumber(newlines);
+//                                return;
+//                            }
+//                            j++;
+                        
                     } else {
-                        nextToken = Token.BACKTICK;
+                        nextToken = new Token.StringTemplate(this, input, inputOffset);
                         return;
                     }
                 case '\n':
@@ -759,7 +740,7 @@ public final class Tokenizer {
                     nextTokenStartOffset = inputOffset;
                     break;
                 case 'Q':
-                    if (inputOffset < inputLength && input.charAt(inputOffset) == '{') {
+                    if (isFollowedBy('{')) {
                         // EQName, revised syntax as per bug 15399
                         int close = input.indexOf('}', inputOffset++);
                         if (close < inputOffset) {
@@ -857,6 +838,16 @@ public final class Tokenizer {
         }
     }
 
+    private boolean isFollowedBy(char ch) {
+        return (inputOffset < inputLength && input.charAt(inputOffset) == ch);
+    }
+
+    private boolean isFollowedBy(String s) {
+        int len = s.length();
+        return inputOffset + len <= inputLength
+                && input.substring(inputOffset, inputOffset + len).equals(s);
+    }
+
     @CSharpReplaceException(from = "java.lang.NumberFormatException", to = "System.FormatException")
     private static IntegerValue parseHexLiteral(String body) throws XPathException {
         try {
@@ -899,15 +890,21 @@ public final class Tokenizer {
         return c == '>' || (languageLevel >= 40 && c == FULL_WIDTH_GT);
     }
     
-    /**
-     * Test whether the previous token is an operator
-     *
-     * @param precedingToken the token to be tested
-     * @return true if the previous token is an operator token
-     */
 
-    private boolean followsOperator(int precedingToken) {
-        return precedingToken <= Token.LAST_OPERATOR;
+    public void startEmbeddedExpression() throws XPathException {
+        if (input.charAt(inputOffset - 1) != '{') {
+            throw new AssertionError("Embedded expression must start immediately after '{'");
+        }
+        lookAhead();
+        next();
+    }
+
+
+    public void endEmbeddedExpression() throws XPathException {
+        if (input.charAt(currentTokenStartOffset) != '}') {
+            throw new AssertionError("Embedded expression must end at '}'");
+        }
+        inputOffset = currentTokenStartOffset+1;
     }
 
     /**
@@ -938,6 +935,14 @@ public final class Tokenizer {
     public char peekChar() {
         if (inputOffset < inputLength) {
             return input.charAt(inputOffset);
+        } else {
+            return NUL;
+        }
+    }
+
+    public char peekChar2() {
+        if (inputOffset < inputLength - 1) {
+            return input.charAt(inputOffset + 1);
         } else {
             return NUL;
         }

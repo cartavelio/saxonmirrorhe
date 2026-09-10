@@ -276,6 +276,17 @@ public class XPathParser {
         }
     }
 
+    /**
+     * Skip past the current token, checking that it matches. Equivalent
+     * to expect(token) followed by nextToken().
+     * @param token the expected token
+     * @throws XPathException if the current token is not the one expected
+     */
+    public void readToken(Token token) throws XPathException {
+        expect(token);
+        nextToken();
+    }
+
     public String expectStringLiteral() throws XPathException {
         if (t.currentToken instanceof Token.StringLiteral) {
             return ((Token.StringLiteral) t.currentToken).getValue();
@@ -292,10 +303,41 @@ public class XPathParser {
         return ((Token.NameToken)t.currentToken).getValue();
     }
 
+    /**
+     * Expect the current token to be a name (perhaps a keyword). Return that name, after moving on
+     * to the next token.
+     * @return the name at the (old) current position
+     * @throws XPathException if the current token is not a name
+     */
+    public String readName() throws XPathException {
+        if (!(t.currentToken instanceof Token.NameToken)) {
+            grumble("expected a name, found " + t.currentToken.toString());
+        }
+        String name = ((Token.NameToken) t.currentToken).getValue();
+        nextToken();
+        return name;
+    }
+
+    /**
+     * Indicate that the current token is expected to be a specific name token,
+     * triggering an error if it is not.
+     * @param keyword the expected name
+     * @throws XPathException if the current token differs from the expected name
+     */
     public void expectKeyword(String keyword) throws XPathException {
         if (!isKeyword(keyword)) {
             grumble("expected '" + keyword + "', found " + t.currentToken.toString());
         }
+    }
+
+    /**
+     * Skip past an expected keyword, failing if the current token is not that keyword
+     * @param keyword the expected keyword
+     * @throws XPathException if the current token is not the expected keyword
+     */
+    public void readKeyword(String keyword) throws XPathException {
+        expectKeyword(keyword);
+        nextToken();
     }
 
     /**
@@ -1274,13 +1316,12 @@ public class XPathParser {
         }
 
         Token operation = t.currentToken;
-        parser.nextToken();
+        nextToken();
         Expression rootExpr = parser.parseExprSingle();
-        expectKeyword("replace");
-        parser.nextToken();
+        readKeyword("replace");
         Expression selectExpr = parser.parseExprSingle();
-        expectKeyword("with");
-        parser.nextToken();
+        readKeyword("with");
+        nextToken();
         Expression actionExpr = parser.parseExprSingle();
         return new DeepUpdate2(-98765, rootExpr, selectExpr, actionExpr);  // TODO
     }
@@ -1423,8 +1464,7 @@ public class XPathParser {
         }
 
         // process the "in" clause
-        expectKeyword("in");
-        nextToken();
+        readKeyword("in");
         Expression collection = parseExprSingle();
 
         // "for member $m in $array" compiles to
@@ -1558,8 +1598,7 @@ public class XPathParser {
 
 
             // process the  ":=" clause
-            expect(Token.COLON_EQUALS);
-            nextToken();
+            readToken(Token.COLON_EQUALS);
             Expression collection = parseExprSingle();
             firstClause.setSequence(collection);
             declareRangeVariable(lastClause);
@@ -1573,8 +1612,7 @@ public class XPathParser {
 
         // process the "return" expression (called the "action") - or in 4.0 a FOR expression
         if (!(allowXPath40Syntax && isKeyword("for"))) {
-            expectKeyword("return");
-            nextToken();
+            readKeyword("return");
         }
         previous.setAction(parseExprSingle());
 
@@ -1626,8 +1664,7 @@ public class XPathParser {
             }
 
             // process the "in" clause
-            expectKeyword("in");
-            nextToken();
+            readKeyword("in");
             v.setSequence(parseExprSingle());
             declareRangeVariable(v);
             if (previous != null) {
@@ -1640,8 +1677,7 @@ public class XPathParser {
         } while (t.currentToken == Token.COMMA);
 
         // process the "return/satisfies" expression (called the "action")
-        expectKeyword("satisfies");
-        nextToken();
+        readKeyword("satisfies");
         previous.setAction(parseExprSingle());
 
 
@@ -1665,23 +1701,19 @@ public class XPathParser {
     private Expression parseIfExpression() throws XPathException {
         int ifoffset = t.currentTokenStartOffset;
         nextToken();
-        expect(Token.LPAREN);
-        nextToken();
+        readToken(Token.LPAREN);
         Expression condition = parseExpression();
-        expect(Token.RPAREN);
-        nextToken();
+        readToken(Token.RPAREN);
         int thenoffset = t.currentTokenStartOffset;
         if (t.currentToken == Token.LCURLY) {
             checkLanguageVersion40();
             return parseBracedActions(condition);
         }
-        expectKeyword("then");
-        nextToken();
+        readKeyword("then");
         Expression thenExp = makeTracer(parseExprSingle(), null);
         setLocation(thenExp, thenoffset);
         int elseoffset = t.currentTokenStartOffset;
-        expectKeyword("else");
-        nextToken();
+        readKeyword("else");
         Expression elseExp = makeTracer(parseExprSingle(), null);
         setLocation(elseExp, elseoffset);
         Expression ifExp = Choose.makeConditional(condition, thenExp, elseExp);
@@ -1710,18 +1742,14 @@ public class XPathParser {
                 expect(Token.LPAREN);
                 condition = parseExpression();
                 nextToken();
-                expect(Token.RPAREN);
-                nextToken();
-                expect(Token.LCURLY);
-                nextToken();
+                readToken(Token.RPAREN);
+                readToken(Token.LCURLY);
                 thenExp = parseExpression();
-                expect(Token.RCURLY);
-                nextToken();
+                readToken(Token.RCURLY);
                 conditions.add(condition);
                 actions.add(thenExp);
             } else {
-                expect(Token.LCURLY);
-                nextToken();
+                readToken(Token.LCURLY);
                 Expression elseExp;
                 if (t.currentToken == Token.RCURLY) {
                     elseExp = Literal.makeEmptySequence();
@@ -2064,10 +2092,8 @@ public class XPathParser {
         switch (kindName) {
             case "item":
                 nextToken();
-                expect(Token.LPAREN);
-                nextToken();
-                expect(Token.RPAREN);
-                nextToken();
+                readToken(Token.LPAREN);
+                readToken(Token.RPAREN);
                 return AnyItemType.getInstance();
             case "node":
             case "element":
@@ -2094,10 +2120,8 @@ public class XPathParser {
                 return parseEnumType();
             case "empty-sequence":
                 nextToken();
-                expect(Token.LPAREN);
-                nextToken();
-                expect(Token.RPAREN);
-                nextToken();
+                readToken(Token.LPAREN);
+                readToken(Token.RPAREN);
                 return ErrorType.getInstance();
             case "type":
                 checkLanguageVersion40();
@@ -2264,8 +2288,7 @@ public class XPathParser {
                 break;
             }
         }
-        expect(Token.RPAREN);
-        nextToken();
+        readToken(Token.RPAREN);
         return ChoiceItemType.makeChoiceItemType(memberTypes);
     }
 
@@ -2277,9 +2300,10 @@ public class XPathParser {
      */
 
     public EnumerationUnionType parseEnumType() throws XPathException {
-        // The initial "enum(" has been read
+        // The initial "enum" has been read
         checkLanguageVersion40();
         nextToken();
+        readToken(Token.LPAREN);
         List<SingletonEnumType> singletonEnums = new ArrayList<>();
 
         while (true) {
@@ -2317,16 +2341,14 @@ public class XPathParser {
     /*@NotNull*/
     protected ItemType parseFunctionItemType(AnnotationList annotations) throws XPathException {
         nextToken();
-        expect(Token.LPAREN);
-        nextToken();
+        readToken(Token.LPAREN);
         List<SequenceType> argTypes = new ArrayList<>(3);
         SequenceType resultType;
 
         if (t.currentToken == Token.STAR) {
             // Allow both to be safe
             nextToken();
-            expect(Token.RPAREN);
-            nextToken();
+            readToken(Token.RPAREN);
             if (annotations.isEmpty()) {
                 return AnyFunctionType.getInstance();
             } else {
@@ -2381,21 +2403,17 @@ public class XPathParser {
         checkMapExtensions();
         Tokenizer t = getTokenizer();
         nextToken();
-        expect(Token.LPAREN);
-        nextToken();
+        readToken(Token.LPAREN);
         if (t.currentToken == Token.STAR) {
             // Allow both to be safe
             nextToken();
-            expect(Token.RPAREN);
-            nextToken();
+            readToken(Token.RPAREN);
             return MapType.ANY_MAP_TYPE;
         } else {
             ItemType keyType = parseItemType();
-            expect(Token.COMMA);
-            nextToken();
+            readToken(Token.COMMA);
             SequenceType valueType = parseSequenceType();
-            expect(Token.RPAREN);
-            nextToken();
+            readToken(Token.RPAREN);
             if (!(keyType instanceof PlainType)) {
                 grumble("Key type of a map must be an atomic or pure union type: found " + keyType);
                 return null;
@@ -2423,13 +2441,11 @@ public class XPathParser {
         if (t.currentToken == Token.STAR) {
             // Allow both to be safe
             nextToken();
-            expect(Token.RPAREN);
-            nextToken();
+            readToken(Token.RPAREN);
             return ArrayItemType.ANY_ARRAY_TYPE;
         } else {
             SequenceType memberType = parseSequenceType();
-            expect(Token.RPAREN);
-            nextToken();
+            readToken(Token.RPAREN);
             return new ArrayItemType(memberType);
         }
     }
@@ -2453,8 +2469,7 @@ public class XPathParser {
             nextToken();
             alternatives.add(parseItemType());
         }
-        expect(Token.RPAREN);
-        nextToken();
+        readToken(Token.RPAREN);
         if (alternatives.size() == 1) {
             return alternatives.get(0);
         } else {
@@ -2765,8 +2780,7 @@ public class XPathParser {
         if (Literal.isConstantZero(predicate)) {
             warning("Positions are numbered from one; the predicate [0] selects nothing", SaxonErrorCode.SXWN9046);
         }
-        expect(Token.RSQB);
-        nextToken();
+        readToken(Token.RSQB);
         step = new FilterExpression(step, predicate);
         setLocation(step);
         return step;
@@ -2777,8 +2791,7 @@ public class XPathParser {
         checkLanguageVersion40();
         nextToken();
         Expression predicate = parsePredicate();
-        expect(Token.RSQB);
-        nextToken();
+        readToken(Token.RSQB);
         step = new FilterExpressionAM(step, predicate);
         setLocation(step);
         return step;
@@ -2882,8 +2895,8 @@ public class XPathParser {
                     }
                     rhs = parseDynamicFunctionCall(fn, varRef);
                 } else {
-                    nextToken();
-                    expect(Token.LPAREN);
+//                    nextToken();
+//                    expect(Token.LPAREN);
                     rhs = parseFunctionCall(fname, varRef);
                 }
             }
@@ -3039,8 +3052,7 @@ public class XPathParser {
                 testPermittedAxis(axis, "XPST0003");
                 short principalNodeType = AxisInfo.principalNodeType[axis];
                 nextToken();
-                expect(Token.COLON_COLON);
-                nextToken();
+                readToken(Token.COLON_COLON);
                 NodeTest nodeTest = parseNodeTest(principalNodeType);
                 AxisExpression ae = new AxisExpression(axis, nodeTest);
                 setLocation(ae);
@@ -3122,6 +3134,13 @@ public class XPathParser {
                 return parseInlineFunction(annotations);
             }
 
+        } else if (token instanceof Token.StringTemplate) {
+            checkLanguageVersion40();
+            return parseStringTemplate();
+
+        } else if (token instanceof Token.StringConstructor) {
+            return parseStringConstructor();
+
         } else if (token instanceof Token.DirectCommentConstructor) {
             requireXQuery("A comment constructor");
             Comment instr = new Comment();
@@ -3141,18 +3160,6 @@ public class XPathParser {
             grumble("Unexpected token " + currentTokenDisplay() + " at start of sub-expression");
             return null;
         }
-
-
-//            case Token.STRING_LITERAL_BACKTICKED:
-//                return parseBackTickedStringLiteral();
-//
-//            case Token.STRING_CONSTRUCTOR_INITIAL:
-//                return parseStringConstructor();
-//
-//            case Token.BACKTICK:
-//                checkLanguageVersion40();
-//                return parseStringTemplate();
-
 
 
 
@@ -3256,8 +3263,7 @@ public class XPathParser {
             return makeTracer(Literal.makeEmptySequence(), null);
         }
         Expression seq = parseExpression();
-        expect(Token.RPAREN);
-        nextToken();
+        readToken(Token.RPAREN);
         return seq;
     }
 
@@ -3359,9 +3365,8 @@ public class XPathParser {
     }
 
     public Expression parseStringTemplate() throws XPathException {
-        int offset = t.inputOffset;
-        // we're reading raw characters
-        //t.nextChar(); // lose this one, it's the initial backtick
+        int offset = t.currentTokenStartOffset;
+        Token.StringTemplate template = (Token.StringTemplate)t.currentToken;
         List<Expression> components = new ArrayList<>();
         StringBuilder currentPart = new StringBuilder();
         boolean finished = false;
@@ -3372,30 +3377,29 @@ public class XPathParser {
                     grumble("Unclosed string template");
                     return null;
                 case '`':
-                    c = t.nextChar();
-                    if (c == '`') {
+                    if (t.peekChar() == '`') {
                         currentPart.append('`');
+                        t.nextChar();
                     } else {
-                        Expression fixed = new StringLiteral(currentPart.toString());
-                        components.add(fixed);
+                        if (currentPart.length() > 0) {
+                            components.add(new StringLiteral(currentPart.toString()));
+                            currentPart.setLength(0);
+                        }
+                        template.close();
                         finished = true;
-                        t.unreadChar();
-                        nextToken();
                     }
                     break;
                 case '{':
-                    c = t.nextChar();
-                    if (c == '{') {
+                    if (t.peekChar() == '{') {
                         currentPart.append('{');
+                        t.nextChar();
                     } else {
-                        Expression fixed = new StringLiteral(currentPart.toString());
-                        components.add(fixed);
-                        currentPart.setLength(0);
-                        t.unreadChar();
-                        nextToken();
-                        if (t.currentToken == Token.RCURLY) {
-                            //components.add(Literal.makeEmptySequence());
-                        } else {
+                        if (currentPart.length() > 0) {
+                            components.add(new StringLiteral(currentPart.toString()));
+                            currentPart.setLength(0);
+                        }
+                        t.startEmbeddedExpression();
+                        if (t.currentToken != Token.RCURLY) {
                             Expression exp = parseExpression();
                             RetainedStaticContext rscSJ = new RetainedStaticContext(env);
                             Expression fnSJ = SystemFunction.makeCall("string-join", rscSJ, exp, new StringLiteral(StringValue.SINGLE_SPACE));
@@ -3403,12 +3407,13 @@ public class XPathParser {
                             components.add(fnSJ);
                             expect(Token.RCURLY);
                         }
+                        t.endEmbeddedExpression();
                     }
                     break;
                 case '}':
-                    c = t.nextChar();
-                    if (c == '}') {
+                    if (t.peekChar() == '}') {
                         currentPart.append('}');
+                        t.nextChar();
                     } else {
                         grumble("Closing brace ('}') in string template must be doubled");
                     }
@@ -3419,19 +3424,15 @@ public class XPathParser {
             }
         } while (!finished);
 
-        RetainedStaticContext rsc = new RetainedStaticContext(env);
-        Block block = new Block(components.toArray(new Expression[]{}));
-        setLocation(block);
-        Expression fn = SystemFunction.makeCall("string-join", rsc, block, new StringLiteral(StringValue.EMPTY_STRING));
-        ExpressionTool.copyLocationInfo(block, fn);
-        components.add(fn);
-        return fn;
+        Expression[] args = components.toArray(new Expression[0]);
+        Expression result = SystemFunction.makeCall("concat", env.makeRetainedStaticContext(), args);
+        setLocation(result, offset);
+        return result;
     }
 
     public StructuredQName parseVariableName() throws XPathException {
         nextToken();
-        String var = expectName();
-        nextToken();
+        String var = readName();
         if (scanOnly) {
             return new StructuredQName("", NamespaceUri.SAXON_GENERATED_VARIABLE, "dummy");
         }
@@ -3649,8 +3650,7 @@ public class XPathParser {
                     break;
             }
             nextToken();
-            expect(Token.COLON_COLON);
-            nextToken();
+            readToken(Token.COLON_COLON);
             token = t.currentToken;
         }
         if (token instanceof Token.NameToken) {
@@ -3783,8 +3783,7 @@ public class XPathParser {
             nextToken();
             test = new CombinedNodeTest(test, OperatorSymbol.UNION, parseNodeTest(nodeType));
         }
-        expect(Token.RPAREN);
-        nextToken();
+        readToken(Token.RPAREN);
         return test;
     }
 
@@ -3801,8 +3800,7 @@ public class XPathParser {
         boolean empty = false;
         String kind = t.currentTokenValue;
         nextToken();
-        expect(Token.LPAREN);
-        nextToken();
+        readToken(Token.LPAREN);
         if (t.currentToken == Token.RPAREN) {
             empty = true;
             nextToken();
@@ -3839,8 +3837,7 @@ public class XPathParser {
                     if (language == ParsedLanguage.EXTENDED_ITEM_TYPE && t.currentToken instanceof Token.NameToken) {
                         String nsName = t.currentTokenValue;
                         nextToken();
-                        expect(Token.RPAREN);
-                        nextToken();
+                        readToken(Token.RPAREN);
                         return new NameTest(Type.NAMESPACE, NamespaceUri.NULL, nsName, pool);
                     } else {
                         grumble("No arguments are allowed in namespace-node()");
@@ -3856,8 +3853,7 @@ public class XPathParser {
                         grumble("Argument to document-node() must be element(...) or schema-element(...)");
                     }
                     NodeTest inner = parseKindTest();
-                    expect(Token.RPAREN);
-                    nextToken();
+                    readToken(Token.RPAREN);
                     return new DocumentNodeTest(inner);
                 }
             case "processing-instruction":
@@ -3887,8 +3883,7 @@ public class XPathParser {
                     grumble("Processing instruction name must be a QName or a string literal");
                 }
                 nextToken();
-                expect(Token.RPAREN);
-                nextToken();
+                readToken(Token.RPAREN);
                 return new NameTest(Type.PROCESSING_INSTRUCTION, fp, pool);
 
             case "schema-attribute":
@@ -3896,11 +3891,9 @@ public class XPathParser {
                     grumble("schema-attribute() requires a name to be supplied");
                     return null;
                 } else {
-                    String name = expectName();
+                    String name = readName();
                     fp = makeFingerprint(name, false);
-                    nextToken();
-                    expect(Token.RPAREN);
-                    nextToken();
+                    readToken(Token.RPAREN);
                     if (!env.isImportedSchema(pool.getURI(fp))) {
                         grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
                     }
@@ -3917,11 +3910,9 @@ public class XPathParser {
                     grumble("schema-element() requires a name to be supplied");
                     return null;
                 } else {
-                    String name = expectName();
+                    String name = readName();
                     fp = makeFingerprint(name, true);
-                    nextToken();
-                    expect(Token.RPAREN);
-                    nextToken();
+                    readToken(Token.RPAREN);
                     if (!env.isImportedSchema(pool.getURI(fp))) {
                         grumble("No schema has been imported for namespace '" + pool.getURI(fp) + '\'', "XPST0008");
                     }
@@ -3936,8 +3927,8 @@ public class XPathParser {
 
             case "attribute":
             case "element":
-                boolean isElementTest = t.currentTokenValue.equals("element");
-                int nodeKind = isElementTest ? Type.ELEMENT : Type.ATTRIBUTE;
+                boolean isElementTest = kind.equals("element");
+                short nodeKind = isElementTest ? Type.ELEMENT : Type.ATTRIBUTE;
                 NodeTest nodeTest;
                 if (empty) {
                     return isElementTest ? NodeKindTest.ELEMENT : NodeKindTest.ATTRIBUTE;
@@ -3997,8 +3988,7 @@ public class XPathParser {
                         grumble("Unexpected " + t.currentToken + " after ',' in SequenceType");
                         return null;
                     }
-                    expect(Token.RPAREN);
-                    nextToken();
+                    readToken(Token.RPAREN);
                     return result;
                 } else {
                     grumble("Expected ')' or ',' in SequenceType");
@@ -4012,7 +4002,7 @@ public class XPathParser {
     }
 
 
-    public List<NodeTest> parseNameTestUnion(int nodeKind) throws XPathException {
+    public List<NodeTest> parseNameTestUnion(short nodeKind) throws XPathException {
         List<NodeTest> tests = new ArrayList<>();
         boolean matchesAll = false;
         while (true) {
@@ -4023,7 +4013,7 @@ public class XPathParser {
                 tests.add(makeNameTest(nodeKind, tokv, true));
             } else if (tok instanceof Token.Wildcard) {
                 nextToken();
-                NodeTest test = getNodeTestForWildcard((Token.Wildcard) tok, Type.ELEMENT);
+                NodeTest test = getNodeTestForWildcard((Token.Wildcard) tok, nodeKind);
                 tests.add(test);
             } else if (tok == Token.STAR) {
                 nextToken();
@@ -4141,8 +4131,7 @@ public class XPathParser {
                 if (t.currentToken == Token.COLON_EQUALS) {
                     grumble("The ':=' notation is no longer accepted in map expressions: use ':' instead");
                 }
-                expect(Token.COLON);
-                nextToken();
+                readToken(Token.COLON);
                 Expression value = parseExprSingle();
                 Expression entry;
                 if (key instanceof Literal && ((Literal)key).getGroundedValue() instanceof AtomicValue
@@ -4157,8 +4146,7 @@ public class XPathParser {
                 if (t.currentToken == Token.RCURLY) {
                     break;
                 } else {
-                    expect(Token.COMMA);
-                    nextToken();
+                    readToken(Token.COMMA);
                 }
             }
         }
@@ -4242,8 +4230,7 @@ public class XPathParser {
             return Literal.makeLiteral(SimpleArrayItem.EMPTY_ARRAY);
         }
         Expression body = parseExpression();
-        expect(Token.RCURLY);
-        nextToken();
+        readToken(Token.RCURLY);
 
         SystemFunction sf = ArrayFunctionSet.getInstance(40).makeFunction("_from-sequence", 1);
         Expression result = sf.makeFunctionCall(body);
@@ -4673,9 +4660,8 @@ public class XPathParser {
         StaticContext env = getStaticContext();
 
         nextToken();
-        expect(Token.HASH);
+        readToken(Token.HASH);
 
-        nextToken();
         if (!(t.currentToken instanceof Token.NumericLiteral)) {
             grumble("Expected number following '#'");
         };
@@ -4767,8 +4753,7 @@ public class XPathParser {
 
     protected Expression parseInlineFunction(AnnotationList annotations) throws XPathException {
         nextToken();
-        expect(Token.LPAREN);
-        nextToken();
+        readToken(Token.LPAREN);
         List<UserFunctionParameter> params = new ArrayList<>(8);
 
         int paramSlot = 0;
@@ -4807,10 +4792,8 @@ public class XPathParser {
      * @throws XPathException if no name was found
      */
     protected StructuredQName readVariableName() throws XPathException {
-        expect(Token.DOLLAR);
-        nextToken();
-        String name = expectName();
-        nextToken();
+        readToken(Token.DOLLAR);
+        String name = readName();
         return makeStructuredQName(name, NamespaceUri.NULL);
     }
 
@@ -4852,16 +4835,14 @@ public class XPathParser {
             declareRangeVariable(arg);
         }
 
-        expect(Token.LCURLY);
-        nextToken();
+        readToken(Token.LCURLY);
         Expression body;
         if (t.currentToken == Token.RCURLY && isAllowXPath31Syntax()) {
             nextToken();
             body = Literal.makeEmptySequence();
         } else {
             body = parseExpression();
-            expect(Token.RCURLY);
-            nextToken();
+            readToken(Token.RCURLY);
         }
         ExpressionTool.setDeepRetainedStaticContext(body, getStaticContext().makeRetainedStaticContext());
         Expression result = makeInlineFunctionValue(this, annotations, details, params, resultType, body);
@@ -5234,8 +5215,7 @@ public class XPathParser {
             body = Literal.makeEmptySequence();
         } else {
             body = parseExpression();
-            expect(Token.RCURLY);
-            nextToken();
+            readToken(Token.RCURLY);
             body.setRetainedStaticContext(getStaticContext().makeRetainedStaticContext());
 
             LocalVariableReference ref = new LocalVariableReference(arg);
