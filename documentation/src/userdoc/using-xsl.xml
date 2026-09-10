@@ -25,8 +25,11 @@
    <section id="commandline" title="From the command line">
       <h1>XSLT from the command line</h1>
 
-
-      <p>A command is available to apply a given stylesheet to a given source XML document.</p>
+      <p>A command is available run an XSLT transformation. In the simplest and most common case,
+         this is used to apply a given stylesheet to a given source XML document. But depending on
+         the options supplied the command can also be used to process a source JSON file, or to
+         export the compiled form of a stylesheet with Saxon-EE (see <a class="bodylink"
+            href="../compiling/packages">Using packages</a>).</p>
       
       <div class="javaonly">
       <p>For simple transformations using SaxonJ, use the command:</p>

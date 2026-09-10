@@ -2148,15 +2148,14 @@
                         <code>yes</code>, then at compile time Saxon outputs (to the standard error
                     output) a representation of the optimized expression tree for that function.</p>
 
-                <p>The attributes <code>cache</code> and <code>new-each-time</code> are interpreted
-                    in Saxon 9.7 (PE or higher) as follows: if the value of <code>cache</code> is
-                        <code>yes</code>, or the value of <code>new-each-time</code> is
-                        <code>no</code>, then the function is implemented as a memo function, in the
-                    same way as when the extension attribute <code>saxon:memo-function</code> is
-                    set. Note that the cache used for a memo function in Saxon 9.7 is always a full
-                    cache, that is, it retains the results of all previous function calls within the
-                    scope of a query or transformation. In Saxon-HE, these attributes have no
-                    effect.</p>
+                <p>The attributes <code>cache</code> and <code>new-each-time</code> (available in
+                    Saxon-HE from Saxon 10; and Saxon-PE/EE since 9.7) are interpreted as follows:
+                    if the value of <code>cache</code> is <code>yes</code>, or the value of
+                    <code>new-each-time</code> is <code>no</code>, then the function is
+                    implemented as a memo function, in the same way as when the extension attribute
+                    <code>saxon:memo-function</code> is set. Note that the cache used for a memo
+                    function since Saxon 9.7 is always a full cache, that is, it retains the results of
+                    all previous function calls within the scope of a query or transformation.</p>
 
                 <p>The <code>visibility</code> attribute is implemented since Saxon 9.6 as part of
                     the implementation of XSLT 3.0 packages.</p>
@@ -3118,8 +3117,8 @@
                         class="bodylink code" href="../apply-templates">xsl:apply-templates</a>.</p>
 
                 <p>The element always appears as a child of <code>xsl:stylesheet</code> (or
-                        <code>xsl:transform</code>), and in XSLT 3.0 it is empty (has no
-                    children).</p>
+                    <code>xsl:transform</code>) or <code>xsl:package</code>, and in XSLT 3.0 it is
+                    empty (has no children).</p>
 
                 <div class="qt4">
                     <p>In XSLT 4.0, an <code>xsl:mode</code> declaration for a named mode can
@@ -4063,7 +4062,7 @@
                     of other packages. </p>
             </description>
             <attributes>
-                <attribute name="declared-modes"> Determines whether of not modes that are
+                <attribute name="declared-modes">Determines whether or not modes that are
                     referenced within the package must be explicitly declared. The default is
                         <code>yes</code>. </attribute>
                 <attribute name="default-collation" use="optional">Standard attribute that may

@@ -805,10 +805,10 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolver-4.6.0.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-5.3.3.jar</span></p>
                   </td>
                   <td>
-                     <p>157Kb</p>
+                     <p>168Kb</p>
                   </td>
                   <td>
                      <p>XML Resolver: an open source library supporting the resolution of URIs using
@@ -820,7 +820,7 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolver-4.6.0-data.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-5.3.3-data.jar</span></p>
                   </td>
                   <td>
                      <p>1Mb</p>

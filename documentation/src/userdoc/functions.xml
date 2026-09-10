@@ -70,7 +70,7 @@
         <proto return-type="xs:date?">
           <arg name="value" type="xs:date?" desc="The input date"/>
           <arg name="timezone" type="xs:dayTimeDuration?" default="fn:implicit-timezone()"
-            desc="The new time zone, as an offset from UTC, or () to denote the implicit timezone"/>
+            desc="The new timezone, as an offset from UTC, or () for no timezone"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -90,7 +90,7 @@
         <proto return-type="xs:dateTime?">
           <arg name="value" type="xs:dateTime?" desc="The input date/time"/>
           <arg name="timezone" type="xs:dayTimeDuration?" default="fn:implicit-timezone()"
-            desc="The new time zone, as an offset from UTC, or () to denote the implicit timezone"/>
+            desc="The new timezone, as an offset from UTC, or () for no timezone"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -110,7 +110,7 @@
         <proto return-type="xs:time?">
           <arg name="value" type="xs:time?" desc="The input time"/>
           <arg name="timezone" type="xs:dayTimeDuration?" default="fn:implicit-timezone()"
-            desc="The new time zone, as an offset from UTC, or () to denote the implicit timezone"/>
+            desc="The new timezone, as an offset from UTC, or () for no timezone"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -2735,8 +2735,8 @@
             <code>'liberal':true()|false()</code>,
             <code>'duplicates':'reject'|'use-first'|'retain'</code>,
             <code>'escape':true()|false()</code>, <code>'fallback':(function)</code>. For full
-          details see the specification. Use of the <code>fallback</code> option requires Saxon-PE
-          or Saxon-EE.</p>
+          details see the specification. Use of the <code>fallback</code> option is available in
+          Saxon-HE from Saxon 10; but requires Saxon-PE or Saxon-EE in earlier versions.</p>
         <p>For the effect of the option <code>liberal=true()</code>, see <a class="bodylink code"
             href="/functions/fn/parse-json">parse-json()</a>.</p>
         <p>The Saxon implementation also offers an additional option: <code>'number-parser' :
@@ -2773,8 +2773,9 @@
             <code>'liberal':true()|false()</code>,
             <code>'duplicates':'reject'|'use-first'|'retain'</code>,
             <code>'validate':true()|false()</code>, <code>'escape':true()|false()</code>,
-            <code>'fallback':(function)</code>. For full details see the specification. Use of the
-            <code>fallback</code> option requires Saxon-PE or Saxon-EE.</p>
+          <code>'fallback':(function)</code>. For full details see the specification. Use of the
+          <code>fallback</code> option is available in Saxon-HE from Saxon 10; but requires
+          Saxon-PE or Saxon-EE in earlier versions.</p>
         <p>For the effect of the option <code>liberal=true()</code>, see <a class="bodylink code"
             href="/functions/fn/parse-json">parse-json()</a>.</p>
         <p>The Saxon implementation also offers an additional option: <code>'number-parser' :
@@ -3621,8 +3622,8 @@
             <code>'liberal':true()|false()</code>,
             <code>'duplicates':'reject'|'use-first'|'retain'</code>,
             <code>'escape':true()|false()</code>, <code>'fallback':(function)</code>. For full
-          details see the specification. Use of the <code>fallback</code> option requires Saxon-PE
-          or Saxon-EE.</p>
+          details see the specification. Use of the <code>fallback</code> option is available in
+          Saxon-HE from Saxon 10; but requires Saxon-PE or Saxon-EE in earlier versions.</p>
         <p>When <code>liberal=true()</code>, the following extensions to the JSON grammar are
           accepted: <ul>
             <li>Within arrays and objects, trailing commas are ignored: for example
@@ -5988,12 +5989,13 @@
         </proto>
       </signatures>
       <status>
+        <p>Available in Saxon-HE from Saxon 10; in Saxon-PE/EE since 9.6.</p>
         <p>Available as defined in XSLT 3.0 since Saxon 9.6, replacing the previously available
           function <code>map:for-each-entry</code> (which was available since Saxon 9.4). Available
           in XSLT, XPath, and XQuery, whether or not 3.0 is available.</p>
         <p>XPath 3.1 version implemented since Saxon 9.7.</p>
       </status>
-      <saxon-edition>PE/EE 9.6</saxon-edition>
+      <saxon-edition>ALL_SINCE_10 PE/EE_9.6</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/map">get</name>
@@ -6257,9 +6259,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7.</p>
+        <p>Available in Saxon-HE from Saxon 10; in Saxon-PE/EE since 9.7.</p>
       </status>
-      <saxon-edition>PE/EE 9.7</saxon-edition>
+      <saxon-edition>ALL_SINCE_10 PE/EE_9.7</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">flatten</name>
@@ -6296,9 +6298,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7.</p>
+        <p>Available in Saxon-HE from Saxon 10; in Saxon-PE/EE since 9.7.</p>
       </status>
-      <saxon-edition>PE/EE 9.7</saxon-edition>
+      <saxon-edition>ALL_SINCE_10 PE/EE_9.7</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">fold-right</name>
@@ -6317,9 +6319,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7.</p>
+        <p>Available in Saxon-HE from Saxon 10; in Saxon-PE/EE since 9.7.</p>
       </status>
-      <saxon-edition>PE/EE 9.7</saxon-edition>
+      <saxon-edition>ALL_SINCE_10 PE/EE_9.7</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">foot</name>
@@ -6355,9 +6357,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7.</p>
+        <p>Available in Saxon-HE from Saxon 10; in Saxon-PE/EE since 9.7.</p>
       </status>
-      <saxon-edition>PE/EE 9.7</saxon-edition>
+      <saxon-edition>ALL_SINCE_10 PE/EE_9.7</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">for-each-pair</name>
@@ -6376,9 +6378,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7.</p>
+        <p>Available in Saxon-HE from Saxon 10; in Saxon-PE/EE since 9.7.</p>
       </status>
-      <saxon-edition>PE/EE 9.7</saxon-edition>
+      <saxon-edition>ALL_SINCE_10 PE/EE_9.7</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">get</name>
@@ -6669,10 +6671,10 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7. Signature changed to add <code>$collation</code> argument from
-          9.7.0.8.</p>
+        <p>Available in Saxon-HE from Saxon 10; in Saxon-PE/EE since 9.7. Signature changed to add
+          <code>$collation</code> argument from 9.7.0.8.</p>
       </status>
-      <saxon-edition>PE/EE 9.7</saxon-edition>
+      <saxon-edition>ALL_SINCE_10 PE/EE_9.7</saxon-edition>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">sort-by</name>
