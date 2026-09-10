@@ -37,7 +37,7 @@ public:
  * Constructor to create a null XdmArray that is not an empty array.
  * Creates an XdmArray
  */
-  XdmArray(bool);
+  //XdmArray(bool);
 
   /**
    * XdmArray copy constructor.

@@ -4,7 +4,7 @@
 
 XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(0) {}
 
-XdmArray::XdmArray(bool): XdmFunctionItem(), arrayLen(0) {}
+//XdmArray::XdmArray(bool): XdmFunctionItem(), arrayLen(0) {}
 
 XdmArray::XdmArray(const XdmArray &d) : XdmFunctionItem(d) {
   arrayLen = d.arrayLen;
