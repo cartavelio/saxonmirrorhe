@@ -607,7 +607,7 @@ PHP_METHOD(SaxonProcessor, setCatalogFiles) {
 
 
     if (catalogFiles != nullptr) {
-      saxonProcessor->setCatalogFiles(catalogFile, argument_length);
+      saxonProcessor->setCatalogFiles(catalogFiles, argument_length);
     }
   }
 }
@@ -668,7 +668,7 @@ PHP_METHOD(SaxonProcessor, parseJsonFromString) {
         zend_object *vobj = Z_OBJ_P(return_value);
         xdmValue_object *xdmVObj =
             (xdmValue_object *)((char *)vobj - XtOffsetOf(xdmValue_object, std));
-        assert(xdmNObj != nullptr);
+        assert(xdmVObj != nullptr);
 
         xdmVObj->xdmValue = value;
       }
