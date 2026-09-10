@@ -49,3 +49,5 @@ namespace Saxon.Callbacks {
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

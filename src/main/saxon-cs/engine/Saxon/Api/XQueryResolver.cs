@@ -36,3 +36,5 @@ namespace Saxon.Api {
     public delegate XQueryModuleSource[] XQueryResolver(string moduleUri, Uri baseUri, Uri[] locationHints);
 
 }
+
+// Copyright (c) 2021 Saxonica Limited

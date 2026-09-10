@@ -16,16 +16,7 @@ namespace Saxon.Impl.Helpers {
                 return input.Skip(start).Take(end - start).ToList();
             }
         }
-        
-        // // Remove the item at position n, returning the item that was removed,
-        // // as per Java's List.remove(n).
-        //
-        // public static T RemoveAt<T>(SysCollGen.IList<T> input, int pos) {
-        //     T existing = input[pos];
-        //     input.RemoveAt(pos);
-        //     return existing;
-        // }
-        
+
         // Overloaded remove() method, following the Java List.remove() semantics
         
         public static T Remove<T>(SysCollGen.IList<T> input, object arg) {
@@ -98,22 +89,7 @@ namespace Saxon.Impl.Helpers {
         }
     }
 
-    // public class ComparableList<T> : SysCollGen.List<T> {
-    //     public override bool Equals(object other) {
-    //         if (other is ComparableList<T>) {
-    //             return ListUtils.EqualLists(this, (ComparableList<T>) other);
-    //         }
-    //         else {
-    //             return this == other;
-    //         }
-    //     }
-    //
-    //     public override int GetHashCode() {
-    //         int h = 654321;
-    //         foreach (T t in this) {
-    //             h ^= t.GetHashCode();
-    //         }
-    //         return h;
-    //     }
-    // }
+
 }
+
+// Copyright (c) 2021 Saxonica Limited

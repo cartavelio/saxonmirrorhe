@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using Saxon.Hej;
-using Saxon.Hej.s9api;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 
@@ -102,7 +99,7 @@ namespace Saxon.Api {
         /// uses update syntax.
         /// </summary>
         /// <remarks>
-        /// <para>This propery must be set to true before any query can be compiled
+        /// <para>This property must be set to true before any query can be compiled
         /// that uses updating syntax. This applies even if the query is not actually an updating
         /// query (for example, a copy-modify expression). XQuery Update syntax is accepted
         /// only by Saxon-EE. Non-updating queries are accepted regardless of the value of this
@@ -312,3 +309,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

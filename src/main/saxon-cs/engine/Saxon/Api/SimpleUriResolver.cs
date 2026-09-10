@@ -20,6 +20,11 @@ namespace Saxon.Api {
     public class SimpleUriResolver : XmlResolver {
 
         private readonly System.Func<Uri, Stream> fetcher;
+        /// <summary>
+        /// Create a <c>SimpleUriResolver</c> that wraps a function from URIs to Streams
+        /// </summary>
+        /// <param name="fetcher">A function (typically supplied as a lambda expression) that takes a <c>Uri</c>
+        /// as input and delivers the content at that <c>Uri</c> as a <c>Stream</c>.</param>
         public SimpleUriResolver(System.Func<Uri, Stream> fetcher) {
             this.fetcher = fetcher;
         } 
@@ -28,3 +33,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

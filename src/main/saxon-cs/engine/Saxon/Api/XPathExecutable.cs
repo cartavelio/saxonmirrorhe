@@ -80,11 +80,9 @@ namespace Saxon.Api {
         /// <para>The type <c>empty-sequence()</c> can be represented by an occurrence indicator of 'º' with 
         /// any item type.</para>
         /// <para>If the variable was explicitly declared, this will be the occurrence indicator that was set when the
-        /// variable was declared. If no item type was set, it will be 
-        /// <see cref="Saxon.Hej.s9api.OccurrenceIndicator#ZERO_OR_MORE"/>.</para>
+        /// variable was declared. If no item type was set, it will be "*".</para>
         /// <para>If the variable was implicitly declared by reference (which can happen only when the
-        /// <c>allowUndeclaredVariables</c> option is set), the returned type will be
-        /// <see cref="Saxon.Hej.s9api.OccurrenceIndicator#ZERO_OR_MORE"/>.</para>
+        /// <c>allowUndeclaredVariables</c> option is set), the returned type will be "*".</para>
         /// <para>If no variable with the specified <c>QName</c> has been declared either explicitly or implicitly,
         /// the method returns '0'.</para>
         /// </remarks>
@@ -146,3 +144,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

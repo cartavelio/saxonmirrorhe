@@ -8,11 +8,10 @@ using Saxon.Hej.value;
 namespace Saxon.Api.Support {
     public class LambdaExtensionFunctionWrapper : Saxon.Hej.lib.ExtensionFunctionDefinition {
 
-        private StructuredQName name;
-        private SpecificFunctionType type;
-        private Func<XdmValue[], XdmValue> implementation;
+        private readonly StructuredQName name;
+        private readonly SpecificFunctionType type;
+        private readonly Func<XdmValue[], XdmValue> implementation;
         
-        private Saxon.Api.ExtensionFunction apiFunction;
         public LambdaExtensionFunctionWrapper(StructuredQName name, SpecificFunctionType type, Func<XdmValue[], XdmValue> implementation) {
             this.name = name;
             this.type = type;
@@ -47,3 +46,5 @@ namespace Saxon.Api.Support {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

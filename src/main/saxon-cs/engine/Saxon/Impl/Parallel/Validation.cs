@@ -26,7 +26,7 @@ namespace Saxon.Impl.Parallel {
                 else {
                     validator.setInvalidityHandler(invalidityHandler);
                 }
-                //localHandler.startReporting(source.getSystemId());
+                //localHandler.StartReporting(source.getSystemId());
                 try {
                     validator.validate(source);
                 }
@@ -34,7 +34,7 @@ namespace Saxon.Impl.Parallel {
                     // ignore validation failure
                 }
 
-                //localHandler.endReporting();
+                //localHandler.EndReporting();
                 if (localHandler is InvalidityReportGeneratorEE handler) {
                     reportDocs.add(((XdmDestination)handler.getDestination()).getXdmNode());
                 }
@@ -42,3 +42,5 @@ namespace Saxon.Impl.Parallel {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

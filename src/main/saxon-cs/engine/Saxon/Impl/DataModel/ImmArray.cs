@@ -78,3 +78,5 @@ namespace Saxon.Impl.DataModel {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

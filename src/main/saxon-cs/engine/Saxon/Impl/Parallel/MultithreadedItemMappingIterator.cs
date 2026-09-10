@@ -97,3 +97,5 @@ namespace Saxon.Impl.Parallel {
     
     
 }
+
+// Copyright (c) 2021 Saxonica Limited

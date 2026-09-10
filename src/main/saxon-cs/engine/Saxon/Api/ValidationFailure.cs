@@ -1,4 +1,3 @@
-using System;
 
 namespace Saxon.Api {
     /// <summary>
@@ -13,7 +12,7 @@ namespace Saxon.Api {
     /// </remarks>
     public class ValidationFailure
     {
-        private Saxon.Hej.type.ValidationFailure failure;
+        private readonly Saxon.Hej.type.ValidationFailure failure;
 
         internal ValidationFailure(Saxon.Hej.type.ValidationFailure failure) {
             this.failure = failure; 
@@ -104,3 +103,5 @@ namespace Saxon.Api {
         public string SystemId => failure.getSystemId();
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

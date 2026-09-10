@@ -86,8 +86,7 @@ namespace Saxon.Api {
         /// <returns>the n'th member in the sequence making up the array, counting from zero</returns>
         public XdmValue Get(int n) {
             try {
-                Sequence member = ((ArrayItem) value).get(n);
-                return XdmValue.Wrap(member);
+                return Wrap(((ArrayItem) value).get(n));
             }
             catch (Exception) {
                 throw new IndexOutOfRangeException();
@@ -104,7 +103,7 @@ namespace Saxon.Api {
         /// <returns>the new array</returns>
         public XdmArray Put(int n, XdmValue valuei) {
             try {
-                return (XdmArray) XdmValue.Wrap(((ArrayItem) this.value).put(n, valuei.value));
+                return (XdmArray) Wrap(((ArrayItem) value).put(n, valuei.value));
             }
             catch (Exception) {
                 throw new IndexOutOfRangeException();
@@ -230,3 +229,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -9,17 +9,19 @@ namespace Saxon.Api.Support {
             this.listener = listener;
         }
 
-        public void startReporting(string systemId) {
+        public void StartReporting(string systemId) {
             // no action
         }
 
-        public void reportInvalidity(ValidationFailure failure) {
+        public void ReportInvalidity(ValidationFailure failure) {
             listener(failure);
         }
 
-        public XdmValue endReporting() {
+        public XdmValue EndReporting() {
             // no action
             return null;
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

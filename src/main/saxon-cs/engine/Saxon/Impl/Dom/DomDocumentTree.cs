@@ -4,7 +4,7 @@ using System.Xml;
 using HtmlAgilityPack;
 
 namespace Saxon.Impl.Dom {
-    /**
+    /*
      * Wraps a .NET DOM tree. This is derived from the Java code in the Saxon .NET product,
      * but for Saxon-CS is maintained as native C# code.
      */
@@ -27,3 +27,5 @@ namespace Saxon.Impl.Dom {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

@@ -1,7 +1,7 @@
 using Saxon.Hej.lib;
 using Saxon.Hej.om;
 
-namespace Saxon.Api {
+namespace Saxon.Api.Support {
     /// <summary>
     /// This class <c>InvalidityHandlerWrapper</c> extends the standard error handler for errors found during
     /// validation of an instance document against a schema, used if a user specifies the -report option on validate.
@@ -31,11 +31,11 @@ namespace Saxon.Api {
         /// <c>$err:value</c> during try/catch processor.</returns>
         public Sequence endReporting()
         {
-            XdmValue value = inHandler.endReporting();
+            XdmValue value = inHandler.EndReporting();
 
             if (value != null)
             {
-                return inHandler.endReporting().Unwrap();
+                return inHandler.EndReporting().Unwrap();
             }
             return null;
 
@@ -49,7 +49,7 @@ namespace Saxon.Api {
         {
             if (i is Saxon.Hej.type.ValidationFailure) { 
                 ValidationFailure error = new ValidationFailure((Saxon.Hej.type.ValidationFailure)i);
-                inHandler.reportInvalidity(error);
+                inHandler.ReportInvalidity(error);
             }
 
             
@@ -62,9 +62,11 @@ namespace Saxon.Api {
         /// <param name="systemId">Optional; may be used to represent the destination of any report produced.</param>
         public void startReporting(string systemId)
         {
-            inHandler.startReporting(systemId);
+            inHandler.StartReporting(systemId);
         }
 
         
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

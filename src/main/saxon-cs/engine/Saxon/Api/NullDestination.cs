@@ -8,8 +8,8 @@ namespace Saxon.Api {
 
     public class NullDestination : IDestination
     {
-
-        Saxon.Hej.s9api.NullDestination destination;
+        readonly Saxon.Hej.s9api.NullDestination destination;
+        
         /// <summary>Construct a <c>NullDestination</c></summary>
 
         public NullDestination()
@@ -47,3 +47,5 @@ namespace Saxon.Api {
 
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

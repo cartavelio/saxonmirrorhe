@@ -1,6 +1,4 @@
 using System;
-using Saxon.Hej.s9api;
-using Saxon.Hej.trans;
 using Saxon.Api.Support;
 
 namespace Saxon.Api {
@@ -89,7 +87,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Get the namespace URI part of a QName provided in lexical form (<c>prefix:localname</c>)
+        /// Get the namespace URI part of a QName provided in lexical form (<c>prefix:localName</c>)
         /// </summary>
         /// <param name="lexicalName">The lexical QName. This may either be a plain <c>NCName</c> (a local name
         /// with no prefix or colon) or a lexical name using a prefix that is bound to a namespace.</param>
@@ -201,7 +199,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="format">The name of the decimal format whose property is to be set.
         ///  Supply null to set a property of the default (unnamed) decimal format.
-        ///  This correponds to a name used in the third argument of <c>format-number()</c>.</param>
+        ///  This corresponds to a name used in the third argument of <c>format-number()</c>.</param>
         /// <param name="property">The name of the property to set: one of
         ///   "decimal-separator", "grouping-separator", "infinity", "NaN",
         ///   "minus-sign", "percent", "per-mille", "zero-digit", "digit",
@@ -387,3 +385,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

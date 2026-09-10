@@ -71,7 +71,7 @@ namespace Saxon.Api {
         /// use information from the configuration (for example, a reference to the name pool)
         /// to construct or configure the returned <c>Receiver</c>.</param>
         /// <param name="params1"></param>
-        public Receiver GetReceiver(PipelineConfiguration pipe, SerializationProperties params1) {
+        private Receiver GetReceiver(PipelineConfiguration pipe, SerializationProperties params1) {
             XmlWriterReceiver dnr = new (writer, pipe);
             dnr.setPipelineConfiguration(pipe);
             dnr.setCloseAfterUse(closeAfterUse);
@@ -91,7 +91,7 @@ namespace Saxon.Api {
         /// to construct or configure the returned <c>Receiver</c>.</param>
         /// <param name="value2">Serialization parameters known to the caller of the method; typically, output
         ///  properties defined in a stylesheet or query. These will mainly be of interest if the destination is performing serialization, but
-        ///  soem properties (such as <c>item-separator</c>) are also used in other situations.</param>
+        ///  some properties (such as <c>item-separator</c>) are also used in other situations.</param>
         public override Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties value2) {
             return GetReceiver(pipe, value2);
         }
@@ -105,8 +105,8 @@ namespace Saxon.Api {
         /// considered to be less stable than the classes in the Saxon.Api namespace.</para> 
         /// <para>The internal methods follow
         /// Java naming conventions rather than .NET conventions.</para>
-        /// <para>Information about the returned <see cref="Saxon.Hej.Configuration"/> object 
-        /// (and the objects it provides access to) is included in the Saxon JavaDoc docmentation.
+        /// <para>Information about the returned <see cref="Saxon.Hej.api.Destination"/> object 
+        /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
@@ -115,3 +115,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

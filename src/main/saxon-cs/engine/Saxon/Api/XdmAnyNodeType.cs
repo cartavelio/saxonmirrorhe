@@ -1,5 +1,4 @@
 using Saxon.Hej.pattern;
-using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -14,7 +13,7 @@ namespace Saxon.Api {
         /// item type <c>node()</c>, which matches any node.
         /// </summary>
 
-        public static readonly XdmAnyNodeType Instance = new XdmAnyNodeType();
+        public static readonly XdmAnyNodeType Instance = new();
 
         private XdmAnyNodeType() : base (AnyNodeTest.getInstance()) {
         }
@@ -41,3 +40,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited

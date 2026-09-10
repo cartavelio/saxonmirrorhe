@@ -1,26 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Impl.Helpers;
 using System.IO;
 using System.Xml;
-using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
-using Saxon.Hej;
 using Saxon.Hej.@event;
 using Saxon.Hej.om;
 using Saxon.Hej.pull;
-using Saxon.Hej.s9api;
-using Saxon.Hej.style;
 using Saxon.Hej.trans;
 using Saxon.Hej.trans.packages;
-using Saxon.Hej.tree.util;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
 using JXsltCompiler = Saxon.Hej.s9api.XsltCompiler;
-using System = Saxon.Ejava.lang.System;
 
 namespace Saxon.Api {
     /// <summary>
@@ -43,7 +36,7 @@ namespace Saxon.Api {
         private Uri baseUri;
         private IDictionary<QName, XdmValue> variableList = new Dictionary<QName, XdmValue>();
         private JXsltCompiler jXsltCompiler;
-        private XmlResolver xmlResolver = null;
+        private XmlResolver xmlResolver;
         private ErrorReporter _errorReporter;
 
         // internal constructor: the public interface is a factory method
@@ -199,9 +192,7 @@ namespace Saxon.Api {
 
         public string XsltLanguageVersion {
             get => jXsltCompiler.getXsltLanguageVersion();
-            set {
-                jXsltCompiler.setXsltLanguageVersion(value);
-            }
+            set => jXsltCompiler.setXsltLanguageVersion(value);
         }
         
         /// <summary>
@@ -347,7 +338,7 @@ namespace Saxon.Api {
 
             StreamSource ss = new StreamSource(input);
             if (theBaseUri != null) {
-                ss.setSystemId(Uri.EscapeUriString(theBaseUri.ToString()));
+                ss.setSystemId(Uri.EscapeUriString(theBaseUri));
             }
             else {
                 if (baseUri != null) {
@@ -372,7 +363,7 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>The source argument identifies an input stream containing an <c>xsl:package</c> element. Any packages
         /// on which this package depends must have been made available to the <c>XsltCompiler</c>
-        /// by importing them using <see cref="ImportPackage"/>.</para>
+        /// by importing them using <c>ImportPackage</c>.</para>
         /// <para>The base URI of the package (used for resolving <c>xsl:import</c> and <c>xsl:include</c>
         /// declarations, and for any other constructs that depend on the static base URI) is taken
         /// from the <c>BaseUri</c> property of the compiler.</para>>
@@ -439,15 +430,9 @@ namespace Saxon.Api {
             }
 
             try {
-                PackageDetails details = new PackageDetails();
-                if (packageName == null) {
-                    packageName = thePackage.PackageName;
-                }
-
-                if (version == null) {
-                    version = thePackage.Version;
-                }
-
+                PackageDetails details = new();
+                packageName ??= thePackage.PackageName;
+                version ??= thePackage.Version;
                 details.nameAndVersion = new VersionedPackageName(packageName, version);
                 details.loadedPackage = thePackage.getUnderlyingPreparedPackage();
                 jXsltCompiler.getUnderlyingCompilerInfo().getPackageLibrary().addPackage(details);
@@ -751,7 +736,7 @@ namespace Saxon.Api {
         /// status, and is not useful for diagnosing the actual error.</exception>
         
         public XsltExecutable CompileAssociatedStylesheet(Uri uri, String media) {
-            object obj = XmlResolver.GetEntity(uri, media == null ? "application/xml" : media,
+            object obj = XmlResolver.GetEntity(uri, media ?? "application/xml",
                 Type.GetType("System.IO.Stream"));
             if (obj is Stream stream) {
                 StreamSource ss = new (stream, uri.OriginalString);
@@ -824,7 +809,6 @@ namespace Saxon.Api {
                     }
                     else {
                         targetWrapper = (XdmNode) XdmValue.Wrap(target);
-                        targetWrapper.SetProcessor(processor);
                     }
             
                     if (targetWrapper == null) {
@@ -847,3 +831,5 @@ namespace Saxon.Api {
         }
     }
 }
+
+// Copyright (c) 2021 Saxonica Limited
