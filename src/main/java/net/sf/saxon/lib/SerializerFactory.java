@@ -286,6 +286,7 @@ public class SerializerFactory {
                     emitter.setPipelineConfiguration(pipe);
                     if (uWriter == null) {
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
                     target = createHTMLSerializer(emitter, params, pipe);
@@ -298,6 +299,7 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
                     target = createXMLSerializer((XMLEmitter) emitter, params);
@@ -309,6 +311,7 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
                     target = createXHTMLSerializer(emitter, params, pipe);
@@ -320,6 +323,7 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
                     target = createTextSerializer(emitter, params);
@@ -331,6 +335,7 @@ public class SerializerFactory {
                         uWriter = expandedResult.obtainUnicodeWriter();
                     }
                     JSONEmitter je = new JSONEmitter(pipe, uWriter, props);
+                    je.setMustClose(expandedResult.isMustCloseAfterUse());
                     JSONSerializer js = new JSONSerializer(pipe, je, props);
                     String sortOrder = props.getProperty(SaxonOutputKeys.PROPERTY_ORDER);
                     if (sortOrder != null) {
@@ -348,6 +353,7 @@ public class SerializerFactory {
                     }
                     AdaptiveEmitter je = new AdaptiveEmitter(pipe, uWriter);
                     je.setOutputProperties(props);
+                    je.setMustClose(expandedResult.isMustCloseAfterUse());
                     CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                     ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
                     return customizeAdaptiveSerializer(je, props, characterMapExpander, normalizer);

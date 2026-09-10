@@ -21,6 +21,7 @@ import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -316,6 +317,41 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
                 result = new ItemMappingIterator(
                         result,
                         new ConfigurationCheckingFunction(context.getConfiguration()), true);
+            }
+        }
+        return result;
+    }
+
+
+    @Override
+    public Item evaluateItem(final XPathContext context) throws XPathException {
+        ExtensionFunctionDefinition definition = function.getDefinition();
+        Sequence[] argValues = new Sequence[getArity()];
+        for (int i = 0; i < argValues.length; i++) {
+            argValues[i] = SequenceTool.toLazySequence(getArg(i).iterate(context));
+        }
+        final RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, getFunctionName().getDisplayName(), 0);
+        final Configuration config = context.getConfiguration();
+        final TypeHierarchy th = config.getTypeHierarchy();
+
+        Item result;
+        try {
+            result = function.call(context, argValues).head();
+        } catch (XPathException e) {
+            e.maybeSetLocation(getLocation());
+            throw e;
+        }
+        if (!definition.trustResultType()) {
+            final ItemType type = resultType.getPrimaryType();
+            if (!type.matches(result, th) || (result == null && !Cardinality.allowsZero(resultType.getCardinality()))) {
+                String msg = role.composeErrorMessage(type, result, th);
+                XPathException err = new XPathException(msg, "XPTY0004");
+                err.setLocation(getLocation());
+                throw err;
+            }
+            if (result instanceof NodeInfo && !config.isCompatible(((NodeInfo) result).getConfiguration())) {
+                throw new XPathException(
+                        "Node returned by extension function was created with an incompatible Configuration", SaxonErrorCode.SXXP0004);
             }
         }
         return result;
