@@ -305,6 +305,24 @@ public:
    */
   XDM_TYPE getType() { return XDM_NODE; }
 
+
+    /**
+      * Internal method used to reset associated reference counts on xdmItems that have been relinquished
+      */
+    void resetRelinquishedChildren();
+
+    /**
+      * Internal method used to increment the ref count for an relinquished child only once
+      */
+    void incrementRefCountForRelinquishedChildren();
+
+    /**
+     * Internal method to check if child nodes have been relinquished
+     */
+
+    bool hasRelinquishedChildren();
+
+
 private:
   const char *baseURI;   /*!< The base URI of this node*/
   const char *nodeName;  /*!< The name of the node, as a clark name format*/

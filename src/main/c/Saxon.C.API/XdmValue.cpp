@@ -115,13 +115,20 @@ XdmValue::XdmValue(int64_t val, bool arr) {
 }
 
 void XdmValue::resetRelinquishedItems(){
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+        std::cerr << "resetRelinquishedItems called:" << " ob ref=" << (this)  << std::endl;
+    }
     for (int i = 0; i < xdmSize; i++) {
-      if (relinquished_values[i] == (char)1 && values[i] != nullptr) {
-        values[i]->decrementRefCount();
-        if(values[i]->getRefCount() < 1) {
-           relinquished_values[i] = (char)0;  //reset
+        if(values[i] != nullptr) {
+            if (relinquished_values[i] == (char) 1) {
+                values[i]->decrementRefCount();
+                if (values[i]->getRefCount() < 1) {
+                    relinquished_values[i] = (char) 0;  //reset
+                }
+            } else {
+                values[i]->decrementRefCount();
+            }
         }
-      }
     }
 }
 
@@ -189,6 +196,7 @@ void XdmValue::addXdmItem(XdmItem *val) {
       relinquished_values = new_relinquish_val;
       values_cap *= 2;
     }
+
     values[xdmSize] = val;
     // values.push_back(val);
     // val->incrementRefCount();

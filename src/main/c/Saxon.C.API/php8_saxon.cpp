@@ -2031,8 +2031,9 @@ PHP_METHOD(XdmNode, __destruct) {
     if (xdmNode != nullptr) {
       xdmNode->decrementRefCount();
       if (xdmNode->getRefCount() < 1) {
-        delete xdmNode;
-        xdmNode = nullptr;
+          xdmNode->resetRelinquishedChildren();
+          delete xdmNode;
+          xdmNode = nullptr;
       } /*else {
           xdmNode->decrementRefCount();
           }*/
@@ -2270,7 +2271,14 @@ PHP_METHOD(XdmNode, getChildren) {
     int count = xdmNode->getChildCount();
     if (count > 0) {
 
-      XdmNode **childNodes = xdmNode->getChildren(false);
+        XdmNode **childNodes = nullptr;
+        if(xdmNode->hasRelinquishedChildren()){
+            XdmNode **childNodes = xdmNode->getChildren(true);
+            xdmNode->incrementRefCountForRelinquishedChildren();
+        } else {
+            XdmNode **childNodes = xdmNode->getChildren(true);
+        }
+
 
       if (childNodes != nullptr) {
         ///// creating PHP array

@@ -471,6 +471,7 @@ cdef class PySaxonProcessor:
 
         cdef PyXdmAtomicValue val = PyXdmAtomicValue()
         val.derivedaptr = val.derivedptr = val.thisvptr = self.thisptr.makeStringValue(c_str_, c_encoding_str_)
+        val.thisvptr.incrementRefCount()
 
         return val
     
@@ -4662,6 +4663,7 @@ cdef class PyXdmNode(PyXdmItem):
         if type(self) is PyXdmNode and self.derivednptr != NULL:
             self.derivednptr.decrementRefCount()
             if self.derivednptr.getRefCount() < 1:
+                self.derivednptr.resetRelinquishedChildren()
                 del self.derivednptr
                 self.derivednptr = self.derivedptr = self.thisvptr = NULL
 
@@ -4996,10 +4998,17 @@ cdef class PyXdmNode(PyXdmItem):
         cdef PyXdmNode val = None
         count = self.derivednptr.getChildCount()
         if count > 0:
-            n = self.derivednptr.getChildren()
+            if not self.derivednptr.hasRelinquishedChildren():
+                n = self.derivednptr.getChildren()
+                self.derivednptr.incrementRefCountForRelinquishedChildren()
+            else:
+                n = self.derivednptr.getChildren()
+
+
             for i in range(count):
                 val = PyXdmNode()
                 val.derivednptr = val.derivedptr = val.thisvptr = n[i]
+
                 val.derivednptr.incrementRefCount()
                 nodes.append(val)
         return nodes

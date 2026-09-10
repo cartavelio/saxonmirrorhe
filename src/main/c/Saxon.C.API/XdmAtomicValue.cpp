@@ -23,10 +23,8 @@ XdmAtomicValue::~XdmAtomicValue() {
               << " ob ref=" << (this) << "value =" << ((long)value)
               << std::endl;
   }
-  if (getRefCount() < 1) {
-    if (!valType.empty()) {
+  if (!valType.empty()) {
       valType.clear();
-    }
   }
 }
 
