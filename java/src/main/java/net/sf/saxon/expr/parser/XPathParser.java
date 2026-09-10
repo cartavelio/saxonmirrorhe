@@ -986,6 +986,10 @@ public class XPathParser {
                     checkLanguageVersion40("the mapping arrow =!>");
                     lhs = parseMappingArrowPostfix(lhs);
                     break;
+                case METHOD_CALL:
+                    checkLanguageVersion40("the mapping arrow =!>");
+                    lhs = parseMappingArrowPostfix(lhs);
+                    break;
                 default:
                     nextToken();
                     Expression rhs = parseUnaryExpression();
@@ -2822,6 +2826,9 @@ public class XPathParser {
             } else if (t.currentToken == Token.QMARK || t.currentToken == Token.QMARK_QMARK) {
                 step = parseLookup(step);
                 setLocation(step);
+            } else if (t.currentToken == Token.METHOD_CALL) {
+                step = parseMethodCall(step);
+                setLocation(step);
             } else if (t.currentToken == Token.QMARK_LSQB) {
                 step = parseFilterExprAM(step);
                 setLocation(step);
@@ -2863,6 +2870,51 @@ public class XPathParser {
         step = new FilterExpressionAM(step, predicate);
         setLocation(step);
         return step;
+    }
+
+
+    protected Expression parseMethodCall(Expression step) throws XPathException {
+        checkLanguageVersion40("method calls ( ?> operator )");
+        nextToken();
+        String methodName = expectName();
+        if (!NameChecker.isValidNCName(methodName)) {
+            grumble("Method name '" + methodName + "' is not a valid NCName");
+        }
+        nextToken();
+        expect(Token.LPAREN);
+        nextToken();
+        
+        List<Expression> args = new ArrayList<>();
+        args.add(new PlaceHolder(1));
+        if (t.currentToken != Token.RPAREN) {
+            while (true) {
+                Expression arg = parseFunctionArgument();
+                args.add(arg);
+                if (t.currentToken == Token.COMMA) {
+                    nextToken();
+                } else {
+                    break;
+                }
+            }
+            expect(Token.RPAREN);
+        }
+        nextToken();
+
+        // Given STEP ?> NAME ( ARG1, ARG2, ...), construct the expression
+        // for $map in STEP as map(*) return ($map ? NAME) treat as function(*) ( $map, ARG1, ARG2, ...)
+
+        ForExpression forex = new ForExpression();
+        forex.setSequence(step);
+        forex.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "m" + forex.hashCode()));
+        forex.setRequiredType(SequenceType.SINGLE_MAP);
+        VariableReference var1 = new LocalVariableReference(forex);
+        Expression function = new LookupExpression(var1, LookupExpression.Modifier.CONTENT, new StringLiteral(methodName));
+        Expression function1 = makeSequenceTypeExpression(function, OperatorSymbol.TREAT_AS,SequenceType.SINGLE_FUNCTION);
+        VariableReference var2 = new LocalVariableReference(forex);
+        args.set(0, var2);
+        Expression call = new DynamicFunctionCall(function1, args);
+        forex.setAction(call);
+        return forex;
     }
 
     /**

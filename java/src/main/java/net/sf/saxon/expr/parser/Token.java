@@ -82,6 +82,7 @@ public class Token {
     public static final Token COLON = new Token(":");
     public static final Token FAT_ARROW = new Token("=>", OperatorSymbol.FAT_ARROW);
     public static final Token THIN_ARROW = new Token("->", OperatorSymbol.THIN_ARROW);
+    public static final Token METHOD_CALL = new Token("?>", OperatorSymbol.METHOD_CALL);
     public static final Token BANG = new Token("!", OperatorSymbol.BANG);
     public static final Token COLON_COLON = new Token("::");
     public static final Token HASH = new Token("#");

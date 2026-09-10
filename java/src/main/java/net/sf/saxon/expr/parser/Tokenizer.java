@@ -356,6 +356,11 @@ public final class Tokenizer {
                         nextToken = Token.QMARK_LSQB;
                         return;
                     }
+                    if (isFollowedBy('>')) {
+                        inputOffset++;
+                        nextToken = Token.METHOD_CALL;
+                        return;
+                    }
                     nextToken = Token.QMARK;
                     return;
                 case '[':

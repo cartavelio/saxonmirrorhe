@@ -7,96 +7,7 @@ public class OperatorInfo {
      */
 
     public String toString(OperatorSymbol symbol) {
-        switch (symbol) {
-            case AND:
-                return "and";
-            case OR:
-                return "or";
-            case PLUS:
-                return "+";
-            case TIMES:
-                return "*";
-            case MINUS:
-                return "-";
-            case NEGATE:
-                return "-";
-            case DIV:
-                return "div";
-            case IDIV:
-                return "idiv";
-            case MOD:
-                return "mod";
-            case EQUALS:
-                return "=";
-            case NE:
-                return "!=";
-            case LT:
-                return "<";
-            case LE:
-                return "<=";
-            case GT:
-                return ">";
-            case GE:
-                return ">=";
-            case FEQ:
-                return "eq";
-            case FNE:
-                return "ne";
-            case FLT:
-                return "lt";
-            case FLE:
-                return "le";
-            case FGT:
-                return "gt";
-            case FGE:
-                return "ge";
-            case IS:
-                return "is";
-            case IS_NOT:
-                return "is-not";
-            case PRECEDES:
-                return "<<";
-            case FOLLOWS:
-                return ">>";
-            case UNION:
-                return "union";
-            case INTERSECT:
-                return "intersect";
-            case EXCEPT:
-                return "except";
-            case OTHERWISE:
-                return "otherwise";
-            case CONCAT:
-                return "||";
-            case TO:
-                return "to";
-            case CAST_AS:
-                return "cast as";
-            case CASTABLE_AS:
-                return "castable as";
-            case INSTANCE_OF:
-                return "instance of";
-            case TREAT_AS:
-                return "treat as";
-            case FAT_ARROW:
-                return "=>";
-            case MAPPING_ARROW:
-                return "=!>";
-            case SLASH:
-                return "/";
-            case SLASH_SLASH:
-                return "//";
-            case BANG:
-                return "!";
-            case LOOKUP:
-                return "?";
-            case DEEP_LOOKUP:
-                return "??";
-            case AM_FILTER:
-                return "?[]";
-            default:
-                return "<unknown op>";
-        }
+        return symbol.toString();
     }
 
     /**
@@ -109,9 +20,7 @@ public class OperatorInfo {
     public static int operatorPrecedence(OperatorSymbol symbol) {
         switch (symbol) {
             case OR: return ( 4);
-            //m.put(Token.OR_ELSE: return ( 4);
             case AND: return ( 5);
-            //m.put(Token.AND_ALSO: return ( 5);
             case FEQ: return ( 6);
             case FNE: return ( 6);
             case FLT: return ( 6);
