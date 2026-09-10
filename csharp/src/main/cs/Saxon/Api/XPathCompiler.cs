@@ -264,7 +264,7 @@ namespace Saxon.Api {
         /// this property is set to "2.0".</para>
         /// <para>There is no support for XPath 1.0.</para>
         /// <para>The value "4.0" enables use of XPath 4.0 syntax. XPath 4.0 is work in progress, and the
-        /// specification is far from stable.</para>
+        /// specification is far from stable. XPath 4.0 is supported only in SaxonCS-EE.</para>
         /// </remarks>
 
 
@@ -283,6 +283,9 @@ namespace Saxon.Api {
                     Implementation.setLanguageVersion(value);
                 }
                 catch (Exception) {
+                    if (value == "4.0") {
+                        throw new Saxon.Api.SaxonApiException("XPath 4.0 requires a licensed SaxonCS-EE configuration");
+                    }
                     throw new Saxon.Api.SaxonApiException("Unknown XPath version " + value);
                 }
             }
