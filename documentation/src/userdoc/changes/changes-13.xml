@@ -2,52 +2,7 @@
 
 <release number="13" date="2024-01-12" xmlns="http://www.saxonica.com/ns/doc/changes">
     
-    <!-- 
-    Schema Processing API Changes
-
-Processor.getSchemaManager() has an optional name parameter. The default name is "#global" which registers a global schema with the configuration. The special name "#local" creates a schema which is standalone, and is not registered with the configuration. Other schema names should be unique within a Processor/Configuration. It is possible for SchemaManager.load() to accept more than one Source, but once a schema has been loaded, it is not possible to add to it. The schema must be loaded before a SchemaValidator is created,
-
-- No, now moved to using XsdCompiler
-
-When multiple calls on SchemaManager.load() are made, each schema must be valid in its own right, as well as the union of the schemas being valid. This means that one call must not load a schema that has "dangling references" to components in another.
-If such dependencies exist, the two schema documents must be loaded in a single call of the load() method.
-
-The DocumentBuilder in the past did validation using the global schema if the Configuration option SCHEMA_VALIDATION_MODE was set to strict or lax. This is no longer the case. The DocumentBuilder needs to be explicitly supplied with a SchemaValidator.
-
-In order to allow components to belong to more than one schema, Wildcards no longer belong to a specific schema, which means that validation against a wildcard always needs to pass the schema as an extra parameter. This is because interpretation of "strict" and "lax", and of ##notDefined, depends on examining the entire schema.
-
-NodeTests such as schema-element(E) and schema-attribute(A) are now meaningful only in the context of a specific schema.
-They can therefore no longer be created using an ItemTypeFactory constructed directly from the Processor; new methods are available to construct an ItemTypeFactory that is associated with a specific XsdSchema.
-
-You need to validate documents with the same schema that you import statically into the query or stylesheet. One way to do this is to compile the schema using a s9api SchemaManager, then call useSchema() on the XQueryCompiler, XPathCompiler, or XsltCompiler. TODO: alternatively, compile the stylesheet or query, then call getSchema() to get the schema and use this to validate source documents.
-
-When constructing schema-specific item types, the two-argument constructor for class ItemTypeFactory must be used; the second argument identifies a particular schema.
-
-When using low-level interfaces that control validation using a `ParseOptions` object, the parse options must now identify the schema to be used for validation.
-
-The static context now has a schema, so it no longer needs a set of imported namespaces. If a name is present in the schema, that's enough of a check.
-
-
-TODO: we aren't type-checking the XPath expressions for identity constraints
-
-Saxon will no longer read user-defined variants of standard W3C-defined schema namespaces such as the XML and XSI namespaces. Any schemaLocation on an xs:import for these namespaces is ignored, and the W3C definition is used instead. XSD 1.1 is explicit that this is expected behaviour; XSD 1.0 has nothing to say on the subject, but it is a reasonable interpretation of the intent of the spec.
-
-JAXP SchemaFactory - the newSchema() method with no arguments now returns an empty schema. Previously it returned the global configuration schema.
-
-Test attribute-1501 assumes that attribute definitions from the XML namespace are present in every schema. This ain't so! Changed the test to import the xml namespace.
-
-TODO: we can get rid of namespace sealing - certainly at configuration level (DONE). Similarly much of the handling of namespace status.
-
-TODO: package export and import
-
-TODO: command line, -scmin, -xsd
-
-TODO: configuration file, schemaDocument, schemaComponentModel
-
-TODO: rethink redefines and override
-
-    
-    -->
+ 
     
     <category name="documentation">
         
@@ -61,11 +16,19 @@ TODO: rethink redefines and override
             and use the same updated notation (e.g. giving default values for parameters that can be
             omitted), and these may have changed since XPath 3.1. The XPath syntax section has been
             reorganised and expanded.</p>
+        
         <p>Information about new 4.0 features is highlighted in the Saxon documentation with a yellow
             colored side-bar and the QT4 lightbulb image. The main objective of the Saxon
             documentation is to inform users about the implementation status for 4.0 features, rather
             than being an actual guide to the new 4.0 features. Users are recommended to see the
             specifications for full details and examples.</p>
+        
+        <p>References in this document such as "PR 1497" refer to GitHub pull requests for the
+        repository in which the draft 4.0 language specifications are maintained. 
+        This particular pull request can be found in GitHub
+        at <a href="https://github.com/qt4cg/qtspecs/pull/1497">https://github.com/qt4cg/qtspecs/pull/1497</a>.
+        Since early 2026, change-marked versions of the specification illustrating the effect of each PR
+        are also available, at <a href="https://qt4cg.org/available-prs.html">https://qt4cg.org/available-prs.html</a>.</p>
         
     </category>
     
@@ -127,7 +90,7 @@ TODO: rethink redefines and override
         
         <p>Similarly, the seconds value in an <code>xs:dateTime</code> or <code>xs:time</code> value is now held
         as a <code>BigDecimal</code>, meaning there is effectively no limit on the precision of fractional
-        seconds. Previously it was held as an integer number of seconds plus an integer number of
+        seconds. Previously this value was held as an integer number of seconds plus an integer number of
         nanoseconds. Again, this is reflected in changes to some low-level interfaces.</p>
  
         
@@ -136,6 +99,11 @@ TODO: rethink redefines and override
     <category name="xslt30">
        <p>The value returned from the function call <code>system-property('xsl:vendor-url')</code> has been changed
        from <code>"http://www.saxonica.com/"</code> to <code>"https://www.saxonica.com/"</code>.</p>
+        
+        <p>The rules for grouping in XSLT 3.0 (and related operations such as the <code>distinct-values</code>
+        function) had the unfortunate property that with mixed numeric types, the equality comparison was not
+        transitive (A=B and B=C did not guarantee A=C). Rather than live with this situation, Saxon 13 implements
+        the resolution from the 4.0 specifications, whether or not XSLT 4.0 processing is enabled.</p>
  
     </category>
     
@@ -145,6 +113,11 @@ TODO: rethink redefines and override
             process to filter a document as it was being constructed, to retain only those nodes needed for evaluation
             of a particular query. In most cases streamed execution of queries provides a more flexible and performant
             solution for this requirement.)</p>
+        
+        <p>The rules for grouping in XQuery 3.1 (and related operations such as the <code>distinct-values</code>
+        function) had the unfortunate property that with mixed numeric types, the equality comparison was not
+        transitive (A=B and B=C did not guarantee A=C). Rather than live with this situation, Saxon 13 implements
+        the resolution from the 4.0 specifications, whether or not XSLT 4.0 processing is enabled.</p>
         
     </category>
     
@@ -199,7 +172,27 @@ TODO: rethink redefines and override
         validation episodes under that <code>Configuration</code>. In Saxon 13, the schema constructed by
         reading these components is transient, and does not affect the result of any subsequent validation task.</p>
         
-        <h3>Other changes</h3>
+        <p>Constructing a schema-aware type such as <code>element(N, T)</code> using the <code>ItemTypeFactory</code>
+        now requires the <code>ItemTypeFactory</code> to be associated with a specific schema (which can be supplied
+        when the factory is created).</p>
+        
+        <p>Building a validated document tree using a <code>DocumentBuilder</code> now requires a 
+            <code>SchemaValidator</code> associated with a specific schema to be supplied.</p>
+        
+        <p>Saxon has built-in ("born binary") schemas for the XML, XSI, and FN namespaces; when these schemas
+        are referenced (for example in an <code>xs:import</code> declaration), Saxon will use its built-in copies
+        and will ignore any schema location hint. This means it is not possible to load custom variants of these schemas.
+        Other W3C-defined schemas, notably the XLink namespace, do allow such variation, although Saxon will load
+        its own copy of the schema by default.</p>
+        
+        <p>Once created, an <code>XsdSchema</code> object is immutable. This affects the interpretation
+        of <code>xs:override</code> and <code>xs:redefines</code> declarations: these are now scoped to the 
+        <code>XsdSchema</code> in which they appear. It also affects the interpretation of other XSD
+        features that were previously global, for example a strict wildcard 
+        (<code>&lt;xs:any processContents="strict"/></code>) will only match an element whose
+        declaration appears in the containing <code>XsdSchema</code>.</p>
+        
+        <h3>Other s9api changes</h3>
         
     <p>Some new convenience methods have been introduced for the <code>XdmValue</code> and <code>XdmStream</code>
     classes. In both cases, you can now write <code>select("name")</code> or <code>select("uri", "local")</code>
@@ -238,6 +231,11 @@ TODO: rethink redefines and override
         <p>The classes <code>ProfessionalXPathFactory</code> and <code>EnterpriseXPathFactory</code> are dropped. It seems there
         were no tests referencing these classes, and JAXP XPath has gradually been deprecated.</p>
         
+        <p>The zero-argument <code>newSchema()</code> method of the JAXP <code>SchemaFactory</code> class now returns an empty schema
+        (one containing only the built-in components such as <code>xs:integer</code>). This conforms more
+            closely to the JAXP specification. Previously the method returned
+        the global schema for the Saxon <code>Configuration</code>.</p>
+        
    
     </category>
     
@@ -256,13 +254,13 @@ TODO: rethink redefines and override
         <p>New capabilities are available when an XDM document is constructed by
             wrapping a DOM (an instance of class <code>System.Xml.XmlDocument</code>). Provided DTD processing
         is enabled when constructing the DOM, the XPath <code>id()</code> function will now locate
-        element based on DTD-identified ID attributes, and the XSLT <code>unparsed-entity-uri</code>
+        elements based on DTD-identified ID attributes, and the XSLT <code>unparsed-entity-uri</code>
         and <code>unparsed-entity-uri</code> functions can be used to obtain information about
         unparsed entities declared in the DTD. However, the Microsoft DOM does not provide information
         enabling <code>IDREF</code> or <code>IDREFS</code> attributes, so the XPath <code>idref()</code>
         function remains inoperative. These new capabilities are not available in an XDM tree
         built using the <code>System.Xml.XmlReader</code> parser, because this parser does not provide
-        sufficient information about the DTD to the application.</p>
+        the application with sufficient information about the DTD.</p>
         
   
         
@@ -289,7 +287,7 @@ TODO: rethink redefines and override
         
         <p>The <code>NodeInfo</code> interface has changed: in place of the two <code>iterateAxis</code>
         methods (taking an integer argument to identify the required axis), there is now one method
-        for each axis, for example <code>iterateChildAxis</code> and <code>iterateDescendantAxis</code>
+        for each axis, for example <code>iterateChildAxis</code> and <code>iterateDescendantAxis</code>.
         For the rare cases where the required axis is not statically known, there is a static method
         <code>Navigator.iterateAxis()</code> that takes the required axis as a parameter. The change is
         made partly for performance reasons (it avoids the switch, and makes methods smaller, which gives
@@ -313,7 +311,7 @@ TODO: rethink redefines and override
         <code>TerminationException</code> that is thrown now includes the content of that final
         message as a <code>Message</code> object. The <code>TerminationException</code> is available
         using <code>SaxonApiException.getCause()</code>. This also applies to transformations
-        terminated using <code>xsl:assert</code></p>
+        terminated using <code>xsl:assert</code>.</p>
         
         <p>The <code>Configuration</code> class now provides a method <code>disableFunction()</code>
         that allows use of any function name to be disabled. This can be a core function, a Saxon-supplied
@@ -349,7 +347,8 @@ TODO: rethink redefines and override
 
     <category name="serialization">
         
-        <p>The serialization option <code>json-lines="yes"</code> is implemented. (PR 1497, PR 1596)</p>
+        <p>When 4.0 processing is enabled, the new serialization option 
+            <code>json-lines="yes"</code> is implemented. (PR 1497, PR 1596)</p>
         
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
             as a representation of the JSON null value. (PR 1028) Since QName literals are supported, this can
@@ -371,13 +370,18 @@ TODO: rethink redefines and override
             for internal use) is now renamed <code>saxon:spec-version</code>, and can be used to control which version
             of the serialization specification is to be used. The differences are minor, but with version 4.0, for example,
             JSON output adopts a fallback representation of Infinity and NaN rather than rejecting these values with an
-            error. When the serializer is invoked directly from XQuery or XSLT then the...
-            TODO: FIXME!!! </p>
+            error. When the serializer is invoked directly from XQuery or XSLT then this serialization parameter
+            is set automatically based on the XQuery or XSLT version, but when serialization is invoked
+            directly by a user application, it can be set manually.</p>
         
         <p>When generating HTML5 output including a <code>meta</code> element, the <code>meta</code>
         element now uses the form mandated by the HTML5 living standard (with a <code>charset</code>
-        attribute). Technically this is a non-conformance with the XSLT 3.0 / XQuery 3.1 specifications,
+        attribute). This applies even when 4.0 processing is not activated. 
+        Technically this is a non-conformance with the XSLT 3.0 / XQuery 3.1 specifications,
         but compliance with HTML5 clearly takes precedence here.</p>
+        
+        <p>When 4.0 is enabled, the option <code>canonical="yes"</code> can be used to produce
+        canonical XML.</p>
         
         
         <h2>4.0 Features not yet implemented</h2>
@@ -433,22 +437,27 @@ TODO: rethink redefines and override
         
         <p>The XSLT-specific function <code>fn:character-map</code> is implemented.</p>
         
-        <p>In XSLT, the <code>xsl:sequence</code> instruction now allows an <code>@as</code> attribute.</p>
+        <p>The <code>xsl:sequence</code> instruction now allows an <code>@as</code> attribute.</p>
         
-        <p>In XSLT, <code>xsl:include</code> declarations now allow cycles and "diamond" structures: if
+        <p><code>xsl:include</code> declarations now allow cycles and "diamond" structures: if
             the same module is included more than once at the same stylesheet (import) level, all but the first
             <code>xsl:include</code> declarations are ignored.</p>
+        
+        <p>Enclosed modes are implemented (a mode in which the <code>xsl:template</code> rules appear
+        as children of the <code>xsl:mode</code> element).</p>
         
         <p>The experimental attribute <code>break-when</code> for <code>xsl:for-each-group</code> is
             renamed <code>split-when</code> in XSLT 4.0; for the time being <code>break-when</code> is retained
             as a synonym.</p>
         
-        <p>At the time of first release of Saxon 13, there is an inconsistency in the draft 4.0 specifications regarding
+        <p>At the time of first release of Saxon 13, there has bene some flux in the draft 4.0 specifications regarding
             the processing of arrays using template rules. The <code>array:members</code> function represents each array member
             as a "value record" (a map with a single entry having the key "value"), while the <code>xsl:array-member</code> instruction
-            represents an array member as a zero-arity function item. The code in Saxon attempts to resolve this by accepting
-            both representations and converting where appropriate; however, this situation is unstable and the specification
-            can be expected to change in this area.</p>
+            originally represented an array member as a zero-arity function item; the representation changed more recently
+            to use a JNode. The current implementation of <code>xsl:array-member</code> in Saxon generates a
+            zero-arity function item, while <code>xsl:array</code> accepts either a zero-arity function item
+            or a value record. Most simple use cases for these instructions are unaffected by the detailed
+            representation; however, this situation is unstable and further changes can be expected in this area.</p>
         
         <p>Constructing an array with <code>xsl:array</code> using the new <code>for-each</code> attribute is currently
             only partially implemented in Saxon. The specification says that "when the <code>for-each</code> attribute
@@ -463,6 +472,10 @@ TODO: rethink redefines and override
             in Saxon 13, the pattern <code>match="order"</code> will only match element nodes. JNodes can be matched
             using a pattern of the form <code>match="~jnode(order)"</code>.</p>
         
+        <p>The <code>duplicates</code> option of <code>xsl:map</code> is implemented.</p>
+        
+        <p>The <code>xsl:select</code> instruction is implemented.</p>
+        
         <h2>4.0 Features not yet implemented</h2>
         
         <p>Here is a list of some of the features in the 4.0 specifications that have NOT yet been implemented.
@@ -474,7 +487,7 @@ TODO: rethink redefines and override
             <li><p>PR1875 - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
             <li><p>PR1773 - intersect and except in patterns (especially across different kinds of
                 pattern, e.g. <code>(node() | jnode())</code>)</p></li>
-            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
+            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, but not well tested</p></li>
             <li><p>PR1674 - composite sort keys in <code>xsl:sort</code></p></li>
             <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
             <li><p>XSLT <code>fn:regex-groups</code> function</p></li>
@@ -496,7 +509,7 @@ TODO: rethink redefines and override
         
         <p>See also the changes for XPath 4.0, which apply equally to XQuery.</p>
         
-        <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
+        <p>The syntax of item type declarations is now <code>declare type</code> rather than
             <code>declare item-type</code>.</p>
         
         <p>In a try/catch expression, the variable <code>err:map</code> is available within the catch clause.</p>
@@ -585,7 +598,7 @@ TODO: rethink redefines and override
         
        
         
-        <p>XPath expressions can be preceded by namespace declarations, allowing namespace
+        <p>XPath expressions can include namespace declarations, allowing namespace
             prefixes to be bound within the XPath expression, rather than relying entirely on the host
             language to declare namespace prefixes.</p>
         
@@ -645,11 +658,7 @@ TODO: rethink redefines and override
         
         <ul>
             <li><p>Casting a string to an enumeration type is now allowed.</p></li>
-            <li><p>The test <code>"A" instance of enum("A", "B")</code> now returns false;
-                for an <code>instance of</code> test to work, the string must be converted to the
-                enumeration type; this can be done with an explicit cast, or it can be done
-                implicitly by applying the coercion rules.</p></li>
-            <li><p>TODO: is that still the case?</p></li>
+            <li><p>The test <code>"A" instance of enum("A", "B")</code> now returns true.</p></li>
         </ul>
         
         <h3>XPath 4.0 features not yet implemented</h3>
@@ -882,7 +891,8 @@ TODO: rethink redefines and override
             <li><p>PR957 - <code>scan-left</code> and <code>scan-right</code> functions</p></li>
             <li><p>PR2552 - <code>system-properties</code> function</p></li>
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
-            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This is due to limitations in the ICU4N library.</p></li>
+            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. 
+                    This is due to limitations in the ICU4N library.</p></li>
         </ul>
         
  
