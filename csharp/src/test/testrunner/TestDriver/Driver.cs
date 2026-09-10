@@ -251,8 +251,9 @@ namespace TestDriver {
                 }
 
                 exceptionPredicates.Add(edition.ToLowerInvariant());
-                exceptionPredicates.Add(driverProc.ProductVersion); 
-
+                exceptionPredicates.Add(driverProc.ProductVersion);
+                exceptionPredicates.Add(treeModel.ToLowerInvariant());
+                exceptionPredicates.Add(requestedSpec.ToString());
 
                 string catalog = testSuiteDir + "/" + catalogFile;
 
