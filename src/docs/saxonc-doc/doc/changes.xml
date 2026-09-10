@@ -20,13 +20,15 @@
       <li>Improved memory management for the handling of XDM objects.</li>
       <li>Multi threading feature added to the <code>Xslt30Processor</code> and <code>XQueryProcessor</code>
          (see: bug issue <a href="https://saxonica.plan.io/issues/4428" target="_blank">#4428</a>).</li>
+      <li>Better encoding of strings: redesigned the handling of string between the C++ JNI API and the
+         internal Java API.</li>
    </ul>
    
    <h3 class="subtitle">API changes</h3>
    <ul>
       <li>Replaced the <code>getXslMessages()</code> method from the <code>XsltProcessor</code> and
-         <code>Xslt30Processor</code> with the method <code>setupXslMessages(boolean show, const char
-            filename=NULL)</code>. This new method gives users the option to direct <code>xsl:message</code>
+         <code>Xslt30Processor</code> with the new <code>XsltExecutable</code> method
+         <code>setSaveXslMessage()</code>. This new method gives users the option to direct <code>xsl:message</code>
          output to the standard error listener (by default). Alternatively the <code>xsl:message</code> output
          can be sent to the given file name.</li>
       <li>For XSLT transformations, the compilation and execution of a stylesheet is now separated as follows:
@@ -127,8 +129,6 @@
 
          </ul>
       </li>
-      
-      <li>Better encoding of string: Redesigned the handling of string between the C++ JNI API and the internal Java API.</li>
       
 
    </ul>
