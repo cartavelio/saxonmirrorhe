@@ -142,8 +142,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             if (theParameterTypes == null) {
                 theParameterTypes = ((Constructor<?>) theMethod).getParameterTypes();
             }
-        }
-        if (theMethod instanceof Method) {
+        } else if (theMethod instanceof Method) {
             if (theParameterTypes == null) {
                 theParameterTypes = ((Method) theMethod).getParameterTypes();
             }
@@ -155,6 +154,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             boolean usesContext = theParameterTypes.length > 0 &&
                     (theParameterTypes[0] == XPathContext.class);
             firstParam = usesContext ? 1 : 0;
+        } else if (theMethod instanceof Field) {
+            boolean isStatic = Modifier.isStatic(((Field) theMethod).getModifiers());
+            firstArg = isStatic ? 0 : 1;
         }
         argumentConverters = new PJConverter[getArity()];
         TypeChecker tc = config.getTypeChecker(false);
@@ -194,6 +196,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 }
             }
         }
+
         int j = firstParam;
         for (int i = firstArg; i < getArity(); i++) {
             SequenceType st = null;
