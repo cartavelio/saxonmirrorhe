@@ -158,6 +158,20 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- Identify static field accessors in net.sf.saxon.s9api.WhitespaceStrippingPolicy -->
+   <!-- Complication here is that different .NET versions support different sets of rounding modes? -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'net.sf.saxon.s9api.WhitespaceStrippingPolicy']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='NONE'">Saxon.Api.WhitespacePolicy.PreserveAll</xsl:when>
+         <xsl:when test="name/@identifier='IGNORABLE'">Saxon.Api.WhitespacePolicy.StripIgnorable</xsl:when>
+         <xsl:when test="name/@identifier='ALL'">Saxon.Api.WhitespacePolicy.StripAll</xsl:when>
+         <xsl:when test="name/@identifier='UNSPECIFIED'">Saxon.Api.WhitespacePolicy.Unspecified</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
    <xsl:variable name="atomicTypes" as="xs:string*" select="tokenize('
       boolean integer double float decimal string date dateTime time duration dayTimeDuration 
       gYear gMonth gDay gYearMonth gMonthDay anyURI hexBinary base64Binary untypedAtomic QName NOTATION')"/>
@@ -167,12 +181,19 @@
       <xsl:sequence select="$in => replace('(\p{Ll})(\p{Lu})', '$1_$2') => upper-case()"/>
    </xsl:function>
    
+   <xsl:variable name="nodeKinds" as="xs:string*" select="tokenize('
+      DOCUMENT_NODE ELEMENT_NODE ATTRIBUTE_NODE COMMENT_NODE TEXT_NODE PROCESSING_INSTRUCTION_NODE NAMESPACE_NODE')"/>
+   
    <xsl:variable name="upperAtomicTypes" as="xs:string*" select="$atomicTypes ! f:toUpperWithUnderscore(.)"/>
    
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'net.sf.saxon.s9api.ItemType']" priority="20">
       <xsl:choose>
          <xsl:when test="name/@identifier=$upperAtomicTypes">
             <xsl:text>Saxon.Api.XdmAtomicType.{f:toUpperWithUnderscore(name/@identifier)}</xsl:text>
+         </xsl:when>
+         <xsl:when test="name/@identifier=$nodeKinds">
+            <xsl:text>Saxon.Api.XdmNodeKind.{f:capitalize(lower-case(name/@identifier)) => replace('_node', '')}</xsl:text>
+            <!-- Doesn't work for PROCESSING_INSTRUCTION -->
          </xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
@@ -189,6 +210,23 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
+   
+   <!-- Identify static field accessors such as java.nio.charset.StandardCharsets.UTF_8 -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'java.nio.charset.StandardCharsets']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='ISO_8859_1'">System.Text.Encoding.Latin1</xsl:when>
+         <xsl:when test="name/@identifier='UTF_8'">System.Text.Encoding.UTF8</xsl:when>
+         <xsl:when test="name/@identifier='UTF_16'">System.Text.Encoding.Unicode</xsl:when>
+         <xsl:when test="name/@identifier='UTF_16BE'">System.Text.Encoding.BigEndianUnicode</xsl:when>
+         <xsl:when test="name/@identifier='UTF_16LE'">System.Text.Encoding.Unicode</xsl:when>
+         <xsl:when test="name/@identifier='US_ASCII'">System.Text.Encoding.ASCII</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+
    
  <!--  <xsl:template match="*[$refactoredProperties(name/@identifier)]" priority="20">
       <xsl:value-of select="f:refactor-property-reference(., name/@identifier)"/>

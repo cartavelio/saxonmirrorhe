@@ -34,11 +34,13 @@ public class ToXml {
     }
 
     private File singleInputFile = null;
+    private File historicInputDir = null; // directory holding the Java prior to preprocessing
     private File inputDir = null;
     private File srcDir = null;
     private File xmlDir = null;
     private File digest = null;
     private File csDir = null;
+    private boolean forceRebuild = false;
 
     private net.sf.saxon.s9api.Processor processor = new Processor(false);
     private XsltCompiler compiler = processor.newXsltCompiler();
@@ -54,6 +56,11 @@ public class ToXml {
                 inputDir = new File(arg.substring(3));
                 if (!inputDir.isDirectory()) {
                     throw new IllegalArgumentException(inputDir + " is not a directory");
+                }
+            } else if (arg.startsWith("-h:")) {
+                historicInputDir = new File(arg.substring(3));
+                if (!historicInputDir.isDirectory()) {
+                    throw new IllegalArgumentException(historicInputDir + " is not a directory");
                 }
             } else if (arg.startsWith("-src:")) {
                 srcDir = new File(arg.substring(5));
@@ -79,6 +86,8 @@ public class ToXml {
                 DEBUG = true;
                 compiler.setCompileWithTracing(true);
                 compiler.setAssertionsEnabled(true);
+            } else if (arg.equals("-force")) {
+                forceRebuild = true;
             }
         }
 
@@ -108,6 +117,18 @@ public class ToXml {
                 processXmlDirToCSharp(xmlDir, digest, csDir);
             }
         }
+    }
+
+    /**
+     * From a file containing preprocessed Java, get the file containing the original Java
+     * @param suppliedFile - contains the preprocessed Java
+     * @return originalFile - contains the original Java
+     */
+
+    public File getOriginalJavaFile(File suppliedFile) {
+        String path = suppliedFile.getAbsolutePath().substring(inputDir.getAbsolutePath().length());
+        String previousPath = historicInputDir + path;
+        return new File(previousPath);
     }
 
     public XdmNode parseDigest(File digestFile) throws SaxonApiException {
@@ -180,25 +201,30 @@ public class ToXml {
     public void processJavaFileToXml(File directory, String filename, File xmlDir, File srcDir) throws Exception {
         File file = new File(directory, filename);
         if (file.isDirectory()) {
-            processJavaDirToXml(file, new File(xmlDir, filename), new File(srcDir, filename));
+            processJavaDirToXml(file, new File(xmlDir, filename), srcDir);
         } else if (filename.endsWith(".java") && file.canRead()) {
             try {
                 xmlDir.mkdirs();
                 boolean skip = false;
                 File xmlOut = new File(xmlDir, filename.replace(".java", ".xml"));
-                if (xmlOut.exists() && srcDir != null) {
-                    File srcFile = new File(srcDir, filename);
-                    skip = xmlOut.lastModified() > srcFile.lastModified();
+                if (xmlOut.exists() && historicInputDir != null && !forceRebuild) {
+                    File historicSrcFile = getOriginalJavaFile(file);
+                    if (historicSrcFile.exists()) {
+                        skip = xmlOut.lastModified() > historicSrcFile.lastModified();
+                        if (file.lastModified() < historicSrcFile.lastModified()) {
+                            throw new IllegalStateException("Failed to run preprocessor on " + file);
+                        }
+                    }
                 }
                 if (skip) {
-                    System.err.println("Unchanged " + filename);
+                    //System.err.println("Unchanged " + filename);
                 } else {
                     System.err.println("Processing " + filename);
                     CompilationUnit cu;
                     try {
                         cu = StaticJavaParser.parse(file);
                     } catch (ParseProblemException pe) {
-                        System.err.println("Failed to parse " + filename +  " - " + pe.getMessage());
+                        System.err.println("Failed to parse " + filename + " - " + pe.getMessage());
                         pe.printStackTrace();
                         return;
                     }
@@ -216,6 +242,7 @@ public class ToXml {
     }
 
     private static JavaSymbolSolver symbolSolver = getJavaSymbolSolver();
+
     private static JavaSymbolSolver getJavaSymbolSolver() {
         try {
             CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();

@@ -149,8 +149,9 @@
       </xsl:if>
    </xsl:template>
    
-   <xsl:template match="extendedType[@nodeType = 'ClassOrInterfaceType'][@RESOLVED_TYPE='java.lang.Exception']" priority="25">
-      <xsl:text>java.lang.Exception</xsl:text>
+   <xsl:template match="extendedType[@nodeType = 'ClassOrInterfaceType']
+      [@RESOLVED_TYPE=('java.lang.Exception', 'java.lang.RuntimeException')]" priority="25">
+      <xsl:text>{@RESOLVED_TYPE}</xsl:text>
    </xsl:template>
    
    <xsl:template name="classOrInterface">
@@ -197,7 +198,7 @@
             <xsl:variable name="parameterName" select="name/@identifier"/>
             <xsl:choose>
                <xsl:when test="typeBound/typeBoun/@RESOLVED_TYPE">                  
-                  <xsl:text> where {name/@identifier} : {typeBound/typeBoun/@RESOLVED_TYPE}</xsl:text>
+                  <xsl:text> where {name/@identifier} : {f:renameType(typeBound/typeBoun/@RESOLVED_TYPE)}</xsl:text>
                </xsl:when>
                <xsl:when test="$thisDeclaration/annotations/annotation[name/@identifier='CSharpTypeBounds']">
                   <xsl:variable name="bound" select="$thisDeclaration/annotations/annotation[name/@identifier='CSharpTypeBounds']
@@ -362,6 +363,25 @@
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
+   <xsl:template match="*[@nodeType='MethodDeclaration']
+         [name/@identifier = 'compare']
+         [count(parameters/parameter) = 2]" priority="20">
+      <!-- If there's a compare(a, b) method, add a Compare(a, b) method  -->
+      <xsl:next-match/>
+      <xsl:call-template name="indent"/>
+      <xsl:text>// Extra method to make the class a C# Comparer{$NL}</xsl:text>
+      <xsl:call-template name="indent"/>
+      <xsl:text>public override int Compare(</xsl:text>
+      <xsl:apply-templates select="parameters/parameter[1]/type"/>
+      <xsl:text> a, </xsl:text>
+      <xsl:apply-templates select="parameters/parameter[2]/type"/>
+      <xsl:text> b) {{{$NL}</xsl:text>
+      <xsl:call-template name="indent-extra"/>
+      <xsl:text>return compare(a, b);{$NL}</xsl:text>
+      <xsl:call-template name="indent"/>
+      <xsl:text>}}{$NL}</xsl:text>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='MethodDeclaration']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:param name="expanding-defaults" select="false()" tunnel="yes" as="xs:boolean"/>
@@ -484,12 +504,15 @@
    
    <xsl:template match="*[@nodeType=('MethodDeclaration', 'ConstructorDeclaration', 'FieldDeclaration')]
                          [annotations/annotation[name/@identifier='CSharpReplaceMethod']]" priority="30">
+      <xsl:param name="indent" tunnel="yes" select="0"/>
       <xsl:call-template name="indent"/>
-      <xsl:text>/* C# Replacement Method */</xsl:text>
+      <xsl:text>/* C# Replacement Method */{$NL}</xsl:text>
       <xsl:call-template name="indent"/>
-      <xsl:text>{annotations/annotation[name/@identifier='CSharpReplaceMethod']//*[@nodeType='StringLiteralExpr']/@value}{$NL}</xsl:text>
-      <xsl:text>/* End of C# Replacement Method */</xsl:text>
+      <xsl:value-of select="annotations/annotation[name/@identifier='CSharpReplaceMethod']
+         //*[@nodeType='StringLiteralExpr']/@value" separator="{$NL || f:indent($indent)}"/>
       <xsl:text>{$NL}</xsl:text>
+      <xsl:call-template name="indent"/>
+      <xsl:text>/* End of C# Replacement Method */{$NL}</xsl:text>
    </xsl:template>
    
    <!-- Handle singleton enum classes. These are not true enumerations, it's
@@ -553,6 +576,7 @@
    <xsl:template match="*[@nodeType='EnumDeclaration']">
       <!-- Code for complex enum classes is inspired by the Tangible converter -->
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
+      <xsl:variable name="enumDecl" select="."/>
       <xsl:call-template name="indent"/>
       <xsl:call-template name="modifiers"/>
       <xsl:text>class </xsl:text>
@@ -643,9 +667,23 @@
       </xsl:for-each>
       
       <xsl:call-template name="indent-plus-two"/>
-      <xsl:text>nameValue = name; ordinalValue = nextOrdinal++; innerEnumValue = innerEnum;{$NL}</xsl:text>      
+      <xsl:text>nameValue = name;{$NL}</xsl:text> 
+      <xsl:call-template name="indent-plus-two"/>
+      <xsl:text>ordinalValue = nextOrdinal++;{$NL}</xsl:text>     
+      <xsl:call-template name="indent-plus-two"/>
+      <xsl:text>innerEnumValue = innerEnum;{$NL}</xsl:text>     
       <xsl:call-template name="indent-extra"/>
       <xsl:text>}}{$NL}</xsl:text>
+      
+      <xsl:for-each select="members/member[@nodeType='ConstructorDeclaration']/parameters/parameter
+            [not(name/@identifier = $enumDecl/members/member[@nodeType='FieldDeclaration']/variables/variable/name/@identifier)]">
+         <xsl:call-template name="indent-extra"/>
+         <xsl:text>private </xsl:text>
+         <xsl:apply-templates select="type"/>
+         <xsl:text> </xsl:text>
+         <xsl:apply-templates select="name"/>
+         <xsl:text>;{$NL}</xsl:text>
+      </xsl:for-each>
       
       <xsl:apply-templates select="members/member[not(@nodeType='ConstructorDeclaration')]">
          <xsl:with-param name="indent" tunnel="yes" select="$indent+1"/>
@@ -1286,24 +1324,6 @@
       <xsl:apply-templates select="." mode="constructors"/>
    </xsl:template>
    
- 
-   
-   <!-- Handle a constructor call with a diamond operator: new ArrayList<>() -->
-   <!-- Inference of the specific type is context dependent and is handled in module diamond.xsl -->
-   
-   <xsl:template match="*[@nodeType='ObjectCreationExpr'][type/typeArguments[not(*)]]" priority="30">
-      <!--<xsl:param name="implicit-type-arguments" tunnel="yes" 
-         as="element(typeArguments)?" select="()"/>-->
-      <xsl:text>new </xsl:text>
-      <xsl:apply-templates select="type"/>
-      <xsl:text>&lt;</xsl:text>
-      <xsl:apply-templates select="." mode="diamond"/>
-      <xsl:text>&gt;</xsl:text>
-      <xsl:text>(</xsl:text>
-      <xsl:apply-templates select="arguments"/>
-      <xsl:text>)</xsl:text>
-   </xsl:template>
-   
    
    <!-- Handle an inline anonymous class, typically `new SomeInterface(x, y, z) { class body }` -->
    <!-- We generate a named static inner class (in a second pass), and at this point we
@@ -1345,12 +1365,16 @@
       
       <xsl:variable name="superclass" select="f:resolveTypeName(../type)" as="xs:string"/>
       <xsl:variable name="isIterator" select="f:isIteratorType($superclass)" as="xs:boolean"/>
+      <xsl:variable name="isComparator" select="f:isComparatorType($superclass)" as="xs:boolean"/>
       
       <!-- The name of the implemented class/interface -->
       
       <xsl:choose>
          <xsl:when test="$isIterator">
             <xsl:text>System.Collections.Generic.IEnumerator&lt;{f:extract-type-arguments($superclass)}&gt;</xsl:text>
+         </xsl:when>
+         <xsl:when test="$isComparator">
+            <xsl:text>System.Collections.Generic.Comparer&lt;{f:extract-type-arguments($superclass)}&gt;</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:text>{f:escapeDottedName($superclass)}</xsl:text>
@@ -1685,7 +1709,11 @@
       <xsl:text>(</xsl:text>
       <xsl:apply-templates select="type"/>
       <xsl:text>)</xsl:text>
+      <!-- Extra parens are needed when the child expression is a lambda expression. 
+           Add them anyway, it does no harm -->
+      <xsl:text>(</xsl:text>
       <xsl:apply-templates select="expression"/>
+      <xsl:text>)</xsl:text>
    </xsl:template>
    
    <!-- match enumeration constants and qualify them with the enumeration class name -->
@@ -1786,7 +1814,7 @@
          </xsl:otherwise>
       </xsl:choose>
       
-      <xsl:variable name="iteratesOver" select="f:typeThatThisIteratesOver($thisDigest)"/>
+      <xsl:variable name="iteratesOver" select="$thisDigest ! f:typeThatThisIteratesOver(.)"/>
       <xsl:if test="$iteratesOver">
          <xsl:call-template name="indent"/>
          <xsl:text>{$NL}</xsl:text>
