@@ -52,12 +52,12 @@ public class GroupByClausePull extends TuplePull {
             TupleExpression retainedTupleExpr = groupByClause.getRetainedTupleExpression();
             HashMap<Object, List<GroupByClause.ObjectToBeGrouped>> map = new HashMap<>();
             while (base.nextTuple(context)) {
-                GroupByClause.ObjectToBeGrouped otbg = new GroupByClause.ObjectToBeGrouped();
                 AtomicValue[] groupingValues = groupingTupleExpr.evaluateItemAllAtomic(context).getValues();
-                //GroupByClausePush.checkGroupingValues(groupingValues);
-                otbg.groupingValues = new FlworTuple<>(groupingValues);
-                otbg.retainedValues = retainedTupleExpr.evaluateItem(context);
-                GroupByClause.TupleComparisonKey key = groupByClause.getComparisonKey(otbg.groupingValues, context);
+                GroupByClause.ObjectToBeGrouped otbg = new GroupByClause.ObjectToBeGrouped(
+                        new FlworTuple<>(groupingValues),
+                        retainedTupleExpr.evaluateItem(context)
+                );
+                GroupByClause.TupleComparisonKey key = groupByClause.getComparisonKey(otbg.groupingValues(), context);
                 List<GroupByClause.ObjectToBeGrouped> group = map.get(key);
                 GroupByClausePush.addToGroup(key, otbg, group, map);
             }
