@@ -64,8 +64,12 @@ public class AccumulatorRegistryEE extends AccumulatorRegistry {
                 throw new XPathException("Cannot get accumulator value for a streamed node unless the accumulator is declared streamable", "XTDE3362");
             }
             FleetingDocumentNode root = (FleetingDocumentNode) node.getRoot();
-            Map<Accumulator, AccumulatorWatch> watchMap = root.getMultiAccumulatorWatch().getAccumulatorMap();
-            AccumulatorWatch accumulatorWatch = watchMap == null ? null : watchMap.get(accumulator);
+            MultiAccumulatorWatch maw = root.getMultiAccumulatorWatch();
+            AccumulatorWatch accumulatorWatch = null;
+            if (maw != null) {
+                Map<Accumulator, AccumulatorWatch> watchMap = maw.getAccumulatorMap();
+                accumulatorWatch = watchMap == null ? null : watchMap.get(accumulator);
+            }
             if (accumulatorWatch == null) {
                 throw new XPathException("The accumulator " + accumulator.getAccumulatorName().getDisplayName() +
                     " is not in use for the current streamed document (check @use-accumulators)", "XTDE3362");
