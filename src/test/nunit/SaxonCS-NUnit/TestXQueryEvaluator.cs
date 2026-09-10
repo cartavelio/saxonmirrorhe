@@ -973,7 +973,7 @@ namespace SaxonCS_NUnit {
                 Processor p = new ();
                 XQueryCompiler c = p.NewXQueryCompiler();
                 XQueryEvaluator eval = c.Compile("doc('file:///a.xml')/z").Load();
-                eval.InputXmlResolver =
+                eval.XmlResolver =
                     new SimpleUriResolver(uri => new MemoryStream("<z>17</z>".GetBytes(Encoding.UTF8)));
 
                 XdmItem result = eval.First();
