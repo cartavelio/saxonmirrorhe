@@ -673,10 +673,10 @@ public class TestIntegratedFunctions {
          *                    be an instance of the same function class as the source function.
          */
 
-        @Override
-        public void copyLocalData(ExtensionFunctionCall destination) {
-            ((InscopePrefixFunctionCall)destination).nsContext = nsContext;
-        }
+//        @Override
+//        public void copyLocalData(ExtensionFunctionCall destination) {
+//            ((InscopePrefixFunctionCall)destination).nsContext = nsContext;
+//        }
 
         /**
          * Evaluate this function call at run-time

@@ -231,6 +231,17 @@
     
     </category>
     
+    <category name="extensibility">
+        <p class="javaonly">In the <code>IntegratedFunctionCall</code> class, there is no longer any need to implement the
+            <code>copyLocalData</code> method, and if it is implemented, the method will never be called. The method definition
+        is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
+        <p class="csonly">In the <code>ExtensionFunctionCall</code> class, there is no longer any need to implement the
+            <code>CopyLocalData</code> method, and if it is implemented, the method will never be called. The method definition
+            is retained in the interface to avoid invalidating existing implementations, but it will be dropped in a future release.</p>
+        <p>The reason for this change is that the object is no longer copied during operations such as function inlining; since it is
+        no longer implemented as a node in the expression tree, this copying was found to be unnecessary.</p>
+    </category>
+    
     <category name="sql" class="javaonly">
         
        
