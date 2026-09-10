@@ -99,12 +99,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("head", 1, e -> e.populate( ArrayHead::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-    //#if EE==true || PE==true
-        register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, filterFunctionType, ONE | INS, null));
-    //#endif
-
         register("insert-before", 3, e -> e.populate( ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null)
@@ -158,6 +152,15 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("tail", 1, e -> e.populate( ArrayTail::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
+        // TODO: the following functions should be private
+
+        register("_to-sequence", 1, e -> e.populate(ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
+        register("_from-sequence", 1, e -> e.populate(ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR | INS, null));
+
+
         //#if EE==true || PE==true
         if (version >= 40) {
             register("empty", 1, e -> e.populate(ArrayEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
@@ -169,6 +172,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
+            register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, filterFunctionType, ONE | INS, null));
+
             register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
@@ -179,13 +186,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
 
-            // TODO: the following functions should be private
-
-            register("_to-sequence", 1, e -> e.populate(ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
-
-            register("_from-sequence", 1, e -> e.populate(ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                    .arg(0, AnyItemType.getInstance(), STAR | INS, null));
 
 
         }
