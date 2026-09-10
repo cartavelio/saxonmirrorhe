@@ -115,14 +115,10 @@ public class StandardSchemaResolver implements SchemaURIResolver {
             return new Source[]{fetchResource("xpath-functions.scm", config)};
         }
 
-        // The previous version of this method explicitly mapped the XLINK namespace to
-        // a local resource. We can rely on the catalog resolver to do the mapping,
-        // so all we have to do is make sure the right public URI is in place. We could
-        // easily do this mapping for several common APIs, but perhaps that should
-        // be in the entity resolver. For now, just continue to map this one for
-        // backwards compatibility.
+        // For the XLink namespace, ignore any location hint pointing to a local copy; but
+        // the request can be redirected using a resolver or a catalog. See bug #5652.
         if (NamespaceConstant.XLINK.equals(targetNamespace)) {
-            locations = new String[]{"https://www.w3.org/1999/xlink.xsd"};
+            locations = null;
         }
 
         //#if CSHARP==false
