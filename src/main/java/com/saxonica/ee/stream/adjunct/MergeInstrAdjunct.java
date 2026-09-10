@@ -23,14 +23,13 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.sf.saxon.trans.SaxonErrorCode.SXWN9024;
 
 /**
  * Streaming adjunct for the xsl:merge instruction. This is rather different from the usual run of streaming
@@ -76,7 +75,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
                 for (String s : reasons) {
                     buffer.append(s + ". ");
                 }
-                config.makeErrorReporter().report(new XmlProcessingIncident(buffer.toString(), SXWN9024).asWarning());
+                config.makeErrorReporter().report(new XmlProcessingIncident(buffer.toString(), SaxonErrorCode.SXWN9024).asWarning());
                 mergeSource.streamable = false;
             } else {
                 StringBuilder buffer = new StringBuilder(120);
