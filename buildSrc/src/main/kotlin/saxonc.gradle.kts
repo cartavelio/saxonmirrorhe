@@ -258,6 +258,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
     val debugPostfix = DebugPostfix(targetHost)
     val releaseKindLibName = editionLibName.map { if (debug) "${it}${debugPostfix}" else it }
     val libFilenames = releaseKindLibName.map { LibFilenames(it, targetHost) }
+    val extraHeaders = layout.projectDirectory.file("../src/main/c/include/saxon_error.h")
 
     val imageTask = tasks.register<GraalNativeImageTask>("${configTaskName}_graal_image") {
         group = LifecycleBasePlugin.BUILD_GROUP
@@ -268,7 +269,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
         graalNativeImage = extension.graal()!!.nativeImage
         libName = releaseKindLibName
         headerLibName = editionLibName
-        extraHeaderFiles.from(layout.projectDirectory.file("../src/main/c/include/saxon_error.h"))
+        extraHeaderFiles.from(extraHeaders)
         version = saxonBuild.version
         majorVersion = saxonBuild.majorVersion
         macosx_min_version = saxonBuild.macosx_min_version
@@ -324,7 +325,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
         majorVersion = saxonBuild.majorVersion
         sharedLibFiles.from(imageTask.map { it.sharedLibFiles })
         importLibFiles.from(imageTask.map { it.importLibFiles })
-        headerFiles.from(imageTask.map { it.headerFiles })
+        headerFiles.from(imageTask.map { it.headerFiles }).from(extraHeaders)
         debugConfig = debug
         packageCMakeFiles.from(install)
         packageDir = configPackageOutputDir.map { it.dir(config) }

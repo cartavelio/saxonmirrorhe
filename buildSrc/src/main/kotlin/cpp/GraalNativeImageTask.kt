@@ -179,7 +179,7 @@ abstract class GraalNativeImageTask
     val headerFiles: FileCollection = layout.files(headerFilenames.map { names ->
         val dir = outputDir.get()
         names.map { dir.file(it) }
-    }).plus(extraHeaderFiles)
+    })
 
     // This gets cast to a Provider so it's not updateable
     @get:Internal
