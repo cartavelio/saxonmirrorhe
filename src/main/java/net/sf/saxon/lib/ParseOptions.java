@@ -111,12 +111,6 @@ public class ParseOptions {
         parserProperties = null;
         invalidityHandler = null;
         applicableAccumulators = null; // null means "all"
-
-        //#if CSHARP==false
-        XMLReader parser = null;
-        EntityResolver entityResolver = null;
-        ErrorHandler errorHandler = null;
-        //#endif
     }
 
     /**
@@ -1161,23 +1155,6 @@ public class ParseOptions {
         } catch (IOException err) {
             // no action
         }
-    }
-
-    @Override
-    public String toString()
-    {
-        return "ParseOptions{" + "schemaValidation=" + schemaValidation + ", dtdValidation=" + dtdValidation + ", topLevelElement="
-                + topLevelElement + ", topLevelType=" + topLevelType + ", wrapDocument=" + wrapDocument + ", treeModel=" + treeModel
-                + ", spaceStrippingRule=" + spaceStrippingRule + ", lineNumbering=" + lineNumbering + ", pleaseClose=" + pleaseClose
-                + ", errorReporter=" + errorReporter + ", filters=" + filters + ", continueAfterValidationErrors="
-                + continueAfterValidationErrors + ", addCommentsAfterValidationErrors=" + addCommentsAfterValidationErrors
-                + ", expandAttributeDefaults=" + expandAttributeDefaults + ", useXsiSchemaLocation=" + useXsiSchemaLocation
-                + ", checkEntityReferences=" + checkEntityReferences + ", stable=" + stable + ", validationErrorLimit="
-                + validationErrorLimit + ", validationParams=" + validationParams + ", validationStatisticsRecipient="
-                + validationStatisticsRecipient + ", parserFeatures=" + parserFeatures + ", parserProperties=" + parserProperties
-                + ", invalidityHandler=" + invalidityHandler + ", applicableAccumulators=" + applicableAccumulators + ", parser="
-                + parser + ", parserMaker=" + parserMaker + ", entityResolver=" + entityResolver + ", errorHandler=" + errorHandler
-                + '}';
     }
 }
 
