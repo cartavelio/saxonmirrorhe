@@ -1,0 +1,3 @@
+<!ELEMENT book (chapter+)>
+<!ELEMENT chapter (para+)>
+<!ELEMENT para (#PCDATA)*>

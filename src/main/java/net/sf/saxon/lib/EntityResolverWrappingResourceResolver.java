@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
 import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 
@@ -69,6 +70,9 @@ public class EntityResolverWrappingResourceResolver implements EntityResolver2 {
                 is.setCharacterStream(((StreamSource) resolved).getReader());
             }
             return is;
+        }
+        if (resolved instanceof SAXSource) {
+            return ((SAXSource) resolved).getInputSource();
         }
         throw new SAXException("Unexpected Source type in resolveEntity()");
     }
