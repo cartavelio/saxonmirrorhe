@@ -8,7 +8,7 @@ namespace Saxon.Api {
     /// </summary>
     /// <remarks>
     /// <para>To construct an <c>XsdCompiler</c>, use the factory method
-    /// <c>NewXsltCompiler</c> on the <see cref="Processor"/> object.</para>
+    /// <c>NewXsdCompiler</c> on the <see cref="Processor"/> object.</para>
     /// <para>An <c>XsdCompiler</c> may be used repeatedly to compile multiple
     /// schemas. Any changes made to the <c>XsdCompiler</c> 
     /// do not affect schemas that have already been compiled.
