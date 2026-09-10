@@ -1788,15 +1788,52 @@ cdef class PyXsltExecutable:
         cdef bool c_tunnel
         cdef string key_str
         c_tunnel = tunnel
-        cdef PyXdmAtomicValue value_
+        cdef PyXdmAtomicValue avalue_
+        cdef PyXdmNode nvalue_
+        cdef PyXdmMap mvalue_
+        cdef PyXdmArray arvalue_
+        cdef PyXdmFunctionItem fvalue_
+        cdef PyXdmItem ivalue_
+        cdef PyXdmValue value_
         global parametersDict
         if parameters is not None:
                 parametersDict = parameters
         for (key, value) in parameters.items():
-                if isinstance(value, PyXdmAtomicValue) or isinstance(value, PyXdmNode) or isinstance(value, PyXdmMap) or isinstance(value, PyXdmArray) or isinstance(value, PyXdmFunctionItem) or isinstance(value, PyXdmItem) or isinstance(value, PyXdmValue):
+                if isinstance(value, PyXdmAtomicValue):
+                        avalue_ = value
+                        key_str = key.encode('UTF-8')
+                        avalue_.derivedptr.incrementRefCount()
+                        c_params[key_str] = <saxoncClasses.XdmValue *> avalue_.derivedptr
+                elif isinstance(value, PyXdmNode):
+                        nvalue_ = value
+                        key_str = key.encode('UTF-8')
+                        nvalue_.derivedptr.incrementRefCount()
+                        c_params[key_str] = <saxoncClasses.XdmValue *> nvalue_.derivedptr
+                elif isinstance(value, PyXdmMap):
+                        mvalue_ = value
+                        key_str = key.encode('UTF-8')
+                        mvalue_.derivedptr.incrementRefCount()
+                        c_params[key_str] = <saxoncClasses.XdmValue *> mvalue_.derivedptr
+                elif isinstance(value, PyXdmArray):
+                        arvalue_ = value
+                        key_str = key.encode('UTF-8')
+                        arvalue_.derivedptr.incrementRefCount()
+                        c_params[key_str] = <saxoncClasses.XdmValue *> arvalue_.derivedptr
+                elif isinstance(value, PyXdmFunctionItem):
+                        fvalue_ = value
+                        key_str = key.encode('UTF-8')
+                        fvalue_.derivedptr.incrementRefCount()
+                        c_params[key_str] = <saxoncClasses.XdmValue *> fvalue_.derivedptr
+                elif isinstance(value, PyXdmItem):
+                        ivalue_ = value
+                        key_str = key.encode('UTF-8')
+                        ivalue_.derivedptr.incrementRefCount()
+                        c_params[key_str] = <saxoncClasses.XdmValue *> ivalue_.derivedptr
+                elif isinstance(value, PyXdmValue):
+                        value_ = value
                         key_str = key.encode('UTF-8')
                         value_.derivedptr.incrementRefCount()
-                        c_params[key_str] = <saxoncClasses.XdmValue *> value.thisvptr
+                        c_params[key_str] = <saxoncClasses.XdmValue *> value_.derivedptr
                 else:
                         raise Exception("Initial template parameters can only be of type PyXdmValue or its sub-types")
         if len(parameters) > 0:
