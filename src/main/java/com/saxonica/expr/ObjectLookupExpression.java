@@ -8,6 +8,7 @@ import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.ObjectValue;
@@ -161,7 +162,12 @@ public class ObjectLookupExpression extends LookupExpression {
                 return context -> {
                     PullEvaluator rhsPull = expr.getRhsExpression().makeElaborator().elaborateForPull();
                     SequenceIterator baseIterator = lhsPull.iterate(context);
-                    GroundedValue rhs = SequenceTool.toGroundedValue(rhsPull.iterate(context));
+                    GroundedValue rhs;
+                    try {
+                        rhs = SequenceTool.toGroundedValue(rhsPull.iterate(context));
+                    } catch (UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                     String key = rhs.getUnicodeStringValue().toString();
                     Configuration config = context.getConfiguration();
                     return ItemMappingIterator.map(baseIterator,

@@ -2009,7 +2009,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (ref == FilterExpression.FILTERED) {
             return SearchableValue.makeSearchableValue(expression.iterate(context));
         } else {
-            return SequenceTool.toGroundedValue(expression.iterate(context));
+            try {
+                return SequenceTool.toGroundedValue(expression.iterate(context));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
     }
     

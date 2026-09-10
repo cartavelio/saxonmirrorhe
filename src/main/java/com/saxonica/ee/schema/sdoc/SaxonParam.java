@@ -8,6 +8,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaException;
@@ -83,6 +84,8 @@ public class SaxonParam extends AnnotationParent {
             defaultValue = SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
         } catch (XPathException e) {
             error(e.getMessage());
+        } catch (UncheckedXPathException e) {
+            error(e.getXPathException().getMessage());
         }
 
         PackageData pd = new PackageData(getConfiguration());

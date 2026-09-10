@@ -10,6 +10,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.NodeImpl;
@@ -325,7 +326,12 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
                         NodeInfo root = builder.getCurrentRoot();
                         AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
-                        GroundedValue extent = SequenceTool.toGroundedValue(top);
+                        GroundedValue extent;
+                        try {
+                            extent = SequenceTool.toGroundedValue(top);
+                        } catch (UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
                         int len = extent.getLength();
                         NodeInfo[] array = new NodeInfo[len];
                         for (int i = 0; i < len; i++) {

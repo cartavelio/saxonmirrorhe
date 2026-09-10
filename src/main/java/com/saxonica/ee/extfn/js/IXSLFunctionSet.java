@@ -14,6 +14,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -193,7 +194,11 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
                 SequenceIterator mapped = context.getConfiguration().getMultithreadedItemMappingIterator(
                         tokenIter, mapper);
                 // discard the result; the aim was to put the documents in the document pool
-                SequenceTool.toGroundedValue(mapped);
+                try {
+                    SequenceTool.toGroundedValue(mapped);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
                 return new LazySequence(action.iterate(context));
             } else {
                 return EmptySequence.getInstance();

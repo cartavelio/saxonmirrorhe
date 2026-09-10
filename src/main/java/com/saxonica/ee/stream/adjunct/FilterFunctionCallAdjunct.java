@@ -11,6 +11,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 
@@ -56,7 +57,11 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
         final UserFunction target = exp.getTargetFunction(context);
         final Sequence[] argValues = SequenceTool.makeSequenceArray(target.getArity());
         for (int i=1; i<argValues.length; i++) {
-            argValues[i] = SequenceTool.toGroundedValue(exp.getArg(i).iterate(context));
+            try {
+                argValues[i] = SequenceTool.toGroundedValue(exp.getArg(i).iterate(context));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
         }
         return new ItemFeed(resultFeed, context) {
 

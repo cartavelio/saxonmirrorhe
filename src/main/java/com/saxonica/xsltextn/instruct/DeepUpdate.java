@@ -16,6 +16,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
@@ -212,7 +213,12 @@ public class DeepUpdate extends Instruction {
                             }
                         }
                         SequenceIterator actionIter = actionPuller.iterate(c3);
-                        GroundedValue actionVal = SequenceTool.toGroundedValue(actionIter);
+                        GroundedValue actionVal;
+                        try {
+                            actionVal = SequenceTool.toGroundedValue(actionIter);
+                        } catch (UncheckedXPathException e) {
+                            throw e.getXPathException();
+                        }
                         Pedigree pedigree = ((PedigreeValue) selected).getPedigree();
                         PedigreeValue parent = pedigree.getContainer();
                         GroundedValue val = actionVal;

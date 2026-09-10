@@ -18,6 +18,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import net.sf.saxon.type.Type;
@@ -1213,7 +1214,11 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                 if (call instanceof JavaExtensionFunctionCall) {
                     ((JavaExtensionFunctionCall) call).prepareForDynamicCall(context.getConfiguration());
                 }
-                return SequenceTool.toGroundedValue(call.iterate(context));
+                try {
+                    return SequenceTool.toGroundedValue(call.iterate(context));
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
             }
             //throw new XPathException("Cannot make a dynamic call to an overloaded external Java method");
         }

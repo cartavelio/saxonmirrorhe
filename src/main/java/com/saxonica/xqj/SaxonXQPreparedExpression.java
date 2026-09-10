@@ -13,6 +13,7 @@ import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
@@ -91,7 +92,12 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         try {
             SequenceIterator iter = expression.iterator(context);
             if (scrollable) {
-                GroundedValue value = SequenceTool.toGroundedValue(iter);
+                GroundedValue value = null;
+                try {
+                    value = SequenceTool.toGroundedValue(iter);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
                 return new SaxonXQSequence(value, this);
             } else {
                 return new SaxonXQForwardSequence(SequenceTool.focusTracker(iter), this);
