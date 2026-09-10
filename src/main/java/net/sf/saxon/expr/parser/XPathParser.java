@@ -2646,7 +2646,7 @@ public class XPathParser {
                 // dynamic function call (XQuery 3.0/XPath 3.0 syntax)
                 step = parseDynamicFunctionCall(step, null);
                 setLocation(step);
-            } else if (t.currentToken == Token.QMARK) {
+            } else if (t.currentToken == Token.QMARK || t.currentToken == Token.QMARK_QMARK) {
                 step = parseLookup(step);
                 setLocation(step);
             } else {
@@ -3313,6 +3313,10 @@ public class XPathParser {
     /*@NotNull*/
     protected Expression parseLookup(Expression lhs) throws XPathException {
         checkLanguageVersion31();
+        boolean deep = t.currentToken == Token.QMARK_QMARK;
+        if (deep) {
+            checkLanguageVersion40();
+        }
         Tokenizer t = getTokenizer();
         int offset = t.currentTokenStartOffset;
         t.setState(Tokenizer.BARE_NAME_STATE); // Prevent mis-recognition of x?f(2)
@@ -3325,18 +3329,17 @@ public class XPathParser {
         if (token == Token.NAME) {
             String name = t.currentTokenValue;
             if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
-                grumble("The name following '?' must be a valid NCName");
+                grumble("The name following '" + (deep ? "??" : "?") + "' must be a valid NCName");
             }
             nextToken();
-            result = lookupName(lhs, name);
+            result = lookupName(lhs, name, deep);
         } else if (token == Token.NUMBER) {
             NumericValue number = NumericValue.parseNumber(t.currentTokenValue);
             if (!(number instanceof IntegerValue)) {
-                grumble("Number following '?' must be an integer");
+                grumble("Number following '" + (deep ? "??" : "?") + "' must be an integer");
             }
             nextToken();
-
-            result = new LookupExpression(lhs, Literal.makeLiteral(number));
+            result = makeLookupExpression(lhs, Literal.makeLiteral(number), deep);
         } else if (token == Token.MULT || token == Token.STAR) {
             nextToken();
             SequenceType sequenceType = SequenceType.ANY_SEQUENCE;
@@ -3346,21 +3349,21 @@ public class XPathParser {
                 ItemType it = parseItemType();  // See QT4 spec bug #859
                 sequenceType = new SequenceType(it,StaticProperty.ALLOWS_MANY);
             }
-            result = lookupStar(lhs, sequenceType);
+            result = lookupStar(lhs, sequenceType, deep);
 
         } else if (token == Token.LPAR) {
             t.setState(Tokenizer.DEFAULT_STATE);
 
-            result = new LookupExpression(lhs, parseParenthesizedExpression());
+            result = makeLookupExpression(lhs, parseParenthesizedExpression(), deep);
         } else if (token == Token.STRING_LITERAL) {
             checkLanguageVersion40();
-            result = lookupName(lhs, t.currentTokenValue);
+            result = lookupName(lhs, t.currentTokenValue, deep);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40();
             offset = t.currentTokenStartOffset;
             StructuredQName varName = parseVariableName();
-            result = new LookupExpression(lhs, resolveVariableReference(offset, varName));
+            result = makeLookupExpression(lhs, resolveVariableReference(offset, varName), deep);
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '?'");
             return null;
@@ -3369,17 +3372,30 @@ public class XPathParser {
         return result;
     }
 
+    private Expression makeLookupExpression(Expression lhs, Expression rhs, boolean deep) {
+        if (deep) {
+            return new DeepLookupExpression(lhs, rhs);
+        } else {
+            return new LookupExpression(lhs, rhs);
+        }
+    }
+
 
     /**
      * Supporting code for lookup expressions (A?B) where B is an NCName
      *
      * @param lhs the LHS operand of the lookup expression
      * @param rhs the RHS operand of the lookup expression
+     * @param deep true if the operator is "??" (in 4.0)
      * @return the result of parsing the expression
      */
 
-    private Expression lookupName(Expression lhs, String rhs) {
-        return new LookupExpression(lhs, new StringLiteral(rhs));
+    private Expression lookupName(Expression lhs, String rhs, boolean deep) {
+        if (deep) {
+            return new DeepLookupExpression(lhs, new StringLiteral(rhs));
+        } else {
+            return new LookupExpression(lhs, new StringLiteral(rhs));
+        }
     }
 
     /**
@@ -3389,8 +3405,12 @@ public class XPathParser {
      * @return the result of parsing the expression
      */
 
-    private static Expression lookupStar(Expression lhs, SequenceType type) {
-        return new LookupAllExpression(lhs, type);
+    private static Expression lookupStar(Expression lhs, SequenceType type, boolean deep) {
+        if (deep) {
+            return new DeepLookupAllExpression(lhs, type);
+        } else {
+            return new LookupAllExpression(lhs, type);
+        }
     }
 
 
