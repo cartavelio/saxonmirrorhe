@@ -3435,7 +3435,7 @@ public class UserComplexType extends UserDefinedType
                 int fp = iter.next();
                 int card = getElementParticleCardinality(fp, true);
                 if (Cardinality.allowsMany(card)) {
-                    return (allowsAttributes() ? "list-plus" : "list") + "/" + getNamePool().getEQName(fp);
+                    return (allowsAttributes() ? "list-plus" : "list") + "/" + fp;
                 } else {
                     return "record";
                 }
