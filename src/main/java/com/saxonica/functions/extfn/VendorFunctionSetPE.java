@@ -362,10 +362,10 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, EMPTY));
         //#endif
-        register("parse-html", 1, e -> e.populate( ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+        register("parse-html", 1, e -> e.populate( com.saxonica.functions.qt4.ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
-        register("parse-html", 2, e -> e.populate( ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
+        register("parse-html", 2, e -> e.populate( com.saxonica.functions.qt4.ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
                 .setOptionDetails(Doc_2.makeOptionsParameter()));

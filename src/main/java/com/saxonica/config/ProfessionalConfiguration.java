@@ -11,6 +11,7 @@ import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.functions.extfn.ObjectMap;
 import com.saxonica.functions.extfn.VendorFunctionSetPE;
+import com.saxonica.functions.registry.XPath40FunctionSet;
 import com.saxonica.functions.registry.XQUpdate10FunctionSet;
 import com.saxonica.functions.registry.XSLT40FunctionSet;
 import com.saxonica.serialize.SerializerFactoryPE;
@@ -654,7 +655,7 @@ public class ProfessionalConfiguration extends Configuration {
             case 31:
                 return XPath31FunctionSet.getInstance();
             case 40:
-                return com.saxonica.functions.registry.XPath40FunctionSet.getInstance();
+                return XPath40FunctionSet.getInstance();
             default:
                 return XPath31FunctionSet.getInstance();
         }

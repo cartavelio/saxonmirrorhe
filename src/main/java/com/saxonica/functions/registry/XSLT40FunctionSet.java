@@ -18,7 +18,7 @@ public class XSLT40FunctionSet extends XSLT30FunctionSet {
 
     @Override
     protected BuiltInFunctionSet correspondingXPathFunctionSet() {
-        return com.saxonica.functions.registry.XPath40FunctionSet.getInstance();
+        return XPath40FunctionSet.getInstance();
     }
 
     private XSLT40FunctionSet() {
