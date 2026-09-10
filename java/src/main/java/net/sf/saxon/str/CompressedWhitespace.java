@@ -53,21 +53,16 @@ public class CompressedWhitespace extends WhitespaceString {
                 return StringTool.compress(in, start, len, false);
             }
         }
-        int ix = 0;
         runlength = 1;
-        int[] out = new int[outlength];
+        long value = 0;
         for (int i = start; i < end; i++) {
             final char c = in[i];
             if (i == end - 1 || c != in[i + 1] || runlength == 63) {
-                out[ix++] = (CODES[c] << 6) | runlength;
+                value = (value << 8) | (CODES[c] << 6) | runlength;
                 runlength = 1;
             } else {
                 runlength++;
             }
-        }
-        long value = 0;
-        for (int i = 0; i < outlength; i++) {
-            value = (value << 8) | (long)out[i];
         }
         value = value << (8 * (8 - outlength));
         return new CompressedWhitespace(value);
