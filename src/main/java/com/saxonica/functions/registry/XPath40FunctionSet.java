@@ -507,9 +507,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
-        register("round", 2, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("round", 1, 3, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY)
-                .arg(1, BuiltInAtomicType.INTEGER, OPT, null));
+                .arg(1, BuiltInAtomicType.INTEGER, OPT, null)
+                .arg(2, EnumerationUnionType.of("toward-zero", "away-from-zero", "floor", "ceiling",
+                                                "half-toward-zero", "half-away-from-zero", "half-to-floor", "half-to-ceiling",
+                                                "half-to-even"), OPT, null));
 
         register("round-half-to-even", 2, e -> e.populate(RoundHalfToEven::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY)
