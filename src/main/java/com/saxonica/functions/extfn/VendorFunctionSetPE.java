@@ -529,8 +529,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
             if (!dt.hasTimezone()) {
                 dt = dt.adjustTimezone(context.getImplicitTimezone());
             }
-            int ms = NamedTimeZone.civilTimeOffset(dt, arguments[1].head().getStringValue());
-            return dt.adjustTimezone(ms / 60000);
+            int seconds = NamedTimeZone.civilTimeOffsetInSeconds(dt, arguments[1].head().getStringValue());
+            return dt.adjustTimezone(seconds / 60);
         }
     }
 
