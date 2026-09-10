@@ -1,18 +1,16 @@
-srcdir = /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API
-builddir = /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API
-top_srcdir = /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API
-top_builddir = /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API
-EGREP = /bin/grep -E
-SED = /bin/sed
+srcdir = /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API
+builddir = /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API
+top_srcdir = /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API
+top_builddir = /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API
+EGREP = /usr/bin/grep -E
+SED = /usr/bin/sed
 CONFIGURE_COMMAND = './configure' '--enable-saxon'
 CONFIGURE_OPTIONS = '--enable-saxon'
 SHLIB_SUFFIX_NAME = so
 SHLIB_DL_SUFFIX_NAME = so
-ZEND_EXT_TYPE = zend_extension
-RE2C = re2c
 AWK = nawk
 SAXON_SHARED_LIBADD = -lstdc++ -ldl
-shared_objects_saxon = php7_saxon.lo SaxonProcessor.lo XQueryProcessor.lo XsltProcessor.lo Xslt30Processor.lo XPathProcessor.lo SchemaValidator.lo XdmValue.lo XdmItem.lo XdmNode.lo XdmAtomicValue.lo SaxonCGlue.lo SaxonCProcessor.lo SaxonCXPath.lo
+shared_objects_saxon = php7_saxon.lo SaxonProcessor.lo XQueryProcessor.lo XsltExecutable.lo Xslt30Processor.lo XPathProcessor.lo SchemaValidator.lo XdmValue.lo XdmItem.lo XdmNode.lo XdmAtomicValue.lo XdmFunctionItem.lo XdmMap.lo XdmArray.lo SaxonApiException.lo SaxonCGlue.lo SaxonCProcessor.lo SaxonCXPath.lo
 PHP_PECL_EXTENSION = saxon
 PHP_MODULES = $(phplibdir)/saxon.la
 PHP_ZEND_EX =
@@ -22,21 +20,21 @@ prefix = /usr
 exec_prefix = $(prefix)
 libdir = ${exec_prefix}/lib
 prefix = /usr
-phplibdir = /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/modules
-phpincludedir = /usr/include/php/20180731
+phplibdir = /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/modules
+phpincludedir = /usr/include/php/20190902
 CC = cc
 CFLAGS = -g -O2
 CFLAGS_CLEAN = $(CFLAGS)
 CPP = cc -E
 CPPFLAGS = -DHAVE_CONFIG_H
 CXX = g++
-CXXFLAGS = -g -O2
+CXXFLAGS = -std=c++14
 CXXFLAGS_CLEAN = $(CXXFLAGS)
-EXTENSION_DIR = /usr/lib/php/20180731
-PHP_EXECUTABLE = /usr/bin/php7.3
+EXTENSION_DIR = /usr/lib/php/20190902
+PHP_EXECUTABLE = /usr/bin/php7.4
 EXTRA_LDFLAGS =
 EXTRA_LIBS =
-INCLUDES = -I/usr/include/php/20180731 -I/usr/include/php/20180731/main -I/usr/include/php/20180731/TSRM -I/usr/include/php/20180731/Zend -I/usr/include/php/20180731/ext -I/usr/include/php/20180731/ext/date/lib -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/jni
+INCLUDES = -I/usr/include/php/20190902 -I/usr/include/php/20190902/main -I/usr/include/php/20190902/TSRM -I/usr/include/php/20190902/Zend -I/usr/include/php/20190902/ext -I/usr/include/php/20190902/ext/date/lib -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/jni
 LFLAGS =
 LDFLAGS =
 SHARED_LIBTOOL =
@@ -125,7 +123,7 @@ PHP_TEST_SHARED_EXTENSIONS =  ` \
 	fi; \
 	if test "x$(PHP_ZEND_EX)" != "x"; then \
 		for i in $(PHP_ZEND_EX)""; do \
-			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d $(ZEND_EXT_TYPE)=$(top_builddir)/modules/$$dlname"; \
+			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d zend_extension=$(top_builddir)/modules/$$dlname"; \
 		done; \
 	fi`
 PHP_DEPRECATED_DIRECTIVES_REGEX = '^(magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*='
@@ -163,9 +161,9 @@ clean:
 	rm -f libphp$(PHP_MAJOR_VERSION).la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
 
 distclean: clean
-	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h main/internal_functions_cli.c main/internal_functions.c stamp-h buildmk.stamp Zend/zend_dtrace_gen.h Zend/zend_dtrace_gen.h.bak Zend/zend_config.h TSRM/tsrm_config.h
-	rm -f php7.spec main/build-defs.h scripts/phpize
-	rm -f ext/date/lib/timelib_config.h ext/mbstring/oniguruma/config.h ext/mbstring/libmbfl/config.h ext/oci8/oci8_dtrace_gen.h ext/oci8/oci8_dtrace_gen.h.bak
+	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h main/internal_functions_cli.c main/internal_functions.c Zend/zend_dtrace_gen.h Zend/zend_dtrace_gen.h.bak Zend/zend_config.h
+	rm -f main/build-defs.h scripts/phpize
+	rm -f ext/date/lib/timelib_config.h ext/mbstring/libmbfl/config.h ext/oci8/oci8_dtrace_gen.h ext/oci8/oci8_dtrace_gen.h.bak
 	rm -f scripts/man1/phpize.1 scripts/php-config scripts/man1/php-config.1 sapi/cli/php.1 sapi/cgi/php-cgi.1 sapi/phpdbg/phpdbg.1 ext/phar/phar.1 ext/phar/phar.phar.1
 	rm -f sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html
 	rm -f ext/iconv/php_have_bsd_iconv.h ext/iconv/php_have_glibc_iconv.h ext/iconv/php_have_ibm_iconv.h ext/iconv/php_have_iconv.h ext/iconv/php_have_libiconv.h ext/iconv/php_iconv_aliased_libiconv.h ext/iconv/php_iconv_supports_errno.h ext/iconv/php_php_iconv_h_path.h ext/iconv/php_php_iconv_impl.h
@@ -190,34 +188,42 @@ prof-use:
 
 .PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:
-php7_saxon.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/php7_saxon.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/php7_saxon.cpp -o php7_saxon.lo 
-SaxonProcessor.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonProcessor.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonProcessor.cpp -o SaxonProcessor.lo 
-XQueryProcessor.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XQueryProcessor.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XQueryProcessor.cpp -o XQueryProcessor.lo 
-XsltProcessor.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XsltProcessor.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XsltProcessor.cpp -o XsltProcessor.lo 
-Xslt30Processor.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/Xslt30Processor.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/Xslt30Processor.cpp -o Xslt30Processor.lo 
-XPathProcessor.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XPathProcessor.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XPathProcessor.cpp -o XPathProcessor.lo 
-SchemaValidator.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SchemaValidator.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SchemaValidator.cpp -o SchemaValidator.lo 
-XdmValue.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmValue.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmValue.cpp -o XdmValue.lo 
-XdmItem.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmItem.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmItem.cpp -o XdmItem.lo 
-XdmNode.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmNode.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmNode.cpp -o XdmNode.lo 
-XdmAtomicValue.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmAtomicValue.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/XdmAtomicValue.cpp -o XdmAtomicValue.lo 
-SaxonCGlue.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonCGlue.c
-	$(LIBTOOL) --mode=compile $(CC)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonCGlue.c -o SaxonCGlue.lo 
-SaxonCProcessor.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonCProcessor.c
-	$(LIBTOOL) --mode=compile $(CC)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonCProcessor.c -o SaxonCProcessor.lo 
-SaxonCXPath.lo: /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonCXPath.c
-	$(LIBTOOL) --mode=compile $(CC)  -I. -I/home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /home/ond1/work/svn/latest9.9-saxonc/Saxon.C.API/SaxonCXPath.c -o SaxonCXPath.lo 
+php7_saxon.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/php7_saxon.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/php7_saxon.cpp -o php7_saxon.lo 
+SaxonProcessor.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonProcessor.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonProcessor.cpp -o SaxonProcessor.lo 
+XQueryProcessor.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XQueryProcessor.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XQueryProcessor.cpp -o XQueryProcessor.lo 
+XsltExecutable.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XsltExecutable.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XsltExecutable.cpp -o XsltExecutable.lo 
+Xslt30Processor.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/Xslt30Processor.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/Xslt30Processor.cpp -o Xslt30Processor.lo 
+XPathProcessor.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XPathProcessor.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XPathProcessor.cpp -o XPathProcessor.lo 
+SchemaValidator.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SchemaValidator.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SchemaValidator.cpp -o SchemaValidator.lo 
+XdmValue.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmValue.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmValue.cpp -o XdmValue.lo 
+XdmItem.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmItem.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmItem.cpp -o XdmItem.lo 
+XdmNode.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmNode.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmNode.cpp -o XdmNode.lo 
+XdmAtomicValue.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmAtomicValue.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmAtomicValue.cpp -o XdmAtomicValue.lo 
+XdmFunctionItem.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmFunctionItem.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmFunctionItem.cpp -o XdmFunctionItem.lo 
+XdmMap.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmMap.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmMap.cpp -o XdmMap.lo 
+XdmArray.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmArray.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/XdmArray.cpp -o XdmArray.lo 
+SaxonApiException.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonApiException.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonApiException.cpp -o SaxonApiException.lo 
+SaxonCGlue.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonCGlue.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonCGlue.c -o SaxonCGlue.lo 
+SaxonCProcessor.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonCProcessor.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonCProcessor.c -o SaxonCProcessor.lo 
+SaxonCXPath.lo: /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonCXPath.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /home/ond1/work/repository/saxondev-11/src/main/c/Saxon.C.API/SaxonCXPath.c -o SaxonCXPath.lo 
 $(phplibdir)/saxon.la: ./saxon.la
 	$(LIBTOOL) --mode=install cp ./saxon.la $(phplibdir)
 

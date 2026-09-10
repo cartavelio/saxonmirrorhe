@@ -782,7 +782,6 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 
 
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator * validator) {
-     std::cerr<<"C++ parseXmlFromString source="<<source<<std::endl;
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
                                                                                     "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {

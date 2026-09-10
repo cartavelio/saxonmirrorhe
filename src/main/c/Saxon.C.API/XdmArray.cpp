@@ -179,7 +179,7 @@ std::list<XdmValue *> XdmArray::asList() {
 
 
 XdmValue ** XdmArray::values() {
-  XdmValue ** arr;
+  XdmValue ** arr = nullptr;
 
 	jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
 	static jmethodID xmID = nullptr;
@@ -193,7 +193,7 @@ XdmValue ** XdmArray::values() {
 	if (!xmID) {
 			std::cerr << "Error: SaxonDll." << "convertXdmArrayToArrayObject"
 				<< " not found\n" << std::endl;
-			return arr;
+			return nullptr;
 		}
 
 

@@ -1034,6 +1034,9 @@ public class Xslt30Processor extends SaxonCAPI {
             if (map.containsKey("rd")) {
                 Object value = map.get("rd");
                 if(value instanceof SaxonCResultDocumentHandler) {
+                    if(SaxonCAPI.debug) {
+                        System.err.println("DEBUG: result-document handler set");
+                    }
                    transformer.setResultDocumentHandler((SaxonCResultDocumentHandler)value);
                 } else if(SaxonCAPI.debug) {
                     System.err.println("DEBUG: Not able to set the result-document handler. Please check type of object");
@@ -1276,21 +1279,20 @@ public class Xslt30Processor extends SaxonCAPI {
         //String cwd = "http://localhost/trax";
         /*if (args.length > 0) {
             cwd = args[0];
-        }      */
+        }
 
-        String sourcefile1 = "/Users/ond1/work/development/tests/jeroen/xml/kamervragen.xml";//"sinsello.xml";//"saxon_php3/xmark64.xml";
-        String stylesheet12 = "xslt/overzicht-resultaten.xslt";//"cadenaoriginal_3_2.xslt";//""saxon_php3/q8.xsl";//"test.xsl";
-        String outfile = "outfile.html";
-        Processor processor = new Processor(true);
-        SaxonCAPI.debug = true;
-        net.sf.saxon.option.cpp.Xslt30Processor cpp = new net.sf.saxon.option.cpp.Xslt30Processor(processor);
+             String */
+        
+
+
+        /*
         XdmNode node = cpp.parseXmlString("<doc><e>text</e></doc>");
         String [] pname =  {"node"};
         Object [] pObj = {node};
         String style = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:output omit-xml-declaration=\"true\" /><xsl:variable name='x' select='.'/><xsl:template match='/'>errorA</xsl:template><xsl:template name='main'>[<xsl:value-of select='name($x)'/>]</xsl:template></xsl:stylesheet>";
         XsltExecutable executable = cpp.compileFromString(null, style, false, null, null);
         String result = new String(net.sf.saxon.option.cpp.Xslt30Processor.callTemplateReturningString(null,executable, "main", pname, pObj));
-        System.out.println("Result = "+ result);
+        System.out.println("Result = "+ result);   */
 
     }
 
