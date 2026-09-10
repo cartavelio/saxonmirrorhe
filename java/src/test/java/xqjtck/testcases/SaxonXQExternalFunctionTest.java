@@ -1,20 +1,33 @@
 // Copyright (c) 2003, 2006, 2007, Oracle. All rights reserved.
 package xqjtck.testcases;
 
-import org.junit.Assert;
-
 import javax.xml.namespace.QName;
 import java.util.Locale;
 import javax.xml.xquery.*;
+import com.saxonica.xqj.SaxonXQDataSource;
 
-public class SaxonXQExternalFunctionTest extends XQJTestCase {
+import org.junit.jupiter.api.*;
 
-    /**
-     * Test the ability to invoke instance-level methods on an external object supplied as a query parameter
-     * @throws javax.xml.xquery.XQException
-     */
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    public void testInstanceLevelMethodsOnExternalObject() throws XQException {
+public class SaxonXQExternalFunctionTest {
+    XQDataSource xqds;
+    XQConnection xqc;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        xqds = new SaxonXQDataSource();
+        xqc = xqds.getConnection();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        xqc.close();
+    }
+
+    @Test
+    @DisplayName("Test the ability to invoke instance-level methods on an external object supplied as a query parameter")
+    void testInstanceLevelMethodsOnExternalObject() throws XQException {
 
         XQConnection conn = xqds.getConnection();
 
@@ -33,8 +46,6 @@ public class SaxonXQExternalFunctionTest extends XQJTestCase {
         XQResultSequence result = exp.executeQuery();
         result.next();
 
-        Assert.assertEquals("A-SXQEF-1.1: wrong result", result.getAtomicValue(), "Italian");
-
+        assertEquals(result.getAtomicValue(), "Italian", "A-SXQEF-1.1: wrong result");
     }
-
 }
