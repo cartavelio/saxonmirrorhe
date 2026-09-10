@@ -8,43 +8,49 @@
 package net.sf.saxon.expr.instruct;
 
 import com.saxonica.trans.XSLArrayMember;
-import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.OperandRole;
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.functions.ConstantFunction;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.query.Annotation;
+import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
- * An xsl:array instruction in the stylesheet (XSLT 4.0 addition)
+ * An xsl:array-member instruction in the stylesheet (XSLT 4.0 addition)
  */
 
-public class ArrayInstr extends Instruction {
+public class ArrayMemberInstr extends Instruction {
 
-    private final Operand forEachOp;
     private final Operand selectOp;
 
     /**
-     * Create a compiled xsl:array instruction
+     * Create a compiled xsl:array-member instruction
      *
      * @param select the expression in the select attribute or sequence constructor
      */
 
-    public ArrayInstr(Expression forEach, Expression select) {
-        forEachOp = new Operand(this, forEach, OperandRole.FOCUS_CONTROLLING_SELECT);
-        selectOp = new Operand(this, select, OperandRole.FOCUS_CONTROLLED_ACTION);
+    public ArrayMemberInstr(Expression select) {
+        selectOp = new Operand(this, select, OperandRole.SAME_FOCUS_ACTION);
     }
 
 
@@ -56,13 +62,9 @@ public class ArrayInstr extends Instruction {
         selectOp.setChildExpression(nameExp);
     }
 
-    public Expression getForEachExp() {
-        return forEachOp.getChildExpression();
-    }
-
     @Override
     public Iterable<Operand> operands() {
-        return operandList(forEachOp, selectOp);
+        return selectOp;
     }
 
     /**
@@ -73,13 +75,13 @@ public class ArrayInstr extends Instruction {
 
     @Override
     public int getInstructionNameCode() {
-        return StandardNames.XSL_ARRAY;
+        return StandardNames.XSL_ARRAY_MEMBER;
     }
 
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return ArrayItemType.ANY_ARRAY_TYPE;
+        return AnyFunctionType.INSTANCE;
     }
 
     @Override
@@ -97,7 +99,7 @@ public class ArrayInstr extends Instruction {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        ArrayInstr exp = new ArrayInstr(getForEachExp().copy(rebindings), getSelectExp().copy(rebindings));
+        ArrayMemberInstr exp = new ArrayMemberInstr(getSelectExp().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -116,8 +118,7 @@ public class ArrayInstr extends Instruction {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        out.startElement("xslArray", this);
-        getForEachExp().export(out);
+        out.startElement("xslArrayMember", this);
         getSelectExp().export(out);
         out.endElement();
     }
@@ -131,108 +132,24 @@ public class ArrayInstr extends Instruction {
 
     @Override
     public Elaborator getElaborator() {
-        return new ArrayInstrElaborator();
+        return new ArrayMemberInstrElaborator();
     }
 
 
-    private static class ArrayInstrElaborator extends ItemElaborator {
+    private static class ArrayMemberInstrElaborator extends ItemElaborator {
 
         @Override
         public ItemEvaluator elaborateForItem() {
-            ArrayInstr expr = (ArrayInstr) getExpression();
-            PullEvaluator forEach = expr.getForEachExp().makeElaborator().elaborateForPull();
-            if (expr.getSelectExp() instanceof ContextItemExpression) {
-                return context -> {
-                    List<GroundedValue> members = new ArrayList<>(8);
-                    SequenceIterator iter = forEach.iterate(context);
-                    Item it;
-                    while ((it = iter.next()) != null) {
-                        if (it instanceof FunctionItem fit && fit.getArity() == 0 &&
-                                fit.getAnnotations().includes(XSLArrayMember.ANNOTATION_NAME)) {
-                            members.add(fit.call(context,new GroundedValue[]{}).materialize());
-                        } else {
-                            members.add(it);
-                        }
-                    }
-                    return new SimpleArrayItem(members);
-                };
-            } else {
-                SequenceEvaluator selectEval = expr.getSelectExp().makeElaborator().eagerly();
-                return context -> {
-                    List<GroundedValue> members = new ArrayList<>(8);
-                    SequenceIterator iter = forEach.iterate(context);
-                    FocusIterator focusIterator = new FocusTrackingIterator(iter);
-                    XPathContext c2 = context.newMinorContext();
-                    c2.setCurrentIterator(focusIterator);
-                    while (focusIterator.next() != null) {
-                        members.add(selectEval.evaluate(c2).materialize());
-                    }
-                    return new SimpleArrayItem(members);
-                };
-            }
-//            PullEvaluator select = expr.getSelectExp().makeElaborator().elaborateForPull();
-//            return context -> {
-//                SequenceIterator input = select.iterate(context);
-//                Item first = input.next();
-//                if (first == null) {
-//                    return SimpleArrayItem.EMPTY_ARRAY;
-//                }
-//                switch (first.getGenre()) {
-//                    case ATOMIC: {
-//                        List<GroundedValue> members = new ArrayList<>();
-//                        members.add(first);
-//                        for (Item item; (item = input.next()) != null; ) {
-//                            if (item.getGenre() == Genre.ATOMIC) {
-//                                members.add(item);
-//                            } else {
-//                                throw new XPathException("xsl:array: if the first item is atomic, then all must be atomic")
-//                                        .withErrorCode("XTTE4045")
-//                                        .withLocation(loc)
-//                                        .asTypeError();
-//                            }
-//                        }
-//                        return new SimpleArrayItem(members);
-//                    }
-//                    case XNODE: {
-//                        List<GroundedValue> members = new ArrayList<>();
-//                        members.add(first);
-//                        for (Item item; (item = input.next()) != null; ) {
-//                            if (item.getGenre() == Genre.XNODE) {
-//                                members.add(item);
-//                            } else {
-//                                throw new XPathException("xsl:array: if the first item is a node, then all must be nodes")
-//                                        .withErrorCode("XTTE4045")
-//                                        .withLocation(loc)
-//                                        .asTypeError();
-//                            }
-//                        }
-//                        return new SimpleArrayItem(members);
-//                    }
-//                    case MAP: {
-//                        List<GroundedValue> members = new ArrayList<>();
-//                        GroundedValue firstMember = memberFromValueRecord(first);
-//                        members.add(firstMember);
-//                        for (Item item; (item = input.next()) != null; ) {
-//                            members.add(memberFromValueRecord(item));
-//                        }
-//                        return new SimpleArrayItem(members);
-//                    }
-////                    case ARRAY: {
-////                        List<GroundedValue> members = new ArrayList<>();
-////                        GroundedValue firstMember = memberFromArray(first);
-////                        members.add(firstMember);
-////                        for (Item item; (item = input.next()) != null; ) {
-////                            members.add(memberFromArray(item));
-////                        }
-////                        return new SimpleArrayItem(members);
-////                    }
-//                    default:
-//                        throw new XPathException("Invalid item in result of xsl:array/@select: " + Err.depict(first))
-//                                .withErrorCode("XTTE4045")
-//                                .withLocation(loc)
-//                                .asTypeError();
-//
-//                }
+            ArrayMemberInstr expr = (ArrayMemberInstr) getExpression();
+            Expression selectExp = expr.getSelectExp();
+            SequenceEvaluator selectEval = selectExp.makeElaborator().eagerly();
+            return cxt -> {
+                GroundedValue member = selectEval.evaluate(cxt).materialize();
+                return new ConstantFunction(member, SequenceType.ANY_SEQUENCE)
+                        .withAnnotationList(AnnotationList.singleton(
+                                new Annotation(XSLArrayMember.ANNOTATION_NAME), cxt.getConfiguration()));
+            };
+
             };
         }
 
@@ -248,19 +165,8 @@ public class ArrayInstr extends Instruction {
             throw new XPathException("In input to xsl:array, expected a value record. Found " + Err.depict(valueRecord));
         }
 
-//        private GroundedValue memberFromArray(Item array) throws XPathException {
-//            if (array instanceof ArrayItem) {
-//                GroundedValue val = ((ArrayItem) array).get(valueField);
-//                if (val != null) {
-//                    return val;
-//                }
-//            }
-//            throw new XPathException("In input to xsl:array, expected a value record. Found " + Err.depict(valueRecord));
-//        }
-
-
     }
 
 
-//}
+
 

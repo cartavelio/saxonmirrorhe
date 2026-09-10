@@ -669,7 +669,6 @@ public class SaxonErrorCode {
 
     public static final String SQWN9052 = "SXWN9052";
 
-
     /**
      * SXSD1000: unknown attribute group
      */

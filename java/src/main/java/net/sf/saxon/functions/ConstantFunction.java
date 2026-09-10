@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -26,6 +27,7 @@ public class ConstantFunction extends AbstractFunction  {
     private final StructuredQName name;
     private final GroundedValue value;
     private final SequenceType resultType;
+    private AnnotationList annotationList;
 
     /**
      * Create a ConstantFunction
@@ -49,6 +51,24 @@ public class ConstantFunction extends AbstractFunction  {
         this.name = null;
         this.value = value;
         this.resultType = resultType;
+    }
+
+    /**
+     * Add an annotation list
+     */
+
+    public ConstantFunction withAnnotationList(AnnotationList annotationList) {
+        this.annotationList = annotationList;
+        return this;
+    }
+
+    /**
+     * Get the annotation list
+     */
+
+    @Override
+    public AnnotationList getAnnotations() {
+        return annotationList == null ? AnnotationList.EMPTY : annotationList;
     }
 
     /**
@@ -90,7 +110,12 @@ public class ConstantFunction extends AbstractFunction  {
      */
     @Override
     public String getDescription() {
-        return name.getDisplayName() + "#0 (->" + value.toShortString() + ")";
+        return "fn(){" + value.toShortString() + "}";
+    }
+
+    @Override
+    public String toShortString() {
+        return getDescription();
     }
 
     @Override

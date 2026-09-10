@@ -7,21 +7,15 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Operand;
-import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
+import com.saxonica.trans.XSLArrayMember;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
@@ -39,6 +33,7 @@ import java.util.List;
 
 public class ArrayInstr extends Instruction {
 
+    private final Operand forEachOp;
     private final Operand selectOp;
 
     /**
@@ -47,8 +42,9 @@ public class ArrayInstr extends Instruction {
      * @param select the expression in the select attribute or sequence constructor
      */
 
-    public ArrayInstr(Expression select) {
-        selectOp = new Operand(this, select, OperandRole.ABSORB);
+    public ArrayInstr(Expression forEach, Expression select) {
+        forEachOp = new Operand(this, forEach, OperandRole.FOCUS_CONTROLLING_SELECT);
+        selectOp = new Operand(this, select, OperandRole.FOCUS_CONTROLLED_ACTION);
     }
 
 
@@ -60,9 +56,13 @@ public class ArrayInstr extends Instruction {
         selectOp.setChildExpression(nameExp);
     }
 
+    public Expression getForEachExp() {
+        return forEachOp.getChildExpression();
+    }
+
     @Override
     public Iterable<Operand> operands() {
-        return operandList(selectOp);
+        return operandList(forEachOp, selectOp);
     }
 
     /**
@@ -97,7 +97,7 @@ public class ArrayInstr extends Instruction {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        ArrayInstr exp = new ArrayInstr(getSelectExp().copy(rebindings));
+        ArrayInstr exp = new ArrayInstr(getForEachExp().copy(rebindings), getSelectExp().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -117,6 +117,7 @@ public class ArrayInstr extends Instruction {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("xslArray", this);
+        getForEachExp().export(out);
         getSelectExp().export(out);
         out.endElement();
     }
@@ -133,76 +134,59 @@ public class ArrayInstr extends Instruction {
         return new ArrayInstrElaborator();
     }
 
+    private static boolean isParcel(Item item) {
+        return item instanceof FunctionItem fit && fit.getArity() == 0 &&
+                fit.getAnnotations().includes(XSLArrayMember.ANNOTATION_NAME);
+    }
 
     private static class ArrayInstrElaborator extends ItemElaborator {
 
         @Override
         public ItemEvaluator elaborateForItem() {
             ArrayInstr expr = (ArrayInstr) getExpression();
-            Location loc = expr.getLocation();
-            PullEvaluator select = expr.getSelectExp().makeElaborator().elaborateForPull();
-            return context -> {
-                SequenceIterator input = select.iterate(context);
-                Item first = input.next();
-                if (first == null) {
-                    return SimpleArrayItem.EMPTY_ARRAY;
-                }
-                switch (first.getGenre()) {
-                    case ATOMIC: {
-                        List<GroundedValue> members = new ArrayList<>();
-                        members.add(first);
-                        for (Item item; (item = input.next()) != null; ) {
-                            if (item.getGenre() == Genre.ATOMIC) {
-                                members.add(item);
-                            } else {
-                                throw new XPathException("xsl:array: if the first item is atomic, then all must be atomic")
-                                        .withErrorCode("XTTE4045")
-                                        .withLocation(loc)
-                                        .asTypeError();
+            PullEvaluator forEach = expr.getForEachExp().makeElaborator().elaborateForPull();
+            if (expr.getSelectExp() instanceof ContextItemExpression) {
+                return context -> {
+                    List<GroundedValue> members = new ArrayList<>(8);
+                    SequenceIterator iter = forEach.iterate(context);
+                    Item it;
+                    while ((it = iter.next()) != null) {
+                        if (isParcel(it)) {
+                            members.add(((FunctionItem)it).call(context, new GroundedValue[]{}).materialize());
+                        } else {
+                            members.add(it);
+                        }
+                    }
+                    return new SimpleArrayItem(members);
+                };
+            } else {
+                SequenceEvaluator selectEval = expr.getSelectExp().makeElaborator().eagerly();
+                PullEvaluator pullEval = expr.getForEachExp().makeElaborator().elaborateForPull();
+                return context -> {
+                    List<GroundedValue> members = new ArrayList<>(8);
+                    SequenceIterator iter = pullEval.iterate(context);
+                    FocusIterator focusIterator = new FocusTrackingIterator(iter);
+                    XPathContext c2 = context.newMinorContext();
+                    c2.setCurrentIterator(focusIterator);
+                    while (focusIterator.next() != null) {
+                        GroundedValue gv = selectEval.evaluate(c2).materialize();
+                        if (gv.getLength() == 1 && isParcel(gv.head())) {
+                            members.add(((FunctionItem)gv.head()).call(context, new GroundedValue[]{}).materialize());
+                        } else if (gv.getLength() >= 2) {
+                            for (Item it : gv.asIterable()) {
+                                if (isParcel(it)) {
+                                    throw new XPathException("xsl:array-member cannot be used to create one "
+                                                                     + "item in the array member, only to create the entire array member", "XTSE4060");
+                                }
                             }
+                        } else {
+                            members.add(selectEval.evaluate(c2).materialize());
                         }
-                        return new SimpleArrayItem(members);
                     }
-                    case XNODE: {
-                        List<GroundedValue> members = new ArrayList<>();
-                        members.add(first);
-                        for (Item item; (item = input.next()) != null; ) {
-                            if (item.getGenre() == Genre.XNODE) {
-                                members.add(item);
-                            } else {
-                                throw new XPathException("xsl:array: if the first item is a node, then all must be nodes")
-                                        .withErrorCode("XTTE4045")
-                                        .withLocation(loc)
-                                        .asTypeError();
-                            }
-                        }
-                        return new SimpleArrayItem(members);
-                    }
-                    case MAP: {
-                        List<GroundedValue> members = new ArrayList<>();
-                        GroundedValue firstMember = memberFromValueRecord(first);
-                        members.add(firstMember);
-                        for (Item item; (item = input.next()) != null; ) {
-                            members.add(memberFromValueRecord(item));
-                        }
-                        return new SimpleArrayItem(members);
-                    }
-//                    case ARRAY: {
-//                        List<GroundedValue> members = new ArrayList<>();
-//                        GroundedValue firstMember = memberFromArray(first);
-//                        members.add(firstMember);
-//                        for (Item item; (item = input.next()) != null; ) {
-//                            members.add(memberFromArray(item));
-//                        }
-//                        return new SimpleArrayItem(members);
-//                    }
-                    default:
-                        throw new XPathException("Invalid item in result of xsl:array/@select: " + Err.depict(first))
-                                .withErrorCode("XTTE4045")
-                                .withLocation(loc)
-                                .asTypeError();
+                    return new SimpleArrayItem(members);
+                };
+            }
 
-                }
             };
         }
 
@@ -218,19 +202,8 @@ public class ArrayInstr extends Instruction {
             throw new XPathException("In input to xsl:array, expected a value record. Found " + Err.depict(valueRecord));
         }
 
-//        private GroundedValue memberFromArray(Item array) throws XPathException {
-//            if (array instanceof ArrayItem) {
-//                GroundedValue val = ((ArrayItem) array).get(valueField);
-//                if (val != null) {
-//                    return val;
-//                }
-//            }
-//            throw new XPathException("In input to xsl:array, expected a value record. Found " + Err.depict(valueRecord));
-//        }
-
 
     }
 
-
-}
+    
 

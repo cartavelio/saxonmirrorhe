@@ -294,172 +294,97 @@ public class StyleNodeFactory implements NodeFactory {
 
     /*@Nullable*/
     protected StyleElement makeXSLElement(int f, NodeImpl parent) {
-        switch (f) {
-            case StandardNames.XSL_ACCEPT:
-                return new XSLAccept();
-            case StandardNames.XSL_ACCUMULATOR:
-                return new XSLAccumulator();
-            case StandardNames.XSL_ACCUMULATOR_RULE:
-                return new XSLAccumulatorRule();
-            case StandardNames.XSL_ANALYZE_STRING:
-                return new XSLAnalyzeString();
-            case StandardNames.XSL_APPLY_IMPORTS:
-                return new XSLApplyImports();
-            case StandardNames.XSL_APPLY_TEMPLATES:
-                return new XSLApplyTemplates();
-            case StandardNames.XSL_ASSERT:
-                return new XSLAssert();
-            case StandardNames.XSL_ATTRIBUTE:
-                return new XSLAttribute();
-            case StandardNames.XSL_ATTRIBUTE_SET:
-                return new XSLAttributeSet();
-            case StandardNames.XSL_BREAK:
-                return new XSLBreak();
-            case StandardNames.XSL_CALL_TEMPLATE:
-                return new XSLCallTemplate();
-            case StandardNames.XSL_CATCH:
-                return new XSLCatch();
-            case StandardNames.XSL_CONTEXT_ITEM:
-                return new XSLContextItem();
-            case StandardNames.XSL_CHARACTER_MAP:
-                return new XSLCharacterMap();
-            case StandardNames.XSL_CHOOSE:
-                return new XSLChoose();
-            case StandardNames.XSL_COMMENT:
-                return new XSLComment();
-            case StandardNames.XSL_COPY:
-                return new XSLCopy();
-            case StandardNames.XSL_COPY_OF:
-                return new XSLCopyOf();
-            case StandardNames.XSL_DECIMAL_FORMAT:
-                return new XSLDecimalFormat();
-            case StandardNames.XSL_DOCUMENT:
-                return new XSLDocument();
-            case StandardNames.XSL_ELEMENT:
-                return new XSLElement();
-            case StandardNames.XSL_EVALUATE:
-                return new XSLEvaluate();
-            case StandardNames.XSL_EXPOSE:
-                return new XSLExpose();
-            case StandardNames.XSL_FALLBACK:
-                return new XSLFallback();
-            case StandardNames.XSL_FOR_EACH:
-                return new XSLForEach();
-            case StandardNames.XSL_FOR_EACH_GROUP:
-                return new XSLForEachGroup();
-            case StandardNames.XSL_FORK:
-                return new XSLFork();
-            case StandardNames.XSL_FUNCTION:
-                return new XSLFunction();
-            case StandardNames.XSL_GLOBAL_CONTEXT_ITEM:
-                return new XSLGlobalContextItem();
-            case StandardNames.XSL_IF:
-                return new XSLIf();
-            case StandardNames.XSL_IMPORT:
-                return new XSLImport();
-            case StandardNames.XSL_IMPORT_SCHEMA:
-                return new XSLImportSchema();
-            case StandardNames.XSL_INCLUDE:
-                return new XSLInclude();
-            case StandardNames.XSL_ITEM_TYPE:
-                return new XSLItemType();
-            case StandardNames.XSL_ITERATE:
-                return new XSLIterate();
-            case StandardNames.XSL_KEY:
-                return new XSLKey();
-            case StandardNames.XSL_MAP:
-                return new XSLMap();
-            case StandardNames.XSL_MAP_ENTRY:
-                return new XSLMapEntry();
-            case StandardNames.XSL_MATCHING_SUBSTRING:
-                return new XSLMatchingSubstring();
-            case StandardNames.XSL_MERGE:
-                return new XSLMerge();
-            case StandardNames.XSL_MERGE_ACTION:
-                return new XSLMergeAction();
-            case StandardNames.XSL_MERGE_KEY:
-                return new XSLMergeKey();
-            case StandardNames.XSL_MERGE_SOURCE:
-                return new XSLMergeSource();
-            case StandardNames.XSL_MESSAGE:
-                return new XSLMessage();
-            case StandardNames.XSL_MODE:
-                return new XSLMode();
-            case StandardNames.XSL_NEXT_ITERATION:
-                return new XSLNextIteration();
-            case StandardNames.XSL_NEXT_MATCH:
-                return new XSLNextMatch();
-            case StandardNames.XSL_NON_MATCHING_SUBSTRING:
-                return new XSLMatchingSubstring();    //sic
-            case StandardNames.XSL_NUMBER:
-                return new XSLNumber();
-            case StandardNames.XSL_NAMESPACE:
-                return new XSLNamespace();
-            case StandardNames.XSL_NAMESPACE_ALIAS:
-                return new XSLNamespaceAlias();
-            case StandardNames.XSL_ON_COMPLETION:
-                return new XSLOnCompletion();
-            case StandardNames.XSL_ON_EMPTY:
-                return new XSLOnEmpty();
-            case StandardNames.XSL_ON_NON_EMPTY:
-                return new XSLOnNonEmpty();
-            case StandardNames.XSL_OTHERWISE:
-                return new XSLOtherwise();
-            case StandardNames.XSL_OUTPUT:
-                return new XSLOutput();
-            case StandardNames.XSL_OUTPUT_CHARACTER:
-                return new XSLOutputCharacter();
-            case StandardNames.XSL_OVERRIDE:
-                return new XSLOverride();
-            case StandardNames.XSL_PACKAGE:
-                return new XSLPackage();
-            case StandardNames.XSL_PARAM:
+        return switch (f) {
+            case StandardNames.XSL_ACCEPT -> new XSLAccept();
+            case StandardNames.XSL_ACCUMULATOR -> new XSLAccumulator();
+            case StandardNames.XSL_ACCUMULATOR_RULE -> new XSLAccumulatorRule();
+            case StandardNames.XSL_ANALYZE_STRING -> new XSLAnalyzeString();
+            case StandardNames.XSL_APPLY_IMPORTS -> new XSLApplyImports();
+            case StandardNames.XSL_APPLY_TEMPLATES -> new XSLApplyTemplates();
+            case StandardNames.XSL_ASSERT -> new XSLAssert();
+            case StandardNames.XSL_ATTRIBUTE -> new XSLAttribute();
+            case StandardNames.XSL_ATTRIBUTE_SET -> new XSLAttributeSet();
+            case StandardNames.XSL_BREAK -> new XSLBreak();
+            case StandardNames.XSL_CALL_TEMPLATE -> new XSLCallTemplate();
+            case StandardNames.XSL_CATCH -> new XSLCatch();
+            case StandardNames.XSL_CONTEXT_ITEM -> new XSLContextItem();
+            case StandardNames.XSL_CHARACTER_MAP -> new XSLCharacterMap();
+            case StandardNames.XSL_CHOOSE -> new XSLChoose();
+            case StandardNames.XSL_COMMENT -> new XSLComment();
+            case StandardNames.XSL_COPY -> new XSLCopy();
+            case StandardNames.XSL_COPY_OF -> new XSLCopyOf();
+            case StandardNames.XSL_DECIMAL_FORMAT -> new XSLDecimalFormat();
+            case StandardNames.XSL_DOCUMENT -> new XSLDocument();
+            case StandardNames.XSL_ELEMENT -> new XSLElement();
+            case StandardNames.XSL_EVALUATE -> new XSLEvaluate();
+            case StandardNames.XSL_EXPOSE -> new XSLExpose();
+            case StandardNames.XSL_FALLBACK -> new XSLFallback();
+            case StandardNames.XSL_FOR_EACH -> new XSLForEach();
+            case StandardNames.XSL_FOR_EACH_GROUP -> new XSLForEachGroup();
+            case StandardNames.XSL_FORK -> new XSLFork();
+            case StandardNames.XSL_FUNCTION -> new XSLFunction();
+            case StandardNames.XSL_GLOBAL_CONTEXT_ITEM -> new XSLGlobalContextItem();
+            case StandardNames.XSL_IF -> new XSLIf();
+            case StandardNames.XSL_IMPORT -> new XSLImport();
+            case StandardNames.XSL_IMPORT_SCHEMA -> new XSLImportSchema();
+            case StandardNames.XSL_INCLUDE -> new XSLInclude();
+            case StandardNames.XSL_ITEM_TYPE -> new XSLItemType();
+            case StandardNames.XSL_ITERATE -> new XSLIterate();
+            case StandardNames.XSL_KEY -> new XSLKey();
+            case StandardNames.XSL_MAP -> new XSLMap();
+            case StandardNames.XSL_MAP_ENTRY -> new XSLMapEntry();
+            case StandardNames.XSL_MATCHING_SUBSTRING -> new XSLMatchingSubstring();
+            case StandardNames.XSL_MERGE -> new XSLMerge();
+            case StandardNames.XSL_MERGE_ACTION -> new XSLMergeAction();
+            case StandardNames.XSL_MERGE_KEY -> new XSLMergeKey();
+            case StandardNames.XSL_MERGE_SOURCE -> new XSLMergeSource();
+            case StandardNames.XSL_MESSAGE -> new XSLMessage();
+            case StandardNames.XSL_MODE -> new XSLMode();
+            case StandardNames.XSL_NEXT_ITERATION -> new XSLNextIteration();
+            case StandardNames.XSL_NEXT_MATCH -> new XSLNextMatch();
+            case StandardNames.XSL_NON_MATCHING_SUBSTRING -> new XSLMatchingSubstring();    //sic
+            case StandardNames.XSL_NUMBER -> new XSLNumber();
+            case StandardNames.XSL_NAMESPACE -> new XSLNamespace();
+            case StandardNames.XSL_NAMESPACE_ALIAS -> new XSLNamespaceAlias();
+            case StandardNames.XSL_ON_COMPLETION -> new XSLOnCompletion();
+            case StandardNames.XSL_ON_EMPTY -> new XSLOnEmpty();
+            case StandardNames.XSL_ON_NON_EMPTY -> new XSLOnNonEmpty();
+            case StandardNames.XSL_OTHERWISE -> new XSLOtherwise();
+            case StandardNames.XSL_OUTPUT -> new XSLOutput();
+            case StandardNames.XSL_OUTPUT_CHARACTER -> new XSLOutputCharacter();
+            case StandardNames.XSL_OVERRIDE -> new XSLOverride();
+            case StandardNames.XSL_PACKAGE -> new XSLPackage();
+            case StandardNames.XSL_PARAM ->
                 //noinspection RedundantCast
-                return parent instanceof XSLModuleRoot || parent instanceof XSLOverride ? (StyleElement)new XSLGlobalParam() : (StyleElement)new XSLLocalParam();
-            case StandardNames.XSL_PERFORM_SORT:
-                return new XSLPerformSort();
-            case StandardNames.XSL_PRESERVE_SPACE:
-                return new XSLPreserveSpace();
-            case StandardNames.XSL_PROCESSING_INSTRUCTION:
-                return new XSLProcessingInstruction();
-            case StandardNames.XSL_RESULT_DOCUMENT:
+                    parent instanceof XSLModuleRoot || parent instanceof XSLOverride ? (StyleElement) new XSLGlobalParam() : (StyleElement) new XSLLocalParam();
+            case StandardNames.XSL_PERFORM_SORT -> new XSLPerformSort();
+            case StandardNames.XSL_PRESERVE_SPACE -> new XSLPreserveSpace();
+            case StandardNames.XSL_PROCESSING_INSTRUCTION -> new XSLProcessingInstruction();
+            case StandardNames.XSL_RESULT_DOCUMENT -> {
                 compilation.setCreatesSecondaryResultDocuments(true);
-                return new XSLResultDocument();
-            case StandardNames.XSL_SEQUENCE:
-                return new XSLSequence();
-            case StandardNames.XSL_SORT:
-                return new XSLSort();
-            case StandardNames.XSL_SOURCE_DOCUMENT:
-                return new XSLSourceDocument();
-            case StandardNames.XSL_STRIP_SPACE:
-                return new XSLPreserveSpace();
-            case StandardNames.XSL_STYLESHEET:
-            case StandardNames.XSL_TRANSFORM:
+                yield new XSLResultDocument();
+            }
+            case StandardNames.XSL_SEQUENCE -> new XSLSequence();
+            case StandardNames.XSL_SORT -> new XSLSort();
+            case StandardNames.XSL_SOURCE_DOCUMENT -> new XSLSourceDocument();
+            case StandardNames.XSL_STRIP_SPACE -> new XSLPreserveSpace();
+            case StandardNames.XSL_STYLESHEET, StandardNames.XSL_TRANSFORM ->
                 //noinspection RedundantCast
-                return topLevelModule ? (StyleElement)new XSLPackage() : (StyleElement)new XSLStylesheet();
-            case StandardNames.XSL_TEMPLATE:
-                return new XSLTemplate();
-            case StandardNames.XSL_TEXT:
-                return new XSLText();
-            case StandardNames.XSL_TRY:
-                return new XSLTry();
-            case StandardNames.XSL_USE_PACKAGE:
-                return new XSLUsePackage();
-            case StandardNames.XSL_VALUE_OF:
-                return new XSLValueOf();
-            case StandardNames.XSL_VARIABLE:
+                    topLevelModule ? (StyleElement) new XSLPackage() : (StyleElement) new XSLStylesheet();
+            case StandardNames.XSL_TEMPLATE -> new XSLTemplate();
+            case StandardNames.XSL_TEXT -> new XSLText();
+            case StandardNames.XSL_TRY -> new XSLTry();
+            case StandardNames.XSL_USE_PACKAGE -> new XSLUsePackage();
+            case StandardNames.XSL_VALUE_OF -> new XSLValueOf();
+            case StandardNames.XSL_VARIABLE ->
                 //noinspection RedundantCast
-                return parent instanceof XSLModuleRoot || parent instanceof XSLOverride
-                        ? (StyleElement)new XSLGlobalVariable() : (StyleElement)new XSLLocalVariable();
-            case StandardNames.XSL_WITH_PARAM:
-                return new XSLWithParam();
-            case StandardNames.XSL_WHEN:
-                return new XSLWhen();
-            case StandardNames.XSL_WHERE_POPULATED:
-                return new XSLWherePopulated();
-            default:
-                return null;
-        }
+                    parent instanceof XSLModuleRoot || parent instanceof XSLOverride
+                            ? (StyleElement) new XSLGlobalVariable() : (StyleElement) new XSLLocalVariable();
+            case StandardNames.XSL_WITH_PARAM -> new XSLWithParam();
+            case StandardNames.XSL_WHEN -> new XSLWhen();
+            case StandardNames.XSL_WHERE_POPULATED -> new XSLWherePopulated();
+            default -> null;
+        };
     }
 
     /**
