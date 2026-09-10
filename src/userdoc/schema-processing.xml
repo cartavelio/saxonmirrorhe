@@ -34,9 +34,9 @@
       <div class="csonly">
 
             <p>For SaxonCS, there are two ways of running validation from the command line.
-               If you download SaxonCS as an executable application from 
-               <a ref="https://www.saxonica.com/download/dotnet.xml">the Saxonica download site</a>, then you
-               can validate one or more source documents with the command:</p>
+               If you download SaxonCS as an executable application from the 
+               <a href="https://www.saxonica.com/download/dotnet.xml" class="bodylink">Saxonica
+                  download page</a>, then you can validate one or more source documents with the command:</p>
          <kbd>SaxonCS validate [options]  source.xml...  </kbd>
             <p>But if you install SaxonCS as a nuget package then you need to prefix the
                command with <code>dotnet</code>, like this:</p>
