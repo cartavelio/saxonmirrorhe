@@ -94,6 +94,11 @@
     
     <category name="extensions">
         
+        <h2>New features from the 4.0 specifications</h2>
+        
+        <p>The second <code>$position</code> argument is available on function callbacks made by the functions
+            <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
+        
         <h2>Dropped experimental features</h2>
         
         <p>Some proposed enhancements that didn't survive into the current 4.0 draft specifications
@@ -109,8 +114,19 @@
             name of a type alias.</p></li>
             <li><p>The "thin arrow" notation for inline functions (<code>->{.+1}</code> or
             <code>->($x){$x+1}</code>).</p></li>
+            <li><p><code>fn:all</code> is renamed <code>fn:every</code>.</p></li>
             <li><p></p></li>
-            <li><p></p></li>
+        </ul>
+        
+        <p>Some Saxon extension functions that were essentially prototypes of 
+            near-identical XPath 4.0 functions are dropped:</p>
+        
+        <ul>
+            <li><p><code>saxon:index-where</code> is superseded by <code>fn:index-where</code>.</p></li>
+            <li><p><code>saxon:highest</code> and <code>saxon:lowest</code> are superseded by 
+                <code>fn:highest</code> and <code>fn:lowest</code>.</p></li>
+            <li><p><code>saxon:is-NaN</code> is superseded by <code>fn:is-NaN</code>.</p></li>
+            <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>.</p></li>
         </ul>
         
  
