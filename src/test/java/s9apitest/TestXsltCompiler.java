@@ -454,6 +454,48 @@ public class TestXsltCompiler {
         }
     }
 
+    @Test
+    public void testJitTemplateTypeCheck() {
+        // Bug 6532
+        try {
+
+            Processor proc = new Processor(true);
+
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+
+            StringReader sr = new StringReader("<xsl:stylesheet version='2.0' " +
+                                                       "xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
+                                                       "xmlns:xs='http://www.w3.org/2001/XMLSchema'>\n" +
+                                                       "<xsl:template match='/'>\n" +
+                                                       "   <xsl:apply-templates/>\n" +
+                                                       "</xsl:template>\n" +
+                                                       "<xsl:template match='/*' as='xs:integer'>\n" +
+                                                       "   <xsl:sequence select='string-length(.) div 2'/>" +
+                                                       "</xsl:template>\n" +
+                                                       "</xsl:stylesheet>");
+
+
+            xqcomp.setJustInTimeCompilation(true);
+            XsltExecutable exec = null;
+            try {
+                exec = xqcomp.compile(new StreamSource(sr));
+            } catch (SaxonApiException ce) {
+                fail("Compilation should not fail yet");
+            }
+            XdmNode in = proc.newDocumentBuilder().build(
+                    new StreamSource(new StringReader("<a>xxx</a>")));
+            try {
+                XdmValue out = exec.load30().applyTemplates(in);
+                fail("Unexected success");
+            } catch (SaxonApiException ce) {
+                assertEquals("XTTE0505", ce.getErrorCode().getLocalName());
+            }
+
+        } catch (SaxonApiException e) {
+            fail();
+        }
+    }
+
 
     /**
      * Test location information for import errors
