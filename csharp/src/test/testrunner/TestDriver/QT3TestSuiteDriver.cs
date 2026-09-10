@@ -380,6 +380,7 @@ namespace TestDriver {
                 bool xpcState = env.xpathCompiler.SchemaAware;
                 bool xqcState = env.xqueryCompiler.SchemaAware;
                 bool xtState = env.xsltCompiler != null && env.xsltCompiler.SchemaAware;
+                env.schemaAware = true;
                 env.xpathCompiler.SchemaAware = (true);
                 env.xqueryCompiler.SchemaAware = (true);
                 if (env.xsltCompiler != null) {
@@ -868,25 +869,25 @@ namespace TestDriver {
                 if ("4.0" == langVersion) {
                     assertXpc.XPathLanguageVersion = langVersion;
                 }
-// #if EE
-//                 assertXpc.XPathLanguageVersion = "4.0";
-// #else
-//                 assertXpc.XPathLanguageVersion = "3.1";
-// #endif                
                 assertXpc.SchemaAware = testIsSchemaAware;
-                if (testIsSchemaAware) {
-                    assertXpc.Schema = env.schema;
-                }
+
                 assertXpc.DeclareNamespace("fn", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareNamespace("xs", "http://www.w3.org/2001/XMLSchema");
                 assertXpc.DeclareNamespace("math", "http://www.w3.org/2005/xpath-functions/math");
                 assertXpc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
                 assertXpc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
+                assertXpc.DeclareNamespace("err", NamespaceConstant.ERR);
+                assertXpc.DeclareNamespace("file", NamespaceUri.EXPATH_FILE.ToString());
+                assertXpc.DeclareNamespace("bin", NamespaceUri.EXPATH_BINARY.ToString());
                 assertXpc.DeclareNamespace("j", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareVariable(new QName("result"));
                 assertXpc.BaseUri = assertion.BaseUri;
+
+                if (env.schemaAware || env.xpathCompiler.SchemaAware) {
+                    assertXpc.SchemaAware = true;
+                    copySchemaNamespaces(env, assertXpc);
+                }
                 
-                copySchemaNamespaces(env, assertXpc);
                 
                 //assertXpc.XPathLanguageVersion = "4.0";
                 bool b = outcome.TestAssertion(outcome, assertion, outcome.GetPrincipalResultDoc(), assertXpc, xpc,

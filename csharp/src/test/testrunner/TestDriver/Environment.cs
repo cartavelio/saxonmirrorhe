@@ -60,6 +60,7 @@ namespace TestDriver {
         public XsltCompiler xsltCompiler;
         public XsltExecutable xsltExecutable;
         public XdmItem contextItem;
+        public bool schemaAware;
         public XsdSchema schema;
         public SysCollGen.Dictionary<QName, XdmValue> params1 = new();
         public bool xml11 = false;
