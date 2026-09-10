@@ -150,7 +150,7 @@ public class TestXsltCompiler {
 
     @Test
     public void testXPath30Failure() {
-        List<StaticError> errors = new ArrayList<>();
+        List<XmlProcessingError> errors = new ArrayList<>();
         try {
             Processor proc = new Processor(false);
             proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT, 30);
@@ -168,7 +168,7 @@ public class TestXsltCompiler {
         } catch (SaxonApiException e) {
             assertTrue(errors.size() > 1);
             Set<String> codes = new HashSet<>();
-            for (StaticError se : errors) {
+            for (XmlProcessingError se : errors) {
                 codes.add(se.getErrorCode().getLocalName());
             }
             assertTrue(codes.contains("XPST0003"));
@@ -195,7 +195,7 @@ public class TestXsltCompiler {
         } catch (SaxonApiException e) {
             assertTrue(errors.size() > 1);
             Set<String> codes = new HashSet<>();
-            for (StaticError se : errors) {
+            for (XmlProcessingError se : errors) {
                 codes.add(se.getErrorCode().getLocalName());
             }
             assertTrue(codes.contains("XPST0003"));
@@ -854,7 +854,7 @@ public class TestXsltCompiler {
 
     @Test
     public void testErrorNotificationFromImportSchemaError() {
-        final List<StaticError> errors = new ArrayList<>(4);
+        final List<XmlProcessingError> errors = new ArrayList<>(4);
 
         try {
 
@@ -891,7 +891,7 @@ public class TestXsltCompiler {
 
     @Test
     public void testErrorNotificationFromInlineSchemaError() {
-        final List<StaticError> errors = new ArrayList<>(4);
+        final List<XmlProcessingError> errors = new ArrayList<>(4);
 
         try {
 
@@ -929,7 +929,7 @@ public class TestXsltCompiler {
 
     @Test
     public void testWarningNotificationFromInlineSchema() {
-        final List<StaticError> errors = new ArrayList<>(4);
+        final List<XmlProcessingError> errors = new ArrayList<>(4);
 
         try {
 

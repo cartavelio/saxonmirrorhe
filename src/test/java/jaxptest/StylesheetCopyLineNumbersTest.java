@@ -146,8 +146,8 @@ public class StylesheetCopyLineNumbersTest {
             Xslt30Transformer t = e.load30();
 
             ErrorReporter el = err -> {
-                System.err.println("error here, as expected, on line: " + err.getLineNumber());
-                assertEquals(3, err.getLineNumber(), "line number is ");
+                System.err.println("error here, as expected, on line: " + err.getLocation().getLineNumber());
+                assertEquals(3, err.getLocation().getLineNumber(), "line number is ");
                 assertEquals("module is ", "http://B/", err.getModuleUri());
             };
             t.setErrorReporter(el);

@@ -19,7 +19,6 @@ import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
 import org.junit.Ignore;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.ErrorHandler;
@@ -145,6 +144,7 @@ public class TestValidator {
             SchemaValidator v = mgr.newSchemaValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
+            v.setDestinationBaseURI(doc.getBaseURI());
             v.validate(doc.asSource());
 
             XdmNode validDoc = dest.getXdmNode();
