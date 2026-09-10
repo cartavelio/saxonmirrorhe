@@ -24,7 +24,7 @@ public class OptionsParameterHelper {
      */
     public static Map<String, GroundedValue> defaultOptionParameters(OptionsParameter params) throws XPathException {
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
-        return params.processSuppliedOptions(EmptyMap.getInstance(), ctxt, 40);
+        return params.processSuppliedOptions(EmptyMap.getInstance(40), ctxt, 40);
     }
 
     /**

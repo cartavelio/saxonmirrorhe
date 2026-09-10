@@ -159,7 +159,7 @@ public class OrderedMapTests {
 
     @Test
     public void testBuildFromEmpty() {
-        MapItem o = EmptyMap.getInstance();
+        MapItem o = EmptyMap.getInstance(40);
         o = o.put(new StringValue("a"), new DoubleValue(1));
         o = o.put(new StringValue("b"), new DoubleValue(2));
         o = o.put(new StringValue("c"), new DoubleValue(3));
@@ -169,7 +169,7 @@ public class OrderedMapTests {
 
     @Test
     public void testBuildFromSingleton() {
-        MapItem o = new SingleEntryMap(new StringValue("a"), new DoubleValue(1));
+        MapItem o = new SingleEntryMap(new StringValue("a"), new DoubleValue(1), 40);
         o = o.put(new StringValue("b"), new DoubleValue(2));
         o = o.put(new StringValue("c"), new DoubleValue(3));
         o = o.put(new StringValue("d"), new DoubleValue(4));
