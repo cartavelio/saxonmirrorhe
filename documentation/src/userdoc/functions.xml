@@ -3836,6 +3836,31 @@
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://www.w3.org/2005/xpath-functions">put</name>
+      <signatures>
+        <proto return-type="xs:NCName?">
+          <arg name="doc" type="node()" desc="The document to be written to disk"/>
+          <arg name="uri" type="xs:string"
+            desc="The location where the document is to be written, as a file:/// URI"/>
+          <in-spec>xquery-update10</in-spec>
+        </proto>
+      </signatures>
+      <status>
+        <p>Implemented in Saxon; available only when XQuery Updates is enabled.</p>
+        <p>From Saxon 9.9, the serialization of the supplied document is performed according to the
+          serialization properties defined in the query prolog (for example <code>declare option
+            output:indent "yes"</code>), which default to the properties defined in the
+          <code>Configuration</code>. Serialization properties specified on the XQuery command line
+          have no effect.</p>
+      </status>
+      <saxon-edition>ALL</saxon-edition>
+      <description>
+        <p>Writes a document to disk. Often (but not necessarily) the document will be the result of
+          applying updates to a source document. It can, however, be a completely new document
+          constructed by the query, or a document copied from a different location.</p>
+      </description>
+    </function>
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">QName</name>
       <signatures>
         <proto return-type="xs:QName">
@@ -11753,7 +11778,7 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
         <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
          declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
       </status>
-      <saxon-edition platform="J CS C">PE/EE</saxon-edition>
+      <saxon-edition>PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function returns a list of the names of the unparsed entities declared with the
