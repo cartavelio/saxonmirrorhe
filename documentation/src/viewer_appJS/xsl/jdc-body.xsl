@@ -666,7 +666,7 @@
         <p>Type <code><xsl:value-of select="$dotname"/></code> is not defined here. </p>
         <xsl:if test="starts-with($dotname, 'java')">
             <p>See the Java Specification for <a
-                    href="http://docs.oracle.com/javase/1.5.0/docs/api/{$path}" target="_blank"
+                href="https://docs.oracle.com/javase/8/docs/api/{$path}" target="_blank"
                         ><xsl:value-of select="$parts[last()]"/></a> for more detail.</p>
         </xsl:if>   
         <xsl:if test="starts-with($dotname, 'System')">
@@ -684,7 +684,7 @@
                 <p>Type: <code><xsl:value-of select="$parts[2]"/></code> is not defined within this
                     documentation.</p>
                 <p>See the Java Specification <a
-                    href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-4.html#jls-4.2"
+                    href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-4.html#jls-4.2"
                     target="_blank">Primitive Types and Values</a> section for more detail.</p>
                 <p class="history">Back</p>
             </xsl:when>
