@@ -131,6 +131,11 @@
     <created by="Michael Kay" on="2023-03-30"/>
     <reason>ICU spellout numbering names not recognized.</reason>
   </exception>
+  
+  <exception test-case="record-024 record-025" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2023-11-02"/>
+    <reason>Coercion of record arguments is not implemented.</reason>
+  </exception>
 
 
 </exceptions>
