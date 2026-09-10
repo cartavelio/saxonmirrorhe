@@ -102,10 +102,15 @@ public class Concat extends SystemFunction implements PushableFunction {
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         UnicodeBuilder builder = new UnicodeBuilder();
         for (Sequence arg : arguments) {
-            SequenceIterator iter = arg.iterate();
-            Item item;
-            while ((item = iter.next()) != null) {
-                builder.accept(item.getUnicodeStringValue());
+            if (arg instanceof Item) {
+                // common case, avoid creating a singleton iterator
+                builder.accept(((Item)arg).getUnicodeStringValue());
+            } else {
+                SequenceIterator iter = arg.iterate();
+                Item item;
+                while ((item = iter.next()) != null) {
+                    builder.accept(item.getUnicodeStringValue());
+                }
             }
         }
         return new StringValue(builder.toUnicodeString());

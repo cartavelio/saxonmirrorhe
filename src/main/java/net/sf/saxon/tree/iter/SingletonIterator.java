@@ -11,6 +11,7 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.value.EmptySequence;
 
 
@@ -32,6 +33,7 @@ public class SingletonIterator implements SequenceIterator,
 
     protected SingletonIterator(Item value) {
         assert value != null;
+        Instrumentation.count("SINGLETON ITERATOR");
         this.item = value;
     }
 
