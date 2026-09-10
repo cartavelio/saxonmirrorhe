@@ -111,9 +111,6 @@ XdmValue::~XdmValue() {
     for (size_t i = 0; i < values.size(); i++) {
       if (values[i] != nullptr && values[i]->getRefCount() < 1) {
         delete values[i];
-      } else {
-        // std::cerr<<"XdmValue destructor called values not deleted thought
-        // !!!!!!!!! ref="<<values[i]->getRefCount()<<std::endl;
       }
     }
     values.clear();
@@ -183,20 +180,13 @@ XdmItem *XdmValue::getHead() {
 }
 
 int64_t XdmValue::getUnderlyingValue() {
-#ifdef DEBUG
-  std::cerr << std::endl << "XdmValue-getUnderlyingValue:" << std::endl;
-#endif
+
   if (jValues == -1) {
     int i;
 
     int count = values.size();
     if (count == 0) {
       return -1;
-    }
-    if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << std::endl
-                << "XdmValue-getUnderlyingValue cp0 size=" << values.size()
-                << std::endl;
     }
 
     if (count == 1) {

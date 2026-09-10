@@ -101,10 +101,8 @@ XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
                                                     const char *name,
                                                     int arity) {
   if (processor == nullptr || name == nullptr) {
-    std::cerr << "Error in getSystemFunction. Please make sure processor and "
-                 "name are not nullptr."
-              << std::endl;
-    return nullptr;
+    throw SaxonApiException("Error in getSystemFunction. Please make sure processor and "
+                 "name are not nullptr.");
   }
 
   int64_t result =

@@ -67,9 +67,8 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
     XdmValue *valuei = paramIter->second;
     if (valuei == nullptr) {
-      std::cerr << "Error in XsltExecutable copy constructor - parameter value "
-                   "is NULL"
-                << std::endl;
+      /*throw SaxonApiException("Error in XsltExecutable copy constructor - parameter value "
+                   "is NULL");*/
     } else {
       parameters[paramIter->first] = new XdmValue(*(valuei));
     }
@@ -219,9 +218,7 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
         char *str = j_getProcessorDataProperty(
             SaxonProcessor::sxn_environ->thread, (void *)fn,
             (void *)resultUrisRef, i - 1);
-        // std::cerr<<"getResultDocuments cp1-2 str="<<(str == nullptr? "str is
-        // null": str)<<std::endl; std::cerr<<"getResultDocuments cp1-1
-        // result["<<i<<"]"<<results[i]<<std::endl;
+
         value = SaxonProcessor::makeXdmValueFromRef(results[i]);
         if (value != nullptr && str != nullptr) {
           resultDocumentMap[str] = value;
@@ -813,14 +810,10 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   if(saxonResultDocRef > 0) {
       additions++;
   }*/
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "C++ DEBUG callTemplateReturningValue cp0" << std::endl;
-  }
+
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "C++ DEBUG callTemplateReturningValue cp1" << std::endl;
-  }
+
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
@@ -980,10 +973,10 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
       exceptionFound = true;
       throw SaxonApiException();
     }
-    if (getenv("SAXONC_DEBUG_FLAG")) {
+    /*if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++: setSaveXslMessage saxonMessageListenerRef = "
                 << ((long)saxonMessageListenerRef) << std::endl;
-    }
+    }*/
   } else {
     if (saxonMessageListenerRef > 0) {
       j_handles_destroy(SaxonProcessor::sxn_environ->thread,
@@ -995,10 +988,6 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
 }
 
 XdmValue *XsltExecutable::getXslMessages() {
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "C++: getXslMessages saxonMessageListenerRef = "
-              << ((long)saxonMessageListenerRef) << std::endl;
-  }
   if (saxonMessageListenerRef > 0) {
     allocFn fn = operator new;
     long long *results =
@@ -1007,9 +996,9 @@ XdmValue *XsltExecutable::getXslMessages() {
 
     if (results != nullptr) {
       int sizex = results[0];
-      if (getenv("SAXONC_DEBUG_FLAG")) {
+      /*if (getenv("SAXONC_DEBUG_FLAG")) {
         std::cerr << "C++: getXslMessages size= " << sizex << std::endl;
-      }
+      }*/
       XdmValue *value = new XdmValue();
       for (int i = 1; i <= sizex; i++) {
         XdmItem *item = nullptr;
