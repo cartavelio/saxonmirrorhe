@@ -786,8 +786,8 @@ protected:
   std::map<std::string, XdmValue *>
       parameters; /*!< map of parameters used for the transformation as (string,
                      value) pairs */
-  std::map<std::string, std::string>
-      configProperties; /*!< map of properties used for the transformation as
+  //std::map<std::string, std::string>
+    /*  configProperties;*/ /*!< map of properties used for the transformation as
                            (string, string) pairs */
   bool licensei; /*!< if true, this indicates that the Processor created
                     needs a license file (i.e. Saxon-EE), otherwise a Saxon-HE

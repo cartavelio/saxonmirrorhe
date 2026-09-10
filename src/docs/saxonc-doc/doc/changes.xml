@@ -192,6 +192,15 @@
                <a href="https://saxonica.plan.io/issues/6349" target="_blank">#6349</a>, and
                <a href="https://saxonica.plan.io/issues/6392" target="_blank">#6392</a>.)</li>
          </ul>
+
+         <p>From SaxonC 12.6:</p>
+
+         <ul>
+            <li>The <code>getSaxonEdition()</code> method on the <code>SaxonProcessor</code> class has
+               been added in the C++, Python and PHP APIs to give the shortened name of the Saxon product edition.</li>
+            <li>The <code>isLicensed()</code> method on the <code>SaxonProcessor</code> class has
+               been added in the C++, Python and PHP APIs to determine if this configuration is licensed.</li>
+         </ul>
       </category>
       
       <category name="installation">

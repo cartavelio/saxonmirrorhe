@@ -108,6 +108,9 @@ def test_version2():
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
 
+def test_saxon_edition(saxonproc):
+    assert saxonproc.edition == '@@edition@@'
+
 class myThread (threading.Thread):
     def __init__(self, threadID, name, saxon_proc):
         threading.Thread.__init__(self)
@@ -1627,7 +1630,7 @@ def test_declare_variable_value2(saxonproc):
         result = xpath_processor.evaluate('$s1')
         assert result is None
     except Exception as err:
-        assert 'No value has been supplied for variable $s1' in str(err)
+            assert 'No value has been supplied for variable $s1' in str(err)
 
 def test_packages(data_dir):
     sp = PySaxonProcessor(license=True)

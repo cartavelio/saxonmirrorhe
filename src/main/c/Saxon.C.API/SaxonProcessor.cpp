@@ -318,9 +318,6 @@ void SaxonProcessor::initialize(bool l) {
 
 }
 
-
-
-
 void SaxonProcessor::attachCurrentThread() {
 #ifdef DEBUG
   std::cerr << "attachCurrentThread called" << std::endl;
@@ -404,6 +401,17 @@ SaxonProcessor::~SaxonProcessor() {
   // exceptionClear();
 }
 
+bool SaxonProcessor::isLicensed() {
+  SaxonProcessor::attachCurrentThread();
+  if (!licensei) {
+    return false;
+  }
+  if (procRef < 0) {
+      return false;
+  }
+  return j_isLicensed(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+}
+
 void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes)
 {
 
@@ -432,6 +440,9 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
       throw SaxonApiException();
     }
 
+const char * SaxonProcessor::getSaxonEdition() {
+    SaxonProcessor::attachCurrentThread();
+  return SAXONC_EDITION;
 }
 
 void SaxonProcessor::registerUserFunction(const char * ns1, XdmValue * (*func)(int, XdmValue **), const char * signature, bool isNativeTypes)
@@ -457,7 +468,7 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
 }
 
 void SaxonProcessor::applyConfigurationProperties() {
-  SaxonProcessor::attachCurrentThread();
+ /*SaxonProcessor::attachCurrentThread();
   if (configProperties.size() > 0) {
     int size = configProperties.size();
     int64_t processorDataRef = createProcessorDataWithCapacity(
@@ -468,18 +479,19 @@ void SaxonProcessor::applyConfigurationProperties() {
         configProperties.begin();
     for (iter = configProperties.begin(); iter != configProperties.end();
          ++iter, i++) {
-      // cnames[i] = (iter->first).c_str();
-      // cvalues[i] = (iter->second).c_str();
       addProcessorPropertyPair(
           SaxonProcessor::sxn_environ->thread, (void *)processorDataRef,
           (char *)(iter->first).c_str(), (char *)(iter->second).c_str());
     }
 
-    j_applyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
+    int resultsi = j_applyPropertiesToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
                            (void *)processorDataRef);
 
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
-  }
+    if (resultsi == SXN_EXCEPTION) {
+      throw SaxonApiException();
+    }
+
+  }*/
 }
 
 XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
@@ -527,6 +539,7 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     } else {
       value = new XdmValue(results, true);
     }
+
     return value;
   } else if (results == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -730,7 +743,7 @@ SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
   cwd = other.cwd;
 
   parameters = other.parameters;
-  configProperties = other.configProperties;
+  //configProperties = other.configProperties;
   licensei = other.licensei;
   exception = other.exception;
   return *this;
@@ -742,7 +755,7 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
   cwd = other.cwd;
 
   parameters = other.parameters;
-  configProperties = other.configProperties;
+  //configProperties = other.configProperties;
   licensei = other.licensei;
   exception = other.exception;
 }
@@ -884,6 +897,7 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
 
 XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
                                               const char *encoding) {
+
   if (source == nullptr) {
     throw SaxonApiException("JSON source string is null");
   }
@@ -891,14 +905,11 @@ XdmValue *SaxonProcessor::parseJsonFromString(const char *source,
   applyConfigurationProperties();
   int64_t xdmValueRef = parseJsonString(sxn_environ->thread, (void *)procRef,
                                         (char *)source, (char *)encoding);
-
-
   if (xdmValueRef >= 0) {
-    XdmValue * value = makeXdmValueFromRef(xdmValueRef);
+    XdmValue *value = makeXdmValueFromRef(xdmValueRef);
+
     return value;
-
   }
-
   if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -915,10 +926,11 @@ XdmValue *SaxonProcessor::parseJsonFromFile(const char *source) {
   int64_t xdmValueRef = parseJsonFile(sxn_environ->thread, (void *)procRef,
                                       (char *)cwd.c_str(), (char *)source);
   if (xdmValueRef >= 0) {
-    XdmValue * value = makeXdmValueFromRef(xdmValueRef);
+    XdmValue *value = makeXdmValueFromRef(xdmValueRef);
 
     return value;
   }
+
   if (xdmValueRef == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -997,13 +1009,19 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri,
 void SaxonProcessor::setConfigurationProperty(const char *name,
                                               const char *value) {
   if (name != nullptr && value != nullptr) {
-    configProperties.insert(std::pair<std::string, std::string>(
-        std::string(name), std::string((value == nullptr ? "" : value))));
+    /*configProperties.insert(std::pair<std::string, std::string>(
+        std::string(name), std::string((value == nullptr ? "" : value))));*/
+    int resultsi = j_applyPropertyToConfiguration(SaxonProcessor::sxn_environ->thread, (void *)procRef,
+                           (char *)name, (char *)value);
+
+    if (resultsi == SXN_EXCEPTION) {
+      throw SaxonApiException();
+    }
   }
 }
 
 void SaxonProcessor::clearConfigurationProperties() {
-  configProperties.clear();
+
 }
 
 void SaxonProcessor::createHeapDump(bool live) {
@@ -1160,8 +1178,8 @@ const char *SaxonProcessor::getStringValue(XdmItem *item) {
 XdmArray *SaxonProcessor::makeArray(short *input, int length) {
   SaxonProcessor::attachCurrentThread();
   if (input == nullptr) {
-    std::cerr << "Error found when converting pointer array of short values to "
-                 "XdmArray";
+    /*std::cerr << "Error found when converting pointer array of short values to "
+                 "XdmArray"; */
     return nullptr;
   }
   int64_t xdmArrayRef =

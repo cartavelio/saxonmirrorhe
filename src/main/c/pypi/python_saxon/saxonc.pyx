@@ -363,6 +363,28 @@ cdef class PySaxonProcessor:
         """
         return self.thisptr.isSchemaAwareProcessor()
 
+    @property
+    def is_licensed(self):
+        """
+        is_licensed(self)
+        Flag to determine if this configuration is licensed.
+        Returns:
+            bool: True if the SaxonC Processor is licensed
+        """
+        return self.thisptr.isLicensed()
+
+    @property
+    def edition(self):
+        """
+        edition(self)
+        Property to get the short name of the Saxon product edition.
+        Returns:
+            bool: the Saxon edition code: "EE", "PE", or "HE".
+        """
+        cdef const char* c_string = self.thisptr.getSaxonEdition()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
+
     def new_document_builder(self):
         """
         new_document_builder(self)

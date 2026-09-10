@@ -47,11 +47,15 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         XdmAtomicValue ** createXdmAtomicValueArray(int len)
 
+        bool isLicensed()
+
+        const char * getSaxonEdition()
+
         #SaxonProcessor * getProcessor()
 
         #Set a configuration property specific to the processor in use. 
         #Properties specified here are common across all the processors.
-        void setConfigurationProperty(char * name, char * value)
+        void setConfigurationProperty(char * name, char * value) except +raise_py_error
 
         #Clear configuration properties specific to the processor in use. 
         void clearConfigurationProperties()
@@ -290,7 +294,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setCaptureResultDocuments(bool flag, bool rawResult)
 
-        # The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>)
+        # The initial value to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:pply-templates</code>)
         void setInitialMatchSelection(XdmValue * selection)     except +raise_py_error
 
         # The initial filename to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>).

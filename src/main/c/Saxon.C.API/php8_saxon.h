@@ -238,6 +238,8 @@ PHP_METHOD(SaxonProcessor, exceptionOccurred);
 PHP_METHOD(SaxonProcessor, getErrorMessage);
 PHP_METHOD(SaxonProcessor, EQNameToClarkName);
 PHP_METHOD(SaxonProcessor, clarkNameToEQName);
+PHP_METHOD(SaxonProcessor, getSaxonEdition);
+PHP_METHOD(SaxonProcessor, isLicensed);
 
 PHP_METHOD(DocumentBuilder, __destruct);
 PHP_METHOD(DocumentBuilder, setLineNumbering);
