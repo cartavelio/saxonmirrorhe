@@ -110,7 +110,7 @@ public class IndependentContext extends AbstractStaticContext
         setExecutable(ic.getExecutable());
         setOptimizerOptions(ic.getOptimizerOptions());
         retainedStaticContext = null;
-        parentlessContextItem = ic.parentlessContextItem
+        parentlessContextItem = ic.parentlessContextItem;
     }
 
     /**
