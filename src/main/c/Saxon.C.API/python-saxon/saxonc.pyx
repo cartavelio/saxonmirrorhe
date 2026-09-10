@@ -4359,6 +4359,8 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          cdef PyXdmMap mval = None
          cdef PyXdmArray aaval = None
          c_xdmValue = self.derivedfptr.call(proc.thisptr, argumentV, _len)
+         if c_xdmValue == NULL:
+             return None
          type_ = c_xdmValue.getType()
          if type_== 1:
               value_ = PyXdmValue()
