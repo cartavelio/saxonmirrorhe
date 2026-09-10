@@ -33,9 +33,9 @@ public class SaxonXQConnectionTest extends XQJTestCase {
 //        xqs1.next();
 //        xqs2.next();
 //
-//        junit.framework.Assert.assertEquals("A-SXQC-1.1: copied expression produces same result",
+//        Assert.assertEquals("A-SXQC-1.1: copied expression produces same result",
 //                xqs1.getItem().getInt(), xqs2.getItem().getInt());
-//        junit.framework.Assert.assertEquals("A-SXQC-1.2: copied expression has same base URI",
+//        Assert.assertEquals("A-SXQC-1.2: copied expression has same base URI",
 //                xqe1.getStaticContext().getBaseURI(), xqe2.getStaticContext().getBaseURI());
 //    }
 

@@ -2,16 +2,17 @@
 package com.oracle.xqj.tck.testcases;
 
 import junit.framework.TestCase;
+import org.junit.Assert;
 
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQDataSource;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-public class XQJTestCase extends TestCase{
+public class XQJTestCase extends TestCase {
   protected XQDataSource xqds;
   protected XQConnection xqc;
-  
+
   protected void setUp() throws Exception{
     // Get the file name of the properties file
     String fileName = System.getProperty("com.oracle.xqj.tck.datasource");
@@ -22,13 +23,13 @@ public class XQJTestCase extends TestCase{
     p.load(new FileInputStream(fileName));
     // create an XQDataSource instance using reflection
     String xqdsClassName = p.getProperty("XQDataSourceClassName");
-    Class xqdsClass = Class.forName(xqdsClassName);
+    Class<?> xqdsClass = Class.forName(xqdsClassName);
     // create the XQDataSource instance
     xqds = (XQDataSource)xqdsClass.newInstance();
     // remove the XQDataSourceClassName property
     // as the XQJ implementation doesn't know about it and raise an error
     p.remove("XQDataSourceClassName");
-    if (!p.isEmpty()) 
+    if (!p.isEmpty())
       // set the remaining properties
       xqds.setProperties(p);
 
@@ -36,11 +37,11 @@ public class XQJTestCase extends TestCase{
   }
 
   protected void tearDown() throws Exception {
-   xqc.close(); 
+    xqc.close();
   }
 
-    public void testDummy() {
-        // Added by MHK: Prevents a warning that there are no test cases in this module
-        assertEquals(2,2);
-    }
+  public void testDummy() {
+    // Added by MHK: Prevents a warning that there are no test cases in this module
+    Assert.assertEquals(2, 2);
+  }
 }

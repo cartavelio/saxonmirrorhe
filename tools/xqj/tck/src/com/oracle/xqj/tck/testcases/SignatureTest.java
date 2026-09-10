@@ -1,6 +1,8 @@
 // Copyright (c) 2003, 2006, 2007, 2008 Oracle. All rights reserved.
 package com.oracle.xqj.tck.testcases;
 
+import org.junit.Assert;
+
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
@@ -164,7 +166,7 @@ public class SignatureTest extends XQJTestCase {
     logClass(sb, "XQStaticContext");
     
     java.io.InputStream signatureStream = this.getClass().getClassLoader().getResourceAsStream(signatureFile__);
-    junit.framework.Assert.assertNotNull("Signature file '" + signatureFile__ + "' not found in classpath.", signatureStream);
+    Assert.assertNotNull("Signature file '" + signatureFile__ + "' not found in classpath.", signatureStream);
     
     java.io.InputStreamReader signatureReader = new java.io.InputStreamReader(signatureStream, "UTF-8");
     Reader in = new BufferedReader(signatureReader);
@@ -174,7 +176,7 @@ public class SignatureTest extends XQJTestCase {
       expected.append((char)ch);
     }
     in.close();
-    junit.framework.Assert.assertEquals("Signature mismatch, expected " + expected.toString() + ", got " + sb.toString(),
+    Assert.assertEquals("Signature mismatch, expected " + expected.toString() + ", got " + sb.toString(),
             expected.toString(), sb.toString());
   }
 }

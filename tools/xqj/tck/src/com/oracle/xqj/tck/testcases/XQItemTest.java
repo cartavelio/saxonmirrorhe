@@ -1,6 +1,15 @@
 // Copyright (c) 2003, 2006, 2007, 2008 Oracle. All rights reserved.
 package com.oracle.xqj.tck.testcases;
 
+import javax.xml.xquery.XQException;
+import javax.xml.xquery.XQExpression;
+import javax.xml.xquery.XQItem;
+import javax.xml.xquery.XQSequence;
+
+import org.junit.Assert;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class XQItemTest extends XQJTestCase {
 
   public void testClose() throws XQException {
@@ -16,7 +25,7 @@ public class XQItemTest extends XQJTestCase {
       xqi.close();
       xqi.close();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQE-2.1: closing item failed with message: " + e.getMessage());
+      fail("A-XQE-2.1: closing item failed with message: " + e.getMessage());
     }
     xqe.close(); 
   }
@@ -31,9 +40,9 @@ public class XQItemTest extends XQJTestCase {
     xqs.next();
     xqi = xqs.getItem();
     
-    junit.framework.Assert.assertEquals("A-XQE-1.1: isClosed() on open item", false, xqi.isClosed());
+    Assert.assertEquals("A-XQE-1.1: isClosed() on open item", false, xqi.isClosed());
     xqi.close();
-    junit.framework.Assert.assertEquals("A-XQE-1.2: isClosed() on closed item", true, xqi.isClosed());
+    Assert.assertEquals("A-XQE-1.2: isClosed() on closed item", true, xqi.isClosed());
     
     xqe.close(); 
   }

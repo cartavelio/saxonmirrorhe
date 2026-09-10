@@ -1,6 +1,11 @@
 // Copyright (c) 2003, 2006, 2007, 2008 Oracle. All rights reserved.
 package com.oracle.xqj.tck.testcases;
 
+import javax.xml.xquery.*;
+import org.junit.Assert;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class XQResultItemTest extends XQJTestCase {
   
   public void testGetConnection() throws XQException {
@@ -14,12 +19,12 @@ public class XQResultItemTest extends XQJTestCase {
     xqs = xqe.executeQuery("1,2,3,4");
     xqs.next();
     xqi = xqs.getItem();
-    junit.framework.Assert.assertTrue("A-XQS-12.5: Item must be XQResultItem", xqi instanceof XQResultItem);   
+    Assert.assertTrue("A-XQS-12.5: Item must be XQResultItem", xqi instanceof XQResultItem);   
     xqri = (XQResultItem)xqi;
     xqri.close();
     try {
       xqri.getConnection();
-      junit.framework.Assert.fail("A-XQRI-1.1: Getting the connection on a closed result item fails.");
+      fail("A-XQRI-1.1: Getting the connection on a closed result item fails.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -29,14 +34,14 @@ public class XQResultItemTest extends XQJTestCase {
     xqs = xqe.executeQuery("1,2,3,4");
     xqs.next();
     xqi = xqs.getItem();
-    junit.framework.Assert.assertTrue("A-XQS-12.5: Item must be XQResultItem", xqi instanceof XQResultItem);   
+    Assert.assertTrue("A-XQS-12.5: Item must be XQResultItem", xqi instanceof XQResultItem);   
     xqri = (XQResultItem)xqi;
     try {
       returned_xqc = xqri.getConnection();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQRI-1.2: getConnection() failed with message: " + e.getMessage());
+      fail("A-XQRI-1.2: getConnection() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertSame("A-XQRI-1.2: Successfully get the connection of a result item.", xqc, returned_xqc);
+    Assert.assertSame("A-XQRI-1.2: Successfully get the connection of a result item.", xqc, returned_xqc);
     xqe.close(); 
   }
 }

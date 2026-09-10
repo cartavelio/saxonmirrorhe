@@ -1,6 +1,14 @@
 // Copyright (c) 2003, 2006, 2007, 2008 Oracle. All rights reserved.
 package com.oracle.xqj.tck.testcases;
 
+import javax.xml.xquery.XQConnection;
+import javax.xml.xquery.XQException;
+import javax.xml.xquery.XQExpression;
+import javax.xml.xquery.XQResultSequence;
+import org.junit.Assert;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class XQResultSequenceTest extends XQJTestCase {
   
   public void testGetConnection() throws XQException {
@@ -13,7 +21,7 @@ public class XQResultSequenceTest extends XQJTestCase {
     xqs.close();
     try {
       xqs.getConnection();
-      junit.framework.Assert.fail("A-XQRS-1.1: Getting the connection on a closed result sequence fails.");
+      fail("A-XQRS-1.1: Getting the connection on a closed result sequence fails.");
     } catch (XQException e) {
       // Expect an XQException
     }
@@ -24,9 +32,9 @@ public class XQResultSequenceTest extends XQJTestCase {
     try {
       returned_xqc = xqs.getConnection();
     } catch (XQException e) {
-      junit.framework.Assert.fail("A-XQRS-1.2: getConnection() failed with message: " + e.getMessage());
+      fail("A-XQRS-1.2: getConnection() failed with message: " + e.getMessage());
     }
-    junit.framework.Assert.assertSame("A-XQRS-1.2: Successfully get the connection of a result sequence.", xqc, returned_xqc);
+    Assert.assertSame("A-XQRS-1.2: Successfully get the connection of a result sequence.", xqc, returned_xqc);
     xqe.close(); 
   }
 }
