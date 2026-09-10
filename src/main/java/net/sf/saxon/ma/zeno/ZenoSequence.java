@@ -9,6 +9,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
@@ -146,7 +147,14 @@ public class ZenoSequence implements GroundedValue {
         return new ZenoSequence(list);
     }
 
-    public static class ZenoSequenceIterator implements GroundedIterator, LookaheadIterator {
+    public static class ZenoSequenceIterator implements GroundedIterator
+            //#if CSHARP==false
+            , LookaheadIterator
+            //#endif
+    {
+
+        // This class is not a LookAheadIterator on C#, because the underlying C# enumerator has no side-effect-free
+        // hasNext() operation.
 
         private ZenoSequence sequence;
         private Iterator<Item> chainIterator;
@@ -182,11 +190,13 @@ public class ZenoSequence implements GroundedValue {
         }
 
         @Override
+        @CSharpReplaceBody(code="return false;")
         public boolean supportsHasNext() {
             return true;
         }
 
         @Override
+        @CSharpReplaceBody(code="throw new InvalidOperationException();")
         public boolean hasNext() {
             return chainIterator.hasNext();
         }
