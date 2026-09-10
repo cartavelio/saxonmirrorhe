@@ -271,8 +271,8 @@ private:
 
     std::string cwdXQ; /*!< current working directory */
 	SaxonProcessor * proc;
-	jclass  cppClass;
-	jobject cppXQ;
+
+	int64_t cppXQ;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
 	SaxonApiException * exception;
