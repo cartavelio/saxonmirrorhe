@@ -134,6 +134,22 @@ public final class DoubleValue extends NumericValue {
     }
 
     /**
+     * Get the numeric value converted to a decimal. This method gets the exact value
+     * as needed for map keys and fn:compare, to give transitive comparison semantics
+     *
+     * @return a decimal representing this numeric value;
+     * @throws ValidationException if the value cannot be converted, for example if it is NaN or infinite
+     */
+    @Override
+    public BigDecimal getExactDecimalValue() throws ValidationException {
+        try {
+            return new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            throw new ValidationException(e);
+        }
+    }
+
+    /**
      * Return the numeric value as a Java long.
      *
      * @return the numeric value as a Java long. This performs truncation

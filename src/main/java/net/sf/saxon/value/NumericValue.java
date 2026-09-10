@@ -83,13 +83,26 @@ public abstract class NumericValue extends AtomicValue
     public abstract float getFloatValue();
 
     /**
-     * Get the numeric value converted to a decimal
+     * Get the numeric value converted to a decimal. This method implements the casting rules,
+     * which may lose some precision.
      *
      * @return a decimal representing this numeric value;
      * @throws ValidationException if the value cannot be converted, for example if it is NaN or infinite
      */
 
     public abstract BigDecimal getDecimalValue() throws ValidationException;
+
+    /**
+     * Get the numeric value converted to a decimal. This method gets the exact value
+     * as needed for map keys and fn:compare, to give transitive comparison semantics
+     *
+     * @return a decimal representing this numeric value;
+     * @throws ValidationException if the value cannot be converted, for example if it is NaN or infinite
+     */
+
+    public BigDecimal getExactDecimalValue() throws ValidationException {
+        return getDecimalValue();
+    }
 
     /**
      * Get the effective boolean value of the value. This override of this method throws no exceptions.
