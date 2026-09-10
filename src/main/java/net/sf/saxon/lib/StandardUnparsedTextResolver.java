@@ -82,20 +82,14 @@ public class StandardUnparsedTextResolver
         rr.uri = absoluteURI.toString();
         rr.nature = encoding == null ? ResourceRequest.BINARY_NATURE : ResourceRequest.TEXT_NATURE;
         rr.purpose = ResourceRequest.ANY_PURPOSE;
-        rr.requestedEncoding = encoding;
         Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
         if (resolved == null) {
             throw new XPathException("unparsed-text(): failed to resolve URI " + absoluteURI);
         }
 
-        if (resolved instanceof AugmentedSource) {
-            Source rsource = ((AugmentedSource) resolved).getContainedSource();
-            if (rsource instanceof SAXSource) {
-                return getReaderFromSAXSource((SAXSource) rsource, encoding, config, debug);
-            }
-            if (rsource instanceof StreamSource) {
-                return getReaderFromStreamSource((StreamSource) rsource, encoding, config, debug);
-            }
+        if (resolved instanceof AugmentedSource
+            && ((AugmentedSource) resolved).getContainedSource() instanceof SAXSource) {
+            return getReaderFromSAXSource((SAXSource) ((AugmentedSource) resolved).getContainedSource(), encoding, config, debug);
         }
 
         if (resolved instanceof StreamSource) {
