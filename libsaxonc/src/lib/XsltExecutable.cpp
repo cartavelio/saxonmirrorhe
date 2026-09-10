@@ -249,6 +249,8 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
   if (flag) {
     resultDocumentMap.clear();
     if (saxonResultDocRef != SXN_UNSET) {
+      j_handles_destroy(thread,
+                  (void *)saxonResultDocRef);
       saxonResultDocRef = SXN_UNSET;
     }
 
@@ -1053,6 +1055,11 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (create) {
     if (filename == nullptr) {
+      if (saxonMessageListenerRef != SXN_UNSET) {
+        j_handles_destroy(thread,
+                  (void *)saxonMessageListenerRef);
+        saxonMessageListenerRef = SXN_UNSET;
+      }
       std::string optionStr = "-:on";
       saxonMessageListenerRef = createSaxonCMessageListener(
           thread, (void *)procRef,
@@ -1084,7 +1091,7 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
 }
 
 XdmValue *XsltExecutable::getXslMessages() {
-  if (saxonMessageListenerRef > 0) {
+  if (saxonMessageListenerRef != SXN_UNSET) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     allocFn fn = operator new;
     long long *results =
@@ -1112,10 +1119,11 @@ XdmValue *XsltExecutable::getXslMessages() {
 
 
 void XsltExecutable::clearXslMessages() {
-  if (saxonMessageListenerRef > 0) {
+  if (saxonMessageListenerRef != SXN_UNSET) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
         j_clearXslMessages(thread,
                          (void *)saxonMessageListenerRef);
+    saxonMessageListenerRef = SXN_UNSET;
 
   }
 }

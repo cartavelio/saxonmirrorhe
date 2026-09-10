@@ -464,14 +464,18 @@ public class SaxonCAPI {
     public static ObjectHandle createHandle(Object obj) {
         ObjectHandle handle = objectHandles.create(obj);
         if (debug) {
-            if(objectHandlesPool.containsKey(handle.rawValue())){
-                System.err.println("Object handle key already exists!");
+            if(handle != WordFactory.nullPointer()) {
+                if (objectHandlesPool.containsKey(handle.rawValue())) {
+                    System.err.println("Object handle key already exists!");
+                } else {
+                    objHandlesCreated++;
+                    System.err.println("Total Object Handles created: " + objHandlesCreated);
+                }
+                System.err.println("Created Object Handle ref=" + handle.rawValue() + " Class name = " + obj.getClass().getName());
+                objectHandlesPool.put(handle.rawValue(), obj.getClass().getName());
             } else {
-                objHandlesCreated++;
-                System.err.println("Total Object Handles created: " + objHandlesCreated);
+                System.err.println("Object handle key is null!");
             }
-            System.err.println("Created Object Handle ref=" + handle.rawValue() + " Class name = "+ obj.getClass().getName());
-            objectHandlesPool.put(handle.rawValue(), obj.getClass().getName());
         }
         return handle;
     }
