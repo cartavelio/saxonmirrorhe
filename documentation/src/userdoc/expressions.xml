@@ -2155,9 +2155,8 @@ return `{$key}={$value}`]]></code></pre>
 
 		<h2>Pre-defined types</h2>
 
-		<xi:include href="datatypes/datatypes_table.xml" xmlns:xi="http://www.w3.org/2001/XInclude">
-			<xi:fallback>See documentation/tools/xml/datatypes.xml for the source that this table will be generated from at build time.</xi:fallback>
-		</xi:include>
+		<!-- See documentation/tools/xml/datatypes.xml for the source that this table will be generated from at build time. -->
+		<xi:include href="datatypes/datatypes_table.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />	
 
 		<p>For more detailed information about types, see:</p>
 		<ul>
