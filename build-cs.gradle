@@ -541,15 +541,54 @@ task dotnetRelease(
 }
 
 task copyNuGetPackage(
-  type: Copy,
   dependsOn: ["dotnetRelease"],
   description: "Copy the architecture-independent .nupkg file"
 ) {
-  from "${buildDir}/cs/bin/Release"
-  into "${buildDir}/distributions"
-  include "SaxonCS.${csver}.nupkg"
+  inputs.file "${buildDir}/cs/bin/Release/SaxonCS.${csver}.nupkg"
+  outputs.file "${buildDir}/distributions/SaxonCS.${csver}.nupkg"
+
+  // This only works on the build/release machine, Wynngifu.
+  def nugetsign = new File("/Users/norm/bin/nuget.exe").exists()
+
+  doLast {
+    if (nugetsign && jarsigner.makeSignedExes) {
+      println("Creating signed NuGet package")
+      exec {
+        commandLine "/Users/norm/bin/nuget.exe", "sign",
+          "${buildDir}\\cs\\bin\\Release\\SaxonCS.${csver}.nupkg",
+          "-CertificatePath", "C:\\Users\\norm\\java\\saxonica_certificate.pfx",
+          "-Timestamper", "http://timestamp.digicert.com",
+          "-OutputDirectory", "${buildDir}\\distributions",
+          "-Verbosity", "detailed", "-CertificatePassword",
+          project.findProperty("saxonSignPassword")
+      }
+    } else {
+      println("Creating UNSIGNED NuGet package")
+      copy {
+        from "${buildDir}/cs/bin/Release"
+        into "${buildDir}/distributions"
+        include "SaxonCS.${csver}.nupkg"
+      }
+    }
+  }
 }
 dotnetRelease.finalizedBy copyNuGetPackage
+
+task pushNuGetPackage(
+  dependsOn: ["dotnetRelease", "copyNuGetPackage"],
+  description: "Publish the NuGet package on nuget.org"
+) {
+  inputs.file "${buildDir}/distributions/SaxonCS.${csver}.nupkg"
+
+  doLast {
+    exec {
+      commandLine "dotnet", "nuget", "push",
+         "${buildDir}/distributions/SaxonCS.${csver}.nupkg",
+         "-k", project.findProperty("nugetApiKey"),
+         "-s", project.findProperty("nugetSource")
+    }
+  }
+}
 
 task dotnetPublish(
   dependsOn: ['dotnetRelease']
