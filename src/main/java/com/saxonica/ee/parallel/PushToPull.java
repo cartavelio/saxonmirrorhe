@@ -70,7 +70,7 @@ public class PushToPull {
                 throw new QuitParsingException(true);
             }
             try {
-                queue.put(new Outcome<Item>(item));
+                queue.put(new Outcome<>(item));
             } catch (InterruptedException e) {
                 throw new QuitParsingException(true);
             }

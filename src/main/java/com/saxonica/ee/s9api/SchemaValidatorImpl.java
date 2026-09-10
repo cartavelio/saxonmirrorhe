@@ -534,6 +534,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
                                 documentElementName.getPrefix(), documentElementName.getNamespaceUri(), documentElementName.getLocalName()));
                     }
 
+                    pipe.setParseOptions(options);
                     Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
                     output.setPipelineConfiguration(pipe);
 
@@ -713,9 +714,9 @@ public class SchemaValidatorImpl extends SchemaValidator {
         if (keepStatistics) {
             latestStatistics = new ValidationStatistics();
             options = options.withValidationStatisticsRecipient(latestStatistics.getRecipient());
-            pipe.setParseOptions(options);
         }
         //#endif
+        pipe.setParseOptions(options);
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());
         output.setPipelineConfiguration(pipe);
 
