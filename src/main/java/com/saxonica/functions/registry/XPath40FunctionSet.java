@@ -348,7 +348,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         LocalUnionType hashInput = LocalUnionType.of(BuiltInAtomicType.STRING,
                                                       BuiltInAtomicType.HEX_BINARY,
                                                       BuiltInAtomicType.BASE64_BINARY);
-        register("hash", 1, 2, e -> e.populate(HashFn::new, BuiltInAtomicType.HEX_BINARY, OPT, 0)
+        register("hash", 1, 3, e -> e.populate(HashFn::new, BuiltInAtomicType.HEX_BINARY, OPT, 0)
                 .arg(0, hashInput, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, MapType.ANY_MAP_TYPE, OPT, null)
@@ -430,7 +430,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(ParseJsonFn.makeOptionsParameter(40)));
 
-        register("json-to-xml", 2, e -> e.populate(JsonToXMLFn::new, AnyItemType.getInstance(), OPT, LATE | NEW)
+        register("json-to-xml", 1, 2, e -> e.populate(JsonToXMLFn::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(JsonToXMLFn.makeOptionsParameter(40)));
@@ -523,11 +523,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
         //#endif
 
-        register("parse-integer", 1, e -> e.populate(ParseInteger::new, BuiltInAtomicType.INTEGER, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("parse-integer", 2, e -> e.populate(ParseInteger::new, BuiltInAtomicType.INTEGER, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+        register("parse-integer", 1, 2, e -> e.populate(ParseInteger::new, BuiltInAtomicType.INTEGER, OPT, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.INTEGER, OPT, null));
 
         register("parse-json", 2, e -> e.populate(ParseJsonFn::new, AnyItemType.getInstance(), OPT, 0)
@@ -567,8 +565,8 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-        register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+        register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, OPT, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
         register("pin", 1, e -> e.populate(com.saxonica.functions.extfn.PinFn::new, AnyItemType.getInstance(), ONE, 0)
                 .arg(0, AnyItemType.getInstance(), ONE, null));
