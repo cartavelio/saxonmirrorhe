@@ -11,15 +11,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.SequenceCoercer;
-import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -189,22 +186,20 @@ public class TypeChecker {
         if (uSupplied == UType.JNODE) {
             return true;
         }
-        if ((supplied instanceof ArrayItemType || supplied instanceof MapType) &&
-                required instanceof GNodeType) {
-            return true;
-        }
+//        if ((supplied instanceof ArrayItemType || supplied instanceof MapType) &&
+//                required instanceof GNodeType) {
+//            return true;
+//        }
         if (uRequired.overlaps(UType.ANY_ATOMIC)) {
-            switch (supplied.getGenre()) {
-                case XNODE: return true;
-                case JNODE:
-                    return true;
-                case ARRAY: return true;
-                case ATOMIC: return possiblePromotions(uSupplied).overlaps(uRequired);
-                case EXTERNAL: return true;
-                case ANY:
-                    return true;
-                default: return false;
-            }
+            return switch (supplied.getGenre()) {
+                case XNODE -> true;
+                case JNODE -> true;
+                case ARRAY -> true;
+                case ATOMIC -> possiblePromotions(uSupplied).overlaps(uRequired);
+                case EXTERNAL -> true;
+                case ANY -> true;
+                default -> false;
+            };
         }
         return false;
     }

@@ -14,7 +14,6 @@ import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -167,21 +166,15 @@ public final class IdentityComparison extends BinaryExpression {
      */
     @Override
     protected String tag() {
-        switch (operator) {
-            case IS:
-                return "is";
-            case IS_NOT:
-                return "is-not";
-            case PRECEDES:
-                return "precedes";
-            case FOLLOWS:
-                return "follows";
-            case PRECEDES_OR_IS:
-                return "precedes-or-is";
-            case FOLLOWS_OR_IS:
-                return "follows-or-is";
-            default: return "?";
-        }
+        return switch (operator) {
+            case IS -> "is";
+            case IS_NOT -> "is-not";
+            case PRECEDES -> "precedes";
+            case FOLLOWS -> "follows";
+            case PRECEDES_OR_IS -> "precedes-or-is";
+            case FOLLOWS_OR_IS -> "follows-or-is";
+            default -> "?";
+        };
     }
 
     /**
@@ -224,18 +217,15 @@ public final class IdentityComparison extends BinaryExpression {
 
     private boolean compareIdentity(GNode node0, GNode node1) {
 
-        switch (operator) {
-            case IS:
-                return node0.equals(node1);
-            case IS_NOT:
-                return !node0.equals(node1);
-            case PRECEDES:
-                return GlobalOrderComparer.getInstance().compare((NodeInfo)node0, (NodeInfo)node1) < 0;
-            case FOLLOWS:
-                return GlobalOrderComparer.getInstance().compare((NodeInfo)node0, (NodeInfo)node1) > 0;
-            default:
-                throw new UnsupportedOperationException("Unknown node identity test");
-        }
+        return switch (operator) {
+            case IS -> node0.equals(node1);
+            case IS_NOT -> !node0.equals(node1);
+            case PRECEDES -> GlobalOrderComparer.getInstance().compare(node0, node1) < 0;
+            case FOLLOWS -> GlobalOrderComparer.getInstance().compare(node0, node1) > 0;
+            case PRECEDES_OR_IS -> GlobalOrderComparer.getInstance().compare(node0, node1) <= 0;
+            case FOLLOWS_OR_IS -> GlobalOrderComparer.getInstance().compare(node0, node1) >= 0;
+            default -> throw new UnsupportedOperationException("Unknown node identity test");
+        };
     }
 
     private static GNode getNode(Expression exp, XPathContext c) throws XPathException {
@@ -322,8 +312,8 @@ public final class IdentityComparison extends BinaryExpression {
                     if (nullable0 || nullable1) {
                         if (generateIdEmulation) {
                             return context -> {
-                                NodeInfo v0 = (NodeInfo) p0.eval(context);
-                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                GNode v0 = (GNode) p0.eval(context);
+                                GNode v1 = (GNode) p1.eval(context);
                                 if (v0 == null) {
                                     return v1 == null;
                                 }
@@ -331,8 +321,8 @@ public final class IdentityComparison extends BinaryExpression {
                             };
                         } else {
                             return context -> {
-                                NodeInfo v0 = (NodeInfo) p0.eval(context);
-                                NodeInfo v1 = (NodeInfo) p1.eval(context);
+                                GNode v0 = (GNode) p0.eval(context);
+                                GNode v1 = (GNode) p1.eval(context);
                                 if (v0 == null || v1 == null) {
                                     return false;
                                 }
@@ -346,8 +336,8 @@ public final class IdentityComparison extends BinaryExpression {
                 case IS_NOT -> {
                     if (nullable0 || nullable1) {
                         return context -> {
-                            NodeInfo v0 = (NodeInfo) p0.eval(context);
-                            NodeInfo v1 = (NodeInfo) p1.eval(context);
+                            GNode v0 = (GNode) p0.eval(context);
+                            GNode v1 = (GNode) p1.eval(context);
                             if (v0 == null || v1 == null) {
                                 return false;
                             }

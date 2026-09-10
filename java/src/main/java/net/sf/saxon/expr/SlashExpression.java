@@ -20,8 +20,10 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.KeyFn;
+import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -29,6 +31,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.GNodeSequenceConverter;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
@@ -184,20 +187,37 @@ public class SlashExpression extends BinaryExpression
 
         int version = visitor.getStaticContext().getXPathVersion();
 
-        // The first operand must be of type gnode()*
-
         Configuration config = visitor.getConfiguration();
-        TypeChecker tc = config.getTypeChecker(false);
+        //TypeHierarchy th = config.getTypeHierarchy();
+
+        // The first operand must be of type gnode()*. This is a specific coercion,
+        // that wraps arrays and maps in gnodes: it's not something that falls out
+        // of the standard coercion rules.
+
         Supplier<RoleDiagnostic> roleSupplier =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, "XPTY0019");
+
+        if (version >= 40) {
+            ItemType lhsItemType = getLhsExpression().getItemType();
+            if (lhsItemType instanceof MapType || lhsItemType instanceof ArrayItemType) {
+                setStart(new GNodeSequenceConverter(getStart(), roleSupplier));
+            } else {
+                Affinity aff = Subsumption.computeRelationship(lhsItemType, AnyGNodeType.getInstance());
+                switch (aff) {
+                    case OVERLAPS:
+                    case SUBSUMES:
+                        setStart(new GNodeSequenceConverter(getStart(), roleSupplier));
+                        break;
+                    default:
+                        // no action
+                }
+            }
+        }
+
+        TypeChecker tc = config.getTypeChecker(false);
         SequenceType lhsType = version >= 40 ? SequenceType.GNODE_SEQUENCE : SequenceType.NODE_SEQUENCE;
         setStart(tc.staticTypeCheck(getStart(), lhsType, roleSupplier, visitor));
 
-//        if (visitor.getStaticContext().getXPathVersion() >= 40
-//                && !(getStart().getItemType() instanceof GNodeType)) {
-//            setStart(SequenceCoercer.makeSequenceCoercer(
-//                    getStart(), AnyGNodeType.getInstance().zeroOrMore(), roleSupplier, true));
-//        }
 
         // Now check the second operand
 

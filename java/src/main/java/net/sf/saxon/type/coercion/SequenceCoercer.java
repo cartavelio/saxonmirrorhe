@@ -13,7 +13,6 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -23,7 +22,6 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.Cardinality;
@@ -69,18 +67,16 @@ public class SequenceCoercer extends UnaryExpression {
         // Also, nodes are handled specially when streaming. So if the required type is a node type,
         // we use an ItemChecker and/or CardinalityChecker.
 
-        // TODO: where the required type is GNode or JNode, we're currently coercing a map or array
-        //   to a root JNode. This conversion should happen for the context item of an AxisExpression.
 
         ItemType requiredItemType = requiredType.getPrimaryType();
         Genre supplied = sequence.getItemType().getGenre();
         if (requiredItemType.isAtomicType() && supplied == Genre.XNODE) {
             sequence = new Atomizer(sequence, role);
         }
-        if (requiredItemType == AnyGNodeType.getInstance() && (supplied == Genre.ARRAY || supplied == Genre.MAP)) {
-            requiredType = SequenceType.makeSequenceType(AnyJNodeType.getInstance(), requiredType.getCardinality());
-            requiredItemType = AnyJNodeType.getInstance();
-        }
+//        if (requiredItemType == AnyGNodeType.getInstance() && (supplied == Genre.ARRAY || supplied == Genre.MAP)) {
+//            requiredType = SequenceType.makeSequenceType(AnyJNodeType.getInstance(), requiredType.getCardinality());
+//            requiredItemType = AnyJNodeType.getInstance();
+//        }
         if (requiredItemType instanceof XNodeType) {
             Expression result = sequence;
             if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
@@ -91,13 +87,13 @@ public class SequenceCoercer extends UnaryExpression {
             }
             return result;
         }
-        if (requiredItemType == AnyGNodeType.getInstance()) {
-            Expression result = sequence;
-            if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
-                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
-            }
-            return new GNodeSequenceConverter(result, role);
-        }
+//        if (requiredItemType == AnyGNodeType.getInstance()) {
+//            Expression result = sequence;
+//            if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+//                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+//            }
+//            return new GNodeSequenceConverter(result, role);
+//        }
         return new SequenceCoercer(sequence, requiredType, role, allow40);
     }
 

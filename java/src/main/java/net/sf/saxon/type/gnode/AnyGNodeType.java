@@ -12,7 +12,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.GNodeCoercionPlan;
 
 import java.util.Optional;
 
@@ -60,11 +59,12 @@ public final class AnyGNodeType extends GNodeType {
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        if (version < 4.0) {
-            return super.getCoercionPlan(version);
-        } else {
-            return GNodeCoercionPlan.getInstance();
-        }
+//        if (version < 4.0) {
+//            return super.getCoercionPlan(version);
+//        } else {
+//            return GNodeCoercionPlan.getInstance();
+//        }
+        return null;
     }
 
     /**

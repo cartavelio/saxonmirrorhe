@@ -18,6 +18,7 @@ import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.MapOrArray;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.MapType;
@@ -113,15 +114,7 @@ public final class GNodeSequenceConverter extends UnaryExpression {
             return operand;
         }
         Affinity arrayRelationship = th.relationship(ArrayItemType.ANY_ARRAY_TYPE, supplied);
-//        if (arrayRelationship == Affinity.SAME_TYPE || arrayRelationship == Affinity.SUBSUMES) {
-//            return convertToJNode();
-//        }
         Affinity mapRelationship = th.relationship(MapType.ANY_MAP_TYPE, supplied);
-//        if (mapRelationship == Affinity.SAME_TYPE || mapRelationship == Affinity.SUBSUMES) {
-//            return convertToJNode();
-//        }
-
-
 
         if (relation == Affinity.DISJOINT && mapRelationship == Affinity.DISJOINT && arrayRelationship == Affinity.DISJOINT) {
             if (Cardinality.allowsZero(card)) {
@@ -134,7 +127,6 @@ public final class GNodeSequenceConverter extends UnaryExpression {
                                                                     message, SaxonErrorCode.SXWN9026, getLocation());
                 }
             } else {
-                int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(AnyGNodeType.getInstance(), operand, th);
                 throw new XPathException(message)
@@ -299,6 +291,9 @@ public final class GNodeSequenceConverter extends UnaryExpression {
     @Override
     public ItemType getItemType() {
         ItemType operandType = getBaseExpression().getItemType();
+        if (operandType instanceof MapType || operandType instanceof ArrayItemType) {
+            return AnyJNodeType.getInstance();
+        }
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
         Affinity relationship = th.relationship(AnyGNodeType.getInstance(), operandType);
         return relationship == Affinity.SUBSUMES ? operandType : AnyGNodeType.getInstance();
