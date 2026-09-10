@@ -40,7 +40,8 @@ class ConfigurationReaderTest {
     @Nested
     class GlobalSection {
         private static Stream<Arguments> globalConfigFileOptions() {
-            return FeatureData.featureList.stream().filter(feat -> feat.configFileDetails.section == "global").map(feat -> Arguments.of(feat));
+            FeatureData.init();
+            return FeatureData.featureList.stream().filter(feat -> { return feat.configFileDetails.section == "global"; }).map(Arguments::of);
         }
 
         public Map<String, FeatureTestLambda> featureConfigFileTests = Map.ofEntries(
@@ -50,7 +51,7 @@ class ConfigurationReaderTest {
                     builder.elem("configuration", conf -> {
                         conf.attr("edition", "EE");
                         conf.elem("global", global -> {
-                            global.attr("allowedProtocols", "''");
+                            global.attr("allowedProtocols", "");
                         });
                     });
                 });
