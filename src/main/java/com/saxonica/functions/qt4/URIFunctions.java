@@ -13,11 +13,11 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Common declarations for BuildURI and ParseURI.
@@ -113,7 +113,11 @@ abstract public class URIFunctions extends SystemFunction {
             char ch = input.charAt(pos);
             if (ch == ' ') {
                 output.append("+");
-            } else if (ch == '=' || ch == '&' || ch == ';' || ch == '?' || ch == '#' || ch == '\'') {
+            } else if (// gen-delims
+                       (ch == ':' || ch == '/' || ch == '?' || ch == '#' || ch == '[' || ch == ']' || ch == '@')
+                       // sub-delims
+                        || (ch == '!' || ch == '$' || ch == '&' || ch == '\'' || ch == '"' || ch == '(' || ch == ')' || ch == '*'
+                            || ch == '+' || ch == ',' || ch == ';' || ch == '=')) {
                 output.append("%").append(toTwoHexDigits((int)ch));
             } else {
                 output.append(ch);
@@ -125,47 +129,5 @@ abstract public class URIFunctions extends SystemFunction {
     @CSharpReplaceBody(code="return String.Format(\"{0:X2}\", ch);")
     private String toTwoHexDigits(int ch) {
         return String.format("%02X", ch);
-    }
-
-    protected String decodeString(String value) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] hexenc = new byte[2];
-        byte[] replacementCharacter = new byte[] { (byte)0xEF, (byte)0xBF, (byte)0xBD }; // UTF-8
-        byte[] bytes = value.replace('+', ' ').getBytes(StandardCharsets.UTF_8);
-        int offset = 0;
-        while (offset < bytes.length) {
-            byte ch = bytes[offset];
-            if (ch == '%') {
-                if (offset+2 < bytes.length) {
-                    hexenc[0] = bytes[offset+1];
-                    hexenc[1] = bytes[offset+2];
-                    String hex = new String(hexenc, StandardCharsets.UTF_8);
-                    try {
-                        int hexbyte = Integer.parseInt(hex, 16);
-                        baos.write(hexbyte & 0xff);
-                    } catch (NumberFormatException ex) {
-                        baos.write(replacementCharacter, 0, replacementCharacter.length);
-                    }
-                    System.err.println(hex);
-                } else {
-                    baos.write(replacementCharacter, 0, replacementCharacter.length);
-                }
-                offset += 3;
-            } else {
-                baos.write(bytes, offset, 1);
-                offset++;
-            }
-        }
-
-        //byte[] inbytes = baos.toByteArray();
-        String xo = new String(baos.toByteArray(), StandardCharsets.UTF_8);
-        /*
-        offset = 0;
-        while (offset < xo.length()) {
-            int ch = xo.charAt(offset);
-            offset += Character.charCount(ch);
-        }
-         */
-        return xo;
     }
 }

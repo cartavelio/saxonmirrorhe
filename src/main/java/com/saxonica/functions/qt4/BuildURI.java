@@ -1,13 +1,15 @@
 package com.saxonica.functions.qt4;
 
-
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -20,10 +22,7 @@ public class BuildURI extends URIFunctions {
         return new RecordTest.Field(name, type, optional);
     }
 
-    private static RecordTest keyValueRecord = RecordTest.extensible(
-            f("key", SequenceType.SINGLE_STRING, true),
-            f("value", SequenceType.SINGLE_STRING, true)
-    );
+    private static final MapType STRING_MAP_TYPE = new MapType(BuiltInAtomicType.STRING, SequenceType.OPTIONAL_STRING);
 
     public static RecordTest uriStructureRecord = RecordTest.extensible(
             f("uri", SequenceType.SINGLE_STRING, true),
@@ -35,8 +34,8 @@ public class BuildURI extends URIFunctions {
             f("path", SequenceType.SINGLE_STRING, true),
             f("query", SequenceType.SINGLE_STRING, true),
             f("fragment", SequenceType.SINGLE_STRING, true),
-            f("path-segments", SequenceType.one(new ArrayItemType(SequenceType.SINGLE_STRING)), true),
-            f("query-parameters", SequenceType.one(new ArrayItemType(SequenceType.one(keyValueRecord))), true));
+            f("path-segments", SequenceType.STRING_SEQUENCE, true),
+            f("query-parameters", SequenceType.one(STRING_MAP_TYPE), true));
 
 
     @Override
@@ -95,11 +94,11 @@ public class BuildURI extends URIFunctions {
         }
 
         if (parts.get(PATH_SEGMENTS) != null) {
-            ArrayItem value = (ArrayItem) parts.get(PATH_SEGMENTS);
-            uri.append(hierarchical ? encodePathSegment(value.get(0)) : value.get(0).getStringValue());
-            for (int pos = 1; pos < value.arrayLength(); pos++) {
+            GroundedValue value = parts.get(PATH_SEGMENTS);
+            uri.append(hierarchical ? encodePathSegment(value.itemAt(0)) : value.itemAt(0).getStringValue());
+            for (int pos = 1; pos < value.getLength(); pos++) {
                 uri.append(pathSeparator);
-                uri.append(encodePathSegment(value.get(pos)));
+                uri.append(encodePathSegment(value.itemAt(pos)));
             }
         } else if (parts.get(PATH) != null) {
             uri.append(parts.get(PATH).getStringValue());
@@ -107,22 +106,20 @@ public class BuildURI extends URIFunctions {
 
         if (parts.get(QUERY_PARAMETERS) != null) {
             String sep = "?";
-            ArrayItem value = (ArrayItem) parts.get(QUERY_PARAMETERS);
-            for (int pos = 0; pos < value.arrayLength(); pos++) {
-                MapItem param = (MapItem) value.get(pos);
-                if (param.get(KEY) != null || param.get(VALUE) != null) {
+            for (KeyValuePair pair : ((MapItem) parts.get(QUERY_PARAMETERS)).keyValuePairs()) {
+                if (pair.key != null || pair.value != null) {
                     uri.append(sep);
                     sep = querySeparator;
-                    if (param.get(KEY) != null) {
-                        if (param.get(VALUE) != null) {
-                            uri.append(encodeOtherSegment(param.get(KEY)));
+                    if (pair.key != null && !pair.key.getStringValue().isEmpty()) {
+                        if (pair.value != null && pair.value.getLength() > 0) {
+                            uri.append(encodeOtherSegment(pair.key));
                             uri.append("=");
-                            uri.append(encodeOtherSegment(param.get(VALUE)));
+                            uri.append(encodeOtherSegment(pair.value));
                         } else {
-                            uri.append(encodeOtherSegment(param.get(KEY)));
+                            uri.append(encodeOtherSegment(pair.key));
                         }
                     } else {
-                        uri.append(encodeOtherSegment(param.get(VALUE)));
+                        uri.append(encodeOtherSegment(pair.value));
                     }
                 }
             }
