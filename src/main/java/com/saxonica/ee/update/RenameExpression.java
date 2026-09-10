@@ -1,6 +1,8 @@
 package com.saxonica.ee.update;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Operand;
+import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.UpdateElaborator;
@@ -217,16 +219,16 @@ public class RenameExpression extends BasicUpdatingExpression {
             ItemEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForItem();
             return (context, pul) -> {
                 NodeInfo node = (NodeInfo) targetEval.eval(context);
-                if (!node.getTreeInfo().isMutable()) {
-                    XPathException err = new XPathException("Node to be renamed is not updatable",
-                                                            SaxonErrorCode.SXUP0081);
-                    err.setLocation(expr.getLocation());
-                    throw err;
-                }
                 int nodeKind = node.getNodeKind();
                 if (!(nodeKind == Type.ELEMENT || nodeKind == Type.ATTRIBUTE || nodeKind == Type.PROCESSING_INSTRUCTION)) {
                     XPathException err = new XPathException(
                             "Node to be renamed is not an element, attribute, or processing-instruction", "XUTY0012");
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                if (!node.getTreeInfo().isMutable()) {
+                    XPathException err = new XPathException("Node to be renamed is not updatable",
+                                                            SaxonErrorCode.SXUP0081);
                     err.setLocation(expr.getLocation());
                     throw err;
                 }
