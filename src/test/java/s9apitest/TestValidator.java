@@ -1268,8 +1268,8 @@ public class TestValidator {
 
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, byteCodeOn);
-            proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, byteCodeOn);
-            proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
+            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, byteCodeOn);
+            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
             SchemaManager sm = proc.getSchemaManager();
             sm.load(new StreamSource(new StringReader(sch1)));
             XQueryCompiler comp = proc.newXQueryCompiler();
@@ -1327,7 +1327,7 @@ public class TestValidator {
             SchemaFactory proc = new SchemaFactoryImpl();
             proc.setProperty(FeatureKeys.GENERATE_BYTE_CODE, byteCodeOn);
             //proc.setProperty(Feature.DEBUG_BYTE_CODE.name, byteCodeOn);
-            proc.setProperty(FeatureKeys.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
+            //proc.setProperty(FeatureKeys.DEBUG_BYTE_CODE_DIR, ConfigTest.TEMP_DIR + "Saxon-bytecode");
             Schema sch = proc.newSchema(new StreamSource(new StringReader(sch1)));
             Validator val = sch.newValidator();
             StringBuilder sb = new StringBuilder();
