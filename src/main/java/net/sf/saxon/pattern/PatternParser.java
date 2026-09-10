@@ -177,7 +177,7 @@ public class PatternParser extends XPathParser {
             }
 
             if (exp instanceof FilterExpression && ((FilterExpression)exp).getBase() instanceof ContextItemExpression) {
-                if (allowXPath40Syntax && (pattern.startsWith("tuple") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
+                if (allowXPath40Syntax && (pattern.startsWith("tuple") || pattern.startsWith("record") || pattern.startsWith("map") || pattern.startsWith("array") || pattern.startsWith("union"))) {
                     // no action, this is OK
                 } else {
                     grumble("A predicatePattern can appear only at the outermost level (parentheses not allowed)");

@@ -15,6 +15,7 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.functions.ResolveQName;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Step;
@@ -1484,9 +1485,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         if (att.isPresent()) {
             String val = att.get().getStringValue().trim();
             if (val.equals("#unnamed")) {
-                return new QName(NamespaceConstant.XSLT, "unnamed");
+                return new QName(NamespaceUri.XSLT, "unnamed");
             } else if (val.equals("#default")) {
-                return new QName(NamespaceConstant.XSLT, "default");
+                return new QName(NamespaceUri.XSLT, "default");
             } else if (val.startsWith("{")) {
                 return new QName(StructuredQName.fromClarkName(val));
             } else if (val.startsWith("Q{")) {

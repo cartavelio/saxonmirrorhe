@@ -3995,7 +3995,7 @@ public class XPathParser {
             while (true) {
                 int peek = t.peekAhead();
                 Expression arg;
-                if (t.currentToken == Token.NAME && peek == Token.ASSIGN) {
+                if (t.currentToken == Token.NAME && peek == Token.ASSIGN && allowXPath40Syntax) {
                     // keyword argument
                     StructuredQName paramName = qNameParser.parse(t.currentTokenValue, NamespaceUri.NULL);
                     nextToken(); // read the operator

@@ -103,7 +103,7 @@ public class StringValue extends AtomicValue {
 
     public StringValue(String value, AtomicType typeLabel) {
         super(typeLabel);
-        this.content = StringView.of(value).tidy();
+        this.content = StringTool.fromCharSequence(value);
     }
 
     /**
