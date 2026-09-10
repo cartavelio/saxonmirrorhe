@@ -2356,7 +2356,7 @@ public class PackageLoaderHE implements IPackageLoader {
             SpecificFunctionType type = (SpecificFunctionType) loader.parseAlphaCode(element, "to").getPrimaryType();
             final String diag = element.getAttributeValue(NamespaceUri.NULL,"diag");
             Expression arg = loader.getFirstChildExpression(element);
-            String flags = element.getAttributeValue("", "flags");
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             boolean allow40 = flags != null && flags.contains("4");
             boolean acceptReducedArity = flags != null && flags.contains("r");
             return new FunctionSequenceCoercer(arg, type, () -> RoleDiagnostic.reconstruct(diag), allow40, acceptReducedArity);
@@ -2434,7 +2434,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (sep != null) {
                     forEach.setSeparatorExpression(sep);
                 }
-                String flags = element.getAttributeValue("", "flags");
+                String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
                 boolean containsTailCall = flags != null && flags.contains("t");
                 forEach.setContainsTailCall(containsTailCall);
                 return forEach;

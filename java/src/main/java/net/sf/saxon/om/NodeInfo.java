@@ -430,24 +430,6 @@ public interface NodeInfo extends GNode, Location
     String getAttributeValue(NamespaceUri uri, String local);
 
     /**
-     * Get the string value of a given attribute of this node
-     *
-     * <p>This method is retained for compatibility, but {@link #getAttributeValue(NamespaceUri, String)} is preferred.</p>
-     *
-     * @param uri   the namespace URI of the attribute name, as a string. Supply the empty string for an attribute
-     *              that is in no namespace
-     * @param local the local part of the attribute name.
-     * @return the attribute value if it exists, or null if it does not exist. Always returns null
-     * if this node is not an element.
-     * @since 9.4
-     */
-
-    /*@Nullable*/
-    default String getAttributeValue(String uri, String local) {
-        return getAttributeValue(uri.isEmpty() ? NamespaceUri.NULL : NamespaceUri.of(uri), local);
-    }
-
-    /**
      * Get the root node of the tree containing this node
      *
      * @return the NodeInfo representing the top-level ancestor of this node.
