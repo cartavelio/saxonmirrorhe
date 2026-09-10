@@ -1381,7 +1381,6 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
     std::cerr<<"inside phpNativeCall"<<std::endl;
 
-    return nullptr;
 
     //JNIEnv *senv = SaxonProcessor::sxn_environ->env;
     //char *nativeString = functionName;

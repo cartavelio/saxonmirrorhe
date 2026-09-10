@@ -932,7 +932,7 @@ function userFunction($param , $param2)
                                                         "      ],".
                                                         "      \"arity\": [1]" .
                                                         "    }".
-                                                        "}", False);
+                                                        "}", True);
 
          $xpathProc = $saxonProc1->newXPathProcessor();
          $xpathProc->declareNamespace("dy", "http://www.example.com");
