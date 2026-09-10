@@ -104,6 +104,7 @@ val preprocessJava = tasks.register<JavaExec>("preprocessJava") {
                  include("net/sf/saxon/**/*.java")
                  include("net/sf/saxon/data/**")
                  exclude("**/package-info.java")
+                 exclude("net/sf/saxon/CommandExitException.java")
                  exclude("net/sf/saxon/dotnet/**")
                  exclude("net/sf/saxon/event/ContentHandlerProxy.java")
                  exclude("net/sf/saxon/event/ContentHandlerProxyLocator.java")
