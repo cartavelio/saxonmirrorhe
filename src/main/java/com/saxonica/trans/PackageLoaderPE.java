@@ -137,7 +137,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
             SymbolicName.F sName = new SymbolicName.F(name, args.length);
             StaticContext env = new IndependentContext(loader.getConfiguration());
             List<String> reasons = new ArrayList<>();
-            Expression exp = lib.bind(sName, args, env, reasons);
+            Expression exp = lib.bind(sName, args, null, env, reasons);
             if (exp == null) {
                 StringBuilder msg = new StringBuilder("Failed to load Java extension function " + name.getEQName());
                 for (String reason : reasons) {
