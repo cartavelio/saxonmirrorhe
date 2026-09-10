@@ -18,15 +18,12 @@ import net.sf.saxon.functions.PushableFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.FunctionItemType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
@@ -40,22 +37,15 @@ import java.util.Map;
  */
 public class XMLToJsonFn extends SystemFunction implements PushableFunction {
 
-    private final static FunctionItemType formatterFunctionType = new SpecificFunctionType(
-            new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING
-    );
-
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter xmlToJsonOptions = new OptionsParameter(version);
         xmlToJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        xmlToJsonOptions.addAllowedOption("number-formatter",
-                                          SequenceType.optional(formatterFunctionType),
-                                          EmptySequence.getInstance());
         return xmlToJsonOptions;
     }
 
     private static class Options {
         public boolean indent;
-        public FunctionItem numberFormatter;
+        public boolean retainNumberFormat;
     }
 
     @Override
@@ -75,21 +65,18 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
     }
 
     private Options getOptions(XPathContext context, Sequence[] arguments) throws XPathException {
+        Options o = new Options();
+        o.retainNumberFormat = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
         if (getArity() > 1) {
             MapItem suppliedOptions = (MapItem) arguments[1].head();
             if (suppliedOptions == null) {
                 suppliedOptions = new DictionaryMap();
             }
             Map<String, GroundedValue> options = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
-            Options o = new Options();
             o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
-            Sequence format = options.get("number-formatter");
-            if (format != null) {
-                o.numberFormatter = (FunctionItem)format.head();
-            }
             return o;
         } else {
-            return new Options();
+            return o;
         }
     }
 
@@ -109,9 +96,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
         pipe.setXPathContext(context);
         JsonReceiver receiver = new JsonReceiver(pipe, context, output);
         receiver.setIndenting(options.indent);
-        if (options.numberFormatter != null) {
-            receiver.setNumberFormatter(options.numberFormatter);
-        }
+        receiver.setRetainNumberFormat(options.retainNumberFormat);
         Receiver r = receiver;
         if (xml.getNodeKind() == Type.DOCUMENT) {
             r = new DocumentValidator(r, "FOJS0006");

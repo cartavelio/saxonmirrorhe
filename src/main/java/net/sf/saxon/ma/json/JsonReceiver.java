@@ -10,8 +10,8 @@ package net.sf.saxon.ma.json;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
+import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
@@ -20,7 +20,6 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.StringToDouble11;
-import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.HashSet;
@@ -44,8 +43,8 @@ public class JsonReceiver implements Receiver {
     private boolean atStart = true;
     private boolean indenting = false;
     private boolean escaped = false;
+    private boolean retainNumberFormat = false;
     private final Stack<Set<String>> keyChecker = new Stack<>();
-    private FunctionItem numberFormatter = null;
     private static final String ERR_INPUT = "FOJS0006";
 
     public JsonReceiver(PipelineConfiguration pipe, XPathContext context, UniStringConsumer output) {
@@ -79,13 +78,8 @@ public class JsonReceiver implements Receiver {
         return indenting;
     }
 
-    public void setNumberFormatter(FunctionItem formatter) {
-        assert formatter.getArity() == 1;
-        this.numberFormatter = formatter;
-    }
-
-    public FunctionItem getNumberFormatter() {
-        return this.numberFormatter;
+    public void setRetainNumberFormat(boolean flag) {
+        this.retainNumberFormat = flag;
     }
 
     @Override
@@ -256,6 +250,8 @@ public class JsonReceiver implements Receiver {
         }
     }
 
+    private final static UnicodeString ZERO = new UnicodeChar('0');
+    private final static UnicodeString MINUS_ZERO = new Twine8("-0");
     @Override
     public void endElement() throws XPathException {
         NodeName name = stack.pop();
@@ -271,7 +267,48 @@ public class JsonReceiver implements Receiver {
                 throw new XPathException("xml-to-json: Value of <boolean> element is not a valid xs:boolean", ERR_INPUT);
             }
         } else if (local.equals("number")) {
-            if (numberFormatter == null) {
+            if (retainNumberFormat) {
+                // 4.0 path
+                try {
+                    double d = StringToDouble11.getInstance().stringToNumber(uContent);
+                    if (Double.isNaN(d) || Double.isInfinite(d)) {
+                        throw new XPathException("xml-to-json: Infinity and NaN are not allowed", ERR_INPUT);
+                    }
+                } catch (NumberFormatException e) {
+                    throw new XPathException("xml-to-json: Invalid number: " + textBuffer, ERR_INPUT);
+                }
+                uContent = Whitespace.trim(uContent);
+                boolean negative = false;
+                if (uContent.codePointAt(0) == '+') {
+                    uContent = uContent.substring(1);
+                } else if (uContent.codePointAt(0) == '-') {
+                    uContent = uContent.substring(1);
+                    negative = true;
+                }
+                // Strip unnecessary leading zeros
+                while (uContent.codePointAt(0) == '0' && uContent.length() > 1 &&
+                        uContent.codePointAt(1) != '.' &&
+                        uContent.codePointAt(1) != 'e' && uContent.codePointAt(1) != 'E') {
+                    uContent = uContent.substring(1);
+                }
+                if (uContent.codePointAt(0) == '.') {
+                    uContent = new UnicodeChar('0').concat(uContent);
+                }
+                if (negative) {
+                    uContent = new UnicodeChar('-').concat(uContent);
+                }
+                if (uContent.codePointAt(uContent.length()-1) == '.') {
+                    uContent = uContent.concat(new UnicodeChar('0'));
+                    // TODO hande 1.e-6, allowed in XSD and not in JSON
+                }
+                output.accept(uContent);
+//                if (uContent.codePointAt(0) == '-' || uContent.hasSubstring(MINUS_ZERO, 0)) {
+//                    output.accept(stripLeadingZeros(uContent));
+//                } else {
+//                    output.accept(uContent);
+//                }
+            } else {
+                // 3.1 path
                 try {
                     double d = StringToDouble11.getInstance().stringToNumber(uContent);
                     if (Double.isNaN(d) || Double.isInfinite(d)) {
@@ -281,10 +318,6 @@ public class JsonReceiver implements Receiver {
                 } catch (NumberFormatException e) {
                     throw new XPathException("xml-to-json: Invalid number: " + textBuffer, ERR_INPUT);
                 }
-            } else {
-                Sequence result = SystemFunction.dynamicCall(
-                        numberFormatter, context, new StringValue(uContent));
-                output.accept(((StringValue)result).getUnicodeStringValue());
             }
 
         } else if (local.equals("string")) {
@@ -309,6 +342,12 @@ public class JsonReceiver implements Receiver {
             output.accept(BMPString.of(base));
         }
         atStart = false;
+    }
+
+    private final static ARegularExpression stripper = ARegularExpression.compile("^(-?)(\\+?0*)([0-9].*)", "");
+    private final static UnicodeString replacement = new Twine8("$1$3");
+    private UnicodeString stripLeadingZeros(UnicodeString str) throws XPathException {
+        return stripper.replace(str, replacement);
     }
 
     /**
