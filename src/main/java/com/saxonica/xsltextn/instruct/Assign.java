@@ -58,11 +58,13 @@ public class Assign extends Instruction implements BindingReference {
     public Expression typeCheck(ExpressionVisitor visitor,
                                 ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
-        TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        Supplier<RoleDiagnostic> role =
-                () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
-        selectOp.setChildExpression(
-                tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
+        if (binding.getRequiredType() != null) { // bug #5924
+            TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
+            selectOp.setChildExpression(
+                    tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
+        }
         return this;
     }
 
