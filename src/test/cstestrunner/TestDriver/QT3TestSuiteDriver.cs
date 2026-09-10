@@ -878,7 +878,7 @@ namespace TestDriver {
                 assertXpc.DeclareNamespace("j", "http://www.w3.org/2005/xpath-functions");
                 assertXpc.DeclareVariable(new QName("result"));
                 assertXpc.BaseUri = assertion.BaseUri;
-                assertXpc.XPathLanguageVersion = "4.0";
+                //assertXpc.XPathLanguageVersion = "4.0";
                 bool b = outcome.TestAssertion(outcome, assertion, outcome.GetPrincipalResultDoc(), assertXpc, xpc,
                     debug);
                 if (b) {
