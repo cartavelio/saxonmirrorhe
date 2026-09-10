@@ -753,8 +753,12 @@ public class ParseOptions {
 
     @CSharpReplaceBody(code="return withProperty(Key.DTD_VALIDATION, option);")
     public ParseOptions withDTDValidationMode(int option) {
-        return withParserFeature("http://xml.org/sax/features/validation",
-                                 option == Validation.STRICT || option == Validation.LAX);
+        return
+        //#if CSHARP==false
+                withParserFeature("http://xml.org/sax/features/validation",
+                          option == Validation.STRICT || option == Validation.LAX).
+        //#endif
+                withProperty(Key.DTD_VALIDATION, option);
     }
 
     /**
