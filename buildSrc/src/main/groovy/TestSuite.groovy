@@ -14,8 +14,10 @@ class TestSuite {
                    "XQ20": "XQuery2.0",
                    "XQ30": "XQuery3.0",
                    "XQ31": "XQuery3.1"]
+  private def errorsReported = [:]
 
   Project project
+  boolean configOk = true
   String suite = null
   String testRelease = null
   String testTaskName = null
@@ -38,6 +40,7 @@ class TestSuite {
   }
 
   private void reset(String suiteName) {
+    configOk = true
     suite = suiteName
     testRelease = null
     testTaskName = null
@@ -99,13 +102,21 @@ class TestSuite {
 
   private void require(String name, Object value) {
     if (value == null) {
-      throw new GradleException("Missing required property in ${suite} test configuration: ${name}")
+      configOk = false
+      if (!errorsReported.containsKey(suite)) {
+        println("Missing required property in ${suite} test configuration: ${name}")
+        errorsReported[suite] = true
+      }
     }
   }
 
   private void forbid(String name, Object value) {
     if (value != null) {
-      throw new GradleException("Unknown property in ${suite} test configuration: ${name}")
+      if (!errorsReported.containsKey(suite)) {
+        println("Unknown property in ${suite} test configuration: ${name}")
+        errorsReported[suite] = true
+      }
+      configOk = false
     }
   }
 
@@ -280,6 +291,19 @@ class TestSuite {
     return path
   }
 
+  def setupInvalidConfig(String testName) {
+    project.task(testTaskName) {
+      doLast {
+        throw new GradleException("Cannot run task, configuration is incorrect.")
+      }
+    }
+    project.task("debug_${testTaskName}") {
+      doLast {
+        throw new GradleException("Cannot run task, configuration is incorrect.")
+      }
+    }
+  }
+
   def qt3(Closure cl) {
     reset("qt3")
     cl.delegate = this
@@ -302,6 +326,11 @@ class TestSuite {
 
     if (testDebug) {
       dumpConfiguration()
+    }
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
     }
 
     project.task(testTaskName, type: JavaExec) {
@@ -408,6 +437,11 @@ class TestSuite {
       dumpConfiguration()
     }
 
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
+    }
+
     project.task(testTaskName, type: JavaExec) {
       inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file "${testReportDirectory}/${testReportFilename}.xml"
@@ -506,6 +540,11 @@ class TestSuite {
 
     if (testDebug) {
       dumpConfiguration()
+    }
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
     }
 
     project.task(testTaskName, type: JavaExec) {
@@ -608,6 +647,11 @@ class TestSuite {
 
     if (testDebug) {
       dumpConfiguration()
+    }
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
     }
 
     project.task(testTaskName, type: JavaExec) {
@@ -719,6 +763,11 @@ class TestSuite {
 
     if (testDebug) {
       dumpConfiguration()
+    }
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
     }
 
     project.task(testTaskName, type: JavaExec) {
@@ -851,6 +900,11 @@ class TestSuite {
 
     if (testDebug) {
       dumpConfiguration()
+    }
+
+    if (!configOk) {
+      setupInvalidConfig(testTaskName)
+      return
     }
 
     project.task(testTaskName, type: JavaExec) {
