@@ -441,6 +441,9 @@ public abstract class HTMLEmitter extends XMLEmitter {
         }
 
         if (isEmptyTag(name) && isHTMLElement(nodeName)) {
+            if (openStartTag) {
+                closeStartTag();
+            }
             // no end tag required
             elementStack.pop();
         } else {
