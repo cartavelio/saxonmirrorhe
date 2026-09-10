@@ -48,12 +48,10 @@ const char *XdmValue::toString(const char *encoding) {
 
   if (count == 0) {
     toStringValuei =
-        xdmItemToString(thread, (void *)fn,
-                        nullptr, nullptr);
+        xdmItemToString(thread, (void *)fn, nullptr, nullptr);
   } else if (count == 1) {
     toStringValuei =
-        xdmItemToString(thread, (void *)fn,
-                        (void *)(values[0]->getUnderlyingValue()), (char *) encoding);
+        xdmItemToString(thread, (void *)fn, (void *)(values[0]->getUnderlyingValue()), (char *) encoding);
   } else {
     if (jValues == -1) {
       jValues = getUnderlyingValue();
@@ -104,8 +102,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
   int typeRef = 0;
 
   for (int p = 1; p <= xdmSizei; ++p) {
-    typeRef = j_getXdmObjectType(thread,
-                                 (void *)results[p]);
+    typeRef = j_getXdmObjectType(thread, (void *)results[p]);
 #ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++ XdmValue - typeRef= " << typeRef << std::endl;

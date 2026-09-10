@@ -108,7 +108,8 @@ const char *SaxonApiException::getErrorCode() {
   if (errorCode.empty() && !cppException) {
     allocFn fn = operator new;
     char *tempm = nullptr;
-    tempm = j_getErrorCode(SaxonProcessor::sxn_environ->thread, (void *)fn);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    tempm = j_getErrorCode(thread, (void *)fn);
     if (tempm == nullptr) {
       return nullptr;
     }
@@ -120,7 +121,8 @@ const char *SaxonApiException::getErrorCode() {
 
 int SaxonApiException::getLineNumber() {
   if (lineNumber == -1 && !cppException) {
-    lineNumber = j_getLineNumber(SaxonProcessor::sxn_environ->thread);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    lineNumber = j_getLineNumber(thread);
   }
   return lineNumber;
 }
@@ -143,12 +145,12 @@ const char *SaxonApiException::getMessage() {
   if (message.empty() && !cppException) {
     allocFn fn = operator new;
     char *tempm = nullptr;
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     if (isStaticError) {
-      tempm = j_getCombinedStaticErrorMessages(
-          SaxonProcessor::sxn_environ->thread, (void *)fn);
+      tempm = j_getCombinedStaticErrorMessages(thread, (void *)fn);
     } else {
       tempm =
-          j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
+          j_getErrorMessage(thread, (void *)fn);
     }
     if (tempm == nullptr) {
       return nullptr;
@@ -167,12 +169,11 @@ const char *SaxonApiException::getMessageWithErrorCode() {
   } else if (ec_message.empty()) {
     allocFn fn = operator new;
     char *tempm = nullptr;
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     if (isStaticError) {
-      tempm = j_getCombinedStaticErrorMessages(
-          SaxonProcessor::sxn_environ->thread, (void *)fn);
+      tempm = j_getCombinedStaticErrorMessages(thread, (void *)fn);
     } else {
-      tempm = j_getErrorMessageWithErrorCode(
-          SaxonProcessor::sxn_environ->thread, (void *)fn);
+      tempm = j_getErrorMessageWithErrorCode(thread, (void *)fn);
     }
     if (tempm == nullptr) {
       return nullptr;
@@ -187,8 +188,8 @@ const char *SaxonApiException::getCombinedStaticErrorMessages() {
   if (s_message.empty() && !cppException) {
     allocFn fn = operator new;
     char *tempm = nullptr;
-    tempm = j_getCombinedStaticErrorMessages(
-        SaxonProcessor::sxn_environ->thread, (void *)fn);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    tempm = j_getCombinedStaticErrorMessages(thread, (void *)fn);
     if (tempm == nullptr) {
       return nullptr;
     }
@@ -199,5 +200,6 @@ const char *SaxonApiException::getCombinedStaticErrorMessages() {
 }
 
 int SaxonApiException::staticErrorCount() {
-  return j_staticErrorCount(SaxonProcessor::sxn_environ->thread);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  return j_staticErrorCount(thread);
 }

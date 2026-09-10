@@ -23,10 +23,9 @@ XPathProcessor::XPathProcessor(SaxonProcessor *p, std::string curr) {
     proc = p;
     xp_baseURI = nullptr;
     unprefixedElementPolicy = UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE;
-    // SaxonProcessor::attachCurrentThread();
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
-    cppXP = createXPathProcessorWithProcessor(SaxonProcessor::sxn_environ->thread,
-                                              (void *) p->procRef);
+    cppXP = createXPathProcessorWithProcessor(thread, (void *) p->procRef);
 
     if (cppXP == SXN_UNSET) {
         throw SaxonApiException(
@@ -52,9 +51,10 @@ XPathProcessor::XPathProcessor(SaxonProcessor *p, std::string curr) {
 }
 
 XPathProcessor::XPathProcessor(const XPathProcessor &other) {
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     cwdXP = other.cwdXP;
     proc = other.proc;
-    cppXP = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppXP);
+    cppXP = j_copy_handles(thread, (void *)other.cppXP);
     if(cppXP == SXN_EXCEPTION) {
         throw SaxonApiException();
     }
@@ -82,14 +82,14 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
 }
 
 XPathProcessor::~XPathProcessor() {
-    SaxonProcessor::attachCurrentThread();
     clearProperties();
     clearParameters();
     if (xp_baseURI != nullptr) {
         operator delete(xp_baseURI);
     }
     if (cppXP != SXN_UNSET) {
-        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *) cppXP);
+        graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+        j_handles_destroy(thread, (void *) cppXP);
         cppXP = SXN_UNSET;
     }
 }
@@ -127,7 +127,6 @@ XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr,
     if (xpathStr == nullptr) {
         throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
     }
-    SaxonProcessor::attachCurrentThread();
 
     setProperty("resources", proc->getResourcesDirectory());
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
@@ -240,8 +239,7 @@ void XPathProcessor::declareVariable(const char *name) {
         return;
     }
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-    j_xp_declareVariable(thread, (void *) cppXP,
-                         (char *) name);
+    j_xp_declareVariable(thread, (void *) cppXP, (char *) name);
 }
 
 #if CVERSION_API_NO >= 121

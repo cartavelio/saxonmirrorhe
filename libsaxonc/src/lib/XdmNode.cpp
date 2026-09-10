@@ -166,6 +166,7 @@ const char *XdmNode::getNodeName() {
     return nodeName;
   }
   allocFn fn = operator new;
+  graal_isolatethread_t *thread = nullptr;
   XDM_NODE_KIND kind = getNodeKind();
   switch (kind) {
   case DOCUMENT:
@@ -176,8 +177,8 @@ const char *XdmNode::getNodeName() {
   case NAMESPACE:
   case ELEMENT:
   case ATTRIBUTE:
-    nodeName = j_getNodeName(SaxonProcessor::sxn_environ->thread, (void *)fn,
-                             (void *)value);
+      thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+      nodeName = j_getNodeName(thread, (void *)fn, (void *)value);
     return nodeName;
   default:
     return nullptr;
@@ -187,15 +188,18 @@ const char *XdmNode::getNodeName() {
 // TODO we still don't know if the result is an XdmAtomicValue, EmptySequence or
 // XdmValue
 XdmValue *XdmNode::getTypedValue() {
-  return SaxonProcessor::makeXdmValueFromRef(j_getTypedValue(SaxonProcessor::sxn_environ->thread, (void *)value));
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  return SaxonProcessor::makeXdmValueFromRef(j_getTypedValue(thread, (void *)value));
 }
 
 int XdmNode::getLineNumber(){
-    return j_getLineNumber1(SaxonProcessor::sxn_environ->thread, (void *)value);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    return j_getLineNumber1(thread, (void *)value);
 }
 
 int XdmNode::getColumnNumber() {
-    return j_getColumnNumber1(SaxonProcessor::sxn_environ->thread, (void *)value);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    return j_getColumnNumber1(thread, (void *)value);
 }
 
 XdmItem *XdmNode::getHead() { return this; }
@@ -206,8 +210,8 @@ const char *XdmNode::toString(const char *encoding) {
   const char *nodeToStringi = nullptr;
   // if (nodeToString == nullptr) {
   allocFn fn = operator new;
-  nodeToStringi = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
-                                  (void *)fn, (void *)value, (char *)encoding);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  nodeToStringi = xdmNodeToString(thread,(void *)fn, (void *)value, (char *)encoding);
   if (nodeToStringi == nullptr) {
     throw SaxonApiException();
   }
@@ -220,14 +224,14 @@ const char *XdmNode::getBaseUri() {
     return baseURI;
   }
   allocFn fn = operator new;
-  baseURI = getBaseURIForXdmNode(SaxonProcessor::sxn_environ->thread,
-                                 (void *)fn, (void *)value);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  baseURI = getBaseURIForXdmNode(thread, (void *)fn, (void *)value);
   return baseURI;
 }
 
 XdmNode *XdmNode::getParent() {
-    int64_t nodeRef =
-        getParentForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)value);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    int64_t nodeRef = getParentForXdmNode(thread, (void *)value);
     if (nodeRef > SXN_UNSET) {
       return new XdmNode(nullptr, nodeRef, UNKNOWN);
     }
@@ -239,11 +243,11 @@ const char *XdmNode::getAttributeValue(const char *str) {
     return nullptr;
   }
   allocFn fn = operator new;
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   const char *stri =
-      j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value,
-                          (char *)str, (void *)fn);
+      j_getAttributeValue(thread, (void *)value, (char *)str, (void *)fn);
 
-  if((bool)j_checkForException(SaxonProcessor::sxn_environ->thread)) {
+  if((bool)j_checkForException(thread)) {
     throw SaxonApiException();
   }
 
@@ -256,8 +260,8 @@ XdmNode **XdmNode::getAttributeNodes(bool cached) {
   } else {
     getAttributeCount();
     allocFn fn = operator new;
-    long long *results = j_getAttributeNodes(
-        SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    long long *results = j_getAttributeNodes(thread, (void *)fn, (void *)value);
 
     if (attrCount == 0) {
       return nullptr;
@@ -283,8 +287,8 @@ int XdmNode::axisNodeCount() {return axisCount; }
 
 XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
   allocFn fn = operator new;
-  long long *results = j_axisIterator(SaxonProcessor::sxn_environ->thread,
-                                      (void *)fn, (void *)value, int(axis));
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  long long *results = j_axisIterator(thread, (void *)fn, (void *)value, int(axis));
   if (results == nullptr) {
     axisCount = 0;
     return nullptr;
@@ -312,17 +316,16 @@ XdmNode **XdmNode::axisNodes(EnumXdmAxis axis) {
 
 int XdmNode::getAttributeCount() {
   if (attrCount == -1) {
-
-    attrCount =
-        j_getAttributeCount(SaxonProcessor::sxn_environ->thread, (void *)value);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    attrCount = j_getAttributeCount(thread, (void *)value);
   }
   return attrCount;
 }
 
 int XdmNode::getChildCount() {
   if (childCount == -1) {
-    childCount =
-        j_getChildCount(SaxonProcessor::sxn_environ->thread, (void *)value);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    childCount = j_getChildCount(thread, (void *)value);
   }
   return childCount;
 }
@@ -337,8 +340,8 @@ XdmNode **XdmNode::getChildren(bool cached) {
   }
 
   allocFn fn = operator new;
-  long long *childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread,
-                                        (void *)fn, (void *)value);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  long long *childNodes = j_getChildren(thread, (void *)fn, (void *)value);
   if (childNodes == nullptr) {
     return nullptr;
   }
@@ -356,9 +359,8 @@ XdmNode *XdmNode::getChild(int i, bool cached) {
   }
 
   XdmNode *child = nullptr;
-
-  int64_t childRef =
-      j_getChild(SaxonProcessor::sxn_environ->thread, (void *)value, i);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t childRef = j_getChild(thread, (void *)value, i);
 
   if (childRef == SXN_UNSET) {
     return nullptr;

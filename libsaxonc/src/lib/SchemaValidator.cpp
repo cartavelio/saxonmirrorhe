@@ -144,7 +144,6 @@ void SchemaValidator::registerSchemaFromNode(XdmNode *node) {
 }
 
 void SchemaValidator::registerSchemaFromFile(const char *sourceFile) {
-  SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (sourceFile == nullptr) {
     throw SaxonApiException("Error: sourceFile string cannot be empty or NULL");
@@ -215,7 +214,6 @@ void SchemaValidator::registerSchemaFromString(const char *sourceStr,
 }
 
 void SchemaValidator::validate(const char *sourceFile) {
-  SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (lax) {
     setProperty("lax", "1");
@@ -241,7 +239,6 @@ void SchemaValidator::validate(const char *sourceFile) {
 }
 
 XdmNode *SchemaValidator::validateToNode(const char *sourceFile) {
-  SaxonProcessor::attachCurrentThread();
   setProperty("resources", proc->getResourcesDirectory());
   if (lax) {
     setProperty("lax", "1");

@@ -313,9 +313,9 @@ void SaxonProcessor::initialize(bool l) {
               << jvmCreatedCPP << std::endl;
 #endif
   }
-  SaxonProcessor::attachCurrentThread();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef =
-      createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
+      createSaxonProcessor2(thread, (int)l);
 
   if (procRef == SXN_EXCEPTION) {
     throw SaxonApiException();
@@ -438,20 +438,20 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
               << jvmCreatedCPP << std::endl;
 #endif
   }
-  procRef = createSaxonProcessorWithConfigurationFile(
-      (SaxonProcessor::sxn_environ->thread), (char *)configFile);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  procRef = createSaxonProcessorWithConfigurationFile(thread, (char *)configFile);
   if (procRef == SXN_EXCEPTION) {
     throw SaxonApiException();
     //"Failed to create SaxonProcessor object - with configuration file");
   }
 
 #ifdef DEBUG
-  setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
+  setDebugMode(thread, 1);
 #endif
 }
 
 SaxonProcessor::~SaxonProcessor() {
-  SaxonProcessor::attachCurrentThread();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   clearConfigurationProperties();
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~SaxonProcessor destructor:"
@@ -463,31 +463,30 @@ SaxonProcessor::~SaxonProcessor() {
                 << " ob ref=" << (this) << std::endl;
     }
     // SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+    j_handles_destroy(thread, (void *)procRef);
     procRef = SXN_UNSET;
   }
   if (!versionStr.empty()) {
 
     versionStr.clear();
   }
-  // exceptionClear();
 }
 
 bool SaxonProcessor::isLicensed() {
-  SaxonProcessor::attachCurrentThread();
   if (!licensei) {
     return false;
   }
   if (procRef < 0) {
       return false;
   }
-  return j_isLicensed(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  return j_isLicensed(thread, (void *)procRef);
 }
 
 
 const char * SaxonProcessor::getSaxonEdition() {
-  SaxonProcessor::attachCurrentThread();
-  return j_c_getSaxonEdition(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  return j_c_getSaxonEdition(thread, (void *)procRef);
 }
 
 void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes) {
@@ -525,7 +524,6 @@ void SaxonProcessor::registerUserFunction(const char * ns1, XdmValue * (*func)(i
 }
 
 bool SaxonProcessor::isSchemaAwareProcessor() {
-  SaxonProcessor::attachCurrentThread();
   if (!licensei) {
     return false;
   } else {
@@ -533,14 +531,14 @@ bool SaxonProcessor::isSchemaAwareProcessor() {
     if (procRef < 0) {
       return false;
     }
-    licensei =
-        j_isSchemaAware(SaxonProcessor::sxn_environ->thread, (void *)procRef);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    licensei = j_isSchemaAware(thread, (void *)procRef);
     return licensei;
   }
 }
 
 void SaxonProcessor::applyConfigurationProperties() {
- SaxonProcessor::attachCurrentThread();
+
  /* if (configProperties.size() > 0) {
     int size = configProperties.size();
     int64_t processorDataRef = createProcessorDataWithCapacity(
@@ -570,8 +568,7 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
   if (results > 0) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     XdmValue *value = nullptr;
-    int typeRef = j_getXdmObjectType(thread,
-                                     (void *)results);
+    int typeRef = j_getXdmObjectType(thread, (void *)results);
 #ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++ makeXdmValueFromRef - typeRef= " << typeRef
@@ -605,7 +602,7 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     } else if (typeRef == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
-      j_handles_destroy(sxn_environ->thread, (void *)results);
+      j_handles_destroy(thread, (void *)results);
       results = SXN_UNSET;
       return nullptr;
 
@@ -623,18 +620,14 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
 
  void SaxonProcessor::destroyHandle(sxnc_environment *sxn_environ, int64_t handleRef){
 
-   //SaxonProcessor::attachCurrentThread();
-   j_handles_destroy(sxn_environ->thread,
-                    (void *)handleRef);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+   j_handles_destroy(thread,(void *)handleRef);
  }
 
 XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
   if (results > 0) {
-    if (sxn_environ == nullptr) {
-      sxn_environ = SaxonProcessor::sxn_environ;
-    }
-    int typeRef = j_getXdmObjectType(sxn_environ->thread,
-                                     (void *)results);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    int typeRef = j_getXdmObjectType(thread, (void *)results);
 
     XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
     XdmItem *xdmItem = nullptr;
@@ -659,7 +652,7 @@ XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
     } else if (xdm_type == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
-      j_handles_destroy(sxn_environ->thread, (void *)results);
+      j_handles_destroy(thread, (void *)results);
       results = SXN_UNSET;
       return nullptr;
 
@@ -678,14 +671,12 @@ XdmItem *SaxonProcessor::makeXdmItemFromRef(int64_t results) {
 
 int64_t SaxonProcessor::createJArray(XdmValue **values, int length) {
   if (length > 0) {
-    int64_t processorDataRef = createProcessorDataWithCapacity(
-        SaxonProcessor::sxn_environ->thread, length);
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    int64_t processorDataRef = createProcessorDataWithCapacity(thread, length);
 
     for (int i = 0; i < length; i++) {
 
-      addProcessorValue(SaxonProcessor::sxn_environ->thread,
-                        (void *)processorDataRef,
-                        (void *)(values[i])->getUnderlyingValue());
+      addProcessorValue(thread,(void *)processorDataRef, (void *)(values[i])->getUnderlyingValue());
     }
 
     return processorDataRef;
@@ -782,30 +773,9 @@ int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *>
 
 #endif
 
-      addProcessorDataPair(sxn_environ->thread,
-                           (void *)processorDataRef,
+      addProcessorDataPair(thread,(void *)processorDataRef,
                            (char *)(iter->first).c_str(),
                            (void *)(iter->second)->getUnderlyingValue());
-      /*#ifdef DEBUG
-                  std::string s1 = typeid(iter->second).name();
-                  std::cerr<<"Type of itr:"<<s1<<std::endl;
-
-                  if((iter->second) == nullptr) {std::cerr<<"iter->second is
-      nullptr"<<std::endl; } else { std::cerr<<"getting underlying
-      value"<<std::endl; jobject xx = (iter->second)->getUnderlyingValue();
-
-                  if(xx == nullptr) {
-                      std::cerr<<"value failed"<<std::endl;
-                  } else {
-
-                      std::cerr<<"Type of
-      value:"<<(typeid(xx).name())<<std::endl;
-                  }
-                  if((iter->second)->getUnderlyingValue() == nullptr) {
-                      std::cerr<<"(iter->second)->getUnderlyingValue() is
-      nullptr"<<std::endl;
-                  }}
-      #endif*/
     }
 
     return processorDataRef;
@@ -816,8 +786,6 @@ int64_t SaxonProcessor::createParameterJArray2(std::map<std::string, XdmValue *>
 }
 
 SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
-  SaxonProcessor::attachCurrentThread();
-
   procRef = other.procRef;
   cwd = other.cwd;
 
@@ -840,9 +808,8 @@ SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
 }
 
 DocumentBuilder *SaxonProcessor::newDocumentBuilder() {
-  SaxonProcessor::attachCurrentThread();
-  int64_t docBuilderRef = createDocumentBuilder(
-      SaxonProcessor::sxn_environ->thread, (void *)procRef);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t docBuilderRef = createDocumentBuilder(thread, (void *)procRef);
 
   DocumentBuilder *builder = new DocumentBuilder(this, docBuilderRef, cwd);
 
@@ -850,24 +817,19 @@ DocumentBuilder *SaxonProcessor::newDocumentBuilder() {
 }
 
 Xslt30Processor *SaxonProcessor::newXslt30Processor() {
-  SaxonProcessor::attachCurrentThread();
-
   return (new Xslt30Processor(this, cwd));
 }
 
 XQueryProcessor *SaxonProcessor::newXQueryProcessor() {
-  SaxonProcessor::attachCurrentThread();
   return (new XQueryProcessor(this, cwd));
 }
 
 XPathProcessor *SaxonProcessor::newXPathProcessor() {
-  SaxonProcessor::attachCurrentThread();
   return (new XPathProcessor(this, cwd));
 }
 
 SchemaValidator *SaxonProcessor::newSchemaValidator() {
   if (licensei) {
-    SaxonProcessor::attachCurrentThread();
     return (new SchemaValidator(this, cwd));
   } else {
     std::cerr << "\nError: Processor is not licensed for schema processing!!"
@@ -879,9 +841,8 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
 const char *SaxonProcessor::version() {
 
   if (versionStr.empty()) {
-    SaxonProcessor::attachCurrentThread();
-    versionStr = std::string(j_c_getProductVersion(
-        SaxonProcessor::sxn_environ->thread, (void *)procRef));
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    versionStr = std::string(j_c_getProductVersion(thread, (void *)procRef));
   }
   return versionStr.c_str();
 }
@@ -910,7 +871,7 @@ void SaxonProcessor::setResourcesDirectory(const char *dir) {
 }
 
 void SaxonProcessor::setCatalog(const char *catalogFile) {
-  SaxonProcessor::attachCurrentThread();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
   if (catalogFile == nullptr) {
 
@@ -923,22 +884,22 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
     return;
   }
   int64_t processorDataRef =
-      createProcessorDataWithCapacity(sxn_environ->thread, 1);
+      createProcessorDataWithCapacity(thread, 1);
 
-  addProcessorProperty(sxn_environ->thread, (void *)processorDataRef,
+  addProcessorProperty(thread, (void *)processorDataRef,
                        (char *)catalogFile);
 
   long result =
-      j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
+      j_setCatalogFiles(thread, (void *)procRef,
                         (char *)cwd.c_str(), (void *)processorDataRef);
-  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+  j_handles_destroy(thread, (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
   }
 }
 
 void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
-  SaxonProcessor::attachCurrentThread();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
   if (catalogFiles == nullptr && length > 0) {
 
@@ -952,21 +913,21 @@ void SaxonProcessor::setCatalogFiles(const char **catalogFiles, int length) {
   }
 
   int64_t processorDataRef =
-      createProcessorDataWithCapacity(sxn_environ->thread, length);
+      createProcessorDataWithCapacity(thread, length);
 
   for (int i = 0; i < length; i++) {
 
     if (catalogFiles[i] != nullptr) {
       char* catFile = (char *)catalogFiles[i];
-      addProcessorProperty(sxn_environ->thread, (void *)processorDataRef,
+      addProcessorProperty(thread, (void *)processorDataRef,
                            catFile);
     }
   }
 
   long result =
-      j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
+      j_setCatalogFiles(thread, (void *)procRef,
                         (char *)cwd.c_str(), (void *)processorDataRef);
-  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+  j_handles_destroy(thread, (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
   } else if (result == SXN_EXCEPTION) {

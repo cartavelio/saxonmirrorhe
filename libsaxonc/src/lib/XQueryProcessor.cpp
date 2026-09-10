@@ -20,11 +20,11 @@ XQueryProcessor::~XQueryProcessor() {
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XQueryProcessor destructor called: ob ref=" << (this)  << std::endl;
   }
-  SaxonProcessor::attachCurrentThread();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   clearProperties();
   clearParameters();
   if (cppXQ != SXN_UNSET) {
-    j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXQ);
+    j_handles_destroy(thread, (void *)cppXQ);
     cppXQ = SXN_UNSET;
   }
   cwdXQ.erase();
@@ -34,7 +34,8 @@ XQueryProcessor::~XQueryProcessor() {
 XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
   proc = p;
   exception = nullptr;
-  cppXQ = j_createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread,
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  cppXQ = j_createXQueryEngineWithProcessor(thread,
                                             (void *)p->procRef);
   if (cppXQ == SXN_UNSET) {
     throw SaxonApiException(
@@ -53,7 +54,8 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
 XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
   cwdXQ = other.cwdXQ;
   proc = other.proc;
-  cppXQ = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppXQ);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  cppXQ = j_copy_handles(thread, (void *)other.cppXQ);
   if(cppXQ == SXN_EXCEPTION) {
     throw SaxonApiException();
   }
@@ -263,7 +265,6 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
-    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
@@ -318,8 +319,7 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
     throw SaxonApiException();
   }
   if (processorDataRef > 0) {
-    j_handles_destroy(thread,
-                      (void *)processorDataRef);
+    j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   return (const char *)result;
@@ -367,7 +367,8 @@ void XQueryProcessor::exceptionClear() {
     delete exception;
     exception = nullptr;
   }
-  j_clearException(SaxonProcessor::sxn_environ->thread);
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  j_clearException(thread);
 }
 
 bool XQueryProcessor::exceptionOccurred() {

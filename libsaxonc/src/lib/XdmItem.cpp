@@ -89,8 +89,6 @@ const char *XdmItem::toString(const char *encoding) {
 XDM_TYPE XdmItem::getType() { return XDM_ITEM; }
 
 XdmItem::~XdmItem() {
-  //SaxonProcessor::attachCurrentThread();
-
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmItem destructor called:" << refCount
               << " ob ref=" << (this) << " value =" << ((long)value)
