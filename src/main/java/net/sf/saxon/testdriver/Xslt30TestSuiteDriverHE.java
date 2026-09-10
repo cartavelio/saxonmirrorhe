@@ -1003,26 +1003,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     protected XsltExecutable exportStylesheet(String testName, String testSetName, XsltCompiler compiler, XsltExecutable sheet, Source styleSource) throws SaxonApiException {
         try {
             File exportFile = new File(resultsDir + "/export/" + testSetName + "/" + testName + ".sef");
-            if (xxCompilerLocation != null && !compiler.isSchemaAware()) {
-                if (xxCompiler == null) {
-                    XsltCompiler c = driverProc.newXsltCompiler();
-                    c.setAssertionsEnabled(true);
-                    c.setParameter(new QName("FAST_JAVA_XPATH"), new XdmAtomicValue(true));
-                    c.setFastCompilation(true); // TODO: temporary
-                    xxCompiler = c.compile(new StreamSource(new File(xxCompilerLocation)));
-                }
-                Xslt30Transformer transformer = xxCompiler.load30();
-                transformer.setAssertionsEnabled(true);
-                transformer.setInitialMode(new QName("compile-complete"));
-                ParseOptions options = new ParseOptions();
-                options.setLineNumbering(true);
-                styleSource = new AugmentedSource(styleSource, options);
-                Serializer serializer = driverProc.newSerializer(exportFile);
-                transformer.applyTemplates(styleSource, serializer);
-            } else {
-                XsltPackage compiledPack = compiler.compilePackage(styleSource);
-                compiledPack.save(exportFile);
-            }
+            XsltPackage compiledPack = compiler.compilePackage(styleSource);
+            compiledPack.save(exportFile);
             sheet = reloadExportedStylesheet(compiler, exportFile);
         } catch (SaxonApiException e) {
             compiler.getErrorReporter().report(new XmlProcessingException(XPathException.makeXPathException(e)));
@@ -1230,7 +1212,6 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         alwaysOn.add("feature/HTML5");
 
         needsPE.add("feature/Saxon-PE");
-        needsPE.add("feature/dynamic_evaluation");
 
         needsEE.add("languages_for_numbering");
         needsEE.add("feature/streaming");
@@ -1316,6 +1297,19 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                             });
                         }
                         return true;
+                    }
+                    case "dynamic_evaluation": {
+                        boolean on = !inverse;
+                        if (!on) {
+                            final boolean old = env.processor.getConfigurationProperty(Feature.DISABLE_XSL_EVALUATE);
+                            env.processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, true);
+                            env.resetActions.add(new Environment.ResetAction() {
+                                @Override
+                                public void reset(Environment env) {
+                                    env.processor.setConfigurationProperty(Feature.DISABLE_XSL_EVALUATE, old);
+                                }
+                            });
+                        }
                     }
                     case "higher_order_functions":
                         return !inverse;
