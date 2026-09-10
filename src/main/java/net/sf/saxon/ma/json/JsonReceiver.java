@@ -38,14 +38,14 @@ public class JsonReceiver implements Receiver {
     private final XPathContext context;
     private PipelineConfiguration pipe;
     private UniStringConsumer output;
-    private final StringBuilder textBuffer = new StringBuilder(128);
+    private final UnicodeBuilder textBuffer = new UnicodeBuilder(128);
     private final Stack<NodeName> stack = new Stack<>();
     private boolean atStart = true;
     private boolean indenting = false;
     private boolean escapeSolidus = true;
     private boolean escaped = false;
     private boolean retainNumberFormat = false;
-    private final Stack<Set<String>> keyChecker = new Stack<>();
+    private final Stack<Set<UnicodeString>> keyChecker = new Stack<>();
     private static final String ERR_INPUT = "FOJS0006";
 
     public JsonReceiver(PipelineConfiguration pipe, XPathContext context, UniStringConsumer output) {
@@ -126,9 +126,9 @@ public class JsonReceiver implements Receiver {
                                              elemName.getStructuredQName().getEQName(), ERR_INPUT);
         }
 
-        String key = null;
-        String escapedAtt = null;
-        String escapedKey = null;
+        UnicodeString key = null;
+        UnicodeString escapedAtt = null;
+        UnicodeString escapedKey = null;
         for (AttributeInfo att : attributes) {
             NodeName attName = att.getNodeName();
             if (attName.hasURI(NamespaceUri.NULL)) {
@@ -138,14 +138,14 @@ public class JsonReceiver implements Receiver {
                             throw new XPathException(
                                     "xml-to-json: The key attribute is allowed only on elements within a map", ERR_INPUT);
                         }
-                        key = att.getValue();
+                        key = StringView.of(att.getValue());
                         break;
                     case "escaped-key":
                         if (!inMap) {
                             throw new XPathException(
                                     "xml-to-json: The escaped-key attribute is allowed only on elements within a map", ERR_INPUT);
                         }
-                        escapedKey = att.getValue();
+                        escapedKey = StringView.of(att.getValue());
                         break;
                     case "escaped":
                         boolean allowed = stack.size() == 1 || elemName.getLocalPart().equals("string");
@@ -156,7 +156,7 @@ public class JsonReceiver implements Receiver {
                                     "xml-to-json: The escaped attribute is allowed only on the <string> element",
                                     ERR_INPUT);
                         }
-                        escapedAtt = att.getValue();
+                        escapedAtt = StringView.of(att.getValue());
                         break;
                     default:
                         throw new XPathException("xml-to-json: Disallowed attribute in input: " + attName.getDisplayName(), ERR_INPUT);
@@ -181,7 +181,7 @@ public class JsonReceiver implements Receiver {
             if (escapedKey != null) {
                 try {
                     alreadyEscaped = StringConverter.StringToBoolean.INSTANCE
-                            .convertString(StringView.tidy(escapedKey)).asAtomic().effectiveBooleanValue();
+                            .convertString(escapedKey).asAtomic().effectiveBooleanValue();
                 } catch (XPathException e) {
                     throw new XPathException("xml-to-json: Value of escaped-key attribute '" + Err.wrap(escapedKey) +
                                                      "' is not a valid xs:boolean", ERR_INPUT);
@@ -189,16 +189,16 @@ public class JsonReceiver implements Receiver {
             }
             key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, !escapeSolidus, isControlChar));
 
-            String normalizedKey = alreadyEscaped ? unescape(key) : key;
+            UnicodeString normalizedKey = alreadyEscaped ? unescape(key) : key;
             boolean added = keyChecker.peek().add(normalizedKey);
             if (!added) {
                 throw new XPathException("xml-to-json: duplicate key value " + Err.wrap(key), ERR_INPUT);
             }
 
             String base = indenting ? " : " : ":";
-            output.accept(BMPString.of("\""))
-                    .accept(StringView.of(key))
-                    .accept(BMPString.of("\""))
+            output.accept(new UnicodeChar('"'))
+                    .accept(key)
+                    .accept(new UnicodeChar('"'))
                     .accept(BMPString.of(base));
         }
         String local = elemName.getLocalPart();
@@ -231,7 +231,7 @@ public class JsonReceiver implements Receiver {
             case "string":
                 if (escapedAtt != null) {
                     try {
-                        escaped = StringConverter.StringToBoolean.INSTANCE.convertString(StringView.tidy(escapedAtt))
+                        escaped = StringConverter.StringToBoolean.INSTANCE.convertString(escapedAtt)
                                 .asAtomic().effectiveBooleanValue();
                     } catch (XPathException e) {
                         throw new XPathException("xml-to-json: value of escaped attribute (" +
@@ -249,7 +249,7 @@ public class JsonReceiver implements Receiver {
             default:
                 throw new XPathException("xml-to-json: unknown element <" + local + ">", ERR_INPUT);
         }
-        textBuffer.setLength(0);
+        textBuffer.clear();
     }
 
     private void checkParent(String child, String parent) throws XPathException {
@@ -265,8 +265,8 @@ public class JsonReceiver implements Receiver {
     public void endElement() throws XPathException {
         NodeName name = stack.pop();
         String local = name.getLocalPart();
-        String content = textBuffer.toString();
-        UnicodeString uContent = StringView.tidy(content);
+        UnicodeString content = textBuffer.toUnicodeString();
+        UnicodeString uContent = content;
         if (local.equals("boolean")) {
             try {
                 boolean b = StringConverter.StringToBoolean.INSTANCE.convertString(uContent).asAtomic().effectiveBooleanValue();
@@ -331,15 +331,15 @@ public class JsonReceiver implements Receiver {
         } else if (local.equals("string")) {
             output.accept(BMPString.of("\""));
             if (escaped) {
-                output.accept(StringView.of(handleEscapedString(content)));
+                output.accept(handleEscapedString(content));
             } else {
-                output.accept(StringView.of(escape(content, false, !escapeSolidus, isControlChar)));
+                output.accept(escape(content, false, !escapeSolidus, isControlChar));
             }
             output.accept(BMPString.of("\""));
         } else if (!Whitespace.isAllWhite(uContent)) {
             throw new XPathException("xml-to-json: Element " + name.getDisplayName() + " must have no text content", ERR_INPUT);
         }
-        textBuffer.setLength(0);
+        textBuffer.clear();
         escaped = false;
         if (local.equals("array")) {
             String base = indenting ? " ]" : "]";
@@ -367,13 +367,13 @@ public class JsonReceiver implements Receiver {
      * @throws XPathException if the input contains invalid escape sequences
      */
 
-    private static String handleEscapedString(String str) throws XPathException {
+    private static UnicodeString handleEscapedString(UnicodeString str) throws XPathException {
         // check that escape sequences are valid
         unescape(str);
-        StringBuilder out = new StringBuilder(str.length() * 2);
+        UnicodeBuilder out = new UnicodeBuilder();
         boolean afterEscapeChar = false;
         for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
+            int c = str.codePointAt(i);
             if (c == '"' && !afterEscapeChar) {
                 out.append("\\\"");
             } else if (c < 32 || (c >= 127 && c < 160)) {
@@ -394,11 +394,11 @@ public class JsonReceiver implements Receiver {
             } else if (c == '/' && !afterEscapeChar) {
                 out.append("\\/");
             } else {
-                out.appendCodePoint(c);
+                out.append(c);
             }
             afterEscapeChar = c == '\\' && !afterEscapeChar;
         }
-        return out.toString();
+        return out.toUnicodeString();
     }
 
 
@@ -413,10 +413,10 @@ public class JsonReceiver implements Receiver {
      * @throws XPathException if the input contains invalid escape sequences
      */
 
-    public static String escape(String in, boolean retainQuot, boolean retainSlash, IntPredicate hexEscapes) throws XPathException {
-        StringBuilder out = new StringBuilder(in.length());
+    public static UnicodeString escape(UnicodeString in, boolean retainQuot, boolean retainSlash, IntPredicate hexEscapes) throws XPathException {
+        UnicodeBuilder out = new UnicodeBuilder();
         for (int i=0; i<in.length(); i++) {
-            int c = in.charAt(i);
+            int c = in.codePointAt(i);
             switch (c) {
                 case '"':
                     out.append(retainQuot ? "\"" : "\\\"");
@@ -447,12 +447,12 @@ public class JsonReceiver implements Receiver {
                         out.append("\\u");
                         out.append(hex4(c));
                     } else {
-                        out.appendCodePoint(c);
+                        out.append(c);
                     }
                     break;
             }
         }
-        return out.toString();
+        return out.toUnicodeString();
     }
 
     private static StringBuilder hex4(int c) {
@@ -526,18 +526,18 @@ public class JsonReceiver implements Receiver {
      * @throws net.sf.saxon.trans.XPathException if the input contains invalid escape sequences
      */
 
-    private static String unescape(String literal) throws XPathException {
+    private static UnicodeString unescape(UnicodeString literal) throws XPathException {
         if (literal.indexOf('\\') < 0) {
             return literal;
         }
-        StringBuilder buffer = new StringBuilder(literal.length());
+        UnicodeBuilder buffer = new UnicodeBuilder();
         for (int i = 0; i < literal.length(); i++) {
-            char c = literal.charAt(i);
+            int c = literal.codePointAt(i);
             if (c == '\\') {
                 if (i++ == literal.length() - 1) {
                     throw new XPathException("String '" + Err.wrap(literal) + "' ends in backslash ", "FOJS0007");
                 }
-                switch (literal.charAt(i)) {
+                switch (literal.codePointAt(i)) {
                     case '"':
                         buffer.append('"');
                         break;
@@ -564,7 +564,7 @@ public class JsonReceiver implements Receiver {
                         break;
                     case 'u':
                         try {
-                            String hex = literal.substring(i + 1, i + 5);
+                            String hex = literal.substring(i + 1, i + 5).toString();
                             int code = Integer.parseInt(hex, 16);
                             buffer.append((char)code);
                             i += 4;
@@ -573,7 +573,7 @@ public class JsonReceiver implements Receiver {
                         }
                         break;
                     default:
-                        int next = literal.charAt(i);
+                        int next = literal.codePointAt(i);
                         String xx = next < 256 ? next + "" : "x" + Integer.toHexString(next);
                         throw new XPathException("Unknown escape sequence \\" + xx, "FOJS0007");
                 }
@@ -581,7 +581,7 @@ public class JsonReceiver implements Receiver {
                 buffer.append(c);
             }
         }
-        return buffer.toString();
+        return buffer.toUnicodeString();
     }
 }
 

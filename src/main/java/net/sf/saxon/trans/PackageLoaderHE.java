@@ -1502,7 +1502,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 String val = eq == line.length() - 1 ? "" : line.substring(eq+1);
                 if (key.equals("item-separator") || key.equals("Q" + SaxonOutputKeys.NEWLINE)) {
                     try {
-                        val = JsonParser.unescape(val, 0, "", -1);
+                        val = JsonParser.unescape(StringView.of(val), 0, "", esc -> esc).toString();
                     } catch (XPathException ignored) {
                         // No action, leave unescaped
                     }

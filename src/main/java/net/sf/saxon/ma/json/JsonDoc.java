@@ -95,7 +95,7 @@ public class JsonDoc extends SystemFunction  {
                     getRetainedStaticContext().getPackageData().getHostLanguageVersion())
                     .getDefaultOptions();
         }
-        Item result = ParseJsonFn.parse(content.toString(), checkedOptions, context);
+        Item result = ParseJsonFn.parse(content, checkedOptions, context);
         return SequenceTool.itemOrEmpty(result);
     }
 

@@ -141,7 +141,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
         if (item instanceof AtomicValue) {
             emitter.writeAtomicValue((AtomicValue) item);
         } else if (item instanceof MapItem) {
-            Set<String> keys = null;
+            Set<UnicodeString> keys = null;
             if (!allowDuplicateKeys) {
                 keys = new HashSet<>();
             }
@@ -155,7 +155,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
                 keyList.sort(propertySorter);
             }
             for (AtomicValue key : keyList) {
-                String stringKey = key.getStringValue();
+                UnicodeString stringKey = key.getUnicodeStringValue();
                 emitter.writeKey(stringKey);
                 if (!allowDuplicateKeys && !keys.add(stringKey)) {
                     throw new XPathException("Key value \"" + stringKey + "\" occurs more than once in JSON map", "SERE0022");

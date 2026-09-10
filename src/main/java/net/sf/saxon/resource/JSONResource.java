@@ -14,6 +14,8 @@ import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
@@ -28,7 +30,7 @@ import java.util.Map;
 public class JSONResource implements Resource {
     private final Configuration config;
     private final String href;
-    private String jsonStr;
+    private UnicodeString jsonStr;
     private Item item;
     private final XPathContext context;
     private AbstractResourceCollection.InputDetails details;
@@ -74,7 +76,7 @@ public class JSONResource implements Resource {
             return item;
         }
         if (jsonStr == null) {
-            jsonStr = details.obtainCharacterContent(config);
+            jsonStr = StringView.of(details.obtainCharacterContent(config));
             if (jsonStr == null) {
                 // implies errors are being ignored
                 return null;

@@ -12,6 +12,7 @@ import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
@@ -56,7 +57,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @throws XPathException if the syntax of the input is incorrect
      */
     @Override
-    protected Item eval(String input, MapItem options, XPathContext context) throws XPathException {
+    protected Item eval(UnicodeString input, MapItem options, XPathContext context) throws XPathException {
         Map<String, GroundedValue> checkedOptions = null;
         if (options != null) {
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
@@ -74,7 +75,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @throws XPathException if the syntax of the input is incorrect
      */
 
-    public static Item parse(String input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
+    public static Item parse(UnicodeString input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         GroundedValue nullRepresentation = EmptySequence.getInstance();
         int flags = 0;
@@ -85,7 +86,7 @@ public class ParseJsonFn extends JsonToXMLFn {
                 nullRepresentation = nullOption;
             }
         }
-        JsonHandlerMap handler = new JsonHandlerMap(context, flags);
+        JsonHandlerMap handler = new JsonHandlerMap(context, parser, flags);
         if ((flags & JsonParser.DUPLICATES_RETAINED) != 0) {
             throw new XPathException("parse-json: duplicates=retain is not allowed", "FOJS0005");
         }

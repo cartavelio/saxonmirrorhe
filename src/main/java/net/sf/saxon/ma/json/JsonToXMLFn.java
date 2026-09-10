@@ -15,6 +15,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
@@ -60,7 +61,7 @@ public class JsonToXMLFn extends SystemFunction {
         if (arg0 == null) {
             return EmptySequence.getInstance();
         }
-        String input = arg0.getStringValue();
+        UnicodeString input = arg0.getUnicodeStringValue();
         MapItem options = null;
         if (getArity() == 2) {
             options = (MapItem) arguments[1].head();
@@ -79,7 +80,7 @@ public class JsonToXMLFn extends SystemFunction {
      * @return the result of the parsing, as an XML element
      * @throws XPathException if the syntax of the input is incorrect
      */
-    protected Item eval(String input, MapItem options, XPathContext context) throws XPathException {
+    protected Item eval(UnicodeString input, MapItem options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         int flags = 0;
         Map<String, GroundedValue> checkedOptions = null;

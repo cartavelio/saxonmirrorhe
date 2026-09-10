@@ -10,10 +10,11 @@ package net.sf.saxon.ma.json;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.MapBuilder;
+import net.sf.saxon.ma.map.LazyStringMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
@@ -28,16 +29,20 @@ import java.util.Stack;
  * representing the content of the JSON text.
  */
 public class JsonHandlerMap extends JsonHandler {
+    final JsonParser parser;
     Stack<Object> stack;
 
-    protected Stack<String> keys;
+    protected Stack<UnicodeString> keys;
     private GroundedValue nullRepresentation = EmptySequence.getInstance();
     private boolean retainOrder = false;
+    private int flags;
 
-    public JsonHandlerMap(XPathContext context, int flags) {
+    public JsonHandlerMap(XPathContext context, JsonParser parser, int flags) {
         setContext(context);
         stack = new Stack<>();
         keys = new Stack<>();
+        this.parser = parser;
+        this.flags = flags;
         escape = (flags & JsonParser.ESCAPE) != 0;
         retainOrder = (flags & JsonParser.ORDER_RETAINED) != 0;
         charChecker = context.getConfiguration().getValidCharacterChecker();
@@ -63,10 +68,11 @@ public class JsonHandlerMap extends JsonHandler {
      * @return true if the key is already present in the map, false if it is not
      */
     @Override
-    public boolean setKey(String unEscaped, String reEscaped) {
+    public boolean setKey(UnicodeString unEscaped, UnicodeString reEscaped) {
         this.keys.push(reEscaped);
-        MapBuilder map = (MapBuilder) stack.peek();
-        return map.get(reEscaped) != null;
+        return false;
+//        LazyStringMap.LazyStringMapBuilder map = (LazyStringMap.LazyStringMapBuilder) stack.peek();
+//        return map.get(reEscaped) != null;
     }
 
     /**
@@ -84,7 +90,7 @@ public class JsonHandlerMap extends JsonHandler {
      * Close the current array
      */
     @Override
-    public void endArray() {
+    public void endArray() throws XPathException {
         ArrayItem arrayItem = (ArrayItem) stack.pop();
         if (stack.empty()) {
             stack.push(arrayItem); // the end
@@ -98,7 +104,8 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void startMap() {
-        MapBuilder mapBuilder = getContext().getConfiguration().makeMapBuilder(retainOrder, true);
+        //MapBuilder mapBuilder = getContext().getConfiguration().makeMapBuilder(retainOrder, true);
+        LazyStringMap.LazyStringMapBuilder mapBuilder = new LazyStringMap.LazyStringMapBuilder(flags);
         stack.push(mapBuilder);
     }
 
@@ -106,8 +113,8 @@ public class JsonHandlerMap extends JsonHandler {
      * Close the current object/map
      */
     @Override
-    public void endMap() {
-        MapBuilder map = (MapBuilder) stack.pop();
+    public void endMap() throws XPathException {
+        LazyStringMap.LazyStringMapBuilder map = (LazyStringMap.LazyStringMapBuilder) stack.pop();
         if (stack.empty()) {
             stack.push(map.getCompletedMap()); // the end
         } else {
@@ -119,14 +126,14 @@ public class JsonHandlerMap extends JsonHandler {
      * Write an item into the current map, with the preselected key
      * @param val   the value/map to be written
      */
-    private void writeItem(GroundedValue val) {
+    private void writeItem(GroundedValue val) throws XPathException {
         if (stack.empty()) {
             stack.push(val);
         } else if (stack.peek() instanceof ArrayItem) {
             SimpleArrayItem array = (SimpleArrayItem) stack.peek();
             array.getMembers().add(val.materialize());
         } else {
-            MapBuilder map = (MapBuilder) stack.peek();
+            LazyStringMap.LazyStringMapBuilder map = (LazyStringMap.LazyStringMapBuilder) stack.peek();
             map.put(keys.pop(), val);
         }
     }
@@ -137,7 +144,7 @@ public class JsonHandlerMap extends JsonHandler {
      * @param parsedValue the double representation of the value
      */
     @Override
-    public void writeNumeric(String asString, Item parsedValue) {
+    public void writeNumeric(String asString, Item parsedValue) throws XPathException {
         writeItem(parsedValue);
     }
 
@@ -149,7 +156,7 @@ public class JsonHandlerMap extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
     @Override
-    public void writeString(String val) throws XPathException {
+    public void writeString(UnicodeString val) throws XPathException {
         writeItem(new StringValue(reEscape(val)));
     }
 
@@ -159,7 +166,7 @@ public class JsonHandlerMap extends JsonHandler {
      * @param value the boolean value to be written
      */
     @Override
-    public void writeBoolean(boolean value)  {
+    public void writeBoolean(boolean value) throws XPathException {
         writeItem(BooleanValue.get(value));
     }
 
@@ -167,7 +174,7 @@ public class JsonHandlerMap extends JsonHandler {
      * Write a null value
      */
     @Override
-    public void writeNull() {
+    public void writeNull() throws XPathException {
         writeItem(nullRepresentation);
     }
 

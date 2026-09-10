@@ -7,8 +7,10 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
+
+import java.util.Iterator;
+import java.util.function.Function;
 
 
 /**
@@ -16,16 +18,30 @@ import net.sf.saxon.value.AtomicValue;
  * is a SequenceIterator that returns atomic values and throws no checked exceptions.
  */
 
-public interface AtomicIterator extends SequenceIterator {
+public class MappedAtomicIterator<T> implements AtomicIterator {
+
+    private final Iterator<T> baseIterator;
+    private final Function<T, AtomicValue> mapper;
+
+    public MappedAtomicIterator(Iterator<T> baseIterator, Function<T, AtomicValue> mapper) {
+        this.baseIterator = baseIterator;
+        this.mapper = mapper;
+    }
 
     /**
-     * Get the next atomic value in the sequence. <BR>
+     * Get the next atomic value in the sequence.
      *
      * @return the next Item. If there are no more items, return null.
      */
 
     @Override
-    AtomicValue next();
+    public AtomicValue next() {
+        if (baseIterator.hasNext()) {
+            return mapper.apply(baseIterator.next());
+        } else {
+            return null;
+        }
+    }
 
 
 }

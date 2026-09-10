@@ -64,7 +64,9 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     /**
      * Append a single unicode character to the content
      * @param codePoint the unicode codepoint. The caller is responsible for ensuring that this
-     *                  is not a surrogate
+     *                  is not a surrogate. (In fact, some callers, such as the JSON parser, do
+     *                  in fact append unpaired surrogates to the builder, and sort it out
+     *                  later.)
      * @return this builder, with the new character added
      */
 

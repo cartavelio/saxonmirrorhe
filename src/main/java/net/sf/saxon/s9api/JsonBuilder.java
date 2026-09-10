@@ -96,7 +96,7 @@ public class JsonBuilder {
             Map<String, GroundedValue> options = new HashMap<>();
             options.put("liberal", BooleanValue.get(liberal));
             options.put("escape", BooleanValue.TRUE);
-            Item result = ParseJsonFn.parse(content.toString(), options, context);
+            Item result = ParseJsonFn.parse(content, options, context);
             return XdmValue.wrap(result);
         } catch (XPathException | IOException e) {
             throw new SaxonApiException(e);

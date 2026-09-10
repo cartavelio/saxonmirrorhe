@@ -15,7 +15,8 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
@@ -31,7 +32,7 @@ public class JsonHandlerXML extends JsonHandler {
     private final Outputter out;
     private final Builder builder;
 
-    private Stack<String> keys;
+    private Stack<UnicodeString> keys;
     private final Stack<Boolean> inMap = new Stack<>();
 
     private boolean allowAnyTopLevel;
@@ -58,7 +59,7 @@ public class JsonHandlerXML extends JsonHandler {
     private static final SimpleType STRING_TYPE = BuiltInAtomicType.STRING;
 
     public HashMap<String, SchemaType> types;
-    private final Stack<HashSet<String>> mapKeys = new Stack<>();
+    private final Stack<HashSet<UnicodeString>> mapKeys = new Stack<>();
 
 
     /**
@@ -176,7 +177,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @return true if the key is already present in the map, false if it is not
      */
     @Override
-    public boolean setKey(String unEscaped, String reEscaped) {
+    public boolean setKey(UnicodeString unEscaped, UnicodeString reEscaped) {
         this.keys.push(unEscaped);
         return checkForDuplicates && !mapKeys.peek().add(reEscaped);
     }
@@ -200,7 +201,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @param literal the string to be checked
      * @return true if the string contains a backslash
      */
-    private boolean containsEscape(String literal) {
+    private boolean containsEscape(UnicodeString literal) {
         return literal.indexOf('\\') >= 0;
     }
 
@@ -230,12 +231,12 @@ public class JsonHandlerXML extends JsonHandler {
         out.startElement(qn, validate && st != null ? st : Untyped.getInstance(),
                          Loc.NONE, ReceiverOption.NONE);
         if (isInMap()) {
-            String k = keys.pop();
-            String uk = reEscape(k);
+            UnicodeString k = keys.pop();
+            UnicodeString uk = reEscape(k);
             if (escape) {
                 markAsEscaped(uk, true);
             }
-            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, uk,
+            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, uk.toString(),
                           Loc.NONE, ReceiverOption.NONE);
         }
     }
@@ -250,8 +251,8 @@ public class JsonHandlerXML extends JsonHandler {
      * @param s the string to be added
      * @throws XPathException if a dynamic error occurs
      */
-    private void characters(String s) throws XPathException {
-        out.characters(StringView.of(s), Loc.NONE, ReceiverOption.NONE);
+    private void characters(UnicodeString s) throws XPathException {
+        out.characters(s, Loc.NONE, ReceiverOption.NONE);
     }
 
     /**
@@ -329,7 +330,7 @@ public class JsonHandlerXML extends JsonHandler {
     public void writeNumeric(String asString, Item parsedValue) throws XPathException {
         startElement(numberQN, isInMap() ? "numberWithinMapType" : "numberType");
         startContent();
-        characters(parsedValue.getStringValue());
+        characters(parsedValue.getUnicodeStringValue());
         endElement();
     }
 
@@ -341,9 +342,9 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
     @Override
-    public void writeString(String val) throws XPathException {
+    public void writeString(UnicodeString val) throws XPathException {
         startElement(stringQN, isInMap() ? "stringWithinMapType" : "stringType");
-        String escaped = reEscape(val);
+        UnicodeString escaped = reEscape(val);
         if (escape) {
             markAsEscaped(escaped, false);
         }
@@ -352,8 +353,8 @@ public class JsonHandlerXML extends JsonHandler {
         endElement();
     }
 
- @Override
-    protected void markAsEscaped(String escaped, boolean isKey) throws XPathException {
+    @Override
+    protected void markAsEscaped(UnicodeString escaped, boolean isKey) throws XPathException {
         if (containsEscape(escaped) && escape) {
             NodeName name = isKey ? escapedKeyQN : escapedQN;
             out.attribute(name, validate ? BOOLEAN_TYPE : SIMPLE_TYPE, "true",
@@ -371,7 +372,7 @@ public class JsonHandlerXML extends JsonHandler {
     public void writeBoolean(boolean value) throws XPathException {
         startElement(booleanQN, isInMap() ? "booleanWithinMapType" : "booleanType");
         startContent();
-        characters(value ? "true" : "false");
+        characters(value ? StringConstants.TRUE : StringConstants.FALSE);
         endElement();
     }
 

@@ -7,142 +7,149 @@
 
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.ma.json.JsonParser;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.trace.Instrumentation;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
+import net.sf.saxon.tree.iter.MappedAtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
- * A simple implementation of MapItem where the strings are keys, and modification is unlikely.
- * This implementation is used in a number of cases where it can be determined that it is suitable,
- * for example when parsing JSON input, or when creating a fixed map to use in an options argument.
+ * An implementation of MapItem where the strings are keys, and query and modification are both unlikely.
+ * This implementation is designed particularly for the result of parsing JSON, where it is quite likely
+ * that many of the nested maps will either be ignored entirely, or used only for serialization. The
+ * complication is that it's necessary to detect duplicate keys, which is done with the help of a
+ * Bloom filter.
  */
 
-public class DictionaryMap extends StringMap {
+public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
 
-    protected static class DictionaryMapBuilder implements MapBuilder {
+    public static class LazyStringMapBuilder {
 
-        protected Map<String, GroundedValue> map;
-        public DictionaryMapBuilder() {
-            map = new HashMap<>();
-        }
-
-        protected DictionaryMapBuilder(Map<String, GroundedValue> emptyMap) {
-            this.map = emptyMap;
-        }
-        public DictionaryMapBuilder(int initialSize) {
-            map = new HashMap<>(initialSize);
+        private final List<UnicodeString> keys = new ArrayList<>();
+        private final List<GroundedValue> values = new ArrayList<>();
+        private final BitSet bloom = new BitSet(1000);
+        private final int flags;
+        private Set<UnicodeString> keySet; // used only if the bloom filter indicates possible duplicates
+        private boolean duplicatesFound = false;
+        public LazyStringMapBuilder(int flags) {
+            Instrumentation.count("LazyStringMapBuilder");
+            this.flags = flags;
         }
 
         /**
-         * During initial construction of the map, add a key-value pair
+         * Add a key-value pair
          *
          * @param key   the key
          * @param value the corresponding value
          */
-        @Override
-        public void put(AtomicValue key, GroundedValue value) {
-            if (!(key instanceof StringValue)) {
-                throw new IllegalArgumentException("Keys added to DictionaryMap must be strings");
+
+        public void put(UnicodeString key, GroundedValue value) throws XPathException {
+            Instrumentation.count("LazyStringMapBuilder.put()");
+            int hash = key.hashCode();
+            int hash0 = hash >> 20 & 0x7ff;
+            int hash1 = hash >> 10 & 0x7ff;
+            int hash2 = hash &0x7ff;
+            if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
+                // This is a possible duplicate
+                Instrumentation.count("Bloom clash");
+                if (keySet == null) {
+                    keySet = new HashSet<>(keys);
+                }
+                if (keySet.contains(key)) {
+                    // Duplicate key found
+                    Instrumentation.count("Duplicate key");
+                    if ((flags & JsonParser.DUPLICATES_REJECTED) != 0) {
+                        Instrumentation.count("Duplicate rejected");
+                        throw new XPathException("Duplicate key value in JSON object'" + key + "'", "FOJS0003");
+                    } else if ((flags & JsonParser.DUPLICATES_FIRST) != 0) {
+                        // ignore this entry
+                        Instrumentation.count("Duplicate ignored");
+                        return;
+                    } else {
+                        // note that there are duplicates; we'll deal with them later
+                        Instrumentation.count("Duplicate deferred");
+                        duplicatesFound = true;
+                    }
+                }
             }
-            map.put(key.getStringValue(), value);
+            if (keySet != null) {
+                keySet.add(key);
+            }
+            bloom.set(hash0);
+            bloom.set(hash1);
+            bloom.set(hash2);
+            keys.add(key);
+            values.add(value);
         }
 
         /**
-         * During initial construction of the map, add a key-value pair where the key is a string
-         *
-         * @param key   the key
-         * @param value the corresponding value
-         */
-        @Override
-        public void put(String key, GroundedValue value) {
-            map.put(key, value);
-        }
-
-        /**
-         * Ask whether the map under construction contains a given key
-         */
-
-        public boolean contains(String key) {
-            return map.get(key) != null;
-        }
-
-        /**
-         * Get a value from the map under construction
-         */
-
-        public GroundedValue get(String key) {
-            return map.get(key);
-        }
-
-        /**
-         * Get a value from the map under construction
-         */
-
-        public GroundedValue get(AtomicValue key) {
-            return map.get(key.getStringValue());
-        }
-
-        /**
-         * Get the constructed map. This method must only be called once; subsequent calls will return null
+         * Get the constructed map. This method must only be called once, because the
+         * lists of keys and values are used within the constructed map and are mutable.
          *
          * @return the constructed map
          */
-        @Override
-        public DictionaryMap getCompletedMap() {
-            DictionaryMap result = new DictionaryMap(map);
-            map = null;
-            return result;
+
+        public MapItem getCompletedMap() {
+            if (keys.size() == 0) {
+                return EmptyMap.getInstance();
+            } else if (keys.size() == 1) {
+                return new SingleEntryMap(new StringValue(keys.get(0)),values.get(0));
+            }
+            if (duplicatesFound) {
+                // Indicates that duplicate keys were found, and the selected option is to retain the last.
+                // In this case we build the map eagerly.
+                MapBuilder target = HashTrieMap.getBuilder();
+                for (int i = 0; i < keys.size(); i++) {
+                    target.put(new StringValue(keys.get(i)), values.get(i));
+                }
+                return target.getCompletedMap();
+
+            }
+            return new LazyStringMap(keys, values);
         }
+
+
     }
 
-    public static MapBuilder getBuilder() {
-        return new DictionaryMapBuilder();
-    }
+    private final List<UnicodeString> keys;
+    private final List<GroundedValue> values;
+    private Map<UnicodeString, GroundedValue> baseMap; // constructed lazily on demand
 
-    public static MapBuilder getBuilder(int initialSize) {
-        return new DictionaryMapBuilder(initialSize);
-    }
-
-    protected final Map<String, GroundedValue> map;
 
     /**
-     * Create an empty dictionary.
+     * Create a lazy string map.
+     * @param keys the string-valued keys
+     * @param values the corresponding values
      */
 
-    public DictionaryMap() {
-        map = new HashMap<>();
-    }
-
-    /**
-     * Create an empty dictionary.
-     * @param size estimated final size of the dictionary
-     */
-
-    public DictionaryMap(int size) {
-        map = new HashMap<>(size);
+    public LazyStringMap(List<UnicodeString> keys, List<GroundedValue> values) {
+        this.keys = keys;
+        this.values = values;
     }
 
     /**
-     * Create a dictionary backed by an existing map. It is the caller's responsibility to ensure that
-     * this map is not subsequently modified.
-     *
-     * @param underlyingMap the initial contents of the dictionary
+     * When required, build the underlying map
      */
-    public DictionaryMap(Map<String, GroundedValue> underlyingMap) {
-        map = underlyingMap;
+
+    private synchronized void prepare() {
+        if (baseMap == null) {
+            Instrumentation.count("Map indexed");
+            baseMap = new HashMap<>(keys.size());
+            for (int i = 0; i < keys.size(); i++) {
+                baseMap.put(keys.get(i), values.get(i));
+            }
+        }
     }
 
     /**
@@ -150,8 +157,9 @@ public class DictionaryMap extends StringMap {
      * @param key the key being tested
      * @return true if the key is present
      */
-    public boolean contains(String key) {
-        return map.containsKey(key);
+    public synchronized boolean contains(String key) {
+        prepare();
+        return baseMap.containsKey(key);
     }
 
     /**
@@ -161,7 +169,7 @@ public class DictionaryMap extends StringMap {
      * @return true if the key is present
      */
     public boolean contains(UnicodeString key) {
-        return map.containsKey(key.toString());
+        return contains(key.toString());
     }
 
     /**
@@ -173,7 +181,7 @@ public class DictionaryMap extends StringMap {
     @Override
     public GroundedValue get(AtomicValue key) {
         if (key instanceof StringValue) {
-            return map.get(key.getStringValue());
+            return get(key.getUnicodeStringValue());
         } else {
             return null;
         }
@@ -185,7 +193,7 @@ public class DictionaryMap extends StringMap {
      * @return the relevant entry if present, or null if absent.
      */
     public GroundedValue get(String key) {
-        return map.get(key);
+        return get(StringView.of(key));
     }
 
     /**
@@ -196,7 +204,8 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public GroundedValue get(UnicodeString key) {
-        return map.get(key.toString());
+        prepare();
+        return baseMap.get(key);
     }
 
     /**
@@ -206,7 +215,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public int size() {
-        return map.size();
+        return keys.size();
     }
 
     /**
@@ -216,17 +225,18 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public boolean isEmpty() {
-        return map.isEmpty();
+        return keys.isEmpty();
     }
 
     /**
      * Get the set of all key values in the map.
      *
-     * @return a set containing all the key values present in the map, in unpredictable order
+     * @return a set containing all the key values present in the map, in order
      */
     @Override
     public AtomicIterator keys() {
-        return new KeyIterator(map);
+        Instrumentation.count("Map keys()");
+        return new MappedAtomicIterator<>(keys.iterator(), StringValue::new);
     }
 
     /**
@@ -235,17 +245,49 @@ public class DictionaryMap extends StringMap {
      * @return an iterable containing all the key-value pairs
      */
     @Override
-    @CSharpReplaceBody(code="return new Saxon.Hej.tree.jiter.IterableUsingIteratorSupplier<Saxon.Hej.ma.map.KeyValuePair>(\n"
-            + "                () => Saxon.Impl.Helpers.MapUtils.convertStringKeyValuePairs(map));")
-    public Iterable<KeyValuePair> keyValuePairs() {
-        return new IterableUsingIteratorSupplier<>(() -> {
-            Iterator<Map.Entry<String, GroundedValue>> entries = map.entrySet().iterator();
-
-            return new net.sf.saxon.tree.jiter.MappingJavaIterator<>(
-                    entries,
-                    e -> new KeyValuePair(new StringValue(e.getKey()), e.getValue()));
-        });
+    public Iterator<KeyValuePair> iterator() {
+        Instrumentation.count("Map keyValuePairs()");
+        return new KeyValuePairIterator(keys, values);
     }
+
+    /**
+     * Get the set of all key-value pairs in the map
+     *
+     * @return an iterable containing all the key-value pairs
+     */
+    @Override
+    public Iterable<KeyValuePair> keyValuePairs() {
+        return this;
+    }
+
+    private static class KeyValuePairIterator implements Iterator<KeyValuePair> {
+        private int i = 0;
+        private final List<UnicodeString> keys;
+        private final List<GroundedValue> values;
+        public KeyValuePairIterator(List<UnicodeString> keys, List<GroundedValue> values) {
+            this.keys = keys;
+            this.values = values;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return i < keys.size();
+        }
+
+        /**
+         * Returns the next element in the iteration.
+         *
+         * @return the next element in the iteration
+         * @throws NoSuchElementException if the iteration has no more elements
+         */
+        @Override
+        public KeyValuePair next() {
+            int j = i++;
+            return new KeyValuePair(new StringValue(keys.get(j)), values.get(j));
+        }
+    }
+
+
 
     /**
      * Create a new map containing the existing entries in the map plus an additional entry,
@@ -292,7 +334,7 @@ public class DictionaryMap extends StringMap {
         if (valueType.equals(SequenceType.ANY_SEQUENCE)) {
             return true;
         }
-        for (GroundedValue val : map.values()) {
+        for (GroundedValue val : values) {
             if (!valueType.matches(val, th)) {
                 return false;
             }
@@ -312,8 +354,7 @@ public class DictionaryMap extends StringMap {
         ItemType valueType = null;
         int valueCard = 0;
         // we need to test the entries individually
-        for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {
-            GroundedValue val = entry.getValue();
+        for (GroundedValue val : values) {
             if (valueType == null) {
                 valueType = SequenceTool.getItemType(val, th);
                 valueCard = SequenceTool.getCardinality(val);
@@ -338,7 +379,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public UType getKeyUType() {
-        return map.isEmpty() ? UType.VOID : UType.STRING;
+        return UType.STRING;
     }
 
     /**
@@ -347,28 +388,12 @@ public class DictionaryMap extends StringMap {
 
     private HashTrieMap toHashTrieMap() {
         //System.err.println("Dictionary rewrite!!!!");
+        Instrumentation.count("Map rewrite");
         MapBuilder target = HashTrieMap.getBuilder();
-        for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {
-            target.put(new StringValue(entry.getKey()), entry.getValue());
+        for (int i = 0; i < keys.size(); i++) {
+            target.put(new StringValue(keys.get(i)), values.get(i));
         }
         return (HashTrieMap)target.getCompletedMap();
-    }
-
-    protected static class KeyIterator implements AtomicIterator {
-        Iterator<String> keyIter;
-
-        public KeyIterator(Map<String, GroundedValue> hashMap) {
-            this.keyIter = hashMap.keySet().iterator();
-        }
-
-        @CSharpSuppressWarnings("UnsafeIteratorConversion")
-        public AtomicValue next() {
-            if (this.keyIter.hasNext()) {
-                return new StringValue(this.keyIter.next());
-            } else {
-                return null;
-            }
-        }
     }
 }
 

@@ -15,9 +15,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.UnicodeWriter;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
@@ -153,7 +151,7 @@ public class JSONEmitter {
      * @throws XPathException if any error occurs
      */
 
-    public void writeKey(String key) throws XPathException {
+    public void writeKey(UnicodeString key) throws XPathException {
         boolean oneLiner = oneLinerStack.peek();
         conditionalComma(false);
         emit('"');
@@ -210,12 +208,12 @@ public class JSONEmitter {
 //                }
             }
         } else if (item instanceof BooleanValue) {
-            emit(item.getStringValue());
+            emit(item.getUnicodeStringValue());
         } else if (item instanceof QNameValue && item.equals(JSON_NULL)) {
-            emit("null");
+            emit(StringConstants.NULL);
         } else {
             emit('"');
-            emit(escape(item.getStringValue()));
+            emit(escape(item.getUnicodeStringValue()));
             emit('"');
         }
     }
@@ -229,7 +227,7 @@ public class JSONEmitter {
      * @throws XPathException if the operation fails
      */
 
-    public void writeStringValue(String str) throws XPathException {
+    public void writeStringValue(UnicodeString str) throws XPathException {
         conditionalComma(false);
         emit('"');
         emit(escape(str));
@@ -262,7 +260,7 @@ public class JSONEmitter {
 
     /**
      * Output the start of an map. This call must be followed by the entries in the
-     * map (each starting with a call on {@link #writeKey(String)}, followed by a call on
+     * map (each starting with a call on {@link #writeKey(UnicodeString)}, followed by a call on
      * {@link #endMap()}.
      *
      * @param oneLiner True if the caller thinks the value should be output without extra newlines
@@ -334,21 +332,21 @@ public class JSONEmitter {
         }
     }
 
-    private String escape(String cs) throws XPathException {
+    private UnicodeString escape(UnicodeString cs) throws XPathException {
         if (characterMap != null) {
-            StringBuilder out = new StringBuilder(cs.length());
-            String s = characterMap.map(StringView.of(cs).tidy(), true).toString();
-            int prev = 0;
+            UnicodeBuilder out = new UnicodeBuilder();
+            UnicodeString s = characterMap.map(cs, true);
+            long prev = 0;
             while (true) {
-                int start = s.indexOf((char)0, prev);
+                long start = s.indexOf((char)0, prev);
                 if (start >= 0) {
                     out.append(simpleEscape(s.substring(prev, start)));
-                    int end = s.indexOf((char)0, start + 1);
-                    out.append(s, start + 1, end);
+                    long end = s.indexOf((char)0, start + 1);
+                    out.append(s.substring(start + 1, end));
                     prev = end + 1;
                 } else {
                     out.append(simpleEscape(s.substring(prev)));
-                    return out.toString();
+                    return out.toUnicodeString();
                 }
             }
         } else {
@@ -356,9 +354,9 @@ public class JSONEmitter {
         }
     }
 
-    private String simpleEscape(String cs) throws XPathException {
+    private UnicodeString simpleEscape(UnicodeString cs) throws XPathException {
         if (normalize) {
-            cs = Normalizer.normalize(cs, normalizationForm);
+            cs = StringView.of(Normalizer.normalize(cs.toString(), normalizationForm));
         }
         return JsonReceiver.escape(cs, false, !escapeSolidus,
                                    c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c));
