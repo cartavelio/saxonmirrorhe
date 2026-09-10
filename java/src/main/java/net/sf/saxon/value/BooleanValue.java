@@ -19,7 +19,7 @@ import net.sf.saxon.type.*;
  * A boolean XPath value
  */
 
-public final class BooleanValue extends AtomicValue implements XPathComparable, AtomicMatchKey, ContextFreeAtomicValue {
+public final class BooleanValue extends AtomicValue implements XPathComparable, AtomicMatchKey {
     private final boolean value;
 
     /**
@@ -181,23 +181,19 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      * @param collator         the collation to be used when comparing strings
      * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
      *                         sensitive
+     * @param specVersion
      * @return an Object whose equals() and hashCode() methods implement the XPath comparison semantics
      * with respect to this atomic value. If ordered is specified, the result will either be null if
      * no ordering is defined, or will be a Comparable
      */
 
     @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
-    @Override
-    public XPathComparable getXPathComparable()  {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 

@@ -103,7 +103,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
             if (aKey.isNaN()) {
                 comparisonKey = AtomicSortComparer.COLLATION_KEY_NaN;
             } else {
-                comparisonKey = aKey.getXPathMatchKey(collator, keyContext.getImplicitTimezone());
+                comparisonKey = aKey.getXPathMatchKey(collator, keyContext.getImplicitTimezone(), 31);
             }
             ckey.add(comparisonKey);
         }

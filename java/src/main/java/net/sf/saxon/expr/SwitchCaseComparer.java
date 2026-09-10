@@ -22,13 +22,13 @@ import net.sf.saxon.value.StringValue;
  */
 public class SwitchCaseComparer extends GenericAtomicComparer {
 
-    protected SwitchCaseComparer(StringCollator collator, XPathContext context) {
-        super(collator, context);
+    protected SwitchCaseComparer(StringCollator collator, int specVersion, XPathContext context) {
+        super(collator, specVersion, context);
     }
 
     @Override
     public SwitchCaseComparer provideContext(XPathContext context) {
-        return new SwitchCaseComparer(getStringCollator(), context);
+        return new SwitchCaseComparer(getStringCollator(), specVersion, context);
     }
 
     /**
@@ -55,8 +55,8 @@ public class SwitchCaseComparer extends GenericAtomicComparer {
             return true;
         } else {
             int implicitTimezone = getContext().getImplicitTimezone();
-            Object ac = a.getXPathMatchKey(getStringCollator(), implicitTimezone);
-            Object bc = b.getXPathMatchKey(getStringCollator(), implicitTimezone);
+            Object ac = a.getXPathMatchKey(getStringCollator(), implicitTimezone, specVersion);
+            Object bc = b.getXPathMatchKey(getStringCollator(), implicitTimezone, specVersion);
             return ac.equals(bc);
         }
     }

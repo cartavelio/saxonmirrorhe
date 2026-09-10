@@ -9,16 +9,12 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.FormatNumber;
-import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicMetadata;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntIterator;
 
 import java.math.BigDecimal;
@@ -108,6 +104,35 @@ public abstract class IntegerValue extends DecimalValue {
         }
         return Int64Value.makeIntegerValue((long) value);
     }
+
+    /**
+     * Comparison method using transitive semantics (for 4.0). When comparing
+     * mixed data types, doubles and floats are converted to an exact decimal.
+     * <p>Where NaN values are involved, they should be handled by the caller
+     * before invoking this method.</p>
+     *
+     * @param other the other comparand
+     * @return -1, 0, or +1 depending on the magnitude relationship.
+     */
+    @Override
+    public int transitiveCompareTo(NumericValue other) {
+        if (other instanceof IntegerValue) {
+            return asBigInteger().compareTo(((IntegerValue)other).asBigInteger());
+        }
+        if (other instanceof DecimalValue) {
+            try {
+                return getDecimalValue().compareTo(other.getDecimalValue());
+            } catch (ValidationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        double dbl = other.getDoubleValue();
+        if (Double.isInfinite(dbl)) {
+            return Double.compare(0.0e0, dbl);
+        }
+        return getDecimalValue().compareTo(new BigDecimal(dbl));
+    }
+
 
     /**
      * This class allows subtypes of xs:integer to be held, as well as xs:integer values.
@@ -379,12 +404,6 @@ public abstract class IntegerValue extends DecimalValue {
     @Override
     public abstract BigDecimal getDecimalValue();
 
-
-    @Override
-    public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
     /**
      * Determine whether the value is a whole number, that is, whether it compares
      * equal to some integer
@@ -512,6 +531,18 @@ public abstract class IntegerValue extends DecimalValue {
      */
 
     public abstract BigInteger asBigInteger();
+
+    /**
+     * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
+     *
+     * @return a value with the property that the equals() and hashCode() methods follow the rules for comparing
+     * keys in maps.
+     */
+
+    @Override
+    public AtomicMatchKey asMapKey(int specVersion) {
+        return new BigDecimalValue(getDecimalValue());
+    }
 
     /**
      * Get the signum of an int

@@ -112,10 +112,11 @@ public abstract class CollatingFunctionFixed extends SystemFunction implements S
             atomicComparer = EqualityComparer.getInstance();
             return;
         }
+        int specVersion = env.getXPathVersion();
 
         atomicComparer = GenericAtomicComparer.makeAtomicComparer(
                 (BuiltInAtomicType) type0.getBuiltInBaseType(), (BuiltInAtomicType) type1.getBuiltInBaseType(),
-                stringCollator, env.makeEarlyEvaluationContext());
+                stringCollator, specVersion, env.makeEarlyEvaluationContext());
 
     }
 
@@ -142,7 +143,8 @@ public abstract class CollatingFunctionFixed extends SystemFunction implements S
         if (atomicComparer != null) {
             return atomicComparer.provideContext(context);
         } else {
-            return new GenericAtomicComparer(getStringCollator(), context);
+            int specVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            return new GenericAtomicComparer(getStringCollator(), specVersion, context);
         }
     }
 

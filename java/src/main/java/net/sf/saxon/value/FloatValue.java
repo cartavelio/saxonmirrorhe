@@ -415,6 +415,21 @@ public final class FloatValue extends NumericValue {
         return value < otherFloat ? -1 : +1;
     }
 
+    @Override
+    public int transitiveCompareTo(NumericValue other) {
+        if (other instanceof DoubleValue || other instanceof FloatValue) {
+            return Double.compare(value, other.getDoubleValue());
+        } else if (other instanceof Int64Value) {
+            try {
+                return compareTo(other.longValue());
+            } catch (XPathException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return -other.transitiveCompareTo(this);
+        }
+    }
+
     /**
      * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
      *

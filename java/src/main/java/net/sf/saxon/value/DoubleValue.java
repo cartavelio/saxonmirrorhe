@@ -427,6 +427,22 @@ public final class DoubleValue extends NumericValue {
         return value < otherDouble ? -1 : +1;
     }
 
+
+    @Override
+    public int transitiveCompareTo(NumericValue other) {
+        if (other instanceof DoubleValue || other instanceof FloatValue) {
+            return Double.compare(value, other.getDoubleValue());
+        } else if (other instanceof Int64Value) {
+            try {
+                return compareTo(other.longValue());
+            } catch (XPathException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return -other.transitiveCompareTo(this);
+        }
+    }
+
     /**
      * Get an object that implements XML Schema comparison semantics
      * @return a comparable that follows XSD rules

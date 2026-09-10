@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 
 public final class DayTimeDurationValue extends DurationValue
-        implements XPathComparable, ContextFreeAtomicValue {
+        implements XPathComparable {
 
 
     public DayTimeDurationValue(BigDecimal seconds) {
@@ -351,12 +351,7 @@ public final class DayTimeDurationValue extends DurationValue
     }
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
-    @Override
-    public XPathComparable getXPathComparable() {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 
@@ -388,10 +383,11 @@ public final class DayTimeDurationValue extends DurationValue
      *
      * @param collator         Collation used for string comparison
      * @param implicitTimezone XPath dynamic context
+     * @param specVersion
      */
 
     @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 

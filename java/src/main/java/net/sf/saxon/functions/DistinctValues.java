@@ -36,8 +36,8 @@ public class DistinctValues extends CollatingFunctionFixed {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringCollator collator = getStringCollator();
-        boolean transitive = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
-        return new LazySequence(new DistinctIterator(arguments[0].iterate(), collator, context, transitive));
+        int specVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        return new LazySequence(new DistinctIterator(arguments[0].iterate(), collator, context, specVersion));
     }
 
 
@@ -52,7 +52,7 @@ public class DistinctValues extends CollatingFunctionFixed {
         private final XPathContext context;
         private final HashSet<AtomicMatchKey> lookup = new HashSet<>(40);
         private Action onDuplicates = null;
-        private final boolean transitive;
+        private final int specVersion;
 
         /**
          * Create an iterator over the distinct values in a sequence
@@ -61,15 +61,14 @@ public class DistinctValues extends CollatingFunctionFixed {
          * @param collator The comparer used to obtain comparison keys from each value;
          *                 these comparison keys are themselves compared using equals().
          * @param context the XPath dynamic context
-         * @param transitive true if transitive equality semantics are used (specifically, for comparing
-         *                   numeric values of different types)
+         * @param specVersion the XPath language version
          */
 
-        public DistinctIterator(SequenceIterator base, StringCollator collator, XPathContext context, boolean transitive) {
+        public DistinctIterator(SequenceIterator base, StringCollator collator, XPathContext context, int specVersion) {
             this.base = base;
             this.collator = collator;
             this.context = context;
-            this.transitive = transitive;
+            this.specVersion = specVersion;
         }
 
         /**
@@ -90,11 +89,7 @@ public class DistinctValues extends CollatingFunctionFixed {
                 if (nextBase.isNaN()) {
                     key = AtomicSortComparer.COLLATION_KEY_NaN;
                 } else {
-                    if (transitive) {
-                        key = nextBase.getXPathTransitiveMatchKey(collator, implicitTimezone);
-                    } else {
-                        key = nextBase.getXPathMatchKey(collator, implicitTimezone);
-                    }
+                    key = nextBase.getXPathMatchKey(collator, implicitTimezone, specVersion);
                 }
                 if (lookup.add(key)) {
                     // returns true if newly added (if not, keep looking)

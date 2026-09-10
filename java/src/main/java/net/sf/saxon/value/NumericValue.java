@@ -8,6 +8,7 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.TransitiveNumericComparable;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
 import net.sf.saxon.lib.StringCollator;
@@ -26,7 +27,7 @@ import java.math.BigDecimal;
  */
 
 public abstract class NumericValue extends AtomicValue
-        implements XPathComparable, AtomicMatchKey, ContextFreeAtomicValue {
+        implements XPathComparable, AtomicMatchKey {
 
     public NumericValue(AtomicMetadata typeLabel) {
         super(typeLabel);
@@ -231,33 +232,27 @@ public abstract class NumericValue extends AtomicValue
     /**
      * Get a Comparable value that implements the XPath ordering comparison semantics for this value.
      * Returns null if the value is not comparable according to XPath rules. The implementation
-     * for all kinds of NumericValue returns the value itself.
+     * for all kinds of NumericValue returns the value itself in 3.1, but not in 4.0.
      *
-     * @param collator the collation to be used when comparing strings
-     * @param implicitTimezone  the implicit timezone in the dynamic context, used when comparing
-     * dates/times with and without timezone
-     * @return a collation key that implements the comparison semantics
+     * @param collator         the collation to be used when comparing strings
+     * @param implicitTimezone the implicit timezone in the dynamic context, used when comparing
+     *                         dates/times with and without timezone
+     * @param specVersion the XPath specification version
+     * @return a match key that implements the comparison semantics
      */
 
     /*@NotNull*/
     @Override
-    public final AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
-        return this;
+    public final AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
+        return specVersion >= 40 ? asMapKey(40) : this;
     }
 
     @Override
-    public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone) {
-        return asMapKey(40);
-    }
-
-    @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
-        return this;
-    }
-
-    @Override
-    public XPathComparable getXPathComparable() {
-        return this;
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
+        if (specVersion < 40) {
+            return this;
+        }
+        return new TransitiveNumericComparable(this);
     }
 
     /**
@@ -294,6 +289,17 @@ public abstract class NumericValue extends AtomicValue
             throw new ClassCastException("Cannot compare numeric value to " + other.toString());
         }
     }
+
+    /**
+     * Comparison method using transitive semantics (for 4.0). When comparing
+     * mixed data types, doubles and floats are converted to an exact decimal.
+     * <p>Where NaN values are involved, they should be handled by the caller
+     * before invoking this method.</p>
+     * @param other the other comparand
+     * @return -1, 0, or +1 depending on the magnitude relationship.
+     */
+    public abstract int transitiveCompareTo(NumericValue other);
+
 
     /**
      * Compare the value to a long

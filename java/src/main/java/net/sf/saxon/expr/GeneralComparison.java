@@ -10,10 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.CodepointCollator;
-import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.expr.sort.UntypedNumericComparer;
+import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.Minimax;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ConversionRules;
@@ -203,7 +200,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
         final Configuration config = visitor.getConfiguration();
-        boolean allow40 = visitor.getStaticContext().getPackageData().getHostLanguageVersion() >= 40;
+        int version = visitor.getStaticContext().getPackageData().getHostLanguageVersion();
 
         Expression oldOp0 = getLhsExpression();
         Expression oldOp1 = getRhsExpression();
@@ -267,7 +264,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 pt1.equals(BuiltInAtomicType.ANY_ATOMIC) || pt1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
             // then no static type checking is possible
         } else {
-            if (!Type.isPossiblyComparable(pt0, pt1, OperatorInfo.isOrderedOperator(singletonOperator), allow40)) {
+            if (!Type.isPossiblyComparable(pt0, pt1, OperatorInfo.isOrderedOperator(singletonOperator), version >= 40)) {
                 String message = "In {" + toShortString() + "}: cannot compare " + t0 + " to " + t1;
                 if (Cardinality.allowsZero(c0) || Cardinality.allowsZero(c1)) {
                     if (!doneWarnings) { // avoid duplicate warnings
@@ -348,7 +345,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             collation = CodepointCollator.getInstance();
         }
         comparer = GenericAtomicComparer.makeAtomicComparer(
-                pt0, pt1, collation, config.getConversionContext());
+                pt0, pt1, collation, version, config.getConversionContext());
 
 
         // evaluate the expression now if both arguments are constant
@@ -664,7 +661,9 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             if (u0) {
                 // a0 is untyped atomic
                 if (a1 instanceof NumericValue) {
-                    return UntypedNumericComparer.quickCompare((StringValue) a0, (NumericValue) a1, operator, rules);
+                    // TODO: reinstate quick compare
+                    //return UntypedNumericComparer.quickCompare((StringValue) a0, (NumericValue) a1, operator, rules);
+                    a0 = new DoubleValue(StringToDouble11.getInstance().stringToNumber(a0.getUnicodeStringValue()));
                 } else if (a1 instanceof StringValue) {
                     // no conversion needed
                 } else {
@@ -678,7 +677,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             } else {
                 // a1 is untyped atomic
                 if (a0 instanceof NumericValue) {
-                    return UntypedNumericComparer.quickCompare((StringValue) a1, (NumericValue) a0, OperatorInfo.inverse(operator), rules);
+                    //TODO: return UntypedNumericComparer.quickCompare((StringValue) a1, (NumericValue) a0, OperatorInfo.inverse(operator), rules);
+                    a1 = new DoubleValue(StringToDouble11.getInstance().stringToNumber(a1.getUnicodeStringValue()));
                 } else if (a0 instanceof StringValue) {
                     // no conversion needed
                 } else {
@@ -924,6 +924,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                                           Location loc,
                                           XPathContext context) throws XPathException {
             try {
+
                 boolean exhausted0 = false;
                 boolean exhausted1 = false;
 

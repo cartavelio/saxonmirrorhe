@@ -20,7 +20,7 @@ import java.util.Arrays;
  * A value of type xs:hexBinary or xs:base64Binary
  */
 
-public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey, XPathComparable, ContextFreeAtomicValue {
+public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey, XPathComparable {
 
     protected final byte[] binaryValue;
 
@@ -60,7 +60,7 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
 
     /*@Nullable*/
     @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
         return asMapKey(40);
     }
 
@@ -79,18 +79,14 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
      * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
      * collation.
      *
-     * @param collator collation to be used for comparing strings
+     * @param collator         collation to be used for comparing strings
      * @param implicitTimezone to be used for comparing dates/times with no timezone
+     * @param specVersion
      * @return a key used for performing the comparison
      */
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
-    @Override
-    public XPathComparable getXPathComparable() {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 

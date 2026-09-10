@@ -527,7 +527,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     }
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
         if (hasTimezone()) {
             return this;
         } else if (implicitTimezone == MISSING_TIMEZONE) {

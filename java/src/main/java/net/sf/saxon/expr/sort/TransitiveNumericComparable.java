@@ -1,20 +1,27 @@
-package net.sf.saxon.expr.sort;public class TransitiveNumericComparable {
+package net.sf.saxon.expr.sort;
+
+import net.sf.saxon.value.NumericValue;
+
+public class TransitiveNumericComparable implements XPathComparable {
+
+    private final NumericValue value;
+
+    public TransitiveNumericComparable(NumericValue value) {
+        this.value = value;
+    }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     */
+
+    @Override
+    public int compareTo(XPathComparable o) {
+        if (o instanceof TransitiveNumericComparable) {
+            return value.transitiveCompareTo(((TransitiveNumericComparable)o).value);
+        }
+        throw new ClassCastException("Cannot compare numeric and non-numeric values");
+    }
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//

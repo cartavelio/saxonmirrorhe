@@ -44,6 +44,7 @@ import java.util.Properties;
 
 public class SortKeyDefinition extends PseudoExpression {
 
+    protected final int specVersion;
     protected Operand sortKey;
     protected Operand order;
     protected Operand dataTypeExpression = null;
@@ -63,10 +64,11 @@ public class SortKeyDefinition extends PseudoExpression {
     // "finalComparator" is what is actually used to do comparisons, after taking into account
     // ascending/descending, caseOrder, etc.
 
-    public SortKeyDefinition() {
+    public SortKeyDefinition(int specVersion) {
         order = new Operand(this, new StringLiteral("ascending"), OperandRole.SINGLE_ATOMIC);
         caseOrder = new Operand(this, new StringLiteral("#default"), OperandRole.SINGLE_ATOMIC);
         language = new Operand(this, new StringLiteral(StringValue.EMPTY_STRING), OperandRole.SINGLE_ATOMIC);
+        this.specVersion = specVersion;
     }
 
     /**
@@ -396,7 +398,7 @@ public class SortKeyDefinition extends PseudoExpression {
 
     @Override
     public SortKeyDefinition copy(RebindingMap rm) {
-        SortKeyDefinition sk2 = new SortKeyDefinition();
+        SortKeyDefinition sk2 = new SortKeyDefinition(specVersion);
         sk2.setSortKey(copy(sortKey.getChildExpression(), rm), true);
         sk2.setOrder(copy(order.getChildExpression(), rm));
         sk2.setDataTypeExpression(dataTypeExpression == null ? null : copy(dataTypeExpression.getChildExpression(), rm));
@@ -546,7 +548,8 @@ public class SortKeyDefinition extends PseudoExpression {
 
         if (dataTypeExpression == null) {
             atomicComparer = AtomicSortComparer.makeSortComparer(stringCollator,
-                    sortKey.getChildExpression().getItemType().getAtomizedItemType().getPrimitiveType(), context);
+                    sortKey.getChildExpression().getItemType().getAtomizedItemType().getPrimitiveType(),
+                                                                 specVersion, context);
             if (!emptyLeast) {
                 atomicComparer = new EmptyGreatestComparer(atomicComparer);
             }
@@ -555,7 +558,9 @@ public class SortKeyDefinition extends PseudoExpression {
             switch (dataType) {
                 case "text":
                     atomicComparer = AtomicSortComparer.makeSortComparer(stringCollator,
-                                                                         StandardNames.XS_STRING, context);
+                                                                         StandardNames.XS_STRING,
+                                                                         specVersion,
+                                                                         context);
                     atomicComparer = new TextComparer(atomicComparer);
                     break;
                 case "number":

@@ -294,7 +294,7 @@ public class SaxonDuration extends Duration {
      * @throws UnsupportedOperationException If the underlying implementation
      *                                       cannot reasonably process the request, e.g. W3C XML Schema allows for
      *                                       arbitrarily large/small/precise values, the request may be beyond the
-     *                                       implementations capability.
+     *                                       implementation's capability.
      * @throws NullPointerException          if <code>duration</code> is <code>null</code>.
      * @throws IllegalArgumentException      if the operands are not dayTimeDuration or yearMonthDuration values.
      * @see #isShorterThan(javax.xml.datatype.Duration)
@@ -305,8 +305,8 @@ public class SaxonDuration extends Duration {
         if (!(rhs instanceof SaxonDuration)) {
             throw new IllegalArgumentException("Supplied duration is not a SaxonDuration");
         }
-        XPathComparable c0 = duration.getXPathComparable(null, 0);
-        XPathComparable c1 = ((SaxonDuration) rhs).duration.getXPathComparable(null, 0);
+        XPathComparable c0 = duration.getXPathComparable(null, 0, 31);
+        XPathComparable c1 = ((SaxonDuration) rhs).duration.getXPathComparable(null, 0, 31);
         return c0.compareTo(c1);
     }
 

@@ -68,14 +68,14 @@ public class SwitchCaseComparison extends BinaryExpression implements Comparison
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         StaticContext env = visitor.getStaticContext();
-        boolean allow40 = env.getPackageData().getHostLanguageVersion() >= 40;
+        int version = env.getPackageData().getHostLanguageVersion();
         String defaultCollationName = env.getDefaultCollationName();
         final Configuration config = visitor.getConfiguration();
         StringCollator collation = config.getCollation(defaultCollationName);
         if (collation == null) {
             collation = CodepointCollator.getInstance();
         }
-        comparer = new SwitchCaseComparer(collation, config.getConversionContext());
+        comparer = new SwitchCaseComparer(collation, version, config.getConversionContext());
 
         Expression oldOp0 = getLhsExpression();
         Expression oldOp1 = getRhsExpression();
@@ -130,7 +130,7 @@ public class SwitchCaseComparison extends BinaryExpression implements Comparison
         } else {
             if (Type.isGuaranteedComparable(pt0, pt1, false)) {
                 knownToBeComparable = true;
-            } else if (!Type.isPossiblyComparable(pt0, pt1, false, allow40)) {
+            } else if (!Type.isPossiblyComparable(pt0, pt1, false, version >= 40)) {
                 env.issueWarning("Cannot compare " + t0 + " to " + t1, SaxonErrorCode.SXWN9025, getLocation());
                 // This is not an error in a switch statement, but it means the branch will never be chosen
             }

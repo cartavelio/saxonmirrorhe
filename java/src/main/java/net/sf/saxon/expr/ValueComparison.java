@@ -83,10 +83,12 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             // This can happen after loading from a SEF file; the static type information is not always available
             t1 = BuiltInAtomicType.ANY_ATOMIC;
         }
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         return GenericAtomicComparer.makeAtomicComparer(
                 (BuiltInAtomicType)t0,
                 (BuiltInAtomicType)t1,
                 getStringCollator(),
+                version,
                 getConfiguration().getConversionContext());
 
     }
@@ -516,7 +518,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
             final ItemEvaluator p0 = expr.getLhsExpression().makeElaborator().elaborateForItem();
             final ItemEvaluator p1 = expr.getRhsExpression().makeElaborator().elaborateForItem();
             final BooleanValue resultWhenEmpty = expr.getResultWhenEmpty();
-            final boolean allow40 = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
+            final int version = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
 
             StringCollator defaultCollation;
             try {
@@ -537,7 +539,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                             operandType(expr.getLhsExpression()),
                             operandType(expr.getRhsExpression()),
                             defaultCollation,
-                            operator, true, allow40);
+                            operator, true, version);
 
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
@@ -573,6 +575,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
         public BooleanEvaluator elaborateForBoolean() {
             final ValueComparison expr = (ValueComparison) getExpression();
+            final int specVersion = expr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             final ItemEvaluator p0 = expr.getLhsExpression().makeElaborator().elaborateForItem();
             final ItemEvaluator p1 = expr.getRhsExpression().makeElaborator().elaborateForItem();
             StringCollator defaultCollation;
@@ -601,7 +604,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 t1 = BuiltInAtomicType.ANY_ATOMIC;
             }
             final GenericAtomicComparer.AtomicComparisonFunction comparer = GenericAtomicComparer.makeAtomicComparisonFunction(
-                    (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true, false);
+                    (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true, specVersion);
 
             final boolean nullable0 = Cardinality.allowsZero(card0);
             final boolean nullable1 = Cardinality.allowsZero(card1);

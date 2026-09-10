@@ -1417,7 +1417,8 @@ public class PackageLoaderHE implements IPackageLoader {
             return ContextFreeAtomicComparer.getInstance();
         } else if (name.startsWith("GAC|")) {
             StringCollator collator = config.getCollation(name.substring(4));
-            return new GenericAtomicComparer(collator, null);
+            int version = packStack.peek().getHostLanguageVersion();
+            return new GenericAtomicComparer(collator, version, null);
         } else if (name.equals("CalVC")) {
             return new CalendarValueComparer(null);
         } else if (name.equals("EQC")) {
@@ -1440,7 +1441,9 @@ public class PackageLoaderHE implements IPackageLoader {
             String fps = name.substring(5, nextBar);
             int fp = Integer.parseInt(fps);
             String collName = name.substring(nextBar + 1);
-            return AtomicSortComparer.makeSortComparer(config.getCollation(collName), fp, new EarlyEvaluationContext(config));
+            int version = packStack.peek().getHostLanguageVersion();
+            return AtomicSortComparer.makeSortComparer(
+                    config.getCollation(collName), fp, version, new EarlyEvaluationContext(config));
         } else if (name.startsWith("DESC|")) {
             AtomicComparer base = makeAtomicComparer(name.substring(5), element);
             return new DescendingComparer(base);
@@ -1464,8 +1467,9 @@ public class PackageLoaderHE implements IPackageLoader {
         NodeInfo sortKeyElement;
         SequenceIterator iterator = element.iterateChildAxis(
                 NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "sortKey", config));
+        int version = packStack.peek().getHostLanguageVersion();
         while ((sortKeyElement = (NodeInfo)iterator.next()) != null) {
-            SortKeyDefinition skd = new SortKeyDefinition();
+            SortKeyDefinition skd = new SortKeyDefinition(version);
             String compAtt = sortKeyElement.getAttributeValue(NamespaceUri.NULL,"comp");
             if (compAtt != null) {
                 AtomicComparer ac = makeAtomicComparer(compAtt, sortKeyElement);

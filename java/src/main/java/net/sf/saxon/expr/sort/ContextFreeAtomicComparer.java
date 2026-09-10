@@ -31,7 +31,8 @@ public class ContextFreeAtomicComparer implements AtomicComparer {
         return THE_INSTANCE;
     }
 
-    protected ContextFreeAtomicComparer() {
+    private ContextFreeAtomicComparer() {
+        
     }
 
     /*@Nullable*/
@@ -68,13 +69,6 @@ public class ContextFreeAtomicComparer implements AtomicComparer {
 
     @Override
     public int compareAtomicValues(AtomicValue a, AtomicValue b) {
-//        if (a == null) {
-//            return (b == null ? 0 : -1);
-//        } else if (b == null) {
-//            return +1;
-//        }
-//        return ((ContextFreeAtomicValue) a).getXPathComparable()
-//                .compareTo(((ContextFreeAtomicValue) b).getXPathComparable());
         return ((XPathComparable)a).compareTo((XPathComparable)b);
     }
 

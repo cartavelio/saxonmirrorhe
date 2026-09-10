@@ -259,11 +259,12 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      *
      * @param collator         collation used for strings
      * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
+     * @param specVersion
      */
 
     /*@Nullable*/
     @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone)
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion)
     throws NoDynamicContextException {
         if (hasTimezone()) {
             return this;
@@ -286,7 +287,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
     }
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
         return null;
     }
 

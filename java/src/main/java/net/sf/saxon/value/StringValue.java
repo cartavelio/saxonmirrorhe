@@ -258,13 +258,14 @@ public class StringValue extends AtomicValue {
      * @param collator         Collation to be used for comparing strings
      * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
      *                         sensitive
+     * @param specVersion
      * @return an Object whose equals() and hashCode() methods implement the XPath comparison semantics
      * with respect to this atomic value. If ordered is specified, the result will either be null if
      * no ordering is defined, or will be a Comparable
      */
 
     @Override
-    public AtomicMatchKey getXPathMatchKey(/*@NotNull*/ StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(/*@NotNull*/ StringCollator collator, int implicitTimezone, int specVersion) {
         return collator.getCollationKey(this.getUnicodeStringValue());
     }
 
@@ -394,7 +395,7 @@ public class StringValue extends AtomicValue {
 
     @Override
     @CSharpInnerClass(outer=true, extra={"Saxon.Hej.lib.StringCollator collator"})
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
         return new StringXPathComparable(getContent(), collator);
     }
 

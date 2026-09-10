@@ -84,6 +84,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
+        int version = visitor.getStaticContext().getXPathVersion();
         getLhs().typeCheck(visitor, contextInfo);
         getRhs().typeCheck(visitor, contextInfo);
 
@@ -94,7 +95,7 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
         }
 
         XPathContext context = env.makeEarlyEvaluationContext();
-        comparer = new GenericAtomicComparer(comp, context);
+        comparer = new GenericAtomicComparer(comp, version, context);
 
         // evaluate the expression now if both arguments are constant
 

@@ -200,11 +200,15 @@ public class DeepEqual extends CollatingFunctionFixed {
             if (version < 40) {
                 AtomicComparer ac = GenericAtomicComparer.makeAtomicComparer(
                         BuiltInAtomicType.ANY_ATOMIC, BuiltInAtomicType.ANY_ATOMIC,
-                        stringCollator, context);
+                        stringCollator, version, context);
                 comparer = (a, b)  -> ac.comparesEqual(a, b);
             } else {
-                comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
-                        .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
+                comparer = (a, b) -> {
+                    int implicitTimezone = context.getImplicitTimezone();
+                    int implicitTimezone1 = context.getImplicitTimezone();
+                    return a.getXPathMatchKey(stringCollator, implicitTimezone1, 40)
+                            .equals(b.getXPathMatchKey(stringCollator, implicitTimezone, 40));
+                };
             }
             if (normalizeSpace || normalizationForm != null) {
                 final BiFunction<AtomicValue, AtomicValue, Boolean> baseComparer = comparer;

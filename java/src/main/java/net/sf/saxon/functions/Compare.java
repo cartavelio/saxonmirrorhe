@@ -8,17 +8,20 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.*;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.GenericAtomicComparer;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ValidationException;
-import net.sf.saxon.value.*;
-
-import java.math.BigDecimal;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class implements the fn:compare() function, introduced in XPath 2.0 and heavily
@@ -78,6 +81,7 @@ public class Compare extends CollatingFunctionFixed {
 
     @Override
     public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+        int specVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         AtomicValue arg0 = (AtomicValue) arguments[0].head();
         AtomicValue arg1 = (AtomicValue) arguments[1].head();
         if (arg0 == null || arg1 == null) {
@@ -100,7 +104,8 @@ public class Compare extends CollatingFunctionFixed {
         }
         switch (p0) {
             case StandardNames.XS_STRING:
-                GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
+                GenericAtomicComparer comparer =
+                        new GenericAtomicComparer(getStringCollator(), specVersion, context);
                 return compareStrings((StringValue)arg0, (StringValue)arg1, comparer);
             case StandardNames.XS_NUMERIC:
                 if (arg0.isNaN()) {
@@ -108,26 +113,28 @@ public class Compare extends CollatingFunctionFixed {
                 } else if (arg1.isNaN()) {
                     return Int64Value.PLUS_ONE;
                 }
-                if (arg0.getPrimitiveType() == arg1.getPrimitiveType()) {
-                    int c = ((NumericValue) arg0).getXPathComparable().compareTo(
-                            ((NumericValue) arg1).getXPathComparable());
+                //if (arg0.getPrimitiveType() == arg1.getPrimitiveType()) {
+                    int c = arg0.getXPathComparable(null, 0, specVersion).compareTo(
+                            arg1.getXPathComparable(null, 0, specVersion));
                     return Int64Value.makeIntegerValue(c);
-                } else {
-                    try {
-                        BigDecimal dec0 = ((NumericValue) arg0).getExactDecimalValue();
-                        BigDecimal dec1 = ((NumericValue) arg1).getExactDecimalValue();
-                        return Int64Value.makeIntegerValue(dec0.compareTo(dec1));
-                    } catch (ValidationException e) {
-                        // Typically one of the values is infinity
-                        return Int64Value.makeIntegerValue(
-                                Double.compare(
-                                        ((NumericValue) arg0).getDoubleValue(),
-                                        ((NumericValue) arg1).getDoubleValue()));
-                    }
-                }
+//                } else {
+//                    try {
+//                        BigDecimal dec0 = ((NumericValue) arg0).getExactDecimalValue();
+//                        BigDecimal dec1 = ((NumericValue) arg1).getExactDecimalValue();
+//                        return Int64Value.makeIntegerValue(dec0.compareTo(dec1));
+//                    } catch (ValidationException e) {
+//                        // Typically one of the values is infinity
+//                        return Int64Value.makeIntegerValue(
+//                                Double.compare(
+//                                        ((NumericValue) arg0).getDoubleValue(),
+//                                        ((NumericValue) arg1).getDoubleValue()));
+//                    }
+//                }
             default:
-                XPathComparable c0 = arg0.getXPathComparable(CodepointCollator.getInstance(), context.getImplicitTimezone());
-                XPathComparable c1 = arg1.getXPathComparable(CodepointCollator.getInstance(), context.getImplicitTimezone());
+                XPathComparable c0 = arg0.getXPathComparable(
+                        CodepointCollator.getInstance(), context.getImplicitTimezone(), specVersion);
+                XPathComparable c1 = arg1.getXPathComparable(
+                        CodepointCollator.getInstance(), context.getImplicitTimezone(), specVersion);
                 return Int64Value.makeIntegerValue(c0.compareTo(c1));
         }
 

@@ -10,16 +10,13 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.CompareToConstant;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.OperatorSymbol;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.CalendarValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 /**
  * An AtomicComparer used for comparing atomic values of arbitrary item types. It encapsulates
@@ -33,20 +30,24 @@ public class GenericAtomicComparer implements AtomicComparer {
 
     private StringCollator collator;
     private final transient XPathContext context;
+    protected final int specVersion;
 
     /**
      * Create an GenericAtomicComparer
      *
      * @param collator          the collation to be used
+     * @oaram specVersion       the XPath specification version
      * @param conversionContext a context, used when converting untyped atomic values to the target type.
      */
 
-    public GenericAtomicComparer(/*@Nullable*/ StringCollator collator, XPathContext conversionContext) {
+    public GenericAtomicComparer(
+            StringCollator collator, int specVersion, XPathContext conversionContext) {
         this.collator = collator;
         if (collator == null) {
             this.collator = CodepointCollator.getInstance();
         }
         context = conversionContext;
+        this.specVersion = specVersion;
     }
 
     /**
@@ -56,12 +57,14 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @param type1    primitive type of the second operand
      * @param collator the collation to be used, if any. This is supplied as a SimpleCollation object
      *                 which encapsulated both the collation URI and the collation itself.
+     * @param specVersion the XPath specification version
      * @param context  the dynamic context
      * @return a GenericAtomicComparer for values of known types
      */
 
     public static AtomicComparer makeAtomicComparer(
-            BuiltInAtomicType type0, BuiltInAtomicType type1, StringCollator collator, XPathContext context) {
+            BuiltInAtomicType type0, BuiltInAtomicType type1,
+            StringCollator collator, int specVersion, XPathContext context) {
         int fp0 = type0.getFingerprint();
         int fp1 = type1.getFingerprint();
         if (fp0 == fp1) {
@@ -110,7 +113,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                 return new CollatingAtomicComparer(collator);
             }
         }
-        return new GenericAtomicComparer(collator, context);
+        return new GenericAtomicComparer(collator, specVersion, context);
     }
     
     /**
@@ -135,7 +138,7 @@ public class GenericAtomicComparer implements AtomicComparer {
     /**
      * Get an atomic comparison function for two atomic values that implement the
      * {@link XPathComparable} interface
-     * @param operator the operator to be used for the comparison, for example {@link Token#FEQ}
+     * @param operator the operator to be used for the comparison, for example {@link OperatorSymbol#FEQ}
      * @return a function to perform the comparison
      */
 
@@ -148,7 +151,7 @@ public class GenericAtomicComparer implements AtomicComparer {
 
     /**
      * Get an atomic comparison function for two xs:float or xs:double values
-     * @param operator the operator to be used for the comparison, for example {@link Token#FEQ}
+     * @param operator the operator to be used for the comparison, for example {@link OperatorSymbol#FEQ}
      * @return a function to perform the comparison
      */
 
@@ -162,24 +165,43 @@ public class GenericAtomicComparer implements AtomicComparer {
         };
     }
 
+
+    private static AtomicComparisonFunction getTransitiveNumericComparisonFunction(OperatorSymbol operator) {
+        return (a, b, context) -> {
+            if (a.isNaN() || b.isNaN()) {
+                return operator == OperatorSymbol.FNE;
+            }
+            if (((NumericValue)a).isNegativeZero()) {
+                a = DoubleValue.ZERO;
+            }
+            if (((NumericValue) b).isNegativeZero()) {
+                b = DoubleValue.ZERO;
+            }
+            XPathComparable xa = new TransitiveNumericComparable((NumericValue) a);
+            XPathComparable xb = new TransitiveNumericComparable((NumericValue) b);
+            int comp = xa.compareTo(xb);
+            return CompareToConstant.interpretComparisonResult(operator, comp);
+        };
+    }
+
     /**
      * Return the integer fingerprint of a type, after promoting the type fpr comparison
      * purposes. Numeric types are promoted to xs:double, while xs:anyURI and xs:untypedAtomic
      * are promoted to xs:string
      *
      * @param type    the input type
-     * @param allow40 true if 4.0 promotions are to be allowed
+     * @param version the XPath specification version
      * @return the fingerprint of the type after promotion
      */
 
-    private static int applyPromotion(BuiltInAtomicType type, boolean allow40) {
+    private static int applyPromotion(BuiltInAtomicType type, int version) {
         if (type.isPrimitiveNumeric()) {
-            return StandardNames.XS_DOUBLE;
+            return version >= 40 ? StandardNames.XS_DECIMAL : StandardNames.XS_DOUBLE;
         }
         int fp = type.getFingerprint();
         if (fp == StandardNames.XS_UNTYPED_ATOMIC || fp == StandardNames.XS_ANY_URI) {
             return StandardNames.XS_STRING;
-        } else if (allow40 && fp == StandardNames.XS_HEX_BINARY) {
+        } else if (version >= 40 && fp == StandardNames.XS_HEX_BINARY) {
             return StandardNames.XS_BASE64_BINARY;
         } else {
             return fp;
@@ -196,17 +218,18 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @param operator       the comparison operator, fpr example {@link OperatorSymbol#FEQ}
      * @param allowRecursion flag to stop infinite recursion (the function recurses if the static types
      *                       are not known; it then relies on testing the run-time types)
-     * @param allow40
+     * @param specVersion    the XPath specification version
      * @return a comparison function for two atomic values (neither of which may be null)
      */
 
     public static AtomicComparisonFunction makeAtomicComparisonFunction(
             BuiltInAtomicType type0, BuiltInAtomicType type1,
             StringCollator collator, OperatorSymbol operator,
-            boolean allowRecursion, boolean allow40) {
+            boolean allowRecursion,
+            int specVersion) {
 
-        int fp0 = applyPromotion(type0, allow40);
-        int fp1 = applyPromotion(type1, allow40);
+        int fp0 = applyPromotion(type0, specVersion);
+        int fp1 = applyPromotion(type1, specVersion);
 
         if (fp0 == fp1) {
             switch (fp0) {
@@ -223,18 +246,29 @@ public class GenericAtomicComparer implements AtomicComparer {
                         return CompareToConstant.interpretComparisonResult(operator, comp);
                     };
 
-                case StandardNames.XS_DOUBLE:
-                case StandardNames.XS_FLOAT:
-                    return getFloatingPointComparisonFunction(operator);
-
                 case StandardNames.XS_BOOLEAN:
-                case StandardNames.XS_INTEGER:
-                case StandardNames.XS_DECIMAL:
                 case StandardNames.XS_DAY_TIME_DURATION:
                 case StandardNames.XS_YEAR_MONTH_DURATION:
                 case StandardNames.XS_BASE64_BINARY:
                 case StandardNames.XS_HEX_BINARY:
                     return getContextFreeComparisonFunction(operator);
+
+
+                case StandardNames.XS_INTEGER:
+                case StandardNames.XS_DECIMAL:
+                    if (specVersion < 40) {
+                        return getContextFreeComparisonFunction(operator);
+                    } else {
+                        return getTransitiveNumericComparisonFunction(operator);
+                    }
+
+                case StandardNames.XS_DOUBLE:
+                case StandardNames.XS_FLOAT:
+                    if (specVersion < 40) {
+                        return getFloatingPointComparisonFunction(operator);
+                    } else {
+                        return getTransitiveNumericComparisonFunction(operator);
+                    }
 
                 case StandardNames.XS_QNAME:
                 case StandardNames.XS_NOTATION:
@@ -289,7 +323,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                 synchronized(firstTimeFunction) {
                     if (firstTimeFunction[0] == null) {
                         AtomicComparisonFunction comparisonFunction =
-                                makeAtomicComparisonFunction(at, bt, collator, operator, false, allow40);
+                                makeAtomicComparisonFunction(at, bt, collator, operator, false, specVersion);
                         firstTimeFunction[0] = comparisonFunction;
                         firstTimeTypes[0] = at;
                         firstTimeTypes[1] = bt;
@@ -299,7 +333,7 @@ public class GenericAtomicComparer implements AtomicComparer {
                             return firstTimeFunction[0].compare(a, b, context);
                         } else {
                             AtomicComparisonFunction comparisonFunction =
-                                    makeAtomicComparisonFunction(at, bt, collator, operator, false, false);
+                                    makeAtomicComparisonFunction(at, bt, collator, operator, false, specVersion);
                             return comparisonFunction.compare(a, b, context);
                         }
                     }
@@ -323,8 +357,8 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @return a matcher function for comparing values under these constraints
      */
     public static AtomicMatcher getTransitiveAtomicMatcher(StringCollator collator, int implicitTimezone) {
-        return (a, b) -> a.getXPathTransitiveMatchKey(collator, implicitTimezone)
-                .equals(b.getXPathTransitiveMatchKey(collator, implicitTimezone));
+        return (a, b) -> a.getXPathMatchKey(collator, implicitTimezone, 40)
+                .equals(b.getXPathMatchKey(collator, implicitTimezone, 40));
     }
 
     @Override
@@ -342,7 +376,7 @@ public class GenericAtomicComparer implements AtomicComparer {
 
     @Override
     public GenericAtomicComparer provideContext(XPathContext context) {
-        return new GenericAtomicComparer(collator, context);
+        return new GenericAtomicComparer(collator, specVersion, context);
     }
 
     /**
@@ -389,8 +423,8 @@ public class GenericAtomicComparer implements AtomicComparer {
             return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();
-            XPathComparable ac = a.getXPathComparable(collator, implicitTimezone);
-            XPathComparable bc = b.getXPathComparable(collator, implicitTimezone);
+            XPathComparable ac = a.getXPathComparable(collator, implicitTimezone, specVersion);
+            XPathComparable bc = b.getXPathComparable(collator, implicitTimezone, specVersion);
             if (ac == null || bc == null) {
                 XPathException e = new XPathException("Objects are not comparable (" +
                         Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004");
@@ -423,8 +457,8 @@ public class GenericAtomicComparer implements AtomicComparer {
             return ((CalendarValue) a).compareTo((CalendarValue) b, context.getImplicitTimezone()) == 0;
         } else {
             int implicitTimezone = context.getImplicitTimezone();
-            AtomicMatchKey ac = a.getXPathMatchKey(collator, implicitTimezone);
-            AtomicMatchKey bc = b.getXPathMatchKey(collator, implicitTimezone);
+            AtomicMatchKey ac = a.getXPathMatchKey(collator, implicitTimezone, specVersion);
+            AtomicMatchKey bc = b.getXPathMatchKey(collator, implicitTimezone, specVersion);
             return ac.equals(bc);
         }
     }

@@ -52,8 +52,9 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
             }
         }
         StringCollator collation = context.getConfiguration().getCollation(collationName);
-
-        AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        AtomicComparer comparer = AtomicSortComparer.makeSortComparer(
+                collation, StandardNames.XS_ANY_ATOMIC_TYPE, version, context);
         Callable key = null;
         if (arguments.length > 2) {
             FunctionItem suppliedKeyFn = (FunctionItem) arguments[2].head();

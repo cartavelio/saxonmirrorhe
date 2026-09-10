@@ -166,11 +166,12 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
      *
      * @param collator         the collation to be used for the comparison
      * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
+     * @param specVersion
      */
 
     /*@Nullable*/
     @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 

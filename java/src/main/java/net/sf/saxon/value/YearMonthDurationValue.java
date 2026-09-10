@@ -26,7 +26,7 @@ import java.math.RoundingMode;
  * to be represented.</p>
  */
 
-public final class YearMonthDurationValue extends DurationValue implements XPathComparable, ContextFreeAtomicValue {
+public final class YearMonthDurationValue extends DurationValue implements XPathComparable {
 
     public YearMonthDurationValue(int months, AtomicType typeLabel) {
         super(months, BigDecimal.ZERO, typeLabel);
@@ -280,15 +280,10 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
     }
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
-
-    @Override
-    public XPathComparable getXPathComparable() {
-        return this;
-    }
-
+    
     /**
      * Get a Comparable value that implements the XPath ordering comparison semantics for this value.
      * Returns null if the value is not comparable according to XPath rules. The default implementation
@@ -297,10 +292,11 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
      *
      * @param collator         for comparing strings - not used
      * @param implicitTimezone implicit timezone in the dynamic context - not used
+     * @param specVersion
      */
 
     @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 

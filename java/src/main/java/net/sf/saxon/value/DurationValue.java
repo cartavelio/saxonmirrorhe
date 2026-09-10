@@ -506,16 +506,17 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param collator         collation used for comparing string values
      * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
+     * @param specVersion
      */
 
     /*@Nullable*/
     @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
     }
 
     @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
         return null;
     }
 

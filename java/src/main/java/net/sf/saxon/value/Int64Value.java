@@ -288,6 +288,27 @@ public final class Int64Value extends IntegerValue {
     }
 
     /**
+     * Comparison method using transitive semantics (for 4.0). When comparing
+     * mixed data types, doubles and floats are converted to an exact decimal.
+     * <p>Where NaN values are involved, they should be handled by the caller
+     * before invoking this method.</p>
+     *
+     * @param other the other comparand
+     * @return -1, 0, or +1 depending on the magnitude relationship.
+     */
+    @Override
+    public int transitiveCompareTo(NumericValue other) {
+        if (other instanceof Int64Value) {
+            try {
+                return compareTo(other.longValue());
+            } catch (XPathException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return super.transitiveCompareTo(other);
+    }
+
+    /**
      * Compare the value to a long
      *
      * @param other the value to be compared with

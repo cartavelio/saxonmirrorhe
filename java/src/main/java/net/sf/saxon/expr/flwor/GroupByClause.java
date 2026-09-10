@@ -346,9 +346,7 @@ public class GroupByClause extends Clause {
             this.groupingValues = groupingValues;
             this.matchKeys = new AtomicMatchKey[groupingValues.length];
             for (int i=0; i<groupingValues.length; i++) {
-                matchKeys[i] = groupingValues[i] == null
-                        ? null
-                        : groupingValues[i].getXPathTransitiveMatchKey(collators[i], implicitTimezone);
+                matchKeys[i] = groupingValues[i] == null ? null : groupingValues[i].getXPathMatchKey(collators[i], implicitTimezone, 40);
             }
         }
 

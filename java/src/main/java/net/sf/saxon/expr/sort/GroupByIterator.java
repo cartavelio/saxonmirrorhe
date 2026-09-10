@@ -114,7 +114,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 if (key.isNaN()) {
                     comparisonKey = AtomicSortComparer.COLLATION_KEY_NaN;
                 } else {
-                    comparisonKey = key.getXPathTransitiveMatchKey(collator, implicitTimezone);
+                    comparisonKey = key.getXPathMatchKey(collator, implicitTimezone, 40);
                 }
                 List<Item> g = index.get(comparisonKey);
                 if (g == null) {
@@ -169,7 +169,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 if (key.isNaN()) {
                     comparisonKey = AtomicSortComparer.COLLATION_KEY_NaN;
                 } else {
-                    comparisonKey = key.getXPathMatchKey(collator, implicitTimezone);
+                    comparisonKey = key.getXPathMatchKey(collator, implicitTimezone, 31);
                 }
                 ckList.add(comparisonKey);
             }

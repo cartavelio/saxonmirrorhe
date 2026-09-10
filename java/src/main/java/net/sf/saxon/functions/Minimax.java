@@ -163,7 +163,8 @@ public abstract class Minimax extends CollatingFunctionFixed {
             type = BuiltInAtomicType.DOUBLE;
         }
         BuiltInAtomicType prim = (BuiltInAtomicType) type;
-        return GenericAtomicComparer.makeAtomicComparer(prim, prim, getStringCollator(), context);
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        return GenericAtomicComparer.makeAtomicComparer(prim, prim, getStringCollator(), version, context);
     }
 
     /**

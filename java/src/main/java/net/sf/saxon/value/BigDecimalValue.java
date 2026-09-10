@@ -10,7 +10,6 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
-import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -671,16 +670,6 @@ public final class BigDecimalValue extends DecimalValue {
         }
     }
 
-    @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
-    @Override
-    public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
-
 
     /**
      * Compare the value to another numeric value
@@ -708,6 +697,24 @@ public final class BigDecimalValue extends DecimalValue {
         }
     }
 
+    @Override
+    public int transitiveCompareTo(NumericValue other) {
+        if (other instanceof DecimalValue) {
+            try {
+                return value.compareTo(other.getDecimalValue());
+            } catch (ValidationException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            double dbl = other.getDoubleValue();
+            if (Double.isInfinite(dbl)) {
+                return Double.compare(0.0e0, dbl);
+            }
+            BigDecimal exactDecimal = new BigDecimal(dbl);
+            return value.compareTo(exactDecimal);
+        }
+    }
+
     /**
      * Compare the value to a long
      *
@@ -722,6 +729,19 @@ public final class BigDecimalValue extends DecimalValue {
         }
         return value.compareTo(BigDecimal.valueOf(other));
     }
+
+    /**
+     * Get a value whose equals() method follows the "same key" rules for comparing the keys of a map.
+     *
+     * @return a value with the property that the equals() and hashCode() methods follow the rules for comparing
+     * keys in maps.
+     */
+
+    @Override
+    public AtomicMatchKey asMapKey(int specVersion) {
+        return this;
+    }
+
 
     /**
      * Determine whether two atomic values are identical, as determined by XML Schema rules. This is a stronger

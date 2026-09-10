@@ -44,7 +44,9 @@ public class Sort extends SystemFunction {
             }
         }
         StringCollator collation = context.getConfiguration().getCollation(collationName);
-        AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
+        int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        AtomicComparer comparer = AtomicSortComparer.makeSortComparer(
+                collation, StandardNames.XS_ANY_ATOMIC_TYPE, version, context);
         Callable key = null;
         if (arguments.length > 2) {
             key = (FunctionItem) arguments[2].head();

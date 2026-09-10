@@ -77,7 +77,7 @@ public class ArraySortBy extends SystemFunction {
             }
             comparers.add(
                     AtomicSortComparer.makeSortComparer(
-                            collator, StandardNames.XS_ANY_ATOMIC_TYPE, context));
+                            collator, StandardNames.XS_ANY_ATOMIC_TYPE, 40, context));
         } else {
 
             for (Item f : details.asIterable()) {
@@ -95,7 +95,7 @@ public class ArraySortBy extends SystemFunction {
                     throw new XPathException("Unknown collation " + collation, "FOCH0002");
                 }
                 int itemType = StandardNames.XS_ANY_ATOMIC_TYPE;
-                AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collator, itemType, context);
+                AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collator, itemType, 40, context);
                 if (descending) {
                     comparer = new DescendingComparer(comparer);
                 }

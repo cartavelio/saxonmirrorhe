@@ -117,7 +117,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
             }
         }
 
-        sortKeyDefinition = new SortKeyDefinition();
+        sortKeyDefinition = new SortKeyDefinition(getEffectiveVersion());
         sortKeyDefinition.setOrder(order);
         sortKeyDefinition.setCaseOrder(caseOrder);
         sortKeyDefinition.setLanguage(lang);

@@ -70,7 +70,7 @@ public class SortBy extends SystemFunction {
         GroundedValue details = arguments[1].materialize();
         if (details.getLength() == 0) {
             StringCollator collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
-            AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collation,StandardNames.XS_ANY_ATOMIC_TYPE, context);
+            AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collation,StandardNames.XS_ANY_ATOMIC_TYPE, 40, context);
             return sort(arguments[0].iterate(), listOfOne(DATA_FN), listOfOne(comparer), context);
         }
 
@@ -92,7 +92,7 @@ public class SortBy extends SystemFunction {
                 throw new XPathException("Unknown collation " + collation, "FOCH0002");
             }
             int itemType = StandardNames.XS_ANY_ATOMIC_TYPE;
-            AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collator, itemType, context);
+            AtomicComparer comparer = AtomicSortComparer.makeSortComparer(collator, itemType, 40, context);
             if (descending) {
                 comparer = new DescendingComparer(comparer);
             }

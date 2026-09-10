@@ -409,7 +409,7 @@ public class KeyIndex {
                 return collation.getCollationKey(value.getUnicodeStringValue());
             }
         } else {
-            return value.getXPathMatchKey(collation, implicitTimezone);
+            return value.getXPathMatchKey(collation, implicitTimezone, 31);
         }
     }
 
