@@ -836,35 +836,36 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public static MapItem mergeMaps(SequenceIterator iter, XPathContext context,
                                         OnDuplicatesAction onDuplicates, int version)
                 throws XPathException {
-            MapItem next;
-            //Old method
-            /*
-             while ((next = (MapItem) iter.next()) != null) {
-                //if(next.size() > 50){
-                    System.err.println("mergeMap size = "  + next.size());
-                //}
-                for (KeyValuePair kvp : next.keyValuePairs()) {
-                    builder.put(kvp.key(), kvp.value());
-                }
-            }
-            return builder.getCompletedMap(context);
-             */
-
             MapItem firstMap = (MapItem) iter.next();
             if (firstMap == null) {
                 return EmptyMap.getInstance(version);
             }
-            if (firstMap instanceof ExtensibleMap || firstMap instanceof DeltaMap || firstMap.size() > 50) {
-                while ((next = (MapItem) iter.next()) != null) {
 
-                    for (KeyValuePair kvp : next.keyValuePairs()) {
+            // Special case where there is only one map. This happens with a single-entry map constructor
+            // such as {"validate":false()}.
+
+            if (iter instanceof SingletonIterator) {
+                return firstMap;
+            }
+
+            // If the first map is extensible, or if it is large, then we merge the second and subsequent
+            // maps into the first using incremental put operations, checking each entry first to see if
+            // it is a duplicate. This path is important for performance when a map is constructed incrementally
+            // using successive calls on map:merge; it avoids copying the contents of the first map, which
+            // can lead to quadratic performance.
+
+            MapItem nextMap;
+            if (firstMap instanceof ExtensibleMap || firstMap instanceof DeltaMap || firstMap.size() > 50) {
+                while ((nextMap = (MapItem) iter.next()) != null) {
+
+                    for (KeyValuePair kvp : nextMap.keyValuePairs()) {
                         AtomicValue keyi = kvp.key();
                         GroundedValue existing = firstMap.get(keyi);
 
                         if (existing == null) {
                             firstMap = firstMap.put(keyi, kvp.value());
                         } else if (onDuplicates == null) {
-                            throw new XPathException("Duplicate key " + Err.depict(keyi) + " in map");
+                            throw new XPathException("Duplicate key " + Err.depict(keyi) + " in map", "FOJS0003");
                         } else {
                             GroundedValue newVal;
                             try {
@@ -877,14 +878,14 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                             }
                             firstMap = firstMap.put(keyi, newVal);
                         }
-                        /*} else {
-                            firstMap = firstMap.put(keyi, kvp.value());
-                        } */
                     }
 
                 }
                 return firstMap;
             }
+            // If the first map is small, or inextensible, then we copy all maps to a new MapBuilder, and construct
+            // a new map from the builder. This path is taken for a map:merge call produced by compiling a map constructor
+            // such as {"a":1, "b":2}.
             GeneralMapBuilder builder = FixedMap.getBuilder(version);
             builder.setDuplicatesAction(onDuplicates);
 
@@ -892,8 +893,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 builder.put(kvp.key(), kvp.value());
             }
 
-            while ((next = (MapItem) iter.next()) != null) {
-                for (KeyValuePair kvp : next.keyValuePairs()) {
+            while ((nextMap = (MapItem) iter.next()) != null) {
+                for (KeyValuePair kvp : nextMap.keyValuePairs()) {
                     builder.put(kvp.key(), kvp.value());
                 }
             }
