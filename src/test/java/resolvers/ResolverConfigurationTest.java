@@ -123,6 +123,74 @@ public class ResolverConfigurationTest {
         }
     }
 
+    @Test
+    public void parseXmlTest() {
+
+        String query = "parse-xml('<!DOCTYPE root [\n" +
+                "  <!ENTITY xxe SYSTEM \"TEST_02.xml\">\n" +
+                "]>\n" +
+                "<root>&amp;xxe;</root>')";
+        // Allow entity expansion
+        try {
+            Processor processor = new Processor(false);
+
+            XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
+            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
+            xqueryEvaluator.run(processor.newSerializer(System.out));
+            System.err.println("First run successful");
+        } catch (SaxonApiException err) {
+            fail(err);
+        }
+        // Disallow using global parser property
+        try {
+            Processor processor = new Processor(false);
+            processor.setConfigurationProperty("http://saxon.sf.net/feature/parserFeature?uri=http://apache.org/xml/features/disallow-doctype-decl", true);
+            XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
+            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
+            xqueryEvaluator.run(processor.newSerializer(System.out));
+            System.err.println("Second run wrongly successful");
+            fail("Error not detected");
+        } catch (SaxonApiException err) {
+            // OK, failure was expected
+        }
+        try {
+            // Disallow using ALLOWED_PROTOCOLS
+            Processor processor = new Processor(false);
+            processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "https,http");
+            XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
+            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
+            xqueryEvaluator.run(processor.newSerializer(System.out));
+            System.err.println("Third run wrongly successful");
+            fail("Error not detected");
+        } catch (SaxonApiException err) {
+            // OK, failure was expected
+        }
+    }
+
+    @Test
+    public void parseXmlFragmentTest() {
+        try {
+            // This should fail without special action, because DOCTYPE
+            // is not allowed in an XML fragment
+            String query = "parse-xml-fragment('<!DOCTYPE root [\n" +
+                    "  <!ENTITY xxe SYSTEM \"TEST_02.xml\">\n" +
+                    "]>\n" +
+                    "<root>&amp;xxe;</root>')";
+            Processor processor = new Processor(false);
+            XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
+            xqueryCompiler.setBaseURI(new File(configTest.getDataDir()).toURI());
+            XQueryEvaluator xqueryEvaluator = xqueryCompiler.compile(query).load();
+            xqueryEvaluator.run(processor.newSerializer(System.out));
+            fail("Error not detected");
+        } catch (SaxonApiException err) {
+            // OK, failure was expected
+        }
+    }
+
+
     private class MyResolver extends CatalogResourceResolver {
         private final CatalogResourceResolver resolver;
 

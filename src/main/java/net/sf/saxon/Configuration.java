@@ -4215,7 +4215,9 @@ public class Configuration implements SourceResolver {
         } else {
             switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
-                    protocolRestrictor = new ProtocolRestrictor((String)value);
+                    protocolRestrictor = new ProtocolRestrictor((String) value);
+                    final ResourceResolver existing = getResourceResolver();
+                    setResourceResolver(protocolRestrictor.asResourceResolver(existing));
                     break;
                 case FeatureCode.COLLATION_URI_RESOLVER:
                     if (!(value instanceof CollationURIResolver)) {
