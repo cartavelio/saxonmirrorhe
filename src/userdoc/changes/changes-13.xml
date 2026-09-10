@@ -99,6 +99,10 @@
         <p>Filter expressions accept a sequence of integer positions, for example <code>$in[3 to 5]</code>
         or <code>$in[1, 4, 7]</code>.</p>
         
+        <p>The precedence of the <code>otherwise</code> operator has changed. The expression
+            <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
+            not as <code>(@price otherwise @cost) * 2</code>.</p>
+        
         <p>The second <code>$position</code> argument is available on function callbacks made by the functions
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
         
@@ -115,7 +119,8 @@
         <p>The functions <code>fn:min</code> and <code>fn:max</code> now return one of the items from
         the input sequence <emph>as is</emph>, rather than converting it to <code>xs:double</code>.</p>
         
-        <p>The functions <code>fn:seconds</code>, <code>fn:subsequence-where</code> are implemented.</p>
+        <p>The functions <code>fn:seconds</code>, <code>fn:subsequence-where</code>, 
+            <code>fn:take-while</code> are implemented.</p>
         
         <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function
         <code>fn:do-until</code> is implemented.</p>
