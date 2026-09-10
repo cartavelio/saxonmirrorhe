@@ -102,7 +102,7 @@ namespace Saxon.Api {
 
             public SchemaSource(System.IO.FileInfo file) {
                 this.Stream = file.OpenRead();
-                this.Uri = new Uri(file.FullName);
+                this.Uri = new System.Uri(file.FullName);
             }
             
             public System.IO.Stream Stream { get; }
