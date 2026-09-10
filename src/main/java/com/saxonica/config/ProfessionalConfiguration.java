@@ -64,6 +64,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 
 /**
@@ -452,13 +453,27 @@ public class ProfessionalConfiguration extends Configuration {
     /**
      * Get the value of a named license feature
      *
-     * @param name the name of the feature
+     * @param name the name of the feature. This is one of the properties explicitly recorded in the
+     *             license file, for example "Licensor", "Licensee", "Email", "Issued", "Serial".
      * @return the value of the feature if present, or null otherwise
      */
 
     @Override
     public final String getLicenseFeature(String name) {
         return verifier.getFeature(name, this);
+    }
+
+    /**
+     * Get all license features, as a Properties object mapping feature names to feature values.
+     *
+     * @return a map containing all license features as name-value pairs. The names and values
+     * are those explicitly recorded in the license file, for example "Issued":"2022-11-25".
+     * If there is no license, the method returns null.
+     * @since 12.3
+     */
+
+    public Properties getLicenseFeatures() {
+        return verifier.getLicenseFeatures(this);
     }
 
     /**

@@ -77,6 +77,11 @@ public abstract class Verifier {
         return primaryLicense.getFeature(name);
     }
 
+    public Properties getLicenseFeatures(Configuration config) {
+        loadPrimaryLicense(config);
+        return primaryLicense.getProperties();
+    }
+
     @CSharpModifiers(code = {"internal"})
     final void loadPrimaryLicense(Configuration config) {
         if (DISABLED || status==UNAVAILABLE) {
@@ -438,7 +443,21 @@ public abstract class Verifier {
             }
         }
 
+        /**
+         * Get the properties of the license. This returns a copy of the license properties so that
+         * modifications have no effect.
+         *
+         * @return a Properties object holding details of the license file
+         */
+
+        public Properties getProperties() {
+            Properties p = new Properties();
+            p.putAll(features);
+            return p;
+        }
+
     }
+
 
     //#if CSHARP==false
     /**
