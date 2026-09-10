@@ -417,6 +417,11 @@
       <e:attribute name="select">
          <e:data-type name="expression"/>
       </e:attribute>
+      <e:attribute name="separator">
+         <e:attribute-value-template>
+            <e:data-type name="string"/>
+         </e:attribute-value-template>
+      </e:attribute>
       <e:attribute name="mode">
          <e:data-type name="token"/>
       </e:attribute>

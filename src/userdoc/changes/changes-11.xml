@@ -429,7 +429,7 @@
         
         <p><i>These extensions are all experimental, and may change as a result of community standardisation efforts.</i></p>
         
-        <p>The <a class="bodylink" href="/expressions/range">range expression</a> <code>A to B</code> has been extended to allow
+        <p>The <a class="bodylink" href="/expressions/range">range expression</a> <code> A to B</code> has been extended to allow
             <code>A by S to B</code>, for example <code>1 by 3 to 10</code> returns <code>(1, 4, 7, 10)</code>. The step may be
             negative: <code>10 by -1 to 6</code> returns <code>(10, 9, 8, 7, 6)</code>.</p>
         

@@ -366,7 +366,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <h1>Type aliases</h1>
 
             <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon
-        9.8; revised in 10.</aside>
+        9.8; revised in 10 and 11.</aside>
 
             <p>Wherever an <code>ItemType</code> may appear (for example in a function signature or variable declaration, or
       in <code>instance of</code> or <code>cast as</code> expressions), the syntax <code
@@ -383,7 +383,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <p>The mapping of type aliases to item types is an extension to the static context of an expression.</p>
 
             <p>In XSLT, type aliases can be defined using the top-level declaration <a
-                  class="bodylink code" href="/extensions/instructions/item-type"
+               class="bodylink code" href="/xsl-elements/item-type"
                >xsl:item-type</a>:</p>
 
             <examples>
@@ -857,7 +857,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp></examp
       <section id="xsl-item-type" title="The xsl:item-type declaration">
          <h1>The xsl:item-type declaration</h1>
          
-         <p>The <code>xsl:item-type</code> declaration declares a type alias for use within a stylesheet.
+         <p>The <a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a> declaration declares a type alias for
+            use within a stylesheet.
             See <a class="bodylink" href="/v4extensions/new-types/type-aliases">Type Aliases</a> for an overview. For example:</p>
          
          <example>
