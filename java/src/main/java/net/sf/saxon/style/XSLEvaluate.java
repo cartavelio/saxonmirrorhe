@@ -326,6 +326,7 @@ public class XSLEvaluate extends StyleElement {
         Expression schemaAware = getSchemaAwareExpression();
         Expression withParams = getWithParamsExpression();
         EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware);
+        inst.setRetainedStaticContext(makeRetainedStaticContext());
         WithParam[] params = getWithParamInstructions(inst, getCompilation(), decl, false);
         inst.setActualParams(params);
         inst.setDynamicParams(withParams);

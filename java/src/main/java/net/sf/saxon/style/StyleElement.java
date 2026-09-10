@@ -579,7 +579,7 @@ public abstract class StyleElement extends ElementImpl {
     /**
      * Ask whether this instruction requires a different retained static context from the containing
      * (parent) instruction. That is, this instruction changes the static base URI, the default collation,
-     * or the set of in-scope namespaces.
+     * the set of in-scope namespaces, or the in-scope schema
      *
      * @return true if the context for evaluating this instruction differs in relevant ways from that
      * of the calling instruction
@@ -588,6 +588,9 @@ public abstract class StyleElement extends ElementImpl {
         NodeImpl parent = getParent();
         return parent == null
                 || !ExpressionTool.equalOrNull(getBaseURI(), parent.getBaseURI())
+                || getNamespaceUri() == NamespaceUri.XSLT
+                    ? getAttributeValue("schema-role") != null
+                    : getAttributeValue(NamespaceUri.XSLT, "schema-role") != null
                 || defaultCollationName != null
                 || defaultXPathNamespace != null
                 || !(parent instanceof StyleElement)
@@ -711,10 +714,13 @@ public abstract class StyleElement extends ElementImpl {
                          clarkName.endsWith("}extension-element-prefixes") ||
                          clarkName.endsWith("}exclude-result-prefixes") ||
                          clarkName.endsWith("}version") ||
+                         clarkName.endsWith("}schema-role") ||
                          clarkName.endsWith("}default-validation") ||
                          clarkName.endsWith("}use-when"))) {
             return;
         }
+
+        // TODO: disallow schema-role unless 4.0 is enabled
 
         // allow standard attributes on an XSLT element
 
@@ -726,6 +732,7 @@ public abstract class StyleElement extends ElementImpl {
                          clarkName.equals("extension-element-prefixes") ||
                          clarkName.equals("exclude-result-prefixes") ||
                          clarkName.equals("version") ||
+                         clarkName.equals("schema-role") ||
                          clarkName.equals("default-validation") ||
                          clarkName.equals("use-when"))) {
             return;
