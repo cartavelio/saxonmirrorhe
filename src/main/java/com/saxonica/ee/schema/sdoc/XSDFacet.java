@@ -5,8 +5,8 @@ import com.saxonica.ee.schema.Facet;
 import com.saxonica.ee.schema.PatternFacet;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.type.SchemaException;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class XSDFacet extends AnnotationParent {
             allowAttributes(atts, allowed);
         }
 
-        String value = atts.getValue("", "value");
+        String value = atts.getValue(NamespaceUri.NULL, "value");
         if (value == null) {
             if (getLocalPart().equals("distinct")) {
                 value = "true";
@@ -71,7 +71,7 @@ public class XSDFacet extends AnnotationParent {
 
         // Saxon extension: @saxon:message="error message"
 
-        String message = atts.getValue(NamespaceConstant.SAXON, "message");
+        String message = atts.getValue(NamespaceUri.SAXON, "message");
         if (message != null) {
             facet.setMessage(message);
         }
@@ -79,7 +79,7 @@ public class XSDFacet extends AnnotationParent {
         // Saxon extension for pattern facet: @saxon:flags="flags"
 
         if (facet instanceof PatternFacet) {
-            String flags = atts.getValue(NamespaceConstant.SAXON, "flags");
+            String flags = atts.getValue(NamespaceUri.SAXON, "flags");
             if (flags != null) {
                 ((PatternFacet) facet).setFlags(flags);
             }
@@ -96,7 +96,7 @@ public class XSDFacet extends AnnotationParent {
 
         //-- @fixed = true/false
 
-        String fixedAtt = atts.getValue("", "fixed");
+        String fixedAtt = atts.getValue(NamespaceUri.NULL, "fixed");
         boolean fixed = false;
         if (fixedAtt != null) {
             fixed = parseBooleanAttribute("fixed", fixedAtt);

@@ -378,7 +378,7 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
                                 case "prefix":
                                     return new StringValue(prefix);
                                 case "namespace":
-                                    return new AnyURIValue((nsResolver.getURIForPrefix(prefix, false)));
+                                    return new AnyURIValue((nsResolver.getURIForPrefix(prefix, false)).toUnicodeString());
                                 default:
                                     return EmptySequence.getInstance();
                             }
@@ -387,7 +387,7 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
                     }
                     return SequenceExtent.makeSequenceExtent(bindings);
                 case "default namespace":
-                    return new AnyURIValue((nsResolver.getURIForPrefix("", true)));
+                    return new AnyURIValue((nsResolver.getURIForPrefix("", true)).toUnicodeString());
                 case "base URI":
                     return new AnyURIValue((baseURI));
                 case "expression":

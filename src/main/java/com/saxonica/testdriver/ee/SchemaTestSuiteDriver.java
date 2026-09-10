@@ -9,6 +9,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.testdriver.TestDriverShell;
@@ -226,7 +227,7 @@ public class SchemaTestSuiteDriver {
             parser = catalogConfig.getSourceParser();
             catalogProcessor = new Processor(catalogConfig);
 
-            xlinkHref = pool.allocateFingerprint("http://www.w3.org/1999/xlink", "href");
+            xlinkHref = pool.allocateFingerprint(NamespaceUri.of("http://www.w3.org/1999/xlink"), "href");
 
 
             XdmNode catalog = catalogProcessor.newDocumentBuilder().build(
@@ -596,7 +597,7 @@ public class SchemaTestSuiteDriver {
             XdmSequenceIterator si = schemaDoc.axisIterator(Axis.CHILD);
             XdmNode schemaElement = (si.hasNext() ? (XdmNode) si.next() : null);
             String targetNamespace = (schemaElement == null ? null : schemaElement.getAttributeValue(QN_targetNamespace));
-            if (targetNamespace != null && processor.getUnderlyingConfiguration().isSchemaAvailable(targetNamespace)) {
+            if (targetNamespace != null && processor.getUnderlyingConfiguration().isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
                 // do nothing
                 // TODO: this is the only way I can get MS additional test addB132 to work.
                 // This test has two schema documents, A and B; A imports B, and the test catalog
@@ -634,7 +635,7 @@ public class SchemaTestSuiteDriver {
             XdmNode schemaElement =
                     (XdmNode) tempXPath.evaluateSingle("*", schemaDoc);
             String targetNamespace = schemaElement.getAttributeValue(QN_targetNamespace);
-            if (targetNamespace != null && tempConfig.isSchemaAvailable(targetNamespace)) {
+            if (targetNamespace != null && tempConfig.isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
                 // do nothing
             } else {
                 try {

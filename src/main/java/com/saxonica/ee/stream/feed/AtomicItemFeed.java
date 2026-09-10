@@ -51,7 +51,7 @@ public abstract class AtomicItemFeed extends ItemFeed {
     }
 
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         notAllowed();
     }
 

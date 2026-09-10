@@ -1,8 +1,8 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.DocumentKey;
 import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.*;
 
@@ -93,7 +93,7 @@ public abstract class UserDefinedType extends SchemaStructure
 
     /*@NotNull*/
     @Override
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return getTypeName().getURI();
     }
 
@@ -142,7 +142,7 @@ public abstract class UserDefinedType extends SchemaStructure
 
     @Override
     public boolean isAnonymousType() {
-        return fingerprint == -1 || getTargetNamespace().equals(NamespaceConstant.ANONYMOUS);
+        return fingerprint == -1 || getTargetNamespace().equals(NamespaceUri.ANONYMOUS);
     }
 
     /**
@@ -387,7 +387,7 @@ public abstract class UserDefinedType extends SchemaStructure
     public String getDescription() {
         int fp = getFingerprint();
         NamePool pool = getNamePool();
-        if (fp != -1 && !getTypeName().hasURI(NamespaceConstant.ANONYMOUS)) {
+        if (fp != -1 && !getTypeName().hasURI(NamespaceUri.ANONYMOUS)) {
             return getTypeName().getEQName();
         }
         if (containingDeclarationName != null) {

@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -76,9 +77,9 @@ public class AttributeGetterCompiler extends ToItemCompiler {
 
         methodInfo.placeLabel(isElement);
         // item
-        ga.push(attributeName.getURI());
+        allocateStatic(compiler, attributeName.getURI());
         ga.push(attributeName.getLocalPart());
-        ga.invokeInstanceMethod(NodeInfo.class, "getAttributeValue", String.class, String.class);
+        ga.invokeInstanceMethod(NodeInfo.class, "getAttributeValue", NamespaceUri.class, String.class);
         // string or null
 
         methodInfo.placeLabel(testAbsence);
@@ -171,9 +172,9 @@ public class AttributeGetterCompiler extends ToItemCompiler {
 
         methodInfo.placeLabel(isElement);
         // item
-        ga.push(attributeName.getURI());
+        allocateStatic(compiler, attributeName.getURI());
         ga.push(attributeName.getLocalPart());
-        ga.invokeInstanceMethod(NodeInfo.class, "getAttributeValue", String.class, String.class);
+        ga.invokeInstanceMethod(NodeInfo.class, "getAttributeValue", NamespaceUri.class, String.class);
         // string
         ga.dup();
         // string string

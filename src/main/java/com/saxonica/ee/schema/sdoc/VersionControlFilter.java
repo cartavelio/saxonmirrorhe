@@ -5,7 +5,6 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
@@ -87,7 +86,7 @@ public class VersionControlFilter extends ProxyReceiver {
             boolean doneAttributes = false;
             for (AttributeInfo att : attributes) {
                 final NodeName attName = att.getNodeName();
-                if (attName.hasURI(NamespaceConstant.SCHEMA_VERSIONING)) {
+                if (attName.hasURI(NamespaceUri.SCHEMA_VERSIONING)) {
                     String localName = attName.getLocalPart();
                     try {
                         switch (localName) {
@@ -180,7 +179,7 @@ public class VersionControlFilter extends ProxyReceiver {
     }
 
     private static final FingerprintedQName XS_SCHEMA =
-            new FingerprintedQName("xs", NamespaceConstant.SCHEMA, "schema", StandardNames.XS_SCHEMA & NamePool.FP_MASK);
+            new FingerprintedQName("xs", NamespaceUri.SCHEMA, "schema", StandardNames.XS_SCHEMA & NamePool.FP_MASK);
 
 
     /**
@@ -279,9 +278,9 @@ public class VersionControlFilter extends ProxyReceiver {
 
     private boolean isKnownFacetName(StructuredQName name) {
         String localName = name.getLocalPart();
-        return (name.hasURI(NamespaceConstant.SCHEMA) &&
+        return (name.hasURI(NamespaceUri.SCHEMA) &&
                 Facet.isFacetName(localName, isXSD11 ? Configuration.XSD11 : Configuration.XSD10)) ||
-                (name.hasURI(NamespaceConstant.SAXON) &&
+                (name.hasURI(NamespaceUri.SAXON) &&
                         localName.equals("preprocess"));
     }
 

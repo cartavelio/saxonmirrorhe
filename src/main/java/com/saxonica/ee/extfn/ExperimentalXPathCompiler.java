@@ -58,9 +58,9 @@ public class ExperimentalXPathCompiler {
     private FunctionLibrary globalFunctionLibrary;
     private Map<StructuredQName, GroundedValue> globalVariables = new HashMap<>();
     private SEFStaticContext uniformStaticContext;
-    private final Map<String, Map<String, String>> namespaceBindingsCache = new HashMap<>();
+    private final Map<String, Map<String, NamespaceUri>> namespaceBindingsCache = new HashMap<>();
     private NodeInfo mostRecentNsAttribute = null;
-    private Map<String, String> mostRecentNsBindings = null;
+    private Map<String, NamespaceUri> mostRecentNsBindings = null;
 
     private ExperimentalXPathCompiler() {
 
@@ -93,7 +93,7 @@ public class ExperimentalXPathCompiler {
         javaLib.declareJavaClass(NamespaceConstant.EXSLT_RANDOM, Random.class);
         //javaLib.declareJavaClass(EXPathFile.NAMESPACE, EXPathFile.class);
         //javaLib.declareJavaClass(EXPathBinary.NAMESPACE, EXPathBinary.class);
-        javaLib.declareJavaClass(Archive.NAMESPACE, Archive.class);
+        javaLib.declareJavaClass(Archive.NAMESPACE.toString(), Archive.class);
 
         FunctionLibraryList libraryList = new FunctionLibraryList();
         libraryList.addFunctionLibrary(XSLT30FunctionSet.getInstance());
@@ -116,14 +116,14 @@ public class ExperimentalXPathCompiler {
         return newComp;
     }
 
-    private static Optional<Map<String, String>> makeNamespaceMap(MapItem namespaceContext) {
-        Map<String, String> bindings = new HashMap<>();
-        for (KeyValuePair kvp : namespaceContext.keyValuePairs()) {
-            bindings.put(kvp.key.getStringValue(), ((StringValue) kvp.value).getStringValue());
-        }
-        bindings.put("xml", NamespaceConstant.XML);
-        return Optional.of(bindings);
-    }
+//    private static Optional<Map<String, String>> makeNamespaceMap(MapItem namespaceContext) {
+//        Map<String, String> bindings = new HashMap<>();
+//        for (KeyValuePair kvp : namespaceContext.keyValuePairs()) {
+//            bindings.put(kvp.key.getStringValue(), ((StringValue) kvp.value).getStringValue());
+//        }
+//        bindings.put("xml", NamespaceConstant.XML);
+//        return Optional.of(bindings);
+//    }
 
     private FunctionLibrary setupUserFunctionLibrary(MapItem globalFunctions) {
 
@@ -218,7 +218,7 @@ public class ExperimentalXPathCompiler {
                     boolean inCatch = sefElement.iterateAxis(
                             AxisInfo.ANCESTOR,
                             new LocalNameTest(config.getNamePool(), Type.ELEMENT, "catch")).next() != null;
-                    boolean allowEmpty = "true".equals(sefElement.getAttributeValue("", "allowEmpty"));
+                    boolean allowEmpty = "true".equals(sefElement.getAttributeValue(NamespaceUri.NULL, "allowEmpty"));
                     expr = make(exprText, env, inCatch, allowEmpty);
                 }
             } catch (XPathException e) {
@@ -240,7 +240,7 @@ public class ExperimentalXPathCompiler {
             Builder b = controller.makeBuilder();
             b.setTiming(false);
             ExpressionPresenter out = new ExpressionPresenter(config, b);
-            out.setDefaultNamespace(NamespaceConstant.SAXON_XSLT_EXPORT);
+            out.setDefaultNamespace(NamespaceUri.SAXON_XSLT_EXPORT);
             ExpressionPresenter.ExportOptions options = new ExpressionPresenter.ExportOptions();
             options.suppressStaticContext = true;
             options.target = "JS";
@@ -305,7 +305,7 @@ public class ExperimentalXPathCompiler {
 
         private final NodeInfo sefElement;
         private RetainedStaticContext retainedStaticContext;
-        private Map<String, String> staticNamespaceBindings;
+        private Map<String, NamespaceUri> staticNamespaceBindings;
         private final PackageData packageData;
         private MapItem localVariableMap;
         private final NodeInfo nsAttribute;
@@ -362,7 +362,7 @@ public class ExperimentalXPathCompiler {
         @Override
         public String getStaticBaseURI() {
             // We're calling this while creating the RetainedStaticContext. Ideally we would do it lazily
-            return Navigator.getInheritedAttributeValue(sefElement, "", "baseUri");
+            return Navigator.getInheritedAttributeValue(sefElement, NamespaceUri.NULL, "baseUri");
         }
 
         public void setLocalVariableMap(MapItem variableMap) {
@@ -382,7 +382,7 @@ public class ExperimentalXPathCompiler {
                 var.setDeclaredType(type.getStringValue());
                 NodeInfo decl = (NodeInfo) localVariableDetails.itemAt(0);
                 if (decl.getLocalPart().equals("accRule") &&
-                        decl.getURI().equals(NamespaceConstant.SAXON_XSLT_EXPORT) &&
+                        decl.getNamespaceUri().equals(NamespaceUri.SAXON_XSLT_EXPORT) &&
                         eqName.equals("Q{}value")) {
                     var.setSuppliedParameter(true);
                 }
@@ -401,7 +401,7 @@ public class ExperimentalXPathCompiler {
 
         @Override
         public String getDefaultCollationName() {
-            String att = sefElement.getAttributeValue("", "default-collation");
+            String att = sefElement.getAttributeValue(NamespaceUri.NULL, "default-collation");
             if (att == null) {
                 return NamespaceConstant.CODEPOINT_COLLATION_URI;
             } else {
@@ -410,32 +410,32 @@ public class ExperimentalXPathCompiler {
         }
 
         @Override
-        public String getDefaultElementNamespace() {
-            String att = sefElement.getAttributeValue("", "xpath-default-namespace");
+        public NamespaceUri getDefaultElementNamespace() {
+            String att = sefElement.getAttributeValue(NamespaceUri.NULL, "xpath-default-namespace");
             if (att == null) {
-                return NamespaceConstant.NULL;
+                return NamespaceUri.NULL;
             } else {
-                return att;
+                return NamespaceUri.of(att);
             }
         }
 
         @Override
-        public String getDefaultFunctionNamespace() {
-            return NamespaceConstant.FN;
+        public NamespaceUri getDefaultFunctionNamespace() {
+            return NamespaceUri.FN;
         }
 
         @Override
         public boolean isInBackwardsCompatibleMode() {
-            return sefElement.getAttributeValue("", "BC") != null;
+            return sefElement.getAttributeValue(NamespaceUri.NULL, "BC") != null;
         }
 
         @Override
-        public boolean isImportedSchema(String namespace) {
+        public boolean isImportedSchema(NamespaceUri namespace) {
             return false;
         }
 
         @Override
-        public Set<String> getImportedSchemaNamespaces() {
+        public Set<NamespaceUri> getImportedSchemaNamespaces() {
             return Collections.emptySet();
         }
 
@@ -452,7 +452,7 @@ public class ExperimentalXPathCompiler {
                 } else {
                     mostRecentNsAttribute = nsAttribute;
                     String ns = nsAttribute.getStringValue();
-                    Map<String, String> cachedValue = namespaceBindingsCache.get(ns);
+                    Map<String, NamespaceUri> cachedValue = namespaceBindingsCache.get(ns);
                     if (cachedValue != null) {
                         staticNamespaceBindings = mostRecentNsBindings = cachedValue;
                     } else {
@@ -467,7 +467,7 @@ public class ExperimentalXPathCompiler {
                                 uri = NamespaceConstant.getUriForConventionalPrefix(prefix);
                                 assert uri != null;
                             }
-                            staticNamespaceBindings.put(prefix, uri);
+                            staticNamespaceBindings.put(prefix, NamespaceUri.of(uri));
                         }
                         namespaceBindingsCache.put(ns, staticNamespaceBindings);
                     }
@@ -476,7 +476,7 @@ public class ExperimentalXPathCompiler {
         }
 
         @Override
-        public String getURIForPrefix(String prefix, boolean useDefault) {
+        public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
             makeNamespaceBindings();
             return staticNamespaceBindings.get(prefix);
         }
@@ -672,16 +672,16 @@ public class ExperimentalXPathCompiler {
      */
 
     public static MapItem parseSequenceType(
-            XPathContext context, String input, NodeInfo nsContext, String xpathDefaultNamespace)
+            XPathContext context, String input, NodeInfo nsContext, NamespaceUri xpathDefaultNamespace)
             throws XPathException {
         try {
             IndependentContext env = new IndependentContext(context.getConfiguration());
             env.setNamespaceResolver(new NamespaceResolver() {
-                final String defaultNS = xpathDefaultNamespace == null ? "" : xpathDefaultNamespace;
+                final NamespaceUri defaultNS = xpathDefaultNamespace == null ? NamespaceUri.NULL : xpathDefaultNamespace;
                 final NamespaceResolver supplied = nsContext.getAllNamespaces();
 
                 @Override
-                public String getURIForPrefix(String prefix, boolean useDefault) {
+                public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
                     if (prefix.isEmpty() && useDefault) {
                         return defaultNS;
                     } else {

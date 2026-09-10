@@ -1183,7 +1183,7 @@ public class OptimizerEE extends Optimizer {
                     return null; // should not happen
                 }
 
-                keyName = new StructuredQName("saxon", NamespaceConstant.SAXON,
+                keyName = new StructuredQName("saxon", NamespaceUri.SAXON,
                                               "kk" + (100 + keyManager.getNumberOfKeyDefinitions()));
                 SymbolicName symbolicName = new SymbolicName(StandardNames.XSL_KEY, keyName);
                 KeyDefinition key = new KeyDefinition(symbolicName, pathFinder, use, defaultCollationName, collator);
@@ -1216,7 +1216,7 @@ public class OptimizerEE extends Optimizer {
 //            decl.setVariableQName(new StructuredQName("dd", NamespaceConstant.SAXON, "dd" + decl.hashCode()));
             ForExpression forExp = new ForExpression();
             forExp.setRequiredType(SequenceType.makeSequenceType(doc.getItemType(), doc.getCardinality()));
-            forExp.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "dd" + forExp.hashCode()));
+            forExp.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "dd" + forExp.hashCode()));
             Expression docs = doc;
             if (!docs.hasSpecialProperty(StaticProperty.ORDERED_NODESET)) {
                 // sort into document order
@@ -2073,7 +2073,7 @@ public class OptimizerEE extends Optimizer {
             }
             // Create an accumulator that maintains the value of the xsl:number result
             SlotManager slots = getConfiguration().makeSlotManager();
-            StructuredQName valueName = new StructuredQName("", "", "value");
+            StructuredQName valueName = new StructuredQName("", NamespaceUri.NULL, "value");
             slots.allocateSlotNumber(valueName);
             SuppliedParameterReference ref = new SuppliedParameterReference(0);
             ArithmeticExpression increment = new ArithmeticExpression(ref, Token.PLUS, Literal.makeLiteral(Int64Value.PLUS_ONE, ni));
@@ -2082,7 +2082,7 @@ public class OptimizerEE extends Optimizer {
             ExpressionTool.allocateSlots(increment, 1, slots);
             AccumulatorRule ruleTarget = new AccumulatorRule(increment, slots, false);
             Rule rule = new Rule(count, ruleTarget, 0, 0, 0, 0, 0);
-            StructuredQName genName = new StructuredQName("anon", NamespaceConstant.ANONYMOUS, "n" + ni.hashCode());
+            StructuredQName genName = new StructuredQName("anon", NamespaceUri.ANONYMOUS, "n" + ni.hashCode());
             SimpleMode rules = new SimpleMode(genName);
             rules.addRule(count, rule);
 

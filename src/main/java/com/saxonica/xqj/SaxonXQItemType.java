@@ -136,7 +136,7 @@ public class SaxonXQItemType implements XQItemType {
             }
             StructuredQName match = ((NodeTest) type).getMatchingNodeName();
             if (match != null) {
-                return new QName(match.getURI(), match.getLocalPart());
+                return new QName(match.getURI().toString(), match.getLocalPart());
             } else {
                 return null;
             }
@@ -193,7 +193,7 @@ public class SaxonXQItemType implements XQItemType {
         ItemType type = itemType;
         if (type instanceof AtomicType) {
             StructuredQName name = ((AtomicType) type).getStructuredQName();
-            return new QName(name.getURI(), name.getLocalPart());
+            return new QName(name.getURI().toString(), name.getLocalPart());
         }
         if (type instanceof DocumentNodeTest) {
             type = ((DocumentNodeTest) type).getElementTest();
@@ -205,7 +205,7 @@ public class SaxonXQItemType implements XQItemType {
             SchemaType t = ((NodeTest) type).getContentType();
             if (t != null) {
                 StructuredQName name = ((NodeTest) type).getContentType().getStructuredQName();
-                return new QName(name.getURI(), name.getLocalPart());
+                return new QName(name.getURI().toString(), name.getLocalPart());
             }
         }
         throw new XQException("getTypeName() failed: itemType is not a document, element, or attribute test");

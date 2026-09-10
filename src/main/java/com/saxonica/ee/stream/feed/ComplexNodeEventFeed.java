@@ -208,7 +208,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.namespace(prefix, namespaceUri, properties);

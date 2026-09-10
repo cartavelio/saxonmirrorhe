@@ -3,11 +3,7 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.expr.instruct.GlobalParam;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Action;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NotationSet;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -52,7 +48,7 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
      * The set of all target namespaces of components in this schema
      */
 
-    private final Set<String> targetNamespaces = new HashSet<>();
+    private final Set<NamespaceUri> targetNamespaces = new HashSet<>();
 
     /**
      * The global attribute declarations for this Schema, indexed by their name
@@ -263,10 +259,10 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
         }
     }
 
-    private boolean isBuiltInNamespace(String namespace) {
-        return namespace.equals(NamespaceConstant.XML) ||
-                namespace.equals(NamespaceConstant.FN) ||
-                namespace.equals(NamespaceConstant.SCHEMA_INSTANCE);
+    private boolean isBuiltInNamespace(NamespaceUri namespace) {
+        return namespace.equals(NamespaceUri.XML) ||
+                namespace.equals(NamespaceUri.FN) ||
+                namespace.equals(NamespaceUri.SCHEMA_INSTANCE);
     }
 
     /**
@@ -421,7 +417,7 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
      */
 
     public SchemaType getSchemaType(StructuredQName name) {
-        if (name.hasURI(NamespaceConstant.SCHEMA)) {
+        if (name.hasURI(NamespaceUri.SCHEMA)) {
             SchemaType type = BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
             if (type != null) {
                 return type;
@@ -696,7 +692,7 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
      * @return the set of all target namespaces for these components
      */
 
-    public Set<String> getTargetNamespaces() {
+    public Set<NamespaceUri> getTargetNamespaces() {
         return targetNamespaces;
     }
 
@@ -1058,7 +1054,7 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
         } else {
             String componentType = SymbolSpace.getSymbolSpaceName(ref.getSymbolSpace());
             String reason = "has not been declared";
-            if (ref.getTargetComponentName().hasURI(NamespaceConstant.SCHEMA)) {
+            if (ref.getTargetComponentName().hasURI(NamespaceUri.SCHEMA)) {
                 reason = "is not defined in the XML Schema namespace";
             }
             String message = "The " + componentType + ' ' +
@@ -1226,7 +1222,7 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
 
 
     @Override
-    public boolean isDeclaredNotation(String uri, String local) {
+    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
         return notations != null && notations.get(new StructuredQName("", uri, local)) != null;
     }
 

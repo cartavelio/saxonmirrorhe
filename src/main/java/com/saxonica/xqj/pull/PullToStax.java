@@ -88,7 +88,7 @@ public class PullToStax implements XMLStreamReader {
     @Override
     public QName getAttributeName(int i) {
         NodeName attName = getAttributeInfo(i).getNodeName();
-        return new QName(attName.getURI(), attName.getLocalPart(), attName.getPrefix());
+        return new QName(attName.getURI().toString(), attName.getLocalPart(), attName.getPrefix());
     }
 
     @Override
@@ -98,7 +98,7 @@ public class PullToStax implements XMLStreamReader {
 
     @Override
     public String getAttributeNamespace(int i) {
-        return getAttributeInfo(i).getNodeName().getURI();
+        return getAttributeInfo(i).getNodeName().getURI().toString();
     }
 
     @Override
@@ -129,7 +129,7 @@ public class PullToStax implements XMLStreamReader {
 
     @Override
     public String getAttributeValue(String uri, String local) {
-        return provider.getAttributes().getValue(uri, local);
+        return provider.getAttributes().getValue(NamespaceUri.of(uri), local);
     }
 
     @Override
@@ -427,7 +427,7 @@ public class PullToStax implements XMLStreamReader {
 
     @Override
     public String getNamespaceURI() {
-        return provider.getNodeName().getURI();
+        return provider.getNodeName().getURI().toString();
     }
 
     @Override
@@ -470,7 +470,7 @@ public class PullToStax implements XMLStreamReader {
 
     @Override
     public String getNamespaceURI(int i) {
-        return provider.getNamespaceDeclarations()[i].getURI();
+        return provider.getNamespaceDeclarations()[i].getURI().toString();
     }
 
     @Override
@@ -481,7 +481,7 @@ public class PullToStax implements XMLStreamReader {
     @Override
     public QName getName() {
         NodeName nn = provider.getNodeName();
-        return new QName(nn.getURI(), nn.getLocalPart(), nn.getPrefix());
+        return new QName(nn.getURI().toString(), nn.getLocalPart(), nn.getPrefix());
     }
 
     @Override
@@ -517,7 +517,7 @@ public class PullToStax implements XMLStreamReader {
     /*@Nullable*/
     @Override
     public String getNamespaceURI(String s) {
-        return provider.getURIForPrefix(s, true);
+        return provider.getURIForPrefix(s, true).toString();
     }
 
     /**

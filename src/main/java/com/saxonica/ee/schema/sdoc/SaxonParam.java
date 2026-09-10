@@ -42,18 +42,18 @@ public class SaxonParam extends AnnotationParent {
         allowAttributes(atts, allowed);
         requireAttribute(atts, "name");
 
-        String name = atts.getValue("", "name");
+        String name = atts.getValue(NamespaceUri.NULL, "name");
         StructuredQName qName = makeQName(name);
-        if (qName.hasURI("") && qName.getLocalPart().equals("value")) {
+        if (qName.hasURI(NamespaceUri.NULL) && qName.getLocalPart().equals("value")) {
             error("The variable name $value is reserved for system use");
         }
 
-        String as = atts.getValue("", "as");
+        String as = atts.getValue(NamespaceUri.NULL, "as");
         if (as == null) {
             as = "item()*";
         }
 
-        String select = atts.getValue("", "select");
+        String select = atts.getValue(NamespaceUri.NULL, "select");
         if (select == null) {
             select = "()";
         }

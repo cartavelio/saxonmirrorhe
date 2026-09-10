@@ -100,7 +100,7 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
         }
 
         @Override
-        public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
             cco.namespace(prefix, namespaceUri, properties);
         }
 

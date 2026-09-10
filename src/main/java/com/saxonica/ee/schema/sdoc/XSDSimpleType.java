@@ -58,7 +58,7 @@ public class XSDSimpleType extends SchemaElement {
             allowAttributes(atts, allowed);
         }
 
-        String name = atts.getValue("", "name");
+        String name = atts.getValue(NamespaceUri.NULL, "name");
 
         simpleTypeDef = new SimpleTypeDefinition((EnterpriseConfiguration) getConfiguration());
         simpleTypeDef.setLocator(this);
@@ -92,7 +92,7 @@ public class XSDSimpleType extends SchemaElement {
         }
 
         //-- @final
-        String finalVal = atts.getValue("", "final");
+        String finalVal = atts.getValue(NamespaceUri.NULL, "final");
         if (finalVal == null) {
             simpleTypeDef.setFinalProhibitions(getXSDSchema().getFinalDefault());
         } else {
@@ -211,7 +211,7 @@ public class XSDSimpleType extends SchemaElement {
             simpleTypeDef.setRedefinitionLevel(oldSType.getRedefinitionLevel() + 1);
             UserSimpleType oldType = (UserSimpleType) oldSType;
             // rename the type being redefined
-            String uri = getXSDSchema().getTargetNamespace();
+            NamespaceUri uri = getXSDSchema().getTargetNamespace();
             NamePool pool = getNamePool();
             String localName = simpleTypeDef.getName();
             String prefix = simpleTypeDef.getTypeName().getPrefix();

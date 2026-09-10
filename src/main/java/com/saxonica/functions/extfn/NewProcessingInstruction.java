@@ -41,7 +41,7 @@ public class NewProcessingInstruction extends SystemFunction {
         StringValue first = (StringValue)arguments[1].head();
         String value = first == null ? "" : first.getStringValue();
         value = value.replace("?>", "? >");
-        orphan.setNodeName(new FingerprintedQName("","",name));
+        orphan.setNodeName(new FingerprintedQName("", NamespaceUri.NULL, name));
         orphan.setStringValue(StringView.tidy(value));
         return orphan;
     }

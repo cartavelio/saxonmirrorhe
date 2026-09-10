@@ -2,7 +2,6 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
@@ -43,7 +42,7 @@ public class NewAttribute extends SystemFunction {
         }
         String prefix = name.getPrefix();
         String local = name.getLocalPart();
-        String uri = name.getURI();
+        NamespaceUri uri = name.getURI();
         if (local.equals("xmlns") && uri.isEmpty()) {
             throw new XPathException("Invalid attribute name: xmlns", "XQDY0044");
         }
@@ -59,7 +58,7 @@ public class NewAttribute extends SystemFunction {
                 prefix = "ns0";
             }
         }
-        if (uri.equals(NamespaceConstant.XML) != "xml".equals(prefix)) {
+        if (uri.equals(NamespaceUri.XML) != "xml".equals(prefix)) {
             throw new XPathException("The xml prefix and namespace can only be used together", "XTDE0835");
         }
         name = new StructuredQName(prefix, uri, local);

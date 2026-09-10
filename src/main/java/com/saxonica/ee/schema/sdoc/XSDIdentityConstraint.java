@@ -3,11 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.type.SchemaException;
 
 /**
@@ -61,7 +57,7 @@ public class XSDIdentityConstraint extends SchemaElement {
         checkMutuallyExclusiveAttributes("ref", "name");
         checkMutuallyExclusiveAttributes("ref", "refer");
 
-        String refAtt = atts.getValue("", "ref");
+        String refAtt = atts.getValue(NamespaceUri.NULL, "ref");
         StructuredQName nameCode;
 
         if (refAtt != null) {
@@ -73,7 +69,7 @@ public class XSDIdentityConstraint extends SchemaElement {
 
         } else {
 
-            String name = atts.getValue("", "name");
+            String name = atts.getValue(NamespaceUri.NULL, "name");
             if (name == null) {
                 missingAttribute("name");
                 name = "saxon-error-" + getLocalPart() + "-name"; // for error recovery
@@ -82,7 +78,7 @@ public class XSDIdentityConstraint extends SchemaElement {
 
             //-- keyref
             if (getFingerprint() == StandardNames.XS_KEYREF) {
-                String referAtt = atts.getValue("", "refer");
+                String referAtt = atts.getValue(NamespaceUri.NULL, "refer");
                 if (referAtt == null) {
                     missingAttribute("refer");
                     return;
@@ -247,7 +243,7 @@ public class XSDIdentityConstraint extends SchemaElement {
                 case StandardNames.XS_FIELD: {
                     IdentityField field = ((XSDFieldOrSelector) child).getIdentityField();
                     identityConstraint.addField(field);
-                    if (child.getAttributeValue(NamespaceConstant.SAXON, "order") != null) {
+                    if (child.getAttributeValue(NamespaceUri.SAXON, "order") != null) {
                         if (getFingerprint() != StandardNames.XS_UNIQUE) {
                             error("saxon:order is allowed only on a field of xs:unique");
                         }

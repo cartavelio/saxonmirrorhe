@@ -5,10 +5,7 @@ import net.sf.saxon.expr.sort.CustomMap;
 import net.sf.saxon.expr.sort.SimpleTypeIdentityComparison;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.om.AtomicArray;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -172,7 +169,7 @@ public class EnumerationFacetSet extends Facet {
             for (AtomicValue av : v) {
                 if (av instanceof QualifiedNameValue) {
                     String prefix = ((QualifiedNameValue) av).getPrefix();
-                    String uri = ((QualifiedNameValue) av).getNamespaceURI();
+                    NamespaceUri uri = ((QualifiedNameValue) av).getNamespaceURI();
                     serializer.declareNamespace(prefix, uri);
                     namespaceSensitive = true;
                 }

@@ -35,6 +35,7 @@ import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.PatternParser;
 import net.sf.saxon.pull.PullProvider;
@@ -110,7 +111,7 @@ public class ProfessionalConfiguration extends Configuration {
     private boolean licenseNotFound = false;
 
     private transient Verifier verifier;
-    private transient HashMap<String, ExtensionElementCreator> xsltExtensionElementNamespaceMap;
+    private transient HashMap<NamespaceUri, ExtensionElementCreator> xsltExtensionElementNamespaceMap;
     protected BuiltInFunctionSet vendorFunctionSet;
     // Static cache of JavaExternalObjectType objects representing Java classes
     private final HashMap<Class, JavaExternalObjectType> externalObjectTypeCache = new HashMap<>();
@@ -767,7 +768,7 @@ public class ProfessionalConfiguration extends Configuration {
             result.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
             //#if CSHARP==false
             OnDemandFunctionSet sql = new OnDemandFunctionSet(
-                    this, NamespaceConstant.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
+                    this, NamespaceUri.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
             result.addFunctionLibrary(sql);
             //#endif
         }
@@ -821,8 +822,8 @@ public class ProfessionalConfiguration extends Configuration {
 
     public void declareBuiltInExtensionElementNamespaces() {
         try {
-            setExtensionElementCreator(NamespaceConstant.SAXON, SaxonElementFactory.FACTORY);
-            setExtensionElementCreator(NamespaceConstant.SAXON6, localName -> {
+            setExtensionElementCreator(NamespaceUri.SAXON, SaxonElementFactory.FACTORY);
+            setExtensionElementCreator(NamespaceUri.SAXON6, localName -> {
                 if (localName.equals("output")) {
                     return new XSLResultDocument();
                 }
@@ -847,7 +848,7 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     public void setExtensionElementNamespace(String namespace, ExtensionElementFactory factory) throws XPathException {
-        setExtensionElementCreator(namespace,
+        setExtensionElementCreator(NamespaceUri.of(namespace),
                                      (localName) -> {
                                          try {
                                              return factory.getExtensionClass(localName).newInstance();
@@ -888,8 +889,8 @@ public class ProfessionalConfiguration extends Configuration {
      * @since 12.0
      */
 
-    public void setExtensionElementCreator(String namespace, ExtensionElementCreator creator) throws XPathException {
-        if (NamespaceConstant.isReserved(namespace)) {
+    public void setExtensionElementCreator(NamespaceUri namespace, ExtensionElementCreator creator) throws XPathException {
+        if (NamespaceUri.isReserved(namespace)) {
             throw new XPathException("Namespace " + namespace +
                                              " is reserved: it cannot be used for extension instructions");
         }
@@ -909,7 +910,7 @@ public class ProfessionalConfiguration extends Configuration {
      * @since 11. Replaces {@code getExtensionElementNamespace}.
      */
 
-    public ExtensionElementCreator getExtensionElementCreator(String namespace) {
+    public ExtensionElementCreator getExtensionElementCreator(NamespaceUri namespace) {
         if (xsltExtensionElementNamespaceMap == null) {
             return null;
         }

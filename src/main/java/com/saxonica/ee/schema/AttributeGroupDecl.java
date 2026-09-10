@@ -126,7 +126,7 @@ public final class AttributeGroupDecl extends SchemaStructure
      * @return the namespace URI of this named AttributeGroup: null if the attribute group is in no namespace
      */
 
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return attributeGroupName.getURI();
     }
 
@@ -713,7 +713,7 @@ public final class AttributeGroupDecl extends SchemaStructure
         serializer.emitAttribute("id", id);
         serializer.emitAttribute("name", getName());
         if (getTargetNamespace() != null && !getTargetNamespace().isEmpty()) {
-            serializer.emitAttribute("targetNamespace", getTargetNamespace());
+            serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
         }
         serializeContents(serializer);
         serializer.endElement();
@@ -762,7 +762,7 @@ public final class AttributeGroupDecl extends SchemaStructure
                     case "name":
                         return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
-                        return new AnyURIValue(getTargetNamespace());
+                        return new AnyURIValue(getTargetNamespace().toUnicodeString());
                     case "attribute uses":
                         List<Item> uses = new ArrayList<>();
                         for (AttributeUse use : getAttributeUses()) {

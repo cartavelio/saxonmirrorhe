@@ -5,7 +5,6 @@ import net.sf.saxon.dom.DOMSender;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -236,7 +235,7 @@ public class Erector implements Receiver {
         for (AttributeInfo att : attributes) {
             tree.nameCode[nodeNr] |= DominoTree.HAS_ATTRIBUTES;
             NodeName attName = att.getNodeName();
-            if (ReceiverOption.contains(properties, ReceiverOption.IS_ID) || (attName.getLocalPart().equals("id") && attName.hasURI(NamespaceConstant.XML))) {
+            if (ReceiverOption.contains(properties, ReceiverOption.IS_ID) || (attName.getLocalPart().equals("id") && attName.hasURI(NamespaceUri.XML))) {
                 tree.registerID(nodeNr, att.getValue());
             }
         }
@@ -328,7 +327,7 @@ public class Erector implements Receiver {
     @Override
     public void processingInstruction(String piname, /*@NotNull*/ UnicodeString remainder, Location locationId, int properties) throws XPathException {
         DominoTree tt = tree;
-        int fp = namePool.allocateFingerprint("", piname);
+        int fp = namePool.allocateFingerprint(NamespaceUri.NULL, piname);
 
         nodeNr = tt.addNode(Type.PROCESSING_INSTRUCTION, currentDepth, fp, sender.getCurrentNode());
 

@@ -7,7 +7,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.style.StylesheetPackage;
@@ -102,7 +102,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
         if (!config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
             throw new XPathException("Exporting a package requires a Saxon-EE license");
         }
-        presenter.setDefaultNamespace(NamespaceConstant.SAXON_XSLT_EXPORT);
+        presenter.setDefaultNamespace(NamespaceUri.SAXON_XSLT_EXPORT);
         ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions)presenter.getOptions();
         options.componentMap = new HashMap<>();
         options.packageMap = new HashMap<>();
@@ -129,10 +129,10 @@ public class StylesheetPackageEE extends StylesheetPackage {
         int packageId = packageIdMap.get(this);
         if (topLevel) {
             presenter.emitAttribute("when", DateTimeValue.now().getStringValue());
-            presenter.namespace("fn", NamespaceConstant.FN);
-            presenter.namespace("xs", NamespaceConstant.SCHEMA);
-            presenter.namespace("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE);
-            presenter.namespace("java-type", NamespaceConstant.JAVA_TYPE);
+            presenter.namespace("fn", NamespaceUri.FN);
+            presenter.namespace("xs", NamespaceUri.SCHEMA);
+            presenter.namespace("vv", NamespaceUri.SAXON_GENERATED_VARIABLE);
+            presenter.namespace("java-type", NamespaceUri.JAVA_TYPE);
             String dmk = getConfiguration().getLicenseFeature("DMK");
             if (dmk != null) {
                 presenter.emitAttribute("dmk", dmk);
@@ -216,9 +216,9 @@ public class StylesheetPackageEE extends StylesheetPackage {
     }
 
     private void exportSchemaNamespaces(ExpressionPresenter presenter) {
-        for (String ns : schemaIndex) {
+        for (NamespaceUri ns : schemaIndex) {
             presenter.startElement("schema");
-            presenter.emitAttribute("ns", ns);
+            presenter.emitAttribute("ns", ns.toString());
             presenter.endElement();
         }
     }

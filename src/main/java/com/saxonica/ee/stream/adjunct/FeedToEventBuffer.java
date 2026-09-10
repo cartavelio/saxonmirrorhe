@@ -69,7 +69,7 @@ public class FeedToEventBuffer extends ItemFeed {
     }
 
     @Override
-    public void namespace(String prefix, String uri, int properties) {
+    public void namespace(String prefix, NamespaceUri uri, int properties) {
         buffer.add(new OutputterEvent.Namespace(prefix, uri, properties));
     }
 

@@ -4,6 +4,7 @@ import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.xsltextn.ExtensionElementFactory;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.ConfigurationReader;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -25,7 +26,7 @@ public class ConfigurationReaderPE extends ConfigurationReader {
         String namespace = null;
         String className = null;
         for (AttributeInfo a : atts) {
-            String uri = a.getNodeName().getURI();
+            NamespaceUri uri = a.getNodeName().getURI();
             String attName = a.getNodeName().getLocalPart();
             String value = a.getValue();
             if (uri.isEmpty()) {

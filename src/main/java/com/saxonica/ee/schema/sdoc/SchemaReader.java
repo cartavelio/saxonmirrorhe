@@ -44,7 +44,7 @@ public abstract class SchemaReader {
      * @param baseURI         the base URI
      * @param relativeURI     the URI to be resolved relative to the base URI
      * @param compiler            the pipeline configuration (which may define a URIResolver to be used)
-     * @param targetNamespace the targetNamespace of the schema document required (this is set to
+     * @param targetNamespaceUri the targetNamespace of the schema document required (this is set to
      *                        null when doing an include or redefine, because in those cases the targetNamespace cannot
      *                        be used to locate the schema document)
      * @return the JAXP Source object representing the deferenced URI, or null if no source could be located
@@ -55,12 +55,13 @@ public abstract class SchemaReader {
     public static Source getSource(String baseURI,
                                    String relativeURI,
                                    SchemaCompiler compiler,
-                                   /*@Nullable*/ String targetNamespace) throws SchemaException {
+                                   NamespaceUri targetNamespaceUri) throws SchemaException {
 
         try {
             String[] locations = {relativeURI};
             Source[] sources = null;
             SchemaURIResolver r = compiler.getSchemaURIResolver();
+            String targetNamespace = targetNamespaceUri == null ? null : targetNamespaceUri.toString();
             if (r != null) {
                 sources = r.resolve(targetNamespace, baseURI, locations);
             }
@@ -98,13 +99,13 @@ public abstract class SchemaReader {
     public static Source[] getSources(String baseURI,
                                       String[] relativeURIs,
                                       SchemaCompiler compiler,
-                                      String targetNamespace) throws SchemaException {
+                                      NamespaceUri targetNamespace) throws SchemaException {
 
         try {
-            Source[] sources = compiler.getSchemaURIResolver().resolve(targetNamespace, baseURI, relativeURIs);
+            Source[] sources = compiler.getSchemaURIResolver().resolve(targetNamespace.toString(), baseURI, relativeURIs);
             if (sources == null) {
                 SchemaURIResolver r = new StandardSchemaResolver((EnterpriseConfiguration) compiler.getConfiguration());
-                sources = r.resolve(targetNamespace, baseURI, relativeURIs);
+                sources = r.resolve(targetNamespace.toString(), baseURI, relativeURIs);
             }
             return sources;
         } catch (XPathException e) {
@@ -147,7 +148,7 @@ public abstract class SchemaReader {
         AxisIterator children = schemaDocument.getDocument().getRootNode().iterateAxis(
                 AxisInfo.CHILD, NodeKindTest.makeNodeKindTest(Type.ELEMENT));
         NodeInfo top = children.next();
-        if (top.getURI().equals(NamespaceConstant.SCM)) {
+        if (top.getNamespaceUri().equals(NamespaceUri.SCM)) {
             if (tracing) {
                 pipe.getConfiguration().getLogger().info("Loaded compiled schema document " + docId);
             }

@@ -2,6 +2,7 @@ package com.saxonica.expr;
 
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.trans.XPathException;
@@ -48,7 +49,7 @@ public class XQueryParserExtensionPE extends SaxonSyntaxExtension {
     public void parseTypeAliasDeclaration(XQueryParser p) throws XPathException {
         p.nextToken();
         p.expect(Token.NAME);
-        StructuredQName typeName = p.makeStructuredQName(p.getTokenizer().currentTokenValue, "");
+        StructuredQName typeName = p.makeStructuredQName(p.getTokenizer().currentTokenValue, NamespaceUri.NULL);
         p.nextToken();
         p.expect(Token.EQUALS);
         p.nextToken();

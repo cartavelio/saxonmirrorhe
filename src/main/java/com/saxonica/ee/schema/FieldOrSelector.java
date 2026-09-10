@@ -2,6 +2,7 @@ package com.saxonica.ee.schema;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.Pattern;
 
 /**
@@ -37,7 +38,7 @@ public abstract class FieldOrSelector extends SchemaStructure {
      * Saved XPath default namespace: needed when serializing
      */
 
-    private String xpathDefaultNamespace;
+    private NamespaceUri xpathDefaultNamespace;
 
     /**
      * Return the source XPath expression of this IdentitySelector.
@@ -125,7 +126,7 @@ public abstract class FieldOrSelector extends SchemaStructure {
      * @param uri the XPath default namespace
      */
 
-    public void setXPathDefaultNamespace(String uri) {
+    public void setXPathDefaultNamespace(NamespaceUri uri) {
         xpathDefaultNamespace = uri;
     }
 
@@ -135,7 +136,7 @@ public abstract class FieldOrSelector extends SchemaStructure {
      * @return the XPath default namespace
      */
 
-    public String getXPathDefaultNamespace() {
+    public NamespaceUri getXPathDefaultNamespace() {
         return xpathDefaultNamespace;
     }
 

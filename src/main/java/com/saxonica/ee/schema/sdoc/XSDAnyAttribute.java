@@ -4,6 +4,7 @@ import com.saxonica.ee.schema.AttributeWildcard;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.type.SchemaException;
 
 /**
@@ -42,25 +43,25 @@ public class XSDAnyAttribute extends AnnotationParent {
         String attValue;
 
         //-- @namespace
-        attValue = atts.getValue("", "namespace");
+        attValue = atts.getValue(NamespaceUri.NULL, "namespace");
         if (attValue != null) {
             processAllowedNamespaces(attValue, wildcard.getWildcard());
         }
 
         //-- @notNamespace
-        attValue = atts.getValue("", "notNamespace");
+        attValue = atts.getValue(NamespaceUri.NULL, "notNamespace");
         if (attValue != null) {
             processDisallowedNamespaces(attValue, wildcard.getWildcard());
         }
 
         //-- @notQName
-        attValue = atts.getValue("", "notQName");
+        attValue = atts.getValue(NamespaceUri.NULL, "notQName");
         if (attValue != null) {
             processDisallowedQNames(attValue, wildcard.getWildcard());
         }
 
         //-- @processContents
-        attValue = atts.getValue("", "processContents");
+        attValue = atts.getValue(NamespaceUri.NULL, "processContents");
 
         if (attValue != null) {
             if (XSDAny.isProcessName(attValue)) {
@@ -86,7 +87,7 @@ public class XSDAnyAttribute extends AnnotationParent {
     @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
         super.validate(compiler);
-        if (getAttributeValue("", "notNamespace") != null && compiler.getLanguageVersion() != Configuration.XSD11) {
+        if (getAttributeValue(NamespaceUri.NULL, "notNamespace") != null && compiler.getLanguageVersion() != Configuration.XSD11) {
             error("The notNamespace attribute requires XSD 1.1 to be enabled");
         }
     }

@@ -2,6 +2,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.Assertion;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
@@ -55,33 +56,36 @@ public class SaxonPreprocess extends AnnotationParent {
 
         // @xpathDefaultNamespace
 
-        String defaultNamespace = atts.getValue("", "xpathDefaultNamespace");
+        String defaultNamespace = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNamespace == null) {
             defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
         }
+        NamespaceUri defaultNamespaceUri;
         if (defaultNamespace.equals("##defaultNamespace")) {
-            defaultNamespace = getURIForPrefix("", true);
+            defaultNamespaceUri = getURIForPrefix("", true);
         } else if (defaultNamespace.equals("##targetNamespace")) {
-            defaultNamespace = getXSDSchema().getTargetNamespace();
+            defaultNamespaceUri = getXSDSchema().getTargetNamespace();
         } else if (defaultNamespace.equals("##local")) {
-            defaultNamespace = "";
+            defaultNamespaceUri = NamespaceUri.NULL;
+        } else {
+            defaultNamespaceUri = NamespaceUri.of(defaultNamespace);
         }
 
         // @action
 
-        String xpath = atts.getValue("", "action");
+        String xpath = atts.getValue(NamespaceUri.NULL, "action");
         if (xpath == null) {
             missingAttribute("action");
             xpath = ".";  // for error recovery
         }
 
         XPathStaticContext env = new XPathStaticContext(this);
-        env.setDefaultElementNamespace(defaultNamespace);
+        env.setDefaultElementNamespace(defaultNamespaceUri);
         env.setNamespaceResolver(makeNamespaceContext());
         env.setBaseURI(getBaseURI());
 
         // Declare the variable $value
-        XPathVariable valueVariable = env.declareVariable("", "value");
+        XPathVariable valueVariable = env.declareVariable(NamespaceUri.NULL, "value");
         XPathExpression expression;
         XPathEvaluator xpe = new XPathEvaluator(getSchema().getConfiguration());
         try {
@@ -103,7 +107,7 @@ public class SaxonPreprocess extends AnnotationParent {
 
         // @reverse
 
-        xpath = atts.getValue("", "reverse");
+        xpath = atts.getValue(NamespaceUri.NULL, "reverse");
         if (xpath != null) {
 
 //            XPathStaticContext env = new XPathStaticContext(getConfiguration());

@@ -11,6 +11,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 
@@ -49,24 +50,22 @@ public class XSDImport extends AnnotationParent {
         processId();
 
         //-- Get schemaLocation
-        String schemaLocation = atts.getValue("", "schemaLocation");
+        String schemaLocation = atts.getValue(NamespaceUri.NULL, "schemaLocation");
         //-- Get namespace
-        String namespace = atts.getValue("", "namespace");
+        String namespace = atts.getValue(NamespaceUri.NULL, "namespace");
 
         if ((schemaLocation == null) && (namespace == null)) {
             //-- A legal <import/> element...just return
             return;
         }
 
+        NamespaceUri targetNamespace = NamespaceUri.of(namespace);
+
         XSDSchema thisSchemaDocument = getXSDSchema();
         //DocumentInfo thisRoot = thisSchemaDocument.getDocumentRoot();
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
 
         SchemaCompiler compiler = thisSchemaDocument.getSchemaCompiler();
-
-        if (namespace == null) {
-            namespace = "";
-        }
 
         String documentBase = getBaseURI();
 
@@ -75,7 +74,7 @@ public class XSDImport extends AnnotationParent {
         if (schemaLocation != null) {
             try {
                 String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
-                XSDSchema existing = compiler.getExistingSchemaDocument(location, namespace);
+                XSDSchema existing = compiler.getExistingSchemaDocument(location, targetNamespace);
                 if (existing != null) {
                     importedSchema = existing.getSchema();
                     return;
@@ -87,12 +86,12 @@ public class XSDImport extends AnnotationParent {
 
         // For the XML namespace, use the built-in version if the schema location is known or if already loaded
 
-        if (namespace.equals(NamespaceConstant.XML)) {
+        if (targetNamespace.equals(NamespaceUri.XML)) {
             if (schemaLocation == null ||
                     schemaLocation.equals("http://www.w3.org/2001/xml.xsd") ||
                     schemaLocation.equals("http://www.w3.org/2001/03/xml.xsd")) {
                 // Use the built-in version, or none if already loaded
-                if (config.getNamespaceStatus(namespace) != PreparedSchema.NAMESPACE_KNOWN) {
+                if (config.getNamespaceStatus(targetNamespace) != PreparedSchema.NAMESPACE_KNOWN) {
                     importedSchema = XMLNamespaceSchema.buildSchema(config);
                     config.addSchema(importedSchema);
                 }
@@ -100,7 +99,7 @@ public class XSDImport extends AnnotationParent {
             }
         }
 
-        if (namespace.equals(thisSchemaDocument.getTargetNamespace())) {
+        if (targetNamespace.equals(thisSchemaDocument.getTargetNamespace())) {
             error("The namespace attribute in the xs:import element cannot be the same as the targetNamespace of the containing schema");
             return;
         }
@@ -111,7 +110,7 @@ public class XSDImport extends AnnotationParent {
                 source = SchemaReader.getSource(documentBase,
                         schemaLocation,
                         compiler,
-                        namespace);
+                        targetNamespace);
             } catch (SchemaException e) {
                 processSchemaException(schemaLocation, namespace, e);
                 return;
@@ -127,7 +126,7 @@ public class XSDImport extends AnnotationParent {
         }
 
         // Is another document for the same schema namespace already loaded?
-        int status = config.getNamespaceStatus(namespace);
+        int status = config.getNamespaceStatus(targetNamespace);
         if (status == PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
             // This implies a cycle of imports. Alternatively, it means that a concurrent
             // process is loading a schema with this namespace...
@@ -163,7 +162,7 @@ public class XSDImport extends AnnotationParent {
             // This path is used on SaxonCS
             warning("Failed to locate imported schema document: " + schemaLocation);
             // create a dummy imported schema for error recovery
-            importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), namespace);
+            importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), targetNamespace);
             return;
         }
 
@@ -173,8 +172,8 @@ public class XSDImport extends AnnotationParent {
                 importedSchema = XSINamespaceSchema.buildSchema(config);
                 config.addSchema(importedSchema);
                 return;
-            } else if (namespace.equals(NamespaceConstant.FN)) {
-                if (!config.isSchemaAvailable(NamespaceConstant.FN)) {
+            } else if (targetNamespace.equals(NamespaceUri.FN)) {
+                if (!config.isSchemaAvailable(NamespaceUri.FN)) {
                     List<String> messages = new ArrayList<>();
                     InputStream in = Version.platform.locateResource("xpath-functions.xsd", messages);
                     if (config.isTiming()) {
@@ -190,7 +189,7 @@ public class XSDImport extends AnnotationParent {
                         if (sources == null || sources.length == 0) {
                             warning("Cannot locate a schema document for namespace " + namespace);
                             // Error recovery
-                            importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), namespace);
+                            importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), targetNamespace);
                             return;
                         } else if (sources.length > 1) {
                             error("SchemaURIResolver returned more than one schema document");
@@ -233,14 +232,14 @@ public class XSDImport extends AnnotationParent {
         // check again that the target namespace differs (the check was only done
         // before if a "namespace" attribute was present
 
-        String importedNamespace = importee.getTargetNamespace();
+        NamespaceUri importedNamespace = importee.getTargetNamespace();
         if (thisSchemaDocument.getTargetNamespace().equals(importedNamespace)) {
             error("The targetNamespace of the imported schema must not be the same as " +
                     "the targetNamespace of the importing schema");
             return;
         }
 
-        if (!namespace.equals(importedNamespace)) {
+        if (!targetNamespace.equals(importedNamespace)) {
             error("The namespace attribute in xs:import differs from the targetNamespace of the imported schema");
             return;
         }
@@ -259,8 +258,7 @@ public class XSDImport extends AnnotationParent {
             error("Failed to process imported schema document: " + e.getMessage());
         }
         // create a dummy imported schema for error recovery
-        importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), namespace);
-        return;
+        importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), getTargetNamespace());
     }
 
     /**
@@ -280,12 +278,12 @@ public class XSDImport extends AnnotationParent {
      * @return the target namespace, using "" to represent the no-namespace
      */
 
-    public String getTargetNamespace() {
-        String uri = attributes().getValue("", "namespace");
-        if (uri == null) {
-            return "";
-        } else {
-            return uri;
+    public NamespaceUri getTargetNamespace() {
+        String uri = attributes().getValue(NamespaceUri.NULL, "namespace");
+        if  (uri == null) {
+                return NamespaceUri.NULL;
+            } else{
+                return NamespaceUri.of(uri);
         }
     }
 

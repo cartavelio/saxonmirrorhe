@@ -6,11 +6,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
@@ -64,7 +60,7 @@ public class XSDSchema extends SchemaElement {
      * The target namespace of this schema document
      */
 
-    private String targetNamespace;
+    private NamespaceUri targetNamespace;
 
     /**
      * chameleon is set to true when this schema document is included or redefined by one that specifies
@@ -78,7 +74,7 @@ public class XSDSchema extends SchemaElement {
      * not transitive.
      */
 
-    private Set<String> importedNamespaces = null;
+    private Set<NamespaceUri> importedNamespaces = null;
 
     /**
      * The default open content wildcard, if any
@@ -230,15 +226,16 @@ public class XSDSchema extends SchemaElement {
                 "finalDefault", "id", "targetNamespace", "version", "xpathDefaultNamespace"};
         allowAttributes(atts, allowed);
 
-        String nsURI = atts.getValue("", "targetNamespace");
-        if (nsURI != null && nsURI.isEmpty()) {
+        String nsURIatt = atts.getValue(NamespaceUri.NULL, "targetNamespace");
+        if (nsURIatt != null && nsURIatt.isEmpty()) {
             error("The zero-length string is not a legal namespace URI");
-            nsURI = null;   // for error recovery
+            nsURIatt = null;   // for error recovery
         }
-        if (nsURI != null) {
+        if (nsURIatt != null) {
+            NamespaceUri nsURI = NamespaceUri.of(nsURIatt);
             // if we are including a schema we must take care that the namespaces are the same
             if (referrer instanceof XSDInclude || referrer instanceof XSDRedefine) {
-                final String includingNamespace = referrer.getXSDSchema().getTargetNamespace();
+                final NamespaceUri includingNamespace = referrer.getXSDSchema().getTargetNamespace();
                 if (!includingNamespace.equals(nsURI)) {
                     error("The target namespace of the included schema must be the same as the target namespace of the including schema");
                     return;
@@ -254,8 +251,8 @@ public class XSDSchema extends SchemaElement {
                 targetNamespace = referrer.getXSDSchema().getTargetNamespace();
                 chameleon = true;
             } else {
-                targetNamespace = "";
-                ((EnterpriseConfiguration) config).addSurrogateSchema("");
+                targetNamespace = NamespaceUri.NULL;
+                ((EnterpriseConfiguration) config).addSurrogateSchema(NamespaceUri.NULL);
                 // targetNamespace absent: no action needed.
                 // In the case of a top-level or imported schema,
                 // the targetNamespace is null; in the case of an included schema,
@@ -263,7 +260,7 @@ public class XSDSchema extends SchemaElement {
             }
         }
 
-        String extensions = atts.getValue(NamespaceConstant.SAXON, "extensions");
+        String extensions = atts.getValue(NamespaceUri.SAXON, "extensions");
         if (extensions != null) {
             StringTokenizer st = new StringTokenizer(extensions, " \t\n\r");
             while (st.hasMoreTokens()) {
@@ -275,11 +272,11 @@ public class XSDSchema extends SchemaElement {
         processId();
 
         // @version
-        //schema.setVersion(atts.getValue("", "version"));
-
+        //schema.setVersion(atts.getValue(NamespaceUri.NULL, "version"));
+        atts.getValue(NamespaceUri.NULL, "version");
         // @attributeFormDefault
 
-        String attValue = atts.getValue("", "attributeFormDefault");
+        String attValue = atts.getValue(NamespaceUri.NULL, "attributeFormDefault");
         if (attValue != null) {
             if (attValue.equals("qualified") || attValue.equals("unqualified")) {
                 setAttributeFormDefault(attValue);
@@ -291,7 +288,7 @@ public class XSDSchema extends SchemaElement {
         }
 
         // @defaultAttributes
-        attValue = atts.getValue("", "defaultAttributes");
+        attValue = atts.getValue(NamespaceUri.NULL, "defaultAttributes");
         if (attValue != null) {
             try {
                 // We can't resolve this the usual way using getNameCode() because we haven't yet processed
@@ -303,7 +300,7 @@ public class XSDSchema extends SchemaElement {
         }
 
         // @elementFormDefault
-        attValue = atts.getValue("", "elementFormDefault");
+        attValue = atts.getValue(NamespaceUri.NULL, "elementFormDefault");
         if (attValue != null) {
             if (attValue.equals("qualified") || attValue.equals("unqualified")) {
                 setElementFormDefault(attValue);
@@ -315,7 +312,7 @@ public class XSDSchema extends SchemaElement {
         }
 
         // @blockDefault
-        attValue = atts.getValue("", "blockDefault");
+        attValue = atts.getValue(NamespaceUri.NULL, "blockDefault");
         if (attValue != null) {
             int v = parseFinalOrBlock("blockDefault",
                     attValue,
@@ -326,7 +323,7 @@ public class XSDSchema extends SchemaElement {
         }
 
         // @finalDefault
-        attValue = atts.getValue("", "finalDefault");
+        attValue = atts.getValue(NamespaceUri.NULL, "finalDefault");
         if (attValue != null) {
             int v = parseFinalOrBlock("finalDefault",
                     attValue,
@@ -339,13 +336,13 @@ public class XSDSchema extends SchemaElement {
         }
 
         // @version
-        //attValue = atts.getValue("", "version");
+        //attValue = atts.getValue(NamespaceUri.NULL, "version");
 //        if (attValue != null) {
 //            schema.setVersion(attValue);
 //        }
 
         // @xpathDefaultNamespace
-        attValue = atts.getValue("", "xpathDefaultNamespace");
+        attValue = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (attValue != null) {
             xpathDefaultNamespace = attValue;
         }
@@ -361,7 +358,7 @@ public class XSDSchema extends SchemaElement {
      * @return true if the namespace has been imported, false otherwise
      */
 
-    public boolean isImportedNamespace(String uri) {
+    public boolean isImportedNamespace(NamespaceUri uri) {
         if (importedNamespaces == null) {
             // Saxon-specific option to license references to components in other namespaces without
             // an explicit xs:import in the containing schema document. Needed for XBRL schemas?
@@ -371,7 +368,7 @@ public class XSDSchema extends SchemaElement {
             importedNamespaces = new HashSet<>(10);
             for (NodeInfo child : children()) {
                 if (child instanceof XSDImport) {
-                    String targetNamespace = ((XSDImport) child).getTargetNamespace();
+                    NamespaceUri targetNamespace = ((XSDImport) child).getTargetNamespace();
                     importedNamespaces.add(targetNamespace);
                 }
             }
@@ -407,7 +404,7 @@ public class XSDSchema extends SchemaElement {
 
         if (defaultAttributeGroup != null) {
             // process it again to check that the namespace has been imported
-            String attValue = getAttributeValue("", "defaultAttributes");
+            String attValue = getAttributeValue(NamespaceUri.NULL, "defaultAttributes");
             try {
                 defaultAttributeGroup = getComponentName(attValue, USE_DEFAULT_NS);
             } catch (SchemaException err) {
@@ -636,15 +633,15 @@ public class XSDSchema extends SchemaElement {
     /**
      * Get the target namespace of this schema document.
      *
-     * @return "" for the no-namespace case
+     * @return {@link NamespaceUri#NULL} for the no-namespace case
      */
 
     /*@Nullable*/
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         if (targetNamespace == null) {
             // can happen on error paths
-            String tn = getAttributeValue("", "targetNamespace");
-            targetNamespace = tn == null ? "" : tn;
+            String tn = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
+            targetNamespace = tn == null ? NamespaceUri.NULL : NamespaceUri.of(tn);
         }
         return targetNamespace;
     }

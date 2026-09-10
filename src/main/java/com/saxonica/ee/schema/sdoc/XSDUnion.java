@@ -4,6 +4,7 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.SchemaException;
@@ -54,7 +55,7 @@ public class XSDUnion extends SchemaElement {
 
         typeDefinition.setDerivationMethodName("union");
 
-        String memberTypes = atts.getValue("", "memberTypes");
+        String memberTypes = atts.getValue(NamespaceUri.NULL, "memberTypes");
         processMemberTypes(memberTypes);
 
     }

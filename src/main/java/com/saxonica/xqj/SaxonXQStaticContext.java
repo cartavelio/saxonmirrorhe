@@ -10,6 +10,7 @@ package com.saxonica.xqj;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.StaticQueryContext;
 
 import javax.xml.xquery.XQConstants;
@@ -29,7 +30,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
     private int bindingMode = XQConstants.BINDING_MODE_IMMEDIATE;
     private int holdability = XQConstants.HOLDTYPE_HOLD_CURSORS_OVER_COMMIT;
     private int scrollability = XQConstants.SCROLLTYPE_FORWARD_ONLY;
-    /*@NotNull*/ private Map<String, String> namespaces = new HashMap<>();
+    /*@NotNull*/ private Map<String, NamespaceUri> namespaces = new HashMap<>();
     private String baseURI = "";
     boolean preserveBoundarySpace = false;
     boolean constructionModeIsPreserve = false;
@@ -39,8 +40,8 @@ public class SaxonXQStaticContext implements XQStaticContext {
     boolean isOrdered = true;
     /*@Nullable*/ SaxonXQItemType contextItemStaticType = null;
     String defaultCollationName = NamespaceConstant.CODEPOINT_COLLATION_URI;
-    String defaultElementNamespace = "";
-    String defaultFunctionNamespace = NamespaceConstant.FN;
+    NamespaceUri defaultElementNamespace = NamespaceUri.NULL;
+    NamespaceUri defaultFunctionNamespace = NamespaceUri.FN;
 
     /**
      * Create a SaxonXQStaticContext object, the Saxon implementation of XQStaticContext in XQJ
@@ -99,7 +100,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         if (contextItemStaticType != null) {
             sqc.setRequiredContextItemType(contextItemStaticType.getSaxonItemType());
         }
-        for (Map.Entry<String, String> e : namespaces.entrySet()) {
+        for (Map.Entry<String, NamespaceUri> e : namespaces.entrySet()) {
             sqc.declareNamespace(e.getKey(), e.getValue());
         }
         return sqc;
@@ -113,7 +114,7 @@ public class SaxonXQStaticContext implements XQStaticContext {
         if (uri.isEmpty()) {
             namespaces.remove(prefix);
         } else {
-            namespaces.put(prefix, uri);
+            namespaces.put(prefix, NamespaceUri.of(uri));
         }
     }
 
@@ -170,12 +171,12 @@ public class SaxonXQStaticContext implements XQStaticContext {
 
     @Override
     public String getDefaultElementTypeNamespace() {
-        return defaultElementNamespace;
+        return defaultElementNamespace.toString();
     }
 
     @Override
     public String getDefaultFunctionNamespace() {
-        return defaultFunctionNamespace;
+        return defaultFunctionNamespace.toString();
     }
 
     @Override
@@ -189,10 +190,10 @@ public class SaxonXQStaticContext implements XQStaticContext {
     @Override
     public String[] getNamespacePrefixes() {
         String[] result = new String[namespaces.size()];
-        Iterator iter = namespaces.keySet().iterator();
+        Iterator<String> iter = namespaces.keySet().iterator();
         for (int i = 0; i < result.length; i++) {
             if (iter.hasNext()) {
-                result[i] = (String) iter.next();
+                result[i] = iter.next();
             }
         }
         return result;
@@ -201,11 +202,11 @@ public class SaxonXQStaticContext implements XQStaticContext {
     @Override
     public String getNamespaceURI(String prefix) throws XQException {
         checkNotNull(prefix);
-        String uri = namespaces.get(prefix);
+        NamespaceUri uri = namespaces.get(prefix);
         if (uri == null) {
             throw new XQException("Unknown prefix");
         }
-        return uri;
+        return uri.toString();
     }
 
     @Override
@@ -324,13 +325,13 @@ public class SaxonXQStaticContext implements XQStaticContext {
     @Override
     public void setDefaultElementTypeNamespace(String uri) throws XQException {
         checkNotNull(uri);
-        defaultElementNamespace = uri;
+        defaultElementNamespace = NamespaceUri.of(uri);
     }
 
     @Override
     public void setDefaultFunctionNamespace(String uri) throws XQException {
         checkNotNull(uri);
-        defaultFunctionNamespace = uri;
+        defaultFunctionNamespace = NamespaceUri.of(uri);
     }
 
     @Override

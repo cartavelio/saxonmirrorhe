@@ -1,7 +1,6 @@
 package com.saxonica.xqj.pull;
 
 import net.sf.saxon.event.NamespaceReducer;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullFilter;
@@ -226,7 +225,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
 
     private NodeName checkProposedPrefix(NodeName nameCode, int seq) {
         String oldPrefix = nameCode.getPrefix();
-        String uri = nameCode.getURI();
+        NamespaceUri uri = nameCode.getURI();
         NamespaceBinding nsBinding = new NamespaceBinding(oldPrefix, uri);
 
         for (int i = allNamespacesSize - 1; i >= 0; i--) {
@@ -372,18 +371,18 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
 
     /*@Nullable*/
     @Override
-    public String getURIForPrefix(String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
         if (prefix.isEmpty() && !useDefault) {
-            return "";
+            return NamespaceUri.NULL;
         } else if ("xml".equals(prefix)) {
-            return NamespaceConstant.XML;
+            return NamespaceUri.XML;
         } else {
             for (int i = allNamespacesSize - 1; i >= 0; i--) {
                 if (allNamespaces[i].getPrefix().equals(prefix)) {
                     return allNamespaces[i].getURI();
                 }
             }
-            return prefix.isEmpty() ? NamespaceConstant.NULL : null;
+            return prefix.isEmpty() ? NamespaceUri.NULL : null;
         }
     }
 

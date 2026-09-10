@@ -10,8 +10,8 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.ForExpression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
@@ -40,7 +40,7 @@ public class ForExpressionAdjunct extends StreamingAdjunct implements FeedMaker 
             return super.computeStreamability(contextInfo, reasons);
         } else {
             if (reasons != null) {
-                String desc = exp.getVariableQName().hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)
+                String desc = exp.getVariableQName().hasURI(NamespaceUri.SAXON_GENERATED_VARIABLE)
                         ? exp.getSequence().toShortString()
                         : "bound to the variable $" + exp.getVariableName();
                 reasons.add("The expression " + desc +

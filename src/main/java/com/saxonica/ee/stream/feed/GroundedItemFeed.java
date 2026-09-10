@@ -97,12 +97,12 @@ public abstract class GroundedItemFeed extends ItemFeed {
     }
 
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         if (buildingOutputter == null) {
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.NAMESPACE);
             orphan.setNodeName(new NoNamespaceName(prefix));
-            orphan.setStringValue(StringView.tidy(namespaceUri));
+            orphan.setStringValue(namespaceUri.toUnicodeString());
             append(orphan);
         } else {
             buildingOutputter.namespace(prefix, namespaceUri, properties);

@@ -4,6 +4,7 @@ import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.trans.XPathException;
@@ -60,13 +61,14 @@ public class XQTSModuleURIResolver implements ModuleURIResolver {
     @Override
     public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
         NamePool pool = testCase.getConfiguration().getNamePool();
-        int moduleNC = pool.allocateFingerprint("http://www.w3.org/2005/02/query-test-XQTSCatalog", "module");
+        int moduleNC = pool.allocateFingerprint(
+                NamespaceUri.of("http://www.w3.org/2005/02/query-test-XQTSCatalog"), "module");
         AxisIterator iter = testCase.iterateAxis(AxisInfo.CHILD, new NameTest(Type.ELEMENT, moduleNC, pool));
         List<String> catalogLocations = new ArrayList<>(5);
         while (true) {
             NodeInfo m = iter.next();
             if (m == null) break;
-            if (moduleURI.equals(m.getAttributeValue("", "namespace"))) {
+            if (moduleURI.equals(m.getAttributeValue(NamespaceUri.NULL, "namespace"))) {
                 String moduleRef = m.getStringValue();
                 // take a short cut here: hard code information from the catalog
                 if (moduleRef.equals("module-defs")) {

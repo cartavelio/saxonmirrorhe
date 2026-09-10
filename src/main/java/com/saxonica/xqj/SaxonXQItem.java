@@ -19,6 +19,7 @@ import net.sf.saxon.expr.instruct.ResultDocument;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pull.PullProvider;
@@ -231,7 +232,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         for (String name : props.stringPropertyNames()) {
             String value = props.getProperty(name);
             String localName = name;
-            String uri = "";
+            NamespaceUri uri = NamespaceUri.NULL;
             if (name.startsWith("{")) {
                 StructuredQName qName = StructuredQName.fromClarkName(name);
                 localName = qName.getLocalPart();

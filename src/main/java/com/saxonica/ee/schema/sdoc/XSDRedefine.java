@@ -5,6 +5,7 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.SchemaException;
@@ -42,7 +43,7 @@ public class XSDRedefine extends SchemaElement {
         processId();
 
         //-- @schemaLocation
-        String schemaLocation = atts.getValue("", "schemaLocation");
+        String schemaLocation = atts.getValue(NamespaceUri.NULL, "schemaLocation");
         if (schemaLocation == null) {
             missingAttribute("schemaLocation");
             throw new SchemaException("Processing abandoned");
@@ -60,7 +61,7 @@ public class XSDRedefine extends SchemaElement {
         }
         if (source == null) {
             warning("Failed to locate redefined schema document " + schemaLocation);
-            externalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+            externalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), NamespaceUri.NULL);
         }
 
         //-- Have we already imported this XML Schema file? We can't handle
@@ -91,7 +92,7 @@ public class XSDRedefine extends SchemaElement {
         Throwable cause = e.getException();
         if (XSDInclude.isFileNotFoundException(cause)) {
             warning("Failed to locate redefined schema document " + schemaLocation);
-            externalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+            externalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), NamespaceUri.NULL);
             // We will get a hard error if any components are actually redefined
         } else {
             // the error has already been reported
@@ -153,7 +154,7 @@ public class XSDRedefine extends SchemaElement {
                     break;
                 }
                 case StandardNames.XS_ATTRIBUTE_GROUP: {
-                    String attributeGroupName = child.getAttributeValue("", "name");
+                    String attributeGroupName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (attributeGroupName != null && !redefinedAttributeGroups.add(attributeGroupName)) {
                         error("Attempting to redefine the same attribute group more than once");
                     }
@@ -161,14 +162,14 @@ public class XSDRedefine extends SchemaElement {
                 }
                 case StandardNames.XS_COMPLEX_TYPE:
                 case StandardNames.XS_SIMPLE_TYPE: {
-                    String typeName = child.getAttributeValue("", "name");
+                    String typeName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (typeName != null && !redefinedTypes.add(typeName)) {
                         error("Attempting to redefine the same type more than once");
                     }
                     break;
                 }
                 case StandardNames.XS_GROUP: {
-                    String modelGroupName = child.getAttributeValue("", "name");
+                    String modelGroupName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (modelGroupName != null && !redefinedModelGroups.add(modelGroupName)) {
                         error("Attempting to redefine the same named model group more than once");
                     }

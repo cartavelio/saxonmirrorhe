@@ -3,10 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
@@ -84,7 +81,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
         allowAttributes(atts, allowed);
 
         //-- @base
-        String base = atts.getValue("", "base");
+        String base = atts.getValue(NamespaceUri.NULL, "base");
 
         if (base == null) {
             missingAttribute("base");

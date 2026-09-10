@@ -120,7 +120,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
             QName[] qnames = new QName[params.size()];
             int q = 0;
             for (StructuredQName name : params) {
-                qnames[q++] = new QName(name.getURI(), name.getLocalPart(), name.getPrefix());
+                qnames[q++] = new QName(name.getURI().toString(), name.getLocalPart(), name.getPrefix());
             }
             return qnames;
         }
@@ -136,7 +136,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         IntHashSet unbound = new IntHashSet(boundParameters.size());
         QName[] all = getAllExternalVariables();
         for (int i = 0; i < all.length; i++) {
-            StructuredQName sq = new StructuredQName("", all[i].getNamespaceURI(), all[i].getLocalPart());
+            StructuredQName sq = new StructuredQName("", NamespaceUri.of(all[i].getNamespaceURI()), all[i].getLocalPart());
             if (!boundParameters.contains(sq)) {
                 unbound.add(i);
             }
@@ -176,7 +176,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         checkNotClosed();
         checkNotNull(name);
         StructuredQName qn = new StructuredQName(
-                name.getPrefix(), name.getNamespaceURI(), name.getLocalPart());
+                name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
         for (GlobalVariable var : expression.getPackageData().getGlobalVariableList()) {
             if (var instanceof GlobalParam && var.getVariableQName().equals(qn)) {
                 return new SaxonXQSequenceType(var.getRequiredType(), connection.getConfiguration());
@@ -189,7 +189,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
     @Override
     protected boolean externalVariableExists(QName name) {
         StructuredQName qn = new StructuredQName(
-                name.getPrefix(), name.getNamespaceURI(), name.getLocalPart());
+                name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
         for (GlobalVariable var : expression.getPackageData().getGlobalVariableList()) {
             if (var instanceof GlobalParam && var.getVariableQName().equals(qn)) {
                 return true;

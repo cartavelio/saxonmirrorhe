@@ -17,9 +17,9 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.functions.Empty;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -70,32 +70,36 @@ public class XSDAssert extends AnnotationParent {
 
         // @xpathDefaultNamespace
 
-        String defaultNamespace = atts.getValue("", "xpathDefaultNamespace");
+        String defaultNamespace = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNamespace == null) {
             defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
         }
+        NamespaceUri defaultNamespaceUri;
         switch (defaultNamespace) {
             case "##defaultNamespace":
-                defaultNamespace = getURIForPrefix("", true);
+                defaultNamespaceUri = getURIForPrefix("", true);
                 break;
             case "##targetNamespace":
-                defaultNamespace = getXSDSchema().getTargetNamespace();
+                defaultNamespaceUri = getXSDSchema().getTargetNamespace();
                 break;
             case "##local":
-                defaultNamespace = "";
+                defaultNamespaceUri = NamespaceUri.NULL;
+                break;
+            default:
+                defaultNamespaceUri = NamespaceUri.of(defaultNamespace);
                 break;
         }
 
         // Saxon extension: @saxon:streamable attribute
         boolean streamable = false;
-        String streamableAtt = atts.getValue(NamespaceConstant.SAXON, "streamable");
+        String streamableAtt = atts.getValue(NamespaceUri.SAXON, "streamable");
         if (streamableAtt != null) {
             streamable = parseBooleanAttribute("streamable", streamableAtt);
         }
 
         // @test
 
-        String xpath = atts.getValue("", "test");
+        String xpath = atts.getValue(NamespaceUri.NULL, "test");
         if (xpath == null) {
             missingAttribute("test");
             xpath = ".";  // for error recovery
@@ -105,12 +109,12 @@ public class XSDAssert extends AnnotationParent {
 
 
         XPathStaticContext env = new XPathStaticContext(this);
-        env.setDefaultElementNamespace(defaultNamespace);
+        env.setDefaultElementNamespace(defaultNamespaceUri);
         env.setNamespaceResolver(makeNamespaceContext());
         env.setBaseURI(getBaseURI());
         env.setRequiredContextItemType(NodeKindTest.ELEMENT);
         env.setContextItemParentless(true);
-        env.setContainingLocation(new AttributeLocation(this, new StructuredQName("", "", "test")));
+        env.setContainingLocation(new AttributeLocation(this, new StructuredQName("", NamespaceUri.NULL, "test")));
         int xpathVersion = config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD);
         if (getXSDSchema().getAllowedExtensions().contains("any-xpath-version")) {
             xpathVersion = 31;
@@ -118,7 +122,7 @@ public class XSDAssert extends AnnotationParent {
         env.setXPathLanguageLevel(xpathVersion);
 
         // If in a simpleType or simpleContent, declare the variable $value
-        XPathVariable valueVariable = env.declareVariable("", "value");
+        XPathVariable valueVariable = env.declareVariable(NamespaceUri.NULL, "value");
 
         // Declare any variables defined in saxon:param elements
         Map<StructuredQName, XPathVariable> parameters = new HashMap<>();
@@ -154,7 +158,7 @@ public class XSDAssert extends AnnotationParent {
         assertion.setStaticContext(env);
 
         // Saxon extension: @saxon:message attribute
-        String message = atts.getValue(NamespaceConstant.SAXON, "message");
+        String message = atts.getValue(NamespaceUri.SAXON, "message");
         assertion.setMessage(message);
 
         // Saxon extension: @saxon:streamable attribute

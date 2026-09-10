@@ -107,7 +107,7 @@ public class UpdateTestSuiteDriver {
 
     }
 
-    public final static String TEST_NS = "http://www.w3.org/2005/02/query-test-update";
+    public final static NamespaceUri TEST_NS = NamespaceUri.of("http://www.w3.org/2005/02/query-test-update");
 
     private NameTest elementNameTest(NamePool pool, String local) {
         int nameFP = pool.allocateFingerprint(TEST_NS, local) & NamePool.FP_MASK;
@@ -240,14 +240,15 @@ public class UpdateTestSuiteDriver {
                     new StreamSource(new File(saxonDir + "/exceptions.xml"))
             );
 
-            NameTest exceptionTestsNT = new NameTest(Type.ELEMENT, pool.allocateFingerprint("", "exception"), pool);
+            NameTest exceptionTestsNT = new NameTest(Type.ELEMENT,
+                                                     pool.allocateFingerprint(NamespaceUri.NULL, "exception"), pool);
             AxisIterator exceptionTestCases = exceptionsDoc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, exceptionTestsNT);
             while (true) {
                 NodeInfo exceptionCase = exceptionTestCases.next();
                 if (exceptionCase == null) {
                     break;
                 }
-                String testCase = exceptionCase.getAttributeValue("", "test-case");
+                String testCase = exceptionCase.getAttributeValue(NamespaceUri.NULL, "test-case");
                 StringTokenizer tok = new StringTokenizer(testCase);
                 while (tok.hasMoreTokens()) {
                     exceptions.add(tok.nextToken());
@@ -290,7 +291,7 @@ public class UpdateTestSuiteDriver {
                 if (schemaElement == null) {
                     break;
                 }
-                String fileName = schemaElement.getAttributeValue("", "FileName");
+                String fileName = schemaElement.getAttributeValue(NamespaceUri.NULL, "FileName");
                 println("Loading schema " + fileName);
                 File schemaFile = new File(testSuiteDir + "/" + fileName);
                 StreamSource ss = new StreamSource(schemaFile);
@@ -310,7 +311,7 @@ public class UpdateTestSuiteDriver {
                 if (sourceElement == null) {
                     break;
                 }
-                String id = sourceElement.getAttributeValue("", "ID");
+                String id = sourceElement.getAttributeValue(NamespaceUri.NULL, "ID");
                 sourceIndex.put(id, sourceElement);
 
             }
@@ -329,7 +330,7 @@ public class UpdateTestSuiteDriver {
                     break;
                 }
 
-                String testName = testCase.getAttributeValue("", "name");
+                String testName = testCase.getAttributeValue(NamespaceUri.NULL, "name");
 
                 dyn.setContextItem(testCase);
 
@@ -362,7 +363,7 @@ public class UpdateTestSuiteDriver {
                 println("Test " + testName);
                 log.info("Test " + testName);
 
-                String filePath = testCase.getAttributeValue("", "FilePath");
+                String filePath = testCase.getAttributeValue(NamespaceUri.NULL, "FilePath");
 //                if (filePath.startsWith("StaticTyping")) {
 //                    continue;
 //                }
@@ -392,7 +393,7 @@ public class UpdateTestSuiteDriver {
                 while ((state = states.next()) != null) {
                     stateNumber++;
                     NodeInfo query = getChildElement(state, queryNT);
-                    String queryName = query.getAttributeValue("", "name");
+                    String queryName = query.getAttributeValue(NamespaceUri.NULL, "name");
 
                     String absQueryName = testSuiteDir + "/Queries/" +
                             (unfolded ? "XQUnfolded/" : "XQuery/") +
@@ -416,13 +417,13 @@ public class UpdateTestSuiteDriver {
 
                     NodeInfo optElement = getChildElement(state, optimizationNT);
                     if (optElement != null) {
-                        String explain = optElement.getAttributeValue("", "explain");
+                        String explain = optElement.getAttributeValue(NamespaceUri.NULL, "explain");
                         if ("true".equals(explain) || "1".equals(explain)) {
                             ExpressionPresenter presenter = new ExpressionPresenter(saConfig);
                             xqe.explain(presenter);
                             presenter.close();
                         }
-                        String assertion = optElement.getAttributeValue("", "assert");
+                        String assertion = optElement.getAttributeValue(NamespaceUri.NULL, "assert");
                         if (assertion != null) {
                             TinyBuilder builder = new TinyBuilder(saConfig.makePipelineConfiguration());
                             builder.setStatistics(saConfig.getTreeStatistics().TEMPORARY_TREE_STATISTICS);
@@ -533,7 +534,7 @@ public class UpdateTestSuiteDriver {
                         foundExpectedResults = true;
                         String resultsDir = testSuiteDir + "/ExpectedTestResults/" + filePath;
                         String resultsPath = resultsDir + outputFileElement.getUnicodeStringValue();
-                        String comparisonMethod = outputFileElement.getAttributeValue("", "compare");
+                        String comparisonMethod = outputFileElement.getAttributeValue(NamespaceUri.NULL, "compare");
                         String comparisonResult;
                         if (comparisonMethod.equals("Ignore")) {
                             comparisonResult = "true";
@@ -612,21 +613,21 @@ public class UpdateTestSuiteDriver {
         SequenceIterator inputURIs = testCase.iterateAxis(AxisInfo.CHILD, inputUriNT);
         NodeInfo inputURI;
         while ((inputURI = (NodeInfo) inputURIs.next()) != null) {
-            String variableName = inputURI.getAttributeValue("", "variable");
+            String variableName = inputURI.getAttributeValue(NamespaceUri.NULL, "variable");
             if (variableName != null) {
                 String docName = inputURI.getStringValue();
                 if (docName.startsWith("putOutput")) {
                     String uri = new File(testSuiteDir + "/TestSources/" + docName + ".xml").toURI().toString();
-                    dqc.setParameter(new StructuredQName("", "", variableName), new AnyURIValue(uri));
+                    dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), new AnyURIValue(uri));
                 } else if (docName.startsWith("collection")) {
                     NodeInfo collectionElement = getCollectionElement(catalog, docName, collectionNT);
                     CollectionFinder r =
                             new XQTSCollectionFinder(catalog, collectionElement, false);
                     saConfig.setCollectionFinder(r);
-                    dqc.setParameter(new StructuredQName("", "", variableName), new AnyURIValue(docName));
+                    dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), new AnyURIValue(docName));
                 } else {
                     String uri = loadDocument(docName).getRootNode().getSystemId();
-                    dqc.setParameter(new StructuredQName("", "", variableName), new AnyURIValue(uri));
+                    dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), new AnyURIValue(uri));
                 }
             }
         }
@@ -641,7 +642,7 @@ public class UpdateTestSuiteDriver {
                 break;
             }
             String fileId = inputFile.getStringValue();
-            String variableName = inputFile.getAttributeValue("", "variable");
+            String variableName = inputFile.getAttributeValue(NamespaceUri.NULL, "variable");
             if (variableName != null) {
                 TreeInfo inputDoc = null;
                 String uri = (String) uriMap.get(fileId);
@@ -651,7 +652,7 @@ public class UpdateTestSuiteDriver {
                 if (inputDoc == null) {
                     inputDoc = loadDocument(fileId);
                 }
-                dqc.setParameter(new StructuredQName("", "", variableName),
+                dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName),
                                  inputDoc.getRootNode().materialize());
                 //System.err.println("Set parameter " + variableName + " := " + inputDoc.getSystemId());
             }
@@ -665,14 +666,14 @@ public class UpdateTestSuiteDriver {
             if (inputQuery == null) {
                 break;
             }
-            String variableName = inputQuery.getAttributeValue("", "variable");
+            String variableName = inputQuery.getAttributeValue(NamespaceUri.NULL, "variable");
             if (variableName != null) {
-                String preQueryName = inputQuery.getAttributeValue("", "name");
+                String preQueryName = inputQuery.getAttributeValue(NamespaceUri.NULL, "name");
                 String subQueryFile = testSuiteDir + "/Queries/XQuery/" + filePath + preQueryName + ".xq";
                 StaticQueryContext sqc2 = saConfig.newStaticQueryContext();
                 XQueryExpression subQuery = sqc2.compileQuery(new FileReader(subQueryFile));
                 SequenceIterator subQueryResult = subQuery.iterator(new DynamicQueryContext(saConfig));
-                dqc.setParameter(new StructuredQName("", "", variableName), SequenceTool.toGroundedValue(subQueryResult));
+                dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), SequenceTool.toGroundedValue(subQueryResult));
             }
         }
     }
@@ -685,7 +686,7 @@ public class UpdateTestSuiteDriver {
             if (coll == null) {
                 break;
             }
-            if (docName.equals(coll.getAttributeValue("", "ID"))) {
+            if (docName.equals(coll.getAttributeValue(NamespaceUri.NULL, "ID"))) {
                 collectionElement = coll;
             }
         }
@@ -725,8 +726,8 @@ public class UpdateTestSuiteDriver {
 
     private TreeInfo loadDocument(String id) throws XPathException {
         NodeInfo sourceElement = sourceIndex.get(id);
-        String schema = sourceElement.getAttributeValue("", "schema");
-        String fileName = sourceElement.getAttributeValue("", "FileName");
+        String schema = sourceElement.getAttributeValue(NamespaceUri.NULL, "schema");
+        String fileName = sourceElement.getAttributeValue(NamespaceUri.NULL, "FileName");
         Source ss = new StreamSource(new File(testSuiteDir + "/" + fileName));
         ParseOptions options = new ParseOptions();
         if (schema != null) {

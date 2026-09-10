@@ -10,7 +10,6 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.functions.registry.XPath20FunctionSet;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -153,12 +152,12 @@ public abstract class SchemaElement extends ElementImpl {
     public void allowAttributes(AttributeMap atts, String[] allowed) throws SchemaException {
         for (AttributeInfo att : atts) {
             NodeName attName = att.getNodeName();
-            if (attName.hasURI("")) {
+            if (attName.hasURI(NamespaceUri.NULL)) {
                 if (Arrays.binarySearch(allowed, attName.getLocalPart()) < 0) {
                     error("Attribute " + Err.wrap(attName.getLocalPart(), Err.ATTRIBUTE) +
                             " is not allowed on element " + Err.wrap(getDisplayName(), Err.ELEMENT));
                 }
-            } else if (attName.hasURI(NamespaceConstant.SCHEMA)) {
+            } else if (attName.hasURI(NamespaceUri.SCHEMA)) {
                 error("Attributes in the XML Schema namespace are not allowed");
             }
         }
@@ -172,7 +171,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     public void requireAttribute(AttributeMap atts, String required) throws SchemaException {
-        if (atts.getValue("", required) == null) {
+        if (atts.getValue(NamespaceUri.NULL, required) == null) {
             missingAttribute(required);
         }
     }
@@ -487,23 +486,25 @@ public abstract class SchemaElement extends ElementImpl {
         try {
             XSDSchema root = getXSDSchema();
             String[] parts = NameChecker.getQNameParts(Whitespace.trim(name));
-            String uri = null;
+            NamespaceUri uri = null;
             if (parts[0].isEmpty()) {
                 if (option == USE_DEFAULT_NS || option == USE_DEFAULT_NS_WITHOUT_IMPORT) {
                     // This option is used for references that need to be resolved, e.g. ref="name"
                     uri = getURIForPrefix("", true);
-                    if ("".equals(uri) && root.isChameleon()) {
+                    if (uri == NamespaceUri.NULL && root.isChameleon()) {
                         uri = root.getTargetNamespace();
                     }
                 } else if (option == REQUIRE_TARGET_NS) {
                     // This option is used for global elements and attributes, and those with form="qualified"
-                    uri = getAttributeValue("", "targetNamespace");
-                    if (uri == null) {
+                    String target = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
+                    if (target == null) {
                         uri = root.getTargetNamespace();
+                    } else {
+                        uri = NamespaceUri.of(target);
                     }
                 } else if (option == REQUIRE_NULL_NS) {
                     // This option is used for local elements and attributes with form="unqualified".
-                    uri = "";
+                    uri = NamespaceUri.NULL;
                 }
             } else {
                 if (option == REQUIRE_TARGET_NS || option == REQUIRE_NULL_NS) {
@@ -516,10 +517,10 @@ public abstract class SchemaElement extends ElementImpl {
             }
             if (option == USE_DEFAULT_NS && !root.getTargetNamespace().equals(uri)
                 && !root.isImportedNamespace(uri)
-                && !uri.equals(NamespaceConstant.SCHEMA)
-                && !uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                && !uri.equals(NamespaceUri.SCHEMA)
+                && !uri.equals(NamespaceUri.SCHEMA_INSTANCE)) {
                 throw new SchemaException("Cannot reference schema components in " +
-                    ("".equals(uri) ? "the null namespace" : "namespace " + uri) +
+                    (uri.isEmpty() ? "the null namespace" : "namespace " + uri) +
                     " as it has not been imported");
             }
             return new StructuredQName(parts[0], uri, parts[1]);
@@ -670,7 +671,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     protected void checkMutuallyExclusiveAttributes(String name1, String name2) throws SchemaException {
         AttributeMap atts = attributes();
-        if (atts.getValue("", name1) != null && atts.getValue("", name2) != null) {
+        if (atts.getValue(NamespaceUri.NULL, name1) != null && atts.getValue(NamespaceUri.NULL, name2) != null) {
             mutuallyExclusiveAttributes(name1, name2);
         }
     }
@@ -835,7 +836,7 @@ public abstract class SchemaElement extends ElementImpl {
      * @throws SchemaException if the id is present and is invalid or is a duplicate
      */
     public void processId() throws SchemaException {
-        String id = attributes().getValue("", "id");
+        String id = attributes().getValue(NamespaceUri.NULL, "id");
         if (id != null) {
             SchemaException err = getSchemaNodeFactory().registerId(id, this);
             if (err != null) {
@@ -879,7 +880,7 @@ public abstract class SchemaElement extends ElementImpl {
             }
             if (node.isTopLevel()) {
                 AttributeMap atts = node.attributes();
-                topname = atts.getValue("", "name");
+                topname = atts.getValue(NamespaceUri.NULL, "name");
                 if (topname == null) {
                     topname = "";
                 }
@@ -891,12 +892,12 @@ public abstract class SchemaElement extends ElementImpl {
         String baseName = topname + "_anonymous_type_" + count + "_at_line_" + getLineNumber() + "_of_" + moduleName;
         String name = baseName;
         // Make sure the name has not been allocated before
-        while (pool.getFingerprint(NamespaceConstant.ANONYMOUS, name) != -1) {
+        while (pool.getFingerprint(NamespaceUri.ANONYMOUS, name) != -1) {
             tries++;
             name = baseName + "_" + tries;
         }
-        int fp = getNamePool().allocateFingerprint(NamespaceConstant.ANONYMOUS, name);
-        return new FingerprintedQName("anon", NamespaceConstant.ANONYMOUS, name, fp);
+        int fp = getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, name);
+        return new FingerprintedQName("anon", NamespaceUri.ANONYMOUS, name, fp);
     }
 
     /**
@@ -999,7 +1000,7 @@ public abstract class SchemaElement extends ElementImpl {
             if (continueOuter) {
                 continue;
             }
-            if (allowWildcards && !NamespaceConstant.SCHEMA.equals(child.getURI())) {
+            if (allowWildcards && !NamespaceUri.SCHEMA.equals(child.getNamespaceUri())) {
                 for (int i = 0; i < terms.length; i++) {
                     if (terms[i] == -1) {
                         state = targets[i];
@@ -1089,9 +1090,9 @@ public abstract class SchemaElement extends ElementImpl {
                 if (ns.equals(NAMESPACE_TARGET)) {
                     wildcard.addAllowedNamespace(getXSDSchema().getTargetNamespace());
                 } else if (ns.equals(NAMESPACE_LOCAL)) {
-                    wildcard.addAllowedNamespace("");
+                    wildcard.addAllowedNamespace(NamespaceUri.NULL);
                 } else if (ns.equals(NAMESPACE_OTHER)) {
-                    wildcard.addDisallowedNamespace("");
+                    wildcard.addDisallowedNamespace(NamespaceUri.NULL);
                     wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
                 } else if (ns.equals(NAMESPACE_ANY)) {
                     // do nothing, this is the default
@@ -1101,7 +1102,7 @@ public abstract class SchemaElement extends ElementImpl {
                     // pass the test suite...)
                     error("Invalid namespace URI " + Err.wrap(ns));
                 } else {
-                    wildcard.addAllowedNamespace(ns);
+                    wildcard.addAllowedNamespace(NamespaceUri.of(ns));
                 }
             }
         }
@@ -1124,14 +1125,14 @@ public abstract class SchemaElement extends ElementImpl {
             if (ns.equals(XSDAny.NAMESPACE_TARGET)) {
                 wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
             } else if (ns.equals(XSDAny.NAMESPACE_LOCAL)) {
-                wildcard.addDisallowedNamespace("");
+                wildcard.addDisallowedNamespace(NamespaceUri.NULL);
             } else if (ns.contains("##")) {
                 // the rules say it must be an anyURI. But we don't want to be
                 // over-restrictive. But we do want to catch mis-spellings (and
                 // pass the test suite...)
                 error("Invalid namespace URI " + Err.wrap(ns));
             } else {
-                wildcard.addDisallowedNamespace(ns);
+                wildcard.addDisallowedNamespace(NamespaceUri.of(ns));
             }
         }
     }
@@ -1161,7 +1162,7 @@ public abstract class SchemaElement extends ElementImpl {
                     error(e.getMessage());
                     continue;
                 }
-                String uri = getNamePool().getURI(fp);
+                NamespaceUri uri = getNamePool().getURI(fp);
                 if (!wildcard.matches(uri)) {
                     error("QName " + Err.wrap(qname, Err.GENERAL) +
                             " is in a namespace that is not allowed by the wildcard");

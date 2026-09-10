@@ -4,7 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.AttributeDecl;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInListType;
@@ -26,7 +26,7 @@ public class XSINamespaceSchema {
     public static PreparedSchema buildSchema(EnterpriseConfiguration config) {
 
 
-        SingleNamespaceSchema schema = new SingleNamespaceSchema(config, NamespaceConstant.SCHEMA_INSTANCE);
+        SingleNamespaceSchema schema = new SingleNamespaceSchema(config, NamespaceUri.SCHEMA_INSTANCE);
 
         // xsi:type attribute
 

@@ -146,7 +146,7 @@ public class ValidateFn extends SystemFunction {
                 if (key instanceof QNameValue) {
                     qKey = (QNameValue) key;
                 } else if (key instanceof StringValue) {
-                    qKey = new QNameValue("", "", key.getStringValue());
+                    qKey = new QNameValue("", NamespaceUri.NULL, key.getStringValue());
                 } else {
                     throw new XPathException("key value in third argument to saxon:validate must be a string or QName");
                 }

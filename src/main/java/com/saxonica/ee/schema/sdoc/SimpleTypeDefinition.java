@@ -3,12 +3,12 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -18,9 +18,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
+import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
-import static net.sf.saxon.type.SchemaValidationStatus.UNVALIDATED;
 
 /**
  * A simple type definition holds all the information about a simpleType
@@ -409,7 +409,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 }
             }
             if (base != null && base.getFingerprint() == StandardNames.XS_ANY_SIMPLE_TYPE &&
-                    !getTypeName().hasURI(NamespaceConstant.SCHEMA)) {
+                    !getTypeName().hasURI(NamespaceUri.SCHEMA)) {
                 // XSD 1.1 makes clear that you can't derive a type directly from XS_ANY_SIMPLE_TYPE
                 // We make an exception for types in the schema namespace, the S4S has special privileges
                 compiler.error("A simple type cannot be derived by restricting xs:anySimpleType", this);
@@ -417,7 +417,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 setBaseTypeReference(new TypeReference(BuiltInAtomicType.STRING.getFingerprint(), getConfiguration(), this));
             }
             if (base != null && base.getFingerprint() == StandardNames.XS_ANY_ATOMIC_TYPE &&
-                    !getTypeName().hasURI(NamespaceConstant.SCHEMA)) {
+                    !getTypeName().hasURI(NamespaceUri.SCHEMA)) {
                 // XSD 1.1 makes clear that you can't derive a type directly from XS_ANY_ATOMIC_TYPE
                 // We make an exception for types in the schema namespace, the S4S has special privileges
                 compiler.error("A simple type cannot be derived by restricting xs:anyAtomicType", this);

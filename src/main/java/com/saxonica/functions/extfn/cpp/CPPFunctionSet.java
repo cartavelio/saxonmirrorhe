@@ -1,8 +1,8 @@
 package com.saxonica.functions.extfn.cpp;
 
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -31,8 +31,8 @@ public class CPPFunctionSet extends BuiltInFunctionSet {
       }
 
       @Override
-      public String getNamespace() {
-              return NamespaceConstant.SAXON;
+      public NamespaceUri getNamespace() {
+              return NamespaceUri.SAXON;
           }
 
 

@@ -117,7 +117,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
     }
 
     static StructuredQName verifyQName(String name, StaticContext env) throws XPathException {
-        return new QNameParser(env.getNamespaceResolver()).parse(name, "");
+        return new QNameParser(env.getNamespaceResolver()).parse(name, NamespaceUri.NULL);
     }
 
     static StructuredQName verifyElementQName(String name, StaticContext env) throws XPathException {

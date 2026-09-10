@@ -48,28 +48,31 @@ public class XSDAlternative extends AnnotationParent {
 
         // @xpathDefaultNamespace
 
-        String defaultNamespace = atts.getValue("", "xpathDefaultNamespace");
+        String defaultNamespace = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNamespace == null) {
             defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
         }
+        NamespaceUri defaultNamespaceUri;
         if (defaultNamespace.equals("##defaultNamespace")) {
-            defaultNamespace = getURIForPrefix("", true);
+            defaultNamespaceUri = getURIForPrefix("", true);
         } else if (defaultNamespace.equals("##targetNamespace")) {
-            defaultNamespace = getXSDSchema().getTargetNamespace();
+            defaultNamespaceUri = getXSDSchema().getTargetNamespace();
         } else if (defaultNamespace.equals("##local")) {
-            defaultNamespace = "";
+            defaultNamespaceUri = NamespaceUri.NULL;
+        } else {
+            defaultNamespaceUri = NamespaceUri.of(defaultNamespace);
         }
 
         // @test
 
-        String xpath = atts.getValue("", "test");
+        String xpath = atts.getValue(NamespaceUri.NULL, "test");
         // Note, the attribute can be omitted on the last element
 
         XPathExpression condition = null;
         Map<StructuredQName, XPathVariable> parameters = new HashMap<StructuredQName, XPathVariable>();
         if (xpath != null) {
             SchemaElement.XPathStaticContext env = new SchemaElement.XPathStaticContext(this);
-            env.setDefaultElementNamespace(defaultNamespace);
+            env.setDefaultElementNamespace(defaultNamespaceUri);
             env.setBaseURI(getBaseURI());
             env.setXPathLanguageLevel(getXSDSchema().getAllowedExtensions().contains("any-xpath-version") ? 31 : 20);
 
@@ -105,7 +108,7 @@ public class XSDAlternative extends AnnotationParent {
         alternative.setParameters(parameters);
 
         // @type
-        String attValue = atts.getValue("", "type");
+        String attValue = atts.getValue(NamespaceUri.NULL, "type");
         if (attValue != null) {
             int fp;
             try {

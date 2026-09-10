@@ -556,8 +556,11 @@ public class CopyCompiler extends ToPushCompiler {
         // Outputter String NodeInfo
         ga.invokeInstanceMethod(NodeInfo.class, "getStringValue");
         // Outputter String String
+        ga.invokeStaticMethod(NamespaceUri.class, "of", String.class);
+        // Outputter String NamespaceUri
         ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, String.class, Integer.TYPE);
+        // Outputter String NamespaceUri int
+        ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, NamespaceUri.class, Integer.TYPE);
 
 
     }

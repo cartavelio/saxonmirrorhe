@@ -89,7 +89,7 @@ public class AttributeSorter extends ProxyReceiver  {
                     return Integer.compare(MIDDLE_GROUND, r1);
                 } else {
                     // both null: sort on URI/local-name
-                    int x = n0.getURI().compareTo(n1.getURI());
+                    int x = n0.getURI().toString().compareTo(n1.getURI().toString());
                     if (x == 0) {
                         x = n0.getLocalPart().compareTo(n1.getLocalPart());
                     }

@@ -2,7 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.*;
 
@@ -96,7 +96,7 @@ public class TypeReference extends SchemaStructure implements ComponentReference
      */
 
     public boolean isAnonymousType() {
-        return getTargetFingerprint() > 1023 && getTargetComponentName().hasURI(NamespaceConstant.ANONYMOUS);
+        return getTargetFingerprint() > 1023 && getTargetComponentName().hasURI(NamespaceUri.ANONYMOUS);
     }
 
 

@@ -2,7 +2,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -28,7 +28,7 @@ public class XMLNamespaceSchema {
     public static PreparedSchema buildSchema(EnterpriseConfiguration config) {
 
         SchemaCompiler compiler = new SchemaCompiler(config);
-        SingleNamespaceSchema schema = new SingleNamespaceSchema(config, NamespaceConstant.XML);
+        SingleNamespaceSchema schema = new SingleNamespaceSchema(config, NamespaceUri.XML);
 
         // xml:lang attribute
 
@@ -38,11 +38,11 @@ public class XMLNamespaceSchema {
         UserAtomicType zls = new UserAtomicType(config);
         zls.setBaseTypeReference(new TypeReference(StandardNames.XS_STRING, config, null));
         zls.setTypeName(
-            new StructuredQName("saxon", NamespaceConstant.SAXON, "zero-length-string"),
-            config.getNamePool().allocateFingerprint(NamespaceConstant.SAXON, "zero-length-string"));
+            new StructuredQName("saxon", NamespaceUri.SAXON, "zero-length-string"),
+            config.getNamePool().allocateFingerprint(NamespaceUri.SAXON, "zero-length-string"));
         schema.addType(zls);
 
-        List<Facet> facetList = new ArrayList<Facet>(1);
+        List<Facet> facetList = new ArrayList<>(1);
         LengthFacet lengthFacet = new LengthFacet();
         lengthFacet.setNumericValue(0);
         facetList.add(lengthFacet);
@@ -57,7 +57,7 @@ public class XMLNamespaceSchema {
         schema.addType(u);
 
         AttributeDecl xmlLang = new AttributeDecl(schema.getConfiguration(), true);
-        xmlLang.setAttributeName(new StructuredQName("xml", NamespaceConstant.XML, "lang"));
+        xmlLang.setAttributeName(new StructuredQName("xml", NamespaceUri.XML, "lang"));
         xmlLang.setSimpleType(u);
         schema.addAttributeDecl(xmlLang);
 

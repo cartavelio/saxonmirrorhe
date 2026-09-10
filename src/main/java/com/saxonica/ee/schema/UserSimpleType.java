@@ -767,7 +767,7 @@ public abstract class UserSimpleType extends UserDefinedType
         if (!isAnonymousType()) {
             serializer.emitAttribute("name", getName());
             if (!getTargetNamespace().isEmpty()) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
             }
         }
         serializer.emitAttribute("base", serializer.getTypeLink(getBaseType()));
@@ -832,7 +832,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     if (type.isAnonymousType()) {
                         return EmptySequence.getInstance();
                     } else {
-                        return new AnyURIValue((type.getTargetNamespace()));
+                        return new AnyURIValue((type.getTargetNamespace().toUnicodeString()));
                     }
                 case "final": {
                     List<AtomicValue> list = new ArrayList<>();

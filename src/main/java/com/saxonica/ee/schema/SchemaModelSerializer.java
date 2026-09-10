@@ -6,7 +6,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.trans.XPathException;
@@ -120,11 +119,11 @@ public class SchemaModelSerializer {
 
     public void startElement(String elementName) throws XPathException {
         if (inStartTag) {
-            cco.namespace("", "", ReceiverOption.NONE);
+            cco.namespace("", NamespaceUri.NULL, ReceiverOption.NONE);
             cco.startContent();
         }
         inStartTag = true;
-        NodeName nc = new FingerprintedQName("scm", NamespaceConstant.SCM, elementName);
+        NodeName nc = new FingerprintedQName("scm", NamespaceUri.SCM, elementName);
         cco.startElement(nc, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
     }
 
@@ -140,12 +139,12 @@ public class SchemaModelSerializer {
         // TODO: maintain a stack of in-scope namespaces
         for (Iterator<String> iter = resolver.iteratePrefixes(); iter.hasNext(); ) {
             String prefix = iter.next();
-            String uri = resolver.getURIForPrefix(prefix, false);
+            NamespaceUri uri = resolver.getURIForPrefix(prefix, false);
             namespaceMap = namespaceMap.put(prefix, uri);
         }
     }
 
-    public void declareNamespace(String prefix, String uri) throws XPathException {
+    public void declareNamespace(String prefix, NamespaceUri uri) throws XPathException {
         namespaceMap = namespaceMap.put(prefix, uri);
     }
 
@@ -163,7 +162,7 @@ public class SchemaModelSerializer {
     }
 
     private static final FingerprintedQName XML_BASE =
-            new FingerprintedQName("xml", NamespaceConstant.XML, "base", StandardNames.XML_BASE);
+            new FingerprintedQName("xml", NamespaceUri.XML, "base", StandardNames.XML_BASE);
 
     public void setIsSerialized(SerializableSchemaComponent component) {
         serializedComponents.put(component, "");
@@ -211,7 +210,7 @@ public class SchemaModelSerializer {
             emitAttribute("type", "#" + type.getName());
             emitAttribute("value", atom.getUnicodeStringValue().toString());
             if (atom instanceof QualifiedNameValue) {
-                emitAttribute("namespace", ((QualifiedNameValue) atom).getNamespaceURI());
+                emitAttribute("namespace", ((QualifiedNameValue) atom).getNamespaceURI().toString());
             }
             endElement();
         }

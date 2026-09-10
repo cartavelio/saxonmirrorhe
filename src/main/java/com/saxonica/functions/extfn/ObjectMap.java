@@ -14,6 +14,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.sxpath.IndependentContext;
@@ -153,7 +154,7 @@ public class ObjectMap extends SystemFunction {
     private static Function makeFunction(JavaExtensionLibrary library, StaticContext env, Class javaClass, Method theMethod) {
         try {
             StructuredQName functionName =
-                    new StructuredQName("java", "java:" + javaClass.getName() + "?void=this", theMethod.getName());
+                    new StructuredQName("java", NamespaceUri.of("java:" + javaClass.getName() + "?void=this"), theMethod.getName());
             int methodArgs = theMethod.getParameterCount();
             int arity = 1 + methodArgs;
             if (methodArgs >= 1 && theMethod.getParameterTypes()[0].equals(XPathContext.class)) {

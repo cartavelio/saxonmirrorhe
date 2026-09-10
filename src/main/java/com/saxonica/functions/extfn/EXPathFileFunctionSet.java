@@ -200,9 +200,9 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     }
 
     public static final BigDecimalValue VERSION = new BigDecimalValue(new BigDecimal("1.0"));
-    public static final String NAMESPACE = "http://expath.org/ns/file";
+    public static final NamespaceUri NAMESPACE = NamespaceUri.of("http://expath.org/ns/file");
     public static final String PREFIX = "file";
-    public static final String ERROR_NAMESPACE = NAMESPACE;
+    public static final NamespaceUri ERROR_NAMESPACE = NAMESPACE;
     public static final String ERROR_PREFIX = PREFIX;
 
     private static final String ERROR_PATH_NOT_EXIST = "not-found";    //FILE0001
@@ -218,7 +218,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
 
     @Override
-    public String getNamespace() {
+    public NamespaceUri getNamespace() {
         return NAMESPACE;
     }
 

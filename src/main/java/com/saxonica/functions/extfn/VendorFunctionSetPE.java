@@ -16,7 +16,6 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.ma.Parcel;
@@ -516,8 +515,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
      * namespace URI.
      */
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.SAXON;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.SAXON;
     }
 
     @Override

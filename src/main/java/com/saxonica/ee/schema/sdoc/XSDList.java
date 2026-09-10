@@ -3,8 +3,10 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
@@ -54,7 +56,7 @@ public class XSDList extends SchemaElement {
         processId();
 
         //-- @itemType
-        String itemTypeName = atts.getValue("", "itemType");
+        String itemTypeName = atts.getValue(NamespaceUri.NULL, "itemType");
         if (itemTypeName != null) {
             foundItemType = true;
             int itemTypeFingerprint;
@@ -78,7 +80,7 @@ public class XSDList extends SchemaElement {
         }
 
         //-- @saxon:separator
-        String separator = atts.getValue(NamespaceConstant.SAXON, "separator");
+        String separator = atts.getValue(NamespaceUri.SAXON, "separator");
         if (separator != null) {
             List<String> warnings = new ArrayList<>();
             try {

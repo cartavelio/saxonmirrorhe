@@ -3,7 +3,6 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -57,10 +56,10 @@ public class XSDAttribute extends SchemaElement {
             allowAttributes(atts, allowed);
         }
 
-        isReference = atts.getValue("", "ref") != null;
+        isReference = atts.getValue(NamespaceUri.NULL, "ref") != null;
 
         //-- @form
-        String form = atts.getValue("", "form");
+        String form = atts.getValue(NamespaceUri.NULL, "form");
         if (form != null) {
             if (isReference) {
                 mutuallyExclusiveAttributes("form", "ref");
@@ -88,19 +87,19 @@ public class XSDAttribute extends SchemaElement {
         }
 
         // @targetNamespace
-        String localTargetNamespace = atts.getValue("", "targetNamespace");
+        String localTargetNamespace = atts.getValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null) {
             if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The targetNamespace cannot be defined locally unless XSD 1.1 is enabled");
             }
-            if (atts.getValue("", "name") == null) {
+            if (atts.getValue(NamespaceUri.NULL, "name") == null) {
                 error("If there is no @name then there must be no @targetNamespace");
             }
             checkMutuallyExclusiveAttributes("targetNamespace", "form");
         }
 
         // @name
-        String attValue = atts.getValue("", "name");
+        String attValue = atts.getValue(NamespaceUri.NULL, "name");
         StructuredQName nc = null;
         if (attValue != null) {
 
@@ -110,13 +109,13 @@ public class XSDAttribute extends SchemaElement {
             if (attValue.equals("xmlns")) {
                 error("The attribute name 'xmlns' is reserved");
             }
-            if (atts.getValue("", "ref") != null) {
+            if (atts.getValue(NamespaceUri.NULL, "ref") != null) {
                 mutuallyExclusiveAttributes("name", "ref");
                 nc = StandardNames.SQ_XS_INVALID_NAME; // error recovery
             } else {
                 try {
                     if (localTargetNamespace != null || "qualified".equals(form)) {
-                        if (getXSDSchema().getTargetNamespace().equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                        if (getXSDSchema().getTargetNamespace().equals(NamespaceUri.SCHEMA_INSTANCE)) {
                             error("Attributes cannot be declared in the 'xsi:' namespace");
                         }
                         nc = getComponentName(attValue, REQUIRE_TARGET_NS);
@@ -143,14 +142,14 @@ public class XSDAttribute extends SchemaElement {
         }
 
         // @ref
-        attValue = atts.getValue("", "ref");
+        attValue = atts.getValue(NamespaceUri.NULL, "ref");
         if (attValue != null) {
             attributeUse = new AttributeUse((EnterpriseConfiguration) getConfiguration());
             attributeUse.setLocator(this);
             try {
                 nc = getComponentName(attValue, USE_DEFAULT_NS);
-                if (nc.hasURI(NamespaceConstant.SCHEMA_INSTANCE)) {
-                    getConfiguration().addSchemaForBuiltInNamespace(NamespaceConstant.SCHEMA_INSTANCE);
+                if (nc.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
+                    getConfiguration().addSchemaForBuiltInNamespace(NamespaceUri.SCHEMA_INSTANCE);
                 }
             } catch (SchemaException err) {
                 nc = StandardNames.SQ_XS_INVALID_NAME;
@@ -161,8 +160,8 @@ public class XSDAttribute extends SchemaElement {
 
 
         // @default
-        attValue = atts.getValue("", "default");
-        if (attValue != null && !nc.hasURI(NamespaceConstant.SCHEMA_INSTANCE)) {
+        attValue = atts.getValue(NamespaceUri.NULL, "default");
+        if (attValue != null && !nc.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
             ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(attValue));
             if (attributeUse != null) {
                 attributeUse.setValueConstraint(vc);
@@ -176,9 +175,9 @@ public class XSDAttribute extends SchemaElement {
         processId();
 
         //-- @fixed
-        attValue = atts.getValue("", "fixed");
+        attValue = atts.getValue(NamespaceUri.NULL, "fixed");
         if (attValue != null) {
-            if (atts.getValue("", "default") != null && !nc.hasURI(NamespaceConstant.SCHEMA_INSTANCE)) {
+            if (atts.getValue(NamespaceUri.NULL, "default") != null && !nc.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
                 mutuallyExclusiveAttributes("fixed", "default");
             }
             ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.FIXED, StringView.tidy(attValue));
@@ -191,7 +190,7 @@ public class XSDAttribute extends SchemaElement {
         }
 
         //-- @type
-        attValue = atts.getValue("", "type");
+        attValue = atts.getValue(NamespaceUri.NULL, "type");
         int typeFingerprint = -1;
         if (attValue == null) {
             if (attributeDecl != null) {
@@ -217,14 +216,14 @@ public class XSDAttribute extends SchemaElement {
         }
 
         //-- @use
-        attValue = atts.getValue("", "use");
+        attValue = atts.getValue(NamespaceUri.NULL, "use");
         if (attValue != null) {
-            boolean hasDefault = atts.getValue("", "default") != null;
+            boolean hasDefault = atts.getValue(NamespaceUri.NULL, "default") != null;
             if (hasDefault && !attValue.equals("optional")) {
                 error("When @default is present, the @use attribute must have the value \"optional\"");
                 attValue = "optional";  // error recovery
             }
-            boolean hasFixed = atts.getValue("", "fixed") != null;
+            boolean hasFixed = atts.getValue(NamespaceUri.NULL, "fixed") != null;
             if (hasFixed && attValue.equals("prohibited") &&
                     getXSDSchema().getSchemaCompiler().getLanguageVersion() != Configuration.XSD10) {
                 // see test attP029 and test bug 14245
@@ -254,7 +253,7 @@ public class XSDAttribute extends SchemaElement {
         }
 
         //-- @inheritable
-        String inheritAtt = atts.getValue("", "inheritable");
+        String inheritAtt = atts.getValue(NamespaceUri.NULL, "inheritable");
         if (inheritAtt != null) {
             if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The inheritable attribute cannot be used unless XSD 1.1 is enabled");
@@ -273,7 +272,7 @@ public class XSDAttribute extends SchemaElement {
         // fixed or default values. We'll give them one if (a) there's a fixed or default value, and (b)
         // the type isn't known to be non-namespace-sensitive
 
-        if (atts.getValue("", "fixed") != null || atts.getValue("", "default") != null) {
+        if (atts.getValue(NamespaceUri.NULL, "fixed") != null || atts.getValue(NamespaceUri.NULL, "default") != null) {
             boolean needResolver = true;
             if (typeSpecified) {
                 if (typeFingerprint < 1024) {
@@ -325,7 +324,7 @@ public class XSDAttribute extends SchemaElement {
     @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
-        String localTargetNamespace = getAttributeValue("", "targetNamespace");
+        String localTargetNamespace = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null && !localTargetNamespace.equals(getXSDSchema().getTargetNamespace())) {
             checkLocalTargetNamespace("attribute");
         }

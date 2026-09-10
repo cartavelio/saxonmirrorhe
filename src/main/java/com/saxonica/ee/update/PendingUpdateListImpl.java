@@ -182,11 +182,11 @@ public class PendingUpdateListImpl implements PendingUpdateList {
             throws XPathException {
         if (targetNode != null && (nodeKind == Type.ELEMENT || !nsCode.getPrefix().isEmpty())) {
             String prefix = nsCode.getPrefix();
-            String uri = nsCode.getURI();
+            NamespaceUri uri = nsCode.getURI();
 
             // Check that the namespace prefix is not already declared on the element
             NamespaceMap map = targetNode.getAllNamespaces();
-            String existingURI = map.getURI(prefix);
+            NamespaceUri existingURI = map.getURI(prefix);
 
             if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
                 XPathException err1 = new XPathException(
@@ -204,7 +204,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                 nsmap = NamespaceMap.of(prefix, uri);
                 newNamespaceBindings.put(targetNode, nsmap);
             } else {
-                String existingUri = nsmap.getURI(prefix);
+                NamespaceUri existingUri = nsmap.getURI(prefix);
                 if (existingUri == null) {
                     nsmap = nsmap.put(prefix, uri);
                     newNamespaceBindings.put(targetNode, nsmap);

@@ -4,7 +4,6 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ComputedElement;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
 import net.sf.saxon.value.AtomicValue;
@@ -49,7 +48,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         LabelInfo XMLNSTest = methodInfo.newLabel("XMLNSTest");
         LabelInfo notEQName = methodInfo.newLabel("notEQName");
         int localNameVar = methodInfo.allocateLocal(String.class);
-        int uriVar = methodInfo.allocateLocal(String.class);
+        int uriVar = methodInfo.allocateLocal(NamespaceUri.class);
         ga.pushNull();
         ga.storeLocal(uriVar);
         final int prefixVar = methodInfo.allocateLocal(String.class);
@@ -132,7 +131,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
             ga.storeLocal(uriVar);
             ga.loadLocal(uriVar);
             ga.ifNonNull(notNull2.label());
-            ga.push("");
+            allocateStatic(compiler, NamespaceUri.NULL);
             ga.storeLocal(uriVar);
             methodInfo.placeLabel(notNull2);
             ga.invokeInstanceMethod(QNameValue.class, "getPrefix");
@@ -180,14 +179,17 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
             ga.ifNonNull(uriNotNull.label());
             if (namespace instanceof StringLiteral) {
                 ga.push(((StringLiteral) namespace).stringify());
+                ga.invokeStaticMethod(NamespaceUri.class, "of", String.class);
                 ga.storeLocal(uriVar);
 
             } else {
                 compiler.compileToPrimitive(namespace, String.class, OnEmpty.RETURN_NULL);
+                ga.invokeStaticMethod(NamespaceUri.class, "of", String.class);
                 ga.storeLocal(uriVar);
 
                 ga.invokeStaticMethod(StandardURIChecker.class, "getInstance");
                 ga.loadLocal(uriVar);
+                ga.invokeInstanceMethod(NamespaceUri.class, "toString");
                 ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", String.class);
                 ga.ifTrue(uriNotNull);
                 compiler.generateDynamicError("The value of the namespace attribute must be a valid URI", "XTDE0835", compElement.getLocation(), false);
@@ -195,6 +197,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
             }
             methodInfo.placeLabel(uriNotNull);
             ga.loadLocal(uriVar);
+            ga.invokeInstanceMethod(NamespaceUri.class, "toString" );
             ga.invokeInstanceMethod(String.class, "length");
             ga.push(0);
             ga.ifCmp(Type.getType(Integer.TYPE), Generator.NE, notEqual2.label());
@@ -215,8 +218,8 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         methodInfo.placeLabel(done);
         ga.loadLocal(uriVar);
 
-        ga.push(NamespaceConstant.XMLNS);
-        ga.invokeInstanceMethod(String.class, "equals", Object.class);
+        allocateStatic(compiler, NamespaceUri.XMLNS);
+        ga.invokeInstanceMethod(NamespaceUri.class, "equals", Object.class);
         ga.ifFalse(XMLNSTest);
         compiler.generateParameterizedDynamicError(
                 new MessageTemplate(ga, "Cannot create element in namespace {$1}", uriVar),
@@ -225,20 +228,19 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
 
         methodInfo.placeLabel(XMLNSTest);
         ga.loadLocal(uriVar);
-        ga.push(NamespaceConstant.XML);
-        ga.invokeInstanceMethod(String.class, "equals", Object.class);
+        allocateStatic(compiler, NamespaceUri.XML);
+        ga.invokeInstanceMethod(NamespaceUri.class, "equals", Object.class);
         ga.loadLocal(prefixVar);
         ga.push("xml");
         ga.invokeInstanceMethod(String.class, "equals", Object.class);
         ga.ifCmp(Type.getType(Boolean.TYPE), Generator.EQ, allocLab.label());
 
         ga.loadLocal(prefixVar);
-        ga.loadLocal(uriVar);
         ga.push(compElement.isXSLT());
         ga.push(compElement.getLocation().getSystemId());
         ga.push(compElement.getLocation().getLineNumber());
         ga.invokeStaticMethod(Callback.class, "makeXmlNamespaceException",
-                    String.class, String.class, Boolean.TYPE, String.class, Integer.TYPE);
+                    String.class, Boolean.TYPE, String.class, Integer.TYPE);
         ga.throwException();
         //ga.goTo(end);
 
@@ -248,9 +250,8 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         ga.dup();
         ga.loadLocal(prefixVar);
         ga.loadLocal(uriVar);
-        ga.invokeInstanceMethod(Object.class, "toString");
         ga.loadLocal(localNameVar);
-        ga.invokeConstructor(FingerprintedQName.class, String.class, String.class, String.class);
+        ga.invokeConstructor(FingerprintedQName.class, String.class, NamespaceUri.class, String.class);
 
         methodInfo.placeLabel(end);
         methodInfo.releaseLocal(localNameVar);

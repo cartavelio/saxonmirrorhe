@@ -15,7 +15,6 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -237,7 +236,7 @@ public class ValidationStack extends ValidatingFilter {
                         initial = ContentValidator.makeValidator(
                                 decl, elemName.getStructuredQName(), location, getValidationContext(), null, initialValidationMode,
                                 pipe, outputReceiver, failures);
-                        if (decl != null && !decl.isNillable() && attributes.get(NamespaceConstant.SCHEMA_INSTANCE, "nil") != null) {
+                        if (decl != null && !decl.isNillable() && attributes.get(NamespaceUri.SCHEMA_INSTANCE, "nil") != null) {
                             String message = "The element is not nillable, so xsi:nil must not be present";
                             ValidationFailure ve = new ValidationFailure(message);
                             ve.setConstraintReference(1, "cvc-elt", "3.1");

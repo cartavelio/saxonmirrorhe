@@ -10,8 +10,8 @@ import net.sf.saxon.expr.parser.ParserExtension;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.query.AnnotationList;
@@ -112,7 +112,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
         List<UserFunctionParameter> params = new ArrayList<>(1);
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
 
-        StructuredQName argQName = new StructuredQName("saxon", NamespaceConstant.SAXON, "dot");
+        StructuredQName argQName = new StructuredQName("saxon", NamespaceUri.SAXON, "dot");
 
         UserFunctionParameter arg = new UserFunctionParameter();
         arg.setRequiredType(SequenceType.SINGLE_ITEM);
@@ -199,7 +199,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
             for (int k=fn.numberedParams.size(); k < n; k++) {
                 UserFunctionParameter arg = new UserFunctionParameter();
                 arg.setRequiredType(SequenceType.ANY_SEQUENCE);
-                StructuredQName argQName = new StructuredQName("_", NamespaceConstant.ANONYMOUS, "_" + (k + 1));
+                StructuredQName argQName = new StructuredQName("_", NamespaceUri.ANONYMOUS, "_" + (k + 1));
                 arg.setVariableQName(argQName);
                 arg.setSlotNumber(k);
                 fn.numberedParams.add(arg);
@@ -270,7 +270,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
             ForMemberExpression v = new ForMemberExpression();
             p.setLocation(v, offset);
 
-            v.setVariableQName(p.makeStructuredQName(var, ""));
+            v.setVariableQName(p.makeStructuredQName(var, NamespaceUri.NULL));
             p.nextToken();
 
             // process the "in" clause

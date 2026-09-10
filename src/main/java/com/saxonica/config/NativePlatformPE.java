@@ -61,7 +61,7 @@ public class NativePlatformPE extends NativePlatform {
                 javaLib.declareJavaClass(NamespaceConstant.EXSLT_RANDOM, Random.class);
                 //javaLib.declareJavaClass(EXPathFile.NAMESPACE, EXPathFile.class);
                 //javaLib.declareJavaClass(EXPathBinary.NAMESPACE, EXPathBinary.class);
-                javaLib.declareJavaClass(Archive.NAMESPACE, Archive.class);
+                javaLib.declareJavaClass(Archive.NAMESPACE.toString(), Archive.class);
 
                 // For sql:connect and sql:query, avoid creating a static dependency on the SQL module, which is in a separate JAR
                 //Dropped from the 9.7 spec

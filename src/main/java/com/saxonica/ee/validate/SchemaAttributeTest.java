@@ -117,7 +117,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
                 SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy());
         } else {
             return node.getNodeKind() == Type.ATTRIBUTE &&
-                node.getURI().equals(declaration.getTargetNamespace()) &&
+                node.getNamespaceUri().equals(declaration.getTargetNamespace()) &&
                 node.getLocalPart().equals(declaration.getName()) &&
                 SchemaElementTest.matchesAnnotation(requiredType, node.getSchemaType(), config.getTypeHierarchy());
         }
@@ -204,7 +204,7 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
             return explanation;
         }
         NodeInfo node = (NodeInfo)item;
-        StructuredQName name = new StructuredQName("", node.getURI(), node.getLocalPart());
+        StructuredQName name = new StructuredQName("", node.getNamespaceUri(), node.getLocalPart());
         if (!declaration.getComponentName().equals(name)) {
             return Optional.of("The supplied attribute has the wrong name");
         }

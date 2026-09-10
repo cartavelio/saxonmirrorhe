@@ -87,7 +87,7 @@ public class ModeEE extends ModePE {
             switch (node.getNodeKind()) {
                 case Type.ELEMENT:
                 case Type.ATTRIBUTE:
-                    return getNamedRuleChain(context, node.getNodeKind(), node.getURI(), node.getLocalPart());
+                    return getNamedRuleChain(context, node.getNodeKind(), node.getNamespaceUri(), node.getLocalPart());
             }
         }
         return null;

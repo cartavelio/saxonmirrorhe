@@ -228,7 +228,7 @@ public class CopyOfFeed extends AbsorptionFeed {
     }
 
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         getNextOutputter().namespace(prefix, namespaceUri, properties);
     }
 

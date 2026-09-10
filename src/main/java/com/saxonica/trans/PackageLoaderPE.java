@@ -18,6 +18,7 @@ import net.sf.saxon.functions.hof.AtomicConstructorFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
@@ -51,14 +52,14 @@ public class PackageLoaderPE extends PackageLoaderHE {
     protected void readSchemaNamespaces(NodeInfo packageElement) throws XPathException {
         Configuration config = getConfiguration();
         for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("schema")))) {
-            String ns = varElement.getAttributeValue("", "ns");
-            if (!config.isSchemaAvailable(ns) && !ns.equals(NamespaceConstant.ANONYMOUS)) {
+            String ns = varElement.getAttributeValue(NamespaceUri.NULL, "ns");
+            if (!config.isSchemaAvailable(NamespaceUri.of(ns)) && !ns.equals(NamespaceConstant.ANONYMOUS)) {
                 throw new XPathException(
                         "The XSLT package requires access to " +
                                 (ns.isEmpty() ? "a no-namespace schema" : "a schema for namespace " + ns) +
                                 ", but this is not available in this Configuration", SaxonErrorCode.SXPK0003);
             }
-            packStack.peek().getSchemaNamespaces().add(ns);
+            packStack.peek().getSchemaNamespaces().add(NamespaceUri.of(ns));
         }
     }
 
@@ -148,7 +149,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
                 SequenceType[] argTypes = new SequenceType[args.length];
                 for (int i = 0; i < args.length; i++) {
                     // Bug in releases up to and including 9.7.0.11
-                    if (element.getAttributeValue("", "arg" + i + "type") == null) {
+                    if (element.getAttributeValue(NamespaceUri.NULL, "arg" + i + "type") == null) {
                         throw new XPathException("SEF file needs to be re-exported using Saxon 9.7.0.12 or later: see bug 3019");
                     }
                     argTypes[i] = loader.parseAlphaCode(element, "arg" + i + "type");
@@ -157,11 +158,11 @@ public class PackageLoaderPE extends PackageLoaderHE {
             }
             if (exp instanceof JavaExtensionFunctionCall) {
                 ((JavaExtensionFunctionCall) exp).prepareForDynamicCall(loader.getConfiguration());
-                String declaredType = element.getAttributeValue("", "declType");
+                String declaredType = element.getAttributeValue(NamespaceUri.NULL, "declType");
                 if (declaredType != null) {
                     try {
                         StructuredQName classQName = StructuredQName.fromEQName(declaredType);
-                        if (classQName.hasURI(NamespaceConstant.JAVA_TYPE)) {
+                        if (classQName.hasURI(NamespaceUri.JAVA_TYPE)) {
                             String className = JavaExternalObjectType.localNameToClassName(classQName.getLocalPart());
                             Configuration config = loader.getConfiguration();
                             Class<?> resultClass = config.getClass(className, false);

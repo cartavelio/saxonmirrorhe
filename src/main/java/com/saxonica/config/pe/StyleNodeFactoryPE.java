@@ -6,11 +6,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.*;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -63,7 +59,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
             Location location,
             int sequence) {
         boolean toplevel = parent instanceof XSLModuleRoot;
-        if (elementName.hasURI(NamespaceConstant.XSLT) ||
+        if (elementName.hasURI(NamespaceUri.XSLT) ||
                 !allowExtensions ||
                 parent instanceof DataElement) {
             return super.makeElementNode(parent, elementName, elementType, isNilled, attlist, namespaces,
@@ -71,7 +67,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
         }
 
         StyleElement extensionElement = null;
-        String uri = elementName.getURI();
+        NamespaceUri uri = elementName.getURI();
         ExtensionElementCreator eef = ((ProfessionalConfiguration) config).getExtensionElementCreator(uri);
         if (eef != null) {
             String localName = elementName.getLocalPart();
@@ -118,12 +114,12 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
         temp.setNamespaceMap(namespaces);
         temp.initialise(elementName, elementType, attlist, parent, sequence);
         temp.setLocation(baseURI, lineNumber, columnNumber);
-        temp.processStandardAttributes(NamespaceConstant.XSLT);
+        temp.processStandardAttributes(NamespaceUri.XSLT);
 
         // Now we work out what class of element we really wanted, and change it if necessary
 
-        if (uri.equals(NamespaceConstant.SAXON)) {
-            if (!(toplevel || temp.isExtensionNamespace(NamespaceConstant.SAXON))) {
+        if (uri.equals(NamespaceUri.SAXON)) {
+            if (!(toplevel || temp.isExtensionNamespace(NamespaceUri.SAXON))) {
                 // We've got an element such as saxon:call-template but the
                 // user didn't declare the Saxon namespace as an extension element
                 // namespace. Chances are they just forgot.
@@ -150,7 +146,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
      */
 
     @Override
-    public boolean isElementAvailable(String uri, String localName, boolean instructionsOnly) {
+    public boolean isElementAvailable(NamespaceUri uri, String localName, boolean instructionsOnly) {
         boolean b = super.isElementAvailable(uri, localName, instructionsOnly);
         if (b) {
             return true;

@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
@@ -150,11 +151,10 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
             //ga.swap();
             ga.push("");
             ga.swap();
-            ga.push("");
+            allocateStatic(compiler, NamespaceUri.NULL);
             ga.swap();
-            // assert: stack contains NamePool, "", "", localName
-            //  ga.invokeInstanceMethod(NamePool.class, "allocate", String.class, String.class, String.class);
-            ga.invokeConstructor(FingerprintedQName.class, String.class, String.class, String.class);
+            // assert: stack contains NamePool, "", NamespaceUri.NULL, localName
+            ga.invokeConstructor(FingerprintedQName.class, String.class, NamespaceUri.class, String.class);
             ga.invokeInstanceMethod(Orphan.class, "setNodeName", NodeName.class);
         }
 

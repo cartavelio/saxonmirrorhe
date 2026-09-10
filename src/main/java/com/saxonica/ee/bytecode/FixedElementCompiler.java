@@ -9,6 +9,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.FixedElement;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NamespaceUri;
 
 /**
  * Generate bytecode for a fixed element constructor (or XSLT literal result element)
@@ -40,9 +41,9 @@ public class FixedElementCompiler extends ElementCreatorCompiler {
             for (NamespaceBinding ns : bindings) {
                 compiler.generateGetOutputter();
                 ga.push(ns.getPrefix());
-                ga.push(ns.getURI());
+                allocateStatic(compiler, ns.getURI());
                 ga.push(ReceiverOption.NONE);
-                ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, String.class, Integer.TYPE);
+                ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, NamespaceUri.class, Integer.TYPE);
             }
         }
     }

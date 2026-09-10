@@ -9,7 +9,6 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.InvalidityHandler;
 import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
@@ -37,8 +36,8 @@ import java.util.*;
 
 public class XSIAttributeHandler extends ValidatingFilter {
 
-    private final HashSet<String> namespacesEncountered;
-    private final HashMap<String, URI> schemaDocumentsRead;
+    private final HashSet<NamespaceUri> namespacesEncountered;
+    private final HashMap<NamespaceUri, URI> schemaDocumentsRead;
     private boolean useXsiSchemaLocation = true;
     private final List<ValidationFailure> xsiValidationErrors = new ArrayList<ValidationFailure>(4);
 
@@ -78,8 +77,8 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
         boolean hasXsiAttributes = false;
         for (AttributeInfo att : attributes) {
-            String uri = att.getNodeName().getURI();
-            if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+            NamespaceUri uri = att.getNodeName().getURI();
+            if (uri.equals(NamespaceUri.SCHEMA_INSTANCE)) {
                 hasXsiAttributes = true;
                 break;
             }
@@ -93,8 +92,8 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 NodeName attName = att.getNodeName();
                 SimpleType attType = att.getType();
                 // Check for special xsi attributes and annotate them with a type code
-                String uri = attName.getURI();
-                if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                NamespaceUri uri = attName.getURI();
+                if (uri.equals(NamespaceUri.SCHEMA_INSTANCE)) {
                     String value = att.getValue();
                     int fp = attName.obtainFingerprint(getNamePool());
                     if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
@@ -134,7 +133,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
         // Keep track of all namespaces encountered
         namespacesEncountered.add(elemName.getURI());
         for (AttributeInfo att : attributes) {
-            String uri = att.getNodeName().getURI();
+            NamespaceUri uri = att.getNodeName().getURI();
             namespacesEncountered.add(uri);
         }
 
@@ -147,12 +146,12 @@ public class XSIAttributeHandler extends ValidatingFilter {
     private void processXsiSchemaLocation(String value, Location locationId) throws XPathException {
         // value is a list of pairs of (target namespace, href)
         StringTokenizer tokenizer = new StringTokenizer(value, " \t\n\r", false);
-        String targetNS = null;
+        NamespaceUri targetNS = null;
         while (tokenizer.hasMoreTokens()) {
             String tok = tokenizer.nextToken();
             if (targetNS == null) {
                 // odd-numbered tokens
-                targetNS = tok;
+                targetNS = NamespaceUri.of(tok);
             } else {
                 // even-numbered tokens
                 boolean ignore;
@@ -175,7 +174,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                             // doing skip validation. But see bug 9158 which suggests changing this.
                             // See also tests addB156 and addB158, and bug 4078 against those tests
                             String message = "xsi:schemaLocation namespace " +
-                                    Err.wrap(targetNS) + " has already appeared earlier in the instance document";
+                                    Err.wrap(targetNS.toUnicodeString()) + " has already appeared earlier in the instance document";
                             ValidationFailure ve = new ValidationFailure(message);
                             ve.setConstraintReference(1, "schema-loc", "4");
                             reportValidationError(ve, false, locationId);
@@ -198,7 +197,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
         while (tokenizer.hasMoreTokens()) {
             String tok = tokenizer.nextToken();
             if (targetNS == null) {
-                targetNS = tok;
+                targetNS = NamespaceUri.of(tok);
             } else {
                 getConfiguration().sealNamespace(targetNS);
                 targetNS = null;
@@ -212,8 +211,8 @@ public class XSIAttributeHandler extends ValidatingFilter {
         try {
             absoluteLocation = ResolveURI.makeAbsolute(value, locationId.getSystemId());
             // ignore a duplicate xsi:noNamespaceSchemaLocation (can occur with XInclude, for example)
-            ignore = absoluteLocation.equals(schemaDocumentsRead.get(""));
-            schemaDocumentsRead.put("", absoluteLocation);
+            ignore = absoluteLocation.equals(schemaDocumentsRead.get(NamespaceUri.NULL));
+            schemaDocumentsRead.put(NamespaceUri.NULL, absoluteLocation);
             // Following removed code suppresses rejection of xsi:schemaLocation when encountered after existing elements
             // in the relevant namespace.
 //            if (getConfiguration().getImportedNamespaces().contains("") &&
@@ -225,14 +224,14 @@ public class XSIAttributeHandler extends ValidatingFilter {
             ignore = false;
         }
         if (!ignore) {
-            if (namespacesEncountered.contains("")) {
+            if (namespacesEncountered.contains(NamespaceUri.NULL)) {
                 String message = "xsi:noNamespaceSchemaLocation cannot appear after the " +
                         "first no-namespace element or attribute";
                 ValidationFailure ve = new ValidationFailure(message);
                 ve.setConstraintReference(1, "schema-loc", "4");
                 reportValidationError(ve, false, locationId);
             }
-            loadSchema(absoluteLocation, "");
+            loadSchema(absoluteLocation, NamespaceUri.NULL);
         }
     }
 
@@ -312,7 +311,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
      * @param targetNS The required target namespace
      * @throws XPathException
      */
-    private void loadSchema(URI value, String targetNS) throws XPathException {
+    private void loadSchema(URI value, NamespaceUri targetNS) throws XPathException {
 
         // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
 

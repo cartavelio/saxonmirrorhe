@@ -201,10 +201,10 @@ public class DominoNode implements NodeInfo, VirtualNode {
      * if this node is not an element.
      */
     @Override
-    public String getAttributeValue(String uri, String local) {
+    public String getAttributeValue(NamespaceUri uri, String local) {
         if (hasAttributes()) {
-            uri = uri.isEmpty() ? null : uri;
-            Node att = getDomNode().getAttributes().getNamedItemNS(uri, local);
+            String ns = uri.isEmpty() ? null : uri.toString();
+            Node att = getDomNode().getAttributes().getNamedItemNS(ns, local);
             return att==null ? null : att.getNodeValue();
         } else {
             return null;
@@ -453,9 +453,9 @@ public class DominoNode implements NodeInfo, VirtualNode {
      * instruction, returns an empty string.
      */
     @Override
-    public String getURI() {
+    public NamespaceUri getNamespaceUri() {
         int fp = getFingerprint();
-        return fp == -1 ? "" : tree.getNamePool().getURI(fp);
+        return fp == -1 ? NamespaceUri.NULL : tree.getNamePool().getURI(fp);
     }
 
     /**
@@ -562,13 +562,11 @@ public class DominoNode implements NodeInfo, VirtualNode {
                     }
                     Node element = getDomNode();
                     if (nodeTest instanceof NameTest) {
-                        String uri = ((NameTest) nodeTest).getNamespaceURI();
-                        if (uri.isEmpty()) {
-                            uri = null;
-                        }
+                        NamespaceUri uri = ((NameTest) nodeTest).getNamespaceURI();
+                        String ns = uri.isEmpty() ? null : uri.toString();
                         String local = ((NameTest) nodeTest).getLocalPart();
                         synchronized(getDomNode()) {
-                            Attr attr = (Attr) element.getAttributes().getNamedItemNS(uri, local);
+                            Attr attr = (Attr) element.getAttributes().getNamedItemNS(ns, local);
                             if (attr == null) {
                                 return EmptyIterator.ofNodes();
                             } else {

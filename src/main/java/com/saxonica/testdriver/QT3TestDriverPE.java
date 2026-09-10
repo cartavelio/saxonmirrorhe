@@ -11,7 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.parser.CodeInjector;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
@@ -108,7 +108,7 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
                     // This is to avoid dynamic computation of Collation uris, which tends to disable bytecode generation
                     return exp;
                 }
-                StructuredQName name = new StructuredQName("saxon", NamespaceConstant.SAXON, "lazy-literal");
+                StructuredQName name = new StructuredQName("saxon", NamespaceUri.SAXON, "lazy-literal");
                 com.saxonica.expr.JavaExtensionFunctionCall wrapper = new com.saxonica.expr.JavaExtensionFunctionCall();
                 try {
                     wrapper.init(name,

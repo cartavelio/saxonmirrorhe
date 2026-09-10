@@ -4,6 +4,7 @@ package com.saxonica.ee.trans;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.style.XSLItemType;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
@@ -67,7 +68,7 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
                 }
                 // Now seal all the schemas that have been imported to guarantee consistency with instance documents
                 Configuration config = getConfiguration();
-                for (String ns : getStylesheetPackage().getSchemaNamespaces()) {
+                for (NamespaceUri ns : getStylesheetPackage().getSchemaNamespaces()) {
                     config.sealNamespace(ns);
                 }
             }

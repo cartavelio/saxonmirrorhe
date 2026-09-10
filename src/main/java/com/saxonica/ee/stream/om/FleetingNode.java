@@ -379,8 +379,8 @@ public class FleetingNode implements NodeInfo {
      */
 
     @Override
-    public final String getURI() {
-        return nodeName == null ? "" : nodeName.getURI();
+    public final NamespaceUri getNamespaceUri() {
+        return nodeName == null ? NamespaceUri.NULL : nodeName.getURI();
     }
 
     /**
@@ -543,7 +543,7 @@ public class FleetingNode implements NodeInfo {
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return null;
     }
 
@@ -590,7 +590,7 @@ public class FleetingNode implements NodeInfo {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
                 getParent().generateId(buffer);
-                buffer.append('a').append(((FleetingElementNode) getParent()).getAttributeIndex(getURI(), getLocalPart()));
+                buffer.append('a').append(((FleetingElementNode) getParent()).getAttributeIndex(getNamespaceUri(), getLocalPart()));
                 break;
             case Type.NAMESPACE:
                 getParent().generateId(buffer);

@@ -86,7 +86,7 @@ public class TransformFn extends SystemFunction {
                             AtomicValue key = pair.key;
                             GroundedValue val = ((Sequence) pair.value).materialize();
                             if (key instanceof StringValue) {
-                                params.put(new StructuredQName("", "", key.getStringValue()), val);
+                                params.put(new StructuredQName("", NamespaceUri.NULL, key.getStringValue()), val);
                             } else if (key instanceof QNameValue) {
                                 params.put(((QNameValue) key).getStructuredQName(), val);
                             }

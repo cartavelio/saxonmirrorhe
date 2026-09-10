@@ -27,7 +27,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * "absent" in the specifications. The set may be empty, indicating that no namespaces are
      * explicitly allowed. If allowedNamespaces is non-null, then disallowedNamespaces must be null.
      */
-    private Set<String> allowedNamespaces = null;
+    private Set<NamespaceUri> allowedNamespaces = null;
 
     /**
      * A namespace that is not permitted (supports ##other). The value "" represents the no-namespace,
@@ -35,7 +35,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * permits all explicit namespaces other than N, but does not permit no-namespace names.
      */
 
-    private Set<String> disallowedNamespaces = null;
+    private Set<NamespaceUri> disallowedNamespaces = null;
 
     /**
      * the processContent of this wildcard.
@@ -90,7 +90,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public void setNoNamespacesAllowed() {
-        allowedNamespaces = new HashSet<String>(3);
+        allowedNamespaces = new HashSet<>(3);
     }
 
     /**
@@ -101,9 +101,9 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      *
      * @param namespace the namespace to add
      */
-    public void addAllowedNamespace(String namespace) {
+    public void addAllowedNamespace(NamespaceUri namespace) {
         if (allowedNamespaces == null) {
-            allowedNamespaces = new HashSet<String>(3);
+            allowedNamespaces = new HashSet<>(3);
         }
         allowedNamespaces.add(namespace);
     }
@@ -114,9 +114,9 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @param namespace the disallowed namespace to be added
      */
 
-    public void addDisallowedNamespace(String namespace) {
+    public void addDisallowedNamespace(NamespaceUri namespace) {
         if (disallowedNamespaces == null) {
-            disallowedNamespaces = new HashSet<String>(3);
+            disallowedNamespaces = new HashSet<>(3);
         }
         disallowedNamespaces.add(namespace);
     }
@@ -128,7 +128,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     /*@Nullable*/
-    public Set<String> getDisallowedNamespaces() {
+    public Set<NamespaceUri> getDisallowedNamespaces() {
         return disallowedNamespaces;
     }
 
@@ -140,7 +140,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @return true if the wildcard allows this namespace, false if not.
      */
 
-    public boolean matches(String uri) {
+    public boolean matches(NamespaceUri uri) {
         if (allowedNamespaces != null) {
             return allowedNamespaces.contains(uri);
         } else {
@@ -259,7 +259,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 return "The wildcard disallows defined siblings, and the name is a permitted sibling. ";
             }
         }
-        String uri = nn.getURI();
+        NamespaceUri uri = nn.getURI();
         if (allowedNamespaces != null) {
             if (allowedNamespaces.contains(uri)) {
                 return null;
@@ -295,7 +295,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @return the set of permitted namespaces of this wildcard, or null if no namespaces are
      *         explicitly permitted
      */
-    public Set<String> getAllowedNamespaces() {
+    public Set<NamespaceUri> getAllowedNamespaces() {
         return allowedNamespaces;
     }
 
@@ -425,11 +425,11 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         return fsb.toString();
     }
 
-    private void appendNamespaces(/*@Nullable*/ Set<String> namespaces, StringBuilder sb) {
+    private void appendNamespaces(/*@Nullable*/ Set<NamespaceUri> namespaces, StringBuilder sb) {
         if (namespaces == null) {
             return;
         }
-        Iterator<String> iter = namespaces.iterator();
+        Iterator<NamespaceUri> iter = namespaces.iterator();
         boolean first = true;
         while (iter.hasNext()) {
             if (first) {
@@ -437,12 +437,12 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
             } else {
                 sb.append(' ');
             }
-            String s = iter.next();
+            NamespaceUri s = iter.next();
             sb.append(s.isEmpty() ? "##local" : s);
         }
     }
 
-    private String listOfNamespaces(/*@Nullable*/ Set<String> namespaces) {
+    private String listOfNamespaces(/*@Nullable*/ Set<NamespaceUri> namespaces) {
         if (namespaces == null) {
             return "";
         }
@@ -471,7 +471,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (sup.disallowedQNames != null) {
             for (IntIterator it = sup.disallowedQNames.iterator(); it.hasNext(); ) {
                 int fp = it.next();
-                String uri = pool.getURI(fp);
+                NamespaceUri uri = pool.getURI(fp);
                 if (this.matches(uri) && !this.disallowsQName(fp)) {
                     return false;
                 }
@@ -603,10 +603,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public static Wildcard makeIntersection(Wildcard wat1, Wildcard wat2, NamePool pool) {
-        Set<String> allowed1 = wat1.getAllowedNamespaces();
-        Set<String> allowed2 = wat2.getAllowedNamespaces();
-        Set<String> disallowed1 = wat1.getDisallowedNamespaces();
-        Set<String> disallowed2 = wat2.getDisallowedNamespaces();
+        Set<NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
+        Set<NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
+        Set<NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
+        Set<NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
         Wildcard result = new Wildcard();
         result.setConfiguration(wat1.getConfiguration());
         result.setProcessContents(wat1.getProcessContents());
@@ -638,7 +638,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (wat1.disallowedQNames != null) {
             for (IntIterator it = wat1.disallowedQNames.iterator(); it.hasNext(); ) {
                 int fp = it.next();
-                String uri = pool.getURI(fp);
+                NamespaceUri uri = pool.getURI(fp);
                 if (wat2.matches(uri)) {
                     result.addDisallowedQName(fp);
                 }
@@ -647,7 +647,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (wat2.disallowedQNames != null) {
             for (IntIterator it = wat2.disallowedQNames.iterator(); it.hasNext(); ) {
                 int fp = it.next();
-                String uri = pool.getURI(fp);
+                NamespaceUri uri = pool.getURI(fp);
                 if (wat1.matches(uri)) {
                     result.addDisallowedQName(fp);
                 }
@@ -673,10 +673,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public static Wildcard makeUnion(Wildcard wat1, Wildcard wat2, NamePool pool) {
-        Set<String> allowed1 = wat1.getAllowedNamespaces();
-        Set<String> allowed2 = wat2.getAllowedNamespaces();
-        Set<String> disallowed1 = wat1.getDisallowedNamespaces();
-        Set<String> disallowed2 = wat2.getDisallowedNamespaces();
+        Set<NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
+        Set<NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
+        Set<NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
+        Set<NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
         Wildcard result = new Wildcard();
         result.setConfiguration(wat1.getConfiguration());
         result.setProcessContents(wat1.getProcessContents());
@@ -708,7 +708,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (wat1.disallowedQNames != null) {
             for (IntIterator it = wat1.disallowedQNames.iterator(); it.hasNext(); ) {
                 int fp = it.next();
-                String uri = pool.getURI(fp);
+                NamespaceUri uri = pool.getURI(fp);
                 if (!wat2.matches(uri) || wat2.disallowsQName(fp)) {
                     result.addDisallowedQName(fp);
                 }
@@ -717,7 +717,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (wat2.disallowedQNames != null) {
             for (IntIterator it = wat2.disallowedQNames.iterator(); it.hasNext(); ) {
                 int fp = it.next();
-                String uri = pool.getURI(fp);
+                NamespaceUri uri = pool.getURI(fp);
                 if (!wat1.matches(uri) || wat1.disallowsQName(fp)) {
                     result.addDisallowedQName(fp);
                 }
@@ -758,14 +758,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @return the union of the two sets
      */
 
-    private static Set<String> union(Set<String> a, Set<String> b) {
-        Set<String> result = new HashSet<String>(a.size() + b.size());
-        for (String s : a) {
-            result.add(s);
-        }
-        for (String s : b) {
-            result.add(s);
-        }
+    private static Set<NamespaceUri> union(Set<NamespaceUri> a, Set<NamespaceUri> b) {
+        Set<NamespaceUri> result = new HashSet<>(a.size() + b.size());
+        result.addAll(a);
+        result.addAll(b);
         return result;
     }
 
@@ -777,9 +773,9 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @return the intersection of the two sets
      */
 
-    private static Set<String> intersection(Set<String> a, Set<String> b) {
-        Set<String> result = new HashSet<String>();
-        for (String s : a) {
+    private static Set<NamespaceUri> intersection(Set<NamespaceUri> a, Set<NamespaceUri> b) {
+        Set<NamespaceUri> result = new HashSet<>();
+        for (NamespaceUri s : a) {
             if (b.contains(s)) {
                 result.add(s);
             }
@@ -795,9 +791,9 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      * @return the difference of the two sets (first minus second)
      */
 
-    private static Set<String> difference(Set<String> a, Set<String> b) {
-        Set<String> result = new HashSet<String>();
-        for (String s : a) {
+    private static Set<NamespaceUri> difference(Set<NamespaceUri> a, Set<NamespaceUri> b) {
+        Set<NamespaceUri> result = new HashSet<>();
+        for (NamespaceUri s : a) {
             if (!b.contains(s)) {
                 result.add(s);
             }
@@ -876,10 +872,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                 if (allowsAny()) {
                                     return EmptySequence.getInstance();
                                 } else {
-                                    Set<String> namespaces = allowedNamespaces != null ? allowedNamespaces : disallowedNamespaces;
+                                    Set<NamespaceUri> namespaces = allowedNamespaces != null ? allowedNamespaces : disallowedNamespaces;
                                     List<AtomicValue> uriList = new ArrayList<>(namespaces.size());
-                                    for (String ns : namespaces) {
-                                        uriList.add(new AnyURIValue(ns));
+                                    for (NamespaceUri ns : namespaces) {
+                                        uriList.add(new AnyURIValue(ns.toUnicodeString()));
                                     }
                                     return new AtomicArray(uriList);
                                 }
@@ -895,7 +891,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                 IntIterator iter = disallowedQNames.iterator();
                                 while (iter.hasNext()) {
                                     int fp = iter.next();
-                                    String uri = pool.getURI(fp);
+                                    NamespaceUri uri = pool.getURI(fp);
                                     String local = pool.getLocalName(fp);
                                     QNameValue value = new QNameValue("", uri, local);
                                     disallowedList.add(value);

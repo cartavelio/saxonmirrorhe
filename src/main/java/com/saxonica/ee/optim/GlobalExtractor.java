@@ -12,7 +12,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.GlobalVariableManager;
 import net.sf.saxon.trans.XPathException;
@@ -144,7 +144,7 @@ public class GlobalExtractor {
         gvd.setBody(expr);
         expr.setRetainedStaticContext(rsc);
         StructuredQName varName = new StructuredQName(
-                "vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "gg" + gvd.hashCode());
+                "vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "gg" + gvd.hashCode());
         gvd.setVariableQName(varName);
         globalVariableManager.addGlobalVariable(gvd);
 

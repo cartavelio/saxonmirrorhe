@@ -5,7 +5,6 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -240,7 +239,8 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                     attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
                 } else {
                     attributeType = (SimpleType) att.getSchemaType();
-                    if (att.isId() || (att.getLocalPart().equals("id") && att.getURI().equals(NamespaceConstant.XML)) ) {
+                    if (att.isId() || (att.getLocalPart().equals("id") &&
+                                               att.getNamespaceUri().equals(NamespaceUri.XML)) ) {
                         properties |= (ReceiverOption.IS_ID);
                     }
                     if (att.isIdref()) {

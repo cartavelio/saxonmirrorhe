@@ -10,6 +10,7 @@ import net.sf.saxon.expr.instruct.NamespaceConstructor;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -142,12 +143,12 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
         // assert stack : Receiver prefix uri prefix uri
         ga.push(NamespaceConstant.XML);
         // assert stack : Receiver prefix uri prefix uri uri
-        ga.invokeInstanceMethod(Object.class, "equals", Object.class);
+        ga.invokeInstanceMethod(String.class, "equals", Object.class);
         // assert stack : Receiver prefix uri prefix boolean
         ga.swap();
         // assert stack : Receiver prefix uri boolean prefix
         ga.push("xml");
-        ga.invokeInstanceMethod(Object.class, "equals", Object.class);
+        ga.invokeInstanceMethod(String.class, "equals", Object.class);
         // assert stack : Receiver prefix uri boolean boolean
         ga.ifICmp(GeneratorAdapter.EQ, xmlTestOk.label());
         compiler.generateDynamicError("Namespace prefix 'xml' and namespace uri " + NamespaceConstant.XML +
@@ -160,7 +161,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
         ga.invokeInstanceMethod(CharSequence.class, "toString");
         ga.dup();
         ga.push(NamespaceConstant.XMLNS);
-        ga.invokeInstanceMethod(Object.class, "equals", Object.class);
+        ga.invokeInstanceMethod(String.class, "equals", Object.class);
         // assert stack : Receiver prefix uri boolean
         ga.ifFalse(xmlnsOk);
         compiler.generateDynamicError("Namespace URI must not be " + NamespaceConstant.XMLNS,
@@ -178,9 +179,9 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
             compiler.generateDynamicError("The string value of the constructed namespace node must be a valid URI", "XTDE0905", expression.getLocation(), false);
             methodInfo.placeLabel(validURI);
         }
-
+        ga.invokeStaticMethod(NamespaceUri.class, "of", String.class);
         ga.push(ReceiverOption.REJECT_DUPLICATES);
-        ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, String.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "namespace", String.class, NamespaceUri.class, Integer.TYPE);
     }
 }
 

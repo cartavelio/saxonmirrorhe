@@ -6,7 +6,7 @@ import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.parser.Evaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.Cardinality;
@@ -75,7 +75,7 @@ public class CommonSubexpressionPromoter {
             SequenceType type = SequenceType.makeSequenceType(itemType.toItemType(), cardinality);
             LetExpression let = new LetExpression();
             let.setSequence(topCandidate);
-            let.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "cc" + topCandidate.hashCode()));
+            let.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "cc" + topCandidate.hashCode()));
             let.setRequiredType(type);
             let.setNeedsLazyEvaluation(true);
             let.setEvaluator(Cardinality.allowsMany(topCandidate.getCardinality()) ? Evaluator.MemoClosureEvaluator.INSTANCE : Evaluator.SingletonClosure.INSTANCE);

@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema.sdoc;
 
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -56,7 +56,7 @@ public class SchemaDocument {
     public boolean isCompiledSchemaDocument() {
         AxisIterator iter = document.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.makeNodeKindTest(Type.ELEMENT));
         NodeInfo node = iter.next();
-        return node.getURI().equals(NamespaceConstant.SCM);
+        return node.getNamespaceUri().equals(NamespaceUri.SCM);
     }
 
     /**
@@ -78,7 +78,7 @@ public class SchemaDocument {
      * @return the target namespace in the xs:schema element of the schema document
      */
 
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         XSDSchema root = getXSDSchema();
         return root == null ? null : root.getTargetNamespace();
     }

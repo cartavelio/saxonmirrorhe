@@ -5,6 +5,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 
@@ -105,7 +106,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
             throw new NullPointerException("No configuration supplied to schema URI resolver");
         }
         if (targetNamespace != null &&
-                config.isSchemaAvailable(targetNamespace) &&
+                config.isSchemaAvailable(NamespaceUri.of(targetNamespace)) &&
                 !config.getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
             return EMPTY_SOURCE_ARRAY;
         }

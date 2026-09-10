@@ -6,7 +6,6 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -123,8 +122,8 @@ public abstract class AttributeValidator extends ContentValidator {
                 // There is no declaration of this attribute.
                 // Certain XSI attributes are always allowed...
                 boolean implicitlyAllowed = false;
-                String uri = attName.getURI();
-                if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE) &&
+                NamespaceUri uri = attName.getURI();
+                if (uri.equals(NamespaceUri.SCHEMA_INSTANCE) &&
                         (fingerprint == StandardNames.XSI_TYPE ||
                                  fingerprint == StandardNames.XSI_NIL ||
                                  fingerprint == StandardNames.XSI_SCHEMA_LOCATION ||
@@ -244,7 +243,7 @@ public abstract class AttributeValidator extends ContentValidator {
                             // If the attribute is in a namespace, we need to ensure that the name has
                             // a prefix and that the prefix is declared
                             NamePool pool = getNamePool();
-                            String uri = use.getTargetComponentName().getURI();
+                            NamespaceUri uri = use.getTargetComponentName().getURI();
                             String prefix = null;
                             if (uri.isEmpty()) {
                                 prefix = "";
@@ -268,7 +267,7 @@ public abstract class AttributeValidator extends ContentValidator {
                                         prefix = "ns";
                                     }
                                     while (true) {
-                                        String u = getNamespaceResolver().getURIForPrefix(prefix, false);
+                                        NamespaceUri u = getNamespaceResolver().getURIForPrefix(prefix, false);
                                         if (u == null || u.equals(uri)) {
                                             break;
                                         }
@@ -352,7 +351,7 @@ public abstract class AttributeValidator extends ContentValidator {
             for (Iterator<AttributeUse> ii = declaredAttributes.valueIterator(); ii.hasNext(); ) {
                 AttributeUse au = ii.next();
                 if (au.getTargetComponentName().getLocalPart().equals(attName.getLocalPart())) {
-                    String ns = au.getTargetComponentName().getURI();
+                    NamespaceUri ns = au.getTargetComponentName().getURI();
                     if (ns.isEmpty()) {
                         possibleNamespaceMessage = " (it would be allowed in no namespace)";
                     } else {

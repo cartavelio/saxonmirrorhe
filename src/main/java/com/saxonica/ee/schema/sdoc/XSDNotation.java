@@ -2,6 +2,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.Notation;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.SchemaException;
@@ -41,7 +42,7 @@ public class XSDNotation extends AnnotationParent {
         processId();
 
         //-- @name
-        String name = atts.getValue("", "name");
+        String name = atts.getValue(NamespaceUri.NULL, "name");
         if (name == null) {
             missingAttribute("name");
             name = "unnamed-notation-" + hashCode();
@@ -57,13 +58,13 @@ public class XSDNotation extends AnnotationParent {
         notation.setNotationName(nc);
 
         //-- @public
-        String publicAtt = atts.getValue("", "public");
+        String publicAtt = atts.getValue(NamespaceUri.NULL, "public");
         if (publicAtt != null) {
             notation.setNotationPublicId(publicAtt);
         }
 
         //-- @system
-        String systemAtt = atts.getValue("", "system");
+        String systemAtt = atts.getValue(NamespaceUri.NULL, "system");
         if (systemAtt != null) {
             notation.setNotationSystemId(systemAtt);
         }

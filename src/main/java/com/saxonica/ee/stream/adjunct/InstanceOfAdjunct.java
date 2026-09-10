@@ -122,7 +122,7 @@ public class InstanceOfAdjunct extends InspectionAdjunct implements FeedMaker {
         }
 
         @Override
-        public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
             if (level == 0) {
                 super.namespace(prefix, namespaceUri, properties);
             }

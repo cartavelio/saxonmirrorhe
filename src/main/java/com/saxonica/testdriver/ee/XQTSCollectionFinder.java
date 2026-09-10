@@ -4,10 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.CollectionFinder;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceCollection;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.resource.XmlResource;
@@ -52,13 +49,14 @@ public class XQTSCollectionFinder implements CollectionFinder {
     @Override
     public ResourceCollection findCollection(XPathContext context, String href) throws XPathException {
         NamePool pool = catalog.getConfiguration().getNamePool();
-        int inputDocumentNC = pool.allocateFingerprint("http://www.w3.org/2005/02/query-test-XQTSCatalog", "input-document");
+        int inputDocumentNC = pool.allocateFingerprint(
+                NamespaceUri.of("http://www.w3.org/2005/02/query-test-XQTSCatalog"), "input-document");
 
         if (href == null) {
             href = "";
         }
 
-        if (!(href.equals(collectionElement.getAttributeValue("", "ID")) || (href.equals("") && isDefault))) {
+        if (!(href.equals(collectionElement.getAttributeValue(NamespaceUri.NULL, "ID")) || (href.equals("") && isDefault))) {
             throw new XPathException("Unknown collection name " + href);
         }
 

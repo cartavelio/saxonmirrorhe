@@ -3,8 +3,8 @@ package com.saxonica.ee.extfn;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.functions.extfn.VendorFunctionSetPE;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyFunctionType;
@@ -77,8 +77,8 @@ public class VendorFunctionSetEE extends BuiltInFunctionSet {
      * namespace URI.
      */
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.SAXON;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.SAXON;
     }
 
     @Override

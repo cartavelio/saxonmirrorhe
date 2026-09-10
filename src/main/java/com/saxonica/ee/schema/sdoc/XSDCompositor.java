@@ -3,6 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.Err;
@@ -74,7 +75,7 @@ public class XSDCompositor extends SchemaElement {
          * or the int value of the attribute, otherwise maxOccurs
          * equals the minOccurs value.
          */
-        attValue = atts.getValue("", "maxOccurs");
+        attValue = atts.getValue(NamespaceUri.NULL, "maxOccurs");
 
         if (attValue != null) {
             if (parent.getFingerprint() == StandardNames.XS_GROUP) {
@@ -85,7 +86,7 @@ public class XSDCompositor extends SchemaElement {
         }
 
         // @minOccurs
-        attValue = atts.getValue("", "minOccurs");
+        attValue = atts.getValue(NamespaceUri.NULL, "minOccurs");
         if (attValue != null) {
             if (parent.getFingerprint() == StandardNames.XS_GROUP) {
                 error("Cannot specify 'minOccurs' on a top-level '" + getLocalPart() + "' compositor within a named group");

@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.query.*;
 import net.sf.saxon.style.*;
@@ -26,7 +27,7 @@ import net.sf.saxon.value.Whitespace;
 public class SaxonImportQuery extends StyleElement {
 
     private String href;
-    private String moduleURI;
+    private NamespaceUri moduleURI;
 
     /**
      * Ask whether the element is in the XSLT namespace
@@ -53,10 +54,10 @@ public class SaxonImportQuery extends StyleElement {
             if (f.equals("href")) {
                 href = Whitespace.trim(value);
             } else if (f.equals("namespace")) {
-                moduleURI = Whitespace.trim(value);
+                moduleURI = NamespaceUri.of(Whitespace.trim(value));
             } else {
                 checkUnknownAttribute(attName);
-                moduleURI = "";   // for error recovery path
+                moduleURI = NamespaceUri.NULL;   // for error recovery path
             }
         }
 
@@ -127,7 +128,7 @@ public class SaxonImportQuery extends StyleElement {
                                                 getPackageData().getLocalLicenseId());
     }
 
-    private QueryLibrary getQueryLibrary(String namespace) {
+    private QueryLibrary getQueryLibrary(NamespaceUri namespace) {
         CompilerInfo info = getCompilation().getCompilerInfo();
         Iterable<QueryLibrary> libs = info.getQueryLibraries();
         if (libs != null) {

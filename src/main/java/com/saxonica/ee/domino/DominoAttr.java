@@ -88,7 +88,7 @@ public class DominoAttr implements NodeInfo {
         return other instanceof DominoAttr &&
                 parent.equals (((DominoAttr)other).parent) &&
                 getLocalPart().equals(((DominoAttr) other).getLocalPart()) &&
-                getURI().equals(((DominoAttr) other).getURI());
+                getNamespaceUri().equals(((DominoAttr) other).getNamespaceUri());
     }
 
     /**
@@ -224,9 +224,8 @@ public class DominoAttr implements NodeInfo {
      * @since 8.4
      */
     @Override
-    public String getURI() {
-        String uri = domAttr.getNamespaceURI();
-        return uri==null ? "" : uri;
+    public NamespaceUri getNamespaceUri() {
+        return NamespaceUri.of(domAttr.getNamespaceURI());
     }
 
     /**
@@ -363,7 +362,7 @@ public class DominoAttr implements NodeInfo {
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(String uri, String local) {
+    public String getAttributeValue(NamespaceUri uri, String local) {
         return null;
     }
 
@@ -404,7 +403,7 @@ public class DominoAttr implements NodeInfo {
     public void generateId(StringBuilder buffer) {
         getParent().generateId(buffer);
         buffer.append("a");
-        buffer.append(Integer.toString(tree.getNamePool().allocateFingerprint(getURI(), getLocalPart())));
+        buffer.append(Integer.toString(tree.getNamePool().allocateFingerprint(getNamespaceUri(), getLocalPart())));
     }
 
     /**

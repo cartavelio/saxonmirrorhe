@@ -217,7 +217,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
                 throw new XQException(e.getMessage());
             }
         }
-        StructuredQName sqName = new StructuredQName("", typename.getNamespaceURI(), typename.getLocalPart());
+        StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
         SchemaType st = getConfiguration().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
@@ -261,7 +261,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         }
         Configuration config = getConfiguration();
 
-        StructuredQName sqName = new StructuredQName("", typename.getNamespaceURI(), typename.getLocalPart());
+        StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
         SchemaType st = getConfiguration().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
@@ -281,7 +281,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             return new SaxonXQItemType(contentTest, config);
         } else {
             NameTest nameTest = new NameTest(
-                    Type.ATTRIBUTE, nodename.getNamespaceURI(), nodename.getLocalPart(), config.getNamePool());
+                    Type.ATTRIBUTE, NamespaceUri.of(nodename.getNamespaceURI()), nodename.getLocalPart(), config.getNamePool());
             CombinedNodeTest combined = new CombinedNodeTest(nameTest, Token.INTERSECT, contentTest);
             return new SaxonXQItemType(combined, config);
         }
@@ -358,7 +358,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             return new SaxonXQItemType(contentTest, config);
         } else {
             NameTest nameTest = new NameTest(
-                    Type.ELEMENT, nodename.getNamespaceURI(), nodename.getLocalPart(), config.getNamePool());
+                    Type.ELEMENT, NamespaceUri.of(nodename.getNamespaceURI()), nodename.getLocalPart(), config.getNamePool());
             CombinedNodeTest combined = new CombinedNodeTest(nameTest, Token.INTERSECT, contentTest);
             return new SaxonXQItemType(combined, config);
         }
@@ -374,7 +374,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         }
         Configuration config = getConfiguration();
 
-        StructuredQName sqName = new StructuredQName("", typename.getNamespaceURI(), typename.getLocalPart());
+        StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
         SchemaType st = getConfiguration().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
@@ -915,7 +915,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             return new SaxonXQItemType(NodeKindTest.PROCESSING_INSTRUCTION, getConfiguration());
         } else {
             return new SaxonXQItemType(
-                    new NameTest(Type.PROCESSING_INSTRUCTION, "", piTarget, getConfiguration().getNamePool()),
+                    new NameTest(Type.PROCESSING_INSTRUCTION, NamespaceUri.NULL, piTarget, getConfiguration().getNamePool()),
                     getConfiguration());
         }
     }
@@ -925,7 +925,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     public XQItemType createSchemaAttributeType(/*@NotNull*/ QName name, int basetype, /*@Nullable*/ URI schemaURI) throws XQException {
         checkNotClosed();
         Configuration config = getConfiguration();
-        StructuredQName nn = new StructuredQName(name.getPrefix(), name.getNamespaceURI(), name.getLocalPart());
+        StructuredQName nn = new StructuredQName(name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
         SchemaDeclaration attributeDecl = config.getAttributeDeclaration(nn);
         if (attributeDecl == null && schemaURI != null) {
             loadSchema(schemaURI);
@@ -1066,7 +1066,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     private int getFingerprint(/*@NotNull*/ QName name) {
-        return getConfiguration().getNamePool().allocateFingerprint(name.getNamespaceURI(), name.getLocalPart());
+        return getConfiguration().getNamePool().allocateFingerprint(NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
     }
 
     /**

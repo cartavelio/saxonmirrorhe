@@ -2,7 +2,6 @@ package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -21,7 +20,7 @@ import java.util.function.Supplier;
 public class RenameExpression extends BasicUpdatingExpression {
 
     private final NamespaceResolver nsContext;
-    private final String defaultNamespace;
+    private final NamespaceUri defaultNamespace;
     private final Operand nameOp;
     private final Operand targetOp;
     private final boolean inheritNamespaces;
@@ -37,11 +36,11 @@ public class RenameExpression extends BasicUpdatingExpression {
      */
 
     public RenameExpression(Expression target, Expression name, NamespaceResolver nsContext,
-            /*@Nullable*/ String defaultNamespace, boolean inherit) {
+            /*@Nullable*/ NamespaceUri defaultNamespace, boolean inherit) {
         nameOp = new Operand(this, name, OperandRole.SINGLE_ATOMIC);
         targetOp = new Operand(this, target, OperandRole.INSPECT);
         this.nsContext = nsContext;
-        this.defaultNamespace = defaultNamespace == null ? NamespaceConstant.NULL : defaultNamespace;
+        this.defaultNamespace = defaultNamespace == null ? NamespaceUri.NULL : defaultNamespace;
         this.inheritNamespaces = inherit;
     }
 
@@ -212,7 +211,7 @@ public class RenameExpression extends BasicUpdatingExpression {
         AtomicValue nameValue = (AtomicValue) getNameExp().evaluateItem(context);
         String prefix;
         String localName;
-        String uri;
+        NamespaceUri uri;
         if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
             String rawName = nameValue.getStringValue();
             try {
@@ -225,7 +224,7 @@ public class RenameExpression extends BasicUpdatingExpression {
                 throw err1;
             }
             if (prefix.isEmpty()) {
-                uri = nodeKind == Type.ELEMENT ? defaultNamespace : "";
+                uri = nodeKind == Type.ELEMENT ? defaultNamespace : NamespaceUri.NULL;
             } else {
                 uri = nsContext.getURIForPrefix(prefix, true);
                 if (uri == null) {
@@ -260,7 +259,7 @@ public class RenameExpression extends BasicUpdatingExpression {
             prefix = "x-xmlns";
         }
         if (nodeKind == Type.PROCESSING_INSTRUCTION) {
-            if (prefix.length() > 0 || uri.length() > 0) {
+            if (prefix.length() > 0 || !uri.isEmpty()) {
                 XPathException err1 = new XPathException("Processing instruction cannot be in a namespace");
                 err1.setErrorCode("XUDY0025");
                 err1.setIsTypeError(true);
@@ -281,8 +280,8 @@ public class RenameExpression extends BasicUpdatingExpression {
         }
         if (targetNode != null && (nodeKind == Type.ELEMENT || prefix.length() != 0)) {
             NamespaceResolver nr = targetNode.getAllNamespaces();
-            String existingURI = nr.getURIForPrefix(prefix, true);
-            if (existingURI != null && existingURI.length() != 0 && !existingURI.equals(uri)) {
+            NamespaceUri existingURI = nr.getURIForPrefix(prefix, true);
+            if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
                 XPathException err1 = new XPathException("New name conflicts with existing namespace binding");
                 err1.setErrorCode("XUDY0023");
                 err1.setIsTypeError(true);

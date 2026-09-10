@@ -52,7 +52,7 @@ public class XSDElement extends SchemaElement {
         PreparedSchema schema = getSchema();
 
         AttributeMap atts = attributes();
-        isReference = atts.getValue("", "ref") != null;
+        isReference = atts.getValue(NamespaceUri.NULL, "ref") != null;
 
         if (isTopLevel()) {
             String[] allowed = {"abstract", "block", "default", "final",
@@ -68,7 +68,7 @@ public class XSDElement extends SchemaElement {
         }
 
         // @form
-        String form = atts.getValue("", "form");
+        String form = atts.getValue(NamespaceUri.NULL, "form");
         if (form != null) {
             if (form.equals("qualified") || form.equals("unqualified")) {
                 //element.setForm(attValue);
@@ -85,19 +85,19 @@ public class XSDElement extends SchemaElement {
         }
 
         // @targetNamespace
-        String localTargetNamespace = atts.getValue("", "targetNamespace");
+        String localTargetNamespace = atts.getValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null) {
             if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The targetNamespace cannot be defined locally unless XSD 1.1 is enabled");
             }
-            if (atts.getValue("", "name") == null) {
+            if (atts.getValue(NamespaceUri.NULL, "name") == null) {
                 error("If there is no @name then there must be no @targetNamespace");
             }
             checkMutuallyExclusiveAttributes("targetNamespace", "form");
         }
 
         // @name
-        String attValue = atts.getValue("", "name");
+        String attValue = atts.getValue(NamespaceUri.NULL, "name");
         if (attValue != null) {
             element = new ElementDecl((EnterpriseConfiguration) getConfiguration(), isTopLevel(), this);
             element.setGeneratedId(Navigator.getPath(this));
@@ -124,13 +124,13 @@ public class XSDElement extends SchemaElement {
 
                 // check for common mistake of using <element name="x"/> instead of <element ref="x"/>
 
-                if (atts.getValue("", "type") == null && !hasChildNodes() && !isReference) {
+                if (atts.getValue(NamespaceUri.NULL, "type") == null && !hasChildNodes() && !isReference) {
                     boolean existsAsTopLevel = schema.getElementDecl(nc) != null;
                     if (!existsAsTopLevel) {
                         String localName = nc.getLocalPart();
                         XSDSchema s = getXSDSchema();
                         for (NodeInfo ignored : s.children(NodeSelector.of(x -> x instanceof XSDElement &&
-                                localName.equals(x.getAttributeValue("", "name"))))) {
+                                localName.equals(x.getAttributeValue(NamespaceUri.NULL, "name"))))) {
                             existsAsTopLevel = true;
                             break;
                         }
@@ -150,7 +150,7 @@ public class XSDElement extends SchemaElement {
         }
 
         // @ref
-        attValue = atts.getValue("", "ref");
+        attValue = atts.getValue(NamespaceUri.NULL, "ref");
         if (attValue != null) {
             StructuredQName nc;
             try {
@@ -181,7 +181,8 @@ public class XSDElement extends SchemaElement {
             generateId(buff);
             element.setGeneratedId(buff.toString());
             element.setNamespaceResolver(getAllNamespaces());
-            element.setElementName(new StructuredQName("", "", "unnamed-error-element-at-line-" + getLineNumber()));
+            element.setElementName(
+                    new StructuredQName("", NamespaceUri.NULL, "unnamed-error-element-at-line-" + getLineNumber()));
         }
         if (elementParticle == null && !isTopLevel()) {
             element = new ElementDecl((EnterpriseConfiguration) getConfiguration(), isTopLevel(), this);
@@ -189,7 +190,7 @@ public class XSDElement extends SchemaElement {
             generateId(buff);
             element.setGeneratedId(buff.toString());
             element.setNamespaceResolver(getAllNamespaces());
-            StructuredQName nameCode = new StructuredQName("", "", "unnamed-error-element-at-line-" + getLineNumber());
+            StructuredQName nameCode = new StructuredQName("", NamespaceUri.NULL, "unnamed-error-element-at-line-" + getLineNumber());
             element.setElementName(nameCode);
             elementParticle = new ElementParticle((EnterpriseConfiguration) getConfiguration(), this);
             elementParticle.setTargetComponentName(nameCode);
@@ -202,14 +203,14 @@ public class XSDElement extends SchemaElement {
         if (element != null) {
 
             // @abstract
-            attValue = atts.getValue("", "abstract");
+            attValue = atts.getValue(NamespaceUri.NULL, "abstract");
             if (attValue != null) {
                 boolean isAbstract = parseBooleanAttribute("abstract", attValue);
                 element.setAbstract(isAbstract);
             }
 
             // @block
-            attValue = atts.getValue("", "block");
+            attValue = atts.getValue(NamespaceUri.NULL, "block");
             if (attValue == null) {
                 if (element != null) {
                     element.setBlock(getXSDSchema().getBlockDefault());
@@ -224,13 +225,13 @@ public class XSDElement extends SchemaElement {
             }
 
             // @default
-            attValue = atts.getValue("", "default");
+            attValue = atts.getValue(NamespaceUri.NULL, "default");
             if (attValue != null) {
                 element.setValueConstraint(new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(attValue)));
             }
 
             // @final
-            attValue = atts.getValue("", "final");
+            attValue = atts.getValue(NamespaceUri.NULL, "final");
             if (attValue == null) {
                 if (element != null) {
                     element.setFinalProhibitions(getXSDSchema().getFinalDefault());
@@ -244,9 +245,9 @@ public class XSDElement extends SchemaElement {
             }
 
             // @fixed
-            attValue = atts.getValue("", "fixed");
+            attValue = atts.getValue(NamespaceUri.NULL, "fixed");
             if (attValue != null) {
-                if (atts.getValue("", "default") != null) {
+                if (atts.getValue(NamespaceUri.NULL, "default") != null) {
                     mutuallyExclusiveAttributes("default", "fixed");
                 } else {
                     element.setValueConstraint(new ValueConstraint(ValueConstraint.Variety.FIXED, StringView.tidy(attValue)));
@@ -254,7 +255,7 @@ public class XSDElement extends SchemaElement {
             }
 
             // @substitutionGroup
-            attValue = atts.getValue("", "substitutionGroup");
+            attValue = atts.getValue(NamespaceUri.NULL, "substitutionGroup");
             if (attValue != null) {
                 StringTokenizer st = new StringTokenizer(attValue, " \t\r\n");
                 while (st.hasMoreTokens()) {
@@ -269,7 +270,7 @@ public class XSDElement extends SchemaElement {
             }
 
             // @type
-            attValue = atts.getValue("", "type");
+            attValue = atts.getValue(NamespaceUri.NULL, "type");
             if (attValue != null) {
                 foundTypeReference = true;
                 int fp;
@@ -284,7 +285,7 @@ public class XSDElement extends SchemaElement {
             }
 
             // @nillable
-            attValue = atts.getValue("", "nillable");
+            attValue = atts.getValue(NamespaceUri.NULL, "nillable");
             if (attValue != null) {
                 boolean isNillable = parseBooleanAttribute("nillable", attValue);
                 element.setNillable(isNillable);
@@ -297,7 +298,7 @@ public class XSDElement extends SchemaElement {
              * if minOccurs is present the value is the int value of
              * of the attribute, otherwise minOccurs is 1.
              */
-            attValue = atts.getValue("", "minOccurs");
+            attValue = atts.getValue(NamespaceUri.NULL, "minOccurs");
             int minOccurs = 1;
             if (attValue != null) {
                 minOccurs = processMinOccurs(attValue);
@@ -310,7 +311,7 @@ public class XSDElement extends SchemaElement {
              * or the int value of the attribute, otherwise maxOccurs
              * equals the minOccurs value.
              */
-            attValue = atts.getValue("", "maxOccurs");
+            attValue = atts.getValue(NamespaceUri.NULL, "maxOccurs");
             if (attValue != null) {
                 int maxOccurs = processMaxOccurs(attValue);
                 if (maxOccurs >= 0 && maxOccurs < minOccurs) {
@@ -362,7 +363,7 @@ public class XSDElement extends SchemaElement {
     @Override
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
-        String localTargetNamespace = getAttributeValue("", "targetNamespace");
+        String localTargetNamespace = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null && !localTargetNamespace.equals(getXSDSchema().getTargetNamespace())) {
             checkLocalTargetNamespace("element");
         }

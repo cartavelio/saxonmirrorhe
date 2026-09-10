@@ -340,7 +340,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
         serializer.startElement("assertion");
         serializer.emitNamespaceContext(staticContext.getNamespaceResolver());
         serializer.emitAttribute("test", getConditionText());
-        serializer.emitAttribute("defaultNamespace", staticContext.getDefaultElementNamespace());
+        serializer.emitAttribute("defaultNamespace", staticContext.getDefaultElementNamespace().toString());
         serializer.emitAttribute("xml:base", staticContext.getStaticBaseURI());
         if (sweep != Sweep.FREE_RANGING) {
             serializer.emitAttribute("sweep", sweep.toString());

@@ -7,7 +7,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ResultDocument;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -79,7 +78,7 @@ public class Serialize extends SystemFunction {
         } else {
             if (secondArg instanceof NodeInfo &&
                     ((NodeInfo) secondArg).getNodeKind() == Type.ELEMENT &&
-                    ((NodeInfo) secondArg).getURI().equals(NamespaceConstant.XSLT) &&
+                    ((NodeInfo) secondArg).getNamespaceUri().equals(NamespaceUri.XSLT) &&
                     ((NodeInfo) secondArg).getLocalPart().equals("output")) {
                 props = new Properties();
                 ResultDocument.processXslOutputElement((NodeInfo) secondArg, props, context);

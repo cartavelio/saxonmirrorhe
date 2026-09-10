@@ -183,7 +183,7 @@ public class FleetingElementNode extends FleetingParentNode {
      * @since 9.4
      */
     @Override
-    public String getAttributeValue(/*@NotNull*/ String uri, /*@NotNull*/ String local) {
+    public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         return attributeMap.getValue(uri, local);
     }
 
@@ -191,7 +191,7 @@ public class FleetingElementNode extends FleetingParentNode {
      * Get the index position of an attribute with given local name and fingerprint
      */
 
-    public int getAttributeIndex(String uri, String local) {
+    public int getAttributeIndex(NamespaceUri uri, String local) {
         int i=0;
         for (AttributeInfo att : attributeMap) {
             final NodeName nn = att.getNodeName();

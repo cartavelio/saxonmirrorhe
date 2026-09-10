@@ -3,6 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.ComplexType;
@@ -52,7 +53,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
         processId();
 
         //-- @base
-        String base = atts.getValue("", "base");
+        String base = atts.getValue(NamespaceUri.NULL, "base");
         if (base != null) {
             int baseFingerprint;
             try {

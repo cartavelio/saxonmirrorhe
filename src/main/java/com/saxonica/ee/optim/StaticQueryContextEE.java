@@ -7,6 +7,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.query.QueryReader;
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StaticQueryContextEE extends StaticQueryContextPE {
 
-    private final Map<String, QueryLibrary> compiledLibraries = new ConcurrentHashMap<>();
+    private final Map<NamespaceUri, QueryLibrary> compiledLibraries = new ConcurrentHashMap<>();
             //Collections.synchronizedMap(new HashMap<String, QueryLibrary>());
     private boolean schemaAware;
     private boolean streaming;
@@ -250,7 +251,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
      */
 
     @Override
-    public QueryLibrary getCompiledLibrary(String namespace) {
+    public QueryLibrary getCompiledLibrary(NamespaceUri namespace) {
         return compiledLibraries.get(namespace);
     }
 

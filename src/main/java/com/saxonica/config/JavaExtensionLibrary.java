@@ -200,7 +200,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
     public Expression bind(SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         boolean debug = config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
         StructuredQName functionName = symbolicName.getComponentName();
-        String uri = functionName.getURI();
+        String uri = functionName.getURI().toString();
         String path = uri;
         int q = uri.indexOf('?');
         if (q > 0) {
@@ -249,7 +249,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         int numArgs = staticArgs.length;
         int significantArgs;
 
-        String methodName = getMethodNameFromLocalName(functionName.getURI(), functionName.getLocalPart(), debug);
+        String methodName = getMethodNameFromLocalName(functionName.getURI().toString(), functionName.getLocalPart(), debug);
 
         // if the method name is "new", look for a matching constructor
 

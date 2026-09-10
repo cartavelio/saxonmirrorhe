@@ -4,8 +4,9 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -90,12 +91,13 @@ public class QNameFnCompiler extends ToItemCompiler {
         ga.push(0);
         ga.arrayLoad(Type.getType(String.class));
         ga.loadLocal(uriVar);
+        ga.invokeStaticMethod(NamespaceUri.class, "of", String.class);
         ga.loadLocal(partsVar);
         ga.push(1);
         ga.arrayLoad(Type.getType(String.class));
         allocateStatic(compiler, BuiltInAtomicType.QNAME);
         ga.push(1);
-        ga.invokeConstructor(QNameValue.class, String.class, String.class, String.class, AtomicType.class, Boolean.TYPE);
+        ga.invokeConstructor(QNameValue.class, String.class, NamespaceUri.class, String.class, AtomicType.class, Boolean.TYPE);
 
         mi.placeLabel(L1);
         mi.placeLabel(L1_1);

@@ -62,7 +62,7 @@ import java.util.List;
 
 public class CompileXPath extends SystemFunction {
 
-    private final static String exportURI = "http://ns.saxonica.com/xslt/export";
+    private final static NamespaceUri exportURI = NamespaceUri.of("http://ns.saxonica.com/xslt/export");
 
     /**
      * Evaluate this function call at run-time
@@ -133,7 +133,7 @@ public class CompileXPath extends SystemFunction {
                             throw new XPathException("Unknown URI for defaulted prefix " + prefix);
                     }
                 }
-                env.declareNamespace(prefix, uri);
+                env.declareNamespace(prefix, NamespaceUri.of(uri));
             }
         }
         MapItem globals = (MapItem) options.get(StringValue.bmp("globals"));
@@ -144,7 +144,7 @@ public class CompileXPath extends SystemFunction {
             while ((key = keys.next()) != null) {
                 knownGlobals.add(key.getStringValue());
                 NodeInfo n = (NodeInfo) globals.get(key);
-                String t = n.getAttributeValue("", "sType");
+                String t = n.getAttributeValue(NamespaceUri.NULL, "sType");
                 XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(key.getStringValue()));
                 v.setRequiredType(makeType(t));
             }
@@ -175,7 +175,7 @@ public class CompileXPath extends SystemFunction {
 
         FunctionLibraryList libraryList0 = ((StylesheetPackage) getRetainedStaticContext().getPackageData()).getFunctionLibrary();
         for (FunctionLibrary lib : libraryList0.getLibraryList()) {
-            if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceConstant.FN)) {
+            if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceUri.FN)) {
                 libraryList.addFunctionLibrary(XPath31FunctionSet.getInstance());
                 libraryList.addFunctionLibrary(XSLT30FunctionSet.getInstance());
                 libraryList.addFunctionLibrary(new VendorFunctionSetEE((EnterpriseConfiguration) configuration));
@@ -204,7 +204,7 @@ public class CompileXPath extends SystemFunction {
                 NodeInfo decl = (NodeInfo) globalFunctions.get(key);
                 decl = decl.getParent(); // TODO - work out whether we need the body or can use the whole definition
                 SequenceType reqType = SequenceType.ANY_SEQUENCE;
-                String rType = decl.getAttributeValue("", "as");
+                String rType = decl.getAttributeValue(NamespaceUri.NULL, "as");
                 if (rType != null) {
                     reqType = parser.parseSequenceType(rType, parseContext);
                 }
@@ -235,9 +235,9 @@ public class CompileXPath extends SystemFunction {
                 AxisIterator iter = decl.iterateAxis(AxisInfo.CHILD, argTest);
                 while (((arg = iter.next()) != null)) {
                     UserFunctionParameter p = new UserFunctionParameter();
-                    String name = arg.getAttributeValue("", "name");
+                    String name = arg.getAttributeValue(NamespaceUri.NULL, "name");
                     reqType = SequenceType.ANY_SEQUENCE;
-                    rType = decl.getAttributeValue("", "as");
+                    rType = decl.getAttributeValue(NamespaceUri.NULL, "as");
                     if (rType != null) {
                         reqType = parser.parseSequenceType(rType, parseContext);
                     }

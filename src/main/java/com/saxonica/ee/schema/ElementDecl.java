@@ -117,7 +117,7 @@ public class ElementDecl extends SchemaStructure
      */
 
     /*@NotNull*/
-    private String targetNamespace;
+    private NamespaceUri targetNamespace;
 
     /**
      * The SchemaType for this element declaration. This is null if the element
@@ -374,7 +374,7 @@ public class ElementDecl extends SchemaStructure
      */
 
     /*@NotNull*/
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return targetNamespace;
     }
 
@@ -1277,7 +1277,7 @@ public class ElementDecl extends SchemaStructure
         if (getName() != null) {
             serializer.emitAttribute("name", getName());
             if (!getTargetNamespace().isEmpty()) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
             }
         }
 
@@ -1356,7 +1356,7 @@ public class ElementDecl extends SchemaStructure
                 case "name":
                     return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
-                    return new AnyURIValue(getTargetNamespace());
+                    return new AnyURIValue(getTargetNamespace().toUnicodeString());
                 case "type definition":
                     return getType().getComponentAsFunction();
                 case "type table":

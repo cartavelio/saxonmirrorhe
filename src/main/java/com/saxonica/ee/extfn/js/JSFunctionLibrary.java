@@ -4,9 +4,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -23,13 +23,13 @@ public class JSFunctionLibrary implements FunctionLibrary {
 
     @Override
     public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
-        return NamespaceConstant.GLOBAL_JS.equals(functionName.getComponentName().getURI());
+        return NamespaceUri.GLOBAL_JS.equals(functionName.getComponentName().getURI());
     }
 
     @Override
     public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         StructuredQName fName = functionName.getComponentName();
-        if (NamespaceConstant.GLOBAL_JS.equals(fName.getURI())) {
+        if (NamespaceUri.GLOBAL_JS.equals(fName.getURI())) {
             try {
                 Expression windowCall = IXSLFunctionSet.getInstance().makeFunction("window", 0).makeFunctionCall();
                 Expression callCall = IXSLFunctionSet.getInstance().makeFunction("call", 3).makeFunctionCall(

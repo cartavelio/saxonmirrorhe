@@ -89,9 +89,9 @@ public class TypedValueFeed extends AbsorptionFeed {
     }
 
     @Override
-    public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+    public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
         if (depth == 0) {
-            characters(StringView.of(namespaceUri), Loc.NONE, properties);
+            characters(namespaceUri.toUnicodeString(), Loc.NONE, properties);
         }
     }
 

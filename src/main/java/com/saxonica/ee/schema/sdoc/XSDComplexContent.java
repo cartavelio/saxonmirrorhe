@@ -4,6 +4,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.SchemaException;
 
@@ -45,7 +46,7 @@ public class XSDComplexContent extends SchemaElement {
         processId();
 
         //-- @mixed
-        String mixedAtt = atts.getValue("", "mixed");
+        String mixedAtt = atts.getValue(NamespaceUri.NULL, "mixed");
         if (mixedAtt != null) {
             // It's not an error in XSD 1.0 if the value conflicts with an explicit value
             // on the complexType element - this value wins. But in XSD 1.1, the values must be consistent

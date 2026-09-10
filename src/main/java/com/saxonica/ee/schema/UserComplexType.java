@@ -2827,9 +2827,9 @@ public class UserComplexType extends UserDefinedType
                 min += p.getMinOccurs();
                 max += p.getMaxOccurs();
                 if (!((ElementWildcard) base).getWildcard().matches(p.getTargetComponentName(), true, config, this)) {
-                    String uri = p.getTargetComponentName().getURI();
+                    NamespaceUri uri = p.getTargetComponentName().getURI();
                     return "The base type does not allow elements in " +
-                            ("".equals(uri) ? "no namespace" : "namespace " + uri);
+                            (uri.isEmpty() ? "no namespace" : "namespace " + uri);
                 }
             }
             if (min < base.getMinOccurs()) {
@@ -3158,7 +3158,7 @@ public class UserComplexType extends UserDefinedType
         if (!isAnonymousType()) {
             serializer.emitAttribute("name", getName());
             if (!getTargetNamespace().isEmpty()) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
             }
         }
         serializer.emitAttribute("base", serializer.getTypeLink(getBaseType()));
@@ -3267,7 +3267,7 @@ public class UserComplexType extends UserDefinedType
                     if (type.isAnonymousType()) {
                         return EmptySequence.getInstance();
                     } else {
-                        return new AnyURIValue((type.getTargetNamespace()));
+                        return new AnyURIValue((type.getTargetNamespace().toUnicodeString()));
                     }
                 case "base type definition":
                     return type.getBaseType().getComponentAsFunction();

@@ -103,7 +103,7 @@ public class OnEmptyAdjunct extends TransmissionAdjunct implements FeedMaker {
         }
 
         @Override
-        public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
             if (isEmpty) {
                 super.namespace(prefix, namespaceUri, properties);
             }

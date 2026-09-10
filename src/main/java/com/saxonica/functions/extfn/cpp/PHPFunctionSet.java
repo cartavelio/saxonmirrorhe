@@ -4,10 +4,12 @@ package com.saxonica.functions.extfn.cpp;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.option.cpp.SaxonCAPI;
 import net.sf.saxon.option.cpp.XdmValueForCpp;
 import net.sf.saxon.s9api.XdmItem;
@@ -45,8 +47,8 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
     }
 
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.PHP;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.PHP;
     }
 
 

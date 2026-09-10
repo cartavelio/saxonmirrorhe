@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.NodeName_1;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AtomicType;
@@ -79,11 +80,11 @@ public class NodeNameFnCompiler extends ToItemCompiler {
         ga.loadLocal(nodeVar);
         ga.invokeInstanceMethod(argClass, "getPrefix");
         ga.loadLocal(nodeVar);
-        ga.invokeInstanceMethod(argClass, "getURI");
+        ga.invokeInstanceMethod(argClass, "getNamespaceUri");
         ga.loadLocal(lnameVar);
         allocateStatic(compiler, BuiltInAtomicType.QNAME);
 
-        ga.invokeConstructor(QNameValue.class, String.class, String.class, String.class, AtomicType.class);
+        ga.invokeConstructor(QNameValue.class, String.class, NamespaceUri.class, String.class, AtomicType.class);
 
         methodInfo.placeLabel(nodeNameReturn);
 

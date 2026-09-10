@@ -5,10 +5,7 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.StringTool;
@@ -108,7 +105,7 @@ public abstract class IdentityConstraint extends SchemaStructure
      *         target namespace is "absent".
      */
 
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return constraintName.getURI();
     }
 
@@ -294,7 +291,7 @@ public abstract class IdentityConstraint extends SchemaStructure
         serializer.emitAttribute("id", serializer.getId(this, false));
         serializer.emitAttribute("name", getName());
         if (getTargetNamespace() != null) {
-            serializer.emitAttribute("targetNamespace", getTargetNamespace());
+            serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
         }
         if (this instanceof KeyRef) {
             IdentityConstraint target = (IdentityConstraint) ((KeyRef) this).getTarget();
@@ -303,13 +300,13 @@ public abstract class IdentityConstraint extends SchemaStructure
         serializer.startElement("selector");
         serializer.emitNamespaceContext(selector.getNamespaceContext());
         serializer.emitAttribute("xpath", selector.getXPath());
-        serializer.emitAttribute("defaultNamespace", selector.getXPathDefaultNamespace());
+        serializer.emitAttribute("defaultNamespace", selector.getXPathDefaultNamespace().toString());
         serializer.endElement();
         for (IdentityField f : fields) {
             serializer.startElement("field");
             serializer.emitNamespaceContext(f.getNamespaceContext());
             serializer.emitAttribute("xpath", f.getXPath());
-            serializer.emitAttribute("defaultNamespace", f.getXPathDefaultNamespace());
+            serializer.emitAttribute("defaultNamespace", f.getXPathDefaultNamespace().toString());
             BuiltInAtomicType baseType = f.getBuiltInBaseType();
             if (baseType != null) {
                 serializer.emitAttribute("type", "#" + baseType.getName() +
@@ -333,7 +330,7 @@ public abstract class IdentityConstraint extends SchemaStructure
                 case "name":
                     return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
-                    return new AnyURIValue((getTargetNamespace()));
+                    return new AnyURIValue((getTargetNamespace().toUnicodeString()));
                 case "identity-constraint category":
                     String kind = IdentityConstraint.this.getConstraintCategory();
                     return new StringValue(kind);

@@ -3,8 +3,9 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.functions.NamespaceUri_1;
+import net.sf.saxon.functions.NamespaceUriFn_1;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.Cardinality;
@@ -22,7 +23,7 @@ public class NamespaceUriFnCompiler extends ToItemCompiler {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         LabelInfo namespaceUriReturn = methodInfo.newLabel("namespaceUriReturn");
-        final NamespaceUri_1 fn = (NamespaceUri_1) fnc.getTargetFunction();
+        final NamespaceUriFn_1 fn = (NamespaceUriFn_1) fnc.getTargetFunction();
         Class<? extends Item> argClass = compiler.compileToItem(fnc.getArg(0));
         argClass = ga.downCast(argClass, NodeInfo.class, true);
         if (Cardinality.allowsZero(fnc.getArg(0).getCardinality())) {
@@ -34,7 +35,8 @@ public class NamespaceUriFnCompiler extends ToItemCompiler {
             ga.goTo(namespaceUriReturn);
             methodInfo.placeLabel(namespaceNotNull);
         }
-        ga.invokeInstanceMethod(argClass, "getURI");
+        ga.invokeInstanceMethod(argClass, "getNamespaceUri");
+        ga.invokeInstanceMethod(NamespaceUri.class, "toString" );
         int uriVar = methodInfo.allocateLocal(String.class);
         ga.storeLocal(uriVar);
         ga.newInstance(Type.getType(AnyURIValue.class));

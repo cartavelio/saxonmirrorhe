@@ -8,8 +8,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.XPathParser;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
@@ -49,13 +49,13 @@ public class XSDFieldOrSelector extends AnnotationParent {
         String[] allowed = {"id", "xpath", "xpathDefaultNamespace"};
         allowAttributes(atts, allowed);
 
-
-        String defaultNS = atts.getValue("", "xpathDefaultNamespace");
-        if (defaultNS == null) {
-            defaultNS = getXSDSchema().getXPathDefaultNamespace();
+        NamespaceUri defaultNS;
+        String defaultNSstring = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
+        if (defaultNSstring == null) {
+            defaultNSstring = getXSDSchema().getXPathDefaultNamespace();
         }
-        if (defaultNS != null) {
-            switch (defaultNS) {
+        if (defaultNSstring != null) {
+            switch (defaultNSstring) {
                 case "##defaultNamespace":
                     defaultNS = getURIForPrefix("", true);
                     break;
@@ -63,14 +63,15 @@ public class XSDFieldOrSelector extends AnnotationParent {
                     defaultNS = getXSDSchema().getTargetNamespace();
                     break;
                 case "##local":
-                    defaultNS = "";
+                default:
+                    defaultNS = NamespaceUri.NULL;
                     break;
             }
         } else {
-            defaultNS = "";
+            defaultNS = NamespaceUri.NULL;
         }
 
-        String xpath = atts.getValue("", "xpath");
+        String xpath = atts.getValue(NamespaceUri.NULL, "xpath");
         if (xpath == null) {
             missingAttribute("xpath");
             xpath = ".";  // for error recovery
@@ -110,7 +111,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
         //-- field
         if (isField) {
             //-- saxon:order
-            String order = Whitespace.trim(getAttributeValue(NamespaceConstant.SAXON, "order"));
+            String order = Whitespace.trim(getAttributeValue(NamespaceUri.SAXON, "order"));
             boolean ascending = true;
             if (order != null) {
                 switch (order) {

@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeSelector;
@@ -36,7 +37,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
     static {
         eMap.put("copyModify", (loader, element) -> {
-            int validation = Validation.getCode(element.getAttributeValue("", "val"));
+            int validation = Validation.getCode(element.getAttributeValue(NamespaceUri.NULL, "val"));
             Expression bindings = loader.getExpressionWithRole(element, "bindings");
             Expression update = loader.getExpressionWithRole(element, "modify");
             Expression returnExp = loader.getExpressionWithRole(element, "return");
@@ -51,11 +52,11 @@ public class PackageLoaderEE extends PackageLoaderPE {
         });
 
         eMap.put("gcEE", (loader, element) -> {
-            String opAtt = element.getAttributeValue("", "op");
+            String opAtt = element.getAttributeValue(NamespaceUri.NULL, "op");
             int op = getOperator(opAtt);
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            String compAtt = element.getAttributeValue("", "comp");
+            String compAtt = element.getAttributeValue(NamespaceUri.NULL, "comp");
             AtomicComparer comp = loader.makeAtomicComparer(compAtt, element);
             GeneralComparison gc = new GeneralComparisonEE(lhs, op, rhs);
             gc.setAtomicComparer(comp);
@@ -66,7 +67,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
             // Dropped in 9.8, but found in 9.7 export files
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
-            String useAtt = element.getAttributeValue("", "use");
+            String useAtt = element.getAttributeValue(NamespaceUri.NULL, "use");
             return new IndexedFilterExpression((VariableReference) lhs, (ComparisonExpression) rhs, "left".equals(useAtt));
         });
 
@@ -75,9 +76,9 @@ public class PackageLoaderEE extends PackageLoaderPE {
             Expression base = loader.getExpressionWithRole(element, "base");
             Expression use = loader.getExpressionWithRole(element, "use");
             Expression search = loader.getExpressionWithRole(element, "search");
-            String compAtt = element.getAttributeValue("", "comp");
+            String compAtt = element.getAttributeValue(NamespaceUri.NULL, "comp");
             AtomicComparer comp = loader.makeAtomicComparer(compAtt, element);
-            String flags = element.getAttributeValue("", "flags");
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             boolean convertUntyped = flags != null && flags.contains("u");
             return new IndexedFilterExpression(base, use, search, comp, convertUntyped);
         });
@@ -88,8 +89,8 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
         eMap.put("insert", (loader, element) -> {
             int constructionMode = loader.getIntegerAttribute(element, "constructionMode");
-            int position = SaxonInsert.interpretPosition(element.getAttributeValue("", "position"));
-            String flags = element.getAttributeValue("", "flags");
+            int position = SaxonInsert.interpretPosition(element.getAttributeValue(NamespaceUri.NULL, "position"));
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             Expression source = loader.getFirstChildExpression(element);
             Expression target = loader.getSecondChildExpression(element);
             return new InsertExpression(source, target, position, constructionMode, flags.contains("i"), flags.contains("p"));
@@ -98,15 +99,15 @@ public class PackageLoaderEE extends PackageLoaderPE {
         eMap.put("rename", (loader, element) -> {
             Expression target = loader.getFirstChildExpression(element);
             Expression namer = loader.getSecondChildExpression(element);
-            String flags = element.getAttributeValue("", "flags");
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             return new RenameExpression(target, namer, null, null, flags != null && flags.contains("i"));
         });
 
         eMap.put("replaceNodes", (loader, element) -> {
-            int constructionMode = Validation.getCode(element.getAttributeValue("", "constructionMode"));
+            int constructionMode = Validation.getCode(element.getAttributeValue(NamespaceUri.NULL, "constructionMode"));
             Expression target = loader.getFirstChildExpression(element);
             Expression replacement = loader.getSecondChildExpression(element);
-            String flags = element.getAttributeValue("", "flags");
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             return new ReplaceNodeExpression(target, replacement, constructionMode, flags != null && flags.contains("i"));
         });
 
@@ -129,7 +130,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
             final ParseOptions options = new ParseOptions(loader.getConfiguration().getParseOptions());
             options.setSchemaValidationMode(validation);
             options.setTopLevelType(schemaType);
-            String flags = element.getAttributeValue("", "flags");
+            String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             if (flags != null && flags.contains("s")) {
                 loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
             }
@@ -138,7 +139,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
             final StreamInstr inst = new StreamInstr(href, body, options);
 
-            String accumulatorNames = element.getAttributeValue("", "accum");
+            String accumulatorNames = element.getAttributeValue(NamespaceUri.NULL, "accum");
             processAccumulatorList(loader, inst, accumulatorNames);
 
             // The xsl:stream instruction might be converted to an xsl:source-document instruction when we
@@ -166,7 +167,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
 
         eMap.put("switch", (loader, element) -> {
             SwitchExpression.SwitchCaseInfo info = new SwitchExpression.SwitchCaseInfo();
-            info.collation = loader.getConfiguration().getCollation(element.getAttributeValue("", "coll"));
+            info.collation = loader.getConfiguration().getCollation(element.getAttributeValue(NamespaceUri.NULL, "coll"));
             info.commonlhs = loader.getExpressionWithRole(element, "value");
             info.defaultAction = loader.getExpressionWithRole(element, "default");
             for (NodeInfo aCase : element.children(NodeSelector.of(n -> n.getLocalPart().equals("case")))) {

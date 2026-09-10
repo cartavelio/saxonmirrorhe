@@ -4,6 +4,7 @@ import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.Cardinality;
@@ -22,8 +23,8 @@ public class NamespaceUriFnElaborator extends ItemElaborator {
 
         return context -> {
             NodeInfo node = (NodeInfo) argEval.eval(context);
-            String uri = nullable && node == null ? "" : node.getURI();
-            return new AnyURIValue(uri);
+            NamespaceUri uri = nullable && node == null ? NamespaceUri.NULL : node.getNamespaceUri();
+            return new AnyURIValue(uri.toUnicodeString());
         };
 
     }

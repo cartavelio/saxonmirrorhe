@@ -170,7 +170,7 @@ public class SchemaNodeFactory implements NodeFactory {
                 }
             case StandardNames.XS_SCHEMA:
                 XSDSchema s = new XSDSchema();
-                SingleNamespaceSchema preparedSchema = new SingleNamespaceSchema(config, "");
+                SingleNamespaceSchema preparedSchema = new SingleNamespaceSchema(config, NamespaceUri.NULL);
                 s.setSchema(preparedSchema);
                 s.setSchemaCompiler(compiler);
                 s.setReferrer(referrer);

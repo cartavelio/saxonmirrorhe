@@ -39,9 +39,9 @@ import java.util.zip.*;
 public class Archive {
     public static final BigDecimalValue VERSION = new BigDecimalValue(new BigDecimal(0.1));
 
-    public static final String NAMESPACE = "http://expath.org/ns/archive";
+    public static final NamespaceUri NAMESPACE = NamespaceUri.of("http://expath.org/ns/archive");
     public static final String PREFIX = "arch";
-    public static final String ERROR_NAMESPACE = NAMESPACE;
+    public static final NamespaceUri ERROR_NAMESPACE = NAMESPACE;
     public static final String ERROR_PREFIX = PREFIX;
 
     /* Generate information attached to elements, rather than as attributes */
@@ -151,7 +151,7 @@ public class Archive {
      */
 
     private static QName qnameNS(String s) {
-        return new QName(PREFIX, NAMESPACE, s);
+        return new QName(PREFIX, NAMESPACE.toString(), s);
     }
 
     private static final HashMap<String, CharsetDecoder> decoders = new HashMap<String, CharsetDecoder>();

@@ -6,14 +6,12 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
@@ -292,7 +290,8 @@ public class InsertExpression extends BasicUpdatingExpression {
                     attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
                 } else {
                     attributeType = (SimpleType) copiedNode.getSchemaType();
-                    if (copiedNode.isId() || ("id".equals(copiedNode.getLocalPart()) && NamespaceConstant.XML.equals(copiedNode.getURI()))) {
+                    if (copiedNode.isId() || ("id".equals(copiedNode.getLocalPart()) &&
+                                                      NamespaceUri.XML.equals(copiedNode.getNamespaceUri()))) {
                         properties |= (ReceiverOption.IS_ID);
                     }
                     if (copiedNode.isIdref()) {

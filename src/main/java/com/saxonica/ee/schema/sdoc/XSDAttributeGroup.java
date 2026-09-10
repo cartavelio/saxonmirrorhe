@@ -4,10 +4,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.SchemaException;
 
@@ -63,7 +60,7 @@ public class XSDAttributeGroup extends SchemaElement {
             allowAttributes(atts, allowed);
             requireAttribute(atts, "name");
 
-            String qname = atts.getValue("", "name");
+            String qname = atts.getValue(NamespaceUri.NULL, "name");
             if (qname == null) {
                 // error already reported
                 return;
@@ -83,7 +80,7 @@ public class XSDAttributeGroup extends SchemaElement {
             String[] allowed = {"id", "ref"};
             allowAttributes(atts, allowed);
             requireAttribute(atts, "ref");
-            String ref = atts.getValue("", "ref");
+            String ref = atts.getValue(NamespaceUri.NULL, "ref");
             if (ref == null) {
                 return;
             }
@@ -289,7 +286,7 @@ public class XSDAttributeGroup extends SchemaElement {
                 // attribute group that it refers to, so that all references
                 // other than this one will identify the redefined group
 
-                String uri = getXSDSchema().getTargetNamespace();
+                NamespaceUri uri = getXSDSchema().getTargetNamespace();
                 String localName = ref.getTargetComponentName().getLocalPart();
                 String newLocalName = localName + '_' + ref.hashCode();
                 StructuredQName newNameCode = new StructuredQName("", uri, newLocalName);

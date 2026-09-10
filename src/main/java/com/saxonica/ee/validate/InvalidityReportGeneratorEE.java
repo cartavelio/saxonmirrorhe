@@ -235,7 +235,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
 //                writer.writeStartDocument();
 //                writer.setDefaultNamespace(REPORT_NS);
 //                writer.writeStartElement(REPORT_NS, "validation-report");
-                doc.setDefaultNamespace(REPORT_NS);
+                doc.setDefaultNamespace(REPORT_NS.toString());
                 report = doc.element("validation-report");
 
                 if (this.systemId != null) {

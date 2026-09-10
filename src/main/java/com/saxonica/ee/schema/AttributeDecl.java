@@ -6,11 +6,7 @@ import com.saxonica.ee.validate.SchemaAttributeTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -176,7 +172,7 @@ public final class AttributeDecl extends SchemaStructure
      * @return the target namespace URI
      */
 
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return attributeName.getURI();
     }
 
@@ -477,7 +473,7 @@ public final class AttributeDecl extends SchemaStructure
         return this == other ||
                 (getFingerprint() == other.getFingerprint() && hasSameLocation(other)) ||
                  // assume that declarations in the XML namespace are consistent
-                getTargetNamespace().equals(NamespaceConstant.XML);
+                getTargetNamespace().equals(NamespaceUri.XML);
     }
 
     /**
@@ -512,7 +508,7 @@ public final class AttributeDecl extends SchemaStructure
         if (getName() != null) {
             serializer.emitAttribute("name", getName());
             if (getTargetNamespace() != null && !getTargetNamespace().isEmpty()) {
-                serializer.emitAttribute("targetNamespace", getTargetNamespace());
+                serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
             }
         }
 
@@ -546,7 +542,7 @@ public final class AttributeDecl extends SchemaStructure
                 case "name":
                     return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
-                    return new AnyURIValue((getTargetNamespace()));
+                    return new AnyURIValue((getTargetNamespace().toUnicodeString()));
                 case "type definition":
                     return getType().getComponentAsFunction();
                 case "scope":

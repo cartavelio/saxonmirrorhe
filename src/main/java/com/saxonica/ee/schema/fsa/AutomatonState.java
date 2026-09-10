@@ -4,6 +4,7 @@ import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.CodedName;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -139,7 +140,7 @@ public abstract class AutomatonState implements State {
         }
 
         if (wildcardEdges != null && compiler.getLanguageVersion() == Configuration.XSD10) {
-            String uri = decl.getTargetNamespace();
+            NamespaceUri uri = decl.getTargetNamespace();
             for (Edge wedge : wildcardEdges) {
                 if (((Wildcard) wedge.getTerm()).matches(uri)) {
                     throw new SchemaException("Ambiguous content model, element " +

@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -126,7 +127,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
      * @return the value of the {target namespace} property of the Notation Declaration
      */
 
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return notationName.getURI();
     }
 
@@ -193,7 +194,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
         serializer.emitAttribute("id", id);
         serializer.emitAttribute("name", getName());
         if (getTargetNamespace() != null && !getTargetNamespace().isEmpty()) {
-            serializer.emitAttribute("targetNamespace", getTargetNamespace());
+            serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
         }
         if (notationPublicId != null) {
             serializer.emitAttribute("publicId", notationPublicId);
@@ -218,7 +219,7 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
                     case "name":
                         return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
-                        return new AnyURIValue(getTargetNamespace());
+                        return new AnyURIValue(getTargetNamespace().toUnicodeString());
                     case "system identifier":
                         if (getNotationSystemId() == null) {
                             return EmptySequence.getInstance();

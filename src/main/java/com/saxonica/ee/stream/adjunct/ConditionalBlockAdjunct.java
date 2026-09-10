@@ -287,7 +287,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
         }
 
         @Override
-        public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
+        public void namespace(String prefix, NamespaceUri namespaceUri, int properties) throws XPathException {
             action();
             getNextOutputter().namespace(prefix, namespaceUri, properties);
         }

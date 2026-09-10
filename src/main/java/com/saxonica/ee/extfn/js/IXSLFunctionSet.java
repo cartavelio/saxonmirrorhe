@@ -8,7 +8,6 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
@@ -122,8 +121,8 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     }
 
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.IXSL;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.IXSL;
     }
 
     @Override

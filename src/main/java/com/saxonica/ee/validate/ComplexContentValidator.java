@@ -353,15 +353,15 @@ public class ComplexContentValidator extends AttributeValidator {
                 if (!explained) {
                     // See if there is an element with the same local name that would be OK here
                     String foundLocal = nodeName.getLocalPart();
-                    String foundURI = nodeName.getURI();
+                    NamespaceUri foundURI = nodeName.getURI();
                     for (Edge e : state.getEdges()) {
                         if (e.getParticle() instanceof ElementParticle) {
                             String local = ((ElementParticle) e.getParticle()).getName();
                             if (local.equals(foundLocal)) {
-                                String uri = ((ElementParticle) e.getParticle()).getNamespaceURI();
+                                NamespaceUri uri = ((ElementParticle) e.getParticle()).getNamespaceURI();
                                 fsb.append("The element is in ")
-                                        .append("".equals(foundURI) ? "no namespace" : "namespace " + foundURI)
-                                        .append(" but it should be in ").append("".equals(uri) ? "no namespace" : "namespace " + uri).append(". ");
+                                        .append(foundURI.isEmpty() ? "no namespace" : "namespace " + foundURI)
+                                        .append(" but it should be in ").append(uri.isEmpty() ? "no namespace" : "namespace " + uri).append(". ");
                                 explained = true;
                                 break;
                             }
@@ -384,8 +384,8 @@ public class ComplexContentValidator extends AttributeValidator {
         if (!explained) {
             Set<String> specificTransitions = new HashSet<>();
             StructuredQName expected = null;
-            Set<String> specificURIs = new HashSet<>();
-            String namespace = null;
+            Set<NamespaceUri> specificURIs = new HashSet<>();
+            NamespaceUri namespace = null;
             for (Edge e : state.getEdges()) {
                 if (e.getParticle() instanceof ElementParticle) {
                     expected = e.getParticle().getTargetComponentName();
@@ -421,13 +421,13 @@ public class ComplexContentValidator extends AttributeValidator {
                         fsb.append("The following elements would be valid here");
                         if (uniform) {
                             fsb.append(", all in ");
-                            fsb.append("".equals(namespace) ? "no namespace" : "namespace " + namespace);
+                            fsb.append(namespace.isEmpty() ? "no namespace" : "namespace " + namespace);
                         }
                         fsb.append(": ");
                         int i = 0;
                         for (String s : specificTransitions) {
                             if (i >= 10) {
-                                fsb.append(", and " + (specificTransitions.size() - 10) + " others");
+                                fsb.append(", and ").append(specificTransitions.size() - 10).append(" others");
                                 break;
                             }
                             if (i++ > 0) {

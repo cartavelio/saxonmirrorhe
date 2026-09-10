@@ -3,6 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.transpile.CSharp;
@@ -49,7 +50,7 @@ public class XSDSimpleTypeRestriction extends SchemaElement {
         processId();
 
         //-- @base
-        String base = atts.getValue("", "base");
+        String base = atts.getValue(NamespaceUri.NULL, "base");
         foundBase = (base != null);
         if (foundBase) {
             int baseFingerprint;

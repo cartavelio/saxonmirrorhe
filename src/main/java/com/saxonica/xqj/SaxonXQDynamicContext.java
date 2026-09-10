@@ -8,10 +8,7 @@
 package com.saxonica.xqj;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -282,7 +279,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
 
     /*@NotNull*/
     private static StructuredQName getStructuredQName(QName qname) {
-        return new StructuredQName(qname.getPrefix(), qname.getNamespaceURI(), qname.getLocalPart());
+        return new StructuredQName(qname.getPrefix(), NamespaceUri.of(qname.getNamespaceURI()), qname.getLocalPart());
     }
 
     private static void checkNotNull(/*@Nullable*/ Object arg) throws XQException {

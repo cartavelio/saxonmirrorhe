@@ -8,6 +8,7 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.query.QueryModule;
@@ -121,7 +122,7 @@ public class UpdateParser {
             String var = t.currentTokenValue;
 
             LetExpression v = new LetExpression();
-            StructuredQName varQName = p.makeStructuredQName(var, "");
+            StructuredQName varQName = p.makeStructuredQName(var, NamespaceUri.NULL);
             v.setRequiredType(SequenceType.SINGLE_NODE);
             v.setVariableQName(varQName);
             clause.binding = v;

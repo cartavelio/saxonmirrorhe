@@ -14,10 +14,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.JPConverter;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -221,8 +218,8 @@ public class StandardObjectConverter implements ObjectConverter {
                 }
             } else if (value instanceof QName) {
                 QName q = (QName) value;
-                return new QNameValue(q.getPrefix(), q.getNamespaceURI(), q.getLocalPart(),
-                        BuiltInAtomicType.QNAME, false);
+                return new QNameValue(q.getPrefix(), NamespaceUri.of(q.getNamespaceURI()), q.getLocalPart(),
+                                      BuiltInAtomicType.QNAME, false);
             } else if (value instanceof Node) {
                 JPConverter jp = DOMObjectModel.getInstance().getJPConverter(Node.class, config);
                 return SequenceTool.asItem(jp.convert(value, new EarlyEvaluationContext(config)));

@@ -37,10 +37,9 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
 
     public static final double VERSION = 1.0;
 
-    public static final String NAMESPACE = "http://expath.org/ns/binary";
+    public static final NamespaceUri NAMESPACE = NamespaceUri.of("http://expath.org/ns/binary");
     public static final String PREFIX = "bin";
-    //public static final String ERROR_NAMESPACE = "http://expath.org/ns/error";
-    public static final String ERROR_NAMESPACE = NAMESPACE;
+    public static final NamespaceUri ERROR_NAMESPACE = NAMESPACE;
     public static final String ERROR_PREFIX = PREFIX;
 
     private static final String defaultEndianness = "BE";
@@ -232,7 +231,7 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
     }
 
     @Override
-    public String getNamespace() {
+    public NamespaceUri getNamespace() {
         return NAMESPACE;
     }
 

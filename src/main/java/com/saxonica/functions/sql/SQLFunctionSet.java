@@ -6,12 +6,12 @@ import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -19,7 +19,10 @@ import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.JavaExternalObjectType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AnyExternalObject;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -215,8 +218,8 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
      * namespace URI.
      */
     @Override
-    public String getNamespace() {
-        return NamespaceConstant.SQL;
+    public NamespaceUri getNamespace() {
+        return NamespaceUri.SQL;
     }
 
     @Override

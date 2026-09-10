@@ -4,9 +4,9 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.StringView;
@@ -62,14 +62,14 @@ public class XSDDocumentation extends SchemaElement {
         // by being in a different namespace. However, we need to check that it's a valid xs:language
         allowAttributes(atts, allowed);
 
-        String source = atts.getValue("", "source");
+        String source = atts.getValue(NamespaceUri.NULL, "source");
         if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             if (source != null && !StandardURIChecker.getInstance().isValidURI(source)) {
                 error("Value of source attribute must be a valid anyURI value");
             }
         }
 
-        String lang = atts.getValue(NamespaceConstant.XML, "lang");
+        String lang = atts.getValue(NamespaceUri.XML, "lang");
         if (lang != null) {
             ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.tidy(lang));
             if (vf != null) {

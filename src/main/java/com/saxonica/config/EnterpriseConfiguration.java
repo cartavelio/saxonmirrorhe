@@ -88,7 +88,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     private int licensedFeatures = 0;
-    private HashMap<String, Integer> namespaceStatus = new HashMap<>();
+    private HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
     private final SchemaURIResolver standardSchemaResolver;
@@ -569,7 +569,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public String readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, String expected)
+    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
         //noinspection SynchronizeOnNonFinalField
         synchronized(superSchema) {
@@ -579,7 +579,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 if (pipe.getErrorReporter() != null) {
                     schemaCompiler.setErrorReporter(pipe.getErrorReporter());
                 }
-                String ns = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
+                NamespaceUri ns = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
                 schemaCompiler.makeAllAutomata();
                 schemaCompiler.checkAllAutomata();
                 return ns;
@@ -598,7 +598,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, String expected)
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
             throws SchemaException {
         newSchemaCompiler().readMultipleSchemas(pipe, baseURI, schemaLocations, expected);
     }
@@ -615,7 +615,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter)
+    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
             throws SchemaException {
         return newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
     }
@@ -702,10 +702,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             return;
         }
         if (pschema instanceof SingleNamespaceSchema) {
-            String targetNamespace = ((SingleNamespaceSchema) pschema).getTargetNamespace();
+            NamespaceUri targetNamespace = ((SingleNamespaceSchema) pschema).getTargetNamespace();
             setNamespaceStatus(targetNamespace, PreparedSchema.NAMESPACE_KNOWN);
         } else {
-            for (String ns : pschema.getTargetNamespaces()) {
+            for (NamespaceUri ns : pschema.getTargetNamespaces()) {
                 setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
             }
         }
@@ -722,7 +722,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @param namespace the target namespace of the schema
      */
 
-    public synchronized void addSurrogateSchema(String namespace) {
+    public synchronized void addSurrogateSchema(NamespaceUri namespace) {
         checkLicensedFeature(LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
         setNamespaceStatus(namespace, PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION);
     }
@@ -734,52 +734,48 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public void addSchemaForBuiltInNamespace(String namespace) {
+    public void addSchemaForBuiltInNamespace(NamespaceUri namespace) {
         if (getNamespaceStatus(namespace) != PreparedSchema.NAMESPACE_UNKNOWN) {
             return;
         }
-        switch (namespace) {
-            case NamespaceConstant.XML:
-                addSchemaForXmlNamespace();
-                break;
-            case NamespaceConstant.SCHEMA_INSTANCE:
-                addSchemaForXsiNamespace();
-                break;
-            case NamespaceConstant.FN:
-                InputStream in = Version.platform.locateResource("xpath-functions.scm", new ArrayList<String>());
-                if (isTiming()) {
-                    getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
-                }
-                try {
-                    addSchemaSource(new StreamSource(in), makeErrorReporter());
-                } catch (SchemaException e) {
-                    throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
-                }
-                break;
-            default:
-                throw new IllegalArgumentException(namespace);
+        if (namespace == NamespaceUri.XML) {
+            addSchemaForXmlNamespace();
+        } else if (namespace == NamespaceUri.SCHEMA_INSTANCE) {
+            addSchemaForXsiNamespace();
+        } else if (namespace == NamespaceUri.FN) {
+            InputStream in = Version.platform.locateResource("xpath-functions.scm", new ArrayList<String>());
+            if (isTiming()) {
+                getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
+            }
+            try {
+                addSchemaSource(new StreamSource(in), makeErrorReporter());
+            } catch (SchemaException e) {
+                throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
+            }
+        } else {
+            throw new IllegalArgumentException(namespace.toString());
         }
     }
 
     private synchronized void addSchemaForXmlNamespace() {
-        if (getNamespaceStatus(NamespaceConstant.XML) == PreparedSchema.NAMESPACE_UNKNOWN) {
+        if (getNamespaceStatus(NamespaceUri.XML) == PreparedSchema.NAMESPACE_UNKNOWN) {
             try {
                 addSchema(XMLNamespaceSchema.buildSchema(this));
             } catch (SchemaException err) {
                 throw new AssertionError(err);
             }
-            setNamespaceStatus(NamespaceConstant.XML, PreparedSchema.NAMESPACE_KNOWN);
+            setNamespaceStatus(NamespaceUri.XML, PreparedSchema.NAMESPACE_KNOWN);
         }
     }
 
     private synchronized void addSchemaForXsiNamespace() {
-        if (getNamespaceStatus(NamespaceConstant.SCHEMA_INSTANCE) == PreparedSchema.NAMESPACE_UNKNOWN) {
+        if (getNamespaceStatus(NamespaceUri.SCHEMA_INSTANCE) == PreparedSchema.NAMESPACE_UNKNOWN) {
             try {
                 addSchema(XSINamespaceSchema.buildSchema(this));
             } catch (SchemaException err) {
                 throw new AssertionError(err);
             }
-            setNamespaceStatus(NamespaceConstant.SCHEMA_INSTANCE, PreparedSchema.NAMESPACE_KNOWN);
+            setNamespaceStatus(NamespaceUri.SCHEMA_INSTANCE, PreparedSchema.NAMESPACE_KNOWN);
         }
     }
 
@@ -791,7 +787,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
      */
 
-    public synchronized int getNamespaceStatus(String namespace) {
+    public synchronized int getNamespaceStatus(NamespaceUri namespace) {
         return namespaceStatus.getOrDefault(namespace, PreparedSchema.NAMESPACE_UNKNOWN);
     }
 
@@ -803,7 +799,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
      */
 
-    public synchronized void setNamespaceStatus(String namespace, int status) {
+    public synchronized void setNamespaceStatus(NamespaceUri namespace, int status) {
         if (status == PreparedSchema.NAMESPACE_UNKNOWN) {
             namespaceStatus.remove(namespace);
         } else {
@@ -820,7 +816,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public boolean isSchemaAvailable(String targetNamespace) {
+    public boolean isSchemaAvailable(NamespaceUri targetNamespace) {
         return getNamespaceStatus(targetNamespace) != PreparedSchema.NAMESPACE_UNKNOWN;
     }
 
@@ -839,10 +835,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     /**
      * Get the set of namespaces of imported schemas
+     * @return
      */
 
     @Override
-    public synchronized Set<String> getImportedNamespaces() {
+    public synchronized Set<NamespaceUri> getImportedNamespaces() {
         return namespaceStatus.keySet();
     }
 
@@ -867,8 +864,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public void sealNamespace(String namespace) {
-        if (!namespace.equals(NamespaceConstant.ANONYMOUS)) {
+    public void sealNamespace(NamespaceUri namespace) {
+        if (!namespace.equals(NamespaceUri.ANONYMOUS)) {
             setNamespaceStatus(namespace, PreparedSchema.NAMESPACE_SEALED);
         }
     }
@@ -882,7 +879,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return true if this namespace has been sealed, otherwise false
      */
 
-    public boolean isSealedNamespace(String namespace) {
+    public boolean isSealedNamespace(NamespaceUri namespace) {
         return getNamespaceStatus(namespace) == PreparedSchema.NAMESPACE_SEALED;
     }
 
@@ -929,7 +926,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             PreparedSchema schema = loader.load(source);
             addSchema(schema);
             schema.copyTo(superSchema, newSchemaCompiler());
-            for (String ns : schema.getTargetNamespaces()) {
+            for (NamespaceUri ns : schema.getTargetNamespaces()) {
                 setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
             }
         } catch (SchemaException e) {
@@ -1035,7 +1032,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     /*@Nullable*/
     @Override
     public SchemaType getSchemaType(StructuredQName name) {
-        if (name.hasURI(NamespaceConstant.SCHEMA)) {
+        if (name.hasURI(NamespaceUri.SCHEMA)) {
             SchemaType t = BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
             if (t != null) {
                 return t;
@@ -1070,8 +1067,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             fsb.append(at.getName());
         }
         String localName = fsb.toString();
-        StructuredQName name = new StructuredQName("anon", NamespaceConstant.ANONYMOUS, localName);
-        uut.setTypeName(name, getNamePool().allocateFingerprint(NamespaceConstant.ANONYMOUS, localName));
+        StructuredQName name = new StructuredQName("anon", NamespaceUri.ANONYMOUS, localName);
+        uut.setTypeName(name, getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, localName));
         uut.setMemberTypeReferences(memberRefs);
         return uut;
     }
@@ -1086,7 +1083,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public boolean isDeclaredNotation(String uri, String local) {
+    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
         return superSchema.getNotation(new StructuredQName("", uri, local)) != null;
     }
 
@@ -2083,9 +2080,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public void declareBuiltInExtensionElementNamespaces() {
         try {
-            setExtensionElementCreator(NamespaceConstant.SAXON, SaxonElementFactoryEE.FACTORY);
-            setExtensionElementCreator(NamespaceConstant.SAXON6, Saxon6ElementFactory.FACTORY);
-            setExtensionElementCreator("http://saxonica.com/ns/interactiveXSLT", IXSLElementFactory.FACTORY);
+            setExtensionElementCreator(NamespaceUri.SAXON, SaxonElementFactoryEE.FACTORY);
+            setExtensionElementCreator(NamespaceUri.SAXON6, Saxon6ElementFactory.FACTORY);
+            setExtensionElementCreator(NamespaceUri.of("http://saxonica.com/ns/interactiveXSLT"), IXSLElementFactory.FACTORY);
         } catch (XPathException e) {
             throw new IllegalStateException(e.getMessage());
         }

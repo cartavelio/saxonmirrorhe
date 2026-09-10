@@ -2,6 +2,7 @@ package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.ElementDecl;
 import net.sf.saxon.lib.ValidationStatisticsRecipient;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.Destination;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -57,7 +58,7 @@ public class StatisticsReporter implements ValidationStatisticsRecipient {
             SchemaComponent component = entry.getKey();
             int count = entry.getValue();
             String kind = null;
-            String namespace = null;
+            NamespaceUri namespace = NamespaceUri.NULL;
             String localname = null;
             if (component instanceof SchemaType) {
                 kind = (((SchemaType) component).isComplexType() ? "complexType" : "simpleType");
@@ -71,7 +72,7 @@ public class StatisticsReporter implements ValidationStatisticsRecipient {
             }
             coverage = coverage.withChild(Saplings.elem("component")
                                               .withAttr("kind", kind)
-                                              .withAttr("namespace", namespace)
+                                              .withAttr("namespace", namespace.toString())
                                               .withAttr("name", localname)
                                               .withAttr("count", count + ""));
 

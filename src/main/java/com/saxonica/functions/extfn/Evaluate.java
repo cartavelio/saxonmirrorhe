@@ -9,6 +9,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
@@ -81,7 +82,7 @@ public class Evaluate extends SystemFunction {
         pexpr.expStaticContext = env;
         pexpr.variables = new XPathVariable[10];
         for (int i = 1; i < 10; i++) {
-            pexpr.variables[i - 1] = env.declareVariable("", "p" + i);
+            pexpr.variables[i - 1] = env.declareVariable(NamespaceUri.NULL, "p" + i);
         }
 
         Expression expr;

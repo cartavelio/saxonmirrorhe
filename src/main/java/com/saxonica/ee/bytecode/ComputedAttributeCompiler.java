@@ -7,7 +7,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ComputedAttribute;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -156,7 +155,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         LabelInfo notEQName = methodInfo.newLabel("notEQName");
 
         int localNameVar = methodInfo.allocateLocal(String.class);
-        int uriVar = methodInfo.allocateLocal(String.class);
+        int uriVar = methodInfo.allocateLocal(NamespaceUri.class);
         ga.pushNull();
         ga.storeLocal(uriVar);
         final int prefixVar = methodInfo.allocateLocal(String.class);
@@ -261,7 +260,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.storeLocal(uriVar);
             ga.loadLocal(uriVar);
             ga.ifNonNull(notNull2.label());
-            ga.push("");
+            allocateStatic(compiler, NamespaceUri.NULL);
             ga.storeLocal(uriVar);
             methodInfo.placeLabel(notNull2);
             ga.loadLocal(localNameVar);
@@ -269,6 +268,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.invokeInstanceMethod(String.class, "equals", Object.class);
             ga.ifFalse(qnameOK);
             ga.loadLocal(uriVar);
+            ga.invokeInstanceMethod(NamespaceUri.class,"toString");
             ga.invokeInstanceMethod(String.class, "length");
             ga.push(0);
             ga.ifICmp(Generator.NE, qnameOK.label());
@@ -276,6 +276,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.goTo(end);
             methodInfo.placeLabel(qnameOK);
             ga.loadLocal(uriVar);
+            ga.invokeInstanceMethod(NamespaceUri.class, "toString");
             ga.invokeInstanceMethod(String.class, "length");
             ga.push(0);
             ga.ifICmp(Generator.NE, uriGTZero.label());
@@ -295,7 +296,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             compiler.generateGetContext();
             ga.invokeInstanceMethod(XPathContext.class, "getNamePool");
             ga.loadLocal(uriVar);
-            ga.invokeInstanceMethod(NamePool.class, "suggestPrefixForURI", String.class);
+            ga.invokeInstanceMethod(NamePool.class, "suggestPrefixForURI", NamespaceUri.class);
             ga.storeLocal(prefixVar);
             ga.loadLocal(prefixVar);
             ga.ifNonNull(prefixOK.label());
@@ -305,20 +306,19 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
 
             ga.loadLocal(uriVar);
-            ga.push(NamespaceConstant.XML);
-            ga.invokeInstanceMethod(String.class, "equals", Object.class);
+            allocateStatic(compiler, NamespaceUri.XML);
+            ga.invokeInstanceMethod(NamespaceUri.class, "equals", Object.class);
             ga.push("xml");
             ga.loadLocal(prefixVar);
             ga.invokeInstanceMethod(String.class, "equals", Object.class);
             ga.ifCmp(Type.getType(Boolean.TYPE), Generator.EQ, test2.label());
 
             ga.loadLocal(prefixVar);
-            ga.loadLocal(uriVar);
             ga.push(compAttr.isXSLT());
             ga.push(compAttr.getLocation().getSystemId());
             ga.push(compAttr.getLocation().getLineNumber());
             ga.invokeStaticMethod(Callback.class, "makeXmlNamespaceException",
-                                  String.class, String.class, Boolean.TYPE, String.class, Integer.TYPE);
+                                  String.class, Boolean.TYPE, String.class, Integer.TYPE);
             ga.throwException();
             //ga.goTo(end);
 
@@ -348,7 +348,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.invokeInstanceMethod(String.class, "length");
             ga.push(0);
             ga.ifICmp(Generator.NE, notEqual.label());
-            ga.push("");
+            allocateStatic(compiler, NamespaceUri.NULL);
             ga.storeLocal(uriVar);
             methodInfo.placeLabel(notEqual);
 
@@ -372,24 +372,28 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.ifNonNull(uriNotNull.label());
             if (namespace instanceof StringLiteral) {
                 ga.push(((StringLiteral) namespace).stringify());
+                ga.invokeStaticMethod(NamespaceUri.class, "of",String.class);
                 ga.storeLocal(uriVar);
 
             } else {
                 compiler.compileToPrimitive(namespace, String.class, OnEmpty.RETURN_NULL);
+                ga.invokeStaticMethod(NamespaceUri.class, "of", String.class);
                 ga.storeLocal(uriVar);
 
                 ga.invokeStaticMethod(StandardURIChecker.class, "getInstance");
                 ga.loadLocal(uriVar);
+                ga.invokeInstanceMethod(NamespaceUri.class, "toString");
                 ga.invokeInstanceMethod(StandardURIChecker.class, "isValidURI", String.class);
                 ga.ifTrue(uriNotNull);
                 compiler.generateDynamicError("The value of the namespace attribute must be a valid URI", "XTDE0865", compAttr.getLocation(), false);
                 ga.goTo(end);
             }
             methodInfo.placeLabel(uriNotNull);
+//            ga.loadLocal(uriVar);
+//            ga.checkCast(Type.getType(String.class));
+//            ga.storeLocal(uriVar);
             ga.loadLocal(uriVar);
-            ga.checkCast(Type.getType(String.class));
-            ga.storeLocal(uriVar);
-            ga.loadLocal(uriVar);
+            ga.invokeInstanceMethod(NamespaceUri.class, "toString");
             ga.invokeInstanceMethod(String.class, "length");
             ga.push(0);
             ga.ifCmp(Type.getType(Integer.TYPE), Generator.NE, notEqual2.label());
@@ -404,7 +408,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             // prefix = pool.suggestPrefixForURI(uri);
             allocateStatic(compiler, compiler.getConfiguration().getNamePool());
             ga.loadLocal(uriVar);
-            ga.invokeInstanceMethod(NamePool.class, "suggestPrefixForURI", String.class);
+            ga.invokeInstanceMethod(NamePool.class, "suggestPrefixForURI", NamespaceUri.class);
             ga.storeLocal(prefixVar);
             ga.loadLocal(prefixVar);
             ga.ifNonNull(doneAtt.label());
@@ -415,8 +419,8 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         }
         methodInfo.placeLabel(doneAtt);
         ga.loadLocal(uriVar);
-        ga.push(NamespaceConstant.XMLNS);
-        ga.invokeInstanceMethod(String.class, "equals", Object.class);
+        allocateStatic(compiler, NamespaceUri.XMLNS);
+        ga.invokeInstanceMethod(NamespaceUri.class, "equals", Object.class);
         ga.ifFalse(done1);
         compiler.generateParameterizedDynamicError(
                 new MessageTemplate(ga, "Cannot create attribute in namespace {$1}", uriVar),
@@ -430,7 +434,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.loadLocal(prefixVar);
         ga.loadLocal(uriVar);
         ga.loadLocal(localNameVar);
-        ga.invokeConstructor(FingerprintedQName.class, String.class, String.class, String.class);
+        ga.invokeConstructor(FingerprintedQName.class, String.class, NamespaceUri.class, String.class);
         methodInfo.placeLabel(end);
 
         methodInfo.releaseLocal(localNameVar);

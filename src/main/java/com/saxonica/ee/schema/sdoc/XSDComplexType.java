@@ -4,7 +4,6 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.*;
@@ -71,7 +70,7 @@ public class XSDComplexType extends SchemaElement {
             allowAttributes(atts, allowed);
         }
 
-        String debug = atts.getValue(NamespaceConstant.SAXON, "debug");
+        String debug = atts.getValue(NamespaceUri.SAXON, "debug");
         if (debug != null) {
             debug = Whitespace.trim(debug);
             if ("true".equals(debug) || "1".equals(debug)) {
@@ -83,7 +82,7 @@ public class XSDComplexType extends SchemaElement {
         processId();
 
         //  @name
-        String attValue = Whitespace.trim(atts.getValue("", "name"));
+        String attValue = Whitespace.trim(atts.getValue(NamespaceUri.NULL, "name"));
 
         // allocate fingerprint
         if (attValue != null) {
@@ -114,21 +113,21 @@ public class XSDComplexType extends SchemaElement {
         }
 
         //  @mixed
-        String mixedAtt = Whitespace.trim(atts.getValue("", "mixed"));
+        String mixedAtt = Whitespace.trim(atts.getValue(NamespaceUri.NULL, "mixed"));
         if (mixedAtt != null) {
             mixed = Optional.of(parseBooleanAttribute("mixed", mixedAtt));
         }
 
 
         //  @abstract
-        attValue = atts.getValue("", "abstract");
+        attValue = atts.getValue(NamespaceUri.NULL, "abstract");
         if (attValue != null) {
             boolean isAbstract = parseBooleanAttribute("abstract", attValue);
             complexType.setAbstract(isAbstract);
         }
 
         //  @block
-        String blockVal = atts.getValue("", "block");
+        String blockVal = atts.getValue(NamespaceUri.NULL, "block");
         if (blockVal == null) {
             complexType.setFinalProhibitions(getXSDSchema().getBlockDefault());
         } else {
@@ -140,7 +139,7 @@ public class XSDComplexType extends SchemaElement {
         }
 
         //  @final
-        String finalVal = atts.getValue("", "final");
+        String finalVal = atts.getValue(NamespaceUri.NULL, "final");
         if (finalVal == null) {
             complexType.setFinalProhibitions(getXSDSchema().getFinalDefault());
         } else {
@@ -152,7 +151,7 @@ public class XSDComplexType extends SchemaElement {
         }
 
         //  @defaultAttributesApply
-        String applyAtt = Whitespace.trim(atts.getValue("", "defaultAttributesApply"));
+        String applyAtt = Whitespace.trim(atts.getValue(NamespaceUri.NULL, "defaultAttributesApply"));
         if (applyAtt != null) {
             if (applyAtt.equals("true") || applyAtt.equals("1")) {
                 defaultAttributesApply = true;
@@ -303,7 +302,7 @@ public class XSDComplexType extends SchemaElement {
             }
             complexType.setRedefinitionLevel(oldType.getRedefinitionLevel() + 1);
             // rename the type being redefined
-            String uri = getXSDSchema().getTargetNamespace();
+            NamespaceUri uri = getXSDSchema().getTargetNamespace();
             NamePool pool = getNamePool();
             String localName = pool.getLocalName(complexType.getFingerprint());
             String newLocalName = localName + '_' + complexType.hashCode();

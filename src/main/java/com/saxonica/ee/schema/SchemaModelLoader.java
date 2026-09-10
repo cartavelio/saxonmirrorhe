@@ -9,13 +9,12 @@ import com.saxonica.ee.schema.sdoc.XSDAssert;
 import com.saxonica.ee.stream.Sweep;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.s9api.HostLanguage;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.IndependentContext;
@@ -250,12 +249,12 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
-            String xsdVersion = attributes.getValue("", "xsdVersion");
+            String xsdVersion = attributes.getValue(NamespaceUri.NULL, "xsdVersion");
             if (xsdVersion != null &&
                     xsdVersion.compareTo(loader.config.getConfigurationProperty(Feature.XSD_VERSION)) > 0) {
                 throw new SchemaException("Imported schema component model requires XSD version " + xsdVersion);
             }
-            loader.dmk = attributes.getValue("", "dmk");
+            loader.dmk = attributes.getValue(NamespaceUri.NULL, "dmk");
             if (loader.dmk != null) {
                 loader.schema.setLocalLicenseId(loader.config.registerLocalLicense(loader.dmk));
             }
@@ -324,21 +323,21 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
-            boolean isGlobal = toBoolean(attributes.getValue("", "global"));
-            boolean isNillable = toBoolean(attributes.getValue("", "nillable"));
-            boolean isAbstract = toBoolean(attributes.getValue("", "abstract"));
-            String type = attributes.getValue("", "type");
-            String finalAtt = attributes.getValue("", "final");
-            String defaultValue = attributes.getValue("", "default");
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            boolean isGlobal = toBoolean(attributes.getValue(NamespaceUri.NULL, "global"));
+            boolean isNillable = toBoolean(attributes.getValue(NamespaceUri.NULL, "nillable"));
+            boolean isAbstract = toBoolean(attributes.getValue(NamespaceUri.NULL, "abstract"));
+            String type = attributes.getValue(NamespaceUri.NULL, "type");
+            String finalAtt = attributes.getValue(NamespaceUri.NULL, "final");
+            String defaultValue = attributes.getValue(NamespaceUri.NULL, "default");
             int finalSet = parseFinalOrBlock("final",
                     finalAtt,
                     Derivation.DERIVATION_EXTENSION |
                     Derivation.DERIVATION_RESTRICTION |
                     Derivation.DERIVE_BY_SUBSTITUTION);
-            String blockAtt = attributes.getValue("", "block");
+            String blockAtt = attributes.getValue(NamespaceUri.NULL, "block");
             int blockSet = parseFinalOrBlock("block",
                     blockAtt,
                     Derivation.DERIVATION_EXTENSION |
@@ -347,7 +346,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             elementDecl = new ElementDecl(config, isGlobal, null);
             elementDecl.setGeneratedId(id);
             loader.components.put(id, elementDecl);
-            elementDecl.setElementName(new StructuredQName("", namespace, name));
+            elementDecl.setElementName(new StructuredQName("", NamespaceUri.of(namespace), name));
             elementDecl.setAbstract(isAbstract);
             elementDecl.setNillable(isNillable);
             elementDecl.setBlock(blockSet);
@@ -358,7 +357,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
             if (type != null) {
                 if (type.startsWith("#")) {
-                    int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
+                    int fp = config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, type.substring(1));
                     elementDecl.setTypeReference(new TypeReference(fp, config, null));
                 } else {
                     loader.fixups.add(new Fixup(elementDecl, type, FIXUP_ELEMENT_TYPE));
@@ -400,7 +399,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String head = attributes.getValue("", "ref");
+            String head = attributes.getValue(NamespaceUri.NULL, "ref");
             if (head != null) {
                 loader.fixups.add(new Fixup(elementDecl, head, FIXUP_ELEMENT_SUBSTITUTION_GROUP));
             }
@@ -437,14 +436,14 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
-            String xpathText = attributes.getValue("", "test");
-            String xmlBase = attributes.getValue(NamespaceConstant.XML, "base");
-            String defaultNamespace = attributes.getValue("", "defaultNamespace");
-            String type = attributes.getValue("", "type");
+            String xpathText = attributes.getValue(NamespaceUri.NULL, "test");
+            String xmlBase = attributes.getValue(NamespaceUri.XML, "base");
+            String defaultNamespace = attributes.getValue(NamespaceUri.NULL, "defaultNamespace");
+            String type = attributes.getValue(NamespaceUri.NULL, "type");
             XPathEvaluator evaluator = new XPathEvaluator(config);
             IndependentContext env = (IndependentContext) evaluator.getStaticContext();
             env.setNamespaceResolver(loader.namespaceResolver);
-            env.setDefaultElementNamespace(defaultNamespace);
+            env.setDefaultElementNamespace(NamespaceUri.of(defaultNamespace));
             env.setBaseURI(xmlBase);
             XPathExpression condition;
             try {
@@ -458,7 +457,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             alt.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
             alt.setParameters(new HashMap<>());
             if (type.startsWith("#")) {
-                int fp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
+                int fp = config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, type.substring(1));
                 alt.setTypeReference(new TypeReference(fp, loader.config, null));
             } else {
                 loader.fixups.add(new Fixup(alt, type, FIXUP_ALTERNATIVE_TYPE));
@@ -491,7 +490,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
 
-            String ref = attributes.getValue("", "ref");
+            String ref = attributes.getValue(NamespaceUri.NULL, "ref");
 
             IdentityConstraintReference constraintRef = new IdentityConstraintReference();
             container.addIdentityConstraint(constraintRef);
@@ -534,11 +533,11 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
-            String key = attributes.getValue("", "key");
-            StructuredQName nameCode = new StructuredQName("", namespace, name);
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            String key = attributes.getValue(NamespaceUri.NULL, "key");
+            StructuredQName nameCode = new StructuredQName("", NamespaceUri.of(namespace), name);
             IdentityConstraint ic;
             //int kind;
             switch (localName) {
@@ -596,12 +595,13 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
-            String xpath = attributes.getValue("", "xpath");
+            String xpath = attributes.getValue(NamespaceUri.NULL, "xpath");
             boolean isField = localName.equals("field");
-            String defaultNamespace = attributes.getValue("", "defaultNamespace");
+            String defaultNamespace = attributes.getValue(NamespaceUri.NULL, "defaultNamespace");
+            NamespaceUri defaultNamespaceUri = NamespaceUri.of(defaultNamespace);
             IndependentContext env = new IndependentContext(loader.config);
             env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
-            env.setDefaultElementNamespace(defaultNamespace);
+            env.setDefaultElementNamespace(defaultNamespaceUri);
             env.setXPathLanguageLevel(20);
             Pattern selector;
             try {
@@ -613,13 +613,13 @@ public class SchemaModelLoader extends ProxyReceiver {
                 IdentityField idf = new IdentityField(xpath);
                 idf.setSelection(selector);
                 idf.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
-                idf.setXPathDefaultNamespace(defaultNamespace);
+                idf.setXPathDefaultNamespace(defaultNamespaceUri);
                 identityConstraint.addField(idf);
             } else {
                 IdentitySelector ids = new IdentitySelector(xpath);
                 ids.setSelection(selector);
                 ids.setNamespaceContext(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
-                ids.setXPathDefaultNamespace(defaultNamespace);
+                ids.setXPathDefaultNamespace(defaultNamespaceUri);
                 identityConstraint.setSelector(ids);
             }
         }
@@ -649,17 +649,17 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            NamespaceUri namespace = NamespaceUri.of(attributes.getValue(NamespaceUri.NULL, "targetNamespace"));
             StructuredQName attributeName = null;
             if (name != null) {
                 attributeName = new StructuredQName("", namespace, name);
             }
-            boolean isGlobal = toBoolean(attributes.getValue("", "global"));
-            boolean isInheritable = toBoolean(attributes.getValue("", "inheritable"));
-            String type = attributes.getValue("", "type");
-            String defaultValue = attributes.getValue("", "default");
+            boolean isGlobal = toBoolean(attributes.getValue(NamespaceUri.NULL, "global"));
+            boolean isInheritable = toBoolean(attributes.getValue(NamespaceUri.NULL, "inheritable"));
+            String type = attributes.getValue(NamespaceUri.NULL, "type");
+            String defaultValue = attributes.getValue(NamespaceUri.NULL, "default");
 
             attributeDecl = new AttributeDecl(loader.config, isGlobal);
             loader.components.put(id, attributeDecl);
@@ -673,7 +673,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
             if (type != null) {
                 if (type.startsWith("#")) {
-                    int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, type.substring(1));
+                    int fp = loader.config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, type.substring(1));
                     attributeDecl.setTypeReference(new TypeReference(fp, loader.config, null));
                 } else {
                     loader.fixups.add(new Fixup(attributeDecl, type, FIXUP_ATTRIBUTE_TYPE));
@@ -730,30 +730,31 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            NamespaceUri namespaceUri = NamespaceUri.of(namespace);
             int fp;
             if (name == null) {
-                fp = loader.config.getNamePool().allocateFingerprint(NamespaceConstant.ANONYMOUS, id);
+                fp = loader.config.getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, id);
                 name = id;
-                namespace = NamespaceConstant.ANONYMOUS;
+                namespaceUri = NamespaceUri.ANONYMOUS;
             } else {
-                fp = loader.config.getNamePool().allocateFingerprint(namespace, name);
+                fp = loader.config.getNamePool().allocateFingerprint(namespaceUri, name);
             }
-            String base = attributes.getValue("", "base");
-            String variety = attributes.getValue("", "variety");
-            boolean isAbstract = toBoolean(attributes.getValue("", "abstract"));
-            String derivation = attributes.getValue("", "derivationMethod");
-            String simpleType = attributes.getValue("", "simpleType");
+            String base = attributes.getValue(NamespaceUri.NULL, "base");
+            String variety = attributes.getValue(NamespaceUri.NULL, "variety");
+            boolean isAbstract = toBoolean(attributes.getValue(NamespaceUri.NULL, "abstract"));
+            String derivation = attributes.getValue(NamespaceUri.NULL, "derivationMethod");
+            String simpleType = attributes.getValue(NamespaceUri.NULL, "simpleType");
             complexType = new UserComplexType(config, null);
             complexType.setEmptyCombinedAttributeGroup();
             //complexType.setSaxonDebug(true);
             loader.components.put(id, complexType);
-            complexType.setTypeName(new StructuredQName("", namespace, name), fp);
+            complexType.setTypeName(new StructuredQName("", namespaceUri, name), fp);
             if (base != null) {
                 if (base.startsWith("#")) {
-                    int basefp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, base.substring(1));
+                    int basefp = config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, base.substring(1));
                     complexType.setBaseTypeReference(new TypeReference(basefp, config, null));
                 } else {
                     loader.fixups.add(new Fixup(complexType, base, FIXUP_COMPLEX_TYPE_BASE_TYPE));
@@ -779,7 +780,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             complexType.setDerivationMethodName(derivation);
             if (simpleType != null) {
                 if (simpleType.startsWith("#")) {
-                    int typefp = config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, simpleType.substring(1));
+                    int typefp = config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, simpleType.substring(1));
                     complexType.setSimpleContentTypeReference(new TypeReference(typefp, config, null));
                 } else {
                     loader.fixups.add(new Fixup(complexType, simpleType, FIXUP_COMPLEX_TYPE_SIMPLE_TYPE));
@@ -790,13 +791,13 @@ public class SchemaModelLoader extends ProxyReceiver {
             } else {
                 loader.schema.addType(complexType);
             }
-            String blockAtt = attributes.getValue("", "block");
+            String blockAtt = attributes.getValue(NamespaceUri.NULL, "block");
             int blockSet = parseFinalOrBlock("block",
                     blockAtt,
                     Derivation.DERIVATION_EXTENSION |
                                                      Derivation.DERIVATION_RESTRICTION);
             complexType.setBlock(blockSet);
-            String finalAtt = attributes.getValue("", "final");
+            String finalAtt = attributes.getValue(NamespaceUri.NULL, "final");
             int finalSet = parseFinalOrBlock("final",
                     finalAtt,
                     Derivation.DERIVATION_EXTENSION |
@@ -833,23 +834,24 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             EnterpriseConfiguration config = loader.config;
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            NamespaceUri namespaceUri = NamespaceUri.of(namespace);
             int fingerprint;
             if (name == null) {
-                fingerprint = config.getNamePool().allocateFingerprint(NamespaceConstant.ANONYMOUS, id);
+                fingerprint = config.getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, id);
                 name = id;
-                namespace = NamespaceConstant.ANONYMOUS;
+                namespaceUri = NamespaceUri.ANONYMOUS;
                 // TODO: this won't be unique if loading several SCM schemas
             } else {
-                fingerprint = loader.config.getNamePool().allocateFingerprint(namespace, name);
+                fingerprint = loader.config.getNamePool().allocateFingerprint(namespaceUri, name);
             }
-            String base = attributes.getValue("", "base");
-            String variety = attributes.getValue("", "variety");
-            String itemType = attributes.getValue("", "itemType");
-            String memberTypes = attributes.getValue("", "memberTypes");
-            //String primitiveType = attributes.getValue("", "primitiveType");
+            String base = attributes.getValue(NamespaceUri.NULL, "base");
+            String variety = attributes.getValue(NamespaceUri.NULL, "variety");
+            String itemType = attributes.getValue(NamespaceUri.NULL, "itemType");
+            String memberTypes = attributes.getValue(NamespaceUri.NULL, "memberTypes");
+            //String primitiveType = attributes.getValue(NamespaceUri.NULL, "primitiveType");
             if ("atomic".equals(variety)) {
                 simpleType = new UserAtomicType(config);
             } else if ("list".equals(variety)) {
@@ -860,10 +862,10 @@ public class SchemaModelLoader extends ProxyReceiver {
                 throw new SchemaException("Unknown simple type variety: " + variety);
             }
             loader.components.put(id, simpleType);
-            simpleType.setTypeName(new StructuredQName("", namespace, name), fingerprint);
+            simpleType.setTypeName(new StructuredQName("", namespaceUri, name), fingerprint);
             if (base != null) {
                 if (base.startsWith("#")) {
-                    int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, base.substring(1));
+                    int fp = loader.config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, base.substring(1));
                     simpleType.setBaseTypeReference(new TypeReference(fp, loader.config, null));
                 } else {
                     loader.fixups.add(new Fixup(simpleType, base, FIXUP_SIMPLE_TYPE_BASE_TYPE));
@@ -872,7 +874,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
             if (itemType != null) {
                 if (itemType.startsWith("#")) {
-                    int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, itemType.substring(1));
+                    int fp = loader.config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, itemType.substring(1));
                     ((UserListType) simpleType).setItemTypeReference(new TypeReference(fp, loader.config, null));
                 } else {
                     loader.fixups.add(new Fixup(simpleType, itemType, FIXUP_SIMPLE_TYPE_ITEM_TYPE));
@@ -883,7 +885,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 while (st.hasMoreTokens()) {
                     String memberType = st.nextToken();
                     if (memberType.startsWith("#")) {
-                        int fp = loader.config.getNamePool().getFingerprint(NamespaceConstant.SCHEMA, memberType.substring(1));
+                        int fp = loader.config.getNamePool().getFingerprint(NamespaceUri.SCHEMA, memberType.substring(1));
                         ((UserUnionType) simpleType).addMemberTypeReference(new TypeReference(fp, loader.config, null));
                     } else {
                         loader.fixups.add(new Fixup(simpleType, memberType, FIXUP_SIMPLE_TYPE_MEMBER_TYPE));
@@ -937,12 +939,12 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
             StructuredQName nameCode = null;
             if (name != null) {
-                nameCode = new StructuredQName("", namespace, name);
+                nameCode = new StructuredQName("", NamespaceUri.of(namespace), name);
             }
 
             loader.components.put(id, group);
@@ -970,20 +972,20 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
             Notation notation = new Notation(loader.config, null);
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
             StructuredQName nameCode;
             if (name == null) {
-                nameCode = new StructuredQName("anon", NamespaceConstant.ANONYMOUS, id);
+                nameCode = new StructuredQName("anon", NamespaceUri.ANONYMOUS, id);
                 // TODO: this won't be unique if loading several SCM schemas
             } else {
-                nameCode = new StructuredQName("", namespace, name);
+                nameCode = new StructuredQName("", NamespaceUri.of(namespace), name);
             }
             notation.setNotationName(nameCode);
-            String systemId = attributes.getValue("", "systemId");
+            String systemId = attributes.getValue(NamespaceUri.NULL, "systemId");
             notation.setNotationSystemId(systemId);
-            String publicId = attributes.getValue("", "publicId");
+            String publicId = attributes.getValue(NamespaceUri.NULL, "publicId");
             notation.setNotationPublicId(publicId);
             loader.components.put(id, notation);
             loader.schema.addNotation(notation);
@@ -1003,10 +1005,11 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String id = attributes.getValue("", "id");
-            String name = attributes.getValue("", "name");
-            String namespace = attributes.getValue("", "targetNamespace");
-            StructuredQName modelGroupName = new StructuredQName("", namespace, name);
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
+            String name = attributes.getValue(NamespaceUri.NULL, "name");
+            String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            NamespaceUri namespaceUri = NamespaceUri.of(namespace);
+            StructuredQName modelGroupName = new StructuredQName("", namespaceUri, name);
             ModelGroupDefinition mgd = new ModelGroupDefinition(loader.config, null);
             mgd.setModelGroupName(modelGroupName);
             loader.components.put(id, mgd);
@@ -1045,10 +1048,10 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
 
-            boolean required = toBoolean(attributes.getValue("", "required"));
-            boolean isInheritable = toBoolean(attributes.getValue("", "inheritable"));
-            String ref = attributes.getValue("", "ref");
-            String defaultValue = attributes.getValue("", "default");
+            boolean required = toBoolean(attributes.getValue(NamespaceUri.NULL, "required"));
+            boolean isInheritable = toBoolean(attributes.getValue(NamespaceUri.NULL, "inheritable"));
+            String ref = attributes.getValue(NamespaceUri.NULL, "ref");
+            String defaultValue = attributes.getValue(NamespaceUri.NULL, "default");
 
             attributeUse = new AttributeUse(loader.config);
             attributeUse.setInheritable(isInheritable ? 1 : 0);
@@ -1096,20 +1099,20 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             if (!localName.equals("assert")) {
-                String value = attributes.getValue("", "value");
-                boolean namespaceSensitive = toBoolean(attributes.getValue("", "namespaceSensitive"));
+                String value = attributes.getValue(NamespaceUri.NULL, "value");
+                boolean namespaceSensitive = toBoolean(attributes.getValue(NamespaceUri.NULL, "namespaceSensitive"));
                 NamespaceResolver resolver = null;
                 if (namespaceSensitive) {
                     resolver = NamespaceMap.fromNamespaceResolver(loader.namespaceResolver);
                 }
                 Facet facet = Facet.makeFacet(localName, value, loader.config, resolver);
-                String fixed = attributes.getValue("", "fixed");
+                String fixed = attributes.getValue(NamespaceUri.NULL, "fixed");
                 if (fixed != null) {
                     facet.setFixed(toBoolean(fixed));
                 }
                 if (facet instanceof PatternFacet) {
                     ((PatternFacet) facet).setDoNotMerge(true);
-                    String flags = attributes.getValue("", "flags");
+                    String flags = attributes.getValue(NamespaceUri.NULL, "flags");
                     if (flags != null) {
                         ((PatternFacet) facet).setFlags(flags);
                     }
@@ -1150,7 +1153,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
 
-            String fixed = attributes.getValue("", "fixed");
+            String fixed = attributes.getValue(NamespaceUri.NULL, "fixed");
             if (fixed != null) {
                 facet.setFixed(toBoolean(fixed));
             }
@@ -1208,13 +1211,13 @@ public class SchemaModelLoader extends ProxyReceiver {
                 default:
                     throw new SchemaException("Unknown kind of particle " + localName);
             }
-            String minOccursAtt = attributes.getValue("", "minOccurs");
+            String minOccursAtt = attributes.getValue(NamespaceUri.NULL, "minOccurs");
             int minOccurs = 1;
             if (minOccursAtt != null) {
                 minOccurs = Integer.parseInt(minOccursAtt.trim());
             }
             particle.setMinOccurs(minOccurs);
-            String maxOccursAtt = attributes.getValue("", "maxOccurs");
+            String maxOccursAtt = attributes.getValue(NamespaceUri.NULL, "maxOccurs");
             int maxOccurs = -1;
             if (maxOccursAtt != null) {
                 maxOccursAtt = maxOccursAtt.trim();
@@ -1227,15 +1230,15 @@ public class SchemaModelLoader extends ProxyReceiver {
             particle.setMaxOccurs(maxOccurs);
 
             if (particle instanceof ElementParticle) {
-                String ref = attributes.getValue("", "ref");
+                String ref = attributes.getValue(NamespaceUri.NULL, "ref");
                 loader.fixups.add(new Fixup(particle, ref, FIXUP_ELEMENT_PARTICLE_REF));
             } else if (particle instanceof ModelGroupParticle) {
-                String ref = attributes.getValue("", "ref");
+                String ref = attributes.getValue(NamespaceUri.NULL, "ref");
                 if (ref != null) {
                     loader.fixups.add(new Fixup(particle, ref, FIXUP_MODEL_GROUP_PARTICLE_REF));
                 }
             } else if (particle instanceof ElementWildcard) {
-                String ref = attributes.getValue("", "ref");
+                String ref = attributes.getValue(NamespaceUri.NULL, "ref");
                 loader.fixups.add(new Fixup(particle, ref, FIXUP_ELEMENT_WILDCARD_REF));
             } else {
                 throw new IllegalStateException("Unknown particle " + particle.getClass().getName());
@@ -1333,10 +1336,11 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
-            String xpathText = attributes.getValue("", "test");
-            String xmlBase = attributes.getValue(NamespaceConstant.XML, "base");
-            String defaultNamespace = attributes.getValue("", "defaultNamespace");
-            String sweep = attributes.getValue("", "sweep");
+            String xpathText = attributes.getValue(NamespaceUri.NULL, "test");
+            String xmlBase = attributes.getValue(NamespaceUri.XML, "base");
+            String defaultNamespace = attributes.getValue(NamespaceUri.NULL, "defaultNamespace");
+            NamespaceUri defaultNamespaceUri = NamespaceUri.of(defaultNamespace);
+            String sweep = attributes.getValue(NamespaceUri.NULL, "sweep");
 
             XPathEvaluator evaluator;
             if (container instanceof UserComplexType) {
@@ -1347,14 +1351,14 @@ public class SchemaModelLoader extends ProxyReceiver {
             IndependentContext env = (IndependentContext) evaluator.getStaticContext();
             env.setNamespaceResolver(NamespaceMap.fromNamespaceResolver(loader.namespaceResolver));
             env.setBaseURI(xmlBase);
-            env.setDefaultElementNamespace(defaultNamespace);
+            env.setDefaultElementNamespace(defaultNamespaceUri);
             env.getPackageData().setLocalLicenseId(loader.schema.getLocalLicenseId());
             env.setSchemaAware(true);
             boolean isSimple = (container instanceof UserSimpleType) ||
                     (container instanceof UserComplexType && ((UserComplexType) container).isSimpleContent());
             XPathVariable valueVariable = null;
             if (isSimple || container instanceof PreprocessFacet || xpathText.contains("$value")) {
-                valueVariable = env.declareVariable("", "value");
+                valueVariable = env.declareVariable(NamespaceUri.NULL, "value");
             }
             XPathExpression condition;
             try {
@@ -1413,8 +1417,8 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String mode = attributes.getValue("", "mode");
-            String wildcardRef = attributes.getValue("", "wildcard");
+            String mode = attributes.getValue(NamespaceUri.NULL, "mode");
+            String wildcardRef = attributes.getValue(NamespaceUri.NULL, "wildcard");
             if (mode.equals("suffix")) {
                 loader.fixups.add(new Fixup(container, wildcardRef, FIXUP_COMPLEX_TYPE_OPEN_CONTENT_SUFFIX));
             } else {
@@ -1454,7 +1458,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             } else {
                 throw new IllegalArgumentException(container.getClass().getName());
             }
-            String ref = attributes.getValue("", "ref");
+            String ref = attributes.getValue(NamespaceUri.NULL, "ref");
             loader.fixups.add(new Fixup(awc, ref, FIXUP_ATTRIBUTE_WILDCARD_REF));
         }
 
@@ -1490,7 +1494,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            lexicalForm = attributes.getValue("", "lexicalForm");
+            lexicalForm = attributes.getValue(NamespaceUri.NULL, "lexicalForm");
         }
 
         @Override
@@ -1533,16 +1537,17 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
-            String type = attributes.getValue("", "type");
+            String type = attributes.getValue(NamespaceUri.NULL, "type");
             BuiltInAtomicType t = (BuiltInAtomicType) loader.config.getSchemaType(
-                new StructuredQName("", NamespaceConstant.SCHEMA, type.substring(1)));
-            String value = attributes.getValue("", "value");
-            String namespace = attributes.getValue("", "namespace");
+                new StructuredQName("", NamespaceUri.SCHEMA, type.substring(1)));
+            String value = attributes.getValue(NamespaceUri.NULL, "value");
+            String namespaceAtt = attributes.getValue(NamespaceUri.NULL, "namespace");
             AtomicValue typedValue;
             try {
-                if (namespace == null) {
+                if (namespaceAtt == null) {
                     typedValue = t.getTypedValue(StringView.tidy(value), null, loader.config.getConversionRules()).head();
                 } else {
+                    NamespaceUri namespace = NamespaceUri.of(namespaceAtt);
                     String[] parts = NameChecker.getQNameParts(value);
                     if (t.equals(BuiltInAtomicType.QNAME)) {
                         typedValue = new QNameValue(parts[0], namespace, parts[1]);
@@ -1583,40 +1588,40 @@ public class SchemaModelLoader extends ProxyReceiver {
 
             Wildcard wildcard = new Wildcard();
             wildcard.setConfiguration((EnterpriseConfiguration) loader.getConfiguration());
-            String id = attributes.getValue("", "id");
+            String id = attributes.getValue(NamespaceUri.NULL, "id");
             if (id != null) {
                 loader.components.put(id, wildcard);
             }
-            String processContents = attributes.getValue("", "processContents");
+            String processContents = attributes.getValue(NamespaceUri.NULL, "processContents");
             wildcard.setProcessContents(processContents);
-            String constraint = attributes.getValue("", "constraint");
+            String constraint = attributes.getValue(NamespaceUri.NULL, "constraint");
             switch (constraint) {
                 case "any":
                     // no action
                     break;
                 case "not": {
-                    String namespaces = attributes.getValue("", "namespaces");
+                    String namespaces = attributes.getValue(NamespaceUri.NULL, "namespaces");
                     StringTokenizer st = new StringTokenizer(namespaces, " \t\n\r");
                     while (st.hasMoreTokens()) {
                         String ns = st.nextToken();
-                        wildcard.addDisallowedNamespace(ns.equals("##local") ? "" : ns);
+                        wildcard.addDisallowedNamespace(ns.equals("##local") ? NamespaceUri.NULL : NamespaceUri.of(ns));
                     }
                     break;
                 }
                 case "enumeration": {
                     wildcard.setNoNamespacesAllowed();
-                    String namespaces = attributes.getValue("", "namespaces");
+                    String namespaces = attributes.getValue(NamespaceUri.NULL, "namespaces");
                     StringTokenizer st = new StringTokenizer(namespaces, " \t\n\r");
                     while (st.hasMoreTokens()) {
                         String ns = st.nextToken();
-                        wildcard.addAllowedNamespace(ns.equals("##local") ? "" : ns);
+                        wildcard.addAllowedNamespace(ns.equals("##local") ? NamespaceUri.NULL : NamespaceUri.of(ns));
                     }
                     break;
                 }
                 default:
                     throw new SchemaException("Unknown wildcard constraint " + constraint);
             }
-            String disallowedQNames = attributes.getValue("", "notQName");
+            String disallowedQNames = attributes.getValue(NamespaceUri.NULL, "notQName");
             if (disallowedQNames != null) {
                 NamePool pool = loader.getNamePool();
                 StringTokenizer st = new StringTokenizer(disallowedQNames, " \r\t\n");
@@ -1706,21 +1711,21 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String stateNumber = attributes.getValue("", "nr");
+            String stateNumber = attributes.getValue(NamespaceUri.NULL, "nr");
             FiniteStateMachine fsm = fsmHandler.getFiniteStateMachine();
             if (stateNumber.equals("0")) {
                 state = (DeterminizedState) fsm.getInitialState();
             } else {
                 state = new DeterminizedState(fsm);
             }
-            String isFinal = attributes.getValue("", "final");
+            String isFinal = attributes.getValue(NamespaceUri.NULL, "final");
             state.setFinalState(toBoolean(isFinal)) ;
-            String min = attributes.getValue("", "minOccurs");
-            String max = attributes.getValue("", "maxOccurs");
+            String min = attributes.getValue(NamespaceUri.NULL, "minOccurs");
+            String max = attributes.getValue(NamespaceUri.NULL, "maxOccurs");
             if (min != null && max != null) {
                 state.setLimits(Integer.parseInt(min), max.equals("unbounded") ? -1 : Integer.parseInt(max));
             }
-            String afterMax = attributes.getValue("", "afterMax");
+            String afterMax = attributes.getValue(NamespaceUri.NULL, "afterMax");
             if (afterMax != null) {
                 PendingEdge leavingEdge = new PendingEdge();
                 leavingEdge.machine = fsm;
@@ -1757,8 +1762,8 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            String term = attributes.getValue("", "term");
-            int targetState = Integer.parseInt(attributes.getValue("", "to"));
+            String term = attributes.getValue(NamespaceUri.NULL, "term");
+            int targetState = Integer.parseInt(attributes.getValue(NamespaceUri.NULL, "to"));
             PendingEdge pe = new PendingEdge();
             pe.machine = fsm.getFiniteStateMachine();
             pe.fromState = state.getStateNumber();

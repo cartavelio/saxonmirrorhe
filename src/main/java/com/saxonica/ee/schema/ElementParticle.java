@@ -2,6 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaComponent;
@@ -81,7 +82,7 @@ public class ElementParticle extends Particle {
      */
 
     /*@NotNull*/
-    public String getNamespaceURI() {
+    public NamespaceUri getNamespaceURI() {
         return getTargetComponentName().getURI();
     }
 

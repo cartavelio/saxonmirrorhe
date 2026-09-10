@@ -4,6 +4,7 @@ import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.AttributeGetter;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -20,7 +21,7 @@ public class AttributeGetterElaborator extends ItemElaborator {
     public ItemEvaluator elaborateForItem() {
         final AttributeGetter exp = (AttributeGetter)getExpression();
         final int fingerprint = exp.getAttributeName().getFingerprint();
-        final String uri = exp.getAttributeName().getURI();
+        final NamespaceUri uri = exp.getAttributeName().getURI();
         final String local = exp.getAttributeName().getLocalPart();
         return context -> {
             Item item = context.getContextItem();

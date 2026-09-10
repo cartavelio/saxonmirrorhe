@@ -1,7 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.om.NamespaceUri;
 
 /**
  * A schema (collection of schema components) that has an identifiable target namespace: typically
@@ -12,9 +12,9 @@ import net.sf.saxon.value.Whitespace;
 public class SingleNamespaceSchema extends PreparedSchema {
 
     /*@NotNull*/
-    private String targetNamespace;
+    private NamespaceUri targetNamespace;
 
-    public SingleNamespaceSchema(EnterpriseConfiguration config, /*@NotNull*/ String targetNamespace) {
+    public SingleNamespaceSchema(EnterpriseConfiguration config, NamespaceUri targetNamespace) {
         super(config);
         this.targetNamespace = targetNamespace;
     }
@@ -23,12 +23,12 @@ public class SingleNamespaceSchema extends PreparedSchema {
      * Sets the target namespace for this Schema
      *
      * @param targetNamespace the target namespace for this Schema
-     * @see <B>&sect; 2.7 XML Schema Part 1: Structures</B>
+     * @see 2.7 XML Schema Part 1: Structures
      */
 
-    public void setTargetNamespace(/*@NotNull*/ String targetNamespace) {
+    public void setTargetNamespace(NamespaceUri targetNamespace) {
         //System.err.println("Schema " + this + " has namespace " + targetNamespace);
-        this.targetNamespace = Whitespace.trim(targetNamespace);
+        this.targetNamespace = targetNamespace;
     }
 
     /**
@@ -40,7 +40,7 @@ public class SingleNamespaceSchema extends PreparedSchema {
      */
 
     /*@NotNull*/
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return targetNamespace;
     }
 }

@@ -73,7 +73,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         } else {
             theParameterTypes = null;
         }
-        returnVoidAsThis = functionName.getURI().endsWith("?void=this");
+        returnVoidAsThis = functionName.getURI().toString().endsWith("?void=this");
     }
 
     /**

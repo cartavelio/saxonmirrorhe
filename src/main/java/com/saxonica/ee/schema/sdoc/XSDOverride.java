@@ -5,6 +5,7 @@ import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 
@@ -49,7 +50,7 @@ public class XSDOverride extends SchemaElement {
         processId();
 
         //-- @schemaLocation
-        String schemaLocation = atts.getValue("", "schemaLocation");
+        String schemaLocation = atts.getValue(NamespaceUri.NULL, "schemaLocation");
         if (schemaLocation == null) {
             missingAttribute("schemaLocation");
             return;
@@ -92,7 +93,7 @@ public class XSDOverride extends SchemaElement {
             SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
             originalSchemaDocument = schemaDoc;
             originalSchema = schemaDoc.getXSDSchema().getSchema();
-            String originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();
+            NamespaceUri originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();
             if (!getSchema().getTargetNamespace().equals(originalTargetNS)) {
                 if (originalTargetNS.isEmpty()) {
                     // chameleon override
@@ -129,7 +130,7 @@ public class XSDOverride extends SchemaElement {
             Throwable cause = e.getException();
             if (cause instanceof java.io.IOException) {
                 warning("Failed to locate overridden schema document " + schemaLocation);
-                originalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+                originalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), NamespaceUri.NULL);
                 // We will get a hard error if any components are actually redefined
             } else {
                 // the error has already been reported
@@ -185,21 +186,21 @@ public class XSDOverride extends SchemaElement {
                     break;
                 }
                 case StandardNames.XS_ATTRIBUTE: {
-                    String attributeName = child.getAttributeValue("", "name");
+                    String attributeName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (attributeName != null && !redefinedAttributes.add(attributeName)) {
                         error("Attempting to override the same attribute declaration more than once");
                     }
                     break;
                 }
                 case StandardNames.XS_ELEMENT: {
-                    String elementName = child.getAttributeValue("", "name");
+                    String elementName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (elementName != null && !redefinedElements.add(elementName)) {
                         error("Attempting to override the same element declaration more than once");
                     }
                     break;
                 }
                 case StandardNames.XS_ATTRIBUTE_GROUP: {
-                    String attributeGroupName = child.getAttributeValue("", "name");
+                    String attributeGroupName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (attributeGroupName != null && !redefinedAttributeGroups.add(attributeGroupName)) {
                         error("Attempting to override the same attribute group more than once");
                     }
@@ -207,21 +208,21 @@ public class XSDOverride extends SchemaElement {
                 }
                 case StandardNames.XS_COMPLEX_TYPE:
                 case StandardNames.XS_SIMPLE_TYPE: {
-                    String typeName = child.getAttributeValue("", "name");
+                    String typeName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (typeName != null && !redefinedTypes.add(typeName)) {
                         error("Attempting to override the same type more than once");
                     }
                     break;
                 }
                 case StandardNames.XS_GROUP: {
-                    String modelGroupName = child.getAttributeValue("", "name");
+                    String modelGroupName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (modelGroupName != null && !redefinedModelGroups.add(modelGroupName)) {
                         error("Attempting to override the same named model group more than once");
                     }
                     break;
                 }
                 case StandardNames.XS_notation: {
-                    String notationName = child.getAttributeValue("", "name");
+                    String notationName = child.getAttributeValue(NamespaceUri.NULL, "name");
                     if (notationName != null && !redefinedNotations.add(notationName)) {
                         error("Attempting to override the same notation declaration more than once");
                     }

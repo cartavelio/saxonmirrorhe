@@ -12,8 +12,8 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.FunctionStreamability;
@@ -70,7 +70,7 @@ public class FilterFnStreamer extends FilteringAdjunct {
         if (uf == null) {
             reasons.add("Call to " + fn.getParentExpression().toShortString() + " is not streamable, because the predicate function is not statically known");
             return false;
-        } else if (uf.getFunctionName().hasURI(NamespaceConstant.ANONYMOUS)) {
+        } else if (uf.getFunctionName().hasURI(NamespaceUri.ANONYMOUS)) {
             // check that the function satisfies the rules for streamability = inspection
             UserFunctionParameter first = uf.getParameterDefinitions()[0];
             first.setFunctionStreamability(FunctionStreamability.INSPECTION);

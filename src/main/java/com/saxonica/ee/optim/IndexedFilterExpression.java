@@ -6,7 +6,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
@@ -183,7 +183,7 @@ public final class IndexedFilterExpression extends Expression {
         if (!(getBaseExpression() instanceof VariableReference)) {
             if (ExpressionTool.dependsOnFocus(getSearchExpression())) {
                 LetExpression let = new LetExpression();
-                let.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "vv" + computeHashCode()));
+                let.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "vv" + computeHashCode()));
                 let.setSequence(getSearchExpression());
                 let.setRequiredType(getSearchExpression().getStaticType());
                 Expression filter = new GeneralComparisonEE(getUseExpression(), Token.EQUALS, new LocalVariableReference(let));

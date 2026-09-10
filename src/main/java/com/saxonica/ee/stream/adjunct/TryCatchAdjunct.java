@@ -10,8 +10,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.TryCatch;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -99,7 +99,7 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
                 for (TryCatch.CatchClause clause : ((TryCatch)getExpression()).getCatchClauses()) {
                     if (code == null) {
                         // fallback, use a code that's only likely to be matched by catch="*"
-                        code = new StructuredQName("saxon", NamespaceConstant.SAXON, "XXXX9999");
+                        code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
                     }
                     if (clause.nameTest.matches(code)) {
                         Expression caught = clause.catchOp.getChildExpression();

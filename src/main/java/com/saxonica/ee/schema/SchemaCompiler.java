@@ -261,7 +261,7 @@ public class SchemaCompiler {
      * @return the root element of the tree representing this schema document
      */
 
-    public XSDSchema getExistingSchemaDocument(String systemId, String targetNamespace) {
+    public XSDSchema getExistingSchemaDocument(String systemId, NamespaceUri targetNamespace) {
         return documentsAlreadyRead.get(systemId + "##" + targetNamespace);
     }
 
@@ -309,7 +309,7 @@ public class SchemaCompiler {
      * @return the actual target namespace of the schema
      */
 
-    public String readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, String expected)
+    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
         Source source = SchemaReader.getSource(baseURI, schemaLocation, this, expected);
         if (source == null) {
@@ -339,13 +339,13 @@ public class SchemaCompiler {
      * is invalid, or inconsistent with already loaded schema components.
      */
 
-    private String processSchemaDocument(SchemaDocument schemadoc, String schemaLocation, String expected)
+    private NamespaceUri processSchemaDocument(SchemaDocument schemadoc, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
         if (schemadoc.isCompiledSchemaDocument()) {
             // the schema will already have been added to the Configuration
             return expected;
         }
-        String targetNamespace = schemadoc.getTargetNamespace();
+        NamespaceUri targetNamespace = schemadoc.getTargetNamespace();
         if (expected != null && !expected.equals(targetNamespace)) {
             SchemaException exception = new SchemaException(
                     "Schema " +
@@ -392,7 +392,7 @@ public class SchemaCompiler {
      * @throws SchemaException if reading a schema document fails
      */
 
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, String expected)
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
             throws SchemaException {
         String[] locations = new String[schemaLocations.size()];
         int loc = 0;
@@ -426,7 +426,7 @@ public class SchemaCompiler {
                 } else {
                     mergedSchema = PreparedSchema.merge(mergedSchema, ps);
                 }
-                String targetNamespace = schemadoc.getTargetNamespace();
+                NamespaceUri targetNamespace = schemadoc.getTargetNamespace();
                 if (expected != null && !expected.equals(targetNamespace)) {
                     throw new SchemaException(
                             "Schema at " + locations[i] +
@@ -472,7 +472,7 @@ public class SchemaCompiler {
      * @throws SchemaException if the inline schema is in error
      */
 
-    public String readInlineSchema(NodeInfo root, String expected, ErrorReporter errorReporter)
+    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
             throws SchemaException {
         ErrorReporter listener = errorReporter == null ? getErrorReporter() : errorReporter;
         setErrorReporter(listener);
@@ -623,9 +623,11 @@ public class SchemaCompiler {
             chameleonTransformer = new SchemaDocumentTransformer(config, "chameleon.xsl");
         }
         HashMap<StructuredQName, Sequence> params = new HashMap<StructuredQName, Sequence>();
-        params.put(new StructuredQName("", "", "newTargetNamespace"), new AnyURIValue((referrer.getXSDSchema().getTargetNamespace())));
+        params.put(new StructuredQName("", NamespaceUri.NULL, "newTargetNamespace"),
+                   new AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
         GlobalParameterSet parameterSet = new GlobalParameterSet();
-        parameterSet.put(new StructuredQName("", "", "newTargetNamespace"), new AnyURIValue((referrer.getXSDSchema().getTargetNamespace())));
+        parameterSet.put(new StructuredQName("", NamespaceUri.NULL, "newTargetNamespace"),
+                         new AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
         TreeInfo doc = chameleonTransformer.transform(this, pipelineConfiguration, referrer, input, parameterSet);
         return new SchemaDocument(doc);
     }
@@ -644,7 +646,7 @@ public class SchemaCompiler {
             overrideTransformer = new SchemaDocumentTransformer(config, "override.xsl");
         }
         GlobalParameterSet params = new GlobalParameterSet();
-        params.put(new StructuredQName("", "", "overrideElement"), referrer);
+        params.put(new StructuredQName("", NamespaceUri.NULL, "overrideElement"), referrer);
         TreeInfo doc = overrideTransformer.transform(this, pipelineConfiguration, referrer, input, params);
         return new SchemaDocument(doc);
     }

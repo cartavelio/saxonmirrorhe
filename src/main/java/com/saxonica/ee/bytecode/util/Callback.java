@@ -62,7 +62,6 @@ public class Callback {
      * URI can only be used as a pair
      *
      * @param prefix    the prefix that was actually used
-     * @param namespace the namespace URI that was actually used
      * @param isXSLT true if this is XSLT code, false if XQuery (affects the error code produced)
      * @param systemId     the module in which the error occurred
      * @param lineNumber the line number where the error occurred
@@ -70,7 +69,7 @@ public class Callback {
      */
 
     @SuppressWarnings({"UnusedParameters"})
-    public static XPathException makeXmlNamespaceException(String prefix, String namespace, boolean isXSLT, String systemId, int lineNumber) {
+    public static XPathException makeXmlNamespaceException(String prefix, boolean isXSLT, String systemId, int lineNumber) {
         String message;
         if (prefix.equals("xml")) {
             message = "When the prefix is 'xml', the namespace URI must be " + NamespaceConstant.XML;

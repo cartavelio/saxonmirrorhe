@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
@@ -86,7 +87,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      *
      * @return the namespace URI of this named Group: null if the group is in no namespace
      */
-    public String getTargetNamespace() {
+    public NamespaceUri getTargetNamespace() {
         return modelGroupName.getURI();
     }
 
@@ -225,7 +226,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
         serializer.emitAttribute("id", id);
         serializer.emitAttribute("name", getName());
         if (getTargetNamespace() != null && !getTargetNamespace().isEmpty()) {
-            serializer.emitAttribute("targetNamespace", getTargetNamespace());
+            serializer.emitAttribute("targetNamespace", getTargetNamespace().toString());
         }
         for (Particle p : getParticles()) {
             p.serializeParticle(serializer);
@@ -252,7 +253,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
                 case "name":
                     return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
-                    return new AnyURIValue(getTargetNamespace());
+                    return new AnyURIValue(getTargetNamespace().toUnicodeString());
                 case "model group":
                     return modelGroupFunction;
                 default:

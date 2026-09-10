@@ -106,7 +106,8 @@ public class XQuery10TestSuiteDriver {
     }
 
     private NameTest elementNameTest(NamePool pool, String local) {
-        int nameFP = pool.allocateFingerprint("http://www.w3.org/2005/02/query-test-XQTSCatalog", local) & NamePool.FP_MASK;
+        int nameFP = pool.allocateFingerprint(
+                NamespaceUri.of("http://www.w3.org/2005/02/query-test-XQTSCatalog"), local) & NamePool.FP_MASK;
         return new NameTest(Type.ELEMENT, nameFP, pool);
     }
 
@@ -229,7 +230,7 @@ public class XQuery10TestSuiteDriver {
 
 
             boolean attSet = true;
-            NameTest exceptionTestsNT = new NameTest(Type.ELEMENT, pool.allocateFingerprint("", "tests"), pool);
+            NameTest exceptionTestsNT = new NameTest(Type.ELEMENT, pool.allocateFingerprint(NamespaceUri.NULL, "tests"), pool);
             AxisIterator exceptionTestCases = exceptionsDoc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, exceptionTestsNT);
             while (true) {
                 NodeInfo testCase = exceptionTestCases.next();
@@ -256,7 +257,7 @@ public class XQuery10TestSuiteDriver {
             );
 
             NodeInfo catalogTop = catalog.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
-            catalogVersion = catalogTop.getAttributeValue("", "version");
+            catalogVersion = catalogTop.getAttributeValue(NamespaceUri.NULL, "version");
 
 
             String date = DateTimeValue.getCurrentDateTime(null).getStringValue().substring(0, 10);
@@ -278,7 +279,7 @@ public class XQuery10TestSuiteDriver {
                 if (schemaElement == null) {
                     break;
                 }
-                String fileName = schemaElement.getAttributeValue("", "FileName");
+                String fileName = schemaElement.getAttributeValue(NamespaceUri.NULL, "FileName");
                 monitor.println("Loading schema " + fileName);
                 FileInputStream ssIStream = new FileInputStream(new File(new File(testSuiteDir), fileName));
                 StreamSource ss = new StreamSource(ssIStream);
@@ -300,9 +301,9 @@ public class XQuery10TestSuiteDriver {
                 if (sourceElement == null) {
                     break;
                 }
-                String schema = sourceElement.getAttributeValue("", "schema");
-                String id = sourceElement.getAttributeValue("", "ID");
-                String fileName = sourceElement.getAttributeValue("", "FileName");
+                String schema = sourceElement.getAttributeValue(NamespaceUri.NULL, "schema");
+                String id = sourceElement.getAttributeValue(NamespaceUri.NULL, "ID");
+                String fileName = sourceElement.getAttributeValue(NamespaceUri.NULL, "FileName");
                 monitor.println("Loading source " + fileName);
                 File sFile = new File(new File(testSuiteDir), fileName);
                 FileInputStream inStream = new FileInputStream(sFile.getCanonicalPath());
@@ -330,7 +331,7 @@ public class XQuery10TestSuiteDriver {
                     break;
                 }
 
-                String testName = testCase.getAttributeValue("", "name");
+                String testName = testCase.getAttributeValue(NamespaceUri.NULL, "name");
                 boolean optimizationOK = true;
                 if (testPattern != null && !testPattern.matcher(testName).matches()) {
                     continue;
@@ -345,7 +346,7 @@ public class XQuery10TestSuiteDriver {
                     continue;
                 }
 
-                String filePath = testCase.getAttributeValue("", "FilePath");
+                String filePath = testCase.getAttributeValue(NamespaceUri.NULL, "FilePath");
                 if (filePath.startsWith("StaticTyping")) {
                     continue;
                 }
@@ -357,8 +358,8 @@ public class XQuery10TestSuiteDriver {
                 //NodeInfo testInput = getChildElement(testCase, inputFileNT);
 
                 NodeInfo query = getChildElement(testCase, queryNT);
-                String queryName = query.getAttributeValue("", "name");
-                String languageVersion = query.getAttributeValue("", "version");
+                String queryName = query.getAttributeValue(NamespaceUri.NULL, "name");
+                String languageVersion = query.getAttributeValue(NamespaceUri.NULL, "version");
                 if (languageVersion == null) {
                     languageVersion = specVersion;
                 }
@@ -411,13 +412,13 @@ public class XQuery10TestSuiteDriver {
 
                 NodeInfo optElement = getChildElement(testCase, optimizationNT);
                 if (optElement != null) {
-                    String explain = optElement.getAttributeValue("", "explain");
+                    String explain = optElement.getAttributeValue(NamespaceUri.NULL, "explain");
                     if ("true".equals(explain) || "1".equals(explain)) {
                         ExpressionPresenter presenter = new ExpressionPresenter(eeConfig);
                         xqe.explain(presenter);
                         presenter.close();
                     }
-                    String assertion = optElement.getAttributeValue("", "assert");
+                    String assertion = optElement.getAttributeValue(NamespaceUri.NULL, "assert");
                     if (assertion != null) {
                         TinyBuilder builder = new TinyBuilder(eeConfig.makePipelineConfiguration());
                         builder.setStatistics(eeConfig.getTreeStatistics().ASSERTION_TREE_STATISTICS);
@@ -456,7 +457,7 @@ public class XQuery10TestSuiteDriver {
 
                 setQueryParameters(catalog, testCase, dqc, inputUriNT, collectionNT);
                 if (unfolded) {
-                    dqc.setParameter(new StructuredQName("", "", "zlsJJ"), StringValue.ZERO_LENGTH_UNTYPED);
+                    dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, "zlsJJ"), StringValue.ZERO_LENGTH_UNTYPED);
                 }
 
                 NodeInfo defaultCollection = getChildElement(testCase, defaultCollectionNT);
@@ -507,13 +508,13 @@ public class XQuery10TestSuiteDriver {
                     if (outputFileElement == null) {
                         break;
                     }
-                    String appliesTo = outputFileElement.getAttributeValue("", "spec-version");
+                    String appliesTo = outputFileElement.getAttributeValue(NamespaceUri.NULL, "spec-version");
                     if (appliesTo != null && !appliesTo.contains(specVersion)) {
                         continue; // results apply to a different version
                     }
                     String resultsDir = testSuiteDir + "/ExpectedTestResults/" + filePath;
                     String resultsPath = resultsDir + outputFileElement.getUnicodeStringValue();
-                    String comparisonMethod = outputFileElement.getAttributeValue("", "compare");
+                    String comparisonMethod = outputFileElement.getAttributeValue(NamespaceUri.NULL, "compare");
                     String comparisonResult;
                     if (comparisonMethod.equals("Ignore")) {
                         comparisonResult = "true";
@@ -549,7 +550,7 @@ public class XQuery10TestSuiteDriver {
                         if (e == null) {
                             break;
                         }
-                        String appliesTo = e.getAttributeValue("", "spec-version");
+                        String appliesTo = e.getAttributeValue(NamespaceUri.NULL, "spec-version");
                         if (appliesTo != null && !appliesTo.contains(specVersion)) {
                             continue; // results apply to a different version
                         }
@@ -590,7 +591,7 @@ public class XQuery10TestSuiteDriver {
             if (inputURI == null) {
                 break;
             }
-            String variableName = inputURI.getAttributeValue("", "variable");
+            String variableName = inputURI.getAttributeValue(NamespaceUri.NULL, "variable");
             if (variableName != null) {
                 String docName = inputURI.getStringValue();
                 if (docName.startsWith("collection")) {
@@ -603,10 +604,10 @@ public class XQuery10TestSuiteDriver {
                 } else {
                     TreeInfo doc = loadDocument(docName);
                     if (doc == null) {
-                        dqc.setParameter(new StructuredQName("", "", variableName), new AnyURIValue("error-document" + docName));
+                        dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), new AnyURIValue("error-document" + docName));
                     } else {
                         String uri = doc.getRootNode().getSystemId();
-                        dqc.setParameter(new StructuredQName("", "", variableName), new AnyURIValue(uri));
+                        dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), new AnyURIValue(uri));
                     }
                 }
             }
@@ -620,10 +621,10 @@ public class XQuery10TestSuiteDriver {
             if (inputFile == null) {
                 break;
             }
-            String variableName = inputFile.getAttributeValue("", "variable");
+            String variableName = inputFile.getAttributeValue(NamespaceUri.NULL, "variable");
             if (variableName != null) {
                 TreeInfo inputDoc = loadDocument(inputFile.getStringValue());
-                dqc.setParameter(new StructuredQName("", "", variableName), inputDoc.getRootNode().materialize());
+                dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), inputDoc.getRootNode().materialize());
                 //System.err.println("Set parameter " + variableName + " := " + inputDoc.getSystemId());
             }
         }
@@ -636,16 +637,16 @@ public class XQuery10TestSuiteDriver {
             if (inputQuery == null) {
                 break;
             }
-            String variableName = inputQuery.getAttributeValue("", "variable");
+            String variableName = inputQuery.getAttributeValue(NamespaceUri.NULL, "variable");
             if (variableName != null) {
-                String preQueryName = inputQuery.getAttributeValue("", "name");
+                String preQueryName = inputQuery.getAttributeValue(NamespaceUri.NULL, "name");
                 String subQueryFile = testSuiteDir + "/Queries/XQuery/" + filePath + preQueryName + ".xq";
                 StaticQueryContext sqc2 = eeConfig.newStaticQueryContext();
                 FileReader subQueryFileReader = new FileReader(subQueryFile);
                 XQueryExpression subQuery = sqc2.compileQuery(subQueryFileReader);
                 subQueryFileReader.close();
                 SequenceIterator subQueryResult = subQuery.iterator(new DynamicQueryContext(eeConfig));
-                dqc.setParameter(new StructuredQName("", "", variableName), SequenceTool.toGroundedValue(subQueryResult));
+                dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, variableName), SequenceTool.toGroundedValue(subQueryResult));
             }
         }
     }
@@ -658,7 +659,7 @@ public class XQuery10TestSuiteDriver {
             if (coll == null) {
                 break;
             }
-            if (docName.equals(coll.getAttributeValue("", "ID"))) {
+            if (docName.equals(coll.getAttributeValue(NamespaceUri.NULL, "ID"))) {
                 collectionElement = coll;
             }
         }
@@ -711,7 +712,7 @@ public class XQuery10TestSuiteDriver {
             if (expectedError == null) {
                 break;
             }
-            String appliesTo = expectedError.getAttributeValue("", "spec-version");
+            String appliesTo = expectedError.getAttributeValue(NamespaceUri.NULL, "spec-version");
             if (appliesTo != null && !appliesTo.contains(specVersion)) {
                 continue; // results apply to a different version
             }

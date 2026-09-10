@@ -2,10 +2,7 @@ package com.saxonica.ee.schema.sdoc;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.MissingComponentException;
@@ -84,7 +81,7 @@ public class XSDGroup extends SchemaElement {
         String attValue;
 
         // @name
-        String name = atts.getValue("", "name");
+        String name = atts.getValue(NamespaceUri.NULL, "name");
         if (groupDeclaration != null) {
             if (name != null) {
                 StructuredQName qName;
@@ -106,7 +103,7 @@ public class XSDGroup extends SchemaElement {
          * or the int value of the attribute, otherwise maxOccurs
          * equals the minOccurs value.
          */
-        attValue = atts.getValue("", "maxOccurs");
+        attValue = atts.getValue(NamespaceUri.NULL, "maxOccurs");
         if (attValue != null && modelGroupParticle != null) {
             foundMaxOccurs = true;
             if (groupDeclaration != null) {
@@ -117,7 +114,7 @@ public class XSDGroup extends SchemaElement {
             }
         }
         //-- minOccurs
-        attValue = atts.getValue("", "minOccurs");
+        attValue = atts.getValue(NamespaceUri.NULL, "minOccurs");
         if (attValue != null && modelGroupParticle != null) {
             foundMinOccurs = true;
             if (groupDeclaration != null) {
@@ -136,7 +133,7 @@ public class XSDGroup extends SchemaElement {
         }
 
         //-- @ref
-        attValue = atts.getValue("", "ref");
+        attValue = atts.getValue(NamespaceUri.NULL, "ref");
         if (attValue != null && modelGroupParticle != null) {
             if (groupDeclaration != null) {
                 mutuallyExclusiveAttributes("name", "ref");
@@ -318,7 +315,7 @@ public class XSDGroup extends SchemaElement {
                 // it refers to, so that all references other than this one will identify
                 // the redefined group
 
-                String uri = getXSDSchema().getTargetNamespace();
+                NamespaceUri uri = getXSDSchema().getTargetNamespace();
                 String localName = gref.getTargetComponentName().getLocalPart();
                 String newLocalName = localName + '_' + gref.hashCode();
                 StructuredQName newNameCode = new StructuredQName("", uri, newLocalName);

@@ -3,6 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.ElementWildcard;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.SchemaException;
@@ -42,7 +43,7 @@ public class XSDOpenContent extends AnnotationParent {
         processId();
 
         //-- @mode
-        String attValue = Whitespace.trim(atts.getValue("", "mode"));
+        String attValue = Whitespace.trim(atts.getValue(NamespaceUri.NULL, "mode"));
         if (attValue != null) {
             if (attValue.equals("interleave") || attValue.equals("suffix") || attValue.equals("none")) {
                 mode = attValue;

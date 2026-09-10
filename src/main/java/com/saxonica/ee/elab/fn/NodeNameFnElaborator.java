@@ -24,7 +24,7 @@ public class NodeNameFnElaborator extends ItemElaborator {
             if (node == null || node.getLocalPart().isEmpty()) {
                 return null;
             }
-            return new QNameValue(node.getPrefix(), node.getURI(), node.getLocalPart(), BuiltInAtomicType.QNAME);
+            return new QNameValue(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart(), BuiltInAtomicType.QNAME);
         };
 
     }

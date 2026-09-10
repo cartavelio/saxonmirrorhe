@@ -33,7 +33,7 @@ public class NewNamespace extends SystemFunction {
         if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
             throw new XPathException("Name of namespace node must be a valid NCName: " + name, "FORG0001");
         }
-        orphan.setNodeName(new FingerprintedQName("", "", name));
+        orphan.setNodeName(new FingerprintedQName("", NamespaceUri.NULL, name));
         orphan.setStringValue(arguments[1].head().getUnicodeStringValue());
         return orphan;
     }

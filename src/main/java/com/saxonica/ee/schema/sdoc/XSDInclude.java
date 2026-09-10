@@ -7,6 +7,7 @@ import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaException;
 
@@ -44,7 +45,7 @@ public class XSDInclude extends AnnotationParent {
         //-- @id
         processId();
 
-        String schemaLocation = atts.getValue("", "schemaLocation");
+        String schemaLocation = atts.getValue(NamespaceUri.NULL, "schemaLocation");
         if (schemaLocation == null) {
             missingAttribute("schemaLocation");
             return;
@@ -72,7 +73,7 @@ public class XSDInclude extends AnnotationParent {
         }
         if (source == null) {
             warning("Failed to locate included schema document " + schemaLocation);
-            includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+            includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), NamespaceUri.NULL);
         } else {
 
             //-- Has this schema location been processed?
@@ -104,7 +105,7 @@ public class XSDInclude extends AnnotationParent {
             // subsequent errors are likely to be obscure
             warning("Included schema document " + schemaLocation + " cannot be located: " +
                             cause.getClass().getName() + " (" + cause.getMessage() + ")");
-            includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+            includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), NamespaceUri.NULL);
         } else {
             error("Failed to process included schema document " + schemaLocation);
             throw e;

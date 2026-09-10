@@ -9,7 +9,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
@@ -768,9 +767,9 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
     /*@Nullable*/
     @Override
-    public String getURIForPrefix(String prefix, boolean useDefault) {
+    public NamespaceUri getURIForPrefix(String prefix, boolean useDefault) {
         if (!useDefault && prefix.isEmpty()) {
-            return NamespaceConstant.NULL;
+            return NamespaceUri.NULL;
         }
         return namespaceStack.peek().getURIForPrefix(prefix, useDefault);
     }
