@@ -248,6 +248,15 @@ def testSuiteMatrix = [
       "XSD11": [
         "_exceptions": "${projectDir}/src/test/exceptions/xsd11.xml",
         "": [:]
+      ],
+    ],
+    "xsdextra": [
+      "_class": "com.saxonica.testdriver.ee.SchemaTestSuiteDriver",
+      "_depends": ["copySaxonExtraTestSuites"],
+      "_summarizeresults": "${System.getenv('SAXON_EXTRA_TEST_SUITE_DIR')}/tools/summarize-results.xsl",
+      "XSD11": [
+        "_exceptions": "${projectDir}/src/test/exceptions/xsd-extra.xml",
+        "": [:]
       ]
     ]
   ],
