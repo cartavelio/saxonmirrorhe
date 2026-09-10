@@ -209,8 +209,17 @@ public abstract class TestDriver {
             // Set optimization flags
             if (args[i].startsWith("-opt:")) {
                 optimizerFlags = argValue;
+                driverProc.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, optimizerFlags);
             }
         }
+
+        if (unfolded) {
+            if (!"-".equals(optimizerFlags)) {
+                System.err.println("The -unfolded option overrides optimizer flags. Using -s.");
+            }
+            driverProc.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, optimizerFlags);
+        }
+
 //        System.err.println("SAXON_LICENSE_DIR=" + System.getenv("SAXON_LICENSE_DIR"));
 //        System.out.println(System.getProperty("java.class.path").replace(':','\n'));
 
