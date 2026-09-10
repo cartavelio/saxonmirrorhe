@@ -810,6 +810,13 @@ public class SchemaCompiler {
      */
 
     public void makeAllAutomata() throws SchemaException {
+//        for (SchemaType rawType : preparedSchema.getAllTypes()) {
+//            if (rawType instanceof UserComplexType
+//                    && preparedSchema.getCompiledComplexType((UserComplexType)rawType) == null) {
+//                CompiledComplexType cct = preparedSchema.compileComplexType(this, (UserComplexType) rawType);
+//                scheduledForAutomaton.add(cct);
+//            }
+//        }
         for (CompiledComplexType type : scheduledForAutomaton) {
             type.makeAutomaton(this);
         }

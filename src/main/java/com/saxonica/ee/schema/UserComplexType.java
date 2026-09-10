@@ -295,8 +295,8 @@ public class UserComplexType extends UserDefinedType
                 }
 
                 // combine the attribute wildcards on this type and the base type
-                AttributeWildcard baseWild = baseAtts.getAttributeWildcard(compiler);
-                AttributeWildcard thisWild = attributes.getAttributeWildcard(compiler);
+                AttributeWildcard baseWild = baseAtts.getAttributeWildcard();
+                AttributeWildcard thisWild = attributes.getAttributeWildcard();
                 if (baseWild != null) {
                     if (thisWild != null) {
                         Wildcard union = Wildcard.makeUnion(
@@ -356,7 +356,7 @@ public class UserComplexType extends UserDefinedType
                 while (iter2.hasNext()) {
                     extendedAttributes.addAttributeUse(iter2.next());
                 }
-                AttributeWildcard wat = getAttributeGroup().getAttributeWildcard(compiler);
+                AttributeWildcard wat = getAttributeGroup().getAttributeWildcard();
                 if (wat != null) {
                     extendedAttributes.setAnyAttribute(wat);
                 }

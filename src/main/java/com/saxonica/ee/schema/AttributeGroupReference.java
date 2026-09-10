@@ -116,7 +116,7 @@ public final class AttributeGroupReference extends SchemaStructure
      *          declaration cannot be resolved
      */
     
-    AttributeWildcard getAttributeWildcard(SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
+    AttributeWildcard getAttributeWildcard(Stack<AttributeGroupDecl> stack) {
         //tryToResolve(compiler);
         if (target == null) {
             throw new MissingComponentExceptionImpl(this);
@@ -125,7 +125,7 @@ public final class AttributeGroupReference extends SchemaStructure
             // XSD 1.1 allows cycles
             return null;
         }
-        return target.getAttributeWildcard(compiler, stack);
+        return target.getAttributeWildcard(stack);
     }
 
     /**

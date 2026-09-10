@@ -202,6 +202,11 @@ public class XSDImport extends AnnotationParent {
             }
         }
 
+        if (source == null) {
+            warning("No schema document for namespace " + targetNamespace + " is available");
+            return;
+        }
+
         SchemaDocument importee = null;
         int errors;
         try {

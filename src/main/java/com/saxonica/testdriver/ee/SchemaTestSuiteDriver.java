@@ -117,13 +117,16 @@ public class SchemaTestSuiteDriver {
      * Get the document referenced by the xlink:href attribute of a given element node
      *
      * @param element   the element node (a node in the catalog)
-     * @param schema the schema to validate against
+     * @param schema the schema to validate against.
      * @throws SaxonApiException  if an error occurs building the document
      */
 
     private void validateLinkedDocument(XdmNode element, XsdSchema schema)
             throws SaxonApiException {
+        Objects.requireNonNull(element);
+        Objects.requireNonNull(schema);
         String href = element.getAttributeValue(QN_xlink_href);
+        Objects.requireNonNull(href);
         URI target = element.getBaseURI().resolve(href);
         Source ss = new StreamSource(target.toString());
         SchemaValidator validator = schema.newValidator();
@@ -514,6 +517,10 @@ public class SchemaTestSuiteDriver {
                                     }
                                 }
                             } else {
+                                if (schema == null) {
+                                    // validate instance using xsi:schemaLocation
+                                    schema = testProcessor.newXsdCompiler().emptySchema();
+                                }
                                 try {
                                     validateLinkedDocument(instanceDocument, schema);
                                 } catch (SaxonApiException err) {

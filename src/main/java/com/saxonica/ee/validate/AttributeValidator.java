@@ -73,7 +73,7 @@ public abstract class AttributeValidator extends ContentValidator {
 
     public void setAttributeGroup(AttributeGroupDecl attributeGroup) {
         if (attributeGroup != null) {
-            attributeWildcard = attributeGroup.getAttributeWildcard(null);
+            attributeWildcard = attributeGroup.getAttributeWildcard();
             declaredAttributes = attributeGroup.getDeclaredAttributes();
             attributeCounterMap = attributeGroup.getCounterMap();
             found = new boolean[attributeCounterMap.size()];

@@ -236,7 +236,6 @@ public final class AttributeGroupDecl extends SchemaStructure
      * is the intersection of the attribute wildcards in the various attribute groups: that is,
      * a wildcard that allows only what each one of these wildcards allows.
      *
-     * @param compiler Used for error reporting. May be null if used at validation time.
      * @return the combined wildcard used in this attribute group. This can be null. It can also
      *         be "inexpressible". This results in an AttributeWildcard marked as being inexpressible,
      *         an error condition that the caller is left to deal with.
@@ -244,11 +243,11 @@ public final class AttributeGroupDecl extends SchemaStructure
      *          if a required component contains a reference
      *          to another component that is not present in the schema
      */
-    public AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler) {
-        return getAttributeWildcard(compiler, new Stack<>());
+    public AttributeWildcard getAttributeWildcard() {
+        return getAttributeWildcard(new Stack<>());
     }
 
-    AttributeWildcard getAttributeWildcard(/*@Nullable*/ SchemaCompiler compiler, Stack<AttributeGroupDecl> stack) {
+    AttributeWildcard getAttributeWildcard(Stack<AttributeGroupDecl> stack) {
         AttributeWildcard awc = getLocalAttributeWildcard();
         Wildcard wat = awc == null ? null : awc.getWildcard();
         if (stack.contains(this)) {
@@ -256,7 +255,7 @@ public final class AttributeGroupDecl extends SchemaStructure
         }
         stack.push(this);
         for (AttributeGroupReference ref : getLocalAttributeGroupReferences()) {
-            AttributeWildcard gawc = ref.getAttributeWildcard(compiler, stack);
+            AttributeWildcard gawc = ref.getAttributeWildcard(stack);
             Wildcard gat = gawc == null ? null : gawc.getWildcard();
             if (gat != null) {
                 if (wat == null) {
@@ -446,7 +445,7 @@ public final class AttributeGroupDecl extends SchemaStructure
             return false;
         }
 
-        AttributeWildcard wild = getAttributeWildcard(compiler);
+        AttributeWildcard wild = getAttributeWildcard();
         if (wild != null) {
             result = wild.validate(compiler);
         }
@@ -545,7 +544,7 @@ public final class AttributeGroupDecl extends SchemaStructure
             //int fp = targetName.getFingerprint();
             AttributeUse baseAtt = base.getAttributeUse(targetName);
             if (baseAtt == null || baseAtt.isProhibited()) {
-                AttributeWildcard baseWildCard = base.getAttributeWildcard(compiler);
+                AttributeWildcard baseWildCard = base.getAttributeWildcard();
                 if (baseWildCard == null) {
                     compiler.error("Invalid restriction: attribute " + Err.wrap(att.getDisplayName(), Err.ATTRIBUTE) +
                             " is " + (baseAtt == null ? "not defined" : "prohibited") + " in the base type", this);
@@ -616,9 +615,9 @@ public final class AttributeGroupDecl extends SchemaStructure
                 }
             }
         }
-        AttributeWildcard wild = getAttributeWildcard(compiler);
+        AttributeWildcard wild = getAttributeWildcard();
         if (wild != null) {
-            AttributeWildcard baseWild = base.getAttributeWildcard(compiler);
+            AttributeWildcard baseWild = base.getAttributeWildcard();
             if (baseWild == null) {
                 compiler.error("Invalid restriction: this type has an <xs:anyAttribute> " +
                         "but the base type does not", this);
