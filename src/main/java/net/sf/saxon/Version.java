@@ -145,6 +145,10 @@ public final class Version {
      */
     public static void main(String[] args) {
         System.err.println(getProductTitle() + " (build " + BUILD + ')');
+        if (args.length > 0 && args[0].equals("-resources")) {
+            // Diagnostics to list embedded resources, used only in SaxonCS
+            platform.showEmbeddedResources();
+        }
     }
 
 

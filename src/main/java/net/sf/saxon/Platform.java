@@ -103,6 +103,14 @@ public interface Platform {
     /*@Nullable*/
     InputStream locateResource(String filename, List<String> messages);
 
+    /**
+     * Diagnostic method to list the embedded resources contained in the loaded software
+     */
+
+    default void showEmbeddedResources() {
+
+    }
+
     //#if CSHARP==false
     /**
      * Get a parser by instantiating the SAXParserFactory

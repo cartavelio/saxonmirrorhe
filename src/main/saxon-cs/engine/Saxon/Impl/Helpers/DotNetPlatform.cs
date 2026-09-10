@@ -347,13 +347,33 @@ namespace Saxon.Impl.Helpers {
             return new DynamicLoader();
         }
 
+        public void showEmbeddedResources() {
+            System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
+            var resourceNames = ass.GetManifestResourceNames();
+            foreach (string name in resourceNames) {
+                Console.WriteLine("Resource: " + name);
+            }
+        }
+
         public Stream locateResource(string filename, IList<string> messages) {
             System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
-            // var resourceNames = ass.GetManifestResourceNames();
-            // foreach (string name in resourceNames) {
-            //     Console.WriteLine("Resource: " + name);
-            // }
-            return ass.GetManifestResourceStream(resourceLocation + filename.Replace('/', '.'));
+            Stream firstAttempt = ass.GetManifestResourceStream(resourceLocation + filename);
+            if (firstAttempt != null) {
+                //Console.Error.WriteLine("First attempt at " + filename + " worked");
+                return firstAttempt;
+            }
+            
+            // The second attempt is needed if the embedded resources have a logical name containing a "." rather than a "/"
+            // for the directory separator. This happens with embedded resources added to the project automatically by Rider:
+            // see bug 5122. The second attempt is unnecessary if the Rider project has the embedded resources added
+            // manually, but it does no harm so we'll keep the code:
+            Stream secondAttempt = ass.GetManifestResourceStream(resourceLocation + filename.Replace('/', '.'));
+            if (secondAttempt != null) {
+                //Console.Error.WriteLine("Second attempt at " + filename + " worked");
+                return secondAttempt;
+            }
+
+            return null;
         }
 
         public ActiveSource resolveSource(Source source, Configuration config) {
