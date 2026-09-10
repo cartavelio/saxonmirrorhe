@@ -394,17 +394,19 @@ public class Controller implements ContextOriginator {
 
     /*@NotNull*/
     public PipelineConfiguration makePipelineConfiguration() {
-        PipelineConfiguration pipe = config.makePipelineConfiguration();
-        //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
-        pipe.getParseOptions().setSchemaValidationMode(validationMode); // added in 9.7
-        pipe.getParseOptions().setErrorReporter(errorReporter); // added in 9.7.0.4
+        PipelineConfiguration pipe = new PipelineConfiguration(getConfiguration());
         pipe.setController(this);
-        final Executable executable = getExecutable();
-        if (executable != null) {
-            // can be null for an IdentityTransformer
-            pipe.setHostLanguage(executable.getHostLanguage());
-        }
         return pipe;
+        //pipe.setURIResolver(userURIResolver == null ? standardURIResolver : userURIResolver);
+//        pipe.getParseOptions().setSchemaValidationMode(validationMode); // added in 9.7
+//        pipe.getParseOptions().setErrorReporter(errorReporter); // added in 9.7.0.4
+//        pipe.setController(this);
+//        final Executable executable = getExecutable();
+//        if (executable != null) {
+//            // can be null for an IdentityTransformer
+//            pipe.setHostLanguage(executable.getHostLanguage());
+//        }
+//        return pipe;
     }
 
 //    /**

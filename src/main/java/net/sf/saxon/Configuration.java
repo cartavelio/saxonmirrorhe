@@ -7,7 +7,6 @@
 
 package net.sf.saxon;
 
-import com.saxonica.ee.elab.eval.PushEvaluator;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
