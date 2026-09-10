@@ -561,7 +561,7 @@ public class Literal extends Expression {
                             out.emitAttribute("prefix", name.getPrefix());
                         }
                         if (!name.hasURI(NamespaceUri.NULL)) {
-                            out.emitAttribute("ns", name.getURI().toString());
+                            out.emitAttribute("ns", name.getNamespaceUri().toString());
                         }
                         out.emitAttribute("content", ((NodeInfo) value).getStringValue());
                         break;

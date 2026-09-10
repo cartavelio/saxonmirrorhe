@@ -12,6 +12,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.*;
@@ -30,7 +31,11 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static net.sf.saxon.s9api.streams.Predicates.*;
+import static net.sf.saxon.s9api.streams.Predicates.hasLocalName;
+import static net.sf.saxon.s9api.streams.Predicates.hasName;
+import static net.sf.saxon.s9api.streams.Predicates.isDocument;
+import static net.sf.saxon.s9api.streams.Predicates.isElement;
+import static net.sf.saxon.s9api.streams.Predicates.isText;
 
 /**
  * This non-instantiable class provides a number of useful implementations of the {@link Step}
@@ -219,10 +224,14 @@ public class Steps {
     }
 
     private static Predicate<? super XdmNode> expandedNamePredicate(String ns, String local) {
+        return expandedNamePredicate(NamespaceUri.of(ns), local);
+    }
+
+    private static Predicate<? super XdmNode> expandedNamePredicate(NamespaceUri nsUri, String local) {
         return item -> {
             NodeInfo node = item.getUnderlyingNode();
             return node.getNodeKind() == Type.ELEMENT
-                    && node.getLocalPart().equals(local) && node.getNamespaceUri().equals(ns);
+                    && node.getNamespaceUri().equals(nsUri) && node.getLocalPart().equals(local);
         };
     }
 

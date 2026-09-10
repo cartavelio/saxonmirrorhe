@@ -83,7 +83,7 @@ public class AbsentExtensionElement extends StyleElement {
                 // Check that all the required parameters are supplied
                 for (NamedTemplate.LocalParamInfo param : declaredParams) {
                     if (param.isRequired && !param.isTunnel) {
-                        if (attributes().get(param.name.getURI(), param.name.getLocalPart()) == null) {
+                        if (attributes().get(param.name.getNamespaceUri(), param.name.getLocalPart()) == null) {
                             compileError("No value supplied for required parameter " +
                                                  Err.wrap(param.name.getDisplayName(), Err.VARIABLE), "XTSE0690");
                         }

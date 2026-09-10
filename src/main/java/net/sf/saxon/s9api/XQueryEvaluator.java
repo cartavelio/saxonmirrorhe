@@ -215,6 +215,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
      */
 
+    @Deprecated
     public void setURIResolver(URIResolver resolver) {
         context.setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
     }
@@ -227,6 +228,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
      */
 
+    @Deprecated
     public URIResolver getURIResolver() {
         ResourceResolver rr = context.getResourceResolver();
         if (rr instanceof ResourceResolverWrappingURIResolver) {

@@ -312,11 +312,26 @@ public interface NodeInfo extends Item, Location
      *
      * @return The URI of the namespace of this node. For an unnamed node,
      *         or for an element or attribute that is not in a namespace, or for a processing
-     *         instruction, returns an empty string.
+     *         instruction, returns {@link NamespaceUri#NULL}.
      * @since 12.0; replaces getURI() which returned a string.
      */
 
     NamespaceUri getNamespaceUri();
+
+    /**
+     * Get the URI part of the name of this node, as a string. This is the URI corresponding to the
+     * prefix, or the URI of the default namespace if appropriate.
+     *
+     * <p>This method is retained for backwards compatibility, but {@link #getNamespaceUri()} is preferred.</p>
+     *
+     * @return The URI of the namespace of this node, as a string. For an unnamed node,
+     * or for an element or attribute that is not in a namespace, or for a processing
+     * instruction, returns an empty string.
+     */
+
+    default String getURI() {
+        return getNamespaceUri().toString();
+    }
 
     /**
      * Get the display name of this node, in the form of a lexical QName.
@@ -431,16 +446,34 @@ public interface NodeInfo extends Item, Location
     /**
      * Get the string value of a given attribute of this node
      *
-     * @param uri   the namespace URI of the attribute name. Supply the empty string for an attribute
+     * @param uri   the namespace URI of the attribute name. Supply {@link NamespaceUri#NULL} for an attribute
      *              that is in no namespace
      * @param local the local part of the attribute name.
      * @return the attribute value if it exists, or null if it does not exist. Always returns null
      *         if this node is not an element.
-     * @since 9.4
+     * @since 12.0
      */
 
     /*@Nullable*/
     String getAttributeValue(NamespaceUri uri, String local);
+
+    /**
+     * Get the string value of a given attribute of this node
+     *
+     * <p>This method is retained for compatibility, but {@link #getAttributeValue(NamespaceUri, String)} is preferred.</p>
+     *
+     * @param uri   the namespace URI of the attribute name, as a string. Supply the empty string for an attribute
+     *              that is in no namespace
+     * @param local the local part of the attribute name.
+     * @return the attribute value if it exists, or null if it does not exist. Always returns null
+     * if this node is not an element.
+     * @since 9.4
+     */
+
+    /*@Nullable*/
+    default String getAttributeValue(String uri, String local) {
+        return getAttributeValue(uri.isEmpty() ? NamespaceUri.NULL : NamespaceUri.of(uri), local);
+    }
 
     /**
      * Get the root node of the tree containing this node

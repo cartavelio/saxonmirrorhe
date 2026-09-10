@@ -97,7 +97,7 @@ public class ReceiverToXMLStreamWriter implements Receiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         String local = elemName.getLocalPart();
-        NamespaceUri uri = elemName.getURI();
+        NamespaceUri uri = elemName.getNamespaceUri();
         String prefix = elemName.getPrefix();
         try {
             if (prefix.equals("") && uri.equals(NamespaceUri.NULL)) {
@@ -108,12 +108,12 @@ public class ReceiverToXMLStreamWriter implements Receiver {
                 writer.writeStartElement(prefix, local, uri.toString());
             }
             for (NamespaceBinding ns : namespaces) {
-                writer.writeNamespace(ns.getPrefix(), ns.getURI().toString());
+                writer.writeNamespace(ns.getPrefix(), ns.getNamespaceUri().toString());
             }
             for (AttributeInfo att : attributes) {
                 NodeName attName = att.getNodeName();
                 String attLocal = attName.getLocalPart();
-                NamespaceUri attUri = attName.getURI();
+                NamespaceUri attUri = attName.getNamespaceUri();
                 String attPrefix = attName.getPrefix();
                 String value = att.getValue();
                 if (attPrefix.equals("") && attUri.equals(NamespaceUri.NULL)) {

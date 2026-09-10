@@ -218,7 +218,11 @@ public abstract class JPConverter {
             return VoidConverter.INSTANCE;
         }
 
-        return new ExternalObjectWrapper(config.getJavaExternalObjectType(javaClass));
+        JavaExternalObjectType result;
+        synchronized(config) {
+            result = JavaExternalObjectType.of(javaClass);
+        }
+        return new ExternalObjectWrapper(result);
     }
 
     /**
@@ -260,8 +264,12 @@ public abstract class JPConverter {
             Class<?> theClass = object.getClass();
             JPConverter instanceConverter = allocate(theClass, null, context.getConfiguration());
             if (instanceConverter instanceof FromObject) {
+                JavaExternalObjectType result;
+                synchronized(context.getConfiguration()) {
+                    result = JavaExternalObjectType.of(theClass);
+                }
                 instanceConverter = new ExternalObjectWrapper(
-                        context.getConfiguration().getJavaExternalObjectType(theClass));
+                        result);
             }
             return instanceConverter.convert(object, context);
         }

@@ -162,6 +162,7 @@ public class CompilerInfo {
      * @deprecated since 11.1: use {@link #setResourceResolver}
      */
 
+    @Deprecated
     public void setURIResolver(URIResolver resolver) {
         resourceResolver = new ResourceResolverWrappingURIResolver(resolver);
     }

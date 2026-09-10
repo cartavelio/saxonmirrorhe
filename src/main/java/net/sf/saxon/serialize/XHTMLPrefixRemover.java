@@ -45,13 +45,13 @@ public class XHTMLPrefixRemover extends ProxyReceiver {
                              Location location, int properties) throws XPathException {
 
         for (NamespaceBinding ns : namespaces) {
-            if (isSpecial(ns.getURI())) {
+            if (isSpecial(ns.getNamespaceUri())) {
                 namespaces = namespaces.remove(ns.getPrefix());
             }
         }
 
-        if (isSpecial(elemName.getURI())) {
-            NamespaceUri uri = elemName.getURI();
+        if (isSpecial(elemName.getNamespaceUri())) {
+            NamespaceUri uri = elemName.getNamespaceUri();
             if (!elemName.getPrefix().isEmpty()) {
                 elemName = new FingerprintedQName("", uri, elemName.getLocalPart());
             }
@@ -59,8 +59,8 @@ public class XHTMLPrefixRemover extends ProxyReceiver {
         }
 
         for (AttributeInfo att : attributes) {
-            if (isSpecial(att.getNodeName().getURI())) {
-                namespaces = namespaces.put(att.getNodeName().getPrefix(), att.getNodeName().getURI());
+            if (isSpecial(att.getNodeName().getNamespaceUri())) {
+                namespaces = namespaces.put(att.getNodeName().getPrefix(), att.getNodeName().getNamespaceUri());
             }
         }
 

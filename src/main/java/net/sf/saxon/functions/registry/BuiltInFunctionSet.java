@@ -20,6 +20,7 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -177,6 +178,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         String localName = functionName.getLocalPart();
         net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry entry = getFunctionDetails(localName, arity);
         if (functionName.hasURI(getNamespace()) && entry != null) {
+            entry.ensurePopulated();
             if ((entry.properties & SEQV) != 0) {
                 // sequence-variadic functions in 4.0 (e.g..concat, codepoints-to-string)
                 // combine the "variable" arguments into a single argument
@@ -251,24 +253,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                 throw err;
             }
         }
-
-        //Class<? extends SystemFunction> functionClass = entry.implementationClass;
-        //SystemFunction f = instantiate(name, functionClass);
-        SystemFunction f = entry.implementationClass.get();
+        entry.ensurePopulated();
+        SystemFunction f = entry.implementationFactory.get();
         f.setDetails(entry);
         f.setArity(arity);
-        return f;
-    }
-
-    private SystemFunction instantiate(String name, Class<? extends SystemFunction> functionClass) {
-        SystemFunction f;
-        try {
-            //noinspection RedundantCast
-            f = (SystemFunction)functionClass.newInstance();
-        } catch (Exception err) {
-            err.printStackTrace();
-            throw new AssertionError("Failed to instantiate system function " + name + " - " + err.getMessage());
-        }
         return f;
     }
 
@@ -379,66 +367,61 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      * about the function arguments.
      */
 
-    /*@NotNull*/
+//    /*@NotNull*/
+//    protected Entry register(String name,
+//                             int arity,
+//                             Supplier<SystemFunction> functionFactory,
+//                             ItemType itemType,
+//                             int cardinality,
+//                             int properties) {
+//        Instrumentation.count("Register function");
+//        Instrumentation.count(getNamespace().toString());
+//        Entry e = new Entry();
+//        e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
+//        e.arity = arity;
+//        e.implementationFactory = functionFactory;
+//        e.functionSet = this;
+//        e.itemType = itemType;
+//        e.cardinality = cardinality;
+//        e.properties = properties;
+//        if (e.arity == -1) {
+//            // special case for concat()
+//            e.argumentTypes = new SequenceType[1];
+//            e.resultIfEmpty = new AtomicValue[1];
+//            e.usage = new OperandUsage[1];
+//        } else {
+//            e.argumentTypes = new SequenceType[arity];
+//            e.resultIfEmpty = new Sequence[arity];
+//            e.usage = new OperandUsage[arity];
+//        }
+//        if (functionTable.containsKey(name + "#" + arity)) {
+//            Instrumentation.count("Duplicate function " + name + "#" + arity);
+//        }
+//        functionTable.put(name + "#" + arity, e);
+//        if ((properties & SEQV) != 0) {
+//            sequenceVariadicFunctions.put(name, arity - 1);
+//        }
+//        return e;
+//    }
+
     protected Entry register(String name,
                              int arity,
-                             Supplier<SystemFunction> functionFactory,
-                             ItemType itemType,
-                             int cardinality,
-                             int properties) {
+                             java.util.function.Function<Entry, Entry> populator) {
         Entry e = new Entry();
         e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
         e.arity = arity;
-        e.implementationClass = functionFactory;
+        e.populator = populator;
         e.functionSet = this;
-        e.itemType = itemType;
-        e.cardinality = cardinality;
-        e.properties = properties;
-        if (e.arity == -1) {
-            // special case for concat()
-            e.argumentTypes = new SequenceType[1];
-            e.resultIfEmpty = new AtomicValue[1];
-            e.usage = new OperandUsage[1];
-        } else {
-            e.argumentTypes = new SequenceType[arity];
-            e.resultIfEmpty = new Sequence[arity];
-            e.usage = new OperandUsage[arity];
-        }
         functionTable.put(name + "#" + arity, e);
-        if ((properties & SEQV) != 0) {
-            sequenceVariadicFunctions.put(name, arity - 1);
-        }
         return e;
     }
 
-    /**
-     * Register reduced-arity versions of a function, with arities in a specified range,
-     * using common argument and return types
-     * @param key the function name
-     * @param min the minimum arity
-     * @param max the maximum arity
-     */
-
-    protected void registerReducedArityVariants(String key, int min, int max) {
-        net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry master = functionTable.get(key);
-        for (int arity = min; arity <= max; arity++) {
-            net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry e = new net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry();
-            e.name = master.name;
-            e.arity = arity;
-            e.implementationClass = master.implementationClass;
-            e.itemType = master.itemType;
-            e.cardinality = master.cardinality;
-            e.properties = master.properties;
-            e.argumentTypes = new SequenceType[arity];
-            e.resultIfEmpty = new Sequence[arity];
-            e.usage = new OperandUsage[arity];
-            for (int i=0; i<arity; i++) {
-                e.argumentTypes[i] = master.argumentTypes[i];
-                e.resultIfEmpty[i] = master.resultIfEmpty[i];
-                e.usage[i] = master.usage[i];
-            }
-            functionTable.put(e.name.getLocalPart() + "#" + arity, e);
-        }
+    protected Entry registerVariadic(String name,
+                             int arity,
+                             java.util.function.Function<Entry, Entry> populator) {
+        Entry e = register(name, arity, populator);
+        sequenceVariadicFunctions.put(name, arity - 1);
+        return e;
     }
 
     /**
@@ -473,7 +456,9 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         /**
          * The class containing the implementation of this function (always a subclass of SystemFunction)
          */
-        public Supplier<SystemFunction> implementationClass;
+        public Supplier<SystemFunction> implementationFactory;
+
+        public java.util.function.Function<Entry, Entry> populator;
         /**
          * The function set in which this function is defined
          */
@@ -513,6 +498,37 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          * For options parameters, details of the accepted options, their defaults, and required type
          */
         public OptionsParameter optionDetails;
+
+        public synchronized void ensurePopulated() {
+            if (implementationFactory == null) {
+                populator.apply(this);
+            }
+        }
+
+        public Entry populate(Supplier<SystemFunction> functionFactory,
+                              ItemType itemType,
+                              int cardinality,
+                              int properties) {
+
+            this.implementationFactory = functionFactory;
+            this.itemType = itemType;
+            this.cardinality = cardinality;
+            this.properties = properties;
+            if (this.arity == -1) {
+                // special case for concat()
+                this.argumentTypes = new SequenceType[1];
+                this.resultIfEmpty = new AtomicValue[1];
+                this.usage = new OperandUsage[1];
+            } else {
+                this.argumentTypes = new SequenceType[arity];
+                this.resultIfEmpty = new Sequence[arity];
+                this.usage = new OperandUsage[arity];
+            }
+            if ((properties & SEQV) != 0) {
+                this.functionSet.sequenceVariadicFunctions.put(name.getLocalPart(), this.arity - 1);
+            }
+            return this;
+        }
 
         /**
          * Add information to a function entry about the argument types of the function

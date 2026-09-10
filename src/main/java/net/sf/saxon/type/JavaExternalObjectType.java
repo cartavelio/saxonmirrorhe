@@ -14,6 +14,8 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.ObjectValue;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * This class represents the type of an external Java object returned by
  * an extension function, or supplied as an external variable/parameter.
@@ -23,14 +25,28 @@ public class JavaExternalObjectType extends ExternalObjectType {
 
     protected Class<?> javaClass;
 
+    private static final ConcurrentHashMap<Class<?>, JavaExternalObjectType> cache = new ConcurrentHashMap<>(20);
+
     /**
-     * Create an external object type.
+     * Create an external object type. Private constructor; to create an instance,
+     * use {@link JavaExternalObjectType#of}.
      *
      * @param javaClass the Java class to which this type corresponds
      */
 
-    public JavaExternalObjectType(Class<?> javaClass) {
+    private JavaExternalObjectType(Class<?> javaClass) {
         this.javaClass = javaClass;
+    }
+
+    /**
+     * Allocate an external object type. for a given Java class. Reuses a known
+     * {@code JavaExternalObjectType} if found in a static cache
+     * @param javaClass the Java class to which this type corresponds
+     * @return the corresponding {@code JavaExternalObjectType}
+     */
+
+    public static JavaExternalObjectType of(Class<?> javaClass) {
+        return cache.computeIfAbsent(javaClass, JavaExternalObjectType::new);
     }
 
     /**
@@ -42,7 +58,7 @@ public class JavaExternalObjectType extends ExternalObjectType {
     /*@Nullable*/
     @Override
     public String getName() {
-        return javaClass.getName();
+        return classNameToQName(javaClass.getName()).getLocalPart();
     }
 
     /**

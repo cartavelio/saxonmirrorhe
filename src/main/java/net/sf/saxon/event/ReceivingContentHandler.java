@@ -436,7 +436,7 @@ public class ReceivingContentHandler
                             trialPrefix = "p" + "_" + qname;
                         }
                     }
-                    while (currentNamespaceMap.getURI(trialPrefix) != null && !currentNamespaceMap.getURI(trialPrefix).equals(nsUri)) {
+                    while (currentNamespaceMap.getNamespaceUri(trialPrefix) != null && !currentNamespaceMap.getNamespaceUri(trialPrefix).equals(nsUri)) {
                         trialPrefix = trialPrefix + "z";
                     }
                     currentNamespaceMap = currentNamespaceMap.put(trialPrefix, nsUri);

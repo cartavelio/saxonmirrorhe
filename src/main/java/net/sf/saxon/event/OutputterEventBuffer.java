@@ -63,7 +63,7 @@ public class OutputterEventBuffer extends Outputter {
             buffer.add(new OutputterEvent.Attribute(att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties()));
         }
         for (NamespaceBinding binding : namespaces) {
-            buffer.add(new OutputterEvent.Namespace(binding.getPrefix(), binding.getURI(), properties));
+            buffer.add(new OutputterEvent.Namespace(binding.getPrefix(), binding.getNamespaceUri(), properties));
         }
         buffer.add(new OutputterEvent.StartContent());
     }

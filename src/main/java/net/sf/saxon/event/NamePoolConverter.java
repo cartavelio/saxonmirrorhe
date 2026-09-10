@@ -53,12 +53,12 @@ public class NamePoolConverter extends ProxyReceiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         checkType(type);
-        int fp = newPool.allocateFingerprint(elemName.getURI(), elemName.getLocalPart());
+        int fp = newPool.allocateFingerprint(elemName.getNamespaceUri(), elemName.getLocalPart());
         final CodedName newElemName = new CodedName(fp, elemName.getPrefix(), newPool);
         AttributeMap newAtts = EmptyAttributeMap.getInstance();
         for (AttributeInfo att : attributes) {
             checkType(att.getType());
-            int afp = newPool.allocateFingerprint(att.getNodeName().getURI(), att.getNodeName().getLocalPart());
+            int afp = newPool.allocateFingerprint(att.getNodeName().getNamespaceUri(), att.getNodeName().getLocalPart());
             NodeName newAttName = new CodedName(afp, att.getNodeName().getPrefix(), newPool);
             newAtts = newAtts.put(new AttributeInfo(newAttName, att.getType(), att.getValue(), att.getLocation(), att.getProperties()));
         }

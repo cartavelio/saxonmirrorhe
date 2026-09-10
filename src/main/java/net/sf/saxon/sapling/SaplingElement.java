@@ -93,7 +93,7 @@ public class SaplingElement extends SaplingNode {
         if (!nodeName.getPrefix().isEmpty() && nodeName.hasURI(NamespaceUri.NULL)) {
             throw new IllegalArgumentException("No namespace URI for prefixed element name: " + name);
         }
-        namespaces = NamespaceMap.of(nodeName.getPrefix(), nodeName.getURI());
+        namespaces = NamespaceMap.of(nodeName.getPrefix(), nodeName.getNamespaceUri());
     }
 
     private SaplingElement(StructuredQName name) {
@@ -197,7 +197,7 @@ public class SaplingElement extends SaplingNode {
         if (attName.getPrefix().isEmpty() && !attName.hasURI(NamespaceUri.NULL)) {
             throw new IllegalArgumentException("An attribute whose name is in a namespace must have a prefix");
         }
-        withNamespace(attName.getPrefix(), attName.getURI().toString());
+        withNamespace(attName.getPrefix(), attName.getNamespaceUri().toString());
         return withAttribute(attName, value);
     }
 
@@ -225,7 +225,7 @@ public class SaplingElement extends SaplingNode {
                 throw new IllegalArgumentException("Cannot bind non-empty prefix to empty URI");
             }
         }
-        NamespaceUri existingURI = namespaces.getURI(prefix);
+        NamespaceUri existingURI = namespaces.getNamespaceUri(prefix);
         NamespaceUri newURI = NamespaceUri.of(uri);
         if (existingURI != null) {
             if (existingURI.equals(newURI)) {
@@ -245,7 +245,7 @@ public class SaplingElement extends SaplingNode {
         final NamePool namePool = config.getNamePool();
         NamespaceMap ns = namespaces;
         if (!nodeName.hasURI(NamespaceUri.NULL)) {
-            ns = ns.put(nodeName.getPrefix(), nodeName.getURI());
+            ns = ns.put(nodeName.getPrefix(), nodeName.getNamespaceUri());
         }
         AttributeMap atts = EmptyAttributeMap.getInstance();
         for (TrieKVP<StructuredQName, String> attribute : attributes) {
@@ -253,7 +253,7 @@ public class SaplingElement extends SaplingNode {
             atts = atts.put(new AttributeInfo(new FingerprintedQName(qName, namePool), BuiltInAtomicType.UNTYPED_ATOMIC,
                                               attribute.getValue(), Loc.NONE, ReceiverOption.NONE));
             if (!qName.hasURI(NamespaceUri.NULL)) {
-                ns = ns.put(qName.getPrefix(), qName.getURI());
+                ns = ns.put(qName.getPrefix(), qName.getNamespaceUri());
             }
         }
         receiver.startElement(new FingerprintedQName(nodeName, namePool), Untyped.getInstance(),

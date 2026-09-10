@@ -628,10 +628,10 @@ public class TypeHierarchy {
                         AnnotationList second = ((FunctionItemType) t2).getAnnotationAssertions();
                         Set<NamespaceUri> namespaces = new HashSet<>();
                         for (Annotation a : first) {
-                            namespaces.add(a.getAnnotationQName().getURI());
+                            namespaces.add(a.getAnnotationQName().getNamespaceUri());
                         }
                         for (Annotation a : second) {
-                            namespaces.add(a.getAnnotationQName().getURI());
+                            namespaces.add(a.getAnnotationQName().getNamespaceUri());
                         }
                         for (NamespaceUri ns : namespaces) {
                             FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ns);

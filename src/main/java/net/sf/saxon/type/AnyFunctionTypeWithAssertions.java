@@ -59,7 +59,7 @@ public class AnyFunctionTypeWithAssertions extends AnyFunctionType {
     private static boolean checkAnnotationAssertions(AnnotationList assertions, Function item, Configuration config) {
         AnnotationList annotations = item.getAnnotations();
         for (Annotation ann : assertions) {
-            FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getURI());
+            FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
             if (handler != null) {
                 boolean ok = handler.satisfiesAssertion(ann, annotations);
                 if (!ok) {

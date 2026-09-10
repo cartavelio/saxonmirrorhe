@@ -511,7 +511,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         for (NamespaceBinding binding : bindings) {
             sb.append(binding.getPrefix());
             sb.append("=");
-            sb.append(binding.getURI());
+            sb.append(binding.getNamespaceUri());
             sb.append(" ");
         }
         sb.setLength(sb.length()-1);

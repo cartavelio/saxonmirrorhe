@@ -341,7 +341,7 @@ public final class ComputedAttribute extends AttributeCreator {
                     StructuredQName qn = StructuredQName.fromEQName(rawName);
                     prefix = "";
                     localName = qn.getLocalPart();
-                    uri = qn.getURI();
+                    uri = qn.getNamespaceUri();
                 } catch (IllegalArgumentException e) {
                     throw new XPathException("Invalid EQName in computed attribute constructor: " + e.getMessage(), "XQDY0074");
                 }

@@ -57,105 +57,105 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("all", 2, SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("all", 2, e -> e.populate( SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, predicate, ONE, null);
+                .arg(1, predicate, ONE, null));
 
-        register("characters", 1, CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("characters", 1, e -> e.populate( CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         // codepoints-to-string becomes variadic in 4.0:
-        register("codepoints-to-string", 1, CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
-                .arg(0, BuiltInAtomicType.INTEGER, STAR, null);
+        register("codepoints-to-string", 1, e -> e.populate( CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
+                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
         // Concat changes in 4.0:
-        register("concat", 1, Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null);
+        register("concat", 1, e -> e.populate( Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
 
-        register("highest", 1, HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null);
+        register("highest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("highest", 2, HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null);
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
-        register("highest", 3, HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, ft, ONE, null);
-
-        register("identity", 1, SefFunction::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null);
-
-        register("index-where", 2, SefFunction::new, BuiltInAtomicType.INTEGER, STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null);
-
-        register("in-scope-namespaces", 1, SefFunction::new, MapType.ANY_MAP_TYPE, ONE, LATE)
-                .arg(0, NodeKindTest.ELEMENT, STAR, null);
-
-        register("is-NaN", 1, SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
-
-        register("items-before", 2, SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null);
-
-        register("items-until", 2, SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null);
-
-        register("items-from", 2, SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null);
-
-        register("items-after", 2, SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null);
-
-        register("lowest", 1, HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null);
-
-        register("lowest", 2, HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null);
-
-        register("lowest", 3, HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 3, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, ft, ONE, null);
+                .arg(2, ft, ONE, null));
 
-        register("parcel", 1, ParcelFn::new, Parcel.TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null);
+        register("identity", 1, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("parts", 1, Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
-
-        register("range", 2, SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("index-where", 2, e -> e.populate( SefFunction::new, BuiltInAtomicType.INTEGER, STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, OPT, null);
+                .arg(1, predicate, ONE, null));
 
-        register("range", 3, SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("in-scope-namespaces", 1, e -> e.populate( SefFunction::new, MapType.ANY_MAP_TYPE, ONE, LATE)
+                .arg(0, NodeKindTest.ELEMENT, STAR, null));
+
+        register("is-NaN", 1, e -> e.populate( SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
+
+        register("items-before", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, ONE, null));
+
+        register("items-until", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, ONE, null));
+
+        register("items-from", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, ONE, null));
+
+        register("items-after", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, ONE, null));
+
+        register("lowest", 1, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
+
+        register("lowest", 2, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("lowest", 3, e -> e.populate( HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                .arg(2, ft, ONE, null));
+
+        register("parcel", 1, e -> e.populate( ParcelFn::new, Parcel.TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
+
+        register("parts", 1, e -> e.populate( Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
+
+        register("range", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, OPT, null));
+
+        register("range", 3, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, OPT, null)
-                .arg(2, predicate, OPT, null);
+                .arg(2, predicate, OPT, null));
 
-        register("range", 4, SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
+        register("range", 4, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, OPT, null)
                 .arg(2, predicate, OPT, null)
-                .arg(3, MapType.ANY_MAP_TYPE,ONE, null);
+                .arg(3, MapType.ANY_MAP_TYPE,ONE, null));
 
-        register("slice", 2, SefFunction::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+        register("slice", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null);   // TODO: define a record type
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));   // TODO: define a record type
 
-        register("some", 2, SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("some", 2, e -> e.populate( SefFunction::new, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, predicate, ONE, null);
+                .arg(1, predicate, ONE, null));
 
-        register("unparcel", 1, UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, Parcel.TYPE, ONE, null);
+        register("unparcel", 1, e -> e.populate( UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, Parcel.TYPE, ONE, null));
     }
 
     public static class HighestOrLowest extends SefFunction {

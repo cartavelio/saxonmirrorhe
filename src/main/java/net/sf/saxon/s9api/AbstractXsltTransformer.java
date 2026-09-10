@@ -105,6 +105,7 @@ public abstract class AbstractXsltTransformer {
      * @deprecated since 11.1. Use {@link #setResourceResolver} in preference.
      */
 
+    @Deprecated
     public void setURIResolver(URIResolver resolver) {
         controller.setResourceResolver(new ResourceResolverWrappingURIResolver(resolver));
     }

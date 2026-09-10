@@ -40,8 +40,8 @@ public class MathFunctionSet extends BuiltInFunctionSet {
     }
 
     private void reg1(String name, Function<Double, Double> method) {
-        register(name, 1, () -> new TrigFn1(method), BuiltInAtomicType.DOUBLE, OPT, CARD0)
-                .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY);
+        register(name, 1, e -> e.populate(() -> new TrigFn1(method), BuiltInAtomicType.DOUBLE, OPT, CARD0)
+                .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY));
     }
 
 
@@ -49,7 +49,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
         // Arity 0 functions
 
-        register("pi", 0, PiFn::new, BuiltInAtomicType.DOUBLE, ONE, 0);
+        register("pi", 0, e -> e.populate(PiFn::new, BuiltInAtomicType.DOUBLE, ONE, 0));
 
         // Arity 1 functions
 
@@ -67,13 +67,13 @@ public class MathFunctionSet extends BuiltInFunctionSet {
 
         // Arity 2 functions
 
-        register("pow", 2, PowFn::new, BuiltInAtomicType.DOUBLE, OPT, CARD0)
+        register("pow", 2, e -> e.populate(PowFn::new, BuiltInAtomicType.DOUBLE, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DOUBLE, OPT, EMPTY)
-                .arg(1, BuiltInAtomicType.DOUBLE, ONE, null);
+                .arg(1, BuiltInAtomicType.DOUBLE, ONE, null));
 
-        register("atan2", 2, Atan2Fn::new, BuiltInAtomicType.DOUBLE, ONE, 0)
+        register("atan2", 2, e -> e.populate(Atan2Fn::new, BuiltInAtomicType.DOUBLE, ONE, 0)
                 .arg(0, BuiltInAtomicType.DOUBLE, ONE, null)
-                .arg(1, BuiltInAtomicType.DOUBLE, ONE, null);
+                .arg(1, BuiltInAtomicType.DOUBLE, ONE, null));
 
     }
 

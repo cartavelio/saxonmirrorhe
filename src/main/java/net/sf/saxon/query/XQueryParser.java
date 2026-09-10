@@ -849,7 +849,7 @@ public class XQueryParser extends XPathParser {
             } else {
                 qName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
                 assert qName != null;
-                uri = qName.getURI();
+                uri = qName.getNamespaceUri();
             }
             Annotation annotation = new Annotation(qName);
             if (uri.equals(NamespaceUri.XQUERY)) {
@@ -1726,7 +1726,7 @@ public class XQueryParser extends XPathParser {
         assert varQName != null;
         var.setVariableQName(varQName);
 
-        NamespaceUri uri = varQName.getURI();
+        NamespaceUri uri = varQName.getNamespaceUri();
         NamespaceUri moduleURI = ((QueryModule) env).getModuleNamespace();
         if (moduleURI != null && !moduleURI.equals(uri)) {
             grumble("A variable declared in a library module must be in the module namespace", "XQST0048", offset);
@@ -1920,7 +1920,7 @@ public class XQueryParser extends XPathParser {
             qName = new StructuredQName("", uri, t.currentTokenValue);
         } else {
             qName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
-            uri = qName.getURI();
+            uri = qName.getNamespaceUri();
         }
 
         if (uri.isEmpty()) {
@@ -2064,7 +2064,7 @@ public class XQueryParser extends XPathParser {
         NamespaceUri defaultUri = NamespaceUri.XQUERY;
         StructuredQName varName = makeStructuredQName(t.currentTokenValue, defaultUri);
         assert varName != null;
-        NamespaceUri uri = varName.getURI();
+        NamespaceUri uri = varName.getNamespaceUri();
 
         if (uri.isEmpty()) {
             grumble("The QName identifying an option declaration must be prefixed", "XPST0081");
@@ -2194,7 +2194,7 @@ public class XQueryParser extends XPathParser {
         try {
             StructuredQName name = makeStructuredQName(keyword, NamespaceUri.NULL);
             String lname = name.getLocalPart();
-            NamespaceUri uri = name.getURI();
+            NamespaceUri uri = name.getNamespaceUri();
             ResultDocument.setSerializationProperty(props,
                                                     uri,
                                                     lname,
@@ -3326,7 +3326,7 @@ public class XQueryParser extends XPathParser {
         boolean validateType = false;
         StructuredQName pragmaName = makeStructuredQName(qname, NamespaceUri.NULL);
         assert pragmaName != null;
-        NamespaceUri uri = pragmaName.getURI();
+        NamespaceUri uri = pragmaName.getNamespaceUri();
         String localName = pragmaName.getLocalPart();
         if (uri.equals(NamespaceUri.SAXON)) {
             if ("validate-type".equals(localName)) {
@@ -3698,7 +3698,7 @@ public class XQueryParser extends XPathParser {
                     throw staticError;
                 }
                 if (attributeName.getPrefix().isEmpty() && !attributeName.hasURI(NamespaceUri.NULL)) {
-                    attributeName = new FingerprintedQName("_", attributeName.getURI(),
+                    attributeName = new FingerprintedQName("_", attributeName.getNamespaceUri(),
                                                            attributeName.getLocalPart(),
                                                            attributeName.getFingerprint());
                 }
@@ -3748,7 +3748,7 @@ public class XQueryParser extends XPathParser {
         NodeName attributeName = makeNodeName(t.currentTokenValue, false);
         if (!attributeName.hasURI(NamespaceUri.NULL) && attributeName.getPrefix().isEmpty()) {
             // This must be because the name was given as Q{uri}local. Invent a prefix.
-            attributeName = new FingerprintedQName("_", attributeName.getURI(), attributeName.getLocalPart());
+            attributeName = new FingerprintedQName("_", attributeName.getNamespaceUri(), attributeName.getLocalPart());
         }
         Expression attContent = null;
         nextToken();
@@ -4346,7 +4346,7 @@ public class XQueryParser extends XPathParser {
         }
         int validationMode = ((QueryModule) env).getConstructionMode();
         FingerprintedQName fqn = new FingerprintedQName(
-                qName.getPrefix(), qName.getURI(), qName.getLocalPart(), pool.allocateFingerprint(qName.getURI(), qName.getLocalPart()));
+                qName.getPrefix(), qName.getNamespaceUri(), qName.getLocalPart(), pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart()));
         FixedElement elInst = new FixedElement(fqn,
                                                ((QueryModule) env).getActiveNamespaceBindings(),
                                                ((QueryModule) env).isInheritNamespaces(),

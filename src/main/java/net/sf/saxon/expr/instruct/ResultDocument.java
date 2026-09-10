@@ -658,7 +658,7 @@ public class ResultDocument extends Instruction
         for (String key : localProperties.stringPropertyNames()) {
             StructuredQName qName = StructuredQName.fromClarkName(key);
             try {
-                setSerializationProperty(computedLocalProps, qName.getURI(), qName.getLocalPart(),
+                setSerializationProperty(computedLocalProps, qName.getNamespaceUri(), qName.getLocalPart(),
                                          localProperties.getProperty(key), nsResolver, true, config);
             } catch (XPathException e) {
                 e.setErrorCode("XTDE0030");
@@ -673,7 +673,7 @@ public class ResultDocument extends Instruction
             for (Map.Entry<StructuredQName, Operand> entry : serializationAttributes.entrySet()) {
                 String value = entry.getValue().getChildExpression().evaluateAsString(context).toString();
                 String lname = entry.getKey().getLocalPart();
-                NamespaceUri uri = entry.getKey().getURI();
+                NamespaceUri uri = entry.getKey().getNamespaceUri();
                 try {
                     setSerializationProperty(computedLocalProps, uri, lname, value, nsResolver, false, config);
                 } catch (XPathException e) {
@@ -920,7 +920,7 @@ public class ResultDocument extends Instruction
     public static void processXslOutputElement(NodeInfo element, Properties props, XPathContext c) throws XPathException {
         NamespaceResolver resolver = element.getAllNamespaces();
         for (AttributeInfo att : element.attributes()) {
-            NamespaceUri uri = att.getNodeName().getURI();
+            NamespaceUri uri = att.getNodeName().getNamespaceUri();
             String local = att.getNodeName().getLocalPart();
             String val = Whitespace.trim(att.getValue());
             setSerializationProperty(props, uri, local, val, resolver, false, c.getConfiguration());

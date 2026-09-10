@@ -80,7 +80,7 @@ public class NameTest extends NodeTest implements QNameTest {
      */
 
     public NameTest(int nodeKind, NodeName name, NamePool pool) {
-        this.uri = name.getURI();
+        this.uri = name.getNamespaceUri();
         this.localName = name.getLocalPart();
         this.nodeKind = nodeKind;
         this.fingerprint = name.obtainFingerprint(pool);
@@ -185,7 +185,7 @@ public class NameTest extends NodeTest implements QNameTest {
     private void computeUriAndLocal() {
         if (uri == null || localName == null) {
             StructuredQName name = namePool.getUnprefixedQName(fingerprint);
-            uri = name.getURI();
+            uri = name.getNamespaceUri();
             localName = name.getLocalPart();
         }
     }

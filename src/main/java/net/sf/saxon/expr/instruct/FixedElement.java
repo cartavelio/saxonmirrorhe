@@ -189,7 +189,7 @@ public class FixedElement extends ElementCreator {
             NamespaceMap reduced = namespaceBindings;
             // TODO: implement difference() operation on NamespaceMap
             for (NamespaceBinding childNamespace : namespaceBindings) {
-                if (childNamespace.getURI().equals(parentNamespaces.getURI(childNamespace.getPrefix()))) {
+                if (childNamespace.getNamespaceUri().equals(parentNamespaces.getNamespaceUri(childNamespace.getPrefix()))) {
                     reduced = reduced.remove(childNamespace.getPrefix());
                 }
             }
@@ -446,7 +446,7 @@ public class FixedElement extends ElementCreator {
                     // The only namespace bindings we can trust are those declared on this element
                     // We could also trust those on enclosing LREs in the same function/template,
                     // but it's not a big win to go looking for them.
-                    NamespaceUri uri = namespaceBindings.getURI(parts[0]);
+                    NamespaceUri uri = namespaceBindings.getNamespaceUri(parts[0]);
                     if (uri == null) {
                         return null;
                     } else {
@@ -568,7 +568,7 @@ public class FixedElement extends ElementCreator {
     public void outputNamespaceNodes(Outputter out, NodeName nodeName, ElementCreationDetails details)
             throws XPathException {
         for (NamespaceBinding ns : namespaceBindings) {
-            out.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+            out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
         }
     }
 
@@ -590,9 +590,9 @@ public class FixedElement extends ElementCreator {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("elem", this);
         out.emitAttribute("name", elementName.getDisplayName());
-        out.emitAttribute("nsuri", elementName.getURI().toString());
+        out.emitAttribute("nsuri", elementName.getNamespaceUri().toString());
         String flags = getInheritanceFlags();
-        if (!elementName.getURI().isEmpty() && elementName.getPrefix().isEmpty()) {
+        if (!elementName.getNamespaceUri().isEmpty() && elementName.getPrefix().isEmpty()) {
             flags += "d";  // "d" to indicate default namespace
         }
         if (isLocal()) {
@@ -607,9 +607,9 @@ public class FixedElement extends ElementCreator {
                 String prefix = ns.getPrefix();
                 if (!prefix.equals("xml")) {
                     fsb.append(prefix.isEmpty() ? "#" : prefix);
-                    if (!ns.getURI().equals(getRetainedStaticContext().getURIForPrefix(prefix, true))) {
+                    if (!ns.getNamespaceUri().equals(getRetainedStaticContext().getURIForPrefix(prefix, true))) {
                         fsb.append('=');
-                        fsb.append(ns.getURI());
+                        fsb.append(ns.getNamespaceUri());
                     }
                     fsb.append(' ');
                 }

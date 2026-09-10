@@ -390,7 +390,7 @@ public class XdmNode extends XdmItem {
     public String getAttributeValue(QName name) {
         NodeInfo node = getUnderlyingNode();
         StructuredQName sq = name.getStructuredQName();
-        return node.getAttributeValue(sq.getURI(), sq.getLocalPart());
+        return node.getAttributeValue(sq.getNamespaceUri(), sq.getLocalPart());
     }
 
     /**

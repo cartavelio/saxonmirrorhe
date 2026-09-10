@@ -337,7 +337,7 @@ public class DOMSender {
         if (prefix.equals("xml")) {
             return NamespaceConstant.XML;
         }
-        NamespaceUri uri = namespaces.peek().getURI(prefix);
+        NamespaceUri uri = namespaces.peek().getNamespaceUri(prefix);
         return uri==null ? "" : uri.toString();
     }
 

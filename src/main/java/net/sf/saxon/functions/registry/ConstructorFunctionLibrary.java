@@ -64,7 +64,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         if (functionName.getArity() != 1) {
             return null;
         }
-        final NamespaceUri uri = functionName.getComponentName().getURI();
+        final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
         final String localName = functionName.getComponentName().getLocalPart();
         final SchemaType type = config.getSchemaType(new StructuredQName("", uri, localName));
         if (type == null || type.isComplexType()) {
@@ -123,7 +123,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
 
     @Override
     public Expression bind(SymbolicName.F functionName, Expression[] arguments, StaticContext env, List<String> reasons) {
-        final NamespaceUri uri = functionName.getComponentName().getURI();
+        final NamespaceUri uri = functionName.getComponentName().getNamespaceUri();
         final String localName = functionName.getComponentName().getLocalPart();
         boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);
         if (builtInNamespace) {

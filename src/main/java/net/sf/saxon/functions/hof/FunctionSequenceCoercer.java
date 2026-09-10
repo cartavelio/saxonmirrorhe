@@ -234,7 +234,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
 
     private static void checkAnnotations(Function item, FunctionItemType requiredItemType, Configuration config) throws XPathException {
         for (Annotation ann : requiredItemType.getAnnotationAssertions()) {
-            FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getURI());
+            FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ann.getAnnotationQName().getNamespaceUri());
             if (handler != null && !handler.satisfiesAssertion(ann, item.getAnnotations())) {
                 throw new XPathException(
                         "Supplied function does not satisfy the annotation assertions of the required function type", "XPTY0004");

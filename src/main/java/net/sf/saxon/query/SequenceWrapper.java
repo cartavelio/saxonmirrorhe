@@ -228,7 +228,7 @@ public class SequenceWrapper extends SequenceReceiver {
             StructuredQName name = type.getStructuredQName();
             String prefix = name.getPrefix();
             String localName = name.getLocalPart();
-            NamespaceUri uri = name.getURI();
+            NamespaceUri uri = name.getNamespaceUri();
             if (prefix.isEmpty()) {
                 prefix = pool.suggestPrefixForURI(uri);
                 if (prefix == null) {
@@ -344,7 +344,7 @@ public class SequenceWrapper extends SequenceReceiver {
             attName, typeCode, value.toString(), locationId, properties));
         NamespaceMap ns = NamespaceMap.emptyMap();
         if (!attName.hasURI(NamespaceUri.NULL)) {
-            ns = ns.put(attName.getPrefix(), attName.getURI());
+            ns = ns.put(attName.getPrefix(), attName.getNamespaceUri());
         }
         out.startElement(resultAttribute, Untyped.getInstance(), atts, ns, Loc.NONE, 0);
         out.startContent();

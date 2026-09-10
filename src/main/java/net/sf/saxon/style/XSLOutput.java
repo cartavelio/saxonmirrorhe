@@ -78,7 +78,7 @@ public class XSLOutput extends StyleElement {
                 }
                 serializationAttributes.put(f, val);
             } else {
-                NamespaceUri attributeURI = attName.getURI();
+                NamespaceUri attributeURI = attName.getNamespaceUri();
                 if (NamespaceUri.NULL.equals(attributeURI) ||
                         NamespaceUri.XSLT.equals(attributeURI) ||
                         NamespaceUri.SAXON.equals(attributeURI)) {

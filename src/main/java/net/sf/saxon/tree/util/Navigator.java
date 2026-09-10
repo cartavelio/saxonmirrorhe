@@ -757,7 +757,7 @@ public final class Navigator {
 
                 if ((copyOptions & CopyOptions.ALL_NAMESPACES) != 0) {
                     for (NamespaceBinding ns : node.getAllNamespaces()) {
-                        out.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+                        out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
                     }
                 }
 

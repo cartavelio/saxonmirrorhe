@@ -230,7 +230,7 @@ public class NamespaceReducer extends ProxyReceiver implements NamespaceResolver
         } else {
             for (int i = namespacesSize - 1; i >= 0; i--) {
                 if (namespaces[i].getPrefix().equals(prefix)) {
-                    return namespaces[i].getURI();
+                    return namespaces[i].getNamespaceUri();
                 }
             }
         }

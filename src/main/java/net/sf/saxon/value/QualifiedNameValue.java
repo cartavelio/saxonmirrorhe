@@ -128,7 +128,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
 
     /*@NotNull*/
     public final NamespaceUri getNamespaceURI() {
-        return qName.getURI();
+        return qName.getNamespaceUri();
     }
 
     /**

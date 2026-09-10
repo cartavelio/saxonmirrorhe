@@ -31,24 +31,24 @@ public class UseWhen30FunctionSet extends BuiltInFunctionSet {
 
         addXPathFunctions();
 
-        register("available-system-properties", 0, AvailableSystemProperties::new, BuiltInAtomicType.QNAME,
-                 STAR, LATE);
+        register("available-system-properties", 0, e -> e.populate(AvailableSystemProperties::new, BuiltInAtomicType.QNAME,
+                 STAR, LATE));
 
-        register("element-available", 1, ElementAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("element-available", 1, e -> e.populate(ElementAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("function-available", 1, FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("function-available", 1, e -> e.populate(FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("function-available", 2, FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
+        register("function-available", 2, e -> e.populate(FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
+                .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("system-property", 1, SystemProperty::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("system-property", 1, e -> e.populate(SystemProperty::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("type-available", 1, TypeAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("type-available", 1, e -> e.populate(TypeAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
 
     }

@@ -260,7 +260,7 @@ public abstract class HTMLEmitter extends XMLEmitter {
     public void startElement(NodeName elemName, SchemaType type,
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
-        uri = elemName.getURI();
+        uri = elemName.getNamespaceUri();
         super.startElement(elemName, type, attributes, namespaces, location, properties);
         parentElement = elementStack.peek();
         if (isHTMLElement(elemName) &&

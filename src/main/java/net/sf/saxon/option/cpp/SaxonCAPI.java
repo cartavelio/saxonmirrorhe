@@ -706,7 +706,7 @@ public class SaxonCAPI {
 
         BuiltInAtomicType typei = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
         StructuredQName sname = typei.getTypeName();
-        return new QName(sname.getPrefix(), sname.getURI().toString(), sname.getLocalPart()).getClarkName();
+        return new QName(sname.getPrefix(), sname.getNamespaceUri().toString(), sname.getLocalPart()).getClarkName();
 
     }
 

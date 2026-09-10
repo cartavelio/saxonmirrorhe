@@ -699,7 +699,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
             List<NamespaceBinding> bindings = setPrefixes.get(i);
             for (int j=bindings.size()-1; j>=0; j--) {
                 NamespaceBinding binding = bindings.get(j);
-                if (binding.getURI().equals(uri)) {
+                if (binding.getNamespaceUri().equals(uri)) {
                     return binding.getPrefix();
                 }
             }
@@ -767,7 +767,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
             rootNamespaceContext = streamWriter.rootNamespaceContext;
             for (List<NamespaceBinding> list : streamWriter.setPrefixes) {
                 for (NamespaceBinding binding : list) {
-                    bindings.put(binding.getPrefix(), binding.getURI());
+                    bindings.put(binding.getPrefix(), binding.getNamespaceUri());
                 }
             }
         }

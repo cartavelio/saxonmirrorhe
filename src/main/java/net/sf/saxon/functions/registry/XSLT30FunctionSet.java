@@ -34,88 +34,88 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
 
         importFunctionSet(XPath40FunctionSet.getInstance());  // TODO: support different function sets for 3.0/4.0
 
-        register("accumulator-after", 1, AccumulatorFn.AccumulatorAfter::new, AnyItemType.getInstance(),
+        register("accumulator-after", 1, e -> e.populate( AccumulatorFn.AccumulatorAfter::new, AnyItemType.getInstance(),
                  STAR, LATE | CITEM)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("accumulator-before", 1, AccumulatorFn.AccumulatorBefore::new, AnyItemType.getInstance(),
+        register("accumulator-before", 1, e -> e.populate( AccumulatorFn.AccumulatorBefore::new, AnyItemType.getInstance(),
                  STAR, LATE | CITEM)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("available-system-properties", 0, AvailableSystemProperties::new, BuiltInAtomicType.QNAME,
-                 STAR, LATE);
+        register("available-system-properties", 0, e -> e.populate( AvailableSystemProperties::new, BuiltInAtomicType.QNAME,
+                 STAR, LATE));
 
-        register("current", 0, Current::new, Type.ITEM_TYPE, ONE, LATE);
+        register("current", 0, e -> e.populate( Current::new, Type.ITEM_TYPE, ONE, LATE));
 
-        register("current-group", 0, CurrentGroup::new, Type.ITEM_TYPE, STAR, LATE);
+        register("current-group", 0, e -> e.populate( CurrentGroup::new, Type.ITEM_TYPE, STAR, LATE));
 
-        register("current-grouping-key", 0, CurrentGroupingKey::new, BuiltInAtomicType.ANY_ATOMIC, STAR, LATE);
+        register("current-grouping-key", 0, e -> e.populate( CurrentGroupingKey::new, BuiltInAtomicType.ANY_ATOMIC, STAR, LATE));
 
-        register("current-merge-group", 0, CurrentMergeGroup::new, AnyItemType.getInstance(),
-                 STAR, LATE);
+        register("current-merge-group", 0, e -> e.populate( CurrentMergeGroup::new, AnyItemType.getInstance(),
+                 STAR, LATE));
 
-        register("current-merge-group", 1, CurrentMergeGroup::new, AnyItemType.getInstance(),
+        register("current-merge-group", 1, e -> e.populate( CurrentMergeGroup::new, AnyItemType.getInstance(),
                  STAR, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("current-merge-key", 0, CurrentMergeKey::new, BuiltInAtomicType.ANY_ATOMIC,
-                 STAR, LATE);
+        register("current-merge-key", 0, e -> e.populate( CurrentMergeKey::new, BuiltInAtomicType.ANY_ATOMIC,
+                 STAR, LATE));
 
-        register("current-output-uri", 0, CurrentOutputUri::new, BuiltInAtomicType.ANY_URI, OPT, LATE);
+        register("current-output-uri", 0, e -> e.populate( CurrentOutputUri::new, BuiltInAtomicType.ANY_URI, OPT, LATE));
 
-        register("document", 1, DocumentFn::new, Type.NODE_TYPE, STAR, BASE | LATE | UO)
-                .arg(0, Type.ITEM_TYPE, STAR, null);
+        register("document", 1, e -> e.populate( DocumentFn::new, Type.NODE_TYPE, STAR, BASE | LATE | UO)
+                .arg(0, Type.ITEM_TYPE, STAR, null));
 
-        register("document", 2, DocumentFn::new, Type.NODE_TYPE, STAR, BASE | LATE | UO)
+        register("document", 2, e -> e.populate( DocumentFn::new, Type.NODE_TYPE, STAR, BASE | LATE | UO)
                 .arg(0, Type.ITEM_TYPE, STAR, null)
-                .arg(1, Type.NODE_TYPE, ONE, null);
+                .arg(1, Type.NODE_TYPE, ONE, null));
 
-        register("element-available", 1, ElementAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("element-available", 1, e -> e.populate( ElementAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("function-available", 1, FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("function-available", 1, e -> e.populate( FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("function-available", 2, FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
+        register("function-available", 2, e -> e.populate( FunctionAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE, null);
+                .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("key", 2, KeyFn::new, Type.NODE_TYPE, STAR, CDOC | NS | LATE)
+        register("key", 2, e -> e.populate( KeyFn::new, Type.NODE_TYPE, STAR, CDOC | NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY);
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
 
-        register("key", 3, KeyFn::new, Type.NODE_TYPE, STAR, NS | LATE)
+        register("key", 3, e -> e.populate( KeyFn::new, Type.NODE_TYPE, STAR, NS | LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
-                .arg(2, Type.NODE_TYPE, ONE, null);
+                .arg(2, Type.NODE_TYPE, ONE, null));
 
-        register("regex-group", 1, RegexGroup::new, BuiltInAtomicType.STRING, ONE, LATE | SIDE)
-                .arg(0, BuiltInAtomicType.INTEGER, ONE, null);
+        register("regex-group", 1, e -> e.populate( RegexGroup::new, BuiltInAtomicType.STRING, ONE, LATE | SIDE)
+                .arg(0, BuiltInAtomicType.INTEGER, ONE, null));
         // Mark it as having side-effects to prevent loop-lifting
 
-        register("stream-available", 1, StreamAvailable::new, BuiltInAtomicType.BOOLEAN,
+        register("stream-available", 1, e -> e.populate( StreamAvailable::new, BuiltInAtomicType.BOOLEAN,
                  ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null);
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
-        register("system-property", 1, SystemProperty::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("system-property", 1, e -> e.populate( SystemProperty::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("type-available", 1, TypeAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("type-available", 1, e -> e.populate( TypeAvailable::new, BuiltInAtomicType.BOOLEAN, ONE, NS)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("unparsed-entity-public-id", 1, UnparsedEntity.UnparsedEntityPublicId::new, BuiltInAtomicType.STRING, ONE, CDOC | LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("unparsed-entity-public-id", 1, e -> e.populate( UnparsedEntity.UnparsedEntityPublicId::new, BuiltInAtomicType.STRING, ONE, CDOC | LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("unparsed-entity-public-id", 2, UnparsedEntity.UnparsedEntityPublicId::new, BuiltInAtomicType.STRING, ONE, 0)
+        register("unparsed-entity-public-id", 2, e -> e.populate( UnparsedEntity.UnparsedEntityPublicId::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, Type.NODE_TYPE, ONE, null);
+                .arg(1, Type.NODE_TYPE, ONE, null));
 
-        register("unparsed-entity-uri", 1, UnparsedEntity.UnparsedEntityUri::new, BuiltInAtomicType.ANY_URI, ONE, CDOC | LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+        register("unparsed-entity-uri", 1, e -> e.populate( UnparsedEntity.UnparsedEntityUri::new, BuiltInAtomicType.ANY_URI, ONE, CDOC | LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("unparsed-entity-uri", 2, UnparsedEntity.UnparsedEntityUri::new, BuiltInAtomicType.ANY_URI, ONE, 0)
+        register("unparsed-entity-uri", 2, e -> e.populate( UnparsedEntity.UnparsedEntityUri::new, BuiltInAtomicType.ANY_URI, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, Type.NODE_TYPE, ONE, null);
+                .arg(1, Type.NODE_TYPE, ONE, null));
 
 
     }

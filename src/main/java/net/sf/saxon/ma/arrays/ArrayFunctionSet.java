@@ -47,121 +47,121 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     private void init() {
 
 
-        register("append", 2, ArrayAppend::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("append", 2, e -> e.populate( ArrayAppend::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, AnyItemType.getInstance(), STAR | NAV, null);
+                .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
 
         ItemType filterFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.SINGLE_BOOLEAN);
 
-        register("filter", 2, ArrayFilter::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("filter", 2, e -> e.populate( ArrayFilter::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, filterFunctionType, ONE | INS, null);
+                .arg(1, filterFunctionType, ONE | INS, null));
 
-        register("flatten", 1, ArrayFlatten::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | ABS, null);
+        register("flatten", 1, e -> e.populate( ArrayFlatten::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR | ABS, null));
 
         ItemType foldFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("fold-left", 3, ArrayFoldLeft::new, AnyItemType.getInstance(), STAR, 0)
+        register("fold-left", 3, e -> e.populate( ArrayFoldLeft::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
-                .arg(2, foldFunctionType, ONE | INS, null);
+                .arg(2, foldFunctionType, ONE | INS, null));
 
-        register("fold-right", 3, ArrayFoldRight::new, AnyItemType.getInstance(), STAR, 0)
+        register("fold-right", 3, e -> e.populate( ArrayFoldRight::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
-                .arg(2, foldFunctionType, ONE | INS, null);
+                .arg(2, foldFunctionType, ONE | INS, null));
 
         ItemType forEachFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, ArrayForEach::new, AnyItemType.getInstance(), STAR, 0)
+        register("for-each", 2, e -> e.populate( ArrayForEach::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, forEachFunctionType, ONE | INS, null);
+                .arg(1, forEachFunctionType, ONE | INS, null));
 
-        register("for-each-pair", 3, ArrayForEachPair::new, AnyItemType.getInstance(), STAR, 0)
+        register("for-each-pair", 3, e -> e.populate( ArrayForEachPair::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(2, foldFunctionType, ONE | INS, null);
+                .arg(2, foldFunctionType, ONE | INS, null));
 
-        register("get", 2, ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
+        register("get", 2, e -> e.populate( ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null);
+                .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null));
 
-        register("head", 1, ArrayHead::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        register("head", 1, e -> e.populate( ArrayHead::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-        register("insert-before", 3, ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("insert-before", 3, e -> e.populate( ArrayInsertBefore::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null)
-                .arg(2, AnyItemType.getInstance(), STAR | NAV, null);
+                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
 
-        register("join", 1, ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null);
+        register("join", 1, e -> e.populate( ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null));
 
-        register("put", 3, ArrayPut::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("put", 3, e -> e.populate( ArrayPut::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR | INS, null)
-                .arg(2, AnyItemType.getInstance(), STAR | NAV, null);
+                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
 
-        register("remove", 2, ArrayRemove::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("remove", 2, e -> e.populate( ArrayRemove::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null);
+                .arg(1, BuiltInAtomicType.INTEGER, STAR | ABS, null));
 
-        register("reverse", 1, ArrayReverse::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        register("reverse", 1, e -> e.populate( ArrayReverse::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-        register("size", 1, ArraySize::new, BuiltInAtomicType.INTEGER, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        register("size", 1, e -> e.populate( ArraySize::new, BuiltInAtomicType.INTEGER, ONE, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
         ItemType sortFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("sort", 1, ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        register("sort", 1, e -> e.populate( ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-        register("sort", 2, ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("sort", 2, e -> e.populate( ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT | ABS, null);
+                .arg(1, BuiltInAtomicType.STRING, OPT | ABS, null));
 
-        register("sort", 3, ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("sort", 3, e -> e.populate( ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT | ABS, null)
-                .arg(2, sortFunctionType, ONE | INS, null);
+                .arg(2, sortFunctionType, ONE | INS, null));
 
-        register("subarray", 2, ArraySubarray::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("subarray", 2, e -> e.populate( ArraySubarray::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null);
+                .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null));
 
-        register("subarray", 3, ArraySubarray::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+        register("subarray", 3, e -> e.populate( ArraySubarray::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                .arg(2, BuiltInAtomicType.INTEGER, ONE | ABS, null);
+                .arg(2, BuiltInAtomicType.INTEGER, ONE | ABS, null));
 
-        register("tail", 1, ArrayTail::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        register("tail", 1, e -> e.populate( ArrayTail::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
         // TODO: the following functions should be private
 
-        register("_to-sequence", 1, ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null);
+        register("_to-sequence", 1, e -> e.populate( ArrayToSequence::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
-        register("_from-sequence", 1, ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | INS, null);
+        register("_from-sequence", 1, e -> e.populate( ArrayFromSequence::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR | INS, null));
 
         // TODO: the following functions should be XPath 4.0 only
 
-        register("of", 1, ArrayOf::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
-                .arg(0, Parcel.TYPE, STAR, null);
+        register("of", 1, e -> e.populate( ArrayOf::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, SEQV)
+                .arg(0, Parcel.TYPE, STAR, null));
 
-        register("members", 1, ArrayMembers::new, Parcel.TYPE, STAR, SEQV)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
+        register("members", 1, e -> e.populate( ArrayMembers::new, Parcel.TYPE, STAR, SEQV)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
 
     }
@@ -246,7 +246,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
      */
     public static class ArrayFlatten extends SystemFunction {
 
-        private void flatten(Sequence arg, List<Item> out) throws XPathException {
+        private void flatten(Sequence arg, List<Item> out) {
             SequenceTool.supply(arg.iterate(), (ItemConsumer<? super Item>) item -> {
                 if (item instanceof ArrayItem) {
                     for (Sequence member : ((ArrayItem) item).members()) {
@@ -604,7 +604,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     public static class ArrayFromSequence extends FoldingFunction {
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return SimpleArrayItem.makeSimpleArrayItem(((Sequence)arguments[0]).iterate());
+            return SimpleArrayItem.makeSimpleArrayItem(arguments[0].iterate());
         }
 
         /**
@@ -617,7 +617,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         @Override
         public Fold getFold(XPathContext context, Sequence... additionalArguments) {
             return new Fold() {
-                List<GroundedValue> members = new ArrayList<>();
+                final List<GroundedValue> members = new ArrayList<>();
 
                 /**
                  * Process one item in the input sequence, returning a new copy of the working data

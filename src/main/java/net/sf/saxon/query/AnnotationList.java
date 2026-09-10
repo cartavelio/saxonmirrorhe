@@ -66,7 +66,7 @@ public class AnnotationList implements Iterable<Annotation> {
     private Map<NamespaceUri, List<Annotation>> groupByNamespace() {
         Map<NamespaceUri, List<Annotation>> result = new HashMap<>();
         for (Annotation ann : list) {
-            NamespaceUri ns = ann.getAnnotationQName().getURI();
+            NamespaceUri ns = ann.getAnnotationQName().getNamespaceUri();
             if (result.containsKey(ns)) {
                 result.get(ns).add(ann);
             } else {

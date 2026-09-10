@@ -1509,7 +1509,7 @@ public class XPathParser {
 
     public ItemType getPlainType(StructuredQName sq) throws XPathException {
         Configuration config = env.getConfiguration();
-        NamespaceUri uri = sq.getURI();
+        NamespaceUri uri = sq.getNamespaceUri();
         if (uri.isEmpty()) {
             uri = env.getDefaultElementNamespace();
         }
@@ -1543,7 +1543,9 @@ public class XPathParser {
                 grumble("Unknown Java class " + local, "XPST0051");
                 return AnyItemType.getInstance();
             }
-            return config.getJavaExternalObjectType(theClass);
+            synchronized(config) {
+                return JavaExternalObjectType.of(theClass);
+            }
 //#endif
         } else if (uri.equals(NamespaceUri.DOT_NET_TYPE)) {
             return Version.platform.getExternalObjectType(config, uri, local);
@@ -1624,7 +1626,7 @@ public class XPathParser {
             grumble(e.getMessage(), e.getErrorCodeLocalPart());
             assert false;
         }
-        NamespaceUri uri = sq.getURI();
+        NamespaceUri uri = sq.getNamespaceUri();
         String local = sq.getLocalPart();
 
         boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);
@@ -3271,7 +3273,7 @@ public class XPathParser {
                         SchemaType schemaType;
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
                         assert contentType != null;
-                        NamespaceUri uri = contentType.getURI();
+                        NamespaceUri uri = contentType.getNamespaceUri();
                         String lname = contentType.getLocalPart();
 
                         if (uri.equals(NamespaceUri.SCHEMA)) {
@@ -3788,7 +3790,7 @@ public class XPathParser {
      */
 
     public static String getMissingFunctionExplanation(StructuredQName functionName, Configuration config) {
-        String actualURI = functionName.getURI().toString();
+        String actualURI = functionName.getNamespaceUri().toString();
         String similarNamespace = NamespaceConstant.findSimilarNamespace(actualURI);
         if (similarNamespace != null) {
             if (similarNamespace.equals(actualURI)) {
@@ -3868,7 +3870,7 @@ public class XPathParser {
         }
 
         if (functionName.hasURI(NamespaceUri.SCHEMA)) {
-            ItemType t = Type.getBuiltInItemType(functionName.getURI(), functionName.getLocalPart());
+            ItemType t = Type.getBuiltInItemType(functionName.getNamespaceUri(), functionName.getLocalPart());
             if (t instanceof BuiltInAtomicType) {
                 checkAllowedType(env, (BuiltInAtomicType) t);
             }
@@ -4492,7 +4494,7 @@ public class XPathParser {
         try {
             NamespaceUri defaultNS = useDefault ? env.getDefaultElementNamespace() : NamespaceUri.NULL;
             StructuredQName sq = qNameParser.parse(qname, defaultNS);
-            return env.getConfiguration().getNamePool().allocateFingerprint(sq.getURI(), sq.getLocalPart());
+            return env.getConfiguration().getNamePool().allocateFingerprint(sq.getNamespaceUri(), sq.getLocalPart());
         } catch (XPathException e) {
             grumble(e.getMessage(), e.getErrorCodeLocalPart());
             return -1;
@@ -4559,7 +4561,7 @@ public class XPathParser {
         StructuredQName sq = makeStructuredQNameSilently(qname,
                                                          useDefault ? env.getDefaultElementNamespace() : NamespaceUri.NULL);
         String prefix = sq.getPrefix();
-        NamespaceUri uri = sq.getURI();
+        NamespaceUri uri = sq.getNamespaceUri();
         String local = sq.getLocalPart();
         if (uri.isEmpty()) {
             int fp = env.getConfiguration().getNamePool().allocateFingerprint(NamespaceUri.NULL, local);
@@ -4599,7 +4601,7 @@ public class XPathParser {
                 case DEFAULT_NAMESPACE_OR_NONE:
                     defaultNS = env.getDefaultElementNamespace();
                     StructuredQName q = makeStructuredQName(qname, defaultNS);
-                    int fp1 = pool.allocateFingerprint(q.getURI(), q.getLocalPart());
+                    int fp1 = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
                     NameTest test1 = new NameTest(nodeType, fp1, pool);
                     int fp2 = pool.allocateFingerprint(NamespaceUri.NULL, q.getLocalPart());
                     NameTest test2 = new NameTest(nodeType, fp2, pool);
@@ -4612,7 +4614,7 @@ public class XPathParser {
             }
         }
         StructuredQName qName = makeStructuredQName(qname, defaultNS);
-        int fp = pool.allocateFingerprint(qName.getURI(), qName.getLocalPart());
+        int fp = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
         return new NameTest(nodeType, fp, pool);
     }
 
@@ -4621,7 +4623,7 @@ public class XPathParser {
         NamePool pool = env.getConfiguration().getNamePool();
         StructuredQName q = makeStructuredQName(qname, NamespaceUri.NULL);
         assert q != null;
-        int fp = pool.allocateFingerprint(q.getURI(), q.getLocalPart());
+        int fp = pool.allocateFingerprint(q.getNamespaceUri(), q.getLocalPart());
         return new NameTest(nodeType, fp, pool);
     }
 
@@ -4649,7 +4651,7 @@ public class XPathParser {
         }
         try {
             StructuredQName sq = qNameParser.parse(prefix + ":dummy", NamespaceUri.NULL);
-            return new NamespaceTest(pool, nodeType, sq.getURI());
+            return new NamespaceTest(pool, nodeType, sq.getNamespaceUri());
         } catch (XPathException err) {
             grumble(err.getMessage(), err.getErrorCodeLocalPart());
             return null;

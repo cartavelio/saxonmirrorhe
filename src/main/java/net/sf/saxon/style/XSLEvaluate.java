@@ -137,7 +137,7 @@ public class XSLEvaluate extends StyleElement {
                     withParams = makeExpression(withParamsAtt, att);
                     break;
                 default:
-                    if (attName.getLocalPart().equals("options") && attName.getURI().equals(NamespaceUri.SAXON)) {
+                    if (attName.getLocalPart().equals("options") && attName.getNamespaceUri().equals(NamespaceUri.SAXON)) {
                         if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                             options = makeExpression(att.getValue(), att);
                         }

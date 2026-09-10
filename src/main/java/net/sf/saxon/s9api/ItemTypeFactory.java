@@ -506,7 +506,11 @@ public class ItemTypeFactory {
      */
 
     public ItemType getExternalObjectType(Class externalClass) {
-        JavaExternalObjectType type = config.getJavaExternalObjectType(externalClass);
+        JavaExternalObjectType result;
+        synchronized(config) {
+            result = JavaExternalObjectType.of(externalClass);
+        }
+        JavaExternalObjectType type = result;
         return new ConstructedItemType(type, config);
     }
 
@@ -586,6 +590,7 @@ public class ItemTypeFactory {
      * @deprecated since 12.0 - use {@link XdmMap#makeMap} instead
      */
 
+    @Deprecated
     public XdmMap newMap(Map<?, ?> map) throws SaxonApiException {
         try {
             return XdmMap.makeMap(map);

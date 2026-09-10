@@ -275,7 +275,7 @@ public class Parts extends SystemFunction implements Callable {
         );
         register(BuiltInAtomicType.QNAME, "namespace-uri", SequenceType.OPTIONAL_STRING,
                  a -> {
-                     String uri = ((QNameValue) a).getStructuredQName().getURI().toString();
+                     String uri = ((QNameValue) a).getStructuredQName().getNamespaceUri().toString();
                      return uri.isEmpty()
                              ? EmptyIterator.ofAtomic()
                              : SingletonIterator.makeIterator(new StringValue(uri, BuiltInAtomicType.ANY_URI));
@@ -457,7 +457,7 @@ public class Parts extends SystemFunction implements Callable {
                         String value = tok.substring(eq + 1);
                         params.initialAppend(keyword, new StringValue(value));
                     } else {
-                        params.initialAppend(tok, BooleanValue.TRUE);
+                        params.initialAppend(tok, EmptySequence.getInstance());
                     }
                 }
                 dict.initialPut("queryParams", params);

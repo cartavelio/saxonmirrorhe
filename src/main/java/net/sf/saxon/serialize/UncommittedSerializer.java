@@ -134,7 +134,7 @@ public class UncommittedSerializer extends ProxyReceiver {
             throws XPathException {
         if (!committed) {
             String name = elemName.getLocalPart();
-            NamespaceUri uri = elemName.getURI();
+            NamespaceUri uri = elemName.getNamespaceUri();
             if (name.equalsIgnoreCase("html") && uri.isEmpty()) {
                 switchToMethod("html");
             } else if (name.equals("html") && uri.equals(NamespaceUri.XHTML)) {

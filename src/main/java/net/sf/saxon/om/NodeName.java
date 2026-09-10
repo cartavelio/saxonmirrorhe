@@ -37,12 +37,24 @@ public interface NodeName extends IdentityComparable {
     String getPrefix();
 
     /**
-     * Get the namespace URI of the QName.
+     * Get the namespace URI of the node name.
      *
-     * @return the URI. Returns the empty string to represent the no-namespace
+     * @return the URI. Returns {@link NamespaceUri#NULL} for nodes that are not in any namespace
      */
 
-    NamespaceUri getURI();
+    NamespaceUri getNamespaceUri();
+
+    /**
+     * Get the namespace URI of the QName, as a string.
+     *
+     * <p>This method is retained for backwards compatibility, but {@link #getNamespaceUri()} is preferred.</p>
+     *
+     * @return the namespace URI. Returns the zero-length string for nodes that are not in any namespace
+     */
+
+    default String getURI() {
+        return getNamespaceUri().toString();
+    }
 
     /**
      * Get the local part of the QName

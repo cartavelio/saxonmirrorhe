@@ -180,11 +180,24 @@ public class StructuredQName implements IdentityComparable {
     /**
      * Get the namespace URI of the QName.
      *
+     * @return the URI. Returns {@link NamespaceUri#NULL} to represent the no-namespace
+     */
+
+    public NamespaceUri getNamespaceUri() {
+        return this.uri;
+    }
+
+    /**
+     * Get the namespace URI of the QName as a string.
+     *
+     * <p>This method is retained for backwards compatibility, but {@link #getNamespaceUri()} should
+     * be used in preference.</p>
+     *
      * @return the URI. Returns the empty string to represent the no-namespace
      */
 
-    public NamespaceUri getURI() {
-        return this.uri;
+    public String getURI() {
+        return this.uri.toString();
     }
 
     /**
@@ -325,7 +338,7 @@ public class StructuredQName implements IdentityComparable {
      */
 
     public QName toJaxpQName() {
-        return new javax.xml.namespace.QName(getURI().toString(), getLocalPart(), getPrefix());
+        return new javax.xml.namespace.QName(getNamespaceUri().toString(), getLocalPart(), getPrefix());
     }
     //#endif
     
@@ -336,7 +349,7 @@ public class StructuredQName implements IdentityComparable {
      */
 
     public NamespaceBinding getNamespaceBinding() {
-        return new NamespaceBinding(getPrefix(), getURI());
+        return new NamespaceBinding(getPrefix(), getNamespaceUri());
     }
 
     /**

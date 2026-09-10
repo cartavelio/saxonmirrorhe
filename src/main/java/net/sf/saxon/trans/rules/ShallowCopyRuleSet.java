@@ -89,7 +89,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     NodeName fqn = NameOfNode.makeName(node);
                     out.startElement(fqn, schemaAware ? AnyType.getInstance() : Untyped.getInstance(), locationId, ReceiverOption.NONE);
                     for (NamespaceBinding ns : node.getAllNamespaces()) {
-                        out.namespace(ns.getPrefix(), ns.getURI(), ReceiverOption.NONE);
+                        out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
                     }
                     XPathContextMajor c2 = context.newContext();
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508

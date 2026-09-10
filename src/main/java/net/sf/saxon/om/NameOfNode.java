@@ -59,7 +59,7 @@ public class NameOfNode implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public NamespaceUri getURI() {
+    public NamespaceUri getNamespaceUri() {
         return node.getNamespaceUri();
     }
 
@@ -90,7 +90,7 @@ public class NameOfNode implements NodeName {
      */
     @Override
     public StructuredQName getStructuredQName() {
-        return new StructuredQName(getPrefix(), getURI(), getLocalPart());
+        return new StructuredQName(getPrefix(), getNamespaceUri(), getLocalPart());
     }
 
     /**
@@ -117,7 +117,7 @@ public class NameOfNode implements NodeName {
 
     @Override
     public NamespaceBinding getNamespaceBinding() {
-        return new NamespaceBinding(getPrefix(), getURI());
+        return new NamespaceBinding(getPrefix(), getNamespaceUri());
     }
 
     /**
@@ -166,7 +166,7 @@ public class NameOfNode implements NodeName {
      */
     @Override
     public int hashCode() {
-        return StructuredQName.computeHashCode(getURI(), getLocalPart());
+        return StructuredQName.computeHashCode(getNamespaceUri(), getLocalPart());
     }
 
     /**

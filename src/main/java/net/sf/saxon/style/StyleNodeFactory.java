@@ -161,7 +161,7 @@ public class StyleNodeFactory implements NodeFactory {
 
         }
 
-        NamespaceUri uri = elemName.getURI();
+        NamespaceUri uri = elemName.getNamespaceUri();
 
         if (toplevel && !uri.equals(NamespaceUri.XSLT)) {
             DataElement d = new DataElement();

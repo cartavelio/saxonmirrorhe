@@ -106,7 +106,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();
             String value = att.getValue();
-            NamespaceUri uri = attName.getURI();
+            NamespaceUri uri = attName.getNamespaceUri();
             String local = attName.getLocalPart();
             if (uri.isEmpty()) {
                 switch (local) {

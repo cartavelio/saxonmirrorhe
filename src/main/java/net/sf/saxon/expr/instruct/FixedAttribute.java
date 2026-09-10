@@ -281,7 +281,7 @@ public final class FixedAttribute extends AttributeCreator {
         out.startElement("att", this);
         out.emitAttribute("name", nodeName.getDisplayName());
         if (!nodeName.getStructuredQName().hasURI(NamespaceUri.NULL)) {
-            out.emitAttribute("nsuri", nodeName.getStructuredQName().getURI().toString());
+            out.emitAttribute("nsuri", nodeName.getStructuredQName().getNamespaceUri().toString());
         }
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
             out.emitAttribute("validation", Validation.describe(getValidationAction()));

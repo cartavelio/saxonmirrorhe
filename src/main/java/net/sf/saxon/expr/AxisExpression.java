@@ -623,7 +623,7 @@ public final class AxisExpression extends Expression {
 
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     private static String getDiagnosticName(StructuredQName name, StaticContext env) {
-        NamespaceUri uri = name.getURI();
+        NamespaceUri uri = name.getNamespaceUri();
         if (uri.isEmpty()) {
             return name.getLocalPart();
         } else {

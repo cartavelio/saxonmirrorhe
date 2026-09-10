@@ -39,7 +39,7 @@ public class FingerprintedQName implements NodeName {
 
     public FingerprintedQName(StructuredQName qName, NamePool pool) {
         this.qName = qName;
-        this.fingerprint = pool.allocateFingerprint(qName.getURI(), qName.getLocalPart());
+        this.fingerprint = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
     }
 
     /**
@@ -133,7 +133,7 @@ public class FingerprintedQName implements NodeName {
     @Override
     public int obtainFingerprint(NamePool pool) {
         if (fingerprint == -1) {
-            fingerprint = pool.allocateFingerprint(getURI(), getLocalPart());
+            fingerprint = pool.allocateFingerprint(getNamespaceUri(), getLocalPart());
         }
         return fingerprint;
     }
@@ -164,8 +164,8 @@ public class FingerprintedQName implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public NamespaceUri getURI() {
-        return qName.getURI();
+    public NamespaceUri getNamespaceUri() {
+        return qName.getNamespaceUri();
     }
 
     /**
@@ -230,7 +230,7 @@ public class FingerprintedQName implements NodeName {
                 return getFingerprint() == ((NodeName) other).getFingerprint();
             } else {
                 return getLocalPart().equals(((NodeName) other).getLocalPart()) &&
-                        hasURI(((NodeName) other).getURI());
+                        hasURI(((NodeName) other).getNamespaceUri());
             }
         } else {
             return false;

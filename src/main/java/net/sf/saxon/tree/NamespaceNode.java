@@ -227,12 +227,12 @@ public class NamespaceNode implements NodeInfo {
 
     @Override
     public UnicodeString getUnicodeStringValue() {
-        return nsBinding.getURI().toUnicodeString();
+        return nsBinding.getNamespaceUri().toUnicodeString();
     }
 
     @Override
     public String getStringValue() {
-        return nsBinding.getURI().toString();
+        return nsBinding.getNamespaceUri().toString();
     }
 
     /**

@@ -82,7 +82,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
     @Override
     public Expression bind(/*@NotNull*/ SymbolicName.F symbolicName, Expression[] staticArgs, StaticContext env, List<String> reasons) {
         final StructuredQName functionName = symbolicName.getComponentName();
-        final NamespaceUri uri = functionName.getURI();
+        final NamespaceUri uri = functionName.getNamespaceUri();
         RetainedStaticContext rsc = new RetainedStaticContext(env);
         for (Expression arg : staticArgs) {
             if (arg.getLocalRetainedStaticContext() == null) {
@@ -105,7 +105,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
     /*@Nullable*/
     @Override
     public XQueryFunction getDeclaration(/*@NotNull*/ StructuredQName functionName, int staticArgs) {
-        NamespaceUri uri = functionName.getURI();
+        NamespaceUri uri = functionName.getNamespaceUri();
         if (namespaces.contains(uri)) {
             return baseLibrary.getDeclaration(functionName, staticArgs);
         } else {
@@ -157,7 +157,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      */
     @Override
     public Function getFunctionItem(SymbolicName.F functionName, StaticContext staticContext) throws XPathException {
-        if (namespaces.contains(functionName.getComponentName().getURI())) {
+        if (namespaces.contains(functionName.getComponentName().getNamespaceUri())) {
             return baseLibrary.getFunctionItem(functionName, staticContext);
         } else {
             return null;
@@ -174,7 +174,7 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      */
     @Override
     public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
-        return namespaces.contains(functionName.getComponentName().getURI())
+        return namespaces.contains(functionName.getComponentName().getNamespaceUri())
                 && baseLibrary.isAvailable(functionName, languageLevel);
     }
 }

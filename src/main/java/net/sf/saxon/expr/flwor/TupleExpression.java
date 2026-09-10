@@ -91,7 +91,7 @@ public class TupleExpression extends Expression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return new JavaExternalObjectType(Tuple.class);
+        return JavaExternalObjectType.of(Tuple.class);
     }
 
     /*@NotNull*/

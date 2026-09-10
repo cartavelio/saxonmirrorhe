@@ -340,7 +340,7 @@ public class ContentHandlerProxy implements Receiver {
             if (prefix.equals("xml")) {
                 return;
             }
-            NamespaceUri uri = ns.getURI();
+            NamespaceUri uri = ns.getNamespaceUri();
             if (!undeclareNamespaces && uri.isEmpty() && !prefix.isEmpty()) {
                 // This is a namespace undeclaration, but the ContentHandler doesn't want to know about undeclarations
                 return;
@@ -370,7 +370,7 @@ public class ContentHandlerProxy implements Receiver {
 
         if (depth > 0 || !requireWellFormed) {
             try {
-                NamespaceUri uri = elemName.getURI();
+                NamespaceUri uri = elemName.getNamespaceUri();
                 String localName = elemName.getLocalPart();
                 String qname = elemName.getDisplayName();
 

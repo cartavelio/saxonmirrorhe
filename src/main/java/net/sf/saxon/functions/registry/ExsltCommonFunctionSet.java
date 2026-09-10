@@ -36,11 +36,11 @@ public class ExsltCommonFunctionSet extends BuiltInFunctionSet {
 
     private void init() {
 
-        register("node-set", 1, NodeSetFn::new, AnyItemType.getInstance(), OPT, 0)
-                .arg(0, AnyItemType.getInstance(), OPT, EMPTY);
+        register("node-set", 1, e -> e.populate(NodeSetFn::new, AnyItemType.getInstance(), OPT, 0)
+                .arg(0, AnyItemType.getInstance(), OPT, EMPTY));
 
-        register("object-type", 1, ObjectTypeFn::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), ONE, null);
+        register("object-type", 1, e -> e.populate(ObjectTypeFn::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), ONE, null));
 
     }
 

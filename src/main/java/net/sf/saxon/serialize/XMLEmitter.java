@@ -481,7 +481,7 @@ public class XMLEmitter extends Emitter {
             boolean isFirst = true;
 
             for (NamespaceBinding ns : namespaces) {
-                namespace(ns.getPrefix(), ns.getURI(), isFirst);
+                namespace(ns.getPrefix(), ns.getNamespaceUri(), isFirst);
                 isFirst = false;
             }
 

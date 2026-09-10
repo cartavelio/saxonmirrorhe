@@ -64,7 +64,7 @@ public class HTML50Emitter extends HTMLEmitter {
      */
     @Override
     protected boolean isHTMLElement(NodeName name) {
-        NamespaceUri uri = name.getURI();
+        NamespaceUri uri = name.getNamespaceUri();
         return uri.isEmpty() || uri.equals(NamespaceUri.XHTML);
     }
 

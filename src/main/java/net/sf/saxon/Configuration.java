@@ -784,6 +784,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @deprecated since 11.1 - use <code>setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);</code>
      */
 
+    @Deprecated
     public void setParameterizedURIResolver() {
         //#if CSHARP==false
         setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);
@@ -1390,6 +1391,17 @@ public class Configuration implements SourceResolver, NotationSet {
             builtInExtensionLibraryList.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
         }
         return builtInExtensionLibraryList;
+    }
+
+    /**
+     * Get the function library for Saxon-defined extension functions available in this edition
+     *
+     * @return the function library
+     */
+
+
+    public BuiltInFunctionSet getVendorFunctionSet() {
+        return VendorFunctionSetHE.getInstance();
     }
 
     /**
@@ -3757,17 +3769,6 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public List<ExternalObjectModel> getExternalObjectModels() {
         return externalObjectModels;
-    }
-
-    /**
-     * Get the JavaExternalObjectType object representing a particular Java class
-     *
-     * @param theClass the class in question
-     * @return the corresponding JavaExternalObjectType
-     */
-
-    public synchronized JavaExternalObjectType getJavaExternalObjectType(Class<?> theClass) {
-        return new JavaExternalObjectType(theClass);
     }
 
     /**

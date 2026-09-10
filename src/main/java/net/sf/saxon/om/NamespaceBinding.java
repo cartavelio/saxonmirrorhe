@@ -46,7 +46,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
     }
 
     @Override
-    public NamespaceUri getURI(String prefix) {
+    public NamespaceUri getNamespaceUri(String prefix) {
         return prefix.equals(this.prefix) ? uri : null;
     }
 
@@ -89,7 +89,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
      *         prefixes, it indicates that the prefix is not bound to any namespace and therefore cannot be used.
      */
 
-    public NamespaceUri getURI() {
+    public NamespaceUri getNamespaceUri() {
         return uri;
     }
 
@@ -134,7 +134,7 @@ public final class NamespaceBinding implements NamespaceBindingSet {
     public boolean equals(Object obj) {
         return obj instanceof NamespaceBinding &&
                 prefix.equals(((NamespaceBinding) obj).getPrefix()) &&
-                uri.equals(((NamespaceBinding) obj).getURI());
+                uri.equals(((NamespaceBinding) obj).getNamespaceUri());
     }
 
     @Override

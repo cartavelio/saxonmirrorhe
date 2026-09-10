@@ -40,7 +40,7 @@ public final class NoNamespaceName implements NodeName {
      * @return the URI. Returns the empty string to represent the no-namespace
      */
     @Override
-    public NamespaceUri getURI() {
+    public NamespaceUri getNamespaceUri() {
         return NamespaceUri.NULL;
     }
 

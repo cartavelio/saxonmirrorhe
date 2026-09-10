@@ -89,7 +89,7 @@ public class SystemProperty extends SystemFunction implements Callable {
                     getRetainedStaticContext());
 
             return new StringValue(getProperty(
-                        qName.getURI().toString(), qName.getLocalPart(), getRetainedStaticContext()));
+                    qName.getNamespaceUri().toString(), qName.getLocalPart(), getRetainedStaticContext()));
 
         } catch (XPathException err) {
             throw new XPathException("Invalid system property name. " + err.getMessage(), "XTDE1390", context);
@@ -102,7 +102,7 @@ public class SystemProperty extends SystemFunction implements Callable {
             StructuredQName qName = StructuredQName.fromLexicalQName(name,
                                                                      false, true,
                                                                      getRetainedStaticContext());
-            String uri = qName.getURI().toString();
+            String uri = qName.getNamespaceUri().toString();
             String local = qName.getLocalPart();
             return uri.equals(NamespaceConstant.XSLT) &&
                     (local.equals("version") || local.equals("vendor") ||

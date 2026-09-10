@@ -82,16 +82,16 @@ public class NamespaceDifferencer extends ProxyReceiver {
         if (thisMap != parentMap) {
             NamespaceMap delta = NamespaceDeltaMap.emptyMap();
             for (NamespaceBinding nb : thisMap) {
-                NamespaceUri parentUri = parentMap.getURI(nb.getPrefix());
+                NamespaceUri parentUri = parentMap.getNamespaceUri(nb.getPrefix());
                 if (parentUri == null) {
-                    delta = delta.put(nb.getPrefix(), nb.getURI());
-                } else if (!parentUri.equals(nb.getURI())) {
-                    delta = delta.put(nb.getPrefix(), nb.getURI());
+                    delta = delta.put(nb.getPrefix(), nb.getNamespaceUri());
+                } else if (!parentUri.equals(nb.getNamespaceUri())) {
+                    delta = delta.put(nb.getPrefix(), nb.getNamespaceUri());
                 }
             }
             if (undeclareNamespaces) {
                 for (NamespaceBinding nb : parentMap) {
-                    if (thisMap.getURI(nb.getPrefix()) == null) {
+                    if (thisMap.getNamespaceUri(nb.getPrefix()) == null) {
                         delta = delta.put(nb.getPrefix(), NamespaceUri.NULL);
                     }
                 }

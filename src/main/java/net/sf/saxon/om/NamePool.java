@@ -209,7 +209,7 @@ public final class NamePool {
         if ((fp & USER_DEFINED_MASK) == 0) {
             return StandardNames.getURI(fp);
         }
-        return getUnprefixedQName(fp).getURI();
+        return getUnprefixedQName(fp).getNamespaceUri();
     }
 
     /**
