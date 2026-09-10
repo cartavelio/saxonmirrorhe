@@ -1,5 +1,5 @@
-#ifndef __LIBSAXON_EEC_12_1_H
-#define __LIBSAXON_EEC_12_1_H
+#ifndef ___HOME_OND1_WORK_REPOSITORY_SAXONDEV_11_BUILD_C_LIBSAXON_EEC_12_1_H
+#define ___HOME_OND1_WORK_REPOSITORY_SAXONDEV_11_BUILD_C_LIBSAXON_EEC_12_1_H
 
 #include <graal_isolate_dynamic.h>
 
@@ -15,8 +15,6 @@ typedef long long int (*j_db_setBaseURI_fn_t)(graal_isolatethread_t*, void *, ch
 typedef long long int (*j_db_setLineNumbering_fn_t)(graal_isolatethread_t*, void *, int);
 
 typedef long long int (*j_db_setDTDValidation_fn_t)(graal_isolatethread_t*, void *, int);
-
-typedef int (*run_main_fn_t)(int argc, char** argv);
 
 typedef long long int (*j_run_validate_fn_t)(graal_isolatethread_t*, void *);
 

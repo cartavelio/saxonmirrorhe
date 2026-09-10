@@ -1,5 +1,5 @@
-#ifndef __LIBSAXON_EEC_12_1_H
-#define __LIBSAXON_EEC_12_1_H
+#ifndef ___HOME_OND1_WORK_REPOSITORY_SAXONDEV_11_BUILD_C_LIBSAXON_EEC_12_1_H
+#define ___HOME_OND1_WORK_REPOSITORY_SAXONDEV_11_BUILD_C_LIBSAXON_EEC_12_1_H
 
 #include <graal_isolate.h>
 
@@ -15,8 +15,6 @@ long long int j_db_setBaseURI(graal_isolatethread_t*, void *, char*);
 long long int j_db_setLineNumbering(graal_isolatethread_t*, void *, int);
 
 long long int j_db_setDTDValidation(graal_isolatethread_t*, void *, int);
-
-int run_main(int argc, char** argv);
 
 long long int j_run_validate(graal_isolatethread_t*, void *);
 

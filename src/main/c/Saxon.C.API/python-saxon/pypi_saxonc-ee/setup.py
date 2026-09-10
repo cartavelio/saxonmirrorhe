@@ -10,12 +10,19 @@ long_description = (this_directory / "README.md").read_text()
 # include platform specific dynamic lib in the wheel.
 from platform import system
 from distutils.dir_util import copy_tree
+
+extra_link_args = []
+
 if system() == 'Darwin':
     saxon_home = 'libs/darwin'
 else:
     saxon_home = 'libs/nix'
-copy_tree(saxon_home, 'src/saxonc_home')
+    extra_link_args.append('-Wl,-rpath,' + saxon_home)
 
+
+
+
+copy_tree(saxon_home, 'src/saxonc_home')
 copy_tree("../../graalvm", 'Saxon.C.API/graalvm')
 shutil.copyfile("../saxonc.pyx","python_saxon/saxonc.pyx")
 shutil.copyfile("../saxoncClasses.pxd","python_saxon/saxoncClasses.pxd")
@@ -82,7 +89,9 @@ ext_modules = [Extension(
                             "Saxon.C.API/SchemaValidator.cpp",
                             "Saxon.C.API/SaxonApiException.cpp"],
                         language="c++",
-                        include_dirs = ['Saxon.C.API/graalvm',], libraries=["saxon-eec-12.1"]
+                        include_dirs = ['Saxon.C.API/graalvm',],
+                         extra_link_args = extra_link_args,
+                       libraries=['saxon-eec-12.1']
                         ),
                     "python_saxon/nodekind.py",
                 ]
@@ -99,6 +108,7 @@ setup(
     # packages=find_packages(),
     package_dir={'saxoncee':'src'},
     packages=['saxoncee'],
+    #package_data={'lib/nix': ['libsaxon-eec-12.1.so']},
     python_requires='>=3.6',                # Minimum version requirement of the package
     ext_modules=cythonize(ext_modules,
                           compiler_directives={'language_level': 3},
