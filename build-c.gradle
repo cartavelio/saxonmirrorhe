@@ -3,8 +3,10 @@ def excelsiorJetHome = null
 ["${excelsiorJet}",
  "/opt/jet15.3-ent-amd64",
  "/usr/local/jet15.3-ent-amd64",
+ "/usr/local/jet15.3-ent-x86",
  "/usr/local/jet",
- "c:/jet15.3-ent-amd64"].each { jet ->
+ "c:/jet15.3-ent-amd64",
+ "c:/jet15.3-ent-x86"].each { jet ->
   if (excelsiorJetHome == null && jet != "" && pathExists(jet)) {
     excelsiorJetHome = jet
   }
@@ -13,33 +15,12 @@ def excelsiorJetHome = null
 task test_jetHome(
   description: "Test that excelsiorJetHome is configured"
 ) {
-  def images = new ByteArrayOutputStream()
-/*
-  doLast {
-    try {
-      exec {
-        commandLine "docker", "images", "-q", "--filter=reference=jet:${excelsiorJetVersion}",
-                    "--format", "{{.Repository}}:{{.Tag}}"
-        standardOutput = images
-      }
-    } catch (Exception ex) {
-      // whatever
-    }
-  }
-*/
-  doLast {
-    if (images.toString("utf-8") != "") {
-      println("Running ExcelsiorJet ${excelsiorJetVersion} from Docker container")
-    } else {
-      if (excelsiorJetHome == null) {
-        throw new GradleException("Cannot build SaxonC, no Docker container and excelsiorJetHome undefined")
-      } else {
-        println("Running ExcelsiorJet from ${excelsiorJetHome}")
-      }
-    }
+  if (excelsiorJetHome == null) {
+    throw new GradleException("Cannot build SaxonC, cannot find ExcelsiorJet")
+  } else {
+    println("Running ExcelsiorJet from ${excelsiorJetHome}")
   }
 }
-
 
 // ============================================================
 // Tasks to rejar ICU
@@ -162,19 +143,10 @@ task rejar_Xerces(
     outputs.file("${buildDir}/c/${release}c/libsaxon${release}c.so")
 
     doLast {
-      try {
-        exec {
-	    commandLine "docker", "run", "--rm", "-v", "${buildDir}:/src", "-i",
-                        "jet:${excelsiorJetVersion}",
-	                "sh", "-c", "cd /src/jet && /usr/local/jet/bin/jc =p libsaxon${release}c"
-	}
-      } catch (Exception ex) {
-        println("Attempt to run jet:${excelsiorJetVersion} in Docker failed; attempting local build...")
-        exec {
-	  workingDir "${buildDir}/jet"
-          commandLine "${excelsiorJetHome}/bin/jc",
-            "=p", "libsaxon${release}c"
-	}
+      exec {
+	workingDir "${buildDir}/jet"
+        commandLine "${excelsiorJetHome}/bin/jc",
+          "=p", "libsaxon${release}c"
       }
     }
   }
@@ -217,7 +189,10 @@ task rejar_Xerces(
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-backend", "excelsior-installer",
         "-source", "${buildDir}/c/${release}c",
-        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C"
+        "-target", "${buildDir}/releases/libsaxon-${RELEASE}C.exe",
+        "-company", "Saxonica",
+        "-product", "SaxonC ${RELEASE}",
+        "-version", saxonVersion
     }
   } else if (systemOs.isMacOsX()) {
     task "${release}c_copyAncillary"(
