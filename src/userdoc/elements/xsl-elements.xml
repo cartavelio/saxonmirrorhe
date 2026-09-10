@@ -1805,11 +1805,12 @@
                         <code>continued="no"</code>.</attribute>
                 <attribute name="break-when" use="optional">Experimental addition in 4.0; available
                     only if syntax extensions are enabled. The value of the attribute is an expression,
-                    which must return a function; the function is supplied with two arguments, being
-                (a) the contents of the current group, and (b) the next item. The function returns false
+                    which must return a boolean. The expression is supplied with two variables, namely
+                (a) <code>$group</code> which is set to the contents of the current group, and 
+                    (b) <code>$next</code> which is set to the next item. The expression returns false
                 if the new item is to be added to the end of the current group, or true if the current
                 group is complete and the new item is to become the first item in a new current group.
-                For example <code>break-when="->($group, $next){sum($group/@page-count) gt 100}"</code> starts
+                For example <code>break-when="sum($group/@page-count) gt 100"</code> starts
                 a new group when the size of the current group passes some threshold.</attribute>
                 <attribute name="composite" use="optional">Can be used when grouping using either
                         <code>group-by</code> or <code>group-adjacent</code>. If set to
@@ -1840,6 +1841,8 @@
                     are extended by virtue of the fact that the pattern used in
                         <code>group-starting-with</code> or <code>group-ending-with</code> can now
                     match atomic values as well as nodes.</p>
+                
+                
             </details>
             <examples>
                 <p>For examples of using the instruction, see the <a
@@ -1848,6 +1851,7 @@
             </examples>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
+            <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
                 <p>Earlier drafts of XSLT 3.0 introduced new attributes <code>bind-group</code> and
@@ -1860,6 +1864,8 @@
                 available in 9.7 maintenance releases and is fully supported in Saxon 9.8 
                 (in this case the <code>xsl:for-each-group</code> instruction
                 must appear within <code>xsl:fork</code>.)</p>
+                <p>The <code>break-when</code> attribute is available from Saxon 11.
+                    Streaming is not yet implemented for <code>break-when</code>.</p>
 
             </status>
             <see-also name="sort" type="xsl-elements"/>
@@ -2065,7 +2071,23 @@
                 <attribute name="test" use="mandatory">The boolean expression to be tested. The full
                     syntax of boolean expressions is outlined in <a class="bodylink"
                         href="/expressions">XPath Syntax</a>.</attribute>
+                <attribute name="then" use="mandatory">Proposed extension for XSLT 4.0; defines the value
+                to be returned if the <code>test</code> condition is true, as an alternative to evaluating
+                the sequence constructor. If the <code>then</code> attribute is present, the <code>xsl:if</code>
+                element must be empty.</attribute>
+                <attribute name="else" use="mandatory">Proposed extension for XSLT 4.0; defines the value
+                    to be returned if the <code>test</code> condition is false, as an alternative to returning an empty
+                    sequence.</attribute>
             </attributes>
+            <details>
+                <p>The new <code>then</code> and <code>else</code> attributes are available only if
+                XSLT syntax extensions are enabled.</p>
+                <p>Note that forwards-compatibility mode in previous versions of XSLT does not handle these
+                extensions particularly well. If an XSLT 3.0 processor encounters an <code>xsl:if</code>
+                instruction with a <code>then</code> or <code>else</code> attribute, and the instruction
+                has an effective version of <code>4.0</code>, the <code>then</code> and <code>else</code> attributes
+                will simply be ignored, which will generally give incorrect results.</p>
+            </details>
             <examples>
                 <example>
                     <p>To include a hyperlink in the output only if the current element has a
@@ -2547,6 +2569,40 @@
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL_SINCE_9.8 PE/EE_9.6</saxon-edition>
             <see-also name="map" type="xsl-elements"/>
+        </xsl-element>
+    </section>
+    
+    <section id="match" title="xsl:match">
+        <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
+            <name>match</name>
+            <description>
+                <p>Matches selected items against an XSLT pattern.</p>
+            </description>
+            <attributes>
+                <attribute name="select" use="optional">Selects the values to be matched against
+                the pattern. If the attribute is absent, it defaults to <code>select="."</code>.
+                The <code>xsl:match</code> instruction returns true if every selected item
+                in the value of this expression matches the given pattern; otherwise it returns false.
+                (Note: this means that if the value of the <code>select</code> expression is an
+                empty sequence, the instruction will return true.)</attribute>
+                <attribute name="pattern" use="required">The XSLT match pattern used to test items
+                in the selected sequence.</attribute>
+            </attributes>
+            <details>
+                <p>The result of the instruction is an <code>xs:boolean</code> value: true if every
+                selected item matches the supplied pattern, otherwise false.</p>
+                
+                <p>The instruction will normally be used where an atomic value is expected, for example
+                as the body of a stylesheet function, the body of an <code>xsl:variable</code> with <code>as="xs:boolean"</code>.</p>
+                
+                <p>Any <code>xsl:fallback</code> children are relevant only if the instruction is executed in
+                forwards-compatibility mode by a processor that doesn't recognize XSLT 4.0 instructions.</p>
+            </details>
+            <in-spec>xslt40</in-spec>
+            <saxon-edition>ALL</saxon-edition>
+            <status>               
+                <p>Available in Saxon 11; requires XSLT syntax extensions to be enabled.</p>
+            </status>
         </xsl-element>
     </section>
 
@@ -3572,6 +3628,13 @@
                     the return value; if present, the contained sequence
                     constructor must be empty.</attribute>
             </attributes>
+            <details>
+                <p>Note that forwards-compatibility mode in previous versions of XSLT does not handle the <code>select</code>
+                    attribute particularly well. If an XSLT 3.0 processor encounters an <code>xsl:otherwise</code>
+                    instruction with a <code>select</code> attribute, and the instruction
+                    has an effective version of <code>4.0</code>, the <code>select</code> attribute
+                    will simply be ignored, which will generally give incorrect results.</p>
+            </details>
             <status>
                 <p>The <code>select</code> attribute is implemented from Saxon 10, provided syntax extensions are enabled.</p>
             </status>
@@ -5431,6 +5494,13 @@
                 the return value when the <code>test</code> condition matches; if present, the contained sequence
                 constructor must be empty.</attribute>
             </attributes>
+            <details>
+                <p>Note that forwards-compatibility mode in previous versions of XSLT does not handle the <code>select</code>
+                    attribute particularly well. If an XSLT 3.0 processor encounters an <code>xsl:when</code>
+                    instruction with a <code>select</code> attribute, and the instruction
+                    has an effective version of <code>4.0</code>, the <code>select</code> attribute
+                    will simply be ignored, which will generally give incorrect results.</p>
+            </details>
             <in-spec>xslt10</in-spec>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>

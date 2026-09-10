@@ -61,7 +61,7 @@
       
       <h2 class="subtitle">Test results</h2>
       
-      <p>At the time of release, Saxon-CS 11 passes all 11393 applicable tests from the XSLT 3.0 test suite. Some 1658 tests
+      <p>At the time of release, SaxonCS 11 passes all 11393 applicable tests from the XSLT 3.0 test suite. Some 1658 tests
       are classified as not applicable, because they have unsatisfied dependencies (for example, localization).</p>
       
       
@@ -118,7 +118,7 @@
          </li>
       </ul>
       
-      <p>Saxon-CS corresponds to Saxon-EE on Java.</p>
+      <p>SaxonCS corresponds to Saxon-EE on Java.</p>
 
       <p>For information on streaming, see <a class="bodylink" href="/sourcedocs/streaming"
             >Streaming of Large Documents</a>.</p>
@@ -667,7 +667,7 @@
                </p>
                <p>&#x25BA; Both 1.0 and 1.1 are supported provided support is available from the chosen XML parser.
                XML 1.1 is available only if explicitly requested.</p>
-               <p class="csonly">Saxon-CS does not support XML 1.1 because the Microsoft <code>System.Xml.XmlReader</code> family
+               <p class="csonly">SaxonCS does not support XML 1.1 because the Microsoft <code>System.Xml.XmlReader</code> family
                of parsers do not support it.</p>
             </li>
             <li>
@@ -677,7 +677,7 @@
                      declaration. (See 26 Serialization)</i>
                </p>
                <p>&#x25BA; XML 1.0 and 1.1 are supported; HTML 4 and 5 are supported; XHTML 1 and 5 are supported.</p>
-               <p class="csonly">Note that XML 1.1 serialization is supported even in Saxon-CS.</p>
+               <p class="csonly">Note that XML 1.1 serialization is supported even in SaxonCS.</p>
             </li>
             <li>
                <p>
@@ -850,7 +850,7 @@
 
       <p>Saxon implements the final XPath 3.1 Recommendation in its entirety.</p>
       
-      <p>At the time of release Saxon-CS 11.0 passes all 21564 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p>At the time of release SaxonCS 11.0 passes all 21564 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XPath 3.1 processor.
       </p>
       
@@ -859,9 +859,9 @@
          named decimal formats in the dynamic context.</aside>
       
       
-      <p>At the time of releasing Saxon-CS 11.0, the corresponding Java product passes all 22,263 applicable XPath 3.1 tests in 
+      <p>At the time of releasing SaxonCS 11.0, the corresponding Java product passes all 22,263 applicable XPath 3.1 tests in 
          the W3C XPath/XQuery test suite (QT3). The pass rate on C# is slightly lower (22,000 tests), mainly because the tests are written
-         to require requests on the <code>fn:unparsed-text()</code> function to be redirected to local files, and the Saxon-CS XPath API
+         to require requests on the <code>fn:unparsed-text()</code> function to be redirected to local files, and the SaxonCS XPath API
          does not currently offer this capability.
       </p>
       
@@ -1022,7 +1022,7 @@
       
       <h2 class="subtitle">Test results</h2>
       
-      <p>At the time of release Saxon-CS 11.0 passes all 31104 applicable tests in the W3C XPath/XQuery test suite (QT3),
+      <p>At the time of release SaxonCS 11.0 passes all 31104 applicable tests in the W3C XPath/XQuery test suite (QT3),
          when run as an XQuery 3.1 processor.
       </p>
       
@@ -1972,14 +1972,14 @@
             <code>xs:ID</code>.</p>
       
       <div class="javaonly">
-      <p>Saxon on the Java platform works with any SAX2-conformant XML parser that is configured to
+      <p>SaxonJ works with any SAX2-conformant XML parser that is configured to
          enable namespace processing. There is one limitation: on the <code>startElement()</code>
          call from the <code>XMLReader</code> to the <code>ContentHandler</code>, the QName (that
          is, the third argument) must be present. According to the SAX2 specification,
          namespace-aware parsers are not obliged to supply this argument. However, all commonly-used
          parsers appear to do so.</p>
 
-      <p>Saxon on the Java platform should work with any DOM-conformant XML parser, however, Saxon's
+      <p>SaxonJ should work with any DOM-conformant XML parser, however, Saxon's
          DOM interface is tested only with the DOM implementation included in the Oracle JDK, and
          other DOM implementations are known to vary. Saxon has been used successfully with the
          Oracle XDK DOM implementation, though this is not included in the standard test suite and

@@ -3,7 +3,7 @@
    <h1>Using XML Schema (XSD)</h1>
 
 
-   <aside>Schema processing is available (a) with Saxon-CS, and (b) with the Enterprise Edition of the Java product, Saxon-EE. </aside>
+   <aside>Schema processing is available (a) with SaxonCS, and (b) with the Enterprise Edition of the Java product, Saxon-EE. </aside>
 
    <p>Saxon can be used as a free-standing schema processor in its own right, either from the
       command line or from a Java or C# application. In addition, Saxon can be used as a schema-aware XSLT
@@ -11,7 +11,7 @@
    
    <p>Saxon-EE offers its own native API for schema validation.</p>
    
-   <p class="javaonly">On the Java platform, Saxon-EE also supports the schema validation APIs in JAXP 1.3.</p>
+   <p class="javaonly">SaxonJ-EE also supports the schema validation APIs in JAXP 1.3.</p>
    
    
    <p>This section covers the following topics:</p>
@@ -27,12 +27,12 @@
 
       
       <div class="javaonly">
-         <p>To validate one or more source documents using the Java platform, write:</p>
+         <p>To validate one or more source documents using SaxonJ, write:</p>
          <kbd>java  com.saxonica.Validate   [options]  source.xml...  </kbd>
       </div>
 
       <div class="csonly">
-            <p>To validate one or more source documents using the .NET platform, write:</p>
+            <p>To validate one or more source documents using SaxonCS, write:</p>
          <kbd>dotnet SaxonCS validate [options]  source.xml...  </kbd>
       </div>
       

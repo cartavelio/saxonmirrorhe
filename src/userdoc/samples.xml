@@ -35,7 +35,7 @@
             <a class="bodylink" href="jdom2">JDOM2 Example</a>
         </li>
         <li>
-            <a class="bodylink" href="dotnetsamples">Saxon-CS API Examples for .NET</a>
+            <a class="bodylink" href="dotnetsamples">SaxonCS API Examples for .NET</a>
         </li>
         <li>
             <a class="bodylink" href="servlet">Saxon Servlet</a>
@@ -75,7 +75,7 @@
 
         <div class="javaonly">
         <p>
-            <i>On the Java platform:</i>
+            <i>For SaxonJ:</i>
         </p>
         <kbd> java net.sf.saxon.Transform -s:data/books.xml -xsl:styles/books.xsl
                 -o:<i>output.html</i>
@@ -84,7 +84,7 @@
 
         <div class="csonly">
         <p>
-            <i>On the .NET platform:</i>
+            <i>For SaxonCS:</i>
         </p>
         <kbd> dotnet SaxonCS transform -s:data/books.xml -xsl:styles/books.xsl -o:<i>output.html</i>
         </kbd>
@@ -170,7 +170,7 @@
             in <code>samples/query/tour.xq</code>. No source document is required.</p>
 
         <div class="javaonly">
-        <p>You can run this example with Saxon on the Java platform using a command of the form:</p>
+        <p>You can run this example with SaxonJ using a command of the form:</p>
         <kbd> java net.sf.saxon.Transform -it:main -xsl:samples/styles/tour.xsl -o:tour.html
             start=e5 </kbd>
 
@@ -179,7 +179,7 @@
         </div>
         
         <div class="csonly">
-        <p>On the .NET platform, the equivalent commands are:</p>
+        <p>With SaxonCS, the equivalent commands are:</p>
         <kbd> dotnet SaxonCS transform -it:main -xsl:samples/styles/tour.xsl -o:tour.html start=e5 </kbd>
 
         <p>or</p>
@@ -297,14 +297,14 @@
             output directory.</p> 
         
         <div class="javaonly">
-        <p>To run this on the Java platform, create a directory (say
+        <p>To run this with SaxonJ, create a directory (say
                 <code>playhtml</code>) and execute the following from the command line:</p>
         <kbd> cd samples<br/> java net.sf.saxon.Transform -s:data/othello.xml -xsl:styles/play.xsl
             dir=playhtml </kbd>
         </div>
 
         <div class="csonly">
-        <p>The equivalent on .NET is:</p>
+        <p>The equivalent with SaxonCS is:</p>
         <kbd> cd samples<br/> dotnet SaxonCS transform -s:data/othello.xml -xsl:styles/play.xsl dir=playhtml </kbd>
         </div>
         
@@ -380,7 +380,7 @@
         <h1>S9API Examples</h1>
 
         <p>
-            <i>This section applies to the Java platform only.</i>
+            <i>This section applies to SaxonJ.</i>
         </p>
 
         <p>Saxon's s9api interface is a custom-designed interface for all XML processing. This API
@@ -413,10 +413,10 @@
         <h1>JAXP Transformation Examples</h1>
 
         <p>
-            <i>This section applies to the Java platform only.</i>
+            <i>This section applies to SaxonJ only.</i>
         </p>
 
-        <p>As an alternative to the s9api interface, Saxon supports the Java JAXP Transformation API
+        <p>As an alternative to the s9api interface, SaxonJ supports the Java JAXP Transformation API
             (package javax.xml.transform), originally known as TrAX, for invoking the XSLT
             stylesheet processor (see <a class="bodylink"
                 href="/using-xsl/embedding/jaxp-transformation">Using JAXP for Transformations</a>).
@@ -438,10 +438,10 @@
         <h1>JDOM2 Example</h1>
 
         <p>
-            <i>This section applies to the Java platform only. Requires Saxon-PE or Saxon-EE</i>
+            <i>This section applies to SaxonJ only. Requires SaxonJ-PE or SaxonJ-EE</i>
         </p>
 
-        <p>Saxon includes an adapter that allows the source tree to be a JDOM2 document. The sample
+        <p>SaxonJ includes an adapter that allows the source tree to be a JDOM2 document. The sample
             application <code>JDOM2Example.java</code> illustrates how a JDOM2 tree can be used with
             Saxon. It combines two scenarios: running XPath expressions directly against a JDOM2
             tree, from the Java application; and invoking a transformation with the JDOM2 document
@@ -494,7 +494,7 @@
         <h1>Saxon Servlet</h1>
 
         <p>
-            <i>This section applies to the Java platform only.</i>
+            <i>This section applies to SaxonJ only.</i>
         </p>
 
         <p>The sample application <code>SaxonServlet.java</code> is a general-purpose servlet that

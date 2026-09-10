@@ -34,15 +34,15 @@
       as follows:</p>
       
       <ul>
-        <li class="javaonly"><p>On Java, the <code>URIResolver</code> is called, and returns
+        <li class="javaonly"><p>With SaxonJ, the <code>URIResolver</code> is called, and returns
           a JAXP <code>Source</code> object; if a user-written
           <code>URIResolver</code> is nominated (using the <code>-r</code> option) then this may
           translate the file name into a <code>Source</code> object any way that it wishes.</p></li>
-        <li class="csonly"><p>On .NET, it is not currently possible to nominate an <code>XmlResolver</code>
+        <li class="csonly"><p>With SaxonCS, it is not currently possible to nominate an <code>XmlResolver</code>
           when running from the command line; the default Saxon-supplied <code>XmlResolver</code> is used.</p></li>
       </ul>
 
-    <aside class="javaonly">Saxon (from 9.7) supports the <code>classpath</code> URI scheme to locate resources
+    <aside class="javaonly">SaxonJ (from 9.7) supports the <code>classpath</code> URI scheme to locate resources
       using the Java classpath. This URI scheme is defined by the Spring framework, but Saxon's
       implementation is free-standing. For example, <code>classpath:utility.xsl</code> will locate
       a file called <code>utility.xsl</code> as a resource on the classpath.</aside>
@@ -111,9 +111,9 @@
       <p>See also <a class="bodylink code"
         href="/functions/saxon/discard-document">saxon:discard-document()</a>.</p></aside>
 
-    <h2 class="subtitle">Defining a collection using a catalog file</h2>
+    <h2 class="subtitle">Defining a collection using a collection catalog</h2>
 
-    <p>If the collection URI identifies a file, Saxon treats this as a catalog file. This is a file
+    <p>If the collection URI identifies a file, Saxon treats this as a collection catalog. This is a file
       in XML format that lists the documents comprising the collection. Here is an example of such a
       catalog file:</p>
     <samp><![CDATA[<collection stable="true">
@@ -709,10 +709,9 @@
         query modules, unparsed text files, collations, and collections.</i>
     </p>
 
-    <p>With Saxon on the Java platform, if the <code>-catalog</code> option is used on the command
+    <p>If the <code>-catalog</code> option is used on the command
       line, then the open-source Apache library <code>resolver.jar</code> must be present on the
-      classpath. With Saxon on .NET, this module (cross-compiled to IL) is included within the Saxon
-      DLL.</p>
+      classpath.</p>
 
     <p>Setting the <code>-catalog</code> option is equivalent to setting the following options:</p>
 
@@ -941,12 +940,11 @@
 
     <ul>
       <li class="javaonly">
-        <p>On the Java platform, the default SAX parser provided as part of the JDK is used. With
+        <p>SaxonJ uses the default SAX parser provided as part of the JDK. With
           the Sun/Oracle JDK, this is a variant of the Apache Xerces parser customized by Sun.</p>
       </li>
       <li class="csonly">
-        <p>On the .NET platform, Saxon uses the <code>System.Xml.XmlReader</code>
-        parser family.</p>
+        <p>SaxonCS uses the <code>System.Xml.XmlReader</code> parser family.</p>
       </li>
     </ul>
 
@@ -954,7 +952,7 @@
       ill-formed XML.</p>
 
 <div class="javaonly">
-    <p>On the Java platform, there are several ways you can cause a different XML parser to be used:</p>
+    <p>With SaxonJ, there are several ways you can cause a different XML parser to be used:</p>
 
     <ul>
       <li>
@@ -1062,7 +1060,7 @@
     <ul>
       <li class="javaonly"><p>On Java, the built-in XML parser and the commonly-used Apache Xerces both
       support XML 1.1</p></li>
-      <li class="csonly"><p>Saxon-CS works only with the Microsoft <code>System.Xml.XmlReader</code> parser,
+      <li class="csonly"><p>SaxonCS works only with the Microsoft <code>System.Xml.XmlReader</code> parser,
       which does not support XML 1.1</p></li>
     </ul>
     
@@ -1163,16 +1161,16 @@
 
 
     <p>
-      <i>This section is relevant to the Java platform only.</i>
+      <i>This section is relevant to SaxonJ only.</i>
     </p>
 
-    <p>When a user application invokes Saxon via the Java API, then a source document is supplied as
+    <p>When a user application invokes SaxonJ via the Java API, then a source document is supplied as
       an instance of the JAXP <code>Source</code> class. This is true whether invoking an XSLT
       transformation, an XQuery query, or a free-standing XPath expression. The <code>Source</code>
       class is essentially a marker interface. The <code>Source</code> that is supplied must be a
       kind of <code>Source</code> that Saxon recognizes.</p>
 
-    <p>Saxon recognizes all three kinds of <code>Source</code> defined in JAXP: a
+    <p>SaxonJ recognizes all three kinds of <code>Source</code> defined in JAXP: a
         <code>StreamSource</code>, a <code>SAXSource</code>, and a <code>DOMSource</code>. </p>
     
     <ul>
@@ -1291,7 +1289,7 @@
 
 
     <p>
-      <i>This section is relevant to the Java platform only.</i>
+      <i>This section is relevant to SaxonJ only.</i>
     </p>
 
     <p>In the case of DOM, all Saxon editions support DOM access "out of the box", and no special
@@ -1308,7 +1306,7 @@
 
 
     <p>The support code for Axiom, DOM4J, JDOM2, and XOM is integrated into the main JAR files
-      for Saxon-PE and Saxon-EE, but (unlike the case of DOM) it is not activated unless the object
+      for SaxonJ-PE and SaxonJ-EE, but (unlike the case of DOM) it is not activated unless the object
       model is registered with the <a class="javalink" href="net.sf.saxon.Configuration"
         >Configuration</a>. To activate support for one of these models, the implementation must either be included 
       in the relevant section of the

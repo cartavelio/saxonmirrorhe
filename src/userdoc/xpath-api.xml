@@ -51,9 +51,9 @@
       XML (the tiny tree and linked tree), and also against trees built using external third-party libraries:</p>
    
    <ul>
-      <li class="javaonly"><p>On the Java platform, the supported tree models are DOM, JDOM, JDOM2,
+      <li class="javaonly"><p>With SaxonJ, the supported tree models are DOM, JDOM, JDOM2,
          DOM4J, XOM, or AXIOM.</p></li>
-      <li class="csonly"><p>On .NET, the DOM implementation provided by the System.Xml.XmlDocument class
+      <li class="csonly"><p>With SaxonCS, the DOM implementation provided by the <code>System.Xml.XmlDocument</code> class
          is supported.</p></li>
    </ul>
    

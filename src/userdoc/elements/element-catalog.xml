@@ -1161,7 +1161,23 @@
          <e:parent-category name="sequence-constructor"/>
       </e:allowed-parents>
    </e:element-syntax>
-
+   
+   <e:element-syntax name="match">
+      <e:in-category name="instruction"/>
+      <e:attribute name="select" required="no">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="pattern" required="yes">
+         <e:data-type name="pattern"/>
+      </e:attribute>
+      <e:sequence>
+         <e:element repeat="zero-or-more" name="fallback"/>
+      </e:sequence>
+      <e:allowed-parents>
+         <e:parent-category name="sequence-constructor"/>
+      </e:allowed-parents>
+   </e:element-syntax>
+   
    <e:element-syntax name="sequence">
       <e:in-category name="instruction"/>
       <e:attribute name="select" required="no">

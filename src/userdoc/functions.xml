@@ -2502,15 +2502,15 @@
           <li>
             <p>
               <code>j</code> - Use the standard Java regular expression engine, allowing native Java
-              regex syntax. This is supported on both the Java platform and the .NET platform. This
+              regex syntax. This
               allows, for example, the use of "\b" in a regular expression to match word boundaries. </p>
-            <p>Note: On the Java platform, this can also be achieved using the flag "!"; this was
-              never formally supported and is likely to be withdrawn in a future Saxon version.</p>
+            <p>If used with SaxonCS, the <code>j</code> flag is treated as if <code>n</code> were specified.</p>
+            
           </li>
           <li>
             <p>
               <code>n</code> - Use the standard .NET regular expression engine, allowing native .NET
-              regex syntax. This is supported on the .NET platform only.</p>
+              regex syntax. This is supported in SaxonCS only.</p>
           </li>
           <li>
             <p>
@@ -5861,7 +5861,7 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.0. Not available in Saxon-CS.</p>
+        <p>Available since Saxon 9.0. Not available in SaxonCS.</p>
       </status>
       <saxon-edition platform="J">PE/EE</saxon-edition>
       <details>
@@ -6939,7 +6939,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.7. Not available in Saxon-CS.</p>
+        <p>Available since Saxon 9.7. Not available in SaxonCS.</p>
       </status>
       <saxon-edition platform="J">EE 9.7</saxon-edition>
       <details>
@@ -6964,7 +6964,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
               <code>--markDefaultedAttributes:on</code> to ensure that the information is
             available.</p>
           
-          <p>The function is not available in Saxon-CS, because the Microsoft XML parser does
+          <p>The function is not available in SaxonCS, because the Microsoft XML parser does
           not make the information available.</p>
 
 
@@ -7223,7 +7223,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.5. Applicable to XSLT only. Not available in Saxon-CS.</p>
+        <p>Available since Saxon 9.5. Applicable to XSLT only. Not available in SaxonCS.</p>
       </status>
       <saxon-edition platform="J">PE/EE 9.5</saxon-edition>
       <details>
@@ -7276,7 +7276,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.0; revised in Saxon 9.2. Not available in Saxon-CS.</p>
+        <p>Available since Saxon 9.0; revised in Saxon 9.2. Not available in SaxonCS.</p>
       </status>
       <saxon-edition platform="J">PE/EE</saxon-edition>
       <details>
@@ -8172,7 +8172,7 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 10. Not available in Saxon-CS.</p>
+        <p>Available since Saxon 10. Not available in SaxonCS.</p>
       </status>
       <saxon-edition platform="J">PE/EE 10</saxon-edition>
       <details>
@@ -8283,7 +8283,7 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
             downloaded from <a href="https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2"
               >https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup/1.2</a>.</p>
 
-          <p class="csonly">On Saxon-CS platform, the HTML is parsed using HTMLAgilityPack, which
+          <p class="csonly">On SaxonCS platform, the HTML is parsed using HTMLAgilityPack, which
           is registered as a dependency and will normally be installed automatically by <b>nuget</b>.</p>
 
           <p>This function is useful where an HTML document is embedded inside another using CDATA.
@@ -8302,7 +8302,7 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
             <li class="javaonly"><p>On Java, default attributes are expanded, for example
               an element written as <code>&lt;br/></code> will appear in the XDM model
               with the additional attribute <code>clear="none"</code>.</p></li>
-            <li class="csonly"><p>On Saxon-CS, defaulted attribute values are not included
+            <li class="csonly"><p>On SaxonCS, defaulted attribute values are not included
             in the XDM model.</p></li>
           </ul>
         </div>
@@ -8456,7 +8456,7 @@ return ....
       </signatures>
       <status>
         <p>Available since Saxon 9.1. The function is available both in XQuery and in XSLT.
-        Not available in Saxon-CS. The function is obsolescent, replaced by the new function
+        Not available in SaxonCS. The function is obsolescent, replaced by the new function
         <code>saxon:xquery()</code>.</p>
       </status>
       <saxon-edition platform="J">PE/EE</saxon-edition>
@@ -9479,7 +9479,7 @@ return if ($bookDecl('type definition')('variety') = 'element-only')
         </proto>
       </signatures>
       <status>
-        <p>This extension function is not available on Saxon-CS.</p>
+        <p>This extension function is not available on SaxonCS.</p>
         <p>Use of this function requires the JavaMail API. The mail.jar must be available on the
           classpath. From Saxon 9.9, the required jar is compiled against version 1.6 (previously,
           this was version 1.4). The jar is not redistributed as part
@@ -10292,7 +10292,7 @@ return saxon:transform($splitter, $results)]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.1. Not available in Saxon-CS.</p>
+        <p>Available since Saxon 9.1. Not available in SaxonCS.</p>
       </status>
       <saxon-edition platform="J">PE/EE</saxon-edition>
       <details>
