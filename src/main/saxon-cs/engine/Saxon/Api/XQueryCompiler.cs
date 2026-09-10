@@ -73,12 +73,10 @@ namespace Saxon.Api {
         /// locations, or as an argument to the <c>doc()</c> function.
         /// </summary>
 
-
-        public string BaseUri {
-            get => Implementation.getBaseURI().OriginalString;
-            set => Implementation.setBaseURI(new Uri(value));
+        public Uri BaseUri {
+            get => Implementation.getBaseURI();
+            set => Implementation.setBaseURI(value);
         }
-
 
         /// <summary>
         /// Property indicating that the query is to be compiled to be schema-aware, even if it contains no

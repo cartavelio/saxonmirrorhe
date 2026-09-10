@@ -277,9 +277,9 @@ namespace Saxon.Api {
         /// within the expression, for example in the argument to the <c>doc()</c> function.
         /// </summary>
 
-        public String BaseUri {
-            get => compiler.getBaseURI().OriginalString;
-            set => compiler.setBaseURI(new Uri(value));
+        public Uri BaseUri {
+            get => compiler.getBaseURI();
+            set => compiler.setBaseURI(value);
         }
 
         /// <summary>

@@ -35,6 +35,15 @@ namespace Saxon.Api {
         {
             return destination;
         }
+        
+        /// <summary>
+        /// Define an action to be performed when writing to the Destination is complete.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        public void OnClose(System.Action action) {
+            destination.onClose(action.Invoke);
+        }
+
 
     }
 }

@@ -53,6 +53,14 @@ namespace Saxon.Api {
             writer.Close();
         }
 
+        /// <summary>
+        /// Define an action to be performed when writing to the Destination is complete.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        public void OnClose(System.Action action) {
+            onClose(action.Invoke);
+        }
+
 
         /// <summary>
         /// Return a <c>Receiver</c>. Saxon calls this method to obtain a Java <c>Receiver</c>, to which it then sends

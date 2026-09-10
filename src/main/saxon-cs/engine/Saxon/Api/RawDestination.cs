@@ -9,7 +9,7 @@ namespace Saxon.Api {
     /// option <code>build-tree="no"</code>.
     /// </summary>
     public class RawDestination : XmlDestination {
-        internal net.sf.saxon.s9api.RawDestination destination;
+        private readonly net.sf.saxon.s9api.RawDestination destination;
 
         /// <summary>Construct a <c>RawDestination</c></summary>
         public RawDestination() {
@@ -43,6 +43,15 @@ namespace Saxon.Api {
         public void CloseAndNotify() {
             destination.closeAndNotify();
         }
+        
+        /// <summary>
+        /// Define an action to be performed when writing to the Destination is complete.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        public void OnClose(System.Action action) {
+            destination.onClose(action.Invoke);
+        }
+
 
 
         /// <summary>This property determines the base URI of the constructed <c>XdmNode</c>. 

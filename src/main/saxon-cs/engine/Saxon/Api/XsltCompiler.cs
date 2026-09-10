@@ -161,6 +161,28 @@ namespace Saxon.Api {
             get => jXsltCompiler.isAssertionsEnabled();
             set => jXsltCompiler.setAssertionsEnabled(value);
         }
+        
+        /// <summary>
+        /// Indicates whether or not any compiled package produced by this compiler is relocatable. If a package
+        /// is relocatable, then any run-time operation that depends on the static base URI (for example, the
+        /// <c>fn:doc</c> function) uses the deployed location of the package, not the location of the original
+        /// source code.
+        /// </summary>
+
+        public bool Relocatable {
+            get => jXsltCompiler.isRelocatable();
+            set => jXsltCompiler.setRelocatable(value);
+        }
+
+        /// <summary>
+        /// Indicates the Saxon edition under which any compiled package is intended to execute. The value
+        /// should be set to "JS" when compiling packages intended for execution under Saxon-JS 2.0 or later.
+        /// </summary>
+        /// 
+        public string TargetEdition {
+            get => jXsltCompiler.getTargetEdition();
+            set => jXsltCompiler.setTargetEdition(value);
+        }
 
         /// <summary>
         /// The <c>XsltLanguageVersion</c> property determines the version of the XSLT language specification
@@ -198,7 +220,6 @@ namespace Saxon.Api {
             get => jXsltCompiler.isJustInTimeCompilation();
             set => jXsltCompiler.setJustInTimeCompilation(value);
         }
-
 
         /// <summary>
         /// The <c>ErrorReporter</c> to be used when reporting static errors in a stylesheet.
@@ -242,6 +263,44 @@ namespace Saxon.Api {
                     ss.setSystemId(Uri.EscapeUriString(baseUri.ToString()));
                 }
 
+                XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(ss));
+                executable.InternalProcessor = processor;
+                return executable;
+            }
+            catch (SaxonApiException err) {
+                throw new StaticError(err);
+            }
+        }
+        
+        /// <summary>
+        /// Compile a stylesheet supplied as a Stream, along with a base URI.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// Stream source = new FileStream("input.xsl", FileMode.Open, FileAccess.Read);
+        /// XsltExecutable q = compiler.Compile(source, new Uri();
+        /// source.Close();
+        /// </code>
+        /// </example>
+        /// <param name="input">A stream containing the source text of the stylesheet</param>
+        /// <param name="baseUri">The base URI of the stylesheet, used for resolving
+        /// any relative URIs in <c>xsl:include</c> and <c>xsl:import</c> declarations,
+        /// and anywhere else that the static base URI of the stylesheet is relevant.</param>
+        /// <returns>An <c>XsltExecutable</c> which represents the compiled stylesheet object.
+        /// The <c>XsltExecutable</c> may be loaded as many times as required, in the same or a different
+        /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
+        /// once it has been compiled.</returns>
+        /// <remarks>
+        /// <para>The <c>BaseUri</c> property of the <c>XsltCompiler</c> is ignored.</para>
+        /// <para>The stylesheet is contained in the part of the input stream between its current
+        /// position and the end of the stream. It is the caller's responsibility to close the input 
+        /// stream after use. If the compilation succeeded, then on exit the stream will be 
+        /// exhausted; if compilation failed, the current position of the stream on exit is
+        /// undefined.</para>
+        /// </remarks>
+        public XsltExecutable Compile(Stream input, Uri baseUri) {
+            try {
+                StreamSource ss = new StreamSource(input, baseUri.OriginalString);
                 XsltExecutable executable = new XsltExecutable(jXsltCompiler.compile(ss));
                 executable.InternalProcessor = processor;
                 return executable;
@@ -304,9 +363,13 @@ namespace Saxon.Api {
 
         /// <summary>Compile a library package.</summary>
         /// <remarks>
-        /// <para>The source argument identifies an XML file containing an <c>xsl:package</c> element. Any packages
+        /// <para>The source argument identifies an input stream containing an <c>xsl:package</c> element. Any packages
         /// on which this package depends must have been made available to the <c>XsltCompiler</c>
         /// by importing them using <see cref="ImportPackage"/>.</para>
+        /// <para>The base URI of the package (used for resolving <c>xsl:import</c> and <c>xsl:include</c>
+        /// declarations, and for any other constructs that depend on the static base URI) is taken
+        /// from the <c>BaseUri</c> property of the compiler.</para>>
+        /// <para>The caller is responsible for closing the input stream after use.</para>
         /// </remarks>
         /// <param name='input'>source identifies an XML document holding the the XSLT package to be compiled</param>
         /// <returns>The <c>XsltPackage</c> that results from the compilation. Note that this package
@@ -325,6 +388,30 @@ namespace Saxon.Api {
                 throw new StaticError(err);
             }
         }
+        
+        /// <summary>Compile a library package, supplying a stream and a base URI</summary>
+        /// <remarks>
+        /// <para>The source argument identifies an input stream containing an <c>xsl:package</c> element. Any packages
+        /// on which this package depends must have been made available to the <c>XsltCompiler</c>
+        /// by importing them using <see cref="ImportPackage"/>.</para>
+        /// <para>The <c>BaseUri</c> property of the compiler is ignored</para>>
+        /// <para>The caller is responsible for closing the input stream after use.</para>
+        /// </remarks>
+        /// <param name='input'>source identifies an XML document holding the the XSLT package to be compiled</param>
+        /// <returns>The <c>XsltPackage</c> that results from the compilation. Note that this package
+        /// is not automatically imported to this <c>XsltCompiler</c>; if the package is required
+        /// for use in subsequent compilations then it must be explicitly imported.</returns>
+
+        public XsltPackage CompilePackage(Stream input, Uri baseUri) {
+            try {
+                StreamSource ss = new StreamSource(input, baseUri.OriginalString);
+                return new XsltPackage(processor, jXsltCompiler.compilePackage(ss));
+            }
+            catch (SaxonApiException err) {
+                throw new StaticError(err);
+            }
+        }
+
 
         /// <summary>Import a library package. Calling this method makes the supplied package available for reference
         /// in the <code>xsl:use-package</code> declaration of subsequent compilations performed using this
@@ -583,7 +670,7 @@ namespace Saxon.Api {
         /// <param name="reader">The XmlReader (that is, the XML parser) used to supply the document containing
         /// the principal stylesheet module.</param>
         /// <returns>An <c>XsltExecutable</c> which represents the compiled stylesheet object.
-        /// The XsltExecutable may be run as many times as required, in the same or a different
+        /// The <c>XsltExecutable</c> may be run as many times as required, in the same or a different
         /// thread. The <c>XsltExecutable</c> is not affected by any changes made to the <c>XsltCompiler</c>
         /// once it has been compiled.</returns>
         /// 
@@ -646,9 +733,7 @@ namespace Saxon.Api {
             Object obj = XmlResolver.GetEntity(uri, media == null ? "application/xml" : media,
                 Type.GetType("System.IO.Stream"));
             if (obj is Stream) {
-                StreamSource ss = new StreamSource((Stream) obj);
-
-                ss.setSystemId(Uri.EscapeUriString(uri.ToString()));
+                StreamSource ss = new StreamSource((Stream) obj, uri.OriginalString);
                 try {
                     // See bug issue #2306
                     XsltExecutable executable =
