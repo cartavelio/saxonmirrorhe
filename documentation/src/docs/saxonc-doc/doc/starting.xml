@@ -38,7 +38,8 @@
       <!--<p>As a prerequisite SaxonC requires <code>GLIBC_2.2.5</code> as minimum. Note that on some Debian stable
       releases this version of the C library is not available: installing the library package
       <code>libc6</code> should resolve any compile issues.</p>-->
-
+      
+      <p><b>From SaxonC 12.6:</b></p>
       <ol>
         <li>
           <p>
@@ -53,7 +54,7 @@
             <b>Unpack</b>
           </p>
           <p>To install the SaxonC-[EDITION] release on Linux, first unpack the download by
-            unzipping the file <code>SaxonC[EDITION]C-linux-[ARCH]-[VERSION].zip</code>.</p>
+            unzipping the file <code>SaxonC[EDITION]-linux-[ARCH]-[VERSION].zip</code>.</p>
         </li>
         <li>
           <p>
@@ -62,7 +63,7 @@
           <p>We recommend copying the contents of the <code>SaxonC[EDITION]</code> directory within
             the zip to a location like <code>/opt/saxonica/</code>. You would then end up with a
             structure like <code>/opt/saxonica/lib</code>, <code>/opt/saxonica/bin</code>, and
-              <code>/opt/saxonica/include</code></p>
+              <code>/opt/saxonica/include</code>.</p>
         </li>
         <li>
           <p>
@@ -78,7 +79,7 @@
       </ol>
 
       <p>
-        <b>For older releases, Saxon 12–12.5:</b>
+        <b>For older releases, Saxon 12.0 – 12.5:</b>
       </p>
       <ol>
         <li>
@@ -97,11 +98,9 @@
             unzipping the file <code>libsaxon-[EDITION]C-linux-v[VERSION].zip</code>.</p>
         </li>
         <li>
-          <p>
-            <b>Copy the SaxonC libraries to the install location</b>
-          </p>
-          <p>The SaxonC libraries are located under the <code>SaxonC[EDITION]/libs</code> directory,
-            named <code>libsaxonc-[EDITION]-[VERSION].so</code>.</p>
+          <p><b>Copy the core SaxonC library to the install location</b></p>
+          <p>The core SaxonC library is located under the <code>libs/nix</code> directory, named
+            <code>libsaxon-[EDITION]c-[VERSION].so</code>.</p>
 
           <p>On Linux, the expected install location is <code>/usr/lib</code>, and the following
             commands use this default. If you choose to install to a different location, then the
@@ -139,10 +138,11 @@
     <section id="installingMac" title="macOS">
       <h1>Installing on macOS</h1>
 
-      <aside>In the following, [EDITION] means one of: HE, PE, EE; and [VERSION] is the maintenance
-        release version number (for instance 12.0), and [ARCH] is the processor architecture (64-bit
+      <aside>In the following, [EDITION] means one of: HE, PE, EE; [VERSION] is the maintenance
+        release version number (for instance 12.0); and [ARCH] is the processor architecture (64-bit
         Intel <code>x86_64</code>, or 64-bit ARM <code>aarch64</code>).</aside>
 
+      <p><b>From SaxonC 12.6:</b></p>
       <ol>
         <li>
           <p>
@@ -172,10 +172,10 @@
           <p>We recommend copying the contents of the <code>SaxonC[EDITION]</code> directory within
             the zip to a location like <code>/opt/saxonica/</code>. You would then end up with a
             structure like <code>/opt/saxonica/lib</code>, <code>/opt/saxonica/bin</code>, and
-              <code>/opt/saxonica/include</code></p>
+              <code>/opt/saxonica/include</code>.</p>
 
 
-          <p>For instance, to copy the SaxonC-HE 12.0 MacOS AArch64 library from the unpacked
+          <p>For instance, to copy the SaxonC-HE 12.6 MacOS AArch64 library from the unpacked
             location <code>SaxonCHE-macos-aarch64-12-6-0</code>, to <code>/opt/saxonica</code>:</p>
 
           <kbd>cd libsaxonCHE-macos-aarch64-12-6-0/</kbd>
@@ -200,7 +200,7 @@
       </ol>
 
       <p>
-        <b>For older releases, Saxon 12–12.5:</b>
+        <b>For older releases, Saxon 12.0 – 12.5:</b>
       </p>
       <ol>
         <li>
@@ -220,35 +220,32 @@
             <code>libsaxon-[EDITION]C-mac-[x86_64|aarch64]-v[VERSION].zip</code>.</p>
         </li>
         <li>
-          <p>
-            <b>Copy the SaxonC libraries to the users chosen install location</b>
-          </p>
-          <p>he SaxonC libraries are located under the <code>SaxonC[EDITION]/SaxonC[EDITION]</code>
-            directory. The two libraries are named
-              <code>libsaxonc-core-[EDITION]-[VERSION].dylib</code> and
-              <code>libsaxonc-[EDITION]-[VERSION].dylib</code> in the <code>lib</code>
-            directory.</p>
+          <p><b>Copy the core SaxonC library to the install location</b></p>
+          <p>The core SaxonC library is located under the <code>libs/darwin</code> directory, named
+            <code>libsaxon-[EDITION]c-[VERSION].dylib</code>.</p>
 
-          <p>On macOS, copy the SaxonC libraries to the install location of choice, which could be
-              <code>/opt/saxonica</code>. Then the <code>DYLD_LIBRARY_PATH</code> environment
-            variable must be set accordingly (see the next step).</p>
+          <p>On Mac OS, the expected install location is <code>/usr/local/lib</code>, and the following
+            commands use this default. If you choose to install to a different location, then the
+            LD_LIBRARY_PATH environment variable must be set accordingly (see the next step).</p>
 
           <p>For instance, to copy the SaxonC-HE 12.0 MacOS AArch64 library from the unpacked
-            location <code>SaxonCEE-macos-aarch64-12-6-0</code>, to <code>/opt/saxonica</code>:</p>
+            location <code>libsaxon-HEC-mac-aarch64-v12.0</code>, to
+            <code>/usr/local/lib</code>:</p>
 
-          <kbd>cd libsaxonCHE-mac-aarch64-v12.0/</kbd>
-          <kbd>sudo cp -r -f SaxonCHE/. /opt/saxonica</kbd>
+          <kbd>cd libsaxon-HEC-mac-aarch64-v12.0/</kbd>
+          <kbd>sudo cp libs/darwin/libsaxon-hec-12.0.dylib /usr/local/lib/.</kbd>
 
           <aside>If you encounter permission issues after copying, then the privileges of the
             folders and files may need adjusting.</aside>
         </li>
-        <li id="setting_dyld_library_path">
-          <p>
-            <b>Set the DYLD_LIBRARY_PATH environment variable</b>
-          </p>
-          <p>The DYLD_LIBRARY_PATH variable must be set to the location where the SaxonC files have
+        <li>
+          <p><b>Set the LD_LIBRARY_PATH environment variable</b></p>
+          <p>The LD_LIBRARY_PATH variable must be set to the location where the SaxonC files have
             been installed. For instance:</p>
-          <kbd>export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/opt/saxonica/lib</kbd>
+          <kbd>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib</kbd>
+          <p>If the SaxonC files were installed to a location other than the default
+            <code>/usr/local/lib</code>, then the LD_LIBRARY_PATH variable must be set to the correct
+            location.</p>
         </li>
       </ol>
 
