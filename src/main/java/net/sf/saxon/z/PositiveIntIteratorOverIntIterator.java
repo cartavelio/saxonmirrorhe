@@ -10,13 +10,24 @@ package net.sf.saxon.z;
 /**
  * An iterator over a sequence of positive int values, returning -1 to indicate the end of the sequence.
  */
-public interface PositiveIntIterator {
+public class PositiveIntIteratorOverIntIterator implements PositiveIntIterator {
 
+    final IntIterator rawIterator;
+
+    public PositiveIntIteratorOverIntIterator(IntIterator rawIterator) {
+        this.rawIterator = rawIterator;
+    }
     /**
      * Return the next positive integer in the sequence, or -1 if the sequence is exhausted.
      *
      * @return the next integer in the sequence, or -1 if the sequence is exhausted.
      */
 
-    int next();
+    public int next() {
+        if (rawIterator.hasNext()) {
+            return rawIterator.next();
+        } else {
+            return -1;
+        }
+    }
 }

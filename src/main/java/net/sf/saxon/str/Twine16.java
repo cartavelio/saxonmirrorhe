@@ -8,6 +8,7 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.PositiveIntIterator;
 
 import java.util.Arrays;
 import java.util.function.IntPredicate;
@@ -229,6 +230,19 @@ public class Twine16 extends UnicodeString {
             //@CSharpModifiers(code = {"public"})
             public int next() {
                 return chars[i++];
+            }
+        };
+    }
+
+    @Override
+    //@CSharpInnerClass(outer = false, extra = {"char[] chars"})
+    public PositiveIntIterator iterate() {
+        return new PositiveIntIterator() {
+            int i = 0;
+
+            @Override
+            public int next() {
+                return i < chars.length ? chars[i++] : -1;
             }
         };
     }

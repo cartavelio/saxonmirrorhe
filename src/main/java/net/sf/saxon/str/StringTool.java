@@ -11,6 +11,7 @@ import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.PositiveIntIterator;
 
 import java.util.Arrays;
 
@@ -165,6 +166,40 @@ public class StringTool {
             }
         };
     }
+
+    /**
+     * Get an iterator over the codepoints in a {@link CharSequence} - typically a {@code String}
+     *
+     * @param value the supplied string
+     * @return an {@code IntIterator} allowing iteration over the codepoints. Note the protocol
+     * for {@code IntIterator} requires exactly one call of {@link IntIterator#hasNext} before
+     * every call of {@link IntIterator#next}
+     */
+
+    @CSharpInnerClass(outer = false, extra = {"string value"})
+    public static PositiveIntIterator iterate(CharSequence value) {
+        return new PositiveIntIterator() {
+            int i = 0;
+
+            @Override
+            public int next() {
+                if (i >= value.length()) {
+                    return -1;
+                }
+                int c = value.charAt(i++);
+                if (UTF16CharacterSet.isHighSurrogate(c)) {
+                    int d = i < value.length() ? value.charAt(i++) : -1;
+                    if (!UTF16CharacterSet.isLowSurrogate(d)) {
+                        throw new IllegalStateException("Unmatched surrogate code value " + c + " at position " + i);
+                    }
+                    return UTF16CharacterSet.combinePair((char) c, (char) d);
+                } else {
+                    return c;
+                }
+            }
+        };
+    }
+
 
     /**
      * Produce a diagnostic representation of the contents of the string

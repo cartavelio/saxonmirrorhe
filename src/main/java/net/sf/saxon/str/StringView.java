@@ -9,6 +9,7 @@ package net.sf.saxon.str;
 
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.PositiveIntIterator;
 
 import java.util.Objects;
 import java.util.function.IntPredicate;
@@ -125,10 +126,14 @@ public class StringView extends UnicodeString {
         return tidy().substring(start, end);
     }
 
-
     @Override
     public IntIterator codePoints() {
         return baseUnicodeString != null ? baseUnicodeString.codePoints() : StringTool.codePoints(baseString);
+    }
+
+    @Override
+    public PositiveIntIterator iterate() {
+        return baseUnicodeString != null ? baseUnicodeString.iterate() : StringTool.iterate(baseString);
     }
 
     @Override

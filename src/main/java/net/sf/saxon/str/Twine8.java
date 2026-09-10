@@ -12,6 +12,7 @@ import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.PositiveIntIterator;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -275,9 +276,21 @@ public class Twine8 extends UnicodeString {
             }
 
             @Override
-            //@CSharpModifiers(code = {"public", "override"})
             public int next() {
                 return bytes[i++] & 0xff;
+            }
+        };
+    }
+
+    @Override
+    @CSharpInnerClass(outer = false, extra = {"byte[] bytes"})
+    public PositiveIntIterator iterate() {
+        return new PositiveIntIterator() {
+            int i = 0;
+
+            @Override
+            public int next() {
+                return i < bytes.length ? bytes[i++] & 0xff : -1;
             }
         };
     }

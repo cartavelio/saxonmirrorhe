@@ -8,34 +8,15 @@
 package net.sf.saxon.z;
 
 /**
- * An iterator over a sequence of unboxed int values.
- *
- * <p>Note that although {@code IntIterator} uses the same method names as {@link java.util.Iterator},
- * the contract is different. The behavior of the iterator is well defined if each call on
- * {@link #next()} is preceded by exactly one call on {@link #hasNext()} (and that call
- * must have returned {@code true}); in all other cases the result is unpredictable. So unlike
- * {@link java.util.Iterator}, both {@link #hasNext()} and {@link #next()} are allowed
- * to advance the position of the iterator.</p>
+ * An iterator over a sequence of positive int values, returning -1 to indicate the end of the sequence.
+ * Used primarily for iterating over the codepoints of a Unicode string.
  */
-public interface IntIterator {
+public interface PositiveIntIterator {
 
     /**
-     * Test whether there are any more integers in the sequence; and change the state of
-     * the iterator so a call on {@link #next()} delivers the next integer.
+     * Return the next positive integer in the sequence, or -1 if the sequence is exhausted.
      *
-     * <p>The effect of calling {@code #hasNext()} a second time without an intervening
-     * call on {@code #next()} is undefined.</p>
-     *
-     * @return true if there are more integers to come
-     */
-
-    boolean hasNext();
-
-    /**
-     * Return the next integer in the sequence. The result is undefined unless {@code #hasNext()} has been called
-     * and has returned true.
-     *
-     * @return the next integer in the sequence
+     * @return the next integer in the sequence, or -1 if the sequence is exhausted.
      */
 
     int next();

@@ -13,6 +13,8 @@ import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.PositiveIntIterator;
+import net.sf.saxon.z.PositiveIntIteratorOverIntIterator;
 
 import java.util.function.IntPredicate;
 
@@ -194,6 +196,18 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      */
 
     public abstract IntIterator codePoints();
+
+    // TODO: the idea is to transition from use of codePoints() to use of iterate(), which only needs one call per character
+
+    /**
+     * Get an iterator over the code points present in the string.
+     * @return a PositiveIntIterator, which delivers successive codepoints,
+     * returning -1 on completion
+     */
+
+    public PositiveIntIterator iterate() {
+        return new PositiveIntIteratorOverIntIterator(codePoints());
+    }
 
     /**
      * Get the code point at a given position in the string
