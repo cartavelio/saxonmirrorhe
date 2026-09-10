@@ -1,4 +1,4 @@
-package com.saxonica.ee.pin.pin;
+package com.saxonica.functions.qt4.pin.pin;
 
 import com.saxonica.xsltextn.pedigree.DelegatingMapItem;
 import net.sf.saxon.expr.CallableDelegate;

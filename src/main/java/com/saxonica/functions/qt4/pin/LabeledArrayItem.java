@@ -1,4 +1,4 @@
-package com.saxonica.ee.pin.pin;
+package com.saxonica.functions.qt4.pin.pin;
 
 import com.saxonica.xsltextn.pedigree.DelegatingArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItem;
