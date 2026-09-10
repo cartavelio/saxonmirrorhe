@@ -112,7 +112,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
       std::cerr << "Error creating XdmValue from array" << std::endl;
     }
   }
-  // delete results;
+  operator delete (results);
 }
 
 XdmValue::~XdmValue() {

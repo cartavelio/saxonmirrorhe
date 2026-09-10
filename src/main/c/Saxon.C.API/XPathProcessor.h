@@ -346,7 +346,7 @@ private:
   SaxonProcessor *proc; /*!< SaxonProcessor pointer to object. This is the
                            object that created the XPathProcessor */
   std::string cwdXP;    /*!< current working directory */
-  const char * xp_baseURI;
+  char * xp_baseURI;
   // jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI
   // */
   int64_t cppXP; /*!< The XPathProcessor underlying Java object  */

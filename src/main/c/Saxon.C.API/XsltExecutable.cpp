@@ -233,7 +233,7 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
           throw SaxonApiException("getResultDocuments failed to create value");
         }
       }
-      delete results;
+      operator delete (results);
       j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                         (void *)resultUrisRef);
     } /*else {
@@ -1016,7 +1016,7 @@ XdmValue *XsltExecutable::getXslMessages() {
           throw SaxonApiException("getXslMessages failed to create value");
         }
       }
-      delete results;
+      operator delete (results);
       return value;
     }
   }
