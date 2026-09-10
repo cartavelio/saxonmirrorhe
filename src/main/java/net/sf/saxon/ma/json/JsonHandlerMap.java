@@ -105,7 +105,7 @@ public class JsonHandlerMap extends JsonHandler {
     @Override
     public void startMap() {
         //MapBuilder mapBuilder = getContext().getConfiguration().makeMapBuilder(retainOrder, true);
-        LazyStringMap.LazyStringMapBuilder mapBuilder = new LazyStringMap.LazyStringMapBuilder(flags);
+        LazyStringMap.Builder mapBuilder = new LazyStringMap.Builder(parser, flags);
         stack.push(mapBuilder);
     }
 
@@ -114,7 +114,8 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void endMap() throws XPathException {
-        LazyStringMap.LazyStringMapBuilder map = (LazyStringMap.LazyStringMapBuilder) stack.pop();
+        LazyStringMap.Builder map = (LazyStringMap.Builder) stack.pop();
+        //MapBuilder map = (MapBuilder)stack.pop();
         if (stack.empty()) {
             stack.push(map.getCompletedMap()); // the end
         } else {
@@ -133,7 +134,8 @@ public class JsonHandlerMap extends JsonHandler {
             SimpleArrayItem array = (SimpleArrayItem) stack.peek();
             array.getMembers().add(val.materialize());
         } else {
-            LazyStringMap.LazyStringMapBuilder map = (LazyStringMap.LazyStringMapBuilder) stack.peek();
+            LazyStringMap.Builder map = (LazyStringMap.Builder) stack.peek();
+            //MapBuilder map = (MapBuilder) stack.peek();
             map.put(keys.pop(), val);
         }
     }

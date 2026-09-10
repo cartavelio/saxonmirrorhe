@@ -7,7 +7,7 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicMetadata;
@@ -120,12 +120,12 @@ public class HexBinaryValue extends BinaryValue {
     @Override
     public UnicodeString getPrimitiveStringValue() {
         String digits = "0123456789ABCDEF";
-        UnicodeBuilder sb = new UnicodeBuilder(binaryValue.length*2);
+        TwineBuilder tb = TwineBuilder.make(binaryValue.length*2);
         for (byte aBinaryValue : binaryValue) {
-            sb.append(digits.charAt((aBinaryValue >> 4) & 0xf));
-            sb.append(digits.charAt(aBinaryValue & 0xf));
+            tb = tb.append(digits.charAt((aBinaryValue >> 4) & 0xf));
+            tb = tb.append(digits.charAt(aBinaryValue & 0xf));
         }
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
 

@@ -16,10 +16,9 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
 
@@ -71,16 +70,16 @@ public class JsonDoc extends SystemFunction  {
         if (reader == null) {
             throw new XPathException("Unable to resolve json-doc() URI " + absoluteURI, "FOUT1170");
         }
-        UnicodeString content;
-        try {
-            content = UnparsedTextFunction.readFile(checker, reader);
-        } catch (java.io.UnsupportedEncodingException encErr) {
-            throw new XPathException("Unknown encoding " + Err.wrap(encoding), encErr).withErrorCode("FOUT1190");
-        } catch (java.io.IOException ioErr) {
-//            System.err.println("ProxyHost: " + System.getProperty("http.proxyHost"));
-//            System.err.println("ProxyPort: " + System.getProperty("http.proxyPort"));
-            throw UnparsedTextFunction.handleIOError(absoluteURI, ioErr);
-        }
+        IntIterator content;
+//        try {
+            content = UnparsedTextFunction.codepoints(checker, reader);
+//        } catch (java.io.UnsupportedEncodingException encErr) {
+//            throw new XPathException("Unknown encoding " + Err.wrap(encoding), encErr).withErrorCode("FOUT1190");
+//        } catch (java.io.IOException ioErr) {
+////            System.err.println("ProxyHost: " + System.getProperty("http.proxyHost"));
+////            System.err.println("ProxyPort: " + System.getProperty("http.proxyPort"));
+//            throw UnparsedTextFunction.handleIOError(absoluteURI, ioErr);
+//        }
 
         Map<String, GroundedValue> checkedOptions;
         if (getArity() == 2) {

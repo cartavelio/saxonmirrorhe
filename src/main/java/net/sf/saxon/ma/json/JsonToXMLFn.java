@@ -106,7 +106,7 @@ public class JsonToXMLFn extends SystemFunction {
             handler.setFallbackFunction(checkedOptions, context);
             parser.setNumberParser(checkedOptions, context);
         }
-        parser.parse(input, flags, handler, context);
+        parser.parse(input.codePoints(), flags, handler, context);
         return handler.getResult();
     }
 

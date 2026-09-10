@@ -16,6 +16,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.value.DoubleValue;
@@ -455,12 +456,9 @@ public class JsonReceiver implements Receiver {
         return out.toUnicodeString();
     }
 
-    private static StringBuilder hex4(int c) {
-        StringBuilder hex = new StringBuilder(Integer.toHexString(c).toUpperCase());
-        while (hex.length() < 4) {
-            hex.insert(0, "0");
-        }
-        return hex;
+    @CSharpReplaceBody(code="return Int32.ToString(\"X4\")")
+    public static String hex4(int c) {
+        return String.format("%04x", c);
     }
 
     private final static IntPredicate isControlChar = c -> c < 31 || (c >= 127 && c <= 159);

@@ -89,16 +89,16 @@ public class GMonthValue extends GDateValue {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder(16);
+        TwineBuilder tb = TwineBuilder.make(16);
 
-        sb.appendLatin("--");
-        appendTwoDigits(sb, month);
+        tb = tb.append('-').append('-');
+        tb = appendTwoDigits(tb, month);
 
         if (hasTimezone()) {
-            appendTimezone(sb);
+            tb = appendTimezone(tb);
         }
 
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
 
     }
 

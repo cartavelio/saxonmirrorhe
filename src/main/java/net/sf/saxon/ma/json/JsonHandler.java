@@ -14,10 +14,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
-import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.str.UnicodeChar;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
@@ -211,29 +208,17 @@ public class JsonHandler {
      * @throws XPathException if the callback function throws an exception
      */
     private void substitute(UnicodeString input, UnicodeBuilder buffer, int offset, int count, XPathContext context) throws XPathException {
-        UnicodeBuilder escaped = new UnicodeBuilder(count*6);
+        TwineBuilder escaped = TwineBuilder.make(count*6);
         for (int j=0; j<count; j++) {
-            escaped.append('\\').append('u');
+            escaped = escaped.append('\\').append('u');
             StringBuilder hex = new StringBuilder(Integer.toHexString(input.codePointAt(offset + j)));
             while (hex.length() < 4) {
                 hex.insert(0, "0");
             }
-            escaped.append(hex.toString().toUpperCase());
+            escaped = escaped.append(hex.toString().toUpperCase());
         }
         UnicodeString replacement = replace(escaped.toUnicodeString(), context);
         buffer.append(replacement);
-//        if (replacement.length() == count) {
-//            for (int j = 0; j < count; j++) {
-//                buffer.setCharAt(offset + j, replacement.charAt(j));
-//            }
-//        } else {
-//            for (int j = 0; j < count; j++) {
-//                buffer.deleteCharAt(offset + j);
-//            }
-//            for (int j=0; j < replacement.length(); j++) {
-//                buffer.insert(offset + j, replacement.charAt(j));
-//            }
-//        }
     }
 
     /**

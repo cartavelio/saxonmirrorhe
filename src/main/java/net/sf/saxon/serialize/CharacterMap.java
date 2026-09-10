@@ -8,7 +8,7 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.WhitespaceString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -127,28 +127,26 @@ public class CharacterMap {
             return in;
         }
 
-        UnicodeBuilder buffer = new UnicodeBuilder();
+        TwineBuilder tb = TwineBuilder.make(in.length32());
         IntIterator iter = in.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();
             if (c >= min && c <= max) {
                 String rep = charMap.get(c);
                 if (rep == null) {
-                    buffer.append(c);
+                    tb = tb.append(c);
                 } else {
                     if (insertNulls) {
-                        buffer.append((char) 0);
-                        buffer.append(rep);
-                        buffer.append((char) 0);
+                        tb = tb.append((char) 0).append(rep).append((char) 0);
                     } else {
-                        buffer.append(rep);
+                        tb = tb.append(rep);
                     }
                 }
             } else {
-                buffer.append(c);
+                tb = tb.append(c);
             }
         }
-        return buffer.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     /**

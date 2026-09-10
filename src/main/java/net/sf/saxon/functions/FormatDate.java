@@ -479,14 +479,14 @@ public class FormatDate extends SystemFunction implements Callable {
             //max = Integer.MAX_VALUE;
 
             String roman = numberer.format(value, primary, null, letterValue, "", ordinal);
-            UnicodeBuilder s = new UnicodeBuilder(32);
-            s.append(roman);
+            TwineBuilder tb = TwineBuilder.make(32);
+            tb = tb.append(roman);
             int len = StringTool.getStringLength(roman);
             while (len < min) {
-                s.append(' ');
+                tb = tb.append(' ');
                 len++;
             }
-            return s.toUnicodeString();
+            return tb.toUnicodeString();
         } else if (!widths.isEmpty()) {
             int[] range = getWidths(widths);
             min = Math.max(min, range[0]);
@@ -498,12 +498,12 @@ public class FormatDate extends SystemFunction implements Callable {
             if (defaultFormat) {
                 // if format was defaulted, the explicit widths override the implicit format
                 if (StringTool.lastCodePoint(primary) == '1' && min != primary.length()) {
-                    UnicodeBuilder sb = new UnicodeBuilder(min + 1);
+                    TwineBuilder tb = TwineBuilder.make(min + 1);
                     for (int i = 1; i < min; i++) {
-                        sb.append('0');
+                        tb = tb.append('0');
                     }
-                    sb.append('1');
-                    primary = sb.toUnicodeString();
+                    tb = tb.append('1');
+                    primary = tb.toUnicodeString();
                 }
             }
         }
@@ -618,11 +618,11 @@ public class FormatDate extends SystemFunction implements Callable {
     }
 
     private static UnicodeString reverse(UnicodeString in) {
-        UnicodeBuilder builder = new UnicodeBuilder(in.length32());
+        TwineBuilder tb = TwineBuilder.make(in.length32());
         for (long i = in.length() - 1; i >= 0; i--) {
-            builder.append(in.codePointAt(i));
+            tb = tb.append(in.codePointAt(i));
         }
-        return builder.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     private static int[] getWidths(UnicodeString widths) throws XPathException {
@@ -801,9 +801,8 @@ public class FormatDate extends SystemFunction implements Callable {
                 return NamedTimeZone.getOlsonTimeZoneName(value, country);
             }
         }
-        UnicodeBuilder sbz = new UnicodeBuilder(16);
-        value.appendTimezone(sbz);
-        return sbz.toString();
+        TwineBuilder sbz = TwineBuilder.make(16);
+        return value.appendTimezone(sbz).toString();
     }
 
 

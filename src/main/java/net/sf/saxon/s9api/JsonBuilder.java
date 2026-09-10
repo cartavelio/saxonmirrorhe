@@ -15,13 +15,12 @@ import net.sf.saxon.lib.StandardUnparsedTextResolver;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
@@ -92,13 +91,13 @@ public class JsonBuilder {
         try {
             XPathContext context = new Controller(config).newXPathContext();
             IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;
-            UnicodeString content = UnparsedTextFunction.readFile(checker, jsonReader);
+            IntIterator content = UnparsedTextFunction.codepoints(checker, jsonReader);
             Map<String, GroundedValue> options = new HashMap<>();
             options.put("liberal", BooleanValue.get(liberal));
             options.put("escape", BooleanValue.TRUE);
             Item result = ParseJsonFn.parse(content, options, context);
             return XdmValue.wrap(result);
-        } catch (XPathException | IOException e) {
+        } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
     }

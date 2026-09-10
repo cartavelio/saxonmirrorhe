@@ -8,7 +8,7 @@
 package net.sf.saxon.expr.number;
 
 
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.value.CalendarValue;
@@ -391,9 +391,9 @@ public class NamedTimeZone {
      */
 
     public static String formatTimeZoneOffset(DateTimeValue timeValue) {
-        UnicodeBuilder sb = new UnicodeBuilder(16);
-        CalendarValue.appendTimezone(timeValue.getTimezoneInMinutes(), sb);
-        return sb.toString();
+        TwineBuilder tb = TwineBuilder.make(16);;
+        tb = CalendarValue.appendTimezone(timeValue.getTimezoneInMinutes(), tb);
+        return tb.toString();
     }
 
     /**

@@ -205,17 +205,17 @@ public class HTML5CaseBlindCollator implements StringCollator, SubstringMatcher 
      */
 
     private UnicodeString normalize(UnicodeString cs) {
-        UnicodeBuilder sb = new UnicodeBuilder(cs.length32());
+        TwineBuilder tb = TwineBuilder.make(cs.length32());
         IntIterator iter = cs.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();
             if ('a' <= c && c <= 'z') {
-                sb.append((char)(c + 'A' - 'a'));
+                tb = tb.append((char)(c + 'A' - 'a'));
             } else {
-                sb.append(c);
+                tb = tb.append(c);
             }
         }
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
     }
 }
 

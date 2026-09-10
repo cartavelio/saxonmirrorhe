@@ -11,7 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -373,30 +373,28 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder(16);
+        TwineBuilder tb = TwineBuilder.make(16);;
 
-        appendTwoDigits(sb, hour);
-        sb.append(':');
-        appendTwoDigits(sb, minute);
-        sb.append(':');
-        appendTwoDigits(sb, second);
+        tb = appendTwoDigits(tb, hour).append(':');
+        tb = appendTwoDigits(tb, minute).append(':');
+        tb = appendTwoDigits(tb, second);
         if (nanosecond != 0) {
-            sb.append('.');
+            tb = tb.append('.');
             int ms = nanosecond;
             int div = 100_000_000;
             while (ms > 0) {
                 int d = ms / div;
-                sb.append((char) (d + '0'));
+                tb = tb.append((char) (d + '0'));
                 ms = ms % div;
                 div /= 10;
             }
         }
 
         if (hasTimezone()) {
-            appendTimezone(sb);
+            tb = appendTimezone(tb);
         }
 
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
 
     }
 

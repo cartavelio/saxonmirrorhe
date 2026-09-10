@@ -11,7 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -253,25 +253,23 @@ public class DateValue extends GDateValue implements XPathComparable {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder(16);
+        TwineBuilder tb = TwineBuilder.make(16);
         int yr = year;
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.append('-');
+                tb = tb.append('-');
             }
         }
-        appendString(sb, yr, yr > 9999 ? (yr + "").length() : 4);
-        sb.append('-');
-        appendTwoDigits(sb, month);
-        sb.append('-');
-        appendTwoDigits(sb, day);
+        tb = appendString(tb, yr, yr > 9999 ? (yr + "").length() : 4).append('-');
+        tb = appendTwoDigits(tb, month).append('-');
+        tb = appendTwoDigits(tb, day);
 
         if (hasTimezone()) {
-            appendTimezone(sb);
+            tb = appendTimezone(tb);
         }
 
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
 
     }
 

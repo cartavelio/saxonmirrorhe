@@ -697,17 +697,17 @@ public class XMLEmitter extends Emitter {
      */
 
     protected UnicodeString convertToAscii(UnicodeString chars) {
-        UnicodeBuilder buff = new UnicodeBuilder();
+        TwineBuilder tb = TwineBuilder.make(chars.length32());
         IntIterator iter = chars.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();
             if (c >= 20 && c < 127) {
-                buff.append(c);
+                tb = tb.append(c);
             } else {
-                buff.append("_" + c + "_");
+                tb.append('_').append(c).append('_');
             }
         }
-        return buff.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     /**

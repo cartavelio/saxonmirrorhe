@@ -14,7 +14,7 @@ import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -22,7 +22,10 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicMetadata;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -1056,42 +1059,38 @@ public final class DateTimeValue extends CalendarValue
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder(32);
+        TwineBuilder tb = TwineBuilder.make(32);
         int yr = year;
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);    // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.append('-');
+                tb = tb.append('-');
             }
         }
-        appendString(sb, yr, yr > 9999 ? (yr + "").length() : 4);
-        sb.append('-');
-        appendTwoDigits(sb, month);
-        sb.append('-');
-        appendTwoDigits(sb, day);
-        sb.append('T');
-        appendTwoDigits(sb, hour);
-        sb.append(':');
-        appendTwoDigits(sb, minute);
-        sb.append(':');
-        appendTwoDigits(sb, second);
+        tb = appendString(tb, yr, yr > 9999 ? (yr + "").length() : 4)
+                .append('-');
+        tb = appendTwoDigits(tb, month).append('-');
+        tb = appendTwoDigits(tb, day).append('T');
+        tb = appendTwoDigits(tb, hour).append(':');
+        tb = appendTwoDigits(tb, minute).append(':');
+        tb = appendTwoDigits(tb, second);
         if (nanosecond != 0) {
-            sb.append('.');
+            tb = tb.append('.');
             int ms = nanosecond;
             int div = 100_000_000;
             while (ms > 0) {
                 int d = ms / div;
-                sb.append((char) (d + '0'));
+                tb = tb.append((char) (d + '0'));
                 ms = ms % div;
                 div /= 10;
             }
         }
 
         if (hasTimezone()) {
-            appendTimezone(sb);
+            tb = appendTimezone(tb);
         }
 
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
 
     }
 

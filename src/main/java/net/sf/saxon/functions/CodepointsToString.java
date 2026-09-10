@@ -11,7 +11,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
@@ -26,24 +26,24 @@ public class CodepointsToString extends SystemFunction implements Callable {
     /**
      * Construct a UnicodeString corresponding to a given sequence of Unicode code values
      *
-     * @param sb builder object to contain the constructed string
+     * @param tb builder object to contain the constructed string
      * @param chars   iterator delivering the characters as integer values
      * @param checker used to test whether a character is valid in the appropriate XML version
      * @throws net.sf.saxon.trans.XPathException
      *          if any of the integers is not the codepoint of a valid XML character
      */
 
-    private static void unicodeToString(UnicodeBuilder sb, SequenceIterator chars, IntPredicateProxy checker) throws XPathException {
+    private static TwineBuilder unicodeToString(TwineBuilder tb, SequenceIterator chars, IntPredicateProxy checker) throws XPathException {
         while (true) {
             NumericValue nextInt = (NumericValue) chars.next();
             if (nextInt == null) {
-                return;
+                return tb;
             }
             long next = nextInt.longValue();
             if (next < 0 || next > Integer.MAX_VALUE || !checker.test((int) next)) {
                 throw new XPathException("codepoints-to-string(): invalid XML character [x" + Integer.toHexString((int) next) + ']', "FOCH0001");
             }
-            sb.append((int) next);
+            tb = tb.append((int) next);
         }
     }
 
@@ -58,10 +58,10 @@ public class CodepointsToString extends SystemFunction implements Callable {
      */
     @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        UnicodeBuilder sb = new UnicodeBuilder();
+        TwineBuilder tb = TwineBuilder.make(256);
         SequenceIterator chars = arguments[0].iterate();
-        unicodeToString(sb, chars, context.getConfiguration().getValidCharacterChecker());
-        return new StringValue(sb.toUnicodeString());
+        tb = unicodeToString(tb, chars, context.getConfiguration().getValidCharacterChecker());
+        return new StringValue(tb.toUnicodeString());
     }
 
     @Override

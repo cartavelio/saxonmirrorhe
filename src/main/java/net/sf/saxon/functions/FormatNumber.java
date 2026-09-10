@@ -298,8 +298,8 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             final int zeroDigit = dfs.getMarker(DecimalSymbols.Property.ZERO_DIGIT);
             final int exponentSeparator = dfs.getMarker(DecimalSymbols.Property.EXPONENT_SEPARATOR_MARKER);
 
-            UnicodeBuilder prefixBuilder = new UnicodeBuilder(8);
-            UnicodeBuilder suffixBuilder = new UnicodeBuilder(8);
+            TwineBuilder prefixBuilder = TwineBuilder.make(8);
+            TwineBuilder suffixBuilder = TwineBuilder.make(8);
 
             List<Integer> wholePartPositions = null;
             List<Integer> fractionalPartPositions = null;
@@ -341,7 +341,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                     isPerMille = c == perMilleMarker;
                     switch (phase) {
                         case 0:
-                            prefixBuilder.append(isPercent
+                            prefixBuilder = prefixBuilder.append(isPercent
                                                          ? dfs.getProperty(DecimalSymbols.Property.PERCENT_RENDITION)
                                                          : dfs.getProperty(DecimalSymbols.Property.PER_MILLE_RENDITION));
                             break;
@@ -356,7 +356,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                             CSharp.emitCode("goto case 6;");
                         case 6:
                             phase = 6;
-                            suffixBuilder.append(isPercent
+                            suffixBuilder = suffixBuilder.append(isPercent
                                                          ? dfs.getProperty(DecimalSymbols.Property.PERCENT_RENDITION)
                                                          : dfs.getProperty(DecimalSymbols.Property.PER_MILLE_RENDITION));
                             break;
@@ -475,7 +475,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                 } else if (c == exponentSeparator) {
                     switch (phase) {
                         case 0:
-                            prefixBuilder.append(c);
+                            prefixBuilder = prefixBuilder.append(c);
                             break;
                         case 1:
                         case 2:
@@ -488,17 +488,17 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                             if (foundExponentMarker) {
                                 foundExponentMarker2 = true;
                                 phase = 6;
-                                suffixBuilder.append(exponentSeparator);
+                                suffixBuilder = suffixBuilder.append(exponentSeparator);
                             }
                             break;
                         case 6:
-                            suffixBuilder.append(c);
+                            suffixBuilder = suffixBuilder.append(c);
                             break;
                     }
                 } else {    // passive character found
                     switch (phase) {
                         case 0:
-                            prefixBuilder.append(c);
+                            prefixBuilder = prefixBuilder.append(c);
                             break;
                         case 1:
                         case 2:
@@ -507,14 +507,13 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
                         case 5:
                             if (minExponentSize == 0 && foundExponentMarker) {
                                 phase = 6;
-                                suffixBuilder.append(exponentSeparator);
-                                suffixBuilder.append(c);
+                                suffixBuilder = suffixBuilder.append(exponentSeparator).append(c);
                                 break;
                             }
                             CSharp.emitCode("goto case 6;");
                         case 6:
                             phase = 6;
-                            suffixBuilder.append(c);
+                            suffixBuilder = suffixBuilder.append(c);
                             break;
                     }
                 }

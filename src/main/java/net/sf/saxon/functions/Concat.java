@@ -16,8 +16,8 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UniStringConsumer;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -79,14 +79,14 @@ public class Concat extends SystemFunction implements PushableFunction {
             @Override
             @CSharpModifiers(code = {"public", "override"})
             public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
-                UnicodeBuilder buffer = new UnicodeBuilder();
+                TwineBuilder tb = TwineBuilder.make(256);
                 for (Operand o: operands()) {
                     SequenceIterator iter = o.getChildExpression().iterate(context);
                     for (Item item; (item = iter.next()) != null; ) {
-                        buffer.accept(item.getUnicodeStringValue());
+                        tb = tb.append(item.getUnicodeStringValue());
                     }
                 }
-                return buffer.toUnicodeString();
+                return tb.toUnicodeString();
             }
 
             @Override
@@ -100,19 +100,19 @@ public class Concat extends SystemFunction implements PushableFunction {
 
     @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        UnicodeBuilder builder = new UnicodeBuilder();
+        TwineBuilder tb = TwineBuilder.make(256);
         for (Sequence arg : arguments) {
             if (arg instanceof Item) {
                 // common case, avoid creating a singleton iterator
-                builder.accept(((Item)arg).getUnicodeStringValue());
+                tb = tb.append(((Item)arg).getUnicodeStringValue());
             } else {
                 SequenceIterator iter = arg.iterate();
                 for (Item item; (item = iter.next()) != null; ) {
-                    builder.accept(item.getUnicodeStringValue());
+                    tb = tb.append(item.getUnicodeStringValue());
                 }
             }
         }
-        return new StringValue(builder.toUnicodeString());
+        return new StringValue(tb.toUnicodeString());
     }
 
     @Override

@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
@@ -66,17 +66,17 @@ public class IriToUri extends ScalarSystemFunction {
             // it's worth doing a prescan to avoid the cost of copying in the common all-ASCII case
             return s;
         }
-        UnicodeBuilder sb = new UnicodeBuilder(s.length32() + 20);
+        TwineBuilder tb = TwineBuilder.make(s.length32() + 20);
         IntIterator iter = s.codePoints();
         while (iter.hasNext()) {
             final int c = iter.next();
             if (c >= 0x7f || !allowedASCII[(int) c]) {
-                EncodeForUri.escapeChar(c, sb);
+                tb = EncodeForUri.escapeChar(c, tb);
             } else {
-                sb.append(c);
+                tb = tb.append(c);
             }
         }
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     private static boolean allAllowedAscii(IntIterator codePoints) {

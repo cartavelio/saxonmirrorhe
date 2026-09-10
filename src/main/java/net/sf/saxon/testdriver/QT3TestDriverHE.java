@@ -775,7 +775,11 @@ public class QT3TestDriverHE extends TestDriver {
                             } catch (SaxonApiException err) {
                                 println("in TestSet " + testSetName);
                                 println(err.getMessage());
-                                outcome.setException(err.getErrorCode());
+                                if (err.getErrorCode() == null) {
+                                    outcome.setException(new QName("ERROR_WITH_NO_ERROR_CODE"));
+                                } else {
+                                    outcome.setException(err.getErrorCode());
+                                }
                                 outcome.setErrorsReported(errorCollector.getErrorCodes());
                             } catch (LicenseException err) {
                                 // treat this as "facility not available", XQST0075

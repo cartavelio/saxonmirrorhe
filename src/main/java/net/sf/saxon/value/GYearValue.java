@@ -88,21 +88,21 @@ public class GYearValue extends GDateValue {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder(16);
+        TwineBuilder tb = TwineBuilder.make(16);
         int yr = year;
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.append('-');
+                tb = tb.append('-');
             }
         }
-        appendString(sb, yr, (yr > 9999 ? (yr + "").length() : 4));
+        tb = appendString(tb, yr, (yr > 9999 ? (yr + "").length() : 4));
 
         if (hasTimezone()) {
-            appendTimezone(sb);
+            tb = appendTimezone(tb);
         }
 
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
 
     }
 

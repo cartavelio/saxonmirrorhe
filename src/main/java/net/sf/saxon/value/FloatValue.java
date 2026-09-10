@@ -12,12 +12,14 @@ import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.Round;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicMetadata;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.Converter;
+import net.sf.saxon.type.ValidationException;
 
 import java.math.BigDecimal;
 
@@ -228,8 +230,7 @@ public final class FloatValue extends NumericValue {
 
     @Override
     public UnicodeString getCanonicalLexicalRepresentation() {
-        UnicodeBuilder fsb = new UnicodeBuilder(32);
-        return FloatingPointConverter.appendFloat(fsb, value, true);
+        return FloatingPointConverter.appendFloat(value, true);
     }
 
     /**
@@ -240,7 +241,7 @@ public final class FloatValue extends NumericValue {
      */
 
     public static UnicodeString floatToString(float value) {
-        return FloatingPointConverter.appendFloat(new UnicodeBuilder(), value, false);
+        return FloatingPointConverter.appendFloat(value, false);
     }
 
     /**

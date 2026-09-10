@@ -87,16 +87,16 @@ public class GDayValue extends GDateValue {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder(16);
+        TwineBuilder tb = TwineBuilder.make(16);
 
-        sb.appendLatin("---");
-        appendTwoDigits(sb, day);
+        tb = tb.append('-').append('-').append('-');
+        tb = appendTwoDigits(tb, day);
 
         if (hasTimezone()) {
-            appendTimezone(sb);
+            tb = appendTimezone(tb);
         }
 
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
 
     }
 

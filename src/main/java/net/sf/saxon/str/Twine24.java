@@ -47,6 +47,8 @@ public class Twine24 extends UnicodeString {
      *
      * @param codePoints the codepoints making up the string: must not contain any surrogates
      *                   (that is, codepoints higher than 65535 must be supplied as a single unit)
+     * @param used the number of codepoints within the array that are actually used; anything beyond is
+     *             ignored
      */
 
     public Twine24(int[] codePoints, int used) {

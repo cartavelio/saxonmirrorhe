@@ -22,7 +22,7 @@ import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.regex.charclass.Categories;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -374,15 +374,15 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      */
     private static UnicodeString extractSeparators(UnicodeString arr, IntSet excludePositions) {
         // TODO: this doesn't do what the documentation says: it ignores the supplied positions entirely
-        UnicodeBuilder ub = new UnicodeBuilder(arr.length32());
+        TwineBuilder tb = TwineBuilder.make(arr.length32());
         IntIterator iter = arr.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();
             if (NumberFormatter.isLetterOrDigit(c)) {
-                ub.append(c);
+                tb = tb.append(c);
             }
         }
-        return ub.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     @Override

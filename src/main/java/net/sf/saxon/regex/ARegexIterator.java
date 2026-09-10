@@ -10,10 +10,10 @@ package net.sf.saxon.regex;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
@@ -266,13 +266,13 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                 }
 
             }
-            UnicodeBuilder buff = new UnicodeBuilder();
+            TwineBuilder tb = TwineBuilder.make(256);
             for (int i = 0; i < current.length() + 1; i++) {
                 List<Integer> events = actions.get(i);
                 if (events != null) {
-                    if (!buff.isEmpty()) {
-                        action.characters(buff.toUnicodeString());
-                        buff.clear();
+                    if (!tb.isEmpty()) {
+                        action.characters(tb.toUnicodeString());
+                        tb = TwineBuilder.make(256);
                     }
                     for (Integer group : events) {
                         if (group > 0) {
@@ -283,11 +283,11 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                     }
                 }
                 if (i < current.length()) {
-                    buff.append(current.codePointAt(i));
+                    tb = tb.append(current.codePointAt(i));
                 }
             }
-            if (!buff.isEmpty()) {
-                action.characters(buff.toUnicodeString());
+            if (!tb.isEmpty()) {
+                action.characters(tb.toUnicodeString());
             }
         }
 

@@ -8,11 +8,10 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.XPathComparable;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicMetadata;
-import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
 import java.util.Arrays;
@@ -119,16 +118,16 @@ public class Base64BinaryValue extends BinaryValue {
      */
 
     public static UnicodeString encode(byte[] value) {
-        UnicodeBuilder buff = new UnicodeBuilder(value.length*2);
+        TwineBuilder tb = TwineBuilder.make(value.length*2);
         int whole = value.length - value.length % 3;
         // process bytes 3 at a time: 3 bytes => 4 characters
         for (int i = 0; i < whole; i += 3) {
             // 3 bytes = 24 bits = 4 characters
             int val = ((((int) value[i]) & 0xff) << 16) + ((((int) value[i + 1]) & 0xff) << 8) + ((((int) value[i + 2]) & 0xff));
-            buff.append((char) encoding[(val >> 18) & 0x3f]);
-            buff.append((char) encoding[(val >> 12) & 0x3f]);
-            buff.append((char) encoding[(val >> 6) & 0x3f]);
-            buff.append((char) encoding[val & 0x3f]);
+            tb = tb.append((char) encoding[(val >> 18) & 0x3f]);
+            tb = tb.append((char) encoding[(val >> 12) & 0x3f]);
+            tb = tb.append((char) encoding[(val >> 6) & 0x3f]);
+            tb = tb.append((char) encoding[val & 0x3f]);
         }
         int remainder = (value.length % 3);
         switch (remainder) {
@@ -139,22 +138,22 @@ public class Base64BinaryValue extends BinaryValue {
             case 1: {
                 // pad the final 8 bits to 12 (2 groups of 6)
                 int val = ((((int) value[whole]) & 0xff) << 4);
-                buff.append((char) encoding[(val >> 6) & 0x3f]);
-                buff.append((char) encoding[val & 0x3f]);
-                buff.appendLatin("==");
+                tb = tb.append((char) encoding[(val >> 6) & 0x3f]);
+                tb = tb.append((char) encoding[val & 0x3f]);
+                tb = tb.append('=').append('=');
                 break;
             }
             case 2: {
                 // pad the final 16 bits to 18 (3 groups of 6)
                 int val = ((((int) value[whole]) & 0xff) << 10) + ((((int) value[whole + 1]) & 0xff) << 2);
-                buff.append((char) encoding[(val >> 12) & 0x3f]);
-                buff.append((char) encoding[(val >> 6) & 0x3f]);
-                buff.append((char) encoding[val & 0x3f]);
-                buff.append("=");
+                tb = tb.append((char) encoding[(val >> 12) & 0x3f]);
+                tb = tb.append((char) encoding[(val >> 6) & 0x3f]);
+                tb = tb.append((char) encoding[val & 0x3f]);
+                tb = tb.append("=");
                 break;
             }
         }
-        return buff.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     /**

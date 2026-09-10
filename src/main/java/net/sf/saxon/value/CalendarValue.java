@@ -12,7 +12,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -321,58 +321,62 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * formatted as "Z" or "+03:00" or "-10:00", to a supplied
      * string buffer
      *
-     * @param sb The StringBuffer that will be updated with the resulting string
-     *           representation
+     * @param tb The TwineBuilder containing the string to be updated
+     * @return the TwineBuilder to be used for subsequent calls
      */
 
-    public final void appendTimezone(UnicodeBuilder sb) {
+    public final TwineBuilder appendTimezone(TwineBuilder tb) {
         if (hasTimezone()) {
-            appendTimezone(getTimezoneInMinutes(), sb);
+            tb = appendTimezone(getTimezoneInMinutes(), tb);
         }
+        return tb;
     }
 
     /**
      * Format a timezone and append it to a buffer
      *
      * @param tz the timezone
-     * @param sb the buffer
+     * @param tb The TwineBuilder containing the string to be updated
+     * @return the TwineBuilder to be used for subsequent calls
      */
 
-    public static void appendTimezone(int tz, UnicodeBuilder sb) {
+    public static TwineBuilder appendTimezone(int tz, TwineBuilder tb) {
         if (tz == 0) {
-            sb.append('Z');
+            tb = tb.append('Z');
         } else {
-            sb.append(tz > 0 ? "+" : "-");
+            tb = tb.append(tz > 0 ? "+" : "-");
             tz = Math.abs(tz);
-            appendTwoDigits(sb, tz / 60);
-            sb.append(':');
-            appendTwoDigits(sb, tz % 60);
+            tb = appendTwoDigits(tb, tz / 60);
+            tb = tb.append(':');
+            tb = appendTwoDigits(tb, tz % 60);
         }
+        return tb;
     }
 
     /**
      * Append an integer, formatted with leading zeros to a fixed size, to a string buffer
      *
-     * @param sb    the string buffer
+     * @param tb The TwineBuilder containing the string to be updated
      * @param value the integer to be formatted
      * @param size  the number of digits required (max 9)
+     * @return the TwineBuilder to be used for subsequent calls
      */
 
-    protected static void appendString(UnicodeBuilder sb, int value, int size) {
+    protected static TwineBuilder appendString(TwineBuilder tb, int value, int size) {
         String s = "000000000" + value;
-        sb.append(s.substring(s.length() - size));
+        return tb.append(s.substring(s.length() - size));
     }
 
     /**
      * Append an integer, formatted as two digits, to a string buffer
      *
-     * @param sb    the string buffer
+     * @param tb The TwineBuilder containing the string to be updated
      * @param value the integer to be formatted (must be in the range 0..99
+     * @return the TwineBuilder to be used for subsequent calls
      */
 
-    protected static void appendTwoDigits(UnicodeBuilder sb, int value) {
-        sb.append((char) (value / 10 + '0'));
-        sb.append((char) (value % 10 + '0'));
+    protected static TwineBuilder appendTwoDigits(TwineBuilder tb, int value) {
+        return tb.append((char) (value / 10 + '0')).append((char) (value % 10 + '0'));
     }
 
     private static class CalendarValueMapKey implements AtomicMatchKey {

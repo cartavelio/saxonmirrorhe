@@ -6,6 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.tree.jiter;
 
+import net.sf.saxon.transpile.CSharpReplaceBody;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -21,11 +23,14 @@ public class ReverseListIterable<T> implements Iterable<T> {
 
     /**
      * Construct a reverse iterator over a list
-     * @param stack the list over which the reverse iterator will iterate
+     * @param list the list over which the reverse iterator will iterate
      */
-    public ReverseListIterable(List<T> stack) {
-        this.list = stack;
+    @CSharpReplaceBody(code="this.list = list.Reverse();")
+    public ReverseListIterable(List<T> list) {
+        this.list = list;
     }
+
+    //#if CSHARP==false
 
     /**
      * Returns an iterator over elements in the list, starting at the end
@@ -46,6 +51,8 @@ public class ReverseListIterable<T> implements Iterable<T> {
             }
         };
     }
+
+    //#endif
 }
 
 

@@ -9,7 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -89,18 +89,17 @@ public class GMonthDayValue extends GDateValue {
     @Override
     public UnicodeString getPrimitiveStringValue() {
 
-        UnicodeBuilder sb = new UnicodeBuilder(16);
+        TwineBuilder tb = TwineBuilder.make(16);
 
-        sb.appendLatin("--");
-        appendTwoDigits(sb, month);
-        sb.append('-');
-        appendTwoDigits(sb, day);
+        tb = tb.append('-').append('-');
+        tb = appendTwoDigits(tb, month).append('-');
+        tb = appendTwoDigits(tb, day);
 
         if (hasTimezone()) {
-            appendTimezone(sb);
+            tb = appendTimezone(tb);
         }
 
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
 
     }
 

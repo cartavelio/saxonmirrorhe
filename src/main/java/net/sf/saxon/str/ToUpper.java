@@ -837,28 +837,28 @@ public class ToUpper {
     }
 
     public static UnicodeString toUpper(UnicodeString input) {
-        UnicodeBuilder ub = new UnicodeBuilder((int)input.estimatedLength());
+        TwineBuilder tb = TwineBuilder.make((int)input.estimatedLength());
         IntIterator iter = input.codePoints();
         while (iter.hasNext()) {
             int cp = iter.next();
             if (cp < 256 && cp != 223) {
                 // Fast path for latin-1 characters other than eszet
-                ub.append(latin[cp]);
+                tb = tb.append(latin[cp]);
             } else {
                 String special = specials.get(cp);
                 if (special != null) {
-                    ub.append(special);
+                    tb = tb.append(special);
                 } else {
                     int delta = ranges.get(cp);
                     if (delta == Integer.MIN_VALUE) {
-                        ub.append(cp);
+                        tb = tb.append(cp);
                     } else {
-                        ub.append(cp + delta);
+                        tb = tb.append(cp + delta);
                     }
                 }
             }
         }
-        return ub.toUnicodeString();
+        return tb.toUnicodeString();
     }
 }
 

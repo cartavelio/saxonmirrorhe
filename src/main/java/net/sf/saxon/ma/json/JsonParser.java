@@ -22,6 +22,7 @@ import net.sf.saxon.type.StringToDouble;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntIterator;
 
 import java.util.HashMap;
 import java.util.List;
@@ -77,39 +78,43 @@ public class JsonParser {
      * @param context XPath evaluation context
      * @throws XPathException if the syntax of the input is incorrect
      */
-    public void parse(UnicodeString input, int flags, JsonHandler handler, XPathContext context) throws XPathException {
-        if (input.isEmpty()) {
-            invalidJSON("An empty string is not valid JSON", ERR_GRAMMAR, 1);
-        }
-
-        if ((flags & ESCAPE) != 0) {
-            invalidEscapeHandler = esc -> esc;
-        } else if (handler.getFallbackFunction() != null) {
-            FunctionItem fallback = handler.getFallbackFunction();
-            invalidEscapeHandler = esc -> {
-                try {
-                    Item result = fallback.call(context, new Sequence[]{new StringValue(esc)}).head();
-                    return result == null ? EmptyUnicodeString.getInstance() : result.getUnicodeStringValue();
-                } catch (XPathException e) {
-                    throw new UncheckedXPathException(e);
-                }
-            };
-        } else {
-            invalidEscapeHandler = esc -> JsonHandler.REPLACEMENT;
-        }
-
-        JsonTokenizer t = new JsonTokenizer(input);
-        t.next();
-
+    public void parse(IntIterator input, int flags, JsonHandler handler, XPathContext context) throws XPathException {
         try {
-            parseConstruct(handler, t, flags, context);
-        } catch (IllegalStateException e) {
-            // e.g. unmatched surrogate pairs
-            invalidJSON(e.getMessage(), ERR_GRAMMAR, t.lineNumber);
-        }
+            if (!input.hasNext()) {
+                invalidJSON("An empty string is not valid JSON", ERR_GRAMMAR, 1);
+            }
 
-        if (t.next() != JsonToken.EOF) {
-            invalidJSON("Unexpected token beyond end of JSON input", ERR_GRAMMAR, t.lineNumber);
+            if ((flags & ESCAPE) != 0) {
+                invalidEscapeHandler = esc -> esc;
+            } else if (handler.getFallbackFunction() != null) {
+                FunctionItem fallback = handler.getFallbackFunction();
+                invalidEscapeHandler = esc -> {
+                    try {
+                        Item result = fallback.call(context, new Sequence[]{new StringValue(esc)}).head();
+                        return result == null ? EmptyUnicodeString.getInstance() : result.getUnicodeStringValue();
+                    } catch (XPathException e) {
+                        throw new UncheckedXPathException(e);
+                    }
+                };
+            } else {
+                invalidEscapeHandler = esc -> JsonHandler.REPLACEMENT;
+            }
+
+            JsonTokenizer t = new JsonTokenizer(input);
+            t.next();
+
+            try {
+                parseConstruct(handler, t, flags, context);
+            } catch (IllegalStateException e) {
+                // e.g. unmatched surrogate pairs
+                invalidJSON(e.getMessage(), ERR_GRAMMAR, t.lineNumber);
+            }
+
+            if (t.next() != JsonToken.EOF) {
+                invalidJSON("Unexpected token beyond end of JSON input", ERR_GRAMMAR, t.lineNumber);
+            }
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException().maybeWithErrorCode("FOJS0001");
         }
 
     }
@@ -488,34 +493,25 @@ public class JsonParser {
             }
         }
         // Now handle surrogates (matching pairs, or unmatched)
-        UnicodeBuilder ub = new UnicodeBuilder(buffer.length());
+        TwineBuilder tb = TwineBuilder.make(buffer.length());
         for (int i=0; i<buffer.length(); i++) {
             char c = buffer.charAt(i);
             if (UTF16CharacterSet.isSurrogate(c)) {
                 if (UTF16CharacterSet.isHighSurrogate(c)) {
                     if (i+1 < buffer.length() && UTF16CharacterSet.isLowSurrogate(buffer.charAt(i+1))) {
-                        ub.append(UTF16CharacterSet.combinePair(c, buffer.charAt(i+1)));
+                        tb = tb.append(UTF16CharacterSet.combinePair(c, buffer.charAt(i+1)));
                         i++;
                     } else {
-                        ub.append(badEscapeHandler.apply(StringView.of("\\u" + toPaddedHex(c))));
+                        tb = tb.append(badEscapeHandler.apply(StringView.of("\\u" + JsonReceiver.hex4(c))));
                     }
                 } else {
-                    ub.append(badEscapeHandler.apply(StringView.of("\\u" + toPaddedHex(c))));
+                    tb = tb.append(badEscapeHandler.apply(StringView.of("\\u" + JsonReceiver.hex4(c))));
                 }
             } else {
-                ub.append(c);
+                tb = tb.append(c);
             }
         }
-        return ub.toUnicodeString();
-    }
-
-    /**
-     * Convert number to 4 hex digits
-     * @param i the number to be converted
-     * @return the representation (for example 255 becomes 00FF)
-     */
-    public static String toPaddedHex(int i) {
-        return String.format("%04X", i);
+        return tb.toUnicodeString();
     }
 
     /**
@@ -556,18 +552,20 @@ public class JsonParser {
 
     private static class JsonTokenizer {
 
-        public final UnicodeString input;
-        public int position;
+        //public final UnicodeString input;
+        //public int position;
+        private final IntIterator codepoints;
+        private int ch;
         public int lineNumber = 1;
         public JsonToken currentToken;
         public UnicodeString currentTokenValue;
 
-        JsonTokenizer(UnicodeString input) {
-            this.input = input;
-            this.position = 0;
+        JsonTokenizer(IntIterator input) {
+            codepoints = input;
+            readCh();
             // Ignore a leading BOM
-            if (!input.isEmpty() && input.codePointAt(0) == 65279) {
-                position++;
+            if (ch == 65279) {
+                readCh();
             }
         }
 
@@ -576,24 +574,30 @@ public class JsonParser {
             return currentToken;
         }
 
+        private void readCh() {
+            if (codepoints.hasNext()) {
+                ch = codepoints.next();
+            } else {
+                ch = -1;
+            }
+        }
+
         private JsonToken readToken() throws XPathException {
-            if (position >= input.length()) {
+            if (ch == -1) {
                 return JsonToken.EOF;
             }
             boolean breakLoop = false;
             do {
-                int c = input.codePointAt(position);
-                switch (c) {
+                switch (ch) {
                     case '\n':
-                    case '\r':
-                        if (!(c == '\n' && position > 0 && input.codePointAt(position) == '\n')) {
-                            lineNumber++;
-                        }
+                        lineNumber++;
                         // drop through
                         CSharp.emitCode("goto case ' ';");
+                    case '\r':
                     case ' ':
                     case '\t':
-                        if (++position >= input.length()) {
+                        readCh();
+                        if (ch == -1) {
                             return JsonToken.EOF;
                         }
                         break;
@@ -602,50 +606,65 @@ public class JsonParser {
                         break;
                 }
             } while (!breakLoop);
-            int ch = input.codePointAt(position++);
+
             switch (ch) {
                 case '[':
+                    readCh();
                     return JsonToken.LSQB;
                 case '{':
+                    readCh();
                     return JsonToken.LCURLY;
                 case ']':
+                    readCh();
                     return JsonToken.RSQB;
                 case '}':
+                    readCh();
                     return JsonToken.RCURLY;
                 case '"': {
                     // String literal. We check that the literal conforms to the JSON grammar, but
                     // return it exactly as written, with no expansion of escape sequences
-                    UnicodeBuilder tokenBuilder = new UnicodeBuilder(64);
-                    boolean afterBackslash = false;
+                    TwineBuilder tb = TwineBuilder.make(64);
+                    readCh();
                     while (true) {
-                        if (position >= input.length()) {
+                        if (ch == -1) {
                             invalidJSON("Unclosed quotes in string literal", ERR_GRAMMAR, lineNumber);
-                        }
-                        int c = input.codePointAt(position++);
-                        if (c < 32) {
-                            invalidJSON("Unescaped control character (x" + Integer.toHexString(c) + ")", ERR_GRAMMAR, lineNumber);
-                        }
-                        if (afterBackslash && c == 'u') {
-                            try {
-                                UnicodeString hex = input.substring(position, position + 4);
-                                Integer.parseInt(hex.toString(), 16);
-                            } catch (Exception e) {
-                                invalidJSON("\\u must be followed by four hex characters", ERR_GRAMMAR, lineNumber);
+                        } else if (ch < 32) {
+                            invalidJSON("Unescaped control character (x" + Integer.toHexString(ch) + ")", ERR_GRAMMAR, lineNumber);
+                        } else if (ch == '\\') {
+                            tb = tb.append(ch);
+                            readCh();
+                            if (ch == 'u') {
+                                tb = tb.append(ch);
+                                readCh();
+                                tb = tb.append(expectHex(ch, lineNumber));
+                                readCh();
+                                tb = tb.append(expectHex(ch, lineNumber));
+                                readCh();
+                                tb = tb.append(expectHex(ch, lineNumber));
+                                readCh();
+                                tb = tb.append(expectHex(ch, lineNumber));
+                                readCh();
+                            } else if (ch == -1) {
+                                invalidJSON("Backslash in string literal at end of input", ERR_GRAMMAR, lineNumber);
+                            } else {
+                                tb = tb.append(ch);
+                                readCh();
                             }
-                        }
-                        if (c == '"' && !afterBackslash) {
-                            break;
+                        } else if (ch == '"') {
+                            readCh();
+                            currentTokenValue = tb.toUnicodeString();
+                            return JsonToken.STRING_LITERAL;
                         } else {
-                            tokenBuilder.append(c);
-                            afterBackslash = c == '\\' && !afterBackslash;
+                            tb = tb.append(ch);
+                            readCh();
                         }
                     }
-                    currentTokenValue = tokenBuilder.toUnicodeString();
-                    return JsonToken.STRING_LITERAL;
                 }
                 case ':':
+                    readCh();
                     return JsonToken.COLON;
                 case ',':
+                    readCh();
                     return JsonToken.COMMA;
                 case '-':
                 case '+': // for liberal parsing
@@ -660,39 +679,35 @@ public class JsonParser {
                 case '7':
                 case '8':
                 case '9': {
-                    UnicodeBuilder tokenBuilder = new UnicodeBuilder(32);
-                    tokenBuilder.append(ch);
-                    if (position < input.length()) {   // We could be in ECMA mode when there is a single digit
-                        while (true) {
-                            int c = input.codePointAt(position);
-                            if ((c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E') {
-                                tokenBuilder.append(c);
-                                if (++position >= input.length()) {
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
+                    TwineBuilder tb = TwineBuilder.make(16);
+                    tb = tb.append(ch);
+                    readCh();
+                    while (ch != -1) {
+                        if ((ch >= '0' && ch <= '9') || ch == '-' || ch == '+' || ch == '.' || ch == 'e' || ch == 'E') {
+                            tb = tb.append(ch);
+                            readCh();
+                        } else {
+                            break;
                         }
                     }
-                    currentTokenValue = tokenBuilder.toUnicodeString();
+                    currentTokenValue = tb.toUnicodeString();
                     return JsonToken.NUMERIC_LITERAL;
                 }
                 default: {
                     // Allow unquoted strings in liberal mode
-                    UnicodeBuilder tokenBuilder = new UnicodeBuilder(32);
+                    TwineBuilder tb = TwineBuilder.make(32);
                     if (NameChecker.isNCNameChar(ch)) {
-                        tokenBuilder.append(ch);
-                        while (position < input.length()) {
-                            int c = input.codePointAt(position);
-                            if (NameChecker.isNCNameChar(c)) {
-                                tokenBuilder.append(c);
-                                position++;
+                        tb = tb.append(ch);
+                        readCh();
+                        while (ch != -1) {
+                            if (NameChecker.isNCNameChar(ch)) {
+                                tb = tb.append(ch);
+                                readCh();
                             } else {
                                 break;
                             }
                         }
-                        currentTokenValue = tokenBuilder.toUnicodeString();
+                        currentTokenValue = tb.toUnicodeString();
                         long len = currentTokenValue.length();
                         if (len == 4) {
                             if (currentTokenValue.equals(StringConstants.TRUE)) {
@@ -709,15 +724,25 @@ public class JsonParser {
                         return JsonToken.UNQUOTED_STRING;
 
                     } else {
-                        int c = input.codePointAt(--position);
-                        String s = UTF16CharacterSet.isSurrogate(c) ? "" : " '" + c + "'";
-                        invalidJSON("Unexpected character" + s + " (\\u" +
-                                            Integer.toHexString(c) + ") at position " + position, ERR_GRAMMAR, lineNumber);
+//                        int c = input.codePointAt(--position);
+//                        String s = UTF16CharacterSet.isSurrogate(c) ? "" : " '" + c + "'";
+                        invalidJSON("Unexpected character " + ch + " (\\u" +
+                                            Integer.toHexString(ch) + ")", ERR_GRAMMAR, lineNumber);
                         return JsonToken.EOF;
                     }
                 }
             }
         }
+    }
+
+    private static int expectHex(int ch, int lineNumber) throws XPathException {
+        if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')) {
+            return ch;
+        } else {
+            invalidJSON("Four hex digits required after \\u ", ERR_GRAMMAR, lineNumber);
+            return ch;
+        }
+
     }
 
 
@@ -765,11 +790,11 @@ public class JsonParser {
         }
     }
 
-    public Shape obtainShape(List<String> keys) {
+    public Shape obtainShape(List<UnicodeString> keyList) {
         if (shapePool == null) {
             shapePool = new HashMap<>();
         }
-        return null; //shapePool.computeIfAbsent(keys, Shape.of())
+        return shapePool.computeIfAbsent(keyList, keys -> new Shape(keyList.toArray(new UnicodeString[]{})));
     }
 
 

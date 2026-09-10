@@ -71,7 +71,7 @@ public class Whitespace {
             case PRESERVE:
                 return value;
             case REPLACE:
-                UnicodeBuilder sb = new UnicodeBuilder(value.length32());
+                TwineBuilder tb = TwineBuilder.make(value.length32());
                 IntIterator iter = value.codePoints();
                 while (iter.hasNext()) {
                     int c = iter.next();
@@ -79,14 +79,14 @@ public class Whitespace {
                         case '\n':
                         case '\r':
                         case '\t':
-                            sb.append(' ');
+                            tb = tb.append(' ');
                             break;
                         default:
-                            sb.append(c);
+                            tb = tb.append(c);
                             break;
                     }
                 }
-                return sb.toUnicodeString();
+                return tb.toUnicodeString();
             case COLLAPSE:
                 return collapseWhitespace(value);
             case TRIM:
@@ -239,7 +239,7 @@ public class Whitespace {
 
     /*@NotNull*/
     public static UnicodeString normalizeWhitespace(UnicodeString input) {
-        UnicodeBuilder sb = new UnicodeBuilder(input.length32());
+        TwineBuilder tb = TwineBuilder.make(input.length32());
         IntIterator iter = input.codePoints();
         while (iter.hasNext()) {
             int c = iter.next();
@@ -247,14 +247,14 @@ public class Whitespace {
                 case '\n':
                 case '\r':
                 case '\t':
-                    sb.append(' ');
+                    tb = tb.append(' ');
                     break;
                 default:
-                    sb.append(c);
+                    tb = tb.append(c);
                     break;
             }
         }
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     /**
@@ -272,7 +272,7 @@ public class Whitespace {
             return in;
         }
         final long len = trimmedEnd(in);
-        UnicodeBuilder sb = new UnicodeBuilder(in.length32());
+        TwineBuilder tb = TwineBuilder.make(in.length32());
         boolean inWhitespace = true;
         for (long i = 0; i < len; i++) {
             int c = in.codePointAt(i);
@@ -282,17 +282,17 @@ public class Whitespace {
                 case '\t':
                 case ' ':
                     if (!inWhitespace) {
-                        sb.append(0x20);
+                        tb = tb.append(0x20);
                         inWhitespace = true;
                     }
                     break;
                 default:
-                    sb.append(c);
+                    tb = tb.append(c);
                     inWhitespace = false;
                     break;
             }
         }
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     /**

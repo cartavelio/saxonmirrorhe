@@ -73,11 +73,11 @@ public class StringTool {
 
     /*@NotNull*/
     public static UnicodeString fromCodePoints(int[] codes, int used) {
-        UnicodeBuilder sb = new UnicodeBuilder();
+        TwineBuilder tb = TwineBuilder.make(codes.length);
         for (int i = 0; i < used; i++) {
-            sb.append(codes[i]);
+            tb = tb.append(codes[i]);
         }
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     /**
@@ -385,7 +385,7 @@ public class StringTool {
      *                  contains no surrogates
      * @param sourcePos the position in the source array where copying is to start
      * @param dest      the destination array
-     * @param destPos   the position in the destination array where copying is to start
+     * @param destPos   the codepoint position (not byte position) in the destination array where copying is to start
      * @param count     the number of characters (codepoints) to copy
      */
 
@@ -404,9 +404,9 @@ public class StringTool {
      * @return a hash code as a long. This is unrelated to the result of the normal int hashCode() method
      */
 
-    public static long longHashCode(UnicodeString string) {
+    public static long longHashCode(UnicodeString str) {
         long h = 0;
-        IntIterator iter = string.codePoints();
+        IntIterator iter = str.codePoints();
         while (iter.hasNext()) {
             int cp = iter.next();
             h = 31L * h + cp;

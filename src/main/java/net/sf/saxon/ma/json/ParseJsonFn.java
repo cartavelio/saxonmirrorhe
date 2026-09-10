@@ -19,6 +19,7 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntIterator;
 
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         if (options != null) {
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
         }
-        return parse(input, checkedOptions, context);
+        return parse(input.codePoints(), checkedOptions, context);
     }
 
     /**
@@ -75,7 +76,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @throws XPathException if the syntax of the input is incorrect
      */
 
-    public static Item parse(UnicodeString input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
+    public static Item parse(IntIterator input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         GroundedValue nullRepresentation = EmptySequence.getInstance();
         int flags = 0;

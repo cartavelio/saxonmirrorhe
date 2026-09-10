@@ -86,7 +86,7 @@ public class JSONResource implements Resource {
         options.put("liberal", BooleanValue.FALSE);
         options.put("duplicates", StringValue.bmp("use-first"));
         options.put("escape", BooleanValue.FALSE);
-        return item = ParseJsonFn.parse(jsonStr, options, context);
+        return item = ParseJsonFn.parse(jsonStr.codePoints(), options, context);
     }
 
     /**

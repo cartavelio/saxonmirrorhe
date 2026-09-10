@@ -15,6 +15,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.MappedAtomicIterator;
 import net.sf.saxon.tree.jiter.ReverseListIterable;
@@ -36,13 +37,15 @@ import java.util.*;
 
 public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
 
-    public static class LazyStringMapBuilder {
+    public static class Builder {
 
-        private final List<UnicodeString> keys = new ArrayList<>();
-        private final List<GroundedValue> values = new ArrayList<>();
+        private List<UnicodeString> keys = new ArrayList<>();
+        private List<GroundedValue> values = new ArrayList<>();
+        private final JsonParser parser;
         private final int flags;
-        public LazyStringMapBuilder(int flags) {
+        public Builder(JsonParser parser, int flags) {
             Instrumentation.count("LazyStringMapBuilder");
+            this.parser = parser;
             this.flags = flags;
         }
 
@@ -100,9 +103,9 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
                 List<GroundedValue> retainedValues = new ArrayList<>(keys.size());
 
                 Iterator<UnicodeString> keyIter =
-                        (reverseOrder ? new ReverseListIterable<>(keys) : keys).iterator();
+                        (reverseOrder ? reverse(keys) : keys).iterator();
                 Iterator<GroundedValue> valueIter =
-                        (reverseOrder ? new ReverseListIterable<>(values) : values).iterator();
+                        (reverseOrder ? reverse(values) : values).iterator();
                 Set<UnicodeString> keySet = new HashSet<>();
 
                 while (keyIter.hasNext() && valueIter.hasNext()) {
@@ -129,16 +132,28 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
                     Collections.reverse(retainedKeys);
                     Collections.reverse(retainedValues);
                 }
-                return new LazyStringMap(retainedKeys, retainedValues);
+                keys = retainedKeys;
+                values = retainedValues;
             }
+            if (keys.size() <= 20) {
+                Instrumentation.count("Shaped maps");
+                Shape shape = parser.obtainShape(keys);
+                return new ShapedMap(shape, values.toArray(values.toArray(new GroundedValue[0])));
+            }
+            Instrumentation.count("Lazy string maps");
             return new LazyStringMap(keys, values);
         }
 
 
     }
 
-    private final List<UnicodeString> keys;
-    private final List<GroundedValue> values;
+    @CSharpReplaceBody(code="return list.Reverse();")
+    private static <T> Iterable<T> reverse(List<T> list) {
+        return new ReverseListIterable<T>(list);
+    }
+
+    private final List<UnicodeString> keyList;
+    private final List<GroundedValue> valueList;
     private Map<UnicodeString, GroundedValue> baseMap; // constructed lazily on demand
 
 
@@ -149,8 +164,8 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      */
 
     public LazyStringMap(List<UnicodeString> keys, List<GroundedValue> values) {
-        this.keys = keys;
-        this.values = values;
+        this.keyList = keys;
+        this.valueList = values;
     }
 
     /**
@@ -160,9 +175,9 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
     private synchronized void prepare() {
         if (baseMap == null) {
             Instrumentation.count("Map indexed");
-            baseMap = new HashMap<>(keys.size());
-            for (int i = 0; i < keys.size(); i++) {
-                baseMap.put(keys.get(i), values.get(i));
+            baseMap = new HashMap<>(keyList.size());
+            for (int i = 0; i < keyList.size(); i++) {
+                baseMap.put(keyList.get(i), valueList.get(i));
             }
         }
     }
@@ -230,7 +245,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      */
     @Override
     public int size() {
-        return keys.size();
+        return keyList.size();
     }
 
     /**
@@ -240,7 +255,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      */
     @Override
     public boolean isEmpty() {
-        return keys.isEmpty();
+        return keyList.isEmpty();
     }
 
     /**
@@ -251,7 +266,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
     @Override
     public AtomicIterator keys() {
         Instrumentation.count("Map keys()");
-        return new MappedAtomicIterator<>(keys.iterator(), StringValue::new);
+        return new MappedAtomicIterator<>(keyList.iterator(), StringValue::new);
     }
 
     /**
@@ -262,7 +277,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
     @Override
     public Iterator<KeyValuePair> iterator() {
         Instrumentation.count("Map keyValuePairs()");
-        return new KeyValuePairIterator(keys, values);
+        return new KeyValuePairIterator(keyList, valueList);
     }
 
     /**
@@ -349,7 +364,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
         if (valueType.equals(SequenceType.ANY_SEQUENCE)) {
             return true;
         }
-        for (GroundedValue val : values) {
+        for (GroundedValue val : valueList) {
             if (!valueType.matches(val, th)) {
                 return false;
             }
@@ -369,7 +384,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
         ItemType valueType = null;
         int valueCard = 0;
         // we need to test the entries individually
-        for (GroundedValue val : values) {
+        for (GroundedValue val : valueList) {
             if (valueType == null) {
                 valueType = SequenceTool.getItemType(val, th);
                 valueCard = SequenceTool.getCardinality(val);
@@ -405,8 +420,8 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
         //System.err.println("Dictionary rewrite!!!!");
         Instrumentation.count("Map rewrite");
         MapBuilder target = HashTrieMap.getBuilder();
-        for (int i = 0; i < keys.size(); i++) {
-            target.put(new StringValue(keys.get(i)), values.get(i));
+        for (int i = 0; i < keyList.size(); i++) {
+            target.put(new StringValue(keyList.get(i)), valueList.get(i));
         }
         return (HashTrieMap)target.getCompletedMap();
     }
