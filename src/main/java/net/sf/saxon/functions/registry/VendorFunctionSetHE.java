@@ -33,8 +33,6 @@ import net.sf.saxon.value.*;
 
 import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -92,19 +90,10 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-//        RecordTest arrayRepresentation = new RecordTest(
-//                Collections.singletonList("value"),
-//                Collections.singletonList(SequenceType.ANY_SEQUENCE),
-//                Collections.emptyList(),
-//                false);
-//        register("array-as-sequence-of-maps", 1, ArrayAsSequenceOfMaps::new, arrayRepresentation, STAR, 0)
-//                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE,null);
+        RecordTest mapRepresentation = RecordTest.nonExtensible(
+                field("key", SequenceType.SINGLE_ATOMIC, false),
+                field("value", SequenceType.ANY_SEQUENCE, false));
 
-        @SuppressWarnings("RedundantArrayCreation") RecordTest mapRepresentation = new RecordTest(
-                Arrays.asList("key", "value"),
-                Arrays.asList(new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE}),
-                Collections.emptyList(),
-                false);
         register("map-as-sequence-of-maps", 1, e -> e.populate(MapAsSequenceOfMaps::new, mapRepresentation, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
 

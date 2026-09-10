@@ -451,6 +451,10 @@ public final class SequenceType {
         return new SequenceType(primaryType, cardinality);
     }
 
+    public static SequenceType one(ItemType itemType) {
+        return new SequenceType(itemType, StaticProperty.EXACTLY_ONE);
+    }
+
     /**
      * Get the "primary" part of this required type. E.g. for type element(*, xs:date) the "primary type" is element()
      *

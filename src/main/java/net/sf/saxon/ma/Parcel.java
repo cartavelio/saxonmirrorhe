@@ -14,28 +14,12 @@ import net.sf.saxon.str.Twine8;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * A Parcel is a way of wrapping an arbitrary sequence as a single item. It is implemented
  * as a single-entry map, the single key being the string "value", and the corresponding
  * value being the wrapped value.
  */
 public class Parcel extends SingleEntryMap {
-
-    /**
-     * Construct a list of length 1
-     * @param value the value to go in the list
-     * @param <T> the type of items in the list
-     * @return the singleton list
-     */
-    private static <T> List<T> singletonList(T value) {
-        List<T> result = new ArrayList<>(1);
-        result.add(value);
-        return result;
-    }
 
     /**
      * The key of the single entry, that is the string "value"
@@ -45,11 +29,8 @@ public class Parcel extends SingleEntryMap {
     /**
      * The type of the singleton map: a record type, effectively <code>record(value: item()*)</code>
      */
-    public static RecordTest TYPE = new RecordTest(
-            singletonList("value"),
-            singletonList(SequenceType.ANY_SEQUENCE),
-            Collections.emptyList(),
-            false);
+    public static RecordTest TYPE = RecordTest.nonExtensible(
+            new RecordTest.Field("value", SequenceType.ANY_SEQUENCE, false));
 
     /**
      * Create a parcel

@@ -48,6 +48,22 @@ public class RecordTest extends AnyFunctionType implements TupleType {
     private boolean extensible;
 
     /**
+     * Class representing one field definition within a record type definition,
+     * used only while constructing a record definition
+     */
+    public static class Field {
+        String name;
+        SequenceType type;
+        boolean optional;
+
+        public Field(String name, SequenceType type, boolean optional) {
+            this.name = name;
+            this.type = type;
+            this.optional = optional;
+        }
+    }
+
+    /**
      * Construct a dummy RecordTest, details to be supplied later
      */
 
@@ -64,6 +80,38 @@ public class RecordTest extends AnyFunctionType implements TupleType {
 
     public RecordTest(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
         setDetails(names, types, optionalFieldNames, extensible);
+    }
+
+    /**
+     * Make an extensible record type
+     * @param fields the fields of the record type
+     * @return the record type
+     */
+    public static RecordTest extensible(Field... fields) {
+        return makeRecordTest(true, fields);
+    }
+
+    /**
+     * Make a non-extensible record type
+     * @param fields the fields of the record type
+     * @return the record type
+     */
+    public static RecordTest nonExtensible(Field... fields) {
+        return makeRecordTest(false, fields);
+    }
+
+    private static RecordTest makeRecordTest(boolean extensible, Field... fields) {
+        List<String> fieldNames = new ArrayList<>(fields.length);
+        List<String> optionalFieldNames = new ArrayList<>(fields.length);
+        List<SequenceType> fieldTypes = new ArrayList<>(fields.length);
+        for (Field field : fields) {
+            fieldNames.add(field.name);
+            fieldTypes.add(field.type);
+            if (field.optional) {
+                optionalFieldNames.add(field.name);
+            }
+        }
+        return new RecordTest(fieldNames, fieldTypes, optionalFieldNames, extensible);
     }
 
     /**
@@ -317,7 +365,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
             if (isOptionalField(field.getKey())) {
                 sb.append('?');
             }
-            sb.append(": ");
+            sb.append(" as ");
             if (field.getValue().getPrimaryType() == this) {
                 sb.append("..").append(Cardinality.getOccurrenceIndicator(field.getValue().getCardinality()));
             } else {
@@ -492,7 +540,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                 SequenceType required = entry.getValue();
                 GroundedValue value = ((MapItem) item).get(new StringValue(key));
                 if (value == null) {
-                    if (!Cardinality.allowsZero(required.getCardinality())) {
+                    if (!Cardinality.allowsZero(required.getCardinality()) && !isOptionalField(key)) {
                         return Optional.of("Field " + key + " is absent; it must have a value");
                     }
                 } else {
