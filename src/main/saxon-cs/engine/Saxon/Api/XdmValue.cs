@@ -11,6 +11,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.value;
 using Saxon.Api.Support;
+using Saxon.Hej.expr;
 using Exception = System.Exception;
 
 namespace Saxon.Api {
@@ -20,6 +21,8 @@ namespace Saxon.Api {
     /// </summary>
     /// <remarks>
     /// <para>An <c>XdmValue</c> is immutable.</para>
+    /// <para>An <c>XdmValue</c> is indexed, so you can get the n'th item in the value (starting from zero) by
+    /// writing <c>value[n]</c>. Alternatively, use the method <c>value.ItemAt(n)</c>.
     /// <para>A sequence consisting of a single item <i>may</i> be represented
     /// as an instance of <see cref="XdmItem"/>, which is a subtype of <c>XdmValue</c>. However,
     /// there is no guarantee that all single-item sequences will be instances of
@@ -230,6 +233,21 @@ namespace Saxon.Api {
             return FromGroundedValue(gv);
         }
 
+        /// <summary>
+        /// Atomize a value (that is, replace nodes by their typed value)
+        /// </summary>
+        /// <returns>
+        /// The atomized value
+        /// </returns>
+        public XdmValue Atomize() {
+            List<Item> list = new List<Item>();
+            foreach (XdmItem item in this) {
+                foreach (AtomicValue val in Atomizer.atomize(item.Unwrap())) {
+                    list.Add(val);
+                }
+            }
+            return FromGroundedValue(SequenceExtent.makeSequenceExtent(list));
+        }
 
         /// <summary>
         /// Create an <c>XdmValue</c> from an underlying Saxon <c>Sequence</c> object.
@@ -242,7 +260,7 @@ namespace Saxon.Api {
         public static XdmValue Wrap(Sequence value) {
             switch (value) {
                 case null:
-                    return XdmEmptySequence.INSTANCE;
+                    return XdmEmptySequence.Instance;
                 case GroundedValue grounded:
                     return FromGroundedValue(grounded);
             }
@@ -256,7 +274,7 @@ namespace Saxon.Api {
             }
 
             if (gv.getLength() == 0) {
-                return XdmEmptySequence.INSTANCE;
+                return XdmEmptySequence.Instance;
             }
             if (gv.getLength() == 1) {
                 Item first = gv.head();
@@ -276,7 +294,7 @@ namespace Saxon.Api {
         static internal XdmValue FromGroundedValue(GroundedValue value) {
             switch (value.getLength()) {
                 case 0:
-                    return XdmEmptySequence.INSTANCE;
+                    return XdmEmptySequence.Instance;
                 case 1:
                     Item first = value.head();
                     switch (first.getGenre()) {
@@ -422,7 +440,7 @@ namespace Saxon.Api {
         }
 
         // Indexer declaration.
-        public XdmItem this[int index] => ItemAt(index);
+        //public XdmItem this[int index] => ItemAt(index);
 
         /// <summary>
         /// Get the i'th item in the value, counting from zero.
@@ -444,7 +462,18 @@ namespace Saxon.Api {
                 throw new Saxon.Api.SaxonApiException(e);
             }
         }
-
+        
+        /// <summary>
+        /// Get the i'th item in the value, counting from zero.
+        /// </summary>
+        /// <remarks>
+        /// Retained for compatibility; but <c>xdmValue.ItemAt(i)</c> can also be written <c>xdmValue[i]</c>
+        /// </remarks>
+        /// <param name="i">The item that is required, counting the first item in the sequence as item zero.</param>
+        /// <returns>The i'th item in the sequence making up the value, counting from zero.</returns>
+        
+        // Indexer declaration
+        public XdmItem this[int index] => ItemAt(index);
 
         /// <summary>
         /// Create a string representation of the value. The is the result of serializing
@@ -518,7 +547,7 @@ namespace Saxon.Api {
                             return this;
                         }
 
-                        return XdmEmptySequence.INSTANCE;
+                        return XdmEmptySequence.Instance;
 
                     case 1:
                         if (this is XdmItem) {

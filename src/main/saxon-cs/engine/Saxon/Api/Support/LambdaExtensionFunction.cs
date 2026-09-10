@@ -1,5 +1,6 @@
 using System;
 using Saxon.Ejava.util;
+using Saxon.Hej.type;
 using Saxon.Hej.value;
 
 
@@ -25,7 +26,7 @@ namespace Saxon.Api.Support {
         private readonly int arity;
         private readonly Func<XdmValue[], XdmValue> implementation;
         
-        public LambdaExtensionFunction(QName name, int arity, Func<XdmValue[], XdmValue> implementation) {
+        public LambdaExtensionFunction(QName name, SpecificFunctionType type, Func<XdmValue[], XdmValue> implementation) {
             this.name = name;
             this.arity = arity;
             this.implementation = implementation;

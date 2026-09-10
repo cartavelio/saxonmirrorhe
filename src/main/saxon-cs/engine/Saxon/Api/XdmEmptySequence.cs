@@ -19,7 +19,7 @@ namespace Saxon.Api {
 
         ///<summary>The singular instance of this class</summary>
 
-        public static XdmEmptySequence INSTANCE = new ();
+        public static XdmEmptySequence Instance = new ();
 
         private XdmEmptySequence() : base(EmptySequence.getInstance())
         { }

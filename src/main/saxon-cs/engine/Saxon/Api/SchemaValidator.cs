@@ -101,7 +101,7 @@ namespace Saxon.Api {
         /// and setting the <c>InvalidityListener</c> property to <c>ErrorList.Add</c>.</remarks> 
         
         public Consumer<ValidationFailure> InvalidityListener {
-            set => this.InvalidityHandler = new InvalidityDelegate(value);
+            set => InvalidityHandler = new InvalidityDelegate(value);
         }
 
         /// <summary>
@@ -120,6 +120,7 @@ namespace Saxon.Api {
         /// directory.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>Stream</c></param>
+        /// <param name="baseUri">Base URI of the source document</param>
         
         public void AddSource(Stream source) {
             AddSource(source, new Uri(Environment.CurrentDirectory));
@@ -141,6 +142,7 @@ namespace Saxon.Api {
         /// directory.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>TextReader</c></param>
+        /// <param name="baseUri">Base URI of the source document</param>
         
         public void AddSource(TextReader source) {
             AddSource(source, new Uri(Environment.CurrentDirectory));

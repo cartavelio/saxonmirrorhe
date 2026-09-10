@@ -17,7 +17,7 @@ namespace Saxon.Impl.Helpers {
     /// <remarks>
     /// <para>A <c>NamespaceDifferencer</c> should be inserted in the pipeline to prevent
     /// redundant namespace declarations being output.</para>
-    /// </remarks>
+    /// <remarks>
     /// 
     public class XmlWriterReceiver : Saxon.Hej.@event.TreeReceiver {
         private readonly XmlWriter writer;

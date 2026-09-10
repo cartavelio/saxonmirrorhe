@@ -21,8 +21,6 @@ namespace Saxon.Impl.Overrides {
         }
 
         protected internal override bool verify(string data, string signature) {
-            // string data = 
-            //     "Licensor=Saxonica\nLicensee=Michael Kay\nCompany=Saxonica\nEmail=mike@saxonica.com\nEdition=EE\nSAT=yes\nSAQ=yes\nSAV=yes\nIssued=2020-05-10\nSeries=V\nSerial=V008779\nUser=P0001\nEvaluation=no\nExpiration=never\nUpgradeDays=365\nMaintenanceDays=365\n";
             byte[] binaryData = Encoding.UTF8.GetBytes(data);
             // byte[] digest = new SHA1Managed().ComputeHash(binaryData);
             DSA dsa = DSA.Create();
@@ -54,25 +52,7 @@ namespace Saxon.Impl.Overrides {
             "5GtA/XYkqcsMyeg=\n" +
             "-----END PUBLIC KEY-----";
         
-        // public static void main(string[] args) {
-        //     string data = 
-        //         "Licensor=Saxonica\nLicensee=Michael Kay\nCompany=Saxonica\nEmail=mike@saxonica.com\nEdition=EE\nSAT=yes\nSAQ=yes\nSAV=yes\nIssued=2020-05-10\nSeries=V\nSerial=V008779\nUser=P0001\nEvaluation=no\nExpiration=never\nUpgradeDays=365\nMaintenanceDays=365\n";
-        //     byte[] binaryData = Encoding.UTF8.GetBytes(data);
-        //     // byte[] digest = new SHA1Managed().ComputeHash(binaryData);
-        //     DSA dsa = DSA.Create();
-        //     dsa.ImportFromPem(publicKeyPem.AsSpan());
-        //     // DSAParameters parameters = dsa.ExportParameters(false);
-        //     // BigInteger G = new BigInteger(parameters.G, true, true);
-        //     // BigInteger P = new BigInteger(parameters.P, true, true);
-        //     // BigInteger Q = new BigInteger(parameters.Q, true, true);
-        //     // BigInteger Y = new BigInteger(parameters.Y, true, true);
-        //     // Console.WriteLine(parameters);
-        //     
-        //     var decodedSig = decodeSignature(signatureHex);
-        //     bool valid = dsa.VerifyData(binaryData, decodedSig, HashAlgorithmName.SHA1);
-        //     Console.WriteLine("Valid? " + valid);
-        // }
-
+     
         // Take the signature as it appears in the license file, and convert it to the
         // form expected by the .NET verification API. We first convert from hex to binary.
         // then treat the binary as a sequence of two long integers encoded in ASN.1 DER

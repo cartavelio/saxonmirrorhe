@@ -1,42 +1,35 @@
-using System.Collections.Generic;
+using System.Linq;
+using SysCollGen = System.Collections.Generic;
 using Saxon.Hej.expr;
 using Saxon.Impl.Overrides;
 
 namespace Saxon.Api.Support {
-    public class ResourceCollectionUnwrapper : Saxon.Hej.lib.ResourceCollection {
+    internal class ResourceCollectionUnwrapper : Saxon.Hej.lib.ResourceCollection {
 
-        private readonly Saxon.Api.IResourceCollection resources;
+        private readonly SysCollGen.IEnumerable<IResource> resources;
+        private readonly string collectionUri;
 
-        private ResourceCollectionUnwrapper(Saxon.Api.IResourceCollection resources) {
+        public ResourceCollectionUnwrapper(string collectionUri, SysCollGen.IEnumerable<IResource> resources) {
             this.resources = resources;
-        }
-
-        public static Saxon.Hej.lib.ResourceCollection Unwrap(Saxon.Api.IResourceCollection resources) {
-            if (resources is ResourceCollectionWrapper) {
-                return ((ResourceCollectionWrapper) resources).Implementation;
-            }
-            else {
-                return new ResourceCollectionUnwrapper(resources);
-            }
+            this.collectionUri = collectionUri;
         }
 
         public string getCollectionURI() {
-            return resources.CollectionURI;
+            return collectionUri;
         }
 
-        public IEnumerator<string> getResourceURIs(XPathContext context) {
-            return resources.GetResourceURIs(new DynamicContext(context));
+        public SysCollGen.IEnumerator<string> getResourceURIs(XPathContext context) {
+            return resources.Select(resource => resource.ResourceUri.ToString()).GetEnumerator();
         }
 
-        public IEnumerator<Saxon.Hej.lib.Resource> getResources(XPathContext context) {
-            return new MappingEnumerator<IResource, Saxon.Hej.lib.Resource>(
-                resources.GetResources(new DynamicContext(context)),
-                r=> Saxon.Api.Support.ResourceUnwrapper.Unwrap(r));
+        public SysCollGen.IEnumerator<Hej.lib.Resource> getResources(XPathContext context) {
+            return resources.Select(ResourceUnwrapper.Unwrap).GetEnumerator();
         }
 
         public bool isStable(XPathContext context) {
-            return false;
+            return true; // optimistically...
         }
+        
         
     }
 }

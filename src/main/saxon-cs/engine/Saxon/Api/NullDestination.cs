@@ -22,8 +22,8 @@ namespace Saxon.Api {
 
         public Uri BaseUri
         {
-            get { return destination.getDestinationBaseURI(); }
-            set { destination.setDestinationBaseURI(value); }
+            get => destination.getDestinationBaseURI();
+            set => destination.setDestinationBaseURI(value);
         }
 
 

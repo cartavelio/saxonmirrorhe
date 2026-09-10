@@ -15,9 +15,11 @@ namespace Saxon.Api {
     /// <c>element()</c> or <c>text()</c>, or the generic function type <code>function()</code>.
     /// </summary>
     /// <remarks>
-    /// More specific node types (such as <c>element(E)</c> or <c>schema-element(E)</c>) cannot currently
-    /// be instantiated in this API.
+    /// <para>More specific node types (such as <c>element(E)</c> or <c>schema-element(E)</c>) cannot currently
+    /// be instantiated directly in this API.</para>
+    /// <para>An <c>XdmItemType</c> may however be constructed using the method <c>Processor.ParseItemType()</c></para>
     /// </remarks>
+
     public abstract class XdmItemType {
         protected readonly Saxon.Hej.type.ItemType underlyingType;
 
@@ -27,7 +29,8 @@ namespace Saxon.Api {
         
         // Construct an XdmItemType wrapping an ItemType. Because no Configuration is available,
         // not all types can be constructed precisely, so in some cases the result is an approximation.
-        // For a more accurate type, use the method that accepts the Configuration as a second argument.
+        // For a more accurate type, use the method that accepts the Configuration as a second argument,
+        // or use Processor.ParseItemType.
         internal static XdmItemType MakeXdmItemType(Saxon.Hej.type.ItemType type) {
             switch (type) {
                 case BuiltInAtomicType builtInAtomicType:

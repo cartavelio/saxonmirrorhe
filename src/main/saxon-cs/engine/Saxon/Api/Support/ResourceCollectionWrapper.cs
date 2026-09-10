@@ -1,28 +1,28 @@
+using System.Collections;
 using System.Collections.Generic;
+using Saxon.Hej.expr;
 
 namespace Saxon.Api.Support {
-    public class ResourceCollectionWrapper : IResourceCollection {
+    public class ResourceCollectionWrapper : IEnumerable<IResource> {
 
         private readonly Saxon.Hej.lib.ResourceCollection resources;
+        private readonly Saxon.Hej.expr.XPathContext context;
 
-        public ResourceCollectionWrapper(Saxon.Hej.lib.ResourceCollection resources) {
+        public ResourceCollectionWrapper(Saxon.Hej.lib.ResourceCollection resources, Saxon.Hej.expr.XPathContext context) {
             this.resources = resources;
+            this.context = context;
         }
 
-        public string CollectionURI => resources.getCollectionURI();
-        
-        public IEnumerator<string> GetResourceURIs(DynamicContext context) {
-            return resources.getResourceURIs(context.context);
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
         }
 
-        public IEnumerator<IResource> GetResources(DynamicContext context) {
-            IEnumerator<Saxon.Hej.lib.Resource> enumerator = resources.getResources(context.context);
-            while (enumerator.MoveNext()) {
-                yield return new ResourceWrapper(enumerator.Current);
+        public IEnumerator<IResource> GetEnumerator() {
+            var collection = resources.getResources(context);
+            while (collection.MoveNext()) {
+                yield return new ResourceWrapper(collection.Current);
             }
         }
-
-        public Saxon.Hej.lib.ResourceCollection Implementation => resources;
 
     }
 }

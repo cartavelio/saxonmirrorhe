@@ -10,8 +10,8 @@ namespace Saxon.Api {
     /// </remarks>
     public class XQueryModuleSource 
     {
-        public Uri BaseUri { get; set; }
+        public Uri BaseUri { get; init; }
         
-        public string Content { get; set; }
+        public string Content { get; init; }
     }
 }
