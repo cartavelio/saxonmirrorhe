@@ -153,7 +153,7 @@ namespace TestDriver {
          * Return a set of named parameters as a map
          *
          * @param xpath     The XPath compiler to use
-         * @param node      The node to search for <param> children
+         * @param node      The node to search for &lt;param> children
          * @param getStatic Whether to collect static or non-static sets
          * @param tunnel    Whether to collect tunnelled or non-tunnelled sets
          * @return Map of the evaluated parameters, keyed by QName
