@@ -733,7 +733,22 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
     public static class FilePathToNative extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            File file = toExistingFile(arguments[0].head().getStringValue());
+            final String path = arguments[0].head().getStringValue();
+            File file = null;
+            if (path.startsWith("file:/")) {
+                try {
+                    URI uri = new URI(path);
+                    file = new File(uri);
+                    if (!(file.exists())) {
+                        error(("No file exists at " + path), ERROR_PATH_NOT_EXIST);
+                    }
+                } catch (URISyntaxException err) {
+                    // no action
+                }
+            }
+            if (file == null) {
+                file = toExistingFile(path);
+            }
             try {
                 return new StringValue(file.getCanonicalPath());
             } catch (IOException e) {
@@ -755,7 +770,12 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             } else {
                 uri = toFile(filePath).toURI().normalize();
             }
-            return new AnyURIValue(uri.toString());
+            return new AnyURIValue(escapeCS(uri.toString()));
+        }
+
+        @CSharpReplaceBody(code="return System.Uri.EscapeUriString(s);")
+        private static String escapeCS(String s) {
+            return s;
         }
     }
 

@@ -36,6 +36,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.tiny.TinyAttributeImpl;
 import net.sf.saxon.tree.util.Orphan;
@@ -456,7 +457,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("string-to-utf8", 2, StringToUTF8.class, BuiltInAtomicType.INTEGER, STAR, 0)
+        register("string-to-utf8", 1, StringToUTF8.class, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
         register("system-id", 0, SystemId.class, BuiltInAtomicType.STRING, OPT, CITEM | LATE);
@@ -554,7 +555,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 Base64BinaryValue in = (Base64BinaryValue) arguments[0].head();
                 byte[] bytes = in.getBinaryValue();
                 String encoding = arguments[1].head().getStringValue();
-                return decodeString(context,bytes,encoding);
+                return decodeString(context, bytes, normalizeEncodingName(encoding));
             } catch (IOException e) {
                 throw new XPathException(e);
             }
@@ -695,14 +696,20 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 HexBinaryValue in = (HexBinaryValue) arguments[0].head();
                 byte[] bytes = in.getBinaryValue();
                 String encoding = arguments[1].head().getStringValue();
-                return decodeString(context, bytes, encoding);
+                return decodeString(context, bytes, normalizeEncodingName(encoding));
             } catch (IOException e) {
                 throw new XPathException(e);
             }
         }
     }
 
+    @CSharpReplaceBody(code="return encoding==\"UTF8\" ? \"utf-8\" : encoding;")
+    private static String normalizeEncodingName(String encoding) {
+        return encoding;
+    }
+
     private static StringValue decodeString(XPathContext context, byte[] bytes, String encoding) throws IOException, XPathException {
+        encoding = normalizeEncodingName(encoding);
         ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
         InputStreamReader reader = new InputStreamReader(stream, encoding);
         char[] array = new char[bytes.length];

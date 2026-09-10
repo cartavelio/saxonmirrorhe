@@ -4,6 +4,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
@@ -36,9 +38,14 @@ public class DecimalDivide extends SystemFunction {
             return EmptySequence.getInstance();
         }
         int scale = (int) ((IntegerValue)arguments[2].head()).longValue();
+        return divide(d1, d2, scale);
+
+    }
+
+    @CSharpReplaceBody(code="return new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Divide(d1.getDecimalValue(), d2.getDecimalValue(), scale < 18 ? 18 :scale, Singulink.Numerics.RoundingMode.ToZero)).round(scale);")
+    private NumericValue divide(NumericValue d1, NumericValue d2, int scale) throws ValidationException {
         return new BigDecimalValue(
                 d1.getDecimalValue().divide(d2.getDecimalValue(), scale, RoundingMode.DOWN));
-
     }
 
 
