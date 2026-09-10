@@ -8,7 +8,10 @@ import com.saxonica.xsltextn.instruct.DeepUpdate;
 import com.saxonica.xsltextn.instruct.DoInstr;
 import com.saxonica.xsltextn.instruct.While;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Component;
+import net.sf.saxon.expr.ComponentInvocation;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.MemoFunction;
 import net.sf.saxon.expr.instruct.UserFunction;
@@ -17,16 +20,13 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.hof.AtomicConstructorFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.PackageLoaderHE;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -50,17 +50,16 @@ public class PackageLoaderPE extends PackageLoaderHE {
 
     @Override
     protected void readSchemaNamespaces(NodeInfo packageElement) throws XPathException {
-        Configuration config = getConfiguration();
-        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("schema")))) {
-            String ns = varElement.getAttributeValue(NamespaceUri.NULL, "ns");
-            if (!config.isSchemaAvailable(NamespaceUri.of(ns)) && !ns.equals(NamespaceConstant.ANONYMOUS)) {
-                throw new XPathException(
-                        "The XSLT package requires access to " +
-                                (ns.isEmpty() ? "a no-namespace schema" : "a schema for namespace " + ns) +
-                                ", but this is not available in this Configuration", SaxonErrorCode.SXPK0003);
-            }
-            packStack.peek().getImportedSchemaNamespaces().add(NamespaceUri.of(ns));
-        }
+//        Configuration config = getConfiguration();
+//        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> n.getLocalPart().equals("schema")))) {
+//            String ns = varElement.getAttributeValue(NamespaceUri.NULL, "ns");
+//            if (!config.isSchemaAvailable(NamespaceUri.of(ns)) && !ns.equals(NamespaceConstant.ANONYMOUS)) {
+//                throw new XPathException(
+//                        "The XSLT package requires access to " +
+//                                (ns.isEmpty() ? "a no-namespace schema" : "a schema for namespace " + ns) +
+//                                ", but this is not available in this Configuration", SaxonErrorCode.SXPK0003);
+//            }
+//        }
     }
 
     @Override

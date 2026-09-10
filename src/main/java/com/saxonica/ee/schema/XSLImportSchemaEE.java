@@ -67,7 +67,6 @@ public class XSLImportSchemaEE extends XSLImportSchema {
             Schema preLoaded = getCompilation().getCompilerInfo().getPreLoadedSchema();
             if (preLoaded != null) {
                 if (preLoaded.includesTargetNamespace(targetNamespace)) {
-                    getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
                     return new CachedSchemaSource(preLoaded);
                 }
             }
@@ -105,7 +104,7 @@ public class XSLImportSchemaEE extends XSLImportSchema {
                 }
 
                 targetNamespace = NamespaceUri.of(namespace);
-                getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
+                //getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
             }
             if (inlineSchema != null) {
                 return inlineSchema.asActiveSource();
@@ -115,7 +114,7 @@ public class XSLImportSchemaEE extends XSLImportSchema {
                     namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
                 targetNamespace = NamespaceUri.of(namespace);
                 Schema xmlSchema = config.getSchemaForBuiltInNamespace(targetNamespace);
-                getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
+                //getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
                 return new CachedSchemaSource((PreparedSchema) xmlSchema);
             }
 

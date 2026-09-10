@@ -8,6 +8,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.BMPString;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -54,8 +55,29 @@ public class SchemaModelSerializer {
         this.cco = new ComplexContentOutputter(this.receiver);
     }
 
+    public SchemaModelSerializer(PreparedSchema schema, ExpressionPresenter presenter) {
+        this.schema = schema;
+        config = schema.getConfiguration();
+        config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
+        this.receiver = presenter.getReceiver();
+        this.cco = presenter.getComplexContentOutputter();
+    }
+
     public PreparedSchema getSchema() {
         return schema;
+    }
+
+    public void serializeAsDocument() throws XPathException {
+        cco.open();
+        cco.startDocument(ReceiverOption.NONE);
+        serialize();
+        if (receiver instanceof CheckSumFilter) {
+            int c = ((CheckSumFilter) receiver).getChecksum();
+            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
+                                      Loc.NONE, ReceiverOption.NONE);
+        }
+        cco.endDocument();
+        cco.close();
     }
 
     /**
@@ -65,8 +87,7 @@ public class SchemaModelSerializer {
      */
 
     public void serialize() throws XPathException {
-        cco.open();
-        cco.startDocument(ReceiverOption.NONE);
+
         startElement("schema");
         emitAttribute("generatedAt", DateTimeValue.getCurrentDateTime(null).getStringValue());
         emitAttribute("xsdVersion", config.getConfigurationProperty(Feature.XSD_VERSION));
@@ -112,13 +133,7 @@ public class SchemaModelSerializer {
         }
 
         endElement();
-        if (receiver instanceof CheckSumFilter) {
-            int c = ((CheckSumFilter) receiver).getChecksum();
-            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
-                                      Loc.NONE, ReceiverOption.NONE);
-        }
-        cco.endDocument();
-        cco.close();
+
 
     }
 
@@ -137,7 +152,7 @@ public class SchemaModelSerializer {
             cco.startContent();
             inStartTag = false;
         }
-        receiver.endElement();
+        cco.endElement();
     }
 
     public void emitNamespaceContext(NamespaceResolver resolver) {

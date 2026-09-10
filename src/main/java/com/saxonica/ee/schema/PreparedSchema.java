@@ -1526,7 +1526,7 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public void exportComponents(Receiver out) throws XPathException {
         SchemaModelSerializer serializer = new SchemaModelSerializer(this, out);
-        serializer.serialize();
+        serializer.serializeAsDocument();
     }
 
     /**
