@@ -834,7 +834,7 @@ task graal_eec_jar(
                      + 'build = "*"\n'
                      + 'archs = ["AMD64"]\n'
                      + 'skip = ["*-win32", "cp36*", "cp37*", "pp37*", "cp*musl*"]\n')
-    libpath = "${buildDir}\\\\${edition}c_pypi\\\\libs\\\\win\\\\"
+    libpath = "libs\\\\win\\\\"
   }
 
   task "setup_${edition}c_pypi"(
@@ -862,7 +862,7 @@ task graal_eec_jar(
                        ? "${pypiDir}/libs/darwin"
                        : (systemOs.isLinux()
                           ? "${pypiDir}/libs/nix"
-                          : "${pypiDir}/libs/win"))
+                          : "libs/win"))
 
     doLast {
       if (SAXONC_HOME == null) {
