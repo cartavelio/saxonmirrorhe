@@ -27,7 +27,7 @@ namespace Saxon.Api {
         /// returned URIs will be dereferenced by calling the <c>GetEntity</c> method.
         /// </returns>
 
-        /**public**/ Uri[] GetSchemaDocuments(String targetNamespace, Uri baseUri, String[] locationHints);
+        /**public**/ Uri[] GetSchemaDocuments(string targetNamespace, Uri baseUri, string[] locationHints);
 
         /// <summary>
         /// Dereference a URI returned by <c>GetSchemaDocuments</c> to retrieve a <c>Stream</c> containing
@@ -37,7 +37,7 @@ namespace Saxon.Api {
         /// <returns>Either a <c>Stream</c> or a <c>String</c> containing the schema text. 
         /// The supplied URI will be used as the base URI of the schema document.</returns>
 
-        /**public**/ Object GetEntity(Uri absoluteUri);
+        /**public**/ object GetEntity(Uri absoluteUri);
 
     }
 }

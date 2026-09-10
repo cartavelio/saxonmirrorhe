@@ -183,22 +183,21 @@ namespace Saxon.Api {
         /// <param name="uri">The required namespace URI: supply a zero-length string to indicate the null namespace</param>
         /// <param name="localName">The required local name</param>
         /// <returns>A predicate that returns true if and only if the supplied item is a node with the given namespace URI and local name.</returns>
-        public static Predicate<XdmNode> HasName(String uri, String localName) {
+        public static Predicate<XdmNode> HasName(string uri, string localName) {
             return item => {
                 QName name = item.NodeName;
-                return name.LocalName.Equals(localName) && name.Uri.Equals(uri);
+                return name != null && name.LocalName.Equals(localName) && name.Uri.Equals(uri);
             };
         }
 
 
-        internal static Predicate<XdmItem> ExpandedNamePredicate(String ns, String local) {
+        internal static Predicate<XdmItem> ExpandedNamePredicate(string ns, string local) {
             return item => {
-                if (!(item is XdmNode)) {
+                if (item is not XdmNode node) {
                     return false;
                 }
 
-                XdmNode node = (XdmNode) item;
-                return node.NodeKind == XmlNodeType.Element
+                return node.NodeKind == XdmNodeKind.Element
                        && node.NodeName.LocalName.Equals(local) && node.NodeName.Uri.Equals(ns);
             };
         }
@@ -208,10 +207,8 @@ namespace Saxon.Api {
                 return IsElement();
             }
 
-            return node => {
-                return node.NodeKind == XmlNodeType.Element
-                       && node.NodeName.LocalName.Equals(given);
-            };
+            return node => node.NodeKind == XdmNodeKind.Element
+                           && node.NodeName.LocalName.Equals(given);
         }
 
 
@@ -220,7 +217,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="localName">The required local name</param>
         /// <returns>A predicate that returns true if and only if the supplied item is a node with the given namespace URI and local name.</returns>
-        public static Predicate<XdmNode> HasLocalName(String localName) {
+        public static Predicate<XdmNode> HasLocalName(string localName) {
             return item => {
                 QName name = item.NodeName;
                 return name != null &&
@@ -359,7 +356,7 @@ namespace Saxon.Api {
 
 
         internal static Predicate<XdmItem> NodeKindPredicate(XmlNodeType kind) {
-            return node => node.IsNode() && ((XdmNode) node).NodeKind == kind;
+            return node => node.IsNode() && ((XdmNode) node).NodeType == kind;
         }
     }
 }

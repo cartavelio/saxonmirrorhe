@@ -8,7 +8,7 @@ namespace Saxon.Api {
     /// constructing an XML tree, and without serialization. It corresponds to the serialization
     /// option <code>build-tree="no"</code>.
     /// </summary>
-    public class RawDestination : XmlDestination {
+    public class RawDestination : IDestination {
         private readonly net.sf.saxon.s9api.RawDestination destination;
 
         /// <summary>Construct a <c>RawDestination</c></summary>

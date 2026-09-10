@@ -83,7 +83,7 @@ namespace Saxon.Api {
         /// <param name="node">The node whose node kind is required</param>
         /// <returns>The relevant node kind</returns>
         public static XdmNodeKind ForNode(XdmNode node) {
-            return ForNodeType(node.NodeKind);
+            return node.NodeKind;
         }
 
         /// <summary>

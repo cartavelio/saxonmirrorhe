@@ -17,7 +17,7 @@ namespace Saxon.Api {
     /// serialize arbitrary CLI objects.
     /// </remarks>
 
-    public class Serializer : XmlDestination
+    public class Serializer : IDestination
     {
 
         private readonly net.sf.saxon.s9api.Serializer jSerializer;
@@ -27,14 +27,15 @@ namespace Saxon.Api {
         private Processor processor = null;
         private Configuration config = null; // Beware: this will often be null
 
-        /// <summary>QName identifying the serialization parameter "method". If the method
+        /// <summary>QName identifying the serialization parameter "method". If the value
         /// is a user-defined method, then it is given as a QName in Clark notation, that is
         /// "{uri}local".</summary>
 
         public static readonly QName METHOD =
             new QName("", "method");
 
-        /// <summary>QName identifying the serialization parameter "byte-order-mark"</summary>
+        /// <summary>QName identifying the serialization parameter "byte-order-mark".
+        /// The value is the string "yes" or "no".</summary>
 
         public static readonly QName BYTE_ORDER_MARK =
             new QName("", "byte-order-mark");
@@ -123,8 +124,8 @@ namespace Saxon.Api {
             new QName("", "standalone");
 
         /// <summary>QName identifying the serialization parameter "suppress-indentation"
-        /// (introduced in XSLT/XQuery 3.0). Previously available as "saxon:suppress-indentation"
-        /// The value is the string "yes" or "no" or "omit".</summary>
+        /// (introduced in XSLT/XQuery 3.0). Previously available as "saxon:suppress-indentation".
+        /// The value is the string "yes" or "no".</summary>
 
         public static readonly QName SUPPRESS_INDENTATION =
             new QName("", "suppress-indentation");
@@ -267,10 +268,10 @@ namespace Saxon.Api {
         /// <remarks>In the case of XSLT, properties set within the serializer override
         /// any properties set in <c>xsl:output</c> declarations in the stylesheet.
         /// Similarly, with XQuery, they override any properties set in the Query
-        /// prolog using <c>declare option saxon:output</c>.</remarks>
+        /// prolog using <c>declare option output</c>.</remarks>
         /// <example>
         ///   <code>
-        ///     Serializer qout = new Serializer();
+        ///     Serializer qout = processor.NewSerializer();
         ///     qout.SetOutputProperty(Serializer.METHOD, "xml");
         ///     qout.SetOutputProperty(Serializer.INDENT, "yes");
         ///     qout.SetOutputProperty(Serializer.SAXON_INDENT_SPACES, "1");
@@ -280,7 +281,7 @@ namespace Saxon.Api {
         /// <param name="value">The value to be set for the serialization property. May be null
         /// to unset the property (that is, to set it back to the default value).</param>
 
-        public void SetOutputProperty(QName name, String value)
+        public void SetOutputProperty(QName name, string value)
         {
             props.setProperty(name.ClarkName, value);
             jSerializer.setOutputProperty(net.sf.saxon.s9api.Serializer.getProperty(name), value);
@@ -322,11 +323,11 @@ namespace Saxon.Api {
         /// form of a file name</summary>
         /// <param name="filename">The name of the file to receive the serialized output. This
         /// method sets the destination base URI to the URI corresponding to the name of the supplied file.</param>
-        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if it is not possible to 
+        /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if it is not possible to 
         /// create an output stream to write to this file, for example, if the filename is in a
         /// directory that does not exist.</exception>
 
-        public void SetOutputFile(String filename)
+        public void SetOutputFile(string filename)
         {
             try
             {
@@ -334,8 +335,7 @@ namespace Saxon.Api {
             }
             catch (java.io.IOException err)
             {
-                XPathException e = new XPathException(err);
-                throw new DynamicError(e);
+                throw new SaxonApiException(err);
             }
         }
 

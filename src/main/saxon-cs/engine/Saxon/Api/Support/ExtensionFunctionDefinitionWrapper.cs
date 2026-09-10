@@ -46,6 +46,11 @@ namespace Saxon.Api.Support {
         public ExtensionFunctionCallWrapper(Saxon.Api.ExtensionFunctionCall apiCall) {
             this.apiCall = apiCall;
         }
+
+        public override void supplyStaticContext(net.sf.saxon.expr.StaticContext context, int locationId, Expression[] arguments) {
+            apiCall.SupplyStaticContext(new Saxon.Api.StaticContext(context));
+        }
+
         public override Sequence call(XPathContext context, Sequence[] arguments) {
             DynamicContext dc = new DynamicContext(context);
             IEnumerator<XdmItem>[] args = new IEnumerator<XdmItem>[arguments.Length];

@@ -5,6 +5,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.XPath;
 using net.sf.saxon.str;
+using Saxon.Api;
 
 namespace System.Impl.Helpers {
     public class DotNetPullProvider : net.sf.saxon.pull.PullProvider, net.sf.saxon.s9api.Location {
@@ -16,6 +17,7 @@ namespace System.Impl.Helpers {
         private bool expandDefaults = true;
         private readonly SysCollGen.Stack<net.sf.saxon.om.NamespaceMap> namespaceStack = new SysCollGen.Stack<net.sf.saxon.om.NamespaceMap>();
         public bool AcceptFragment { get; set; }
+        public WhitespacePolicy WhitespacePolicy = WhitespacePolicy.PreserveAll;
         public DotNetPullProvider(XmlReader parser)  {
             this.parser = parser;
             namespaceStack.Push(net.sf.saxon.om.NamespaceMap.emptyMap());
@@ -200,11 +202,21 @@ namespace System.Impl.Helpers {
               case XmlNodeType.ProcessingInstruction:
                 return net.sf.saxon.pull.PullEvent.PROCESSING_INSTRUCTION;
               case XmlNodeType.SignificantWhitespace:
-                return net.sf.saxon.pull.PullEvent.TEXT;
+                  if (WhitespacePolicy != WhitespacePolicy.StripAll) {
+                      return net.sf.saxon.pull.PullEvent.TEXT;
+                  }
+                  else {
+                      return null;
+                  }
               case XmlNodeType.Text:
                 return net.sf.saxon.pull.PullEvent.TEXT;
               case XmlNodeType.Whitespace:
-                return net.sf.saxon.pull.PullEvent.TEXT;
+                  if (WhitespacePolicy == WhitespacePolicy.PreserveAll) {
+                      return net.sf.saxon.pull.PullEvent.TEXT;
+                  }
+                  else {
+                      return null;
+                  }
               case XmlNodeType.EntityReference:
                   Console.WriteLine("Found entity reference " + parser.Name);
                   

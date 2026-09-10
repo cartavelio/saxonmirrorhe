@@ -17,6 +17,9 @@ namespace javax.xml.transform.stream {
         }
 
         public StreamResult(java.io.File file) {
+            if (file.getParent() is null or "") {
+                throw new java.io.IOException("Cannot create output file " + file + ": parent directory not known");
+            }
             java.io.File dir = new java.io.File(file.getParent());
             if (dir.isFile()) {
                 throw new java.io.IOException("Cannot create output file: parent " + dir +

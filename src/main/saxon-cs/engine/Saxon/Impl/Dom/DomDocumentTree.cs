@@ -8,8 +8,8 @@ namespace Saxon.Impl.Dom {
      * Wraps a .NET DOM tree. This is derived from the Java code in the Saxon .NET product,
      * but for Saxon-CS is maintained as native C# code.
      */
-    public class DomDocumentWrapper : net.sf.saxon.om.GenericTreeInfo {
-        public DomDocumentWrapper(XmlDocument doc, string baseURI, net.sf.saxon.Configuration config) : base (config) {
+    public class DomDocumentTree : net.sf.saxon.om.GenericTreeInfo {
+        public DomDocumentTree(XmlDocument doc, string baseURI, net.sf.saxon.Configuration config) : base (config) {
             setRootNode(wrap(doc));
             setSystemId(baseURI);
         }

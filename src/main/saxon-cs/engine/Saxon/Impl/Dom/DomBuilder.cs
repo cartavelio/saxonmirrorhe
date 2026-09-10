@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using net.sf.saxon.value;
 
 namespace Saxon.Impl.Dom {
     public class DomBuilder : net.sf.saxon.@event.Receiver {
@@ -53,7 +54,7 @@ namespace Saxon.Impl.Dom {
                     string nsprefix = ns.getPrefix();
                     string nsuri = ns.getURI();
                     if (!(nsuri.Equals(net.sf.saxon.lib.NamespaceConstant.XML))) {
-                        if ((prefix.Length==0)) {
+                        if ((nsprefix.Length==0)) {
                             element.SetAttribute("xmlns", uri);
                         } else {
                             XmlAttribute decl = _document.CreateAttribute("xmlns", nsprefix, "http://www.w3.org/2000/xmlns/");
@@ -81,6 +82,9 @@ namespace Saxon.Impl.Dom {
                 XmlText text = _document.CreateTextNode(chars.ToString());
                 _currentNode.AppendChild(text);
             } catch (System.Exception err) {
+                if (Whitespace.isAllWhite(chars) && _currentNode == _document) {
+                    return; // No error when adding top-level whitespace text; just ignore it
+                }
                 throw new net.sf.saxon.trans.XPathException(err);
             }
         }

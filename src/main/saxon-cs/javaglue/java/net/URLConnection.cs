@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace java.net {
     public class URLConnection {
@@ -36,8 +37,22 @@ namespace java.net {
             throw new NotImplementedException();
         }
 
-        public static string guessContentTypeFromName(string uri) {
-            return "application/xml";
+        public static string guessContentTypeFromName(string uriStr) {
+            Uri uri = new Uri(uriStr, UriKind.RelativeOrAbsolute);
+            string path = uri.PathAndQuery;
+            int qMark = path.IndexOf('?');
+            if (qMark >= 0) {
+                path = path.Substring(0, qMark);
+            }
+
+            // code from https://dotnetcoretutorials.com/2018/08/14/getting-a-mime-type-from-a-file-name-in-net-core/
+            var provider = new FileExtensionContentTypeProvider();
+            string contentType;
+            if(!provider.TryGetContentType(path, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
         }
 
         public static string guessContentTypeFromStream(System.IO.Stream stream) {

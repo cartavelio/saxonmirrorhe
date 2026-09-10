@@ -32,7 +32,7 @@ namespace Saxon.Callbacks {
             lock (this) {
                 try {
                     Saxon.Api.XdmNode node = message.Content;
-                    System.Diagnostics.Debug.Assert((node.NodeKind == XmlNodeType.Document));
+                    System.Diagnostics.Debug.Assert((node.NodeKind == XdmNodeKind.Document));
                     if ((writer == null)) {
                         System.IO.TextWriter w = config.getLogger().asWriter();
                         writer = new net.sf.saxon.str.UnicodeWriterToWriter(w);

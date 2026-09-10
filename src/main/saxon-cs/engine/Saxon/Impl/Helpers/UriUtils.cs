@@ -13,11 +13,12 @@ namespace Saxon.Impl.Helpers {
         public static string GetQuery(System.Uri uri) {
             string q = uri.Query;
             if (q.StartsWith("?")) {
-                return q.Substring(1);
-            } else if (q == "") {
+                q = q.Substring(1);
+            }
+            if (q == "") {
                 return null;
             } else {
-                return q;
+                return System.Uri.UnescapeDataString(q);
             }
         }
 

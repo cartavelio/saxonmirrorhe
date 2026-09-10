@@ -8,7 +8,7 @@ namespace Saxon.Api {
     /// </remarks>
 
 
-    public interface XmlDestination
+    public interface IDestination
     {
 
         /// <summary>

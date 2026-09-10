@@ -30,7 +30,7 @@ namespace Saxon.Impl.Helpers {
 
             throw new NotSupportedException("Unsupported number radix " + radix);
         }
-        
+
 
         public static double roundDouble(double value, int scale) {
             if (System.Double.IsNaN(value) || System.Double.IsInfinity(value) || value == 0.0) {
