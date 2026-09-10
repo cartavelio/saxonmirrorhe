@@ -498,7 +498,7 @@ public class FormatDate extends SystemFunction implements Callable {
             min = range[0];
             //max = Integer.MAX_VALUE;
 
-            String roman = numberer.format(value, primary, null, letterValue, ordinal);
+            String roman = numberer.format(value, primary, null, letterValue, "", ordinal);
             UnicodeBuilder s = new UnicodeBuilder(32);
             s.append(roman);
             int len = StringTool.getStringLength(roman);
@@ -625,7 +625,7 @@ public class FormatDate extends SystemFunction implements Callable {
         }
         UnicodeString adjustedPicture = picGroupFormat.getAdjustedPicture();
 
-        String formattedStr = numberer.format(value, adjustedPicture, picGroupFormat, letterValue, ordinal);
+        String formattedStr = numberer.format(value, adjustedPicture, picGroupFormat, letterValue, "", ordinal);
         int formattedLen = StringTool.getStringLength(formattedStr);
         int digitZero;
         if (formattedLen < min) {

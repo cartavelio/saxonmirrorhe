@@ -1965,9 +1965,13 @@ public class Configuration implements SourceResolver, NotationSet {
      * This method is provided primarily for internal use.
      *
      * @param language the language for which a Numberer is required. May be null,
-     *                 indicating default language
+     *                 indicating default language. The language may include variants
+     *                 such as "en-GB" for British English or "fr-CA" for
+     *                 Canadian French.
      * @param country  the country for which a Numberer is required. May be null,
-     *                 indicating default country
+     *                 indicating default country. This is the country of a date/time
+     *                 to be formatted, and does not contribute to selection
+     *                 of a locale.
      * @return a suitable numberer. If no specific numberer is available
      * for the language, the default numberer (normally English) is used.
      */

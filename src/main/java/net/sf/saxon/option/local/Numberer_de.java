@@ -38,39 +38,39 @@ public class Numberer_de extends AbstractNumberer {
      */
 
     @Override
-    public String toWords(long number) {
+    public String toWords(String cardinal, long number) {
         if (number >= 1000000000000000L) {
-            return format(number, BMPString.of("1.000.000"), 3, ".", "", "");
+            return format(number, BMPString.of("1.000.000"), 3, ".", "", "", "");
         }
         if (number >= 1000000000000L) {
             long rem = number % 1000000000000L;
             long n = number / 1000000000000L;
-            String s = (n == 1 ? "Eine" : toWords(n));
+            String s = (n == 1 ? "Eine" : toWords(cardinal, n));
             return s + " Billion" +
-                    (rem == 0 ? "" : ' ' + toWords(rem));
+                    (rem == 0 ? "" : ' ' + toWords(cardinal, rem));
         } else if (number >= 1000000000) {
             long rem = number % 1000000000;
             long n = number / 1000000000;
-            String s = (n == 1 ? "Eine" : toWords(n));
+            String s = (n == 1 ? "Eine" : toWords(cardinal, n));
             return s + " Milliarde" +
-                    (rem == 0 ? "" : ' ' + toWords(rem));
+                    (rem == 0 ? "" : ' ' + toWords(cardinal, rem));
         } else if (number >= 1000000) {
             long rem = number % 1000000;
             long n = number / 1000000;
-            String s = (n == 1 ? "Eine" : toWords(n));
+            String s = (n == 1 ? "Eine" : toWords(cardinal, n));
             return s + " Million" +
                     (n == 1 ? "" : "en") +
-                    (rem == 0 ? "" : toWords(rem));
+                    (rem == 0 ? "" : toWords(cardinal, rem));
         } else if (number >= 1000) {
             long rem = number % 1000;
             long n = number / 1000;
-            String s = (n == 1 ? "Ein" : toWords(n));
-            return s + "tausend" + (rem == 0 ? "" : toWords(rem, LOWER_CASE));
+            String s = (n == 1 ? "Ein" : toWords(cardinal, n));
+            return s + "tausend" + (rem == 0 ? "" : toWords(cardinal, rem, LOWER_CASE));
         } else if (number >= 100) {
             long rem = number % 100;
             long n = number / 100;
-            String s = (n == 1 ? "Ein" : toWords(n));
-            return s + "hundert" + (rem == 0 ? "" : toWords(rem, LOWER_CASE));
+            String s = (n == 1 ? "Ein" : toWords(cardinal, n));
+            return s + "hundert" + (rem == 0 ? "" : toWords(cardinal, rem, LOWER_CASE));
         } else {
             if (number < 20) return number == 0 ? "Null" : (number == 1 ? "Eins" : germanUnits[(int) number]);
             int rem = (int) (number % 10);
@@ -121,7 +121,7 @@ public class Numberer_de extends AbstractNumberer {
                 return ord;
             }
         } else if (mod100 < 20 && mod100 > 0) {
-            return toWords(number - (mod100), wordCase) +
+            return toWords("", number - (mod100), wordCase) +
                     toOrdinalWords(ordinalParam, mod100,
                                    (wordCase == TITLE_CASE ? LOWER_CASE : wordCase));
         } else {
@@ -129,13 +129,13 @@ public class Numberer_de extends AbstractNumberer {
             if (wordCase == UPPER_CASE) {
                 ending = ending.toUpperCase();
             }
-            return toWords(number, wordCase) +
+            return toWords("", number, wordCase) +
                     (wordCase == UPPER_CASE ? ending.toUpperCase() : ending);
         }
     }
 
     private static final String[] germanOrdinalUnits = {
-            "", "Erst", "Zweit", "Dritt", "Viert", "F\u00fcnft", "Sechst", "Siebt", "Acht", "Neunt",
+            "Nullt", "Erst", "Zweit", "Dritt", "Viert", "F\u00fcnft", "Sechst", "Siebt", "Acht", "Neunt",
             "Zehnt", "Elft", "Zw\u00f6lft", "Dreizehnt", "Vierzehnt", "F\u00fcnfzehnt", "Sechszehnt",
             "Siebzehnt", "Achtzehnt", "Neunzehnt"};
 

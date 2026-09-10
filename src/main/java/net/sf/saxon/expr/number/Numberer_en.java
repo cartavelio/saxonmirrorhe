@@ -100,28 +100,29 @@ public class Numberer_en extends AbstractNumberer {
      * Show the number as words in title case. (We choose title case because
      * the result can then be converted algorithmically to lower case or upper case).
      *
-     * @param number the number to be formatted
+     * @param cardinal
+     * @param number   the number to be formatted
      * @return the number formatted as English words
      */
 
     @Override
-    public String toWords(long number) {
+    public String toWords(String cardinal, long number) {
         if (number >= 1000000000) {
             long rem = number % 1000000000;
-            return toWords(number / 1000000000) + " Billion" +
-                    (rem == 0 ? "" : (rem < 100 ? " and " : " ") + toWords(rem));
+            return toWords(cardinal, number / 1000000000) + " Billion" +
+                    (rem == 0 ? "" : (rem < 100 ? " and " : " ") + toWords(cardinal, rem));
         } else if (number >= 1000000) {
             long rem = number % 1000000;
-            return toWords(number / 1000000) + " Million" +
-                    (rem == 0 ? "" : (rem < 100 ? " and " : " ") + toWords(rem));
+            return toWords(cardinal, number / 1000000) + " Million" +
+                    (rem == 0 ? "" : (rem < 100 ? " and " : " ") + toWords(cardinal, rem));
         } else if (number >= 1000) {
             long rem = number % 1000;
-            return toWords(number / 1000) + " Thousand" +
-                    (rem == 0 ? "" : (rem < 100 ? " and " : " ") + toWords(rem));
+            return toWords(cardinal, number / 1000) + " Thousand" +
+                    (rem == 0 ? "" : (rem < 100 ? " and " : " ") + toWords(cardinal, rem));
         } else if (number >= 100) {
             long rem = number % 100;
-            return toWords(number / 100) + " Hundred" +
-                    (rem == 0 ? "" : " and " + toWords(rem));
+            return toWords(cardinal, number / 100) + " Hundred" +
+                    (rem == 0 ? "" : " and " + toWords(cardinal, rem));
         } else {
             if (number < 20) {
                 return englishUnits[(int) number];
@@ -147,22 +148,22 @@ public class Numberer_en extends AbstractNumberer {
         String s;
         if (number >= 1000000000) {
             long rem = number % 1000000000;
-            s = toWords(number / 1000000000) + " Billion" +
+            s = toWords(ordinalParam, number / 1000000000) + " Billion" +
                     (rem == 0 ? "th" : (rem < 100 ? " and " : " ") +
                             toOrdinalWords(ordinalParam, rem, wordCase));
         } else if (number >= 1000000) {
             long rem = number % 1000000;
-            s = toWords(number / 1000000) + " Million" +
+            s = toWords(ordinalParam, number / 1000000) + " Million" +
                     (rem == 0 ? "th" : (rem < 100 ? " and " : " ") +
                             toOrdinalWords(ordinalParam, rem, wordCase));
         } else if (number >= 1000) {
             long rem = number % 1000;
-            s = toWords(number / 1000) + " Thousand" +
+            s = toWords(ordinalParam, number / 1000) + " Thousand" +
                     (rem == 0 ? "th" : (rem < 100 ? " and " : " ") +
                             toOrdinalWords(ordinalParam, rem, wordCase));
         } else if (number >= 100) {
             long rem = number % 100;
-            s = toWords(number / 100) + " Hundred" +
+            s = toWords(ordinalParam, number / 100) + " Hundred" +
                     (rem == 0 ? "th" : " and " +
                             toOrdinalWords(ordinalParam, rem, wordCase));
         } else {

@@ -28,11 +28,12 @@ public class Numberer_he extends Numberer_en {
      * @param numGroupFormatter object contains separators to appear between groups of digits
      * @param letterValue       The letter-value specified to xsl:number: "alphabetic" or
      *                          "traditional". Can also be an empty string or null.
+     * @param cardinal
      * @param ordinal           The value of the ordinal attribute specified to xsl:number
      *                          The value "yes" indicates that ordinal numbers should be used; "" or null indicates
      *                          that cardinal numbers
      * @return the formatted number. Note that no errors are reported; if the request
-     *         is invalid, the number is formatted as if the string() function were used.
+     * is invalid, the number is formatted as if the string() function were used.
      */
 
     @Override
@@ -40,14 +41,14 @@ public class Numberer_he extends Numberer_en {
                          UnicodeString picture,
                          NumericGroupFormatter numGroupFormatter,
                          String letterValue,
-                         String ordinal) {
+                         String cardinal, String ordinal) {
 
         StringBuilder sb = new StringBuilder(16);
         int formchar = picture.codePointAt(0);
 
         /* only catch traditional formatting. */
         if (!"traditional".equals(letterValue)) {
-            return super.format(number, picture, numGroupFormatter, letterValue, ordinal);
+            return super.format(number, picture, numGroupFormatter, letterValue, cardinal, ordinal);
         }
 
         switch (formchar) {
@@ -58,7 +59,7 @@ public class Numberer_he extends Numberer_en {
                 sb.append(toTraditionalSequence(number, numGroupFormatter.getSeparator()));
                 break;
             default:
-                return super.format(number, picture, numGroupFormatter, letterValue, ordinal);
+                return super.format(number, picture, numGroupFormatter, letterValue, cardinal, ordinal);
         }
 
         return sb.toString();

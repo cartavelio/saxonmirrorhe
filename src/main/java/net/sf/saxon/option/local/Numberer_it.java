@@ -55,12 +55,12 @@ public class Numberer_it extends AbstractNumberer {
         if (number >= 1000000000) {
             long rem = number % 1000000000;
             long num = number / 1000000000;
-            s = (num == 1 ? "un" : toWords(num)) +
+            s = (num == 1 ? "un" : toWords("", num)) +
                     (rem == 0 ? " miliardesimo" : (num == 1 ? " miliardo " : " miliardi ") + toOrdinalWords(ordinalParam, rem, wordCase));
         } else if (number >= 1000000) {
             long rem = number % 1000000;
             long num = number / 1000000;
-            s = (num == 1 ? "un" : toWords(num)) +
+            s = (num == 1 ? "un" : toWords("", num)) +
                     (rem == 0 ? " milionesimo" : (num == 1 ? " milione " : " milioni ") + toOrdinalWords(ordinalParam, rem, wordCase));
         } else if (number >= 1000) {
             if (number == 100000) {
@@ -70,7 +70,7 @@ public class Numberer_it extends AbstractNumberer {
             } else {
                 long rem = number % 1000;
                 long num = number / 1000;
-                s = (num == 1 ? "" : toWords(num)) +
+                s = (num == 1 ? "" : toWords("", num)) +
                         (rem == 0 ? "millesimo" : (num == 1 ? "mille" : "mila") + toOrdinalWords(ordinalParam, rem, wordCase));
             }
         } else if (number >= 100) {
@@ -80,9 +80,9 @@ public class Numberer_it extends AbstractNumberer {
                 s = "centesimo";
             } else {
                 if (rem == 0 && num != 1) {
-                    s = toWords(num) + "centesimo";
+                    s = toWords("", num) + "centesimo";
                 } else {
-                    s = (num == 1 ? "" : toWords(num)) + "cento" + toOrdinalWords(ordinalParam, rem, wordCase);
+                    s = (num == 1 ? "" : toWords("", num)) + "cento" + toOrdinalWords(ordinalParam, rem, wordCase);
                 }
             }
         } else {
@@ -118,24 +118,24 @@ public class Numberer_it extends AbstractNumberer {
     }
 
     @Override
-    public String toWords(long number) {
+    public String toWords(String cardinal, long number) {
         if (number >= 1000000000) {
             long rem = number % 1000000000;
             long num = number / 1000000000;
-            return (num == 1 ? "un miliardo" : toWords(num) + " miliardi") +
-                    (rem == 0 ? "" : " ") + toWords(rem);
+            return (num == 1 ? "un miliardo" : toWords(cardinal, num) + " miliardi") +
+                    (rem == 0 ? "" : " ") + toWords(cardinal, rem);
         } else if (number >= 1000000) {
             long rem = number % 1000000;
             long num = number / 1000000;
-            return (num == 1 ? "un milione" : toWords(num) + " milioni") +
-                    (rem == 0 ? "" : " ") + toWords(rem);
+            return (num == 1 ? "un milione" : toWords(cardinal, num) + " milioni") +
+                    (rem == 0 ? "" : " ") + toWords(cardinal, rem);
         } else if (number >= 1000) {
             long rem = number % 1000;
             long num = number / 1000;
-            return (num == 1 ? "mille" : toWords(num) + "mila") + toWords(rem);
+            return (num == 1 ? "mille" : toWords(cardinal, num) + "mila") + toWords(cardinal, rem);
         } else if (number >= 100) {
             long rem = number % 100;
-            return (number / 100 == 1 ? "" : toWords(number / 100)) + "cento" + toWords(rem);
+            return (number / 100 == 1 ? "" : toWords(cardinal, number / 100)) + "cento" + toWords(cardinal, rem);
         } else {
             if (number < 20) {
                 return italianUnits[(int) number];
@@ -157,12 +157,12 @@ public class Numberer_it extends AbstractNumberer {
     }
 
     @Override
-    public String toWords(long number, int wordCase) {
+    public String toWords(String cardinal, long number, int wordCase) {
         String s;
         if (number == 0) {
             s = "zero";
         } else {
-            s = toWords(number);
+            s = toWords(cardinal, number);
         }
         if (wordCase == UPPER_CASE) {
             return s.toUpperCase();
