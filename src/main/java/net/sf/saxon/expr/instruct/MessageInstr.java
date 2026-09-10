@@ -352,7 +352,11 @@ public class MessageInstr extends Instruction {
                 builder.close();
                 NodeInfo content = builder.getCurrentRoot();
                 Message message = expr.makeMessage(abort, errorCode, content);
-                controller.getMessageHandler().accept(message);
+                try {
+                    controller.getMessageHandler().accept(message);
+                } catch (Exception e) {
+                    // Ignore exceptions from the message handler - see bug 6464
+                }
                 // Allow the message handler to indicate that the message is to be treated as fatal
                 String reason = "";
                 if (!abort && message.isTerminate()) {
