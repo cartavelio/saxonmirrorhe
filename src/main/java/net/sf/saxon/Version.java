@@ -17,7 +17,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 
 public final class Version {
 
-    private static final int MAJOR_VERSION = 12;
+    private static final int MAJOR_VERSION = 13;
     private static final int MINOR_VERSION = 0;
     private static final int BUILD = 11208; //mmddhh  BEWARE: a leading 0 means octal.
     private static final String MAJOR_RELEASE_DATE = "2023-01-12";
