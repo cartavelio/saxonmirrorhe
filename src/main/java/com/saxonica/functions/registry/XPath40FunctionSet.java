@@ -4,6 +4,7 @@ import com.saxonica.functions.qt4.*;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FilterFn;
+import net.sf.saxon.functions.hof.ForEachFn;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
@@ -37,6 +38,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
     private void init() {
 
         importFunctionSet(XPath31FunctionSet.getInstance());
+
+        SpecificFunctionType forEachArg = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
         SpecificFunctionType predicate = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
@@ -186,6 +191,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
+
+        register("for-each", 2, e -> e.populate(ForEachFn::new, AnyItemType.getInstance(),
+                                                STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+                .arg(1, forEachArg, ONE, null));
 
         register("filter", 2, e -> e.populate(FilterFn::new, AnyItemType.getInstance(),
                                               STAR, AS_ARG0 | LATE)

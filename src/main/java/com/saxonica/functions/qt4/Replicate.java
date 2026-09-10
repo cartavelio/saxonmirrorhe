@@ -46,7 +46,7 @@ public class Replicate extends SystemFunction {
         }
     }
 
-    private static class RepeatingIterator extends AbstractBlockIterator {
+    public static class RepeatingIterator extends AbstractBlockIterator {
 
         private final GroundedValue baseValue;
 
