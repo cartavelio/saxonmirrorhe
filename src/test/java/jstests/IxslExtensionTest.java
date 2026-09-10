@@ -31,7 +31,7 @@ public class IxslExtensionTest {
             ProfessionalConfiguration config = (ProfessionalConfiguration)p.getUnderlyingConfiguration();
             FunctionLibrary lib = IXSLFunctionSet.getInstance();
             XPathCompiler comp = p.newXPathCompiler();
-            FunctionLibraryList list = config.getBuiltInExtensionLibraryList();
+            FunctionLibraryList list = config.getBuiltInExtensionLibraryList(31);
             list.addFunctionLibrary(lib);
             comp.declareNamespace("ixsl", NamespaceConstant.IXSL);
             XPathExecutable exec = comp.compile("ixsl:eval('2+2')");
