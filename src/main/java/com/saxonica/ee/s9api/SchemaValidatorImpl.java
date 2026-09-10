@@ -417,87 +417,6 @@ public class SchemaValidatorImpl extends SchemaValidator {
         }
     }
 
-
-//    /**
-//     * A task to be performed when validation completes
-//     */
-
-//    @FunctionalInterface
-//    @CSharpDelegate
-//    interface ValidationCompletionAction {
-//        void finish() throws SaxonApiException;
-//    }
-
-//    class ValidationTask implements java.util.concurrent.Callable<Outcome<Boolean>> {
-//        private final Source source;
-//        private ValidationCompletionAction action = null;
-//        private InvalidityHandler handler = null;
-//
-//        public ValidationTask(Source s, InvalidityHandler handler, ValidationCompletionAction action) {
-//            source = s;
-//            this.handler = handler;
-//            this.action = action;
-//        }
-//
-//        /**
-//         * Computes a result, or throws an exception if unable to do so.
-//         *
-//         * @return computed result
-//         * @throws Exception if unable to compute a result
-//         */
-//        @Override
-//        public Outcome<Boolean> call() throws Exception {
-//            Configuration config = processor.getUnderlyingConfiguration();
-//
-//            try {
-//                Controller controller = new Controller(config);
-//                controller.getExecutable().setSchemaAware(true);
-//                PipelineConfiguration pipe = controller.makePipelineConfiguration();
-//                pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
-//                pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-//
-//                ParseOptions options = new ParseOptions();
-//
-//                options.setCheckEntityReferences(true);
-//                options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
-//                options.setInvalidityHandler(handler);
-//
-//
-//                options.setCheckEntityReferences(true);
-//                options.setExpandAttributeDefaults(expandAttributeDefaults);
-//                options.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
-//                options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-//                options.setTopLevelType(documentElementType);
-//                if (documentElementName != null) {
-//                    options.setTopLevelElement(new StructuredQName(
-//                            documentElementName.getPrefix(), documentElementName.getNamespaceURI(), documentElementName.getLocalName()));
-//                }
-//
-//                Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
-//                output.setPipelineConfiguration(pipe);
-//
-//                Receiver receiver = config.getDocumentValidator(output, source.getSystemId(), options, null);
-//
-//                /*if (keepStatistics) {
-//                    latestStatistics = new ValidationStatistics();
-//                    options.setValidationStatisticsRecipient(latestStatistics.recipient);
-//                } */
-//                Sender.send(source, receiver, options);
-//            } catch (XPathException | SaxonApiException e1) {
-//                //e1.printStackTrace();
-//                return new Outcome<>(e1);
-//            } finally {
-//                if (action != null) {
-//                    action.finish();
-//                }
-//
-//            }
-//            return new Outcome<>(true);
-//        }
-//
-//    }
-
-
     public void setThreadCount(int tc) {
         threadCount = tc;
     }
@@ -574,7 +493,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
                 singleReporter = (InvalidityReportGeneratorEE)processor.getUnderlyingConfiguration().createValidityReporter();
                 singleReporter.setDestination(dest);
-                final InvalidityReportGeneratorEE singleReportHandler = (InvalidityReportGeneratorEE) singleReporter;
+                final InvalidityReportGeneratorEE singleReportHandler = singleReporter;
                 singleReporter.setXsdVersion(processor.getUnderlyingConfiguration().getXsdVersion() == Configuration.XSD11 ? "1.1" : "1.0");
                 try {
                     singleReporter.startReporting(source.getSystemId());
@@ -593,7 +512,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
             //Future<Outcome<Boolean>> result = executorService.submit(new ValidationTask(s, singleTaskHandler, completionAction));
             Future<Outcome<Boolean>> result = executorService.submit(() -> {
                 //Configuration config = processor.getUnderlyingConfiguration();
-                Outcome<Boolean> outcome = new Outcome<Boolean>(true);
+                Outcome<Boolean> outcome = new Outcome<>(true);
                 try {
                     Controller controller = new Controller(config);
                     controller.getExecutable().setSchemaAware(true);
@@ -622,13 +541,13 @@ public class SchemaValidatorImpl extends SchemaValidator {
                     Sender.send(source, receiver, options);
                 } catch (XPathException | SaxonApiException e1) {
                     //e1.printStackTrace();
-                    outcome = new Outcome<Boolean>(e1);
+                    outcome = new Outcome<>(e1);
                 } finally {
                     if (action != null) {
                         try {
                             action.doAction();
                         } catch (XPathException e) {
-                            outcome = new Outcome<Boolean>(e);
+                            outcome = new Outcome<>(e);
                         }
                     }
                 }
@@ -671,6 +590,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
             backing.add(node);
         }
 
+        @SuppressWarnings("NullableProblems")
         @Override
         public Iterator<XdmNode> iterator() {
             return backing.iterator();
@@ -793,6 +713,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         if (keepStatistics) {
             latestStatistics = new ValidationStatistics();
             options = options.withValidationStatisticsRecipient(latestStatistics.getRecipient());
+            pipe.setParseOptions(options);
         }
         //#endif
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());
