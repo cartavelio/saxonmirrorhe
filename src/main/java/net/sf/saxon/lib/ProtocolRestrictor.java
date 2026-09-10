@@ -66,6 +66,11 @@ public class ProtocolRestrictor {
         }
     }
 
+    /**
+     * Test whether a particular URI is permitted by this protocol restrictor
+     * @param uri the candidate URI
+     * @return true if access to this URI is permitted
+     */
     public boolean test(URI uri) {
         return predicate.test(uri);
     }

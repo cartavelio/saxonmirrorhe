@@ -18,7 +18,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -37,7 +36,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -127,7 +125,7 @@ public class TestCollections {
     public void testDirectoryForbiddenProtocol() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http https");
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("collection(.)!base-uri(.)");
             XPathSelector eval = exec.load();
@@ -174,7 +172,7 @@ public class TestCollections {
     public void testDirectoryUriForbiddenProtocol() {
         try {
             Processor p = new Processor(true);
-            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http https");
+            p.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
             XPathCompiler c = p.newXPathCompiler();
             XPathExecutable exec = c.compile("uri-collection(.)");
             XPathSelector eval = exec.load();
