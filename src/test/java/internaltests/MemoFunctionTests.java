@@ -31,7 +31,7 @@ public class MemoFunctionTests {
         try {
             String xsl = "<x:transform xmlns:x='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' version='3.0'>" +
                     "<x:function name='f:memo' cache='yes'><x:param name='p'/>"
-                    + "<x:sequence select='count($p)||Q{http://saxon.sf.net/}timestamp()'/>"
+                    + "<x:sequence select='substring(string(sum(count($p) to 1000000)), 1, 1)||Q{http://saxon.sf.net/}timestamp()'/>"
                     + "</x:function>" +
                     "<x:param name='p'/><x:param name='q'/>" +
                     "<x:template name='x:initial-template'><x:sequence select='deep-equal(f:memo($p), f:memo($q))'/></x:template>" +
@@ -53,7 +53,7 @@ public class MemoFunctionTests {
         try {
             String xsl = "<x:transform xmlns:x='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' version='3.0'>" +
                     "<x:function name='f:memo' cache='yes'><x:param name='x'/><x:param name='y'/>"
-                    + "<x:sequence select='count($x)||count($y)||Q{http://saxon.sf.net/}timestamp()'/>"
+                    + "<x:sequence select='substring(string(sum(count($x) to 1000000)), 1, 1)||count($y)||Q{http://saxon.sf.net/}timestamp()'/>"
                     + "</x:function>" +
                     "<x:param name='p'/><x:param name='q'/>" +
                     "<x:param name='r'/><x:param name='s'/>" +
