@@ -10,6 +10,8 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -18,7 +20,6 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -636,6 +637,18 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
     @Override
     public String getStreamerName() {
         return "ApplyTemplates";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        // Currently using the fallback elaborator. It would be nice to do better, especially for with-param
+        // evaluation, but it's complicated.
+        return new FallbackElaborator(this);
     }
 
 }

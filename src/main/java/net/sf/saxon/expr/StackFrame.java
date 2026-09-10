@@ -24,7 +24,8 @@ public class StackFrame {
     protected Sequence[] slots;
     protected Stack<Sequence> dynamicStack;
 
-    public static final StackFrame EMPTY = new StackFrame(SlotManager.EMPTY, new Sequence[0]);
+    public static final Sequence[] EMPTY_ARRAY_OF_SEQUENCE = new Sequence[0];
+    public static final StackFrame EMPTY = new StackFrame(SlotManager.EMPTY, EMPTY_ARRAY_OF_SEQUENCE);
 
     public StackFrame(SlotManager map, Sequence[] slots) {
         this.map = map;

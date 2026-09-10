@@ -8,15 +8,19 @@ import net.sf.saxon.value.StringValue;
 
 public abstract class StringElaborator extends Elaborator {
 
+    public boolean returnZeroLengthWhenAbsent() {
+        return false;
+    }
+
     @Override
     public EagerEvaluator eagerly() {
-        UnicodeStringEvaluator u = elaborateForUnicodeString(false);
+        UnicodeStringEvaluator u = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
         return context -> new StringValue(u.eval(context));
     }
 
     @Override
     public PullEvaluator elaborateForPull() {
-        UnicodeStringEvaluator strEval = elaborateForUnicodeString(false);
+        UnicodeStringEvaluator strEval = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
@@ -41,7 +45,7 @@ public abstract class StringElaborator extends Elaborator {
 
     @Override
     public ItemEvaluator elaborateForItem() {
-        UnicodeStringEvaluator strEval = elaborateForUnicodeString(false);
+        UnicodeStringEvaluator strEval = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
@@ -53,7 +57,7 @@ public abstract class StringElaborator extends Elaborator {
     }
 
     public BooleanEvaluator elaborateForBoolean() {
-        UnicodeStringEvaluator strEval = elaborateForUnicodeString(false);
+        UnicodeStringEvaluator strEval = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
         return context -> {
             UnicodeString value = strEval.eval(context);
             return value != null && !value.isEmpty();

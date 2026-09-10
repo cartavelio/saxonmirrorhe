@@ -53,14 +53,14 @@ public class Twine8 extends UnicodeString {
         bytes = new byte[len];
         for (int i = start; i < len; i++) {
             int c = chars[i];
-            if (Configuration.isAssertionsEnabled()) {
-                if (c > 255) {
-                    throw new IllegalArgumentException();
-                }
+            if (CHECKING && c > 255) {
+                throw new IllegalArgumentException();
             }
             bytes[i] = (byte) (chars[i] & 0xff);
         }
     }
+
+    private final static boolean CHECKING = Configuration.isAssertionsEnabled();
 
     /**
      * Create a Twine8 from a string whose characters are known to be single byte chars

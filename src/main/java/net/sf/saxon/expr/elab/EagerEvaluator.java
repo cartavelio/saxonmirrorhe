@@ -5,7 +5,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trans.XPathException;
 
 @FunctionalInterface
-public interface EagerEvaluator {
+public interface EagerEvaluator extends SequenceEvaluator {
 
     /**
      * Evaluate a construct to produce a grounded value

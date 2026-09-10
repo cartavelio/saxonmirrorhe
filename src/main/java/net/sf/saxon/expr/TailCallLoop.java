@@ -192,7 +192,7 @@ public final class TailCallLoop extends UnaryExpression {
     private Sequence tailCallDifferentFunction(UserFunction userFunction, XPathContextMajor cm) throws XPathException {
         cm.resetStackFrameMap(userFunction.getStackFrameMap(), userFunction.getArity());
         try {
-            return userFunction.getEvaluator().evaluate(userFunction.getBody(), cm);
+            return userFunction.getBodyEvaluator().evaluate(cm);
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());
             err.maybeSetContext(cm);

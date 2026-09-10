@@ -320,6 +320,8 @@ public class DocumentFn extends SystemFunction implements Callable {
                     if (err.getErrorCodeLocalPart() == null || err.getErrorCodeLocalPart().equals("SXXP0003")) {
                         err.setErrorCode("FODC0002");
                     }
+                    err.maybeSetLocation(locator);
+                    err.maybeSetContext(c);
                     throw err;
                 } finally {
                     if (options.isPleaseCloseAfterUse()) {

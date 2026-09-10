@@ -492,7 +492,7 @@ public class XQueryFunction implements Declaration, Location {
         }
         compiledFunction.setBody(body);
 
-        compiledFunction.computeEvaluationMode();
+        //compiledFunction.computeEvaluationMode();
         ExpressionTool.allocateSlots(body, arity, compiledFunction.getStackFrameMap());
         //#if BYTECODE==true
         if (config.isGenerateByteCode(HostLanguage.XQUERY)) {

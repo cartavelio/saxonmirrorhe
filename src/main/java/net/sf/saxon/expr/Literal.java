@@ -849,6 +849,12 @@ public class Literal extends Expression {
             return context -> value;
         }
 
+        @Override
+        public SequenceEvaluator lazily(boolean repeatable) {
+            GroundedValue value = ((Literal) getExpression()).getGroundedValue();
+            return context -> value;
+        }
+
 
         @Override
         public PullEvaluator elaborateForPull() {

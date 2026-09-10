@@ -464,7 +464,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             }
         }
 
-        compiledFunction.computeEvaluationMode();
+        //compiledFunction.computeEvaluationMode();
 
         if (streamability.isStreaming()) {
             compiledFunction.prepareForStreaming();

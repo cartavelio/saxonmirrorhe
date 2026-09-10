@@ -34,7 +34,7 @@ public class SlotManager {
 
     public static SlotManager EMPTY = new SlotManager(0);
 
-    private ArrayList<StructuredQName> variableMap = new ArrayList<>(10);
+    private final ArrayList<StructuredQName> variableMap;
     // values are StructuredQName objects representing the variable names
     private int numberOfVariables = 0;
 

@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.OriginalFunction;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -266,6 +269,24 @@ public class StaticFunctionCall extends FunctionCall implements Callable {
         }
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new StaticFunctionCallElaborator();
+    }
+    
+    private static class StaticFunctionCallElaborator extends FunctionCallElaborator {
 
+        @Override
+        public PullEvaluator elaborateForPull() {
+            StaticFunctionCall expr = (StaticFunctionCall) getExpression();
+            return context -> expr.call(context, evaluateArguments(context)).iterate();
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            StaticFunctionCall expr = (StaticFunctionCall) getExpression();
+            return context -> expr.call(context, evaluateArguments(context)).head();
+        }
+    }
 }
 

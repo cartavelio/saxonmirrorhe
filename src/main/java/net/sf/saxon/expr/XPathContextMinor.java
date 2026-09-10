@@ -368,8 +368,8 @@ public class XPathContextMinor implements XPathContext {
      */
 
     @Override
-    public final Sequence evaluateLocalVariable(int slotnumber) {
-        return stackFrame.slots[slotnumber];
+    public final Sequence evaluateLocalVariable(int slot) {
+        return stackFrame.slots[slot];
     }
 
     /**

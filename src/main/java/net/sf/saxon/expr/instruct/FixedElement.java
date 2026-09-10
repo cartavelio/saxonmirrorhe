@@ -7,24 +7,22 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.ComplexNodePushElaborator;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.ComplexNodePushElaborator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.CombinedNodeTest;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.type.*;
 
@@ -147,58 +145,6 @@ public class FixedElement extends ElementCreator {
 //            }
 //        }
         return this;
-    }
-
-    /**
-     * Remove namespaces that are not required for this element because they are output on
-     * the parent element
-     *
-     * @param visitor          the expression visitor
-     * @param parentNamespaces the namespaces that are output by the parent element
-     */
-
-    private void removeRedundantNamespaces(ExpressionVisitor visitor, NamespaceMap parentNamespaces) {
-        // It's only safe to remove any namespaces if the element is incapable of creating any attribute nodes
-        // in a non-null namespace
-        // This is because namespaces created on this element take precedence over namespaces created by namespace
-        // fixup based on the prefix used in the attribute name (see atrs24)
-        if (namespaceBindings.isEmpty()) {
-            return;
-        }
-        TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        ItemType contentType = getContentExpression().getItemType();
-        boolean ok = th.relationship(contentType, NodeKindTest.ATTRIBUTE) == Affinity.DISJOINT;
-        if (!ok) {
-            // if the content might include attributes, discount any that are known to be in the null namespace
-            if (getContentExpression() instanceof Block) {
-                ok = true;
-                for (Operand o : getContentExpression().operands()) {
-                    Expression exp = o.getChildExpression();
-                    if (exp instanceof FixedAttribute) {
-                        if (!((FixedAttribute)exp).getAttributeName().hasURI(NamespaceUri.NULL)) {
-                            ok = false;
-                            break;
-                        }
-                    } else {
-                        ItemType childType = exp.getItemType();
-                        if (th.relationship(childType, NodeKindTest.ATTRIBUTE) != Affinity.DISJOINT) {
-                            ok = false;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        if (ok) {
-            NamespaceMap reduced = namespaceBindings;
-            // TODO: implement difference() operation on NamespaceMap
-            for (NamespaceBinding childNamespace : namespaceBindings) {
-                if (childNamespace.getNamespaceUri().equals(parentNamespaces.getNamespaceUri(childNamespace.getPrefix()))) {
-                    reduced = reduced.remove(childNamespace.getPrefix());
-                }
-            }
-            namespaceBindings = reduced;
-        }
     }
 
     /**

@@ -16,7 +16,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.IdentityHashMap;
@@ -289,9 +288,9 @@ public class LoopLifter {
         ExpressionTool.copyLocationInfo(child, let);
         let.setSequence(child);
         let.setNeedsLazyEvaluation(true);
-        let.setEvaluator(Cardinality.allowsMany(child.getCardinality())
-                                 ? Evaluator.MemoClosureEvaluator.INSTANCE
-                                 : Evaluator.SingletonClosure.INSTANCE);
+//        let.setEvaluator(Cardinality.allowsMany(child.getCardinality())
+//                                 ? Evaluator.MemoClosureEvaluator.INSTANCE
+//                                 : Evaluator.SingletonClosure.INSTANCE);
         let.setAction(newAction);
         let.adoptChildExpression(newAction);
 //        if (indexed) {

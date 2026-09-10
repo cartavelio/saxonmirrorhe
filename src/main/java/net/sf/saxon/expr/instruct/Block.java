@@ -7,13 +7,11 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -609,10 +607,9 @@ public class Block extends Instruction {
      *
      * @param targetList the new list of expressions comprising the contents of the block
      *                   after simplification
-     * @throws XPathException should not happen
      */
 
-    private void flatten(List<Expression> targetList) throws XPathException {
+    private void flatten(List<Expression> targetList)  {
         List<Item> currentLiteralList = null;
         for (Operand o : operands()) {
             Expression child = o.getChildExpression();
@@ -833,11 +830,48 @@ public class Block extends Instruction {
         return new BlockElaborator();
     }
 
+    @FunctionalInterface
+    public interface ChainAction {
+        ZenoSequence perform(ZenoSequence in, XPathContext context) throws XPathException;
+    }
     /**
      * Elaborator for a "Block", which is typically either an XPath sequence expression (a, b, c)
      * or an XSLT sequence constructor
      */
     public static class BlockElaborator extends PullElaborator {
+
+        @Override
+        public SequenceEvaluator lazily(boolean repeatable) {
+            final Block expr = (Block) getExpression();
+            if (expr.isCandidateForSharedAppend()) {
+                ChainAction[] actions = new ChainAction[expr.size()];
+                for (int i=0; i < expr.size(); i++) {
+                    Expression child = expr.getOperanda()[i].getChildExpression();
+                    if (child instanceof VariableReference) {
+                        EagerEvaluator eval = makeElaborator(child).eagerly();
+                        actions[i] = (chain, context) -> chain.appendSequence(eval.evaluate(context));
+                    } else {
+                        PullEvaluator pull = makeElaborator(child).elaborateForPull();
+                        actions[i] = (chain, context) -> {
+                            SequenceIterator iter = pull.iterate(context);
+                            for (Item item; (item = iter.next()) != null; ) {
+                                chain = chain.append(item);
+                            }
+                            return chain;
+                        };
+                    }
+                }
+                return context -> {
+                    ZenoSequence chain = new ZenoSequence();
+                    for (ChainAction action : actions) {
+                        chain = action.perform(chain, context);
+                    }
+                    return chain;
+                };
+            } else {
+                return super.lazily(repeatable);
+            }
+        }
 
         public PullEvaluator elaborateForPull() {
             final Block expr = (Block) getExpression();

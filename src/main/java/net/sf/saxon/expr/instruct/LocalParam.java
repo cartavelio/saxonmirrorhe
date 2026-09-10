@@ -9,6 +9,9 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StandardNames;
@@ -37,7 +40,8 @@ import java.util.function.Supplier;
 public final class LocalParam extends Instruction implements LocalBinding {
 
     private Operand conversionOp = null;
-    private Evaluator conversionEvaluator = null;
+    private SequenceEvaluator evaluator = null;
+    private SequenceEvaluator conversionEvaluator = null;
 
     private static final int REQUIRED = 4;
     private static final int TUNNEL = 8;
@@ -50,7 +54,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     private SequenceType requiredType;
     private int slotNumber = -999;
     private int referenceCount = 10;
-    private Evaluator evaluator = null;
+
 
 
 
@@ -212,7 +216,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
      * @return true if this is a required parameter
      */
 
-    public final boolean isRequiredParam() {
+    public boolean isRequiredParam() {
         return (properties & REQUIRED) != 0;
     }
 
@@ -263,9 +267,11 @@ public final class LocalParam extends Instruction implements LocalBinding {
     public void computeEvaluationMode() {
         if (getSelectExpression() != null) {
             if (referenceCount == FilterExpression.FILTERED) {
-                evaluator = Evaluator.MakeIndexedVariable.INSTANCE;
+                final Optimizer optimizer = getConfiguration().obtainOptimizer();
+                PullEvaluator pullEval = Elaborator.makeElaborator(getSelectExpression()).elaborateForPull();
+                evaluator =  context -> optimizer.makeIndexedValue(pullEval.iterate(context));
             } else {
-                evaluator = ExpressionTool.lazyEvaluator(getSelectExpression(), referenceCount > 1);
+                evaluator = Elaborator.makeElaborator(getSelectExpression()).lazily(referenceCount > 1);
             }
         }
     }
@@ -350,8 +356,10 @@ public final class LocalParam extends Instruction implements LocalBinding {
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);
             Sequence result;
-            Evaluator eval = evaluator == null ? Evaluator.EagerSequence.INSTANCE : evaluator;
-            result = eval.evaluate(select, context);
+            if (evaluator == null) {
+                evaluator = Elaborator.makeElaborator(select).lazily(true);
+            }
+            result = evaluator.evaluate(context);
             context.setTemporaryOutputState(savedOutputState);
             return result;
         }
@@ -413,7 +421,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
             if (conversionOp == null) {
                 conversionOp = new Operand(this, convertor, OperandRole.SINGLE_ATOMIC);
             }
-            conversionEvaluator = ExpressionTool.eagerEvaluator(convertor);
+            conversionEvaluator = Elaborator.makeElaborator(convertor).eagerly();
         } else {
             conversionOp = null;
         }
@@ -431,7 +439,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return conversionOp == null ? null : conversionOp.getChildExpression();
     }
 
-    public Evaluator getConversionEvaluator() {
+    public SequenceEvaluator getConversionEvaluator() {
         return conversionEvaluator;
     }
 
@@ -481,8 +489,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
                 // if a parameter was supplied by the caller, with no type-checking by the caller,
                 // then we may need to convert it to the type required
                 if (conversionOp != null) {
-                    context.setLocalVariable(slotNumber,
-                            conversionEvaluator.evaluate(getConversion(), context));
+                    context.setLocalVariable(slotNumber, conversionEvaluator.evaluate(context));
                     // We do an eager evaluation here for safety, because the result of the
                     // type conversion overwrites the slot where the actual supplied parameter
                     // is contained.

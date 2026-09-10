@@ -25,7 +25,14 @@ public class FallbackElaborator extends Elaborator {
 
     @Override
     public EagerEvaluator eagerly() {
-        return context -> SequenceTool.toGroundedValue(getExpression().iterate(context));
+        Expression expr = getExpression();
+        return context -> SequenceTool.toGroundedValue(expr.iterate(context));
+    }
+
+    @Override
+    public SequenceEvaluator lazily(boolean repeatable) {
+        Expression expr = getExpression();
+        return context -> SequenceTool.toGroundedValue(expr.iterate(context));
     }
 
 

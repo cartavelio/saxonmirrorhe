@@ -225,11 +225,10 @@ public class Sum extends FoldingFunction {
             return context -> {
                 SumFold fold = new SumFold(context, (AtomicValue)zero.eval(context));
                 SequenceIterator iter = puller.iterate(context);
-                Item it;
-                while ((it = iter.next()) != null) {
+                for (Item it; (it = iter.next()) != null; ) {
                     fold.processItem(it);
                 }
-                return (AtomicValue)fold.result();
+                return fold.result().head();
             };
         }
 

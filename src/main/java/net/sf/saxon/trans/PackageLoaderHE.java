@@ -694,7 +694,8 @@ public class PackageLoaderHE implements IPackageLoader {
             streaming = true;
         }
 
-        function.setEvaluator(Evaluators.getEvaluator(evalMode));
+        function.computeEvaluationMode();
+        //Evaluator(Evaluators.getEvaluator(evalMode));
 
         currentFunction = function;
         List<UserFunctionParameter> params = new ArrayList<>();
@@ -2319,7 +2320,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     props.setProperty(att.getLocalPart(), att.getStringValue());
                 }
                 fn.importAttributes(props);
-                loader.addCompletionAction(() -> ((SystemFunctionCall) e).allocateArgumentEvaluators(args));
+                //loader.addCompletionAction(() -> ((SystemFunctionCall) e).allocateArgumentEvaluators(args));
                 loader.addCompletionAction(() -> fn.fixArguments(args));
             }
             loader.contextStack.pop();
@@ -2553,9 +2554,9 @@ public class PackageLoaderHE implements IPackageLoader {
                     ((IntegratedFunctionCall) exp).setResultType(type);
                 }
             }
-            if (exp instanceof SystemFunctionCall) {
-                ((SystemFunctionCall)exp).allocateArgumentEvaluators(args);
-            }
+//            if (exp instanceof SystemFunctionCall) {
+//                ((SystemFunctionCall)exp).allocateArgumentEvaluators(args);
+//            }
             return exp;
         });
 
@@ -2617,7 +2618,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression select = loader.getFirstChildExpression(element);
 
             int slot = loader.getIntegerAttribute(element, "slot");
-            int evalMode = loader.getIntegerAttribute(element, "eval");
+            //int evalMode = loader.getIntegerAttribute(element, "eval");
             StructuredQName name = loader.getQNameAttribute(element, "var");
             SequenceType requiredType = loader.parseAlphaCode(element, "as");
             LetExpression let = new LetExpression();
@@ -2625,7 +2626,7 @@ public class PackageLoaderHE implements IPackageLoader {
             let.setRequiredType(requiredType);
             let.setSlotNumber(slot);
             let.setVariableQName(name);
-            let.setEvaluator(Evaluators.getEvaluator(evalMode));
+            //let.setEvaluator(Evaluators.getEvaluator(evalMode));
 
             loader.localBindings.push(let);
             Expression action = loader.getSecondChildExpression(element);
@@ -3261,15 +3262,15 @@ public class PackageLoaderHE implements IPackageLoader {
             call.setArguments(args);
             int bindingSlot = loader.getIntegerAttribute(element, "bSlot");
             call.setBindingSlot(bindingSlot);
-            String eval = element.getAttributeValue(NamespaceUri.NULL,"eval");
-            if (eval != null) {
-                String[] evals = eval.split(" ");
-                Evaluator[] evalModes = new Evaluator[evals.length];
-                for (int i = 0; i < evals.length; i++) {
-                    evalModes[i] = Evaluators.getEvaluator(Integer.parseInt(evals[i]));
-                }
-                call.setArgumentEvaluators(evalModes);
-            }
+//            String eval = element.getAttributeValue(NamespaceUri.NULL,"eval");
+//            if (eval != null) {
+//                String[] evals = eval.split(" ");
+//                Evaluator[] evalModes = new Evaluator[evals.length];
+//                for (int i = 0; i < evals.length; i++) {
+//                    evalModes[i] = Evaluators.getEvaluator(Integer.parseInt(evals[i]));
+//                }
+//                call.setArgumentEvaluators(evalModes);
+//            }
             loader.addComponentFixup(call);
             return call;
         });

@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
@@ -128,11 +131,11 @@ public abstract class FunctionCall extends Expression {
     public Expression getArg(int n) {
         return getOperanda().getOperandExpression(n);
     }
-    
+
     /**
      * Set the expression to be used as the Nth argument
      *
-     * @param n the required argument, zero-based
+     * @param n     the required argument, zero-based
      * @param child the expression to be used in the relevant position
      * @throws java.lang.IllegalArgumentException if the value of n is out of range
      */
@@ -559,30 +562,12 @@ public abstract class FunctionCall extends Expression {
      */
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        Function target = getTargetFunction(context);
-        Sequence[] actualArgs = evaluateArguments(context);
-        try {
-            return target.call(context, actualArgs).iterate();
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            e.maybeSetFailingExpression(this);
-            throw e;
-        }
+        return Elaborator.makeElaborator(this).elaborateForPull().iterate(context);
     }
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        Function target = getTargetFunction(context);
-        Sequence[] actualArgs = evaluateArguments(context);
-        try {
-            return target.call(context, actualArgs).head();
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            e.maybeSetFailingExpression(this);
-            throw e;
-        }
+        return Elaborator.makeElaborator(this).elaborateForItem().eval(context);
     }
 
     public Sequence[] evaluateArguments(XPathContext context) throws XPathException {
@@ -594,7 +579,7 @@ public abstract class FunctionCall extends Expression {
         return actualArgs;
     }
 
-   /**
+    /**
      * When a call to a Java extension function appears in a context where there the required type
      * is a Java external object (typically an xsl:variable with a declared type, or as an argument
      * to another Java extension function), notify this required type so that the process of converting
@@ -609,6 +594,40 @@ public abstract class FunctionCall extends Expression {
 
     public boolean adjustRequiredType(JavaExternalObjectType requiredType) throws XPathException {
         return false;
+    }
+
+    public static abstract class FunctionCallElaborator extends PullElaborator {
+        SequenceEvaluator[] argumentEvaluators;
+
+        @Override
+        public void setExpression(Expression expr) {
+            super.setExpression(expr);
+            allocateArgumentEvaluators((FunctionCall)expr, true);
+        }
+
+        /**
+         * Allocate evaluation functions for each argument (in field {@code argumentEvaluators})
+         * @param expr the function call
+         * @param allowRepeatedUse true if the value of the argument must be supplied
+         *                         to the function in a way that allows repeated use. This
+         *                         will be true for user-written functions, false for system functions,
+         *                         where the implementation is arranged to only use the value once.
+         */
+        protected void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
+            int arity = expr.getArity();
+            argumentEvaluators = new SequenceEvaluator[arity];
+            for (int i = 0; i < arity; i++) {
+                argumentEvaluators[i] = makeElaborator(expr.getArg(i)).lazily(allowRepeatedUse);
+            }
+        }
+
+        protected Sequence[] evaluateArguments(XPathContext context) throws XPathException {
+            Sequence[] args = new Sequence[argumentEvaluators.length];
+            for (int i = 0; i < argumentEvaluators.length; i++) {
+                args[i] = argumentEvaluators[i].evaluate(context);
+            }
+            return args;
+        }
     }
 
 }

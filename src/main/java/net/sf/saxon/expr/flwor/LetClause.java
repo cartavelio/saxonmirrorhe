@@ -9,6 +9,8 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -29,27 +31,29 @@ public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosur
 
     private LocalVariableBinding rangeVariable;
     private Operand sequenceOp;
-    private Evaluator evaluator;
-    private Evaluator.ElaboratedEvaluator variableEvaluator;
+    private SequenceEvaluator variableEvaluator;
+
+
+    private int completed = 0;
+    private int abandoned = 0;
+    private boolean switchedToEagerEvaluation = false;
 
     @Override
     public ClauseName getClauseKey() {
         return LET;
     }
 
-    public Evaluator getEvaluator() {
-        if (evaluator == null) {
-            evaluator = ExpressionTool.lazyEvaluator(getSequence(), true);
+    public SequenceEvaluator getEvaluator() {
+        if (variableEvaluator == null) {
+            variableEvaluator = Elaborator.makeElaborator(getSequence()).lazily(true);
         }
-        return evaluator;
+        return variableEvaluator;
     }
 
-    private int completed = 0;
-    private int abandoned = 0;
 
     public void accept(MemoClosure.MemoClosureStatistics statistics) {
         // Note, does thread-unsafe updates to the statistics
-        if (evaluator.getCode() == Evaluators.MAKE_MEMO_CLOSURE) {
+        if (!switchedToEagerEvaluation) {
             if (statistics.allRead) {
                 completed++;
             } else {
@@ -57,8 +61,8 @@ public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosur
             }
             if (completed > 10 && abandoned == 0) {
                 //System.err.println("LetClause set to eager");
-                evaluator = Evaluator.EagerSequence.INSTANCE;
-                variableEvaluator = evaluator.elaborate(getSequence());
+                variableEvaluator = Elaborator.makeElaborator(getSequence()).eagerly();
+                switchedToEagerEvaluation = true;
             }
         }
     }
@@ -96,10 +100,9 @@ public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosur
 
     public void evaluateRangeVariable(XPathContext context) throws XPathException {
         if (variableEvaluator == null) {
-            Evaluator evaluator = getEvaluator();
-            variableEvaluator = evaluator.elaborate(getSequence());
+            getEvaluator();
         }
-        Sequence val = variableEvaluator.eval(context);
+        Sequence val = variableEvaluator.evaluate(context);
         if (val instanceof MemoClosure) {
             ((MemoClosure)val).setBindingExpression(this);
         }
@@ -165,7 +168,7 @@ public class LetClause extends Clause implements Consumer<MemoClosure.MemoClosur
                 () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
         setSequence(TypeChecker.strictTypeCheck(
                 getSequence(), rangeVariable.getRequiredType(), role, visitor.getStaticContext()));
-        evaluator = ExpressionTool.lazyEvaluator(getSequence(), true);
+        //variableEvaluator = Elaborator.makeElaborator(getSequence()).lazily(true);
     }
 
     @Override

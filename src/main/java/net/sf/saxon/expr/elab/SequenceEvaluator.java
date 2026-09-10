@@ -5,7 +5,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
 @FunctionalInterface
-public interface FullEvaluator {
+public interface SequenceEvaluator {
 
     /**
      * Evaluate a construct to produce a value (which might be a lazily evaluated Sequence)

@@ -34,7 +34,6 @@ import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 
 import java.util.*;
@@ -447,9 +446,8 @@ public final class EvaluateInstr extends Expression {
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             TypeChecker tc = config.getTypeChecker(false);
             expr = tc.staticTypeCheck(expr, requiredType, role, visitor);
-            ItemType contextItemType = Type.ITEM_TYPE;
             expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
-            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, context.getContextItem() == null);
+            ContextItemStaticInfo cit = ContextItemStaticInfo.DEFAULT;   // TODO: we could set it to absent in some cases. See bug 5626
             expr = expr.typeCheck(visitor, cit).optimize(visitor, cit);
             slotMap = env.getStackFrameMap();
             ExpressionTool.allocateSlots(expr, slotMap.getNumberOfVariables(), slotMap);
