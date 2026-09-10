@@ -140,7 +140,7 @@ public interface ComplexType extends SchemaType {
      * If there is no such particle, return {@link net.sf.saxon.expr.StaticProperty#EMPTY}.
      *
      * @param elementName        Identifies the name of the child element within this content model
-     * @param schema
+     * @param schema             The containing schema
      * @param considerExtensions True if types derived from this type by extension are to be included in the search
      * @return the cardinality associated with the child element particle with the given name.
      * If there is no such particle, return {@link net.sf.saxon.expr.StaticProperty#EMPTY}.

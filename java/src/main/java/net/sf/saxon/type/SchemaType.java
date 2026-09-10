@@ -23,6 +23,11 @@ import net.sf.saxon.trans.XPathException;
  * <p>The implementations of these interfaces are organized into a different hierarchy: on the one side,
  * built-in types such as AnyType, AnySimpleType, and the built-in atomic types and list types; on the other
  * side, user-defined types defined in a schema.</p>
+ * <p>From Saxon 13, some of the information associated with a schema type may vary from one schema to
+ * another. For example, a particular schema type (as defined in a particular schema document) may
+ * have other schema types derived from it by restriction or extension, but the set of derived types
+ * may vary from one schema to another. Information about the derived types therefore requires
+ * knowing not only the schema type, but also the {@link Schema}.</p>
  */
 
 public interface SchemaType extends SchemaComponent {

@@ -10,7 +10,12 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.value.Cardinality;
 
 /**
- * A {@code SequenceType} is the combination of an ItemType and an OccurrenceIndicator
+ * A {@code SequenceType} is the combination of an {@link ItemType} and an {@link OccurrenceIndicator}.
+ *
+ * <p>The most convenient way to obtain a {@code SequenceType} is often with
+ * a method such as <code>ItemType.BOOLEAN.one()</code>, representing the
+ * sequence type <code>xs:boolean</code>, or <code>ItemType.ANY_NODE.zeroOrMore()</code>
+ * representing the type <code>node()*</code>.</p>
  */
 public class SequenceType {
 
