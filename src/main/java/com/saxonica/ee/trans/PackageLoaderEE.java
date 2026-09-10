@@ -128,7 +128,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
             options.setTopLevelType(schemaType);
             String flags = element.getAttributeValue("", "flags");
             if (flags != null && flags.contains("s")) {
-                loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getPackage().getSpaceStrippingRule()));
+                loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
             }
             Expression body = loader.getExpressionWithRole(element, "body");
             Expression href = loader.getExpressionWithRole(element, "href");

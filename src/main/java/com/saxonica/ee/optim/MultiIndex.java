@@ -11,13 +11,11 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.z.*;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -347,7 +345,7 @@ public class MultiIndex {
         return new SelectedItemsIterator(indexedValue, selectedItems);
     }
 
-    private UnfailingIterator singletonIterator(int pos) throws XPathException{
+    private SequenceIterator singletonIterator(int pos) throws XPathException{
         return SequenceTool.itemAt(indexedValue, pos).iterate();
     }
 
@@ -369,6 +367,12 @@ public class MultiIndex {
             this.selection = selection;
             iter = selection.iterator();
         }
+
+        @Override
+        public boolean supportsHasNext() {
+            return true;
+        }
+
 
         /**
          * Determine whether there are more items to come. Note that this operation
@@ -411,6 +415,20 @@ public class MultiIndex {
         }
 
         /**
+         * Ask whether this iterator supports use of the {@link #getLength()} method. This
+         * method should always be called before calling {@link #getLength()}, because an iterator
+         * that implements this interface may support use of {@link #getLength()} in some situations
+         * and not in others
+         *
+         * @return true if the {@link #getLength()} method can be called to determine the length
+         * of the underlying sequence.
+         */
+        @Override
+        public boolean supportsGetLength() {
+            return true;
+        }
+
+        /**
          * Get the last position (that is, the number of items in the sequence). This method is
          * non-destructive: it does not change the state of the iterator.
          * The result is undefined if the next() method of the iterator has already returned null.
@@ -423,21 +441,6 @@ public class MultiIndex {
             return selection.size();
         }
 
-        /**
-         * Get properties of this iterator, as a bit-significant integer.
-         *
-         * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-         *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-         *         acceptable to return the value zero, indicating that there are no known special properties.
-         *         It is acceptable for the properties of the iterator to change depending on its state.
-         * @since 8.6
-         */
-
-        @Override
-        public EnumSet<SequenceIteratorProperty> getProperties() {
-            return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
-        }
     }
 
 

@@ -98,7 +98,7 @@ public class GeneralComparisonMinimaxFeed extends AtomicItemFeed {
                     if (val.isUntypedAtomic()) {
                         unstreamedUntypedValues.add((StringItem) val);
                     } else {
-                        XPathComparable k2 = next.getXPathComparable(collator, implicitTimezone);
+                        XPathComparable k2 = val.getXPathComparable(collator, implicitTimezone);
                         if (!existsUnstreamed) {
                             existsUnstreamed = true;
                             minUnstreamed = k2;

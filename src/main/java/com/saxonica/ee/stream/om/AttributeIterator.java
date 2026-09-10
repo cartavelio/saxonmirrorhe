@@ -3,12 +3,10 @@ package com.saxonica.ee.stream.om;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 
@@ -42,6 +40,12 @@ final public class AttributeIterator implements AxisIterator, LookaheadIterator 
         attributeIter = attributes.iterator();
     }
 
+    @Override
+    public boolean supportsHasNext() {
+        return true;
+    }
+
+
     /**
      * Test if there are mode nodes still to come.
      * ("elements" is used here in the sense of the Java enumeration class, not in the XML sense)
@@ -65,21 +69,6 @@ final public class AttributeIterator implements AxisIterator, LookaheadIterator 
         } else {
             return null;
         }
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 
 

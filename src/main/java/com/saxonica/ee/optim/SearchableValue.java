@@ -1,16 +1,16 @@
 package com.saxonica.ee.optim;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -29,7 +29,15 @@ public abstract class SearchableValue implements GroundedValue {
     public static SearchableValue makeSearchableValue(SequenceIterator iter) throws XPathException {
         Item[] array;
         int end;
-        if (!iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
+        if (SequenceTool.supportsGetLength(iter)) {
+            end = SequenceTool.getLength(iter);
+            array = new Item[end];
+            int i = 0;
+            Item it;
+            while ((it = iter.next()) != null) {
+                array[i++] = it;
+            }
+        } else {
             int used = 0;
             array = new Item[20];
             Item it;
@@ -44,14 +52,6 @@ public abstract class SearchableValue implements GroundedValue {
                 array = Arrays.copyOf(array, used);
             }
             end = used;
-        } else {
-            end = ((LastPositionFinder) iter).getLength();
-            array = new Item[end];
-            int i = 0;
-            Item it;
-            while ((it = iter.next()) != null) {
-                array[i++] = it;
-            }
         }
         if (end < 8) {
             return new SmallSearchableValue(array, end);
@@ -74,7 +74,7 @@ public abstract class SearchableValue implements GroundedValue {
 
     /*@NotNull*/
     @Override
-    public UnfailingIterator iterate() {
+    public SequenceIterator iterate() {
         return new ArrayIterator.Of<>(value, 0, end);
     }
 

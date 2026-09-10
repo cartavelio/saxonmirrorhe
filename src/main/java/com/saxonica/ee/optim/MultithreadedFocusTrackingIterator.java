@@ -6,8 +6,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
-import java.util.EnumSet;
-
 /**
  * This is a thread-safe version of the parent class {@link FocusTrackingIterator}. It is identical
  * to the superclass except that the methods a synchronized. It is used when there is any possibility
@@ -97,6 +95,10 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
         return super.position();
     }
 
+    public boolean supportsGetLength() {
+        return true;
+    }
+
     /**
      * Get the position of the last item in the sequence. The method is stateless in its external effect:
      * that is, it does not change the values returned by position(), next(), hasNext(), etc. However,
@@ -170,21 +172,6 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
     @Override
     public synchronized void close() {
         super.close();
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     * acceptable to return the value zero, indicating that there are no known special properties.
-     * It is acceptable for the properties of the iterator to change depending on its state.
-     * @since 8.6
-     */
-    @Override
-    public synchronized EnumSet<SequenceIteratorProperty> getProperties() {
-        return super.getProperties();
     }
 
     /**

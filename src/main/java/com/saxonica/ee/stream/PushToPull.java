@@ -7,7 +7,6 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AbstractSequenceIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.QuitParsingException;
@@ -16,6 +15,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.StringItem;
 
+import java.io.Closeable;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -46,8 +46,7 @@ public class PushToPull {
         /**
          * Evaluate an instruction in push mode
          *
-         *
-         * @param output the destination for the result
+         * @param output  the destination for the result
          * @param context the evaluation context
          * @throws XPathException       in the event of a failure
          * @throws QuitParsingException if there was an early exit, that is, if the instruction was evaluated
@@ -62,7 +61,7 @@ public class PushToPull {
      * output to a blocking queue, from which the consumer can read it. Note that the queue
      * holds items in composed form, so this only works well if the producer is generating
      * a sequence of independent items, rather than a single large tree.
-     *
+     * <p>
      * The queue does not hold items directly, but wraps them in an Outcome object, which
      * can hold either an Item or an exception.
      */
@@ -131,61 +130,71 @@ public class PushToPull {
 
     /**
      * Get an iterator over the result of evaluating the supplied expression.
+     *
      * @return an iterator. Calls to next() on this iterator will read items from the
      * queue, waiting if necessary until the next item becomes available.
      */
 
     public SequenceIterator getIterator() {
-        EnterpriseConfiguration config = (EnterpriseConfiguration)context.getConfiguration();
+        EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
         final Thread provider = config.getMultithreadingFactory().makeThread(new Provider());
         provider.start();
-        return new AbstractSequenceIterator() {
-
-            boolean allDone = false;
-
-            @Override
-            @CSharpModifiers(code = {"public", "override"})
-            public Item next() {
-                //System.err.println("Consumer.read()");
-                if (allDone) {
-                    // Just in case the caller does another call on next() after completion
-                    return null;
-                }
-                try {
-                    Outcome<Item> next = queue.take();
-                    if (next.isSuccess()) {
-                        Item item = next.getResult();
-                        if (item == stopper) {
-                            // this is a special item indicating the end of the sequence
-                            allDone = true;
-                            return null;
-                        } else {
-                            return item;
-                        }
-                    } else {
-                        XPathException xpe = XPathException.makeXPathException(next.getException());
-                        throw new UncheckedXPathException(xpe);
-                    }
-                } catch (InterruptedException e) {
-                    XPathException xpie = XPathException.makeXPathException(e);
-                    throw new UncheckedXPathException(xpie);
-                }
-            }
-
-            /**
-             * If the consumer does not need any more items from the iterator, it should call close(); this will signal
-             * the producer to stop producing any more items. In cases where the producer is parsing an input XML document,
-             * this may cause the parse() to be aborted early, which gives substantial performance benefits.
-             */
-
-            @Override
-            @CSharpModifiers(code = {"public", "override"})
-            public void close() {
-                allDone = true;
-                provider.interrupt();
-            }
-        };
+        return new PushToPullIterator(provider);
     }
+
+    private class PushToPullIterator implements SequenceIterator, Closeable {
+
+        Thread provider;
+        boolean allDone = false;
+
+        public PushToPullIterator(Thread provider) {
+            this.provider = provider;
+        }
+
+        @Override
+        @CSharpModifiers(code = {"public", "override"})
+        public Item next() {
+            //System.err.println("Consumer.read()");
+            if (allDone) {
+                // Just in case the caller does another call on next() after completion
+                return null;
+            }
+            try {
+                Outcome<Item> next = queue.take();
+                if (next.isSuccess()) {
+                    Item item = next.getResult();
+                    if (item == stopper) {
+                        // this is a special item indicating the end of the sequence
+                        allDone = true;
+                        return null;
+                    } else {
+                        return item;
+                    }
+                } else {
+                    XPathException xpe = XPathException.makeXPathException(next.getException());
+                    throw new UncheckedXPathException(xpe);
+                }
+            } catch (InterruptedException e) {
+                XPathException xpie = XPathException.makeXPathException(e);
+                throw new UncheckedXPathException(xpie);
+            }
+        }
+
+        /**
+         * If the consumer does not need any more items from the iterator, it should call close(); this will signal
+         * the producer to stop producing any more items. In cases where the producer is parsing an input XML document,
+         * this may cause the parse() to be aborted early, which gives substantial performance benefits.
+         */
+
+        @Override
+        @CSharpModifiers(code = {"public", "override"})
+        public void close() {
+            allDone = true;
+            provider.interrupt();
+        }
+    }
+
+
 }
 
 // Copyright (c) 2018-2020 Saxonica Limited

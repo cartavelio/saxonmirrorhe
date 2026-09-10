@@ -15,7 +15,6 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.TextLinesIterator;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntPredicateLambda;
 
@@ -917,7 +916,7 @@ public class EXPathFile {
             file = checkWriteDestination(path.head().getStringValue());
             FileOutputStream stream = new FileOutputStream(file);
             Writer writer = new OutputStreamWriter(stream, encoding.head().getStringValue());
-            UnfailingIterator ui = contents.iterate();
+            SequenceIterator ui = contents.iterate();
             Item i = ui.next();
             while (i != null) {
                 writer.write(i.getUnicodeStringValue() + NEWLINE);

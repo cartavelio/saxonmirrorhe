@@ -13,10 +13,10 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.type.ErrorType;
 
 import java.util.List;
@@ -68,7 +68,7 @@ public class LiteralAdjunct extends StreamingAdjunct implements FeedMaker {
                 if (value instanceof Item) {
                     out.append((Item) value);
                 } else {
-                    UnfailingIterator iter = value.iterate();
+                    SequenceIterator iter = value.iterate();
                     processItems(iter, out);
                 }
             }

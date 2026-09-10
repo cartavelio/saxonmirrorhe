@@ -8,9 +8,10 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
@@ -66,7 +67,11 @@ public class BufferingFeed extends ItemFeed {
         inputValue = new ArrayList<>(4);
         SequenceIterator iter = getExpression().iterate(getContext());
         final Outputter out = getNextOutputter();
-        SequenceTool.supply(iter, (ItemConsumer<? super Item>) out::append);
+        try {
+            SequenceTool.supply(iter, (ItemConsumer<? super Item>) out::append);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
         out.close();
     }
 

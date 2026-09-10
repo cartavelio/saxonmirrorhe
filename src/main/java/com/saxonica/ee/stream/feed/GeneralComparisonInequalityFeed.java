@@ -13,6 +13,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.NumericValue;
@@ -100,19 +101,23 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
                 boolean existsUnstreamed = false;
                 while ((val = (AtomicValue) comparand.next()) != null) {
                     existsUnstreamed = true;
+                    if (!Type.isGenerallyComparable(matchType, val.getPrimitiveType(), false)) {
+                        throw new XPathException("Cannot compare " + matchType + " to " + val.getPrimitiveType(), "FORG0001");
+                    }
                     if (val.isUntypedAtomic()) {
                         firstUntypedUnstreamed = (StringItem) val;
                         AtomicValue cval = Converter.convert(firstUntypedStreamed, matchType, rules);
                         AtomicMatchKey ku1 = cval.getXPathMatchKey(collator, implicitTimezone);
-                        if (ku1 != ks1) {
+                        if (!ku1.equals(ks1)) {
                             reportDone(true);
                             break;
                         } else {
                             firstUnstreamed = ku1;
                         }
                     } else {
+
                         AtomicMatchKey ku2 = val.getXPathMatchKey(collator, implicitTimezone);
-                        if (ks1 != ku2) {
+                        if (!ks1.equals(ku2)) {
                             reportDone(true);
                             break;
                         } else {

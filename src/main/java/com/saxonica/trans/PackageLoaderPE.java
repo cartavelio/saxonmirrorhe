@@ -92,7 +92,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
             final Assign inst = new Assign(select);
             loader.completionActions.add(() -> {
                 SymbolicName sn = new SymbolicName(StandardNames.XSL_VARIABLE, varName);
-                GlobalVariable var = (GlobalVariable) loader.getPackage().getComponent(sn).getActor();
+                GlobalVariable var = (GlobalVariable) loader.getTopLevelPackage().getComponent(sn).getActor();
                 inst.fixup(var);
             });
             return inst;

@@ -2,15 +2,12 @@ package com.saxonica.ee.bytecode.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.EnumSetTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-
-import java.util.EnumSet;
 
 /**
  * Abstract iterator that performs a one-to-one mapping from the items in the input sequence to the
@@ -66,30 +63,15 @@ public abstract class OneToOneMappingIterator implements SequenceIterator, Looka
         base.close();
     }
 
+    public boolean supportsGetLength() {
+        return SequenceTool.supportsGetLength(base);
+    }
+
     @Override
     public int getLength() {
-        // Must only be called if this is a last-position-finder iterator, which will only be true if the base iterator
-        // is a last-position-finder iterator and one-to-one is true
         return ((LastPositionFinder) base).getLength();
     }
 
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED},
-     *         {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSetTool.intersect(
-                base.getProperties(),
-                EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.LOOKAHEAD));
-    }
 }
 
 // Copyright (c) 2011-2020 Saxonica Limited
