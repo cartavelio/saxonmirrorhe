@@ -16,22 +16,20 @@ pip install saxonc@@edition@@
 
 ## Usage
 
-I will make references to the Saxonica official documentation a lot from here because they list all the Python APIs with examples for some.  
- Import all the modules
 ```python 
-from saxonc import *
+from saxonc@@edition@@ import *
 ```
 
 Import specific modules
 ```python 
-from saxonc import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 ```
 
-Now, let's check what 6 other processors are available from Saxon by visiting the [Saxonica's site](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api). In the API section, you will find more information about what each processor does.
+Now, let's check what processors are available see our docuemntation: [Saxonica's site](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api). In the API section, you will find more information about what each processor does.
 
 Next, we will use `PySaxonProcessor` to check the Saxon version.
 ```python
-from saxonc import PySaxonProcessor
+from saxonc@@edition@@ import PySaxonProcessor
 
 with PySaxonProcessor(license=False) as proc:
 	print(proc.version)
@@ -46,7 +44,7 @@ Please **note** that `license=False` requests the open-source version of Saxon, 
 ### Example #1
 Let's parse a toy XML.
 ```python
-from  saxonc  import PySaxonProcessor
+from  saxonc@@edition@@  import PySaxonProcessor
 
 with PySaxonProcessor(license=False) as  proc:
 	xml = """\
@@ -82,9 +80,9 @@ value2
 As we can see, we can explore the XML node structure, attributes, and many other things if you check more on the [APIs](https://www.saxonica.com/saxon-c/documentation/index.html#!api/saxon_c_python_api).
 
 ### Example #2
-Let's use the XML path processor from Saxonica. 
+Let's use the XML path processor. 
 ```python
-from  saxonc  import PySaxonProcessor
+from  saxonc@@edition@@  import PySaxonProcessor
 
 with PySaxonProcessor(license=False) as  proc:
 	xml = """\
@@ -115,7 +113,7 @@ Saxon shows the result given the path.
 ### Example #3
 The XSLT processor, #1
 ```python
-from  saxonc  import PySaxonProcessor
+from  saxonc@@edition@@  import PySaxonProcessor
 
 with PySaxonProcessor(license=False) as  proc:
 	xsltproc = proc.new_xslt30_processor()
@@ -139,7 +137,7 @@ Here is the output that shows the result of transformation.
 ### Example #4
 Watch out for the not-pythonic way!
 ```python
-from  saxonc  import PySaxonProcessor
+from  saxonc@@edition@@  import PySaxonProcessor
 
 with PySaxonProcessor(license=False) as  proc:
 	xsltproc = proc.new_xslt30_processor()
@@ -174,7 +172,7 @@ Please check out [Saxonica's documentation](https://www.saxonica.com/saxon-c/doc
 `with` is good to clear out the underlying processes when the program exits.
 
 ## Source code & Development
-- We downloaded Saxonc HE from [Saxonica's site](https://www.saxonica.com/download/c.xml) 
+- Source code is available here: [Saxonica's site](https://www.saxonica.com/download/c.xml) 
 - We have the source code on a [github repo](https://github.com/?????) to make the wheel packages for Linux and macOS. We have [a separate repo](https://github.com/tennom/??????-win) for Windows. 
 - We use Github action runners for CI and releases.
 
