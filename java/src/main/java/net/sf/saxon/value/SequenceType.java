@@ -216,6 +216,13 @@ public final class SequenceType {
             BuiltInAtomicType.ANY_URI.zeroOrOne();
 
     /**
+     * A type that allows a sequence of anyURI values
+     */
+
+    public static final SequenceType ANY_URI_SEQUENCE =
+            BuiltInAtomicType.ANY_URI.zeroOrMore();
+
+    /**
      * A type that allows a single optional date
      */
 
