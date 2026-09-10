@@ -353,6 +353,8 @@ TODO: rethink redefines and override
         <p><emph>References of the form </emph>PR nnnn <emph>refer to pull requests against the
         specifications in <a href="https://github.com/qt4cg/qtspecs/pulls">GitHub</a>.</emph></p>
         
+        <h3>Changes to XPath Expressions</h3>
+        
         <p>Filter expressions accept a sequence of integer positions, for example <code>$in[3 to 5]</code>
         or <code>$in[1, 4, 7]</code>.</p>
         
@@ -360,7 +362,7 @@ TODO: rethink redefines and override
             <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
             not as <code>(@price otherwise @cost) * 2</code>. (PR 1031)</p>
         
-        <p>In XPath, the <code>for</code> and <code>let</code> expressions now accept a larger subset
+        <p>The <code>for</code> and <code>let</code> expressions now accept a larger subset
         of XQuery <code>FLWOR</code> syntax. Specifically:</p>
         
         <ul>
@@ -393,103 +395,205 @@ TODO: rethink redefines and override
         
         <p>In a try/catch expression, the variable <code>err:map</code> is available within the catch clause.</p>
         
-        <!--<p>Variadic functions (syntax <code>declare %variadic function</code>) are implemented in XQuery.</p>-->
         
-        <p>The second <code>$position</code> argument is available on function callbacks made by the functions
+        <p>A second <code>$position</code> argument is available on many function callbacks, for example those on
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
         
-        <p>The functions <code>starts-with-sequence</code>, <code>ends-with-sequence</code>, <code>contains-sequence</code>
-            are renamed <code>starts-with-subsequence</code>, <code>ends-with-subsequence</code>, <code>contains-subsequence</code>.</p>
+        <h3>Changes to Functions</h3>
         
-        <p>The functions <code>deep-equal</code>, <code>distinct-values</code>,  
-            <code>duplicate-values</code>, <code>all-equal</code>, <code>all-different</code>, 
-            <code>starts-with-subsequence</code>, <code>ends-with-subsequence</code>, <code>contains-subsequence</code>, 
-            now use transitive equality semantics: this means that numeric values of different types (for example 
-            <code>xs:double</code> and <code>xs:decimal</code> are compared by converting both values to
-            decimals, not to doubles.</p>
         
-        <p>The <code>deep-equal</code> function now supports the <code>items-equal</code> callback.
-        The <code>collation</code> and <code>options</code> arguments of <code>deep-equal</code>
-        have been combined.</p>
+        <p>The following functions are new in 4.0 (some of these were already implemented in Saxon 12):</p>
         
-        <p>The function <code>fn:format-number</code> can now take an options map as the third argument.</p>
+        <ul>
+            <li><code>array:build</code></li> 
+            <li><code>array:empty</code></li> 
+            <li><code>array:foot</code></li> 
+            <li><code>array:index-of</code></li> 
+            <li><code>array:index-where</code></li> 
+            <li><code>array:items</code></li> 
+            <li><code>array:members</code></li> 
+            <li><code>array:of-members</code></li> 
+            <li><code>array:slice</code></li> 
+            <li><code>array:sort-with</code></li> 
+            <li><code>array:split</code></li> 
+            <li><code>array:trunk</code></li> 
+            <li><code>fn:atomic-type-annotation</code></li> 
+            <li><code>fn:build-uri</code></li> 
+            <li><code>fn:char</code></li> 
+            <li><code>fn:characters</code></li> 
+            <li><code>fn:civil-timezone</code></li> 
+            <li><code>fn:collation-available</code></li> 
+            <li><code>fn:collation</code></li> 
+            <li><code>fn:contains-subsequence</code></li> 
+            <li><code>fn:csv-doc</code></li> 
+            <li><code>fn:csv-to-arrays</code></li> 
+            <li><code>fn:csv-to-xml</code></li> 
+            <li><code>fn:decode-from-uri</code></li> 
+            <li><code>fn:distinct-ordered-nodes</code></li> 
+            <li><code>fn:do-until</code></li> 
+            <li><code>fn:duplicate-values</code></li> 
+            <li><code>fn:element-to-map-plan</code></li> 
+            <li><code>fn:ends-with-subsequence</code></li> 
+            <li><code>fn:every</code></li> 
+            <li><code>fn:expanded-QName</code></li> 
+            <li><code>fn:foot</code></li> 
+            <li><code>fn:graphemes</code></li> 
+            <li><code>fn:hash</code></li> 
+            <li><code>fn:highest</code></li> 
+            <li><code>fn:html-doc</code></li> 
+            <li><code>fn:identity</code></li> 
+            <li><code>fn:in-scope-namespaces</code></li> 
+            <li><code>fn:index-where</code></li> 
+            <li><code>fn:insert-separator</code></li> 
+            <li><code>fn:invisible-xml</code></li> 
+            <li><code>fn:is-NaN</code></li> 
+            <li><code>fn:items-at</code></li> 
+            <li><code>fn:jnode-position</code></li> 
+            <li><code>fn:jnode-selector</code></li> 
+            <li><code>fn:jtree</code></li> 
+            <li><code>fn:lowest</code></li> 
+            <li><code>fn:message</code></li> 
+            <li><code>fn:node-type-annotation</code></li> 
+            <li><code>fn:op</code></li> 
+            <li><code>fn:parse-QName</code></li> 
+            <li><code>fn:parse-csv</code></li> 
+            <li><code>fn:parse-html</code></li> 
+            <li><code>fn:parse-integer</code></li> 
+            <li><code>fn:parse-uri</code></li> 
+            <li><code>fn:partial-apply</code></li> 
+            <li><code>fn:partition</code></li> 
+            <li><code>fn:replicate</code></li> 
+            <li><code>fn:scan-left</code></li> 
+            <li><code>fn:scan-right</code></li> 
+            <li><code>fn:schema-type</code></li> 
+            <li><code>fn:seconds</code></li> 
+            <li><code>fn:siblings</code></li> 
+            <li><code>fn:slice</code></li> 
+            <li><code>fn:some</code></li> 
+            <li><code>fn:sort-with</code></li> 
+            <li><code>fn:starts-with-subsequence</code></li> 
+            <li><code>fn:subsequence-where</code></li> 
+            <li><code>fn:take-while</code></li> 
+            <li><code>fn:transitive-closure</code></li> 
+            <li><code>fn:trunk</code></li> 
+            <li><code>fn:type-of</code></li> 
+            <li><code>fn:unix-dateTime</code></li> 
+            <li><code>fn:unparsed-binary</code></li> 
+            <li><code>fn:void</code></li> 
+            <li><code>fn:while-do</code></li> 
+            <li><code>fn:xsd-validator</code></li> 
+            <li><code>map:build</code></li> 
+            <li><code>map:empty</code></li> 
+            <li><code>map:entries</code></li> 
+            <li><code>map:filter</code></li> 
+            <li><code>map:items</code></li> 
+            <li><code>map:keys-where</code></li> 
+            <li><code>math:cosh</code></li> 
+            <li><code>math:e</code></li> 
+            <li><code>math:sinh</code></li> 
+            <li><code>math:tanh</code></li>
+        </ul>
         
-        <p>The functions <code>fn:min</code> and <code>fn:max</code> now return one of the items from
-        the input sequence <emph>as is</emph>, rather than converting it to <code>xs:double</code>.</p>
+        <p>The following functions have been significantly extended in 4.0. Again, a few of the changes might have
+            already been implemented in Saxon 12:</p>
         
-        <p>The functions <code>fn:seconds</code> (PR 984), <code>fn:subsequence-where</code> (PR 940), 
-            <code>fn:take-while</code> (PR 1008), and <code>fn-unix-dateTime</code> (PR 1358, 1435)
-            are implemented.</p>
+        <ul>
+            <li><code>array:filter</code></li> 
+            <li><code>array:for-each-pair</code></li> 
+            <li><code>array:for-each</code></li> 
+            <li><code>array:get</code></li> 
+            <li><code>array:index-where</code></li> 
+            <li><code>array:join</code></li> 
+            <li><code>array:sort-by</code></li> 
+            <li><code>array:subarray</code></li> 
+            <li><code>fn:all-different</code></li> 
+            <li><code>fn:all-equal</code></li> 
+            <li><code>fn:analyze-string</code></li> 
+            <li><code>fn:apply</code></li> 
+            <li><code>fn:atomic-equal</code></li> 
+            <li><code>fn:avg</code></li> 
+            <li><code>fn:base-uri</code></li> 
+            <li><code>fn:codepoints-to-string</code></li> 
+            <li><code>fn:compare</code></li> 
+            <li><code>fn:concat</code></li> 
+            <li><code>fn:day-from-dateTime</code></li> 
+            <li><code>fn:deep-equal</code></li> 
+            <li><code>fn:distinct-values</code></li> 
+            <li><code>fn:divide-decimals</code></li> 
+            <li><code>fn:do-until</code></li> 
+            <li><code>fn:doc-available</code></li> 
+            <li><code>fn:doc</code></li> 
+            <li><code>fn:document-uri</code></li> 
+            <li><code>fn:element-to-map</code></li> 
+            <li><code>fn:error</code></li> 
+            <li><code>fn:every</code></li> 
+            <li><code>fn:filter</code></li> 
+            <li><code>fn:for-each-pair</code></li> 
+            <li><code>fn:for-each</code></li> 
+            <li><code>fn:format-date</code></li> 
+            <li><code>fn:format-dateTime</code></li> 
+            <li><code>fn:format-integer</code></li> 
+            <li><code>fn:format-number</code></li> 
+            <li><code>fn:format-time</code></li> 
+            <li><code>fn:function-annotations</code></li> 
+            <li><code>fn:has-children</code></li> 
+            <li><code>fn:hours-from-dateTime</code></li> 
+            <li><code>fn:in-scope-prefixes</code></li> 
+            <li><code>fn:index-of</code></li> 
+            <li><code>fn:index-where</code></li> 
+            <li><code>fn:innermost</code></li> 
+            <li><code>fn:json-doc</code></li> 
+            <li><code>fn:load-xquery-module</code></li> 
+            <li><code>fn:max</code></li> 
+            <li><code>fn:min</code></li> 
+            <li><code>fn:minutes-from-dateTime</code></li> 
+            <li><code>fn:month-from-dateTime</code></li> 
+            <li><code>fn:namespace-uri-for-prefix</code></li> 
+            <li><code>fn:normalize-space</code></li> 
+            <li><code>fn:outermost</code></li> 
+            <li><code>fn:parse-json</code></li> 
+            <li><code>fn:parse-xml-fragment</code></li> 
+            <li><code>fn:parse-xml</code></li> 
+            <li><code>fn:path</code></li> 
+            <li><code>fn:random-number-generator</code></li> 
+            <li><code>fn:remove</code></li> 
+            <li><code>fn:replace</code></li> 
+            <li><code>fn:resolve-uri</code></li> 
+            <li><code>fn:round-half-to-even</code></li> 
+            <li><code>fn:round</code></li> 
+            <li><code>fn:serialize</code></li> 
+            <li><code>fn:some</code></li> 
+            <li><code>fn:sort-by</code></li> 
+            <li><code>fn:string-length</code></li> 
+            <li><code>fn:subsequence</code></li> 
+            <li><code>fn:substring</code></li> 
+            <li><code>fn:sum</code></li> 
+            <li><code>fn:take-while</code></li> 
+            <li><code>fn:timezone-from-dateTime</code></li> 
+            <li><code>fn:tokenize</code></li> 
+            <li><code>fn:trace</code></li> 
+            <li><code>fn:unparsed-text-available</code></li> 
+            <li><code>fn:unparsed-text-lines</code></li> 
+            <li><code>fn:unparsed-text</code></li> 
+            <li><code>fn:while-do</code></li> 
+            <li><code>fn:xml-to-json</code></li> 
+            <li><code>fn:year-from-dateTime</code></li> 
+            <li><code>map:filter</code></li> 
+            <li><code>map:find</code></li> 
+            <li><code>map:for-each</code></li> 
+            <li><code>map:get</code></li> 
+            <li><code>map:keys-where</code></li> 
+            <li><code>map:merge</code></li> 
+            <li><code>map:put</code></li> 
+            <li><code>map:remove</code></li> 
+
+        </ul>
         
-        <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function
-        <code>fn:do-until</code> is implemented. (PR 962)</p>
         
-        <p>The function <code>fn:round</code> acquires a third argument that can be used to control
-        the rounding mode.</p>
-        
-        <p>The functions <code>fn:message</code> and <code>fn:trace#1</code> are implemented.</p>
-        
-        <p>The functions <code>map:values</code> and <code>array:values</code> are implemented.</p>
-        
-        <p>The functions <code>map:empty</code> and <code>map:keys-where</code> are implemented.</p>
-        
-        <p>The function <code>map:build</code> allows multiple index entries to be created for a single
-        input item.</p>
-        
-        <p>The functions <code>map:values</code> and <code>array:values</code> are renamed
-        as <code>map:items</code> and <code>array:items</code> respectively; the old names are
-        retained for the time being as synonyms.</p>
-        
-        <p>The functions <code>fn:csv-to-arrays</code>, <code>fn:parse-csv</code>, and <code>fn:csv-to-xml</code>
-        are implemented.</p>
-        
-        <p>The function <code>fn:compare</code>, previously used only to compare strings, is extended
-        to compare any comparable atomic values.</p>
-        
-        <p>The new function <code>fn:sort-with</code> is implemented. (PR 795)</p>
-        
-        <p>The new functions <code>fn:collation</code> and <code>fn:collation-available</code> are implemented.</p>
-        
-        <p>The new function <code>fn:graphemes</code> is implemented. (PR 1068)</p>
-        
-        <p>The new function <code>fn:hash</code> is implemented.</p>
-        
-        <p>The new function <code>fn:function-annotations</code> is implemented.</p>
-        
-        <p>The new functions <code>fn:node-kind</code>, <code>fn:schema-type</code>, 
-            <code>fn:atomic-type-annotation</code>, <code>fn:node-type-annotation</code> are implemented.</p>
-        
-        <!--<p>The function <code>fn:codepoints-to-string</code> is now variadic: you can write
-        <code>codepoints-to-string(13, 10)</code> instead of <code>codepoints-to-string((13, 10))</code>.</p>-->
-        
-        <p>The functions <code>fn:parse-xml</code> and <code>fn:parse-xml-fragment</code> now accept
-        an <code>options</code> parameter.</p>
-        
-        <p>The deep-lookup operator <code>??</code> is implemented. TODO: well, it was. Now gone?</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
             flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (PR 1022)</p>
         
-        <p>The <code>fn:parse-json</code> and <code>fn:json-doc</code> functions accept an option
-        to allow JSON null to be represented by something other than an empty sequence, for example
-            <code>map{'null':[]}</code> maps null to an empty array while <code>map{'null':[]}</code>.</p>
-        
-        <p>The function <code>fn:load-xquery-module</code> accepts a new option <code>content</code>
-        whose value is the text of the module to be loaded, as a string. This works whether or not
-        4.0 is enabled. (PR 1333)</p>
-        
-        <p>The rules for the <code>number-parser</code> callback in <code>fn:parse-json</code> and 
-            <code>fn:json-doc</code> have been changed to reflect changes in the specification.
-        (PR 1058, PR 1080)</p>
-        
-        <p>The <code>xml-to-json</code> function is changed so that numbers in the input are output with
-        their lexical representation unchanged, other than changes (such as removing leading zeroes or
-        plus signs) needed to make the output valid JSON. In particular, large integers are no longer
-        output using exponential notation. The <code>number-formatter</code> option, which was a previous
-        attempt to solve this problem, has been dropped.</p>
-        
-        <p>The <code>escape-solidus</code> option of <code>xml-to-json</code> is implemented. (This is available
-        whether or not 4.0 is enabled). (PR 1353)</p>
         
         <p>The serialization option <code>json-lines="yes"</code> is implemented. (PR 1497, PR 1596)</p>
         
@@ -497,8 +601,6 @@ TODO: rethink redefines and override
         for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
         in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
         
-        <p>The functions <code>math:e</code>, <code>math:sinh</code>, <code>math:cosh</code>,
-        and <code>math:tanh</code> are implemented. (PR 1205)</p>
         
         <p>The XSLT-specific function <code>fn:character-map</code> is implemented.</p>
         
@@ -645,29 +747,26 @@ TODO: rethink redefines and override
                           is an approximation to the type defined in the specification.</p></li>
               </ul>
             </li>
-            <li><p>PR1355, PR1708 - Named record types in XSLT (xsl:record-type) and XQuery</p></li>
+            <li><p>PR1355, PR1708 - Named record types in XSLT (<code>xsl:record-type</code>) and XQuery(<code>declare record type</code>)</p></li>
             <li><p>PR1817, PR1853 - Methods</p></li>
-            <li><p>PR1856: lookahead/behind in regular expressions. While the basic
+            <!--<li><p>PR1856: lookahead/behind in regular expressions. While the basic
             capability is implemented, captured groups within lookahead expressions
-            aren't fully working. TODO: is this still true?</p></li>
-            <li><p>The pipeline operator <code>-></code> (partially implemented)</p></li>
-            <li><p>try/catch/finally in XQuery</p></li>
-            <!--<li><p>xsd-validator function (partially implemented)</p></li>-->
-            <li><p>scan-left and scan-right functions</p></li>
-            <li><p>PR1864, PR1877 - type specifiers in lookup expressions</p></li>
-            <li><p>PR1875 - params passed implicitly through xsl:next-match</p></li>
-            <li><p>PR1819 - multiple schemas TODO: now implemented? But not thoroughly tested</p></li>
+            aren't fully working. TODO: is this still true?</p></li>-->
+            <li><p>PR1686 - The pipeline operator <code>-></code> is implemented, but there has been limited testing
+                 of the case where the context value is not a single item.</p></li>
+            <li><p>PR1914 - try/catch/finally in XQuery</p></li>
+            <li><p>PR957 - scan-left and scan-right functions</p></li>
+            <li><p>PR1875 - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
             <li><p>PR1773 - intersect and except in patterns (especially across different kinds of pattern, e.g. (node() | jnode())</p></li>
             <li><p>PR1676 - collation-available</p></li>
             <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
-            <li><p>PR1622 - XSLT map-for-key function</p></li>
-            <!--<li><p>JSON-Lines input and output</p></li>-->
+            <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
             <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
             <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
             <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
-            <li><p>PR2213 - trusted attribute for xsl:evaluate</p></li>
-            <li><p>Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
-            <li><p>The fn:invisible-xml function is not implemented in SaxonCS</p></li>
+            <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
+            <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
+            <li><p>PR791 - The fn:invisible-xml function is not implemented in SaxonCS</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
