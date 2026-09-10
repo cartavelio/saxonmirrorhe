@@ -72,7 +72,9 @@ public class AxiomDocument extends GenericTreeInfo implements ActiveSource {
 
     /**
      * Factory method to wrap an Axiom node with a wrapper that implements the
-     * Saxon NodeInfo interface.
+     * Saxon NodeInfo interface. Note that the Axiom interface makes no attempt to
+     * merge adjacent text nodes, which is required for strict XDM conformance. Adjacent
+     * text nodes can arise because of CDATA sections, depending on the Axiom and parser version.
      *
      * @param node       The Axiom node (an element, text, processing-instruction, or comment node)
      * @param docWrapper The wrapper for the Document containing this node

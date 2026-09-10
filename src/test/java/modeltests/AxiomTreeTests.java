@@ -37,6 +37,11 @@ public class AxiomTreeTests extends ObjectModelTests {
         }
     }
 
+    @Override
+    boolean mergesAdjacentTextNodes() {
+        return false;
+    }
+
 
     /**
      * To be implemented in each subclass - supply an XPath extension function call that finds
