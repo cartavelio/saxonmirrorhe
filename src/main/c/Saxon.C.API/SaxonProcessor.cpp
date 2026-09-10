@@ -1014,83 +1014,34 @@ XdmArray *SaxonProcessor::makeArray(const char **input, int length) {
 
 XdmMap *SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
 
-        int64_t  processorDataRef = -1;
+        int64_t  mapDataRef = -1;
 
-        if(length == 0) {
-            processorDataRef = createProcessorData(sxn_environ->thread);
-            std::cerr << "Converting array of XdmValue to XdmArray length=0"<<std::endl;
-        } else {
-            processorDataRef = createProcessorDataWithCapacity(sxn_environ->thread, length);
 
-        }
+            mapDataRef = j_create_mapDataWithCapacity(sxn_environ->thread, dataMap.size());
 
-        for (int i = 0; i < length; i++) {
-            if (input[i] == nullptr || input[i]->getUnderlyingValue() <= -1) {
+
+        for (std::map<XdmAtomicValue *, XdmValue *>::iterator iter =
+                dataMap.begin(); iter != dataMap.end(); ++iter) {
+            if ((iter->first)->getUnderlyingValue() <= -1 || (iter->second)->getUnderlyingValue() <= -1) {
                 std::cerr << "Error found when converting array of XdmValue to XdmArray"<<std::endl;
                 return nullptr;
             }
-            addProcessorValue(sxn_environ->thread, (void *)processorDataRef, (void *)input[i]->getUnderlyingValue());
+            j_addMapPair(sxn_environ->thread, (void *)mapDataRef, (void *)(iter->first)->getUnderlyingValue(), (void *)(iter->second)->getUnderlyingValue());
 
         }
 
-        int64_t  xdmArrayRef = j_makeXdmArray(sxn_environ->thread, (void *)processorDataRef);
+        int64_t  xdmmapRef = j_makeXdmMap(sxn_environ->thread, (void *)mapDataRef);
 
-        if(xdmArrayRef <= 0) {
-           std::cerr << "Error found when converting array of XdmValue to XdmArray - Ref="<< ((long)xdmArrayRef)<<std::endl;
+        if(xdmmapRef <= 0) {
+           std::cerr << "Error found when converting std:map of pair (XdmAtomicValue, XdmValue) to XdmMap - Ref="<< ((long)xdmmapRef)<<std::endl;
+           //TODO create exception
             return nullptr;
         }
 
-        XdmArray * newArray = new XdmArray(xdmArrayRef, length);
+        XdmMap * newArray = new XdmMap(xdmmapRef);
         return newArray;
 
-   /* SaxonProcessor::attachCurrentThread();
-    jobjectArray keyArray = nullptr;
-    jobjectArray valueArray = nullptr;
-    jclass objectClass = lookForClass(SaxonProcessor::sxn_environ->env,
-                                      "java/lang/Object");
 
-    int size = dataMap.size();
-
-    if (size > 0) {
-
-        keyArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size,
-                                                                    objectClass, 0);
-        valueArray = SaxonProcessor::sxn_environ->env->NewObjectArray((jint) size,
-                                                                      objectClass, 0);
-        int i = 0;
-        for (std::map<XdmAtomicValue *, XdmValue *>::iterator iter =
-                dataMap.begin(); iter != dataMap.end(); ++iter, i++) {
-
-
-            SaxonProcessor::sxn_environ->env->SetObjectArrayElement(keyArray, i,
-                                                                    (iter->first)->getUnderlyingValue());
-
-            SaxonProcessor::sxn_environ->env->SetObjectArrayElement(valueArray, i,
-                                                                    (iter->second)->getUnderlyingValue());
-
-        }
-        jclass xdmUtilsClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/option/cpp/XdmUtils");
-        jmethodID xmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(xdmUtilsClass, "makeXdmMap",
-                                                                                         "([Lnet/sf/saxon/s9api/XdmAtomicValue;[Lnet/sf/saxon/s9api/XdmValue;)Lnet/sf/saxon/s9api/XdmMap;");
-        if (!xmID) {
-            std::cerr << "Error: SaxonDll." << "makeXdmMap"
-                      << " not found\n" << std::endl;
-            return nullptr;
-        }
-
-
-        jobject results = (jobject) (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(xdmUtilsClass, xmID,
-                                                                                              keyArray, valueArray));
-        SaxonProcessor::sxn_environ->env->DeleteLocalRef(keyArray);
-        SaxonProcessor::sxn_environ->env->DeleteLocalRef(valueArray);
-        if (exceptionOccurred() || !results) {
-            checkAndCreateException(saxonCAPIClass);
-        } else {
-            return new XdmMap(results);
-        }
-    }*/
-
-    return nullptr;
 }
 
 
