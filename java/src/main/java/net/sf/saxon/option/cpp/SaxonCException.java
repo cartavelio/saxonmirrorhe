@@ -85,8 +85,15 @@ public class SaxonCException  {
             //return WordFactory.nullPointer();
         }
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
-        return a;
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(exception.getMessage())){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
+
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
+        //return a;
     }
 
 
@@ -162,8 +169,15 @@ public class SaxonCException  {
             System.err.println("Java Debug: Exception found cp0: " + errorMessage);
         }
 
-        a = SaxonCAPI.stringToNative2(alloc, errorMessage);
-        return a;
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(errorMessage)){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
+
+        //a = SaxonCAPI.stringToNative2(alloc, errorMessage);
+        //return a;
     }
 
 
@@ -187,9 +201,12 @@ public class SaxonCException  {
         if(exception.getMessage() == null) {
             return WordFactory.nullPointer();
         }
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(exception.getMessage())){
 
-        final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(exception.getMessage());
-        return holder.get();
+            final CCharPointer result=holder.get();
+            return result;
+        }
     }
 
 
@@ -224,8 +241,14 @@ public class SaxonCException  {
             return j_getErrorMessageWithErrorCode(thread, alloc);
         }
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
-        return a;
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(message)){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
+        //return a;
 
 
     }
@@ -264,8 +287,15 @@ public class SaxonCException  {
             return WordFactory.nullPointer();
         }
         String qnameStr = exception.getErrorCode().getClarkName();
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, qnameStr);
-        return a;
+
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qnameStr)){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, qnameStr);
+        //return a;
     }
 
 
@@ -286,8 +316,16 @@ public class SaxonCException  {
         if(systemId == null || systemId.isEmpty()) {
             return WordFactory.nullPointer();
         }
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, systemId);
-        return a;
+
+        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(systemId)){
+
+            final CCharPointer result=holder.get();
+            return result;
+        }
+
+        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, systemId);
+        //return a;
     }
 
     @CEntryPoint(name = "j_clearException")

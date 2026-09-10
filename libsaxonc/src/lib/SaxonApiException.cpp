@@ -115,7 +115,7 @@ const char *SaxonApiException::getErrorCode() {
       return nullptr;
     }
     errorCode = std::string(tempm);
-    operator delete(tempm);
+    //operator delete(tempm);
   }
   return errorCode.c_str();
 }
@@ -137,7 +137,7 @@ const char *SaxonApiException::getSystemId() {
       return nullptr;
     }
     systemId = std::string(tempm);
-    operator delete(tempm);
+    //operator delete(tempm);
   }
   return systemId.c_str();
 }
@@ -157,7 +157,7 @@ const char *SaxonApiException::getMessage() {
       return nullptr;
     }
     message = std::string(tempm);
-    operator delete(tempm);
+    //operator delete(tempm);
   }
 
   return message.c_str();
@@ -180,7 +180,7 @@ const char *SaxonApiException::getMessageWithErrorCode() {
       return nullptr;
     }
     ec_message = std::string(tempm);
-    operator delete(tempm);
+    //operator delete(tempm);
   }
   return ec_message.c_str();
 }
@@ -195,7 +195,7 @@ const char *SaxonApiException::getCombinedStaticErrorMessages() {
       return nullptr;
     }
     s_message = std::string(tempm);
-    operator delete(tempm);
+    //operator delete(tempm);
   }
   return s_message.c_str();
 }

@@ -345,8 +345,13 @@ public class XQueryEngine extends SaxonCAPI {
             }
             XQueryEvaluator eval = xqueryEvaluator(processor, cwd, null, params, values, serializer);
             eval.run(serializer);
-            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
-            return holder.get();
+
+            //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
+            try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString())){
+
+                final CCharPointer result=holder.get();
+                return result;
+            }
 
         }
 
