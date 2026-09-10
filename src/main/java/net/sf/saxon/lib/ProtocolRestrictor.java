@@ -19,7 +19,7 @@ import java.util.function.Predicate;
  * which constrain the set of URIs that can be used by supplying a list of permitted protocols.
  */
 
-public class ProtocolRestricter {
+public class ProtocolRestrictor {
 
     private final Predicate<URI> predicate;
     private final String originalRule;
@@ -36,7 +36,7 @@ public class ProtocolRestricter {
      *  @param value the list of allowed protocols
      */
 
-    public ProtocolRestricter(String value) {
+    public ProtocolRestrictor(String value) {
         Objects.requireNonNull(value);
         this.originalRule = value;
         value = value.trim();

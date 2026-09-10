@@ -64,12 +64,10 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.*;
 import java.io.*;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Predicate;
 
 
 /**
@@ -189,6 +187,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private final TypeChecker10 typeChecker10 = new TypeChecker10();
 
     private transient ResourceResolver commonResolver;
+    private ProtocolRestrictor protocolRestrictor = new ProtocolRestrictor("all");
     protected FunctionLibraryList builtInExtensionLibraryList;
     protected int xsdVersion = XSD11;
     private int xmlVersion = XML10;
@@ -781,6 +780,18 @@ public class Configuration implements SourceResolver, NotationSet {
         //#if CSHARP==false
         setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);
         //#endif
+    }
+
+    /**
+     * Get the ProtocolRestrictor in use. This restricts the URI schemes that may be used
+     * when dereferencing a resource. The ProtocolRestrictor can be set by setting the
+     * property {@link Feature#ALLOWED_PROTOCOLS} to a comma-separated list of permitted
+     * protocols.
+     * @return the ProtocolRestrictor in use
+     */
+
+    public ProtocolRestrictor getProtocolRestrictor() {
+        return protocolRestrictor;
     }
 
     /**
@@ -4314,9 +4325,7 @@ public class Configuration implements SourceResolver, NotationSet {
         } else {
             switch (code) {
                 case FeatureCode.ALLOWED_PROTOCOLS:
-                    Predicate<URI> allowedUriTest = ProtocolRestricter.make((String)value);
-                    setResourceResolver(new ChainedResourceResolver(
-                            new ProtocolRestricter(allowedUriTest), getResourceResolver()));
+                    protocolRestrictor = new ProtocolRestrictor((String)value);
                     break;
                 case FeatureCode.COLLATION_URI_RESOLVER:
                     if (!(value instanceof CollationURIResolver)) {
@@ -5039,8 +5048,7 @@ public class Configuration implements SourceResolver, NotationSet {
         switch (code) {
 
             case FeatureCode.ALLOWED_PROTOCOLS:
-                // TODO: support this
-                return null;
+                return protocolRestrictor.toString();
 
             case FeatureCode.COLLATION_URI_RESOLVER:
                 return getCollationURIResolver();

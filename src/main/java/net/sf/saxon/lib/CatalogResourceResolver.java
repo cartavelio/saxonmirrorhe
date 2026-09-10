@@ -1,16 +1,13 @@
 package net.sf.saxon.lib;
 
+import net.sf.saxon.resource.TypedStreamSource;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xmlresolver.Resolver;
-import org.xmlresolver.ResolverFeature;
-import org.xmlresolver.XMLResolverConfiguration;
-import org.xmlresolver.sources.ResolverSAXSource;
+import org.xmlresolver.*;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -40,6 +37,7 @@ public class CatalogResourceResolver extends CommonResourceResolver {
         // the resolver doesn't use ./catalog.xml as a default. Historically, Saxon didn't use a
         // resolver unless a catalog was specified, so this default could have unexpected consequences.
         catalogBasedResolver = new Resolver(new XMLResolverConfiguration(null, Collections.emptyList()));
+        catalogBasedResolver.getConfiguration().setFeature(ResolverFeature.THROW_URI_EXCEPTIONS, true);
     }
 
     /**
@@ -140,54 +138,43 @@ public class CatalogResourceResolver extends CommonResourceResolver {
     @Override
     public Source resolve(ResourceRequest request) throws XPathException {
         if (catalogBasedResolver != null) {
-            Source rr = null;
+            CatalogResolver cr = catalogBasedResolver.getCatalogResolver();
+            ResolvedResource rr;
             if (request.uriIsNamespace) {
                 try {
-                    rr = catalogBasedResolver.resolveNamespace(
-                            request.uri, request.nature, request.purpose);
-                    // TODO: get the underlying ResolvedResource from the CatalogManager, which exposes the
-                    // HTTP content type header.
-                    if (rr instanceof ResolverSAXSource) {
-                        ResolverSAXSource rss = (ResolverSAXSource)rr;
-                        rr = new StreamSource(rss.getInputSource().getByteStream(), rss.getSystemId());
+                    rr = cr.resolveNamespace(
+                            request.uri, request.baseUri, request.nature, request.purpose);
+                    if (rr == null) {
+                        return null;
                     }
-                } catch (TransformerException e) {
-                    throw XPathException.makeXPathException(e);
+
+                } catch (IllegalArgumentException e) {
+                    throw new XPathException("Exception from catalog resolver resolveNamespace(): ", e);
                 }
             } else if (ResourceRequest.DTD_NATURE.equals(request.nature)) {
                 return null;
             } else if (ResourceRequest.EXTERNAL_ENTITY_NATURE.equals(request.nature)) {
                 try {
-                    InputSource is = catalogBasedResolver.resolveEntity(
+                    rr = cr.resolveEntity(
                             request.entityName, request.publicId, request.baseUri, request.uri);
-                    if (is == null) {
-                        return null;
-                    }
-                    StreamSource ss = new StreamSource(request.uri);
-                    if (is.getByteStream() != null) {
-                        ss.setInputStream(is.getByteStream());
-                    }
-                    if (is.getCharacterStream() != null) {
-                        ss.setReader(is.getCharacterStream());
-                    }
-                    return ss;
-                } catch (SAXException| IOException e) {
-                    throw XPathException.makeXPathException(e);
+                } catch (IllegalArgumentException e) {
+                    throw new XPathException("Exception from catalog resolver resolveEntity():", e);
                 }
             } else {
                 String href = request.relativeUri == null ? request.uri : request.relativeUri;
                 String baseUri = request.baseUri == null ? request.uri : request.baseUri;
                 try {
-                    rr = catalogBasedResolver.resolve(href, baseUri);
-                } catch (TransformerException e) {
-                    throw XPathException.makeXPathException(e);
+                    rr = cr.resolveURI(href, baseUri);
                 } catch (IllegalArgumentException e) {
-                    // TODO: this is only here because of a Resolver bug which will probably be fixed. Test stream-006
-                    throw XPathException.makeXPathException(e);
+                    throw new XPathException("Exception from catalog resolver resolverURI()", e);
                 }
             }
             if (rr != null) {
-                return rr;
+                TypedStreamSource result = new TypedStreamSource();
+                result.setSystemId(rr.getResolvedURI().toString());
+                result.setInputStream(rr.getInputStream());
+                result.setContentType(rr.getContentType());
+                return result;
             }
         }
         return nextResourceResolver == null ? null : nextResourceResolver.resolve(request);
@@ -240,17 +227,25 @@ public class CatalogResourceResolver extends CommonResourceResolver {
      */
     @Override
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
-        InputSource result = null;
-        if (catalogBasedResolver != null) {
-            result = catalogBasedResolver.resolveEntity(name, publicId, baseURI, systemId);
+        try {
+            InputSource result = null;
+            if (catalogBasedResolver != null) {
+                result = catalogBasedResolver.resolveEntity(name, publicId, baseURI, systemId);
+            }
+            if (result == null && nextEntityResolver2 != null) {
+                result = nextEntityResolver2.resolveEntity(name, publicId, baseURI, systemId);
+            }
+            if (result == null && nextEntityResolver != null && nextEntityResolver != nextEntityResolver2) {
+                result = nextEntityResolver.resolveEntity(publicId, systemId);
+            }
+            return result;
+        } catch (IllegalArgumentException e) {
+            if (e.getCause() instanceof IOException) {
+                throw (IOException)e.getCause();
+            } else {
+                throw new SAXException(e);
+            }
         }
-        if (result == null && nextEntityResolver2 != null) {
-            result = nextEntityResolver2.resolveEntity(name, publicId, baseURI, systemId);
-        }
-        if (result == null && nextEntityResolver != null && nextEntityResolver != nextEntityResolver2) {
-            result = nextEntityResolver.resolveEntity(publicId, systemId);
-        }
-        return result;
     }
 
     /**

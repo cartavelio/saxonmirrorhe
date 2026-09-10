@@ -420,6 +420,10 @@ public class DocumentFn extends SystemFunction implements Callable {
         request.purpose = "source document";
         try {
             return request.resolve(resolver, config.getResourceResolver(), new DirectResourceResolver(config));
+        } catch (XPathException err) {
+            err.setErrorCode("FODC0005");
+            err.maybeSetContext(context);
+            throw err;
         } catch (Exception ex) {
             XPathException de = new XPathException("Exception thrown by URIResolver resolving `"
                                                            + href + "` against `" + baseURI + "'", ex);

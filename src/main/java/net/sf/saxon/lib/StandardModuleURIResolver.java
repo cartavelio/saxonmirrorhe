@@ -95,6 +95,9 @@ public class StandardModuleURIResolver implements ModuleURIResolver {
     @Override
     public StreamSource[] resolve(String moduleURI, String baseURI, String[] locations) throws XPathException {
 
+        if (config == null) {
+            throw new NullPointerException("No Configuration available in StandardModuleResolver");
+        }
         StreamSource source = resolveModuleURI(moduleURI, baseURI);
         if (source != null) {
             return new StreamSource[]{source};

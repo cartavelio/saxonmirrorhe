@@ -27,6 +27,7 @@ import net.sf.saxon.value.NestedIntegerValue;
 import org.xml.sax.Locator;
 
 import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.TemplatesHandler;
 
 
@@ -39,6 +40,7 @@ import javax.xml.transform.sax.TemplatesHandler;
 
 public class TemplatesHandlerImpl extends ReceivingContentHandler implements TemplatesHandler {
 
+    private final TransformerFactory factory;
     private final Processor processor;
     private final LinkedTreeBuilder builder;
     private final StyleNodeFactory nodeFactory;
@@ -50,11 +52,12 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
      * the Filter should be created using newTemplatesHandler() in the SAXTransformerFactory
      * class
      *
+     * @param factory the JAXP TransformerFactory
      * @param processor the Saxon s9api processor
      */
 
-    protected TemplatesHandlerImpl(Processor processor) {
-
+    protected TemplatesHandlerImpl(TransformerFactory factory, Processor processor) {
+        this.factory = factory;
         this.processor = processor;
         Configuration config = processor.getUnderlyingConfiguration();
         setPipelineConfiguration(config.makePipelineConfiguration());
@@ -96,7 +99,7 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
 
             try {
                 XsltCompiler compiler = processor.newXsltCompiler();
-                templates = new TemplatesImpl(compiler.compile(doc.asActiveSource()));
+                templates = new TemplatesImpl(factory, compiler.compile(doc.asActiveSource()));
             } catch (SaxonApiException tce) {
                 // don't know why we aren't allowed to just throw it!
                 throw new IllegalStateException(tce.getMessage());
