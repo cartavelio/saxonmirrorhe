@@ -89,7 +89,10 @@ public class ParseXml extends SystemFunction implements Callable {
         }
         val = checkedOptions.get("xsd-validation");
         boolean validating = false;
-        if (val != null) {
+        if (val == null) {
+            // In 3.1 we defaulted from the configuration values, in 4.0 it has to be explicit
+            parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
+        } else {
             String validationValue = Whitespace.normalize(val.getStringValue());
             validating = !"skip".equals(validationValue);
             if (validationValue.equals("strict")) {

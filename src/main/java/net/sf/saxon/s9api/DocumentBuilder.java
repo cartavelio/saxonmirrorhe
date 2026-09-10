@@ -349,8 +349,14 @@ public class DocumentBuilder {
                 throw new SaxonApiException("When schema validation is used, the whitespace stripping policy must be IGNORABLE");
             }
         }
-        ParseOptions options = config.getParseOptions()
-                .withDTDValidationMode(dtdValidation ? Validation.STRICT : Validation.STRIP);
+        ParseOptions options;
+        if (source instanceof AugmentedSource) {
+            options = ((AugmentedSource)source).getParseOptions();
+            source = ((AugmentedSource)source).getContainedSource();
+        } else {
+            options = config.getParseOptions()
+                    .withDTDValidationMode(dtdValidation ? Validation.STRICT : Validation.STRIP);
+        }
 
         if (schemaValidator != null) {
             options = options.withSchema(schemaValidator.getSchema().getUnderlyingSchema());

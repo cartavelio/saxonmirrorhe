@@ -1415,12 +1415,20 @@ public class Transform {
                         source = new AugmentedSource(source, getConfiguration().getParseOptions());
                     }
                     StylesheetPackage top = pss.getTopLevelPackage();
+                    ParseOptions opt = source instanceof AugmentedSource ? ((AugmentedSource)source).getParseOptions() : new ParseOptions();
+                    boolean changedOptions = false;
                     if (top.isStripsTypeAnnotations()) {
-                        ParseOptions opt = source instanceof AugmentedSource ? ((AugmentedSource)source).getParseOptions() : new ParseOptions();
                         opt = opt.withFilter(
                                 receiver -> getConfiguration().getAnnotationStripper(receiver));
+                        changedOptions = true;
+                    }
+                    if (opt.getSchemaValidationMode() != Validation.SKIP && opt.getSchema() == null) {
+                        opt = opt.withSchema(top.getImportedSchema());
+                        changedOptions = true;
+                    }
+                    if (changedOptions) {
                         source = AugmentedSource.makeAugmentedSource(source);
-                        ((AugmentedSource)source).setParseOptions(opt);
+                        ((AugmentedSource) source).setParseOptions(opt);
                     }
                     XdmNode node = builder.build(source);
                     transformer.setGlobalContextItem(node, true);
