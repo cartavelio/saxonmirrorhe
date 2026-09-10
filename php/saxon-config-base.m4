@@ -1,5 +1,4 @@
-dnl config.m4 for extension saxon
-SAXON_VERSION="12.6.0"
+SAXON_VERSION="12.9.0"
 
 PHP_ARG_WITH([saxon],
   [for saxon support],
