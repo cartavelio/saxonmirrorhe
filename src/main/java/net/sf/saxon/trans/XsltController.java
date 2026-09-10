@@ -954,7 +954,9 @@ public class XsltController extends Controller {
                 if (traceListener != null) {
                     traceListener.close();
                 }
-                finalResult.close();
+                if (inUse) {   // Bug 6624
+                    finalResult.close();
+                }
                 inUse = false;
             }
         };
