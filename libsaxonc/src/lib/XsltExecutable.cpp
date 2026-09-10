@@ -74,6 +74,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   exceptionFound = other.exceptionFound;
   saxonMessageListenerRef = other.saxonMessageListenerRef;
   selectionStringFlag = other.selectionStringFlag;
+  saxonResultDocRef = SXN_UNSET;
 
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();

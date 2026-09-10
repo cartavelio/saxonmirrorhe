@@ -3142,19 +3142,23 @@ void testThreads(SaxonProcessor *processor, Xslt30Processor *trans,
 
   cerr << endl << "testThreads test" << endl;
 
-  std::vector<std::string> s = {CppTestUtils::concat(2, dataDir->c_str(), "/xmark100k.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/xmark1.xml").c_str(),
-                                CppTestUtils::concat(2, dataDir->c_str(), "/xmark4.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/xmark10.xml").c_str()};
+  std::vector<std::string> s = {CppTestUtils::concat(2, dataDir->c_str(), "/xmark100k.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str(),
+                                CppTestUtils::concat(2, dataDir->c_str(), "/example.xml").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str()};
+
+  std::vector<std::string> stylesheets = {CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test.xsl").c_str(),
+                                CppTestUtils::concat(2, dataDir->c_str(), "/example.xsl").c_str(), CppTestUtils::concat(2, dataDir->c_str(), "/test2.xsl").c_str()};
 
   std::vector<std::thread> threads;
 
   int threadFailures = 0;
   try {
     for (int i = 0; i < s.size(); i++) {
-      XsltExecutable *executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/q12.xsl").c_str());
+      XsltExecutable *executable = trans->compileFromFile(stylesheets[i].c_str());
       if (executable == nullptr) {
         continue;
       }
-      threads.push_back(std::thread(RunThread, executable, i, s[i], &threadFailures));
+      XsltExecutable *copyExecutable = executable->clone();//new XsltExecutable(* executable);
+      threads.push_back(std::thread(RunThread, copyExecutable, i, s[i], &threadFailures));
     }
 
     } catch (SaxonApiException &e) {
