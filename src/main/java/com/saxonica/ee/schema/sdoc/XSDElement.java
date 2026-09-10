@@ -4,14 +4,11 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.tree.iter.AxisIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.Type;
 
 import java.util.StringTokenizer;
 
@@ -131,7 +128,7 @@ public class XSDElement extends SchemaElement {
                     if (!existsAsTopLevel) {
                         String localName = nc.getLocalPart();
                         XSDSchema s = getXSDSchema();
-                        for (NodeInfo decl : s.children(new NameTest(Type.ELEMENT, StandardNames.XS_ELEMENT, getNamePool()))) {
+                        for (NodeInfo decl : s.children(x -> x instanceof XSDElement)) {
                             if (localName.equals(decl.getAttributeValue("", "name"))) {
                                 existsAsTopLevel = true;
                                 break;

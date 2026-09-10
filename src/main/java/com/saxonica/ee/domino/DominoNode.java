@@ -25,7 +25,6 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A node in the Domino tree (other than an attribute or namespace node)
@@ -541,7 +540,7 @@ public class DominoNode implements NodeInfo, VirtualNode {
      * @see AxisInfo
      */
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+    public AxisIterator iterateAxis(int axisNumber, NodeTest predicate) {
         if (predicate instanceof NodeTest) {
             NodeTest nodeTest = (NodeTest)predicate;
             int type = getNodeKind();

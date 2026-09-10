@@ -14,15 +14,12 @@ import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 
 /**
@@ -169,9 +166,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
             info.collation = loader.getConfiguration().getCollation(element.getAttributeValue("", "coll"));
             info.commonlhs = loader.getExpressionWithRole(element, "value");
             info.defaultAction = loader.getExpressionWithRole(element, "default");
-            NameTest condition = new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT,
-                                                                  "case", loader.getConfiguration().getNamePool());
-            for (NodeInfo aCase : element.children(condition)) {
+            for (NodeInfo aCase : element.children(n -> n.getLocalPart().equals("case"))) {
                 Expression val = loader.getFirstChildExpression(aCase);
                 AtomicValue av = (AtomicValue) ((Literal) val).getGroundedValue();
                 info.values.add(av);

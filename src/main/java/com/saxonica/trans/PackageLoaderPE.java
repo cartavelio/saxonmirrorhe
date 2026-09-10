@@ -9,7 +9,6 @@ package com.saxonica.trans;
 
 import com.saxonica.config.JavaExtensionLibrary;
 import com.saxonica.config.ProfessionalConfiguration;
-import net.sf.saxon.expr.ForMemberExpression;
 import com.saxonica.expr.JavaExtensionFunctionCall;
 import com.saxonica.xsltextn.instruct.Assign;
 import com.saxonica.xsltextn.instruct.DeepUpdate;
@@ -28,14 +27,15 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.PackageLoaderHE;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.JavaExternalObjectType;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
     @Override
     protected void readSchemaNamespaces(NodeInfo packageElement) throws XPathException {
         Configuration config = getConfiguration();
-        for (NodeInfo varElement : packageElement.children(new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT, "schema", config.getNamePool()))) {
+        for (NodeInfo varElement : packageElement.children(n -> n.getLocalPart().equals("schema"))) {
             String ns = varElement.getAttributeValue("", "ns");
             if (!config.isSchemaAvailable(ns) && !ns.equals(NamespaceConstant.ANONYMOUS)) {
                 throw new XPathException(

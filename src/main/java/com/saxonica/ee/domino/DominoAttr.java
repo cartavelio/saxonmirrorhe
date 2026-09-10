@@ -1,6 +1,7 @@
 package com.saxonica.ee.domino;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -16,8 +17,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
-
-import java.util.function.Predicate;
 
 /**
  * An attribute node in the Domino tree
@@ -308,7 +307,7 @@ public class DominoAttr implements NodeInfo {
      * @since 8.4
      */
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
                 return parent.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);

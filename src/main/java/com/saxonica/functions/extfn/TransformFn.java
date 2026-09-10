@@ -76,7 +76,7 @@ public class TransformFn extends SystemFunction {
                                 setTransformerParameter(param, params);
                                 break;
                             case Type.DOCUMENT:
-                                for (NodeInfo kid : ((NodeInfo)param).children(NodeKindTest.ELEMENT)) {
+                                for (NodeInfo kid : ((NodeInfo)param).children(NodeKindTest.ELEMENT::test)) {
                                     setTransformerParameter(kid, params);
                                 }
                                 break;
