@@ -8,12 +8,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.functions.registry.XPath31FunctionSet;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
@@ -58,17 +53,7 @@ public class Evaluate extends SystemFunction {
         // Copy the function library list, except for XSLT-defined system functions
         PackageData pack = getRetainedStaticContext().getPackageData();
         if (pack instanceof StylesheetPackage) {
-            FunctionLibraryList libraryList0 = ((StylesheetPackage) pack).getFunctionLibrary();
-            FunctionLibraryList libraryList1 = new FunctionLibraryList();
-            for (FunctionLibrary lib : libraryList0.getLibraryList()) {
-                if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceConstant.FN)) {
-                    // Exclude XSLT-defined functions
-                    libraryList1.addFunctionLibrary(XPath31FunctionSet.getInstance());
-                } else {
-                    libraryList1.addFunctionLibrary(lib);
-                }
-            }
-            env.setFunctionLibrary(libraryList1);
+            env.setFunctionLibrary(((StylesheetPackage) pack).getFunctionLibrary());
         } else {
             env.setFunctionLibrary(context.getController().getExecutable().getFunctionLibrary());
         }
