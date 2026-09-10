@@ -216,11 +216,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             register("items", 1, e -> e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
-            register("keys-where", 2, e -> e.populate(MapKeysWhere::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                    .arg(1, filterFunctionType, ONE, null));
-
-
             register("empty", 1, e -> e.populate(MapEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
@@ -731,29 +726,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 return ((SingleEntryMap) map).getKey();
             }
             return SequenceTool.toLazySequence(map.keys());
-        }
-    }
-
-    /**
-     * Implementation of the XPath 4.0 function map:keys-where(Map, predicate) =&gt; atomicValue*
-     */
-    public static class MapKeysWhere extends SystemFunction {
-
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            MapItem map = (MapItem) arguments[0].head();
-            assert map != null;
-
-            FunctionItem fn = (FunctionItem) arguments[1].head();
-            ZenoSequence results = new ZenoSequence();
-            for (KeyValuePair pair : map.keyValuePairs()) {
-                BooleanValue selected = (BooleanValue) fn.call(context, new Sequence[]{pair.key(), pair.value()}).head();
-                if (selected != null && selected.getBooleanValue()) {
-                    results = results.append(pair.key());
-                }
-            }
-            return results;
-
         }
     }
 
