@@ -4,10 +4,11 @@ using System.Collections.Generic;
 namespace Saxon.Api {
     /// <summary>
     ///  An <c>CollectionFinder</c> can be registered with the <c>Processor</c>; it is called in response
-    ///  to calls on the fn:collection() and fn:uri-collection() functions.
+    ///  to calls on the <c>fn:collection()</c> and <c>fn:uri-collection()</c> functions.
     ///  When these functions are called, the delegate is called to get a collection of <c>IResource</c>
     ///  objects representing resources identified by the supplied collection URI.
     /// </summary>
+    /// <returns>The set of resources represented by the collection URI</returns>
     /// <remarks>
     /// The implementation may be lazy: that is, the returned resource collection might not contain
     /// the actual resources, but only the information needed to fetch the resources when required.
