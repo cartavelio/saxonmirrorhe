@@ -23,6 +23,7 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -334,10 +335,14 @@ public class MessageInstr extends Instruction {
                 cco.startDocument(abort ? ReceiverOption.TERMINATE : ReceiverOption.NONE);
 
                 try {
-                    TailCall tc = select.processLeavingTail(cco, context);
-                    dispatchTailCall(tc);
+                    try {
+                        TailCall tc = select.processLeavingTail(cco, context);
+                        dispatchTailCall(tc);
+                    } catch (UncheckedXPathException e) {
+                        throw e.getXPathException();
+                    }
                 } catch (XPathException e) {
-                    cco.append(StringValue.bmp("Error " + e.showErrorCode() +
+                    cco.append(new StringValue("Error " + e.showErrorCode() +
                                                        " while evaluating xsl:message at line "
                                                        + expr.getLocation().getLineNumber() + " of " + expr.getLocation().getSystemId() +
                                                        ": " + e.getMessage()));
