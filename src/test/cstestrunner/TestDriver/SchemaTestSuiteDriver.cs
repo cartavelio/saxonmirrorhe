@@ -9,7 +9,6 @@ using NullDestination = Saxon.Api.NullDestination;
 using Processor = Saxon.Api.Processor;
 using SchemaManager = Saxon.Api.SchemaManager;
 using SchemaValidator = Saxon.Api.SchemaValidator;
-using XmlProcessingError = Saxon.Api.XmlProcessingError;
 
 namespace TestDriver {
     /**
@@ -319,7 +318,7 @@ namespace TestDriver {
                                     }
                                 }
 
-                                List<XmlProcessingError> errorList = new ();
+                                List<Error> errorList = new ();
                                 schemaManager.ErrorReporter = errorList.Add;
                                 try {
                                     schemaManager.Compile(schemaDoc);
@@ -335,7 +334,7 @@ namespace TestDriver {
                                     }
                                 }
 
-                                foreach (XmlProcessingError err in errorList) {
+                                foreach (Error err in errorList) {
                                     if (!err.IsWarning) {
                                         schemaOK = false;
                                         break;
