@@ -28,6 +28,7 @@ public interface FunctionDefinition {
     /**
      * Get the name (keyword) of the Nth parameter
      *
+     * @param i the position of the required parameter
      * @return the expression for computing the value of the Nth parameter
      */
     StructuredQName getParameterName(int i);
@@ -35,6 +36,7 @@ public interface FunctionDefinition {
     /**
      * Get the default value expression of the Nth parameter, if any
      *
+     * @param i the position of the required parameter
      * @return the expression for computing the value of the Nth parameter, or null if there is none
      */
 

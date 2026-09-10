@@ -81,7 +81,8 @@ public class StylesheetFunctionLibrary implements FunctionLibrary {
      * @param staticArgs   The expressions supplied statically in the function call. The intention is
      *                     that the static type of the arguments (obtainable via getItemType() and getCardinality() may
      *                     be used as part of the binding algorithm.
-     * @param keywords
+     * @param keywords     May be null if no keywords are used in the function call. Otherwise, a map identifying the
+     *                     keywords appearing in the function call, and the 0-based position at which they appeared.
      * @param env          The static context
      * @param reasons In the event that a function cannot be bound, this output parameter may be populated with one
      *                or more diagnostic messages indicating possible reasons why no function binding was possible.

@@ -181,7 +181,9 @@ public class UseWhenStaticContext extends AbstractStaticContext implements Stati
      * in the static context as being an imported schema namespace. (A consequence of this is that
      * within a Configuration, there can only be one schema for any given namespace, including the
      * null namespace).
-     * @param namespace
+     *
+     * @param namespace the target namespace in question
+     * @return true if the given namespace has been imported
      */
 
     @Override

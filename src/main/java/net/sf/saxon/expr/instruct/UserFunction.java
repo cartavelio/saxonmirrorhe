@@ -1010,7 +1010,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     /**
      * Get the name (keyword) of the Nth parameter
      *
-     * @param i
+     * @param i the position of the required parameter
      * @return the expression for computing the value of the Nth parameter
      */
     @Override
@@ -1021,7 +1021,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     /**
      * Get the default value expression of the Nth parameter, if any
      *
-     * @param i the 0
+     * @param i the position of the required parameter
      * @return the expression for computing the value of the Nth parameter, or null if there is none
      */
     @Override

@@ -222,9 +222,9 @@ public class JAXPXPathStaticContext extends AbstractStaticContext
      * within a Configuration, there can only be one schema for any given namespace, including the
      * null namespace).
      *
+     * @param namespace the target namespace in question
      * @return true if schema components for the given namespace have been imported into the
      *         schema-aware configuration
-     * @param namespace
      */
 
     @Override

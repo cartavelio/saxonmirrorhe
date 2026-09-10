@@ -252,21 +252,24 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
     /**
      * Get the name of the Nth parameter, if any
      *
+     * @param i the position of the required parameter
      * @return the name (keyword) of the Nth parameter
      */
 
-    public StructuredQName getParameterName(int param) {
-        return parameters.get(param).getVariableQName();
+    public StructuredQName getParameterName(int i) {
+        return parameters.get(i).getVariableQName();
     }
 
 
     /**
      * Get the default value expression of the Nth parameter, if any
+     *
+     * @param i the position of the required parameter
      * @return the expression for computing the value of the Nth parameter, or null if there is none
      */
 
-    public Expression getDefaultValueExpression(int param) {
-        return parameters.get(param).getDefaultValueExpression();
+    public Expression getDefaultValueExpression(int i) {
+        return parameters.get(i).getDefaultValueExpression();
     }
 
     /**

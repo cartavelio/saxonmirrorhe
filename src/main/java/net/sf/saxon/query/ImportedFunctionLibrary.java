@@ -72,7 +72,8 @@ public class ImportedFunctionLibrary implements FunctionLibrary, XQueryFunctionB
      *                     example, the result of f(4) is expected to be the same as f(2+2). The actual expression is supplied
      *                     here to enable the binding mechanism to select the most efficient possible implementation (including
      *                     compile-time pre-evaluation where appropriate).</p>
-     * @param keywords
+     * @param keywords     May be null if no keywords are used in the function call. Otherwise, a map identifying the
+     *                     keywords appearing in the function call, and the 0-based position at which they appeared.
      * @param env          The static context of the function call
      * @param reasons      If no matching function is found by the function library, it may add
      *                     a diagnostic explanation to this list explaining why none of the available
