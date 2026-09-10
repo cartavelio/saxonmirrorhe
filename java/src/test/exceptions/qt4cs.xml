@@ -85,15 +85,7 @@
       <reason>Tokenize#2 does not currently allow second argument to be an empty sequence</reason>
    </exception>
    
-   <exception test-set="fn-parts" test-case="  
-      parts-anyURI-007
-      parts-anyURI-025
-      parts-anyURI-026" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-23"/>
-      <reason>fn:parts is not yet in the spec; URI parsing is superseded.</reason>
-   </exception>
-   
- 
+
    <exception test-set="prod-Recordtest" test-case="RecordTest-010" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-18"/>
       <reason>Coercion on fields of record test not yet implemented</reason>
@@ -155,7 +147,7 @@
       <reason>Saxon-CS delivers collection results in wrong order due to multithreading. Should this be allowed? See bug 5067.</reason>
    </exception>
    
-   <exception test-set="fn-format-integer" 
+  <!-- <exception test-set="fn-format-integer" 
       test-case="
          format-integer-032 
          format-integer-032-fr 
@@ -167,6 +159,12 @@
       run="false" report="not supported">
       <created by="Michael Kay" on="2021-12-07"/>
       <reason>SaxonCS doesn't format "numbers as words" for languages other than English.</reason>
+   </exception>-->
+   
+   <exception test-set="fn-normalize-unicode" test-case="fn-normalize-unicode-11-6-0" run="false" report="N/A">
+      <created by="Michael Kay" on="2025-12-30"/>
+      <reason>Test applies to Unicode 6.0. Subsequent Unicode versions assign some of these codes
+      to codepoints, so they are no longer idempotent under normalization.</reason>
    </exception>
    
    <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="known restriction">
@@ -264,12 +262,12 @@
    </exception>
    
   
-   
+ <!--  
    <exception test-set="prod-ThinArrow"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Not yet implemented</reason>
    </exception>
-   
+   -->
    <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
@@ -349,19 +347,19 @@
       <reason>Wrong results from AngleSharp? Needs checking.</reason>
    </exception>
    
-   <exception test-set="fn-format-number" test-case="
+ <!--  <exception test-set="fn-format-number" test-case="
       numberformat-40-87 numberformat-40-88
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Third argument as xs:QName not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-message" run="false" report="n/a">
+<!--   <exception test-set="fn-message" run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Function fn:message not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-iterate-while" test-case=" 
+ <!--  <exception test-set="fn-iterate-while" test-case=" 
       iterate-while-019
       iterate-while-020
       iterate-while-021
@@ -369,20 +367,20 @@
       iterate-while-023" run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Two-argument callback not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-duplicate-values" test-case="cbcl-duplicate-values-002c
+<!--   <exception test-set="fn-duplicate-values" test-case="cbcl-duplicate-values-002c
       fn-duplicate-values-1a
       fn-duplicate-values-mixed-args-012
       fn-duplicate-values-mixed-args-013" run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Numeric precision changes not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-function-annotations" run="false" report="n/a">
+<!--   <exception test-set="fn-function-annotations" run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Function fn:function-annotations not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
@@ -440,7 +438,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+ <!--  <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-chain-001
       fo-test-fn-chain-002
       fo-test-fn-chain-003
@@ -462,7 +460,7 @@
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
-   
+   -->
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-csv-to-simple-rows-001
       fo-test-fn-csv-to-simple-rows-002
@@ -477,7 +475,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+<!--   <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-csv-to-xml-001
       fo-test-fn-csv-to-xml-002
       fo-test-fn-csv-to-xml-003
@@ -490,7 +488,7 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-function-annotations-001
@@ -510,7 +508,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+ <!--  <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-parse-csv-001
       fo-test-fn-parse-csv-002
       fo-test-fn-parse-csv-003
@@ -536,7 +534,7 @@
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
-   
+   -->
    <exception test-set="app-spec-examples" 
       test-case="fo-test-map-substitute-001
       fo-test-map-substitute-002" 
@@ -554,7 +552,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+ <!--  <exception test-set="app-spec-examples" 
       test-case="fo-test-array-filter-004
       fo-test-array-fold-left-004
       fo-test-array-fold-right-004
@@ -580,13 +578,13 @@
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Position argument on callback function not yet implemented.</reason>
    </exception>
-   
-   <exception test-set="app-spec-examples" test-case="
+   -->
+ <!--  <exception test-set="app-spec-examples" test-case="
       fo-test-fn-transitive-closure-001" run="false" edition="HE PE" report="n/a">
       <created by="Michael Kay" on="2023-11-21"/>
       <reason>Spec has changed, implementation needs updating.</reason>
    </exception> 
-   
+   -->
 
    
    

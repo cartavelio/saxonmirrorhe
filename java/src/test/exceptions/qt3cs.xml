@@ -32,6 +32,12 @@
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
   </exception>
   
+  <exception test-set="fn-normalize-unicode" test-case="fn-normalize-unicode-11-6-0" run="false" report="N/A">
+    <created by="Michael Kay" on="2025-12-30"/>
+    <reason>Test applies to Unicode 6.0. Subsequent Unicode versions assign some of these codes
+    to codepoints, so they are no longer idempotent under normalization.</reason>
+  </exception>
+  
   <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="known restriction">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
@@ -51,45 +57,6 @@
     <created by="Michael Kay" on="2021-10-04"/>
     <reason>Fails with a stack overflow (we've set a limit but it's too low)</reason>
   </exception>
-  
-  <!--<exception test-set="app-spec-examples" test-case="
-    fo-test-fn-contains-004
-    fo-test-fn-contains-005
-    fo-test-fn-contains-006
-    fo-test-fn-contains-007
-    fo-test-fn-starts-with-004
-    fo-test-fn-starts-with-005
-    fo-test-fn-starts-with-006
-    fo-test-fn-starts-with-007
-    fo-test-fn-starts-with-008
-    fo-test-fn-ends-with-004
-    fo-test-fn-ends-with-005
-    fo-test-fn-ends-with-006
-    fo-test-fn-ends-with-007
-    fo-test-fn-ends-with-008
-    fo-test-fn-substring-before-004
-    fo-test-fn-substring-before-005
-    fo-test-fn-substring-before-006
-    fo-test-fn-substring-before-007
-    fo-test-fn-substring-after-004
-    fo-test-fn-substring-after-005
-    fo-test-fn-substring-after-006
-    fo-test-fn-substring-after-007
-    " run="false" report="known restriction">
-    <created by="Michael Kay" on="2019-03-11"/>
-    <reason>alternate=blanked not supported by ICU4N (apparently?)</reason>
-  </exception>-->
-  
-  <!--<exception test-set="fn-contains" test-case="
-    fn-contains-34
-    fn-contains-35
-    fn-contains-36
-    fn-contains-37
-    fn-contains-38
-    " run="false" report="known restriction">
-    <created by="Michael Kay" on="2021-08-08"/>
-    <reason>alternate=blanked not supported by ICU4N (apparently?)</reason>
-  </exception>-->
   
   
  
