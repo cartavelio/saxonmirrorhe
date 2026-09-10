@@ -2386,6 +2386,31 @@ public class TestXslt30Transformer {
        }
    }
 
+   @Test
+    public void testBug5866() {
+        try {
+            String TRANSFORM_DOC = ""
+                    + "<xsl:transform version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" >"
+                    + "   <xsl:template match=\"/\">"
+                    + "      <!-- successful transform if $emptySeq is instead *explicitly* the empty sequence -->"
+                    + "      <xsl:variable name=\"emptySeq\" select=\"nothing\" />"
+                    + "      <xsl:sequence select=\"upper-case($emptySeq/text()) || lower-case($emptySeq/text()) = 'foo'\" />"
+                    + "   </xsl:template>"
+                    + "</xsl:transform>";
+
+            Processor processor = new Processor(false);
+            try (StringReader xsltIn = new StringReader(TRANSFORM_DOC); StringReader xmlIn = new StringReader("<doc/>");) {
+                StringWriter sw = new StringWriter();
+                Xslt30Transformer transformer = processor.newXsltCompiler().compile(new StreamSource(xsltIn)).load30();
+                transformer.applyTemplates(new StreamSource(xmlIn), processor.newSerializer(sw));
+                assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>false", sw.toString());
+            }
+
+        } catch (SaxonApiException e) {
+            fail(e);
+        }
+   }
+
 
 }
 
