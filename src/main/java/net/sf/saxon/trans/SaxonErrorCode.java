@@ -222,6 +222,12 @@ public class SaxonErrorCode {
     public static final String SXPK0004 = "SXPK0004";
 
     /**
+     * SXPK0005: unresolved component reference in SEF file
+     */
+
+    public static final String SXPK0005 = "SXPK0005";
+
+    /**
      * SXRD0001: URI supplied to xsl:result-document does not identify a writable destination
      */
 

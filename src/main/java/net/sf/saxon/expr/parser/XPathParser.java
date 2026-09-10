@@ -407,7 +407,7 @@ public class XPathParser {
      * Output a warning message
      *
      * @param message the text of the message
-     * @param errorCode
+     * @param errorCode the error code associated with the warning
      */
 
     protected void warning(String message, String errorCode)  {
@@ -561,7 +561,7 @@ public class XPathParser {
         setLanguage(language, languageVersion);
 
         Expression exp = null;
-        int offset = start;
+        int offset;
         if (accelerator != null &&
                 env.getUnprefixedElementMatchingPolicy() == UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE &&
                 terminator != Token.IMPLICIT_EOF &&
@@ -1476,10 +1476,12 @@ public class XPathParser {
         expect(Token.THEN);
         nextToken();
         Expression thenExp = makeTracer(parseExprSingle(), null);
+        setLocation(thenExp, thenoffset);
         int elseoffset = t.currentTokenStartOffset;
         expect(Token.ELSE);
         nextToken();
         Expression elseExp = makeTracer(parseExprSingle(), null);
+        setLocation(elseExp, elseoffset);
         Expression ifExp = Choose.makeConditional(condition, thenExp, elseExp);
         setLocation(ifExp, ifoffset);
         return makeTracer(ifExp, null);
@@ -1499,7 +1501,7 @@ public class XPathParser {
         if (scanOnly) {
             return BuiltInAtomicType.STRING;
         }
-        StructuredQName sq = null;
+        StructuredQName sq;
         try {
             sq = qNameParser.parse(qname, env.getDefaultElementNamespace());
         } catch (XPathException e) {
@@ -1545,6 +1547,7 @@ public class XPathParser {
                 grumble("Unknown Java class " + local, "XPST0051");
                 return AnyItemType.getInstance();
             }
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(config) {
                 return JavaExternalObjectType.of(theClass);
             }
@@ -1639,6 +1642,7 @@ public class XPathParser {
             } else if (!(target instanceof CastingTarget)) {
                 grumble("Unsuitable type for cast: " + target.getDescription(), "XPST0080");
             }
+            assert target instanceof CastingTarget;
             CastingTarget t = (CastingTarget) target;
             if (t instanceof BuiltInAtomicType) {
                 checkAllowedType(env, (BuiltInAtomicType) t);
@@ -1935,10 +1939,6 @@ public class XPathParser {
             }
         }
         p.nextToken();
-        if (fieldNames.isEmpty()) {
-            p.grumble("RecordTest must contain at least one field");
-            return null;
-        }
         recordTest.setDetails(fieldNames, fieldTypes, optionalFieldNames, extensible);
         return recordTest;
     }
@@ -2513,11 +2513,8 @@ public class XPathParser {
             // later in the case where the predicate selects a singleton.
             RetainedStaticContext rsc = env.makeRetainedStaticContext();
             step = SystemFunction.makeCall("reverse", rsc, step);
-            assert step != null;
-            return step;
-        } else {
-            return step;
         }
+        return step;
     }
 
     protected Expression parsePredicate(Expression step) throws XPathException {
@@ -2965,12 +2962,8 @@ public class XPathParser {
         }
     }
 
-    protected Expression generateApplyCall(Expression functionItem, ArrayList<Expression> args) throws XPathException {
-        SquareArrayConstructor block = new SquareArrayConstructor(args);
-        SymbolicName.F name = new SymbolicName.F(new StructuredQName("fn", NamespaceConstant.FN, "apply"), 2);
-        SystemFunctionCall call = (SystemFunctionCall)env.getFunctionLibrary()
-                .bind(name, new Expression[]{functionItem, block}, null, env, new ArrayList<>());
-        ((ApplyFn) call.getTargetFunction()).setDynamicFunctionCall(functionItem.toShortString());
+    protected Expression generateApplyCall(Expression functionItem, ArrayList<Expression> args) {
+        DynamicFunctionCall call = new DynamicFunctionCall(functionItem, args);
         setLocation(call, t.currentTokenStartOffset);
         return call;
     }
@@ -3008,40 +3001,29 @@ public class XPathParser {
                 grumble("Number following '?' must be an integer");
             }
             nextToken();
-            result = lookup(this, lhs, Literal.makeLiteral(number));
+
+            result = new LookupExpression(lhs, Literal.makeLiteral(number));
         } else if (token == Token.MULT || token == Token.STAR) {
             nextToken();
             result = lookupStar(lhs);
         } else if (token == Token.LPAR) {
             t.setState(Tokenizer.DEFAULT_STATE);
-            result = lookup(this, lhs, parseParenthesizedExpression());
+
+            result = new LookupExpression(lhs, parseParenthesizedExpression());
         } else if (token == Token.STRING_LITERAL) {
             checkLanguageVersion40();
             result = lookupName(lhs, t.currentTokenValue);
             nextToken();
         } else if (token == Token.DOLLAR) {
             checkLanguageVersion40();
-            result = lookup(this, lhs, parseVariableReference());
+
+            result = new LookupExpression(lhs, parseVariableReference());
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '?'");
             return null;
         }
         setLocation(result, offset);
         return result;
-    }
-
-    /**
-     * Supporting code for lookup expressions (A?B)
-     *
-     * @param parser the XPath parser
-     * @param lhs the LHS operand of the lookup expression
-     * @param rhs the RHS operand of the lookup expression
-     * @return the result of parsing the expression
-     */
-
-    private static Expression lookup(XPathParser parser, Expression lhs, Expression rhs) {
-        return new LookupExpression(lhs, rhs);
-
     }
 
 
@@ -3317,7 +3299,6 @@ public class XPathParser {
                         StructuredQName contentType = makeStructuredQName(t.currentTokenValue, env.getDefaultElementNamespace());
                         assert contentType != null;
                         NamespaceUri uri = contentType.getNamespaceUri();
-                        String lname = contentType.getLocalPart();
 
                         if (uri.equals(NamespaceUri.SCHEMA)) {
                             schemaType = env.getConfiguration().getSchemaType(contentType);
@@ -4521,45 +4502,6 @@ public class XPathParser {
     }
 
 
-    /**
-     * Process a function call in which one or more of the argument positions are
-     * represented as "?" placemarkers (indicating partial application or currying)
-     *
-     * @param offset       the position of the expression in the source text
-     * @param name         the function name (as if there were no currying)
-     * @param args         the arguments (with EmptySequence in the placemarker positions)
-     * @param placeMarkers the positions of the placemarkers    @return the curried function
-     * @return the curried function
-     * @throws XPathException if a static error is found
-     */
-
-    /*@NotNull*/
-    protected Expression makeCurriedFunction(
-            int offset, StructuredQName name, Expression[] args, IntSet placeMarkers)
-            throws XPathException {
-        grumble("Partial function application is not allowed in Saxon-HE");
-        return new ErrorExpression();
-    }
-
-    /* Must be in alphabetical order, since a binary search is used */
-
-    private final static String[] reservedFunctionNames30 = new String[]{
-            "attribute", "comment", "document-node", "element", "empty-sequence", "function", "if", "item",
-            "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"
-    };
-
-    /**
-     * Check whether a function name is reserved in XPath 3.0 (when unprefixed)
-     *
-     * @param name the function name (the local-name as a string)
-     * @return true if the function name is reserved
-     */
-
-    protected static boolean isReservedFunctionName30(String name) {
-        int x = Arrays.binarySearch(reservedFunctionNames30, name);
-        return x >= 0;
-    }
-
     /* Must be in alphabetical order, since a binary search is used */
 
     private final static String[] reservedFunctionNames31 = new String[]{
@@ -5038,21 +4980,7 @@ public class XPathParser {
         private final Location containingLocation;
         private final int localLineNumber;
         private final int localColumnNumber;
-        private String nearbyText;
-
-        /**
-         * Create a NestedLocation
-         *
-         * @param containingLocation the location of the containing construct, typically an attribute or
-         *                           text node in an XML document
-         * @param localLineNumber    the line number within the containing construct, starting at zero
-         * @param localColumnNumber  the column number within the containing construct, starting at zero
-         */
-        public NestedLocation(Location containingLocation, int localLineNumber, int localColumnNumber) {
-            this.containingLocation = containingLocation.saveLocation();
-            this.localLineNumber = localLineNumber;
-            this.localColumnNumber = localColumnNumber;
-        }
+        private final String nearbyText;
 
         /**
          * Create a NestedLocation

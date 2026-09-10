@@ -111,8 +111,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
 
     /**
      * Get the immediate sub-expressions of this expression, with information about the relationship
-     * of each expression to its parent expression. Default implementation
-     * works off the results of iterateSubExpressions()
+     * of each expression to its parent expression.
      *
      * <p>If the expression is a Callable, then it is required that the order of the operands
      * returned by this function is the same as the order of arguments supplied to the corresponding
