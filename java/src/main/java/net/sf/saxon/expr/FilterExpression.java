@@ -220,8 +220,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     @Override
     public Expression simplify() throws XPathException {
 
-        setBase(getBase().simplify());
-        setFilter(getFilter().simplify());
+        simplifyChildren();
 
         // ignore the filter if the base expression is an empty sequence
         if (Literal.isEmptySequence(getBase())) {

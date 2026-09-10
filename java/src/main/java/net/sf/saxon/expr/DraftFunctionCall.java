@@ -277,7 +277,7 @@ public class DraftFunctionCall extends DraftExpression {
                         throw new UnsupportedOperationException();
                     }
                 }
-                adoptChildExpression(fc.getArg(i));
+                fc.adoptChildExpression(fc.getArg(i));
             }
 
             // If there are placeholders as well as keywords then we take advantage of the fact that
