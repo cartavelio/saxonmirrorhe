@@ -3217,22 +3217,6 @@ public class Configuration implements SourceResolver {
     }
 
     /**
-     * Validate an attribute value.
-     * <p>This method is intended for internal use.</p>
-     *
-     * @param nodeName   the name of the attribute
-     * @param value      the value of the attribute as a string
-     * @param validation STRICT or LAX
-     * @return the type annotation to apply to the attribute node
-     * @throws ValidationException if the value is invalid
-     */
-
-    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
-            throws ValidationException, MissingComponentException {
-        return BuiltInAtomicType.UNTYPED_ATOMIC;
-    }
-
-    /**
      * Add to a pipeline a receiver that strips all type annotations. This
      * has a null implementation in the Saxon-HE product, because type annotations
      * can never arise.
@@ -3295,7 +3279,7 @@ public class Configuration implements SourceResolver {
      * @param language set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
      * @param updating indicates whether or not XQuery update syntax may be used. Note that XQuery Update
      *                 is supported only in Saxon-EE
-     * @param env
+     * @param env the XPath or XQuery static context
      * @return the XPath or Query parser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
@@ -3590,30 +3574,6 @@ public class Configuration implements SourceResolver {
         return new StyleNodeFactory(this, compilation);
     }
 
-    /**
-     * Make an instruction to implement xsl:evaluate
-     * @param source the xsl:evaluate element in the raw stylesheet tree
-     * @param decl the corresponding component declaration
-     * @return the compiled instruction
-     * @throws XPathException if static errors are found
-     */
-
-    public Expression makeEvaluateInstruction(XSLEvaluate source, ComponentDeclaration decl) throws XPathException {
-        Expression xpath = source.getTargetExpression();
-        SequenceType requiredType = source.getRequiredType();
-        Expression contextItem = source.getContextItemExpression();
-        Expression baseUri = source.getBaseUriExpression();
-        Expression namespaceContext = source.getNamespaceContextExpression();
-        Expression schemaAware = source.getSchemaAwareExpression();
-        Expression withParams = source.getWithParamsExpression();
-        EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware);
-        WithParam[] params = source.getWithParamInstructions(inst, source.getCompilation(), decl, false);
-        inst.setActualParams(params);
-        inst.setDynamicParams(withParams);
-        inst.setDefaultXPathNamespace(source.getDefaultXPathNamespace());
-        inst.setOptionsExpression(source.getOptionsExpression());
-        return inst;
-    }
 
     /**
      * Factory method to make a StylesheetPackage
