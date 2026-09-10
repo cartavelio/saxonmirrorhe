@@ -174,6 +174,7 @@ public class ParamKeywords {
         fnParamNames.put("index-where", "input|predicate");
         fnParamNames.put("innermost", "nodes");
         fnParamNames.put("insert-before", "input|position|insert");
+        fnParamNames.put("insert-separator", "input|separator");
         fnParamNames.put("invisible-xml", "grammar|options");
         fnParamNames.put("iri-to-uri", "value");
         fnParamNames.put("is-NaN", "value");
@@ -253,7 +254,6 @@ public class ParamKeywords {
         fnParamNames.put("seconds-from-dateTime", "value");
         fnParamNames.put("seconds-from-duration", "value");
         fnParamNames.put("seconds-from-time", "value");
-        fnParamNames.put("sequence-join", "input|separator");
         fnParamNames.put("serialize", "input|options");
         fnParamNames.put("siblings", "node");
         fnParamNames.put("slice", "input|start|end|step");
