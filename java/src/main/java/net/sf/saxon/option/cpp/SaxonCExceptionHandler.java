@@ -60,16 +60,22 @@ public class SaxonCExceptionHandler {
             String errorCode = null;
 
             if (throwable instanceof SaxonApiException) {
+                if (SaxonCAPI.debug) {
+                    System.err.println("Java DEBUG: SaxonCExceptionHandler SaxonApiException found" );
+                }
                 exception = (SaxonApiException) throwable;
                 lineNumber = exception.getLineNumber();
-                errorMessage = exception.getMessage();
+                errorMessage = getAllCausedMessages(throwable);
 
-            } if(throwable instanceof NullPointerException) {
+            } else if(throwable instanceof NullPointerException) {
 
                 createStandardErrorResult(errorStruct, "NullPointerException found");
                 return;
 
             } else {
+                if (SaxonCAPI.debug) {
+                    System.err.println("Java DEBUG: SaxonCExceptionHandler not SaxonApiException found. Create new one!" );
+                }
                 exception = new SaxonApiException(throwable);
                 errorMessage = getAllCausedMessages(throwable);
             }
@@ -81,6 +87,9 @@ public class SaxonCExceptionHandler {
             QName errorCodeQName = exception.getErrorCode();
             if (errorCodeQName != null) {
                 errorCode = errorCodeQName.toString();
+                if (SaxonCAPI.debug) {
+                    System.err.println("Java DEBUG: SaxonCExceptionHandler errorCode found: " + errorCode );
+                }
 
             }
 

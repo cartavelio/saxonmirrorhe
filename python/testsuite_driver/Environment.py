@@ -154,6 +154,7 @@ class Environment:
 
         self.reset_actions = []
         self.usable = True
+        self.resources_remove = []
 
     def create_processors(self):
         self.xpath_proc = self.proc.new_xpath_processor()
@@ -163,8 +164,7 @@ class Environment:
 
 def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spec: Spec, environments_i: dict,
                         environment: Environment):
-    environment.create_processors()
-    xpc.set_context(xdm_item=env)
+
     name = env.get_attribute_value("name")
     if name is not None:
         print("Loading environment " + name)
@@ -176,6 +176,36 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
         print("Loading environment without name")
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print(str(env))
+
+    resources = xpc.evaluate("resource")
+
+
+    if resources is not None:
+        resource_xslt_proc = environment.proc.new_xslt30_processor()
+        builderi = environment.proc.new_document_builder()
+        script_dir = pathlib.Path(__file__).resolve().parent
+
+        base_uri = script_dir.as_uri()
+
+        print(base_uri)
+
+        resource_xsl_filename = str(script_dir)+"/XML_Resolver_Catalog_Maker.xsl"
+        resources_exec = resource_xslt_proc.compile_stylesheet(stylesheet_file=resource_xsl_filename)
+        resource_filename = "temp/"+str(name)+".xml"
+        env_text = str(env)
+        builderi.set_base_uri(env.base_uri)
+        env_tempi = builderi.parse_xml(xml_text=env_text)
+        resources_exec.set_cwd(str(cwd_from_base_uri))
+        resources_exec.apply_templates_returning_file(xdm_value=env_tempi, output_file=base_uri+"/"+resource_filename, base_output_uri=cwd_from_base_uri)
+        environment.proc.set_catalog_files([base_uri+"/"+resource_filename])
+        '''
+        TODO: remove the created temp catalog files
+        environment.resources_remove.append(base_uri+"/"+resource_filename)'''
+
+
+    environment.create_processors()
+    xpc.set_context(xdm_item=env)
+
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri)
@@ -304,7 +334,6 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
 
     ''' PyXdmNode.base_uri returns file:// - this will cause problems with resolving later.'''
     '''Create bug issue to remove the file:// internally TODO create bug issue '''
-
 
 
     #environment.xsd_schema = load_schema_documents(xpc, environment, builder, xsd_compiler)
