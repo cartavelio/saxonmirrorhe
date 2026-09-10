@@ -49,7 +49,9 @@
          been available in SaxonJ since version 9.8, and are belatedly added to the SaxonC API.) The
          superclass <code>XdmFunctionItem</code> is also implemented, and provides the methods
          <code>call()</code> and <code>getSystemFunction()</code> for working with XDM functions.</li>
-      
+      <li>The schema component model (SCM) exported files now supported in the <code>SchemaValidator</code>. Users can now create and export to file a precompiled SCM.</li>
+      <li>The <code>xsl:result-document</code> output can now be captured into an map if enabled, which overrides the default mechanism. This is avilable on the 
+         <code>XsltExecutable</code> class  via the methods <code>setCaptureResultDocuments(bool flag)</code> and <code>getResultDocument()</code></li>
    </ul>
    
    
