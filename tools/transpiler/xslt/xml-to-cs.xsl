@@ -282,7 +282,15 @@
          <xsl:text>#nullable {annotations/annotation[name/@identifier='CSharpNullable']//@value}{$NL}</xsl:text>
          <xsl:call-template name="indent"/>
       </xsl:if>
-      <xsl:call-template name="modifiers"/>
+      <xsl:choose>
+         <xsl:when test="annotations/annotation[name/@identifier='CSharpModifiers']">
+            <xsl:value-of select="annotations/annotation[name/@identifier='CSharpModifiers']//@value ! string()" separator=" "/>
+            <xsl:text> </xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:call-template name="modifiers"/>
+         </xsl:otherwise>
+      </xsl:choose>     
       <xsl:call-template name="classOrInterface"/>
    </xsl:template>
    
@@ -419,7 +427,9 @@
       
       <xsl:choose>
          <xsl:when test="f:isIteratorType(string(type/@RESOLVED_TYPE))">
-            <xsl:text>System.Collections.Generic.IEnumerator&lt;{f:extract-type-arguments(type/@RESOLVED_TYPE)}&gt;</xsl:text>
+            <xsl:variable name="typeArgs" select="f:extract-type-arguments(type/@RESOLVED_TYPE)
+                                                  => replace('\? extends ', '')"/>           
+            <xsl:text>System.Collections.Generic.IEnumerator&lt;{$typeArgs}&gt;</xsl:text>
          </xsl:when>
          <xsl:when test="string($digestMethod/@csReturns)">{f:escapeDottedName(f:renameType($digestMethod/@csReturns))}</xsl:when>
          <xsl:otherwise>
@@ -459,17 +469,10 @@
       
       <!-- Type bounds (where clauses) -->
       
-      <!--<typeParameters>
-         <typeParameter nodeType="TypeParameter" UNRESOLVED="T extends XdmValue">
-            <name nodeType="SimpleName" identifier="T"/>
-            <typeBound>
-               <typeBoun nodeType="ClassOrInterfaceType"
-                  RESOLVED_TYPE="net.sf.saxon.s9api.XdmValue">
-                  <name nodeType="SimpleName" identifier="XdmValue"/>
-               </typeBoun>
-            </typeBound>
-         </typeParameter>
-      </typeParameters>-->
+      <xsl:variable name="bounds" select="annotations/annotation[name/@identifier='CSharpTypeBounds']"/>
+      <xsl:if test="$bounds and normalize-space($bounds/@value)">
+          <xsl:text> where {$bounds/@value}</xsl:text>   
+      </xsl:if>
       
       <xsl:for-each select="typeParameters/typeParameter[typeBound/typeBoun]">
          <xsl:text> where {name/@identifier} : {f:renameGenericType(typeBound/typeBoun/@RESOLVED_TYPE)}</xsl:text>
@@ -913,7 +916,7 @@
                   <xsl:call-template name="indent"/>
                   <xsl:text>  case </xsl:text>
                   <xsl:choose>
-                     <xsl:when test="$enumType">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
+                     <xsl:when test="$enumType and exists($firstLabel/@RESOLVED_TYPE)">{f:renameType($firstLabel/@RESOLVED_TYPE)}.{if (not($isSimpleEnum)) then 'InnerEnum.' else ''}{name/@identifier}</xsl:when>
                      <xsl:otherwise>
                         <xsl:apply-templates select="."/>
                      </xsl:otherwise>
@@ -1436,6 +1439,7 @@
             <xsl:variable name="declaredType" as="text()">
                <xsl:choose>
                   <xsl:when test="@RESOLVED_TYPE">{f:escapeDottedName(@RESOLVED_TYPE)}</xsl:when>
+                  <xsl:when test="@RETURN">{f:escapeDottedName(@RETURN)}</xsl:when>
                   <xsl:when test="@nodeType='ThisExpr'">{$containingClass}{$containingClassParams}</xsl:when>
                   <xsl:otherwise>/* UNKNOWN ARG TYPE */ object</xsl:otherwise>
                </xsl:choose>
@@ -1763,8 +1767,8 @@
    <xsl:template match="*[not(self::selector)]
                          [@nodeType='NameExpr']
                          [matches(name/@identifier, '^[A-Z0-9_]+$')]
-                         [key('digestClassKey', @RESOLVED_TYPE, $digest)/self::enum]" priority="18">
-      <xsl:text>/*implicit enum*/ {f:escapeDottedName(f:renameType(@RESOLVED_TYPE))}.{name/@identifier}</xsl:text>
+                         [key('digestClassKey', f:expressionType(current()), $digest)/self::enum]" priority="18">
+      <xsl:text>/*implicit enum*/ {f:escapeDottedName(f:renameType(f:expressionType(.)))}.{name/@identifier}</xsl:text>
    </xsl:template>
    
    <!-- match a reference to a field of an outer class -->
