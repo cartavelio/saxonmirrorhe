@@ -1,12 +1,10 @@
 package net.sf.saxon.test.matchers;
 
-import net.sf.saxon.functions.SaxonDeepEqual;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
@@ -20,6 +18,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 public class GroundedValueIsDeepEqualTo extends TypeSafeDiagnosingMatcher<GroundedValue> {
     private GroundedValue expected;
+    private XPathContext context;
 
     private static class LocalErrorReporter implements ErrorReporter {
         private final StringBuilder errors;
@@ -39,15 +38,16 @@ public class GroundedValueIsDeepEqualTo extends TypeSafeDiagnosingMatcher<Ground
     }
 
 
-    GroundedValueIsDeepEqualTo(GroundedValue expected) {
+    GroundedValueIsDeepEqualTo(GroundedValue expected, XPathContext context) {
         this.expected = expected;
+        this.context = context;
     }
 
     @Override
     public boolean matchesSafely(GroundedValue actual, Description mismatchDescription) {
         try {
             LocalErrorReporter err = new LocalErrorReporter();
-            boolean ok = check(err, actual);
+            boolean ok = check(err, actual, context);
             if (!ok) {
                 appendExpectedTypeAndValue(mismatchDescription.appendText("was "), actual)
                         .appendText("\n")
@@ -81,14 +81,13 @@ public class GroundedValueIsDeepEqualTo extends TypeSafeDiagnosingMatcher<Ground
         return "XDM value";
     }
 
-    private boolean check(ErrorReporter err, GroundedValue actual) throws XPathException {
-        XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
+    private boolean check(ErrorReporter err, GroundedValue actual, XPathContext ctxt) throws XPathException {
         StringCollator collator = CodepointCollator.getInstance();
         AtomicMatcher atomicMatcher = GenericAtomicComparer.getTransitiveAtomicMatcher(collator, 0);
-        return SaxonDeepEqual.deepEqual(expected.iterate(), actual.iterate(), atomicMatcher, ctxt, 0);
+        return SaxonDeepEqual.deepEqual(expected.iterate(), actual.iterate(), atomicMatcher, ctxt, SaxonDeepEqual.WARNING_IF_FALSE);
     }
 
-    public static Matcher<GroundedValue> deepEquals(GroundedValue expected) {
-        return new GroundedValueIsDeepEqualTo(expected);
+    public static Matcher<GroundedValue> deepEquals(GroundedValue expected, XPathContext context) {
+        return new GroundedValueIsDeepEqualTo(expected, context);
     }
 }
