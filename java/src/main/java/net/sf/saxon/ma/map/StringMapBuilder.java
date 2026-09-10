@@ -110,9 +110,10 @@ public class StringMapBuilder {
             if (combiner == null) {
                 UnicodeString[] keyArray = keys.toArray(new UnicodeString[0]);
                 GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
+                int ix = 0;
                 for (int i = 0; i < keys.size(); i++) {
                     UnicodeString key = keyArray[i];
-                    boolean isNew = AbstractFixedMap.putOffsetIfAbsent(index, key, i);
+                    boolean isNew = AbstractFixedMap.putOffsetIfAbsent(index, key, ix);
                     if (!isNew) {
                         throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
                     }
@@ -124,8 +125,9 @@ public class StringMapBuilder {
                 int offset = 0;
                 for (int i = 0; i < keys.size(); i++) {
                     UnicodeString key = keys.get(i);
-                    boolean isNew = AbstractFixedMap.putOffsetIfAbsent(index, key, offset++);
+                    boolean isNew = AbstractFixedMap.putOffsetIfAbsent(index, key, offset);
                     if (isNew) {
+                        offset++;
                         keys2.add(key);
                         values2.add(values.get(i));
                     } else {
