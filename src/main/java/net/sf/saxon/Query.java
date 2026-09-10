@@ -343,6 +343,12 @@ public class Query {
                 sourceInput = processSourceFile(sourceXmlFileName, useURLs);
             }
 
+            if (repeat > 1 && showTime) {
+                for (int c=0; c<20; c++) {
+                    // Absorb Java start-up cost
+                    compileQuery(compiler, queryFileName, useURLs);
+                }
+            }
             long startTime = System.nanoTime();
             if (showTime) {
                 config.getLogger().info("Analyzing query from " + queryFileName);
