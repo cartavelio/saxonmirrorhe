@@ -112,7 +112,6 @@ public class GlobalVariableReference extends VariableReference implements Compon
      */
     @Override
     public GroundedValue evaluateVariable(XPathContext c) throws XPathException {
-
         if (bindingSlot >= 0) {
             if (c.getCurrentComponent() == null) {
                 throw new AssertionError("No current component");

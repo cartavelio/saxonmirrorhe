@@ -493,6 +493,7 @@ public class UserFunctionReference extends Expression
             c2.setCurrentComponent(component);
             c2.setResourceResolver(oldContext.getResourceResolver());
             c2.setOrigin(originator);
+            c2.setCaller(oldContext);
             return function.makeNewContext(c2, originator);
         }
 
