@@ -1,5 +1,6 @@
 package jaxptest;
 
+import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.lib.EmptySource;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardURIResolver;
@@ -9,18 +10,26 @@ import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.InputSource;
 
 import javax.xml.transform.*;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -47,28 +56,28 @@ public class URIResolverTest {
             tfactory.setAttribute(FeatureKeys.OPTIMIZATION_LEVEL, "-j"); // Disable JIT compilation
             Resolver1 phoo = new Resolver1("phoo");
             tfactory.setURIResolver(phoo);
-            assertTrue(tfactory.getURIResolver() == phoo);
+            assertSame(tfactory.getURIResolver(), phoo);
 
             Templates foo1Templates = tfactory.newTemplates(new StreamSource(foo_xsl));
             assertTrue(phoo.history.contains("inc1/inc1.xsl"));
             assertTrue(phoo.history.contains("inc2/inc2.xsl"));
 
             Transformer foo1Transformer = foo1Templates.newTransformer();
-            assertTrue(foo1Transformer.getURIResolver() == phoo);
+            assertSame(foo1Transformer.getURIResolver(), phoo);
 
             Resolver1 phut = new Resolver1("phut");
             phut.map("inc1/inc1.xsl", "identity.xsl");
             tfactory.setURIResolver(phut);
-            assertTrue(tfactory.getURIResolver() == phut);
+            assertSame(tfactory.getURIResolver(), phut);
 
             Resolver1 phum = new Resolver1("phum");
             foo1Transformer.setURIResolver(phum);
-            assertTrue(foo1Transformer.getURIResolver() == phum);
-            assertTrue(tfactory.getURIResolver() == phut);
+            assertSame(foo1Transformer.getURIResolver(), phum);
+            assertSame(tfactory.getURIResolver(), phut);
 
             foo1Transformer.setURIResolver(null);
-            assertTrue(foo1Transformer.getURIResolver() == null);
-            assertTrue(tfactory.getURIResolver() == phut);
+            assertNull(foo1Transformer.getURIResolver());
+            assertSame(tfactory.getURIResolver(), phut);
 
             Templates foo2Templates;
             try {
@@ -178,6 +187,73 @@ public class URIResolverTest {
             trans.applyTemplates(new StreamSource(new StringReader("<in>xyz</in>")),
                                  proc.newSerializer(sw));
             assertTrue(sw.toString().endsWith("xyz"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testSaxSourceForUnparsedText_ReturningReader() {
+        // Bug 5582: for legacy reasons (and Ant), we should allow an unparsed-text URI to return
+        // a SAXSource
+        try {
+            TransformerFactory f = new SaxonTransformerFactory();
+            f.setURIResolver(new URIResolver() {
+                @Override
+                public Source resolve(String href, String base) throws TransformerException {
+                    if (href.endsWith("foo.txt")) {
+                        return new SAXSource(new InputSource(new StringReader("this be foo")));
+                    } else {
+                        return null;
+                    }
+                }
+            });
+            Templates exec = f.newTemplates(
+                    new StreamSource(new StringReader(
+                            "<e xsl:version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
+                                    "content='{unparsed-text(\"foo.txt\")}'/>")));
+
+            Transformer trans = exec.newTransformer();
+
+            StringWriter sw = new StringWriter();
+            trans.transform(new StreamSource(new StringReader("<in>xyz</in>")),
+                                  new StreamResult(sw));
+            assertTrue(sw.toString().contains("<e content=\"this be foo\"/>"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testSaxSourceForUnparsedText_ReturningStream() {
+        // Bug 5582: for legacy reasons (and Ant), we should allow an unparsed-text URI to return
+        // a SAXSource
+        try {
+            TransformerFactory f = new SaxonTransformerFactory();
+            f.setURIResolver(new URIResolver() {
+                @Override
+                public Source resolve(String href, String base) throws TransformerException {
+                    if (href.endsWith("foo.txt")) {
+                        ByteArrayInputStream stream = new ByteArrayInputStream("this be foo".getBytes(StandardCharsets.UTF_8));
+                        return new SAXSource(new InputSource(stream));
+                    } else {
+                        return null;
+                    }
+                }
+            });
+            Templates exec = f.newTemplates(
+                    new StreamSource(new StringReader(
+                            "<e xsl:version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
+                                    "content='{unparsed-text(\"foo.txt\")}'/>")));
+
+            Transformer trans = exec.newTransformer();
+
+            StringWriter sw = new StringWriter();
+            trans.transform(new StreamSource(new StringReader("<in>xyz</in>")),
+                            new StreamResult(sw));
+            assertTrue(sw.toString().contains("<e content=\"this be foo\"/>"));
         } catch (Exception ex) {
             ex.printStackTrace();
             fail();
