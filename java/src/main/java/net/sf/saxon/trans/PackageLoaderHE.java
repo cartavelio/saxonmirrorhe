@@ -2326,6 +2326,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 // encountered in files exported by Saxon 9.7
                 name = "string-join";
             }
+            if (rsc.getConfiguration().isDisabledFunction(NamespaceUri.FN.qName(name))) {
+                throw new XPathException("System function " + name + " has been disabled", "XPST0017");
+            }
             Expression e;
             try {
                 e = SystemFunction.makeCall(name, rsc, args);
@@ -2367,6 +2370,9 @@ public class PackageLoaderHE implements IPackageLoader {
             SystemFunction f = null;
             if (name.startsWith("Q{")) {
                 StructuredQName qName = StructuredQName.fromEQName((name));
+                if (rsc.getConfiguration().isDisabledFunction(qName)) {
+                    throw new XPathException("Function " + name + " has been disabled", "XPST0017");
+                }
                 NamespaceUri uri = qName.getNamespaceUri();
                 if (uri == NamespaceUri.MATH) {
                     f = MathFunctionSet.getInstance(40).makeFunction(qName.getLocalPart(), arity);
@@ -2533,6 +2539,9 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("ifCall", (loader, element) -> {
             Expression[] args = getChildExpressionArray(loader, element);
             StructuredQName name = loader.getQNameAttribute(element, "name");
+            if (loader.getConfiguration().isDisabledFunction(name)) {
+                throw new XPathException("Function " + name.getEQName() + " has been disabled", "XPST0017");
+            }
             Expression exp = null;
             if (name.hasURI(NamespaceUri.MATH)) {
                 exp = MathFunctionSet.getInstance(40).makeFunction(name.getLocalPart(), args.length).makeFunctionCall(args);
