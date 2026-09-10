@@ -348,21 +348,31 @@ public class ExpressionPresenter {
                 emitAttribute("defaultFunctionNS", defaultFnNs);
             }
             if (!options.suppressStaticContext && (parentSC == null || !sc.declaresSameNamespaces(parentSC))) {
-                emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap()));
+                boolean includeXmlNamespace = "JS".equals(getOptions().target) && getOptions().targetVersion == 2;
+                emitAttribute("ns", getNamespacesAsString(sc.getNamespaceMap(), includeXmlNamespace));
             }
         } catch (XPathException e) {
             throw new AssertionError(e);
         }
     }
 
-    public static String getNamespacesAsString(NamespaceMap sc) throws XPathException {
+    /**
+     * From a NamespaceMap, produce the SEF concise representation, for example "xs=~ xsl=~ example=file://example.com/"
+     * @param sc the namespace map
+     * @param includeXmlNamespace for compatibility with SaxonJS 2.x, indicate that any explicit binding for the
+     *                            XML namespace should be included in the list
+     * @return the concise string representation of the namespace map
+     * @throws XPathException if the namespace map contains unsuitable namespaces, for example namespace URIs containing
+     * whitespace.
+     */
+    public static String getNamespacesAsString(NamespaceMap sc, boolean includeXmlNamespace) throws XPathException {
         // Note that this will throw an UnsupportedOperationException if the context does
         // not allow namespace prefixes to be enumerated: that is, if it is a JAXP static context.
         // Fortunately we don't need to serialize XPath expressions in that scenario.
         UnicodeBuilder ub = new UnicodeBuilder();
         for (Iterator<String> iter = sc.iteratePrefixes(); iter.hasNext(); ) {
             String p = iter.next();
-            if (!p.equals("xml")) {
+            if (includeXmlNamespace || !p.equals("xml")) { //Bugs 6198, 6274
                 NamespaceUri uri = sc.getURIForPrefix(p, true);
                 ub.append(p);
                 ub.append("=");
