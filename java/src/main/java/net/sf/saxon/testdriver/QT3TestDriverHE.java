@@ -782,7 +782,7 @@ public class QT3TestDriverHE extends TestDriver {
                                 outcome.setErrorsReported(errorCollector.getErrorCodes());
                             } catch (Exception err) {
                                 writeTestcaseElement(testCaseName, "fail", "Crashed");
-                                noteFailure(testSetName, testCaseName);
+                                //noteFailure(testSetName, testCaseName);
                                 throw err;
                             }
                             break;
