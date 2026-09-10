@@ -3318,8 +3318,9 @@ public class XPathParser {
     }
 
     public Expression parseStringTemplate() throws XPathException {
-        int offset = t.currentTokenStartOffset;
         Token.StringTemplate template = (Token.StringTemplate)t.currentToken;
+        int offset = template.getStartOffset();
+        t.reposition(offset);
         List<Expression> components = new ArrayList<>();
         StringBuilder currentPart = new StringBuilder();
         boolean finished = false;

@@ -992,12 +992,23 @@ public final class Tokenizer {
      * tokenization state is reset from the saved stack.
      */
 
-    public void endEmbeddedExpression() {
+    public void endEmbeddedExpression() throws XPathException {
+        if (inputOffset >= inputLength) {
+            throw new XPathException("Reached end of input while processing an embedded expression: last token starts " + precedingToken);
+        }
         if (input.charAt(inputOffset++) != '}') {
             throw new AssertionError("Embedded expression must end at '}'");
         }
         braceDepth = braceDepthStack.pop();
         finishCondition = finishConditionStack.pop();
+    }
+
+    /**
+     * Reposition for reading characters. Needs care!
+     */
+
+    public void reposition(int offset) {
+        inputOffset = offset;
     }
 
     /**

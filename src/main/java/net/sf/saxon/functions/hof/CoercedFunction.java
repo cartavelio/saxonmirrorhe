@@ -138,7 +138,11 @@ public class CoercedFunction extends AbstractFunction {
      */
     @Override
     public String getDescription() {
-        return targetFunction.getDescription() + " (used where the required type is " + requiredType + ")";
+        if (targetFunction instanceof CoercedFunction) {
+            return targetFunction.getDescription();
+        } else {
+            return targetFunction.getDescription() + " (used where the required type is " + requiredType + ")";
+        }
     }
 
     /**

@@ -281,6 +281,7 @@ public class Token {
     public static abstract class ComplexToken extends Token {
 
         protected final Tokenizer tokenizer;
+        protected int startOffset;
         protected String tokenType;
 
         public ComplexToken(Tokenizer tokenizer, String input, int startOffset) {
@@ -292,6 +293,10 @@ public class Token {
             tokenizer.currentToken = this;
             tokenizer.lookAhead();
             tokenizer.next();
+        }
+
+        public int getStartOffset() {
+            return startOffset;
         }
 
     }
@@ -309,6 +314,7 @@ public class Token {
         public StringTemplate(Tokenizer tokenizer, String input, int startOffset) {
             super(tokenizer, input, startOffset);
             this.tokenType = "StringTemplate";
+            this.startOffset = startOffset;
         }
     }
 
