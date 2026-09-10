@@ -173,9 +173,12 @@ public class Gizmo {
     public Gizmo(String[] args) {
         initSubCommands();
         config = Configuration.newConfiguration();
-        config.setConfigurationProperty(Feature.ALLOW_SYNTAX_EXTENSIONS, true);
+        boolean allow40 = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY);
+        if (allow40) {
+            config.setConfigurationProperty(Feature.ALLOW_SYNTAX_EXTENSIONS, true);
+        }
         env = new IndependentContext(config);
-        env.setXPathLanguageLevel(40);
+        env.setXPathLanguageLevel(allow40 ? 40 : 31);
         String source = null;
         String script = null;
         boolean interactive = true;
