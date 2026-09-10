@@ -3,9 +3,10 @@ package net.sf.saxon.ma.pin;
 import com.saxonica.xsltextn.pedigree.DelegatingArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +17,14 @@ import java.util.List;
  */
 public class LabeledArrayItem extends DelegatingArrayItem implements LabeledItem {
 
-    MapItem label;
+    StringMap label;
 
     /**
      * Create a PedigreeArrayItem with an empty pedigree
      * @param base the underlying array item
      */
 
-    public LabeledArrayItem(ArrayItem base, MapItem label) {
+    public LabeledArrayItem(ArrayItem base, StringMap label) {
         super(base);
         this.label = label;
     }
@@ -33,7 +34,7 @@ public class LabeledArrayItem extends DelegatingArrayItem implements LabeledItem
     }
 
     public static LabeledArrayItem makePinnedArrayItem(ArrayItem base) {
-        return new LabeledArrayItem(base, LabeledMapItem.PIN_LABEL);
+        return new LabeledArrayItem(base, LabelTool.PIN_LABEL);
     }
 
     /**
@@ -82,33 +83,57 @@ public class LabeledArrayItem extends DelegatingArrayItem implements LabeledItem
         List<GroundedValue> list = new ArrayList<>(arrayLength()-1);
         int i = 0;
         for (GroundedValue value : getBaseItem().members()) {
-            i++;
-            if (i==index) {
-                i++;
+            if (i!=index) {
+                list.add(adaptValue(i+1, value));
             }
-            list.add(adaptValue(i, value));
+            i++;
         }
         return new SimpleArrayItem(list);
     }
 
     @Override
+    public ArrayItem removeSeveral(IntSet positions) {
+        List<GroundedValue> list = new ArrayList<>(arrayLength() - 1);
+        int i = 0;
+        for (GroundedValue value : getBaseItem().members()) {
+            if (!positions.contains(i)) {
+                list.add(adaptValue(i + 1, value));
+            }
+            i++;
+        }
+        return new SimpleArrayItem(list);
+    }
+
+    /**
+     * Get a sub-array given a start and end position
+     *
+     * @param start the start position (zero based)
+     * @param end   the end position (the position of the first item not to be returned)
+     *              (zero based)
+     * @return a new array item containing the sub-array
+     * @throws IndexOutOfBoundsException if start, or start+end, is out of range
+     */
+
+    @Override
     public ArrayItem subArray(int start, int end) {
         List<GroundedValue> list = new ArrayList<>(end-start);
-        int index = start;
+        int index = start+1;  // to give a 1-based index
         for (GroundedValue value : super.subArray(start, end).members()) {
-            // TODO: adjust index
-            list.add(adaptValue(index, value));
+            GroundedValue labeledValue = adaptValue(index, value);
+            list.add(labeledValue);
+            index++;
         }
         return new SimpleArrayItem(list);
     }
 
     /**
      * Get the pedigree of this array item, providing information as to how it was selected.
+     *
      * @return the pedigree of this array item
      */
 
     @Override
-    public MapItem getLabel() {
+    public StringMap getLabel() {
         return label;
     }
 

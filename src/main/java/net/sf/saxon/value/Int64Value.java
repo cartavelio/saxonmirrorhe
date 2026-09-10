@@ -99,7 +99,7 @@ public final class Int64Value extends IntegerValue {
      * @param typeLabel the type annotation (trusted to be correct)
      */
 
-    public Int64Value(long value, AtomicType typeLabel) {
+    public Int64Value(long value, AtomicMetadata typeLabel) {
         super(typeLabel);
         this.value = value;
     }
@@ -198,7 +198,7 @@ public final class Int64Value extends IntegerValue {
     @Override
     public AtomicValue withMetadata(/*@NotNull*/ AtomicMetadata metadata) {
         if (metadata.getType().getPrimitiveType() == StandardNames.XS_INTEGER) {
-            return new Int64Value(value, metadata.getType());
+            return new Int64Value(value, metadata);
         } else {
             return new BigDecimalValue(value).withMetadata(metadata);
         }

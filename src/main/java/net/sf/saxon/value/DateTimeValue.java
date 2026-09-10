@@ -76,7 +76,7 @@ public final class DateTimeValue extends CalendarValue
     private final boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
 
     public DateTimeValue(int year, byte month, byte day, byte hour, byte minute, byte second,
-                         int nanosecond, boolean hasNoYearZero, int tzMinutes, AtomicType typeLabel) {
+                         int nanosecond, boolean hasNoYearZero, int tzMinutes, AtomicMetadata typeLabel) {
         super(typeLabel, tzMinutes);
         this.year = year;
         this.month = month;
@@ -99,7 +99,7 @@ public final class DateTimeValue extends CalendarValue
         public int nanosecond; // the number of nanoseconds within the current second
         public boolean hasNoYearZero;  // true if XSD 1.0 rules apply for negative years
         public int tzMinutes = NO_TIMEZONE;
-        public AtomicType typeLabel = BuiltInAtomicType.DATE_TIME;
+        public AtomicMetadata typeLabel = BuiltInAtomicType.DATE_TIME;
     }
 
     private MutableDateTimeValue makeMutableCopy() {
@@ -1140,7 +1140,7 @@ public final class DateTimeValue extends CalendarValue
     @Override
     public DateTimeValue withMetadata(AtomicMetadata metadata) {
         MutableDateTimeValue v = makeMutableCopy();
-        v.typeLabel = metadata.getType();
+        v.typeLabel = metadata;
         return fromMutableCopy(v);
     }
 

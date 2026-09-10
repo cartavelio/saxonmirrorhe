@@ -8,7 +8,7 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
@@ -186,7 +186,7 @@ public interface AtomicType extends SimpleType, PlainType, CastingTarget, Atomic
      * In this case the atomic value has no label.
      */
 
-    default MapItem getLabel() {
+    default StringMap getLabel() {
         return null;
     }
 }

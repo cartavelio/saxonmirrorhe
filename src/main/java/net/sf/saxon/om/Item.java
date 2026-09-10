@@ -7,7 +7,7 @@
 
 package net.sf.saxon.om;
 
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -180,10 +180,11 @@ public interface Item extends GroundedValue {
 
     /**
      * Get the item's label, if there is one. See the 4.0 version of the XDM model.
+     *
      * @return the item's label (as a map) if it has one, or null otherwise
      */
 
-    default MapItem getLabel() {
+    default StringMap getLabel() {
         return null;
     }
 

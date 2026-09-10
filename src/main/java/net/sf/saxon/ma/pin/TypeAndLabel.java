@@ -1,6 +1,8 @@
 package net.sf.saxon.ma.pin;
 
+import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 
@@ -13,9 +15,9 @@ import net.sf.saxon.type.AtomicType;
 public class TypeAndLabel implements AtomicMetadata {
 
     private final AtomicType type;
-    private final MapItem label;
+    private final StringMap label;
 
-    public TypeAndLabel(AtomicType type, MapItem label) {
+    public TypeAndLabel(AtomicType type, StringMap label) {
         this.type = type;
         this.label = label;
     }
@@ -26,7 +28,7 @@ public class TypeAndLabel implements AtomicMetadata {
     }
 
     @Override
-    public MapItem getLabel() {
+    public StringMap getLabel() {
         return label;
     }
 }

@@ -7,7 +7,6 @@
 
 package net.sf.saxon.query;
 
-import com.saxonica.xsltextn.instruct.DeepUpdate;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
@@ -3504,7 +3503,7 @@ public class XQueryParser extends XPathParser {
         if (!allowXPath40Syntax) {
             grumble("update map/array syntax requires 4.0 to be enabled");
         }
-        boolean isMap = t.currentToken == Token.UPDATE_MAP;
+        int operation = t.currentToken;
         nextToken();
         Expression rootExpr = parseExprSingle();
         if (!isKeyword("replace")) {
@@ -3517,7 +3516,7 @@ public class XQueryParser extends XPathParser {
         }
         nextToken();
         Expression actionExpr = parseExprSingle();
-        return new DeepUpdate(rootExpr, selectExpr, actionExpr);
+        return new DeepUpdate2(operation, rootExpr, selectExpr, actionExpr);
     }
 
     /**

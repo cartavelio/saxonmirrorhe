@@ -1,26 +1,23 @@
 package net.sf.saxon.expr;
 
-import com.saxonica.xsltextn.pedigree.Pedigree;
-import com.saxonica.xsltextn.pedigree.PedigreeArrayItem;
-import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
-import com.saxonica.xsltextn.pedigree.PedigreeValue;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushElaborator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import com.saxonica.functions.extfn.PinFn;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.ma.pin.LabelTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.IdentityHashMap;
@@ -101,9 +98,11 @@ public class DeepUpdate2 extends Instruction {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
-        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/root", 0);
-        SequenceType required = operation == Token.UPDATE_MAP ? MapType.SINGLE_MAP_ITEM : ArrayItemType.SINGLE_ARRAY;
-        setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
+        if (operation != -1) {
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/root", 0);
+            SequenceType required = operation == Token.UPDATE_MAP ? MapType.SINGLE_MAP_ITEM : ArrayItemType.SINGLE_ARRAY;
+            setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
+        }
 
 //        setSelectExpression(getSelectExpression());
 //
@@ -143,15 +142,8 @@ public class DeepUpdate2 extends Instruction {
         return getRootExpression().getItemType();
     }
 
-    private static Item makePinnedRoot(Item root) {
-        if (root instanceof MapItem) {
-            return new PedigreeMapItem((MapItem) root);
-        } else if (root instanceof ArrayItem) {
-            return new PedigreeArrayItem((ArrayItem) root);
-        } else {
-            assert false;
-            return null;
-        }
+    private static Item makePinnedRoot(Item root) throws XPathException {
+        return PinFn.makePinnedRoot(root);
     }
 
 
@@ -183,72 +175,61 @@ public class DeepUpdate2 extends Instruction {
         @Override
         public PushEvaluator elaborateForPush() {
             DeepUpdate2 expr = (DeepUpdate2) getExpression();
-            PullEvaluator rootPuller = expr.getRootExpression().makeElaborator().elaborateForPull();
+            ItemEvaluator rootEval = expr.getRootExpression().makeElaborator().elaborateForItem();
             PullEvaluator selectPuller = expr.getSelectExpression().makeElaborator().elaborateForPull();
-            PullEvaluator actionPuller = expr.getActionExpression().makeElaborator().elaborateForPull();
+            SequenceEvaluator actionEval = expr.getActionExpression().makeElaborator().eagerly();
             return (output, context) -> {
-                Item root;
-                SequenceIterator rootIterator = rootPuller.iterate(context);
-                SequenceIterator mappedRootIterator =
-                        MappingIterator.map(rootIterator,
-                                            item -> SingletonIterator.makeIterator(makePinnedRoot(item)));
-
-                XPathContext c2 = context.newMinorContext();
-                FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
-                while ((root = trackingIterator.next()) != null) {
-                    Item root1 = root;
+                try {
+                    Item root = rootEval.eval(context);
+                    Item pinnedRoot = makePinnedRoot(root);
+                    XPathContext c2 = context.newMinorContext();
+                    c2.setCurrentIterator(new ManualIterator(pinnedRoot));
                     IdentityHashMap<Item, Item> substitutions = new IdentityHashMap<>();
                     XPathContext c3 = c2.newMinorContext();
-                    FocusIterator selectIterator = c3.trackFocus(selectPuller.iterate(c2));
+                    FocusIterator selectIterator = new FocusTrackingIterator(selectPuller.iterate(c2));
+                    c3.setCurrentIterator(selectIterator);
                     Item selected;
+                    Item finalRoot = null;
                     while ((selected = selectIterator.next()) != null) {
-                        if (!(selected instanceof PedigreeValue)) {
-                            if (selected instanceof MapItem) {
-                                throw new XPathException("saxon:deep-update: selected item is a map with no pedigree");
-                            } else if (selected instanceof ArrayItem) {
-                                throw new XPathException("saxon:deep-update: selected item is an array with no pedigree");
-                            } else {
-                                throw new XPathException(
-                                        "saxon:deep-update: selected value " + Err.depict(selected) +
-                                                " is an instance of "
-                                                + SequenceTool.getItemType(selected, c2.getConfiguration().getTypeHierarchy())
-                                                + " (expected a map/array with pedigree)");
-                            }
+                        StringMap label = selected.getLabel();
+                        if (label == null) {
+                            throw new XPathException(
+                                    "Update expression: selected value " + Err.depict(selected) +
+                                            " is not a labeled item", "XXXX9999");
                         }
-                        SequenceIterator actionIter = actionPuller.iterate(c3);
-                        GroundedValue actionVal;
-                        try {
-                            actionVal = SequenceTool.toGroundedValue(actionIter);
-                        } catch (UncheckedXPathException e) {
-                            throw e.getXPathException();
-                        }
-                        Pedigree pedigree = ((PedigreeValue) selected).getPedigree();
-                        PedigreeValue parent = pedigree.getContainer();
+                        // TODO: test if it belongs to the right tree
+                        GroundedValue actionVal = actionEval.evaluate(c3).materialize();
+                        Item parent = (Item)label.get(LabelTool.PARENT_KEY);
                         GroundedValue val = actionVal;
                         while (parent != null) {
-                            Item latestParent = (Item) parent;
+                            Item latestParent = parent;
                             // If two updates affect the same parent/ancestor at some level in the
                             // tree, then the updates need to be cumulative, so we keep track of a mapping
                             // from items in the original tree to the items that replace them in the new tree
-                            if (substitutions.containsKey((Item) parent)) {
-                                latestParent = substitutions.get((Item) parent);
+                            if (substitutions.containsKey(parent)) {
+                                latestParent = substitutions.get(parent);
                             }
                             if (latestParent instanceof ArrayItem) {
-                                val = ((ArrayItem) latestParent).put(pedigree.getIndex(), val);
+                                val = ((ArrayItem) latestParent).put(
+                                        ((IntegerValue)label.get(LabelTool.KEY_KEY)).asSubscript() - 1, val);
                             } else if (latestParent instanceof MapItem) {
-                                val = ((MapItem) latestParent).addEntry(pedigree.getKey(), val);
+                                val = ((MapItem) latestParent).addEntry(
+                                        ((AtomicValue) label.get(LabelTool.KEY_KEY)), val);
                             } else {
                                 assert false;
                             }
-                            substitutions.put((Item) parent, (Item) val);
+                            substitutions.put(parent, (Item) val);
                             substitutions.put(latestParent, (Item) val);
-                            pedigree = parent.getPedigree();
-                            parent = pedigree.getContainer();
+                            label = parent.getLabel();
+                            parent = (Item)label.get(LabelTool.PARENT_KEY);
+                            finalRoot = (Item)val;
                         }
-                        root1 = (Item) val;
+
                     }
-                    Item replacedRoot = root1;
-                    output.append(replacedRoot);
+                    assert finalRoot != null;
+                    output.append(finalRoot);
+                } catch (XPathException e) {
+                    throw e.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                 }
                 return null;
             };

@@ -4,15 +4,13 @@ import com.saxonica.xsltextn.pedigree.DelegatingMapItem;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.ma.map.ShapedMap;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.Twine8;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
@@ -26,17 +24,7 @@ import java.util.List;
 
 public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
 
-    private MapItem label;
-
-    public final static Shape NAVIGATION_LABEL_SHAPE = new Shape(
-            new Twine8("parent"),
-            new Twine8("key"),
-            new Twine8("position"),
-            new Twine8("ancestors"),
-            new Twine8("path"));
-
-    public final static Shape PIN_LABEL_SHAPE = new Shape(new Twine8("pinned"));
-    public final static ShapedMap PIN_LABEL = new ShapedMap(PIN_LABEL_SHAPE, BooleanValue.TRUE);
+    private final StringMap label;
 
     /**
      * Create a LabeledMapItem with a supplied label
@@ -44,7 +32,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
      * @param label the label
      */
 
-    public LabeledMapItem(MapItem base, MapItem label) {
+    public LabeledMapItem(MapItem base, StringMap label) {
         super(base);
         this.label = label;
     }
@@ -60,7 +48,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
     }
 
     public static LabeledMapItem makePinnedMapItem(MapItem base) {
-        return new LabeledMapItem(base, PIN_LABEL);
+        return new LabeledMapItem(base, LabelTool.PIN_LABEL);
     }
 
     /**
@@ -75,6 +63,9 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
     @Override
     public GroundedValue get(AtomicValue key) {
         GroundedValue value = super.get(key);
+        if (value == null) {
+            return null;
+        }
         return adaptValue(this, key, value);
     }
 
@@ -110,7 +101,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
                 item = ((LabeledItem) item).getSubject();
             }
             // Tricky because the new item and the label both reference each other
-            ShapedMap label = new ShapedMap(LabeledMapItem.NAVIGATION_LABEL_SHAPE,
+            ShapedMap label = new ShapedMap(LabelTool.NAVIGATION_LABEL_SHAPE,
                                             parent,
                                             key,
                                             Int64Value.makeIntegerValue(++position),
@@ -159,23 +150,24 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
                                     new SpecificFunctionType(new SequenceType[0], SequenceType.ANY_SEQUENCE));
     }
 
-    public static LabeledItem makeLabeledItem(Item subject, MapItem label) {
-        if (subject instanceof MapItem) {
-            return new LabeledMapItem((MapItem)subject, label);
-        } else if (subject instanceof ArrayItem) {
-            return new LabeledArrayItem((ArrayItem)subject, label);
-        } else {
-            return new AnyLabeledItem(subject, label);
-        }
-    }
+//    public static LabeledItem makeLabeledItem(Item subject, StringMap label) {
+//        if (subject instanceof MapItem) {
+//            return new LabeledMapItem((MapItem)subject, label);
+//        } else if (subject instanceof ArrayItem) {
+//            return new LabeledArrayItem((ArrayItem)subject, label);
+//        } else {
+//            return new AnyLabeledItem(subject, label);
+//        }
+//    }
 
     /**
      * Get the pedigree of this map item, providing information as to how it was selected.
+     *
      * @return the pedigree of this map item
      */
 
     @Override
-    public MapItem getLabel() {
+    public StringMap getLabel() {
         return label;
     }
 

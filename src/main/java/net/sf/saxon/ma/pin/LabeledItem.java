@@ -1,6 +1,6 @@
 package net.sf.saxon.ma.pin;
 
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMap;
 import net.sf.saxon.om.Item;
 
 /**
@@ -15,10 +15,11 @@ public interface LabeledItem extends Item {
     /**
      * Get the label of this value, typically, information about
      * the containing maps and arrays in the containing tree
+     *
      * @return the associated {@code Pedigree}.
      */
 
-    MapItem getLabel();
+    StringMap getLabel();
 
     /**
      * Get the subject item without its label
