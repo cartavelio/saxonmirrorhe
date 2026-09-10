@@ -184,7 +184,6 @@ public class Predicates {
      * @return a predicate that returns true if and only if the supplied item is a node with the given
      * namespace URI and local name
      */
-
     public static Predicate<? super XdmNode> hasName(String uri, String localName) {
         NamespaceUri nsUri = NamespaceUri.of(uri);
         return item -> {
@@ -192,6 +191,21 @@ public class Predicates {
             return name != null &&
                     name.getLocalName().equals(localName) &&
                     name.getNamespaceUri().equals(nsUri);
+        };
+    }
+
+    /**
+     * Obtain a predicate that tests whether an item is a node with a given QName
+     *
+     * @param name      the required name
+     * @return a predicate that returns true if and only if the supplied item is a node with the given name
+     */
+    public static Predicate<? super XdmNode> hasName(QName name) {
+        return item -> {
+            QName nodeName = item.getNodeName();
+            return nodeName != null
+                    && nodeName.getNamespaceUri() == name.getNamespaceUri()
+                    && nodeName.getLocalName().equals(name.getLocalName());
         };
     }
 
@@ -255,11 +269,25 @@ public class Predicates {
      * @param uri the namespace URI
      * @param local the required attribute name
      * @return a predicate that returns true if and only if the supplied item is an element having an attribute
-     * with the given local name, in no namespace
+     * with the given local name, in the given namespace
      */
     public static Predicate<XdmNode> hasAttribute(String uri, String local) {
         return item -> {
             QName name = new QName(NamespaceUri.of(uri), local);
+            return item.getAttributeValue(name) != null;
+        };
+    }
+
+    /**
+     * Obtain a predicate that tests whether an item is an element node with a given attribute (whose
+     * name is in the specified namespace)
+     *
+     * @param name the required attribute name
+     * @return a predicate that returns true if and only if the supplied item is an element having an attribute
+     * with the given name
+     */
+    public static Predicate<XdmNode> hasAttribute(QName name) {
+        return item -> {
             return item.getAttributeValue(name) != null;
         };
     }
@@ -286,12 +314,28 @@ public class Predicates {
      * @param local the required attribute name
      * @param value the required attribute value
      * @return a predicate that returns true if and only if the supplied item is an element having an attribute
-     * with the given local name, in no namespace, whose string value is equal to the given value
+     * with the given local name, in the given namespace, whose string value is equal to the given value
      */
 
     public static Predicate<XdmNode> attributeEq(String uri, String local, String value) {
         return item -> {
             QName name = new QName(NamespaceUri.of(uri), local);
+            return value != null && value.equals(item.getAttributeValue(name));
+        };
+    }
+
+    /**
+     * Obtain a predicate that tests whether an item is an element node with a given attribute
+     * whose string value is equal to a given value
+     *
+     * @param name the required attribute name
+     * @param value the required attribute value
+     * @return a predicate that returns true if and only if the supplied item is an element having an attribute
+     * with the given name whose string value is equal to the given value
+     */
+
+    public static Predicate<XdmNode> attributeEq(QName name, String value) {
+        return item -> {
             return value != null && value.equals(item.getAttributeValue(name));
         };
     }
@@ -339,7 +383,7 @@ public class Predicates {
      * @return a predicate that is true if every item selected by the step matches the supplied condition
      */
 
-    public static <T extends XdmItem> Predicate<XdmItem> every(Step<T> step, Predicate<? super XdmItem> condition) {
+    public static <T extends XdmItem> Predicate<XdmItem> every(Step<T> step, Predicate<? super T> condition) {
         return item -> step.apply(item).allMatch(condition);
     }
 

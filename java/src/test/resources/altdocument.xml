@@ -1,0 +1,26 @@
+<doc xmlns="http://example.org/test">
+  <element xml:id="spoon" attr="value"/>
+  some text
+  <!-- comment -->
+  <?pi?>
+  <wrapper1>
+    <field name="f1"/>
+    <field name="f2"/>
+    <field/>
+    <field name="f4"/>
+  </wrapper1>
+  <wrapper2>
+    <property name="p1"/>
+    <property name="p2"/>
+    <property name="p3"/>
+  </wrapper2>
+  <wrapper3>
+    <text>Now is the time</text>
+    <text>Now is not the time</text>
+    <text>There was enver any time</text>
+  </wrapper3>
+  <wrapper4>
+    <text>Now is the time</text>
+  </wrapper4>
+</doc>
+  

@@ -68,7 +68,7 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * Filter a stream of items, to create a new stream containing only those items
      * that satisfy a supplied condition.
      *
-     * <p>For example, {@code body.select(child("*")).filter(n -> n.getNodeName().getLocalName().startsWith("h"))}
+     * <p>For example, {@code body.select(child("*")).filter(n -&gt; n.getNodeName().getLocalName().startsWith("h"))}
      * returns a stream of all the child elements of <code>body</code> whose local name starts with "h".</p>
      * <p>Note: an alternative to filtering a stream is to use a {@link Step} that incorporates
      * a {@link Predicate}, for example {@code body.select(child("*").where(n -> n.getNodeName().getLocalName().startsWith("h")))}</p>
@@ -261,9 +261,21 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * @param localName the local name of the child elements to be selected
      * @since 13
      */
-
     public XdmStream<XdmNode> select(String uri, String localName) {
         return select(Steps.child(uri, localName));
+    }
+
+    /**
+     * Select children of the nodes in this stream. This is a shortcut for
+     * <code>select(Steps.child(name))</code>; it returns an <code>XdmStream</code>
+     * containing all the child elements of nodes in this <code>XdmValue</code> that have
+     * the name <code>name</code>.
+     *
+     * @param name the name of the child elements to be selected
+     * @since 13
+     */
+    public XdmStream<XdmNode> select(QName name) {
+        return select(Steps.child(name));
     }
 
 

@@ -1,4 +1,5 @@
-<book xmlns:ex="http://example.org/ns/ex">
+<book xmlns="http://example.org/ns"
+      xmlns:ex="http://example.org/ns/ex">
   <front>
     <preface>
       <title>Preface</title>
@@ -6,7 +7,8 @@
     </preface>
   </front>
   <body>
-    <chapter>
+    <chapter status="draft">
+      <author>John Doe</author>
       <title>First Chapter</title>
       <para>Introductory paragraph.</para>
     </chapter>
@@ -14,8 +16,23 @@
       <ex:title>Second Chapter</ex:title>
       <ex:para>Main paragraph.</ex:para>
     </ex:chapter>
-    <chapter id="third">
+    <chapter id="third" status="draft" number="3">
+      <author>Jane Smith</author>
       <title>Third Chapter</title>
+      <section>
+        <title>Section</title>
+        <section>
+          <title>Subsection</title>
+          <section id="subsub">
+            <title>Subsubsection</title>
+            <para>Deeply nested paragraph.</para>
+          </section>
+        </section>
+      </section>
+    </chapter>
+    <chapter xml:id="fourth" status="draft">
+      <author>Jane Smith</author>
+      <title>Fourth Chapter</title>
       <para>Desultory paragraph.</para>
       <para>Ultimate paragraph.</para>
     </chapter>
