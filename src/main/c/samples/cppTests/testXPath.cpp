@@ -30,11 +30,18 @@ void testXPathSingle(SaxonProcessor * processor, XPathProcessor * xpath, sResult
         sresult->failureList.push_back("testXPathSingle");
 
 	} else {
+	    const char * messagei = result->getStringValue();
 		cout<<"Number of items="<<result->size()<<endl;
-		cout<<"String Value of result="<<result->getStringValue()<<endl;
+		cout<<"String Value of result="<<messagei<<endl;
 		sresult->success++;
+		//delete messagei;
+		//messagei = nullptr;
 	}
 	delete result;
+
+	xpath->clearParameters();
+	xpath->clearProperties();
+	delete input;
 
 	
 
@@ -61,9 +68,11 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
 	}
 
 	XdmNode ** children = input->getChildren();
-
+cerr<<"xxxx cp0"<<endl;
     cout<<"number of children for input: "<<input->getChildCount()<<endl;
 	XdmNode ** children0 = children[0]->getChildren();
+    cerr<<"xxxx cp1"<<endl;
+
 	int num = children[0]->getChildCount();
 
 
@@ -318,12 +327,12 @@ int main()
     XPathProcessor * xpathProc = processor->newXPathProcessor();
     sResultCount *sresult = new sResultCount();
     cout<<endl<<"Test: XPathProcessor with Saxon version="<<processor->version()<<endl; 
-    //testXPathSingle(processor, xpathProc, sresult);
+    testXPathSingle(processor, xpathProc, sresult);
     testXPathValues(processor, xpathProc, sresult);
-    /*testXPathAttrValues(processor, xpathProc, sresult);
+    testXPathAttrValues(processor, xpathProc, sresult);
     testXPathOnFile(processor, xpathProc, sresult);
     testXPathOnFile2(xpathProc, sresult);
-    testXPathValues2(processor, xpathProc, sresult);*/
+    testXPathValues2(processor, xpathProc, sresult);
 
     std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
               << sresult->success << ",  Failures= " << sresult->failure << std::endl;
