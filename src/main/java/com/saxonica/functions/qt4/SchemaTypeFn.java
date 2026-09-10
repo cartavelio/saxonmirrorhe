@@ -29,24 +29,20 @@ public class SchemaTypeFn extends SystemFunction {
                 f("name", SequenceType.SINGLE_QNAME, false),
                 f("is-simple", SequenceType.SINGLE_BOOLEAN, false),
                 f("base-type", SequenceType.one(
-                        new SpecificFunctionType(NO_ARGS,
-                                                 SequenceType.optional(schemaTypeRecord))), false),
+                        new SpecificFunctionType(SequenceType.optional(schemaTypeRecord))), false),
                 f("primitive-type", SequenceType.one(
-                        new SpecificFunctionType(NO_ARGS,
-                                                 SequenceType.one(schemaTypeRecord))), true),
+                        new SpecificFunctionType(SequenceType.one(schemaTypeRecord))), true),
                 f("variety", SequenceType.one(
                         EnumerationUnionType.of("atomic", "list", "union", "empty", "simple", "element-only", "mixed")), false),
                 f("members", SequenceType.one(
-                        new SpecificFunctionType(NO_ARGS,
-                                                 SequenceType.zeroOrMore(schemaTypeRecord))), true),
+                        new SpecificFunctionType(SequenceType.zeroOrMore(schemaTypeRecord))), true),
                 f("simple-content-type", SequenceType.one(
-                        new SpecificFunctionType(NO_ARGS,
-                                                 SequenceType.one(schemaTypeRecord))), false),
+                        new SpecificFunctionType(SequenceType.one(schemaTypeRecord))), false),
                 f("matches", SequenceType.one(
-                        new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ATOMIC},
+                        new SpecificFunctionType(SequenceType.SINGLE_ATOMIC,
                                                  SequenceType.SINGLE_BOOLEAN)), true),
                 f("constructor", SequenceType.one(
-                        new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ATOMIC},
+                        new SpecificFunctionType(SequenceType.SINGLE_ATOMIC,
                                                  SequenceType.SINGLE_ATOMIC)), true)
         );
     }
@@ -114,7 +110,7 @@ public class SchemaTypeFn extends SystemFunction {
         if (st.isAtomicType() && !st.isSameType(BuiltInAtomicType.ANY_ATOMIC)) {
             Callable callable = new CallableDelegate((context, args) -> makeSchemaRecord(((AtomicType) st).getPrimitiveAtomicType()));
             CallableFunction fn = new CallableFunction(0, callable,
-                                                       new SpecificFunctionType(NO_ARGS, SequenceType.one(schemaTypeRecord)));
+                                                       new SpecificFunctionType(SequenceType.one(schemaTypeRecord)));
             result.initialPut("primitive-type", fn);
 
         }

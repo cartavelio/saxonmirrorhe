@@ -53,31 +53,31 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         importFunctionSet(XPath31FunctionSet.getInstance());
 
         SpecificFunctionType forEachArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
         SpecificFunctionType predicate2 = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                 SequenceType.OPTIONAL_BOOLEAN).withAcceptReducedArity();
 
         SpecificFunctionType compareFnType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM,
                 SequenceType.OPTIONAL_BOOLEAN);
 
         SpecificFunctionType ft = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ITEM,
                 SequenceType.ATOMIC_SEQUENCE);
 
         SpecificFunctionType navigator = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_NODE},
+                SequenceType.SINGLE_NODE,
                 SequenceType.NODE_SEQUENCE);
 
         SpecificFunctionType replaceAction = new SpecificFunctionType(
-                new SequenceType[]{BuiltInAtomicType.UNTYPED_ATOMIC.one(), BuiltInAtomicType.UNTYPED_ATOMIC.zeroOrMore()},
+                BuiltInAtomicType.UNTYPED_ATOMIC.one(), BuiltInAtomicType.UNTYPED_ATOMIC.zeroOrMore(),
                 SequenceType.OPTIONAL_ITEM);
 
         SpecificFunctionType forEachPairArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE); //.withAcceptReducedArity();
 
         ChoiceItemType chronoType = ChoiceItemType.of(
@@ -209,10 +209,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         //#endif
 
         SpecificFunctionType valuePredicate = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.OPTIONAL_BOOLEAN).withAcceptReducedArity();
         SpecificFunctionType valueAction = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
         register("distinct-ordered-nodes", 0, 1, e -> e.populate(DistinctOrderedNodes::new, AnyNodeTest.getInstance(), STAR, UO | SEQV)
@@ -290,7 +290,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, predicate2, ONE, null));
 
         SpecificFunctionType foldLeftArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE);
 
         register("fold-left", 3, e -> e.populate(FoldLeftFn::new, AnyItemType.getInstance(),
@@ -300,7 +300,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(2, foldLeftArg, ONE, null));
 
         SpecificFunctionType foldRightArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE);
 
         register("fold-right", 3, e -> e.populate(FoldRightFn::new, AnyItemType.getInstance(),
@@ -484,7 +484,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
         SpecificFunctionType operatorType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
         register("op", 1, e -> e.populate(OpFn::new, operatorType, ONE, LATE)
@@ -506,11 +506,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                         new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_INTEGER)), true),
                 new RecordTest.Field("rows", SequenceType.zeroOrMore(new ArrayItemType(SequenceType.SINGLE_STRING)), true),
                 new RecordTest.Field("get", SequenceType.one(
-                        new SpecificFunctionType(new SequenceType[]{
+                        new SpecificFunctionType(
                                 BuiltInAtomicType.POSITIVE_INTEGER.one(),
                                 SequenceType.one(
-                                        LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER, BuiltInAtomicType.STRING))
-                        }, SequenceType.OPTIONAL_STRING)), true));
+                                        LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER, BuiltInAtomicType.STRING)),
+                                SequenceType.OPTIONAL_STRING)), true));
 
         register("parse-csv", 1, e -> e.populate(com.saxonica.functions.qt4.csv.ParseCsv::new, parseCsvResultType, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -558,7 +558,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .setOptionDetails(ParseXmlFragment.makeOptionsParameter(40)));
 
         ItemType partitionFunctionType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                 SequenceType.OPTIONAL_BOOLEAN);
 
         register("partition", 2, e -> e.populate(Partition::new, new ArrayItemType(SequenceType.SINGLE_ITEM), STAR, 0)
@@ -632,7 +632,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, predicate2, OPT, null));
 
         SpecificFunctionType comparator = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM,
                 SequenceType.SINGLE_INTEGER);
 
         register("sort", 4, e -> e.populate(Sort_3::new, AnyItemType.getInstance(),

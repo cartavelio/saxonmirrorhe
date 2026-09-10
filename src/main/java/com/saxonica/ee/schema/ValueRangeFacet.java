@@ -152,17 +152,19 @@ public abstract class ValueRangeFacet extends Facet {
         } else {
             // Base type is a built-in type; so we just need to check the built-in integer subtype ranges
             BuiltInAtomicType bbase = (BuiltInAtomicType) base;
-            boolean ok = true;
-            if (requiredValue instanceof Int64Value) {
-                long v = ((Int64Value) requiredValue).longValue();
-                ok = IntegerValue.checkRange(v, bbase);
-            } else if (requiredValue instanceof BigIntegerValue) {
-                BigInteger v = ((BigIntegerValue) requiredValue).asBigInteger();
-                ok = IntegerValue.checkBigRange(v, bbase);
-            }
-            if (!ok) {
-                throw new SchemaException("The value of the " + getName() +
-                        " facet is out of range for the base type");
+            if (bbase.getBasicAlphaCode().startsWith("ADI")) {
+                boolean ok = true;
+                if (requiredValue instanceof Int64Value) {
+                    long v = ((Int64Value) requiredValue).longValue();
+                    ok = IntegerValue.checkRange(v, bbase);
+                } else if (requiredValue instanceof BigIntegerValue) {
+                    BigInteger v = ((BigIntegerValue) requiredValue).asBigInteger();
+                    ok = IntegerValue.checkBigRange(v, bbase);
+                }
+                if (!ok) {
+                    throw new SchemaException("The value of the " + getName() +
+                                                      " facet is out of range for the base type");
+                }
             }
         }
     }

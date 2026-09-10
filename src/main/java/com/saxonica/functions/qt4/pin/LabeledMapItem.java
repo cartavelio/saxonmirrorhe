@@ -129,7 +129,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
         });
         logic.setDescription("fn:label()?ancestors");
         return new CallableFunction(0, logic,
-                                    new SpecificFunctionType(new SequenceType[0], SequenceType.ANY_SEQUENCE));
+                                    new SpecificFunctionType(SequenceType.ANY_SEQUENCE));
     }
 
     private static FunctionItem makePathFunction(Item start) {
@@ -149,7 +149,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
         });
         logic.setDescription("fn:label()?key");
         return new CallableFunction(0, logic,
-                                    new SpecificFunctionType(new SequenceType[0], SequenceType.ANY_SEQUENCE));
+                                    new SpecificFunctionType(SequenceType.ANY_SEQUENCE));
     }
 
 //    public static LabeledItem makeLabeledItem(Item subject, StringMap label) {

@@ -1,7 +1,6 @@
 package com.saxonica.functions.extfn;
 
 import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -60,9 +59,10 @@ public class XQueryFn extends SystemFunction {
         return new CallableFunction(2, callable, functionType);
     }
 
-    private static MapType paramMap = new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE);
-    public static FunctionItemType functionType = new SpecificFunctionType(
-            new SequenceType[]{SequenceType.OPTIONAL_ITEM, new SequenceType(paramMap, StaticProperty.EXACTLY_ONE)},
+    private static final MapType paramMap = new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE);
+    public static final FunctionItemType functionType = new SpecificFunctionType(
+            SequenceType.OPTIONAL_ITEM,
+            SequenceType.one(paramMap),
             SequenceType.ANY_SEQUENCE);
 }
 

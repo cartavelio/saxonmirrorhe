@@ -106,17 +106,12 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
     private final static RecordTest analyzeUriResult = new RecordTest(
             analyzeUriKeys, analyzeUriValues, new ArrayList<>(), false);
 
-    private final static SpecificFunctionType predicate = new SpecificFunctionType(
-            new SequenceType[]{SequenceType.SINGLE_ITEM},
-            SequenceType.SINGLE_BOOLEAN);
+    private final static SpecificFunctionType predicate =
+            new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.SINGLE_BOOLEAN);
 
     private void init() {
 
         importFunctionSet(VendorFunctionSetHE.getInstance());
-
-        SpecificFunctionType orderKey = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
-                SequenceType.OPTIONAL_ATOMIC);
 
 
         register("adjust-to-civil-time", 2, e -> e.populate( AdjustToCivilTime::new, BuiltInAtomicType.DATE_TIME, OPT, LATE)

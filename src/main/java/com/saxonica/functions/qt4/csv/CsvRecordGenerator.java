@@ -2,7 +2,6 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.ItemMappingIterator;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.*;
@@ -183,12 +182,11 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
 
 
     private final static FunctionItemType GETTER_TYPE =
-            new SpecificFunctionType(new SequenceType[]{
-                    new SequenceType(BuiltInAtomicType.POSITIVE_INTEGER, StaticProperty.EXACTLY_ONE),
-                    new SequenceType(LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER,
-                                                        BuiltInAtomicType.STRING),
-                                     StaticProperty.EXACTLY_ONE)},
-                                     SequenceType.SINGLE_STRING);
+            new SpecificFunctionType(
+                    SequenceType.one(BuiltInAtomicType.POSITIVE_INTEGER),
+                    SequenceType.one(LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER,
+                                                       BuiltInAtomicType.STRING)),
+                    SequenceType.SINGLE_STRING);
 
     /**
      * Make the "get" function item to be delivered in the result

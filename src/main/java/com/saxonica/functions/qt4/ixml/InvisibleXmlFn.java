@@ -29,7 +29,6 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
 import org.nineml.coffeefilter.InvisibleXml;
 import org.nineml.coffeefilter.InvisibleXmlDocument;
 import org.nineml.coffeefilter.InvisibleXmlParser;
@@ -47,7 +46,8 @@ import java.util.Properties;
 public class InvisibleXmlFn extends SystemFunction {
 
     public final static SpecificFunctionType RETURN_TYPE = new SpecificFunctionType(
-            new SequenceType[]{SequenceType.SINGLE_STRING}, NodeKindTest.DOCUMENT.one());
+            SequenceType.SINGLE_STRING,
+            NodeKindTest.DOCUMENT.one());
 
 
     public static OptionsParameter getOptionDetails() {
