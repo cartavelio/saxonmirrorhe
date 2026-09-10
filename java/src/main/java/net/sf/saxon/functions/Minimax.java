@@ -251,7 +251,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
                     break;
                 }
             } else {
-                if (!prim.getPrimitiveType().isOrdered(false)) {
+                if (!isXPath40 && !prim.getPrimitiveType().isOrdered(false)) {
                     throw new XPathException("Type " + prim.getPrimitiveType() + " is not an ordered type")
                             .withErrorCode("FORG0006").asTypeError().withXPathContext(context);
                 }

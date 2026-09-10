@@ -258,30 +258,32 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
         return fromMonths(-getLengthInMonths());
     }
 
-    /**
-     * Compare the value to another duration value
-     *
-     * @param other The other dateTime value
-     * @return negative value if this one is the earler, 0 if they are chronologically equal,
-     *         positive value if this one is the later. For this purpose, dateTime values with an unknown
-     *         timezone are considered to be UTC values (the Comparable interface requires
-     *         a total ordering).
-     * @throws ClassCastException if the other value is not a DateTimeValue (the parameter
-     *                            is declared as Object to satisfy the Comparable interface)
-     */
-
-    @Override
-    public int compareTo(XPathComparable other) {
-        if (other instanceof YearMonthDurationValue) {
-            return Integer.compare(getLengthInMonths(), ((YearMonthDurationValue) other).getLengthInMonths());
-        } else {
-            throw new ClassCastException("Cannot compare xs:yearMonthDuration with " + other);
-        }
-    }
+//    /**
+//     * Compare the value to another duration value
+//     *
+//     * @param other The other dateTime value
+//     * @return negative value if this one is the earler, 0 if they are chronologically equal,
+//     *         positive value if this one is the later. For this purpose, dateTime values with an unknown
+//     *         timezone are considered to be UTC values (the Comparable interface requires
+//     *         a total ordering).
+//     * @throws ClassCastException if the other value is not a DateTimeValue (the parameter
+//     *                            is declared as Object to satisfy the Comparable interface)
+//     */
+//
+//    @Override
+//    public int compareTo(XPathComparable other) {
+//        if (other instanceof YearMonthDurationValue) {
+//            return Integer.compare(getLengthInMonths(), ((YearMonthDurationValue) other).getLengthInMonths());
+//        } else {
+//            throw new ClassCastException("Cannot compare xs:yearMonthDuration with " + other);
+//        }
+//    }
 
     @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) {
-        return this;
+        return specVersion >= 40
+                ? new DurationValue(_months, _seconds, BuiltInAtomicType.DURATION)
+                : this;
     }
     
     /**

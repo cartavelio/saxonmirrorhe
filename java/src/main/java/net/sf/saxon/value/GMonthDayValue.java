@@ -7,10 +7,13 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
@@ -74,6 +77,13 @@ public class GMonthDayValue extends GDateValue {
         MutableGDateValue m = makeMutableCopy();
         m.typeLabel = metadata.getType();
         return new GMonthDayValue(m);
+    }
+
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
+        return specVersion >= 40 ? new DateValue(1972, month, day)
+                .adjustTimezone(hasTimezone() ? getTimezoneInMinutes() : implicitTimezone) : null;
     }
 
     /**

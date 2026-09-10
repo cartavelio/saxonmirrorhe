@@ -92,7 +92,11 @@ public class GenericAtomicComparer implements AtomicComparer {
 
                 case StandardNames.XS_QNAME:
                 case StandardNames.XS_NOTATION:
-                    return EqualityComparer.getInstance();
+                    if (specVersion < 40) {
+                        return EqualityComparer.getInstance();
+                    } else {
+                        return ContextFreeAtomicComparer.getInstance();
+                    }
 
             }
         }
@@ -280,9 +284,16 @@ public class GenericAtomicComparer implements AtomicComparer {
                         case FNE:
                             return (a, b, context) -> !a.equals(b);
                         default:
-                            return (a, b, context) -> {
-                                throw new XPathException(type0 + " values cannot be compared for ordering", "XPTY0004");
-                            };
+                            if (specVersion < 40) {
+                                return (a, b, context) -> {
+                                    throw new XPathException(type0 + " values cannot be compared for ordering", "XPTY0004");
+                                };
+                            } else {
+                                return (a, b, context) -> {
+                                    int comp = ((QNameValue) a).compareTo((QNameValue) b);
+                                    return CompareToConstant.interpretComparisonResult(operator, comp);
+                                };
+                            }
                     }
 
                 case StandardNames.XS_STRING:
@@ -309,8 +320,15 @@ public class GenericAtomicComparer implements AtomicComparer {
                 case FNE:
                     return (a, b, context) -> !a.equals(b);
                 default:
-                    // fall through and try again using the run-time types
-                    break;
+                    if (specVersion < 40) {
+                        // fall through and try again using the run-time types
+                        break;
+                    } else {
+                        return (a, b, context) -> {
+                            int comp = ((DurationValue) a).compareTo((DurationValue) b);
+                            return CompareToConstant.interpretComparisonResult(operator, comp);
+                        };
+                    }
             }
         }
 

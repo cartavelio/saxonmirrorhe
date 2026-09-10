@@ -9,7 +9,6 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.TwineBuilder;
@@ -284,11 +283,6 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
     @Override
     public AtomicMatchKey asMapKey(int specVersion) {
         return new CalendarValueMapKey(this);
-    }
-
-    @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
-        return null;
     }
 
     /**

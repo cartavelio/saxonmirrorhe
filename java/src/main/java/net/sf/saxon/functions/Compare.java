@@ -14,10 +14,9 @@ import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.PrimitiveUType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
@@ -44,30 +43,21 @@ public class Compare extends CollatingFunctionFixed {
         }
     }
 
-    private int getTypeCategory(BuiltInAtomicType t) {
-        switch (t.getFingerprint()) {
-            case StandardNames.XS_STRING:
-            case StandardNames.XS_ANY_URI:
-            case StandardNames.XS_UNTYPED_ATOMIC:
-                return StandardNames.XS_STRING;
-            case StandardNames.XS_FLOAT:
-            case StandardNames.XS_DOUBLE:
-            case StandardNames.XS_DECIMAL:
-            case StandardNames.XS_INTEGER:
-                return StandardNames.XS_NUMERIC;
-            case StandardNames.XS_BOOLEAN:
-            case StandardNames.XS_DATE:
-            case StandardNames.XS_TIME:
-            case StandardNames.XS_DATE_TIME:
-            case StandardNames.XS_DAY_TIME_DURATION:
-            case StandardNames.XS_YEAR_MONTH_DURATION:
-                return t.getFingerprint();
-            case StandardNames.XS_HEX_BINARY:
-            case StandardNames.XS_BASE64_BINARY:
-                return StandardNames.XS_HEX_BINARY;
-            default:
-                return -1;
-        }
+    private PrimitiveUType getTypeCategory(PrimitiveUType t) {
+        return switch (t) {
+            case STRING,
+                 ANY_URI,
+                 UNTYPED_ATOMIC ->
+                    PrimitiveUType.STRING;
+            case FLOAT,
+                 DOUBLE,
+                 DECIMAL ->
+                    PrimitiveUType.DECIMAL;
+            case HEX_BINARY,
+                 BASE64_BINARY ->
+                    PrimitiveUType.HEX_BINARY;
+            default -> t;
+        };
     }
 
     private void unorderedError(AtomicType t, int which) throws XPathException {
@@ -87,15 +77,20 @@ public class Compare extends CollatingFunctionFixed {
         if (arg0 == null || arg1 == null) {
             return EmptySequence.INSTANCE;
         }
-        int p0 = getTypeCategory(arg0.getPrimitiveType());
-        int p1 = getTypeCategory(arg1.getPrimitiveType());
+        PrimitiveUType p0 = getTypeCategory(arg0.getPrimitiveType().getPrimitiveUType());
+        PrimitiveUType p1 = getTypeCategory(arg1.getPrimitiveType().getPrimitiveUType());
 
-        if (p0 == -1) {
-            unorderedError(arg0.getItemType(), 0);
+        if (specVersion < 40 && (p0 != PrimitiveUType.STRING || p1 != PrimitiveUType.STRING)) {
+            throw new XPathException("4.0 is not enabled, so fn:compare() can only be used to compare strings", "XPTY0004")
+                    .asTypeError();
         }
-        if (p1 == -1) {
-            unorderedError(arg1.getItemType(), 1);
-        }
+
+//        if (p0 == -1) {
+//            unorderedError(arg0.getItemType(), 0);
+//        }
+//        if (p1 == -1) {
+//            unorderedError(arg1.getItemType(), 1);
+//        }
         if (p0 != p1) {
             throw new XPathException("fn:compare(): cannot compare " +
                     arg0.getItemType() +
@@ -103,33 +98,19 @@ public class Compare extends CollatingFunctionFixed {
                     arg1.getItemType(), "XPTY0004").asTypeError();
         }
         switch (p0) {
-            case StandardNames.XS_STRING:
+            case STRING:
                 GenericAtomicComparer comparer =
                         new GenericAtomicComparer(getStringCollator(), specVersion, context);
                 return compareStrings((StringValue)arg0, (StringValue)arg1, comparer);
-            case StandardNames.XS_NUMERIC:
+            case DECIMAL:
                 if (arg0.isNaN()) {
                     return arg1.isNaN() ? Int64Value.ZERO : Int64Value.MINUS_ONE;
                 } else if (arg1.isNaN()) {
                     return Int64Value.PLUS_ONE;
                 }
-                //if (arg0.getPrimitiveType() == arg1.getPrimitiveType()) {
-                    int c = arg0.getXPathComparable(null, 0, specVersion).compareTo(
-                            arg1.getXPathComparable(null, 0, specVersion));
-                    return Int64Value.makeIntegerValue(c);
-//                } else {
-//                    try {
-//                        BigDecimal dec0 = ((NumericValue) arg0).getExactDecimalValue();
-//                        BigDecimal dec1 = ((NumericValue) arg1).getExactDecimalValue();
-//                        return Int64Value.makeIntegerValue(dec0.compareTo(dec1));
-//                    } catch (ValidationException e) {
-//                        // Typically one of the values is infinity
-//                        return Int64Value.makeIntegerValue(
-//                                Double.compare(
-//                                        ((NumericValue) arg0).getDoubleValue(),
-//                                        ((NumericValue) arg1).getDoubleValue()));
-//                    }
-//                }
+                int c = arg0.getXPathComparable(null, 0, specVersion).compareTo(
+                        arg1.getXPathComparable(null, 0, specVersion));
+                return Int64Value.makeIntegerValue(c);
             default:
                 XPathComparable c0 = arg0.getXPathComparable(
                         CodepointCollator.getInstance(), context.getImplicitTimezone(), specVersion);

@@ -18,7 +18,6 @@ import net.sf.saxon.type.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.Objects;
 
 /**
  * A value of type xs:dayTimeDuration (or a subtype thereof).
@@ -352,28 +351,30 @@ public final class DayTimeDurationValue extends DurationValue
 
     @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) {
-        return this;
+        return specVersion >= 40
+                ? new DurationValue(_months, _seconds,BuiltInAtomicType.DURATION)
+                : this;
     }
 
-    /**
-     * Compare the value to another duration value
-     *
-     * @param other The other dateTime value
-     * @return negative value if this one is the smaller, 0 if they are equal,
-     *         positive value if this one is the greater.
-     * @throws ClassCastException if the other value is not a DayTimeDurationValue
-     */
-
-    @Override
-    public int compareTo(XPathComparable other) {
-        if (other instanceof DayTimeDurationValue) {
-            Objects.requireNonNull(other);
-            DayTimeDurationValue dtd = (DayTimeDurationValue)other;
-            return _seconds.compareTo(dtd._seconds);
-        } else {
-            throw new ClassCastException("Cannot compare xs:dayTimeDuration to " + other);
-        }
-    }
+//    /**
+//     * Compare the value to another duration value
+//     *
+//     * @param other The other dateTime value
+//     * @return negative value if this one is the smaller, 0 if they are equal,
+//     *         positive value if this one is the greater.
+//     * @throws ClassCastException if the other value is not a DayTimeDurationValue
+//     */
+//
+//    @Override
+//    public int compareTo(XPathComparable other) {
+//        if (other instanceof DayTimeDurationValue) {
+//            Objects.requireNonNull(other);
+//            DayTimeDurationValue dtd = (DayTimeDurationValue)other;
+//            return _seconds.compareTo(dtd._seconds);
+//        } else {
+//            throw new ClassCastException("Cannot compare xs:dayTimeDuration to " + other);
+//        }
+//    }
 
     /**
      * Get a Comparable value that implements the XPath ordering comparison semantics for this value.

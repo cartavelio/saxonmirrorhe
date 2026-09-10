@@ -260,7 +260,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                         .asTypeError().withErrorCode("XPTY0004").withLocation(getLocation());
             }
         }
-        if (!(operator == OperatorSymbol.FEQ || operator == OperatorSymbol.FNE)) {
+        if (!allow40 && !(operator == OperatorSymbol.FEQ || operator == OperatorSymbol.FNE)) {
             mustBeOrdered(t0, p0);
             mustBeOrdered(t1, p1);
         }

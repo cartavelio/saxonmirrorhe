@@ -1371,6 +1371,44 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     }
 
     /**
+     * Get the corresponding primitive UType. Note this treats integer as decimal, and duration
+     * subtypes as xs:duration.
+     * @return the corresponding primitive UType
+     */
+
+    public PrimitiveUType getPrimitiveUType() {
+        return switch (getPrimitiveType()) {
+            case StandardNames.XS_STRING -> PrimitiveUType.STRING;
+            case StandardNames.XS_ANY_URI -> PrimitiveUType.ANY_URI;
+            case StandardNames.XS_DECIMAL -> PrimitiveUType.DECIMAL;
+            case StandardNames.XS_DURATION -> PrimitiveUType.DURATION;
+            case StandardNames.XS_G_YEAR -> PrimitiveUType.G_YEAR;
+            case StandardNames.XS_G_YEAR_MONTH -> PrimitiveUType.G_YEAR_MONTH;
+            case StandardNames.XS_G_MONTH -> PrimitiveUType.G_MONTH;
+            case StandardNames.XS_G_MONTH_DAY -> PrimitiveUType.G_MONTH_DAY;
+            case StandardNames.XS_G_DAY -> PrimitiveUType.G_DAY;
+            case StandardNames.XS_TIME -> PrimitiveUType.TIME;
+            case StandardNames.XS_DATE -> PrimitiveUType.DATE;
+            case StandardNames.XS_DATE_TIME -> PrimitiveUType.DATE_TIME;
+            case StandardNames.XS_BOOLEAN -> PrimitiveUType.BOOLEAN;
+            case StandardNames.XS_DOUBLE -> PrimitiveUType.DOUBLE;
+            case StandardNames.XS_FLOAT -> PrimitiveUType.FLOAT;
+            case StandardNames.XS_HEX_BINARY -> PrimitiveUType.HEX_BINARY;
+            case StandardNames.XS_BASE64_BINARY -> PrimitiveUType.BASE64_BINARY;
+            case StandardNames.XS_QNAME -> PrimitiveUType.QNAME;
+            case StandardNames.XS_NOTATION -> PrimitiveUType.NOTATION;
+            case StandardNames.XS_UNTYPED_ATOMIC -> PrimitiveUType.UNTYPED_ATOMIC;
+
+            case StandardNames.XS_INTEGER -> PrimitiveUType.DECIMAL;
+            case StandardNames.XS_DAY_TIME_DURATION -> PrimitiveUType.DURATION;
+            case StandardNames.XS_YEAR_MONTH_DURATION -> PrimitiveUType.DURATION;
+
+            default -> throw new IllegalArgumentException();
+
+        };
+    }
+
+    /**
      * Apply any pre-lexical facets, other than whitespace. At the moment the only such
      * facet is saxon:preprocess
      *

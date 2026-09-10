@@ -7,13 +7,10 @@
 
 package net.sf.saxon.value;
 
-import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.functions.AccessorFn;
-import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
@@ -174,9 +171,5 @@ public class QNameValue extends QualifiedNameValue {
         return qName.hashCode();
     }
 
-    @Override
-    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
-        return null;
-    }
 }
 

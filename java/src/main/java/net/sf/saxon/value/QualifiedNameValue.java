@@ -8,6 +8,8 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.NamespaceUri;
@@ -15,6 +17,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
@@ -30,7 +33,7 @@ import java.util.Objects;
  * XPath primitive types xs:QName and xs:NOTATION respectively
  */
 
-public abstract class QualifiedNameValue extends AtomicValue implements AtomicMatchKey {
+public abstract class QualifiedNameValue extends AtomicValue implements AtomicMatchKey, XPathComparable {
 
     /*@NotNull*/ protected final StructuredQName qName;
 
@@ -173,6 +176,26 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
     @Override
     public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
         return this;
+    }
+
+    @Override
+    public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
+        return specVersion >= 40 ? this : null;
+    }
+
+    @Override
+    public int compareTo(XPathComparable o) {
+        if (o instanceof QualifiedNameValue q2 && getPrimitiveType() == q2.getPrimitiveType()) {
+            int nsDiff = CodepointCollator.getInstance().compareStrings(getNamespaceURI().toUnicodeString(),
+                                                                        q2.getNamespaceURI().toUnicodeString());
+            int result = nsDiff == 0
+                    ? CodepointCollator.getInstance().compareStrings(StringView.of(getLocalName()),
+                                                                     StringView.of(q2.getLocalName()))
+                    : nsDiff;
+            return Integer.signum(result);
+        } else {
+            throw new ClassCastException();
+        }
     }
 
     public int hashCode() {

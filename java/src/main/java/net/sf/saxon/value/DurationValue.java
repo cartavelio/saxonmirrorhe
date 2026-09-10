@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * and a BigDecimal number of seconds (no limits). Both (if non-zero) must have the same sign.
  */
 
-public class DurationValue extends AtomicValue implements AtomicMatchKey {
+public class DurationValue extends AtomicValue implements XPathComparable, AtomicMatchKey {
 
 
     protected final int _months;
@@ -508,7 +508,8 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      *
      * @param collator         collation used for comparing string values
      * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
-     * @param specVersion
+     * @param specVersion      Durations (as distinct from subtypes thereof) are comparable only if version is 4.0
+     *                         or greater.
      */
 
     /*@Nullable*/
@@ -519,7 +520,17 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
 
     @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) throws NoDynamicContextException {
-        return null;
+        return specVersion >= 40 ? this : null;
+    }
+
+    @Override
+    public int compareTo(XPathComparable o) {
+        if (o instanceof DurationValue d2) {
+            int mDiff = Integer.compare(this._months, d2.getTotalMonths());
+            return mDiff == 0 ? this._seconds.compareTo(d2.getTotalSeconds()) : mDiff;
+        } else {
+            throw new ClassCastException();
+        }
     }
 
     /**
@@ -529,12 +540,9 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     public boolean equals(Object other) {
-        if (other instanceof DurationValue) {
-            DurationValue d1 = this;
-            DurationValue d2 = (DurationValue) other;
-
-            return d1._months == d2._months &&
-                    d1._seconds.compareTo(d2._seconds) == 0;
+        if (other instanceof DurationValue d2) {
+            return this._months == d2._months &&
+                    this._seconds.compareTo(d2._seconds) == 0;
         } else {
             return false;
         }
