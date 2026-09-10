@@ -191,7 +191,7 @@ public class OpSequence extends Operation {
             "Saxon.Hej.regex.REMatcher matcher",
             "System.Collections.Generic.Stack<Saxon.Hej.z.IntIterator> iterators",
             "int backtrackingLimit",
-            "Saxon.Hej.regex.REMatcher.State savedState",
+            "Saxon.Hej.regex.REMatcher.CapturedGroupState savedState",
             "int position"})
     public IntIterator iterateMatches(final REMatcher matcher, final int position) {
 
