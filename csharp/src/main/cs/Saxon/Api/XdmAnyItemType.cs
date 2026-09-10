@@ -34,6 +34,14 @@ namespace Saxon.Api {
         public override bool Subsumes(XdmItemType other) {
             return true;
         }
+        
+        // <summary>
+        // Get the string representation of this item type, specifically, "item()"
+        // </summary>
+
+        public override string ToString() {
+            return "item()";
+        }
     }
 }
 
