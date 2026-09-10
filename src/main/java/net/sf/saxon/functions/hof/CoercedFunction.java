@@ -135,7 +135,7 @@ public class CoercedFunction extends AbstractFunction {
      */
     @Override
     public String getDescription() {
-        return "coerced " + targetFunction.getDescription();
+        return targetFunction.getDescription() + " (used where the required type is " + requiredType + ")";
     }
 
     /**
@@ -192,7 +192,7 @@ public class CoercedFunction extends AbstractFunction {
             return rawResult;
         } else {
             Supplier<RoleDiagnostic> role =
-                    () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, targetFunction.getDescription(), 0);
+                    () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, getDescription(), 0);
             return th.applyFunctionConversionRules(rawResult, req.getResultType(), role, Loc.NONE);
         }
     }
