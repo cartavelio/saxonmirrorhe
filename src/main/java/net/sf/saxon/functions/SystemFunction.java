@@ -78,6 +78,16 @@ public abstract class SystemFunction extends AbstractFunction {
         return fn;
     }
 
+    public static SystemFunction makeFunction40(String name, RetainedStaticContext rsc, int arity) {
+        Objects.requireNonNull(rsc);
+        SystemFunction fn = rsc.getConfiguration().makeSystemFunction40(name, arity);
+        if (fn == null) {
+            throw new IllegalArgumentException(name + "#" + arity);
+        }
+        fn.setRetainedStaticContext(rsc);
+        return fn;
+    }
+
     /**
      * Make an expression that either calls this function, or that is equivalent to a call
      * on this function

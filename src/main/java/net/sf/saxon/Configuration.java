@@ -1446,6 +1446,10 @@ public class Configuration implements SourceResolver, NotationSet {
         }
     }
 
+    public SystemFunction makeSystemFunction40(String localName, int arity) {
+        return makeSystemFunction(localName, arity);
+    }
+
     /**
      * Register an extension function that is to be made available within any stylesheet, query,
      * or XPath expression compiled under the control of this processor. This method
