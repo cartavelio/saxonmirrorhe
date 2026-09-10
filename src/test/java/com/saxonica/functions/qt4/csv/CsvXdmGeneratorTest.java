@@ -32,6 +32,7 @@ class CsvXdmGeneratorTest {
     CsvXdmGenerator subject;
     Map<String, GroundedValue> options = new HashMap<>();
     MapItem expected;
+    MapItem expectedColumns;
     MapItem actual;
 
     CsvXdmGenerator subject() throws XPathException {
@@ -102,7 +103,6 @@ class CsvXdmGeneratorTest {
                 assertThat(actual, matchesCsvRecord(expected,
                         expectedRows(r -> r.row("Alice", "Aachen"))));
             }
-
         }
 
         @Nested
@@ -203,7 +203,7 @@ class CsvXdmGeneratorTest {
             options.put("filter-columns", FixtureBuilder.sequence(s -> s.append(2, 3, 1)));
             options.put("column-names", FixtureBuilder.map(m -> m.put("First", 1).put("Second", 2).put("Third", 3)));
 
-            expected = FixtureBuilder.map(cols -> {
+            expectedColumns = FixtureBuilder.map(cols -> {
                 cols.put("names", cols.map(names -> {
                     names.put("First", 1)
                             .put("Second", 2)
@@ -214,8 +214,215 @@ class CsvXdmGeneratorTest {
 
             actual = subject().fromRowSequence(input);
 
-            assertThat(actual, matchesCsvRecord(expected,
+            assertThat(actual, matchesCsvRecord(expectedColumns,
                     expectedRows(r -> r.row("b", "c", "a").row("2", "3", "1"))));
+        }
+    }
+
+    @Nested
+    class NumberOfColumns {
+        Sequence input = makeRows(r -> r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4"));
+
+        @Nested
+        class ExplictlySpecified {
+            @Test
+            @DisplayName("the number of columns can be truncated")
+            void truncation() throws XPathException {
+                options.put("number-of-columns", integerValue(3));
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                    r.row("a", "b", "c").row("1", "2", "3");
+                })));
+            }
+
+
+            @Test
+            @DisplayName("the number of columns can be padded")
+            void padding() throws XPathException {
+                options.put("number-of-columns", integerValue(7));
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                    r.row("a", "b", "c", "d", "e", "f", "").row("1", "2", "3", "4", "", "", "");
+                })));
+            }
+
+            @Test
+            @DisplayName("some rows can be padded while other rows are truncated")
+            void padAndTruncate() throws XPathException {
+                options.put("number-of-columns", integerValue(5));
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                    r.row("a", "b", "c", "d", "e").row("1", "2", "3", "4", "");
+                })));
+            }
+
+            @Test
+            @DisplayName("setting the number of columns affects the extraction of column-names")
+            void columnsNamesAlsoTruncated() throws XPathException {
+                options.put("number-of-columns", integerValue(4));
+                options.put("column-names", BooleanValue.TRUE);
+
+                expectedColumns = FixtureBuilder.map(cols -> {
+                    cols.put("names", cols.map(names -> {
+                        names.put("a", 1)
+                                .put("b", 2)
+                                .put("c", 3)
+                                .put("d", 4);
+                    }));
+                    cols.put("fields", cols.sequence("a", "b", "c", "d"));
+                });
+
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> {
+                    r.row("1", "2", "3", "4");
+                })));
+            }
+
+            @Test
+            @DisplayName("setting the number of columns does not affect an explicit column-names map")
+            void explicitColumnNamesUnaffected() throws XPathException {
+                options.put("number-of-columns", integerValue(4));
+                options.put("column-names", FixtureBuilder.map(names -> {
+                    names.put("C1", 1).put("C2", 2)
+                            .put("C3", 3).put("C4", 4)
+                            .put("C5", 5);
+                }));
+
+                expectedColumns = FixtureBuilder.map(cols -> {
+                    cols.put("names", cols.map(names -> {
+                        names.put("C1", 1).put("C2", 2)
+                                .put("C3", 3).put("C4", 4)
+                                .put("C5", 5);
+                    }));
+                    cols.put("fields", cols.sequence("C1", "C2", "C3", "C4", "C5"));
+                });
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> {
+                    r.row("a", "b", "c", "d").row("1", "2", "3", "4");
+                })));
+            }
+        }
+
+        @Nested
+        class FirstRow {
+            @Test
+            @DisplayName("following rows size is conformed to the first")
+            void followingRowsAreConformed() throws XPathException {
+                options.put("number-of-columns", string("first-row"));
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                    r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4", "", "");
+                })));
+            }
+
+            @Test
+            @DisplayName("the first row, extracted by column-names: true(), is also used as the first row for the number-of-columns")
+            void columnsNamesRowIsFirst() throws XPathException {
+                options.put("number-of-columns", string("first-row"));
+                options.put("column-names", BooleanValue.TRUE);
+
+                expectedColumns = FixtureBuilder.map(cols -> {
+                    cols.put("names", cols.map(names -> {
+                        names.put("a", 1)
+                                .put("b", 2)
+                                .put("c", 3)
+                                .put("d", 4)
+                                .put("e", 5)
+                                .put("f", 6);
+                    }));
+                    cols.put("fields", cols.sequence("a", "b", "c", "d", "e", "f"));
+                });
+
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> {
+                    r.row("1", "2", "3", "4", "", "");
+                })));
+            }
+        }
+
+        @Nested
+        class All {
+            @Test
+            @DisplayName("rows return all their fields, no matter the size")
+            void followingRowsAreConformed() throws XPathException {
+                options.put("number-of-columns", string("all"));
+
+                actual = subject().fromRowSequence(input);
+
+                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                    r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4");
+                })));
+            }
+        }
+    }
+
+    @Nested
+    class OptionTypePreconditions {
+        Sequence input = makeRows(r -> r.row("a", "b", "c", "d", "e"));
+
+        @Nested
+        class PositiveIntegers {
+            @Test
+            @DisplayName("column-names maps cannot use zero as a value")
+            void columnNamesMapsZeroErrors() throws XPathException {
+                options.put("column-names", FixtureBuilder.map(m -> m.put("First", 0)));
+
+                assertThat(() -> subject().fromRowSequence(input), throwsXPathException("FOCV0005"));
+            }
+
+            @Test
+            @DisplayName("column-names maps cannot use negative integers as a value")
+            void columnNamesMapsNegativeErrors() throws XPathException {
+                options.put("column-names", FixtureBuilder.map(m -> m.put("First", -1)));
+
+                assertThat(() -> subject().fromRowSequence(input), throwsXPathException("FOCV0005"));
+            }
+
+            @Test
+            @DisplayName("number-of-columns cannot be set to zero")
+            void numberOfColumnsZeroErrors()  {
+                options.put("number-of-columns", integerValue(0));
+
+                assertThat(() -> subject().fromRowSequence(input), throwsXPathException("FOCV0005"));
+            }
+
+            @Test
+            @DisplayName("number-of-columns cannot be set to a negative integer")
+            void negativeNumberOfColumnsErrors()  {
+                options.put("number-of-columns", integerValue(-1));
+
+                assertThat(() -> subject().fromRowSequence(input), throwsXPathException("FOCV0005"));
+            }
+
+            @Test
+            @DisplayName("filter-columns cannot contain zero")
+            void filterColumnsZero()  {
+                options.put("filter-columns", integerValue(0));
+
+                assertThat(() -> subject().fromRowSequence(input), throwsXPathException("FOCV0005"));
+            }
+
+            @Test
+            @DisplayName("filter-columns cannot contain a negative integer")
+            void filterColumnsNegative()  {
+                options.put("filter-columns", integerValue(-1));
+
+                assertThat(() -> subject().fromRowSequence(input), throwsXPathException("FOCV0005"));
+            }
         }
     }
 }

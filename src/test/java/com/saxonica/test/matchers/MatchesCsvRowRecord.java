@@ -168,7 +168,7 @@ public class MatchesCsvRowRecord extends TypeSafeDiagnosingMatcher<MapItem> {
                 Sequence actual = callFieldFunction(ctxt, actualFieldFunction, kv.key);
                 int oneBasedIndex = (int) ((Int64Value) kv.value.head().atomize().head()).longValue();
                 int zeroBasedIndex = oneBasedIndex - 1;
-                String expected = fields.get(zeroBasedIndex);
+                String expected = zeroBasedIndex >= fields.size() ? "" : fields.get(zeroBasedIndex);
                 if (!checker.apply(expected, actual)) ok = false;
             }
         }

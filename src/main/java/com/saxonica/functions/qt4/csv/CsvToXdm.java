@@ -1,24 +1,38 @@
 package com.saxonica.functions.qt4.csv;
 
 
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class CsvToXdm extends CsvFunction {
+    static SequenceType NUMBER_OF_COLUMNS_TYPE;
+    static {
+        Set<String> values = new HashSet<>(2);
+        values.add("first-row");
+        values.add("all");
+        ItemType numberOfColumnsItemType = new LocalUnionType(new EnumerationType(values), BuiltInAtomicType.INTEGER);
+        NUMBER_OF_COLUMNS_TYPE = SequenceType.makeSequenceType(numberOfColumnsItemType, StaticProperty.EXACTLY_ONE);
+    }
     public static OptionsParameter OPTION_DETAILS;
     static {
         OPTION_DETAILS = coreOptions();
-        OPTION_DETAILS.addAllowedOption("column-names", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        OPTION_DETAILS.addAllowedOption("column-names", SequenceType.SINGLE_ITEM, BooleanValue.FALSE);
         OPTION_DETAILS.addAllowedOption("filter-columns", SequenceType.INTEGER_SEQUENCE, EmptyAtomicSequence.getInstance());
+        OPTION_DETAILS.addAllowedOption("number-of-columns", NUMBER_OF_COLUMNS_TYPE);
     }
 
     private Map<String, GroundedValue> options;
