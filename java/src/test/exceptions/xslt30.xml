@@ -1,4 +1,25 @@
 <exceptions>
+
+  <exception test-case="axes-090" run="false" when="xom">
+    <created by="Norm Tovey-Walsh" on="2026-05-06"/>
+    <reason>XOM won’t allow whitespace-only text nodes to be added to a document node
+    (before the document element, for example).</reason>
+  </exception>
+
+  <exception test-case="axes-197" run="false" when="axiom dom dom4j domino jdom2">
+    <created by="Norm Tovey-Walsh" on="2026-05-06"/>
+    <reason>Tree model doesn’t provide ID attributes declared in the DTD</reason>
+  </exception>
+
+  <exception test-case="axes-201" run="false" when="axiom dom dom4j domino jdom2">
+    <created by="Norm Tovey-Walsh" on="2026-05-06"/>
+    <reason>Tree model doesn’t provide ID attributes declared in the DTD</reason>
+  </exception>
+
+  <exception test-case="higher-order-functions-075" run="false" when="axiom dom dom4j domino xom">
+    <created by="Norm Tovey-Walsh" on="2026-05-06"/>
+    <reason>Test inserts text nodes into a document. Forbidden (or broken) with these models.</reason>
+  </exception>
   
   <!--<exception test-case="function-available-1008" run="false" report="bug">
     <created by="Michael Kay" on="2021-10-01"/>

@@ -76,6 +76,7 @@ public abstract class TestDriver {
     protected boolean quiet = false;
     protected boolean strict = false;
     protected Set<String> laxTests = new HashSet<>();
+    protected Set<String> exceptionPredicates = new HashSet<>();
 
     static Set<String> unsharedEnvironments = new HashSet<>();
     static {
@@ -90,7 +91,6 @@ public abstract class TestDriver {
     }
 
     public void go(String[] args) throws Exception {
-
         long startTime = System.nanoTime();
         if (driverProc == null) {
             driverProc = new Processor(false);
@@ -146,6 +146,8 @@ public abstract class TestDriver {
                 runWithJS = true;
                 treeModel = DOMObjectModel.getInstance();
                 jsPlatforms = new String[]{"browser", "nodejs"};
+                exceptionPredicates.add("js");
+                exceptionPredicates.add("dom");
             }
             if (args[i].equals("-pullparser")) {
                 usePullParser = true;
@@ -185,7 +187,7 @@ public abstract class TestDriver {
                 if (treeModel == null) {
                     throw new Exception("The requested TreeModel '" + argValue + "' does not exist");
                 }
-
+                exceptionPredicates.add(argValue.toLowerCase());
             }
             if (args[i].startsWith("-lang:")) {
                 lang = argValue;
@@ -392,6 +394,7 @@ public abstract class TestDriver {
         QName platform = new QName("platform");
         QName compiler = new QName("compiler");
         QName relocate = new QName("relocatable");
+        QName when = new QName("when");
         String saxonEdition = driverProc.getSaxonEdition();
         try {
             String suppliedName = getNameOfExceptionsFile();
@@ -406,6 +409,21 @@ public abstract class TestDriver {
             XdmSequenceIterator<XdmNode> iter = exceptionsDoc.axisIterator(Axis.DESCENDANT, new QName("exception"));
             while (iter.hasNext()) {
                 XdmNode entry = iter.next();
+
+                // If a test claims to apply only "when" certain conditions apply, skip the test
+                // unless one of the current predicates matches one of the when conditions.
+                // For example: <exception ... when="axiom js"> will only apply if either the js
+                // or axiom (tree model) predicates is present.
+                if (entry.getAttributeValue(when) != null) {
+                    boolean applyThisException = false;
+                    for (String token : entry.getAttributeValue(when).split("\\s+")) {
+                        applyThisException = applyThisException || exceptionPredicates.contains(token);
+                    }
+                    if (!applyThisException) {
+                        continue;
+                    }
+                }
+
                 String testName = entry.getAttributeValue(testCase);
                 if (testName == null) {
                     testName = "$" + entry.getAttributeValue(testSet);
