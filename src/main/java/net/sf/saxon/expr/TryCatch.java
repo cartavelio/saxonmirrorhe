@@ -496,7 +496,11 @@ public class TryCatch extends Expression {
         }
 
         private boolean isCaught(XmlProcessingError err) {
-            StructuredQName code = err.getErrorCode().getStructuredQName();
+            net.sf.saxon.s9api.QName errorCode = err.getErrorCode();
+            if (errorCode == null) {
+                return false;
+            }
+            StructuredQName code = errorCode.getStructuredQName();
             for (CatchClause clause : catchClauses) {
                 if (clause.nameTest.matches(code)) {
                     return true;
