@@ -844,8 +844,11 @@ public class StylesheetPackage extends PackageData {
         functionLibrary.addFunctionLibrary(new StylesheetFunctionLibrary(this, true));
         functionLibrary.addFunctionLibrary(config.getBuiltInExtensionLibraryList(hostLanguageVersion==40 ? 40 : 31));
         functionLibrary.addFunctionLibrary(new ConstructorFunctionLibrary(config));
-        if ("JS".equals(getTargetEdition())) {
+        if ("JS".equals(getTargetEdition()) || "JS2".equals(getTargetEdition())) {
             addIxslFunctionLibrary(functionLibrary);
+        }
+        if ("JS3".equals(getTargetEdition())) {
+            addIxsl3FunctionLibrary(functionLibrary);
         }
 
         queryFunctions = new XQueryFunctionLibrary(config);
@@ -859,6 +862,8 @@ public class StylesheetPackage extends PackageData {
     }
 
     protected void addIxslFunctionLibrary(FunctionLibraryList functionLibrary) {}
+
+    protected void addIxsl3FunctionLibrary(FunctionLibraryList functionLibrary) {}
 
     /**
      * Get the function library.

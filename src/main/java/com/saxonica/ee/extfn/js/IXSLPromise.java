@@ -1,5 +1,6 @@
 package com.saxonica.ee.extfn.js;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -82,6 +83,9 @@ public class IXSLPromise extends StyleElement {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
+        if (!"JS3".equals(exec.getCompilerInfo().getTargetEdition())) {
+            compileError("ixsl:promise is available only if the target edition is JS3");
+        }
         return new PromiseInstr(select, onCompletion, onFailure);
     }
 

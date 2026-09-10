@@ -1,9 +1,8 @@
 package com.saxonica.ee.trans;
 
+import com.saxonica.ee.extfn.js.IXSL3FunctionSet;
 import com.saxonica.ee.extfn.js.IXSLFunctionSet;
 import com.saxonica.ee.extfn.js.JSFunctionLibrary;
-import com.saxonica.ee.schema.PreparedSchema;
-import com.saxonica.ee.schema.SchemaModelSerializer;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.Component;
@@ -115,8 +114,13 @@ public class StylesheetPackageEE extends StylesheetPackage {
 
     @Override
     protected void addIxslFunctionLibrary(FunctionLibraryList functionLibrary) {
-        //functionLibrary.addFunctionLibrary(new IxslFunctionLibrary(config));
         functionLibrary.addFunctionLibrary(IXSLFunctionSet.getInstance());
+        functionLibrary.addFunctionLibrary(new JSFunctionLibrary());
+    }
+
+    @Override
+    protected void addIxsl3FunctionLibrary(FunctionLibraryList functionLibrary) {
+        functionLibrary.addFunctionLibrary(IXSL3FunctionSet.getInstance());
         functionLibrary.addFunctionLibrary(new JSFunctionLibrary());
     }
 
@@ -178,10 +182,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
         if (topLevel && globalContextRequirement != null) {
             globalContextRequirement.export(presenter);
         }
-        if (isSchemaAware()) {
-            SchemaModelSerializer sms = new SchemaModelSerializer((PreparedSchema) getImportedSchema(), presenter);
-            sms.serialize();
-        }
+        exportSchemaNamespaces(presenter);
         for (Component c : getComponentIndex().values()) {
             if (needToExport(c)) {
                 c.export(presenter, componentIdMap, packageIdMap);
@@ -217,6 +218,14 @@ public class StylesheetPackageEE extends StylesheetPackage {
             return c.getActor().isExportable();
         } else {
             return true;
+        }
+    }
+
+    private void exportSchemaNamespaces(ExpressionPresenter presenter) {
+        for (NamespaceUri ns : schemaIndex) {
+            presenter.startElement("schema");
+            presenter.emitAttribute("ns", ns.toString());
+            presenter.endElement();
         }
     }
 

@@ -18,7 +18,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
@@ -85,74 +84,6 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         register("apply", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, ArrayItemType.getInstance(), ONE, null));
-
-        register("abort-controller", 0, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE));
-
-        register("abort-controller", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.INTEGER, OPT, null));
-
-        register("all", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, ArrayItemType.getInstance(), ONE, null));
-
-        register("all-settled", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, ArrayItemType.getInstance(), ONE, null));
-
-        register("any", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, ArrayItemType.getInstance(), ONE, null));
-
-        register("doc", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null));
-
-        register("doc", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, AnyItemType.getInstance(), OPT, null));
-
-        register("doc-fetched", 1, e -> e.populate(Stub::new, BuiltInAtomicType.BOOLEAN, ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null));
-
-        register("http-request", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
-
-        register("http-request", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE, null)
-                .arg(1, AnyItemType.getInstance(), OPT, null));
-
-        register("json-doc", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
-
-        register("json-doc", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
-
-        register("json-doc", 3, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
-                .arg(2, AnyItemType.getInstance(), OPT, null));
-
-        register("race", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, ArrayItemType.getInstance(), ONE, null));
-
-        register("sleep", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.INTEGER, ONE, null));
-
-        register("then", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, AnyItemType.getInstance(), ONE, null)
-                .arg(1, AnyFunctionType.getInstance(), ONE, null));
-
-        register("unparsed-text", 1, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null));
-
-        register("unparsed-text", 2, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null));
-
-        register("unparsed-text", 3, e -> e.populate(Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, AnyItemType.getInstance(), OPT, null));
-
-        register("unparsed-text-fetched", 1, e -> e.populate(Stub::new, BuiltInAtomicType.BOOLEAN, ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
         register("schedule-action", 3, e -> e.populate(Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null)

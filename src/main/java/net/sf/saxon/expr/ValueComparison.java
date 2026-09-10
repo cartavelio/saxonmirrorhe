@@ -486,7 +486,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         if (resultWhenEmpty != null) {
             out.emitAttribute("onEmpty", resultWhenEmpty.getBooleanValue() ? "1" : "0");
         }
-        if ("JS".equals(out.getOptions().target) && out.getOptions().targetVersion == 2) {
+        if ("JS".equals(out.getOptions().target) && out.getOptions().targetVersion >= 2) {
             // for backwards compatibility, output a comp attribute
             AtomicComparer comparer = getAtomicComparer();
             out.emitAttribute("comp", comparer.save());
