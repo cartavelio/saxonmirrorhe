@@ -23,7 +23,7 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 
 /**
- * A binary resource that might appear in a resource collection.
+ * A binary resource that might appear in a resource collection. Currently limited to 2G octets.
  */
 
 public class BinaryResource implements Resource {
@@ -102,7 +102,10 @@ public class BinaryResource implements Resource {
         try {
             raw = connection.getInputStream();
 
-            int contentLength = connection.getContentLength();
+            long contentLength = connection.getContentLengthLong();
+            if (contentLength > Integer.MAX_VALUE) {
+                throw new XPathException("Cannot handle binary resources longer than 2G octets");
+            }
             InputStream in = new BufferedInputStream(raw);
             if (contentLength < 0) {
                 // bug 4475
@@ -110,7 +113,7 @@ public class BinaryResource implements Resource {
                 in.close();
                 return result;
             } else {
-                byte[] data = new byte[contentLength];
+                byte[] data = new byte[(int)contentLength];
                 int bytesRead = 0;
                 int offset = 0;
                 while (offset < contentLength) {

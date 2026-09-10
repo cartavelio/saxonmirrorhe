@@ -10,10 +10,14 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * An exception thrown by the Saxon s9api API. This is always a wrapper for some other underlying exception
  */
+@CSharpInjectMembers(code="public override string Message {get => InnerException.Message;}")
+
 public class SaxonApiException extends Exception {
 
     /**
@@ -64,6 +68,7 @@ public class SaxonApiException extends Exception {
      *         (which may be <tt>null</tt>).
      */
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public String getMessage() {
         return getCause().getMessage();
     }

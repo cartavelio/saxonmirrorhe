@@ -94,6 +94,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      *        The equals() method has been defined because it is useful in contexts such as a Java Set or HashMap.
      */
 
+    @CSharpModifiers(code={"public", "override"})
     public boolean equals(Object other) {
         if (!(other instanceof AbstractNodeWrapper)) {
             return false;

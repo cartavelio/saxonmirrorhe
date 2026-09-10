@@ -101,7 +101,9 @@ public class PullPushTee extends PullFilter {
                     if (binding == null) {
                         break;
                     }
-                    nsMap = nsMap.put(binding.getPrefix(), binding.getURI());
+                    if (!(binding.getPrefix().isEmpty() && binding.getURI().equals(nsMap.getDefaultNamespace()))) {
+                        nsMap = nsMap.put(binding.getPrefix(), binding.getURI());
+                    }
                 }
                 nsStack.push(nsMap);
                 out.startElement(in.getNodeName(), in.getSchemaType(),

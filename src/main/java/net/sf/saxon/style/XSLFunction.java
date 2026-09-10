@@ -250,13 +250,12 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             makeQName(s, null, "streamability");
             return FunctionStreamability.UNCLASSIFIED;
         }
-        for (FunctionStreamability v : FunctionStreamability.values()) {
-            if (v.streamabilityStr.equals(s)) {
-                return v;
-            }
+        try {
+            return FunctionStreamability.of(s);
+        } catch (IllegalArgumentException ill) {
+            invalidAttribute("streamability", "unclassified|absorbing|inspection|filter|shallow-descent|deep-descent|ascent");
+            return null;
         }
-        invalidAttribute("streamability", "unclassified|absorbing|inspection|filter|shallow-descent|deep-descent|ascent");
-        return null;
     }
 
     /**

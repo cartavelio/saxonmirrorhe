@@ -10,7 +10,9 @@ package net.sf.saxon.resource;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
+import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.json.ParseJsonFn;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -27,7 +29,8 @@ import java.util.Map;
 public class JSONResource implements Resource {
     private final String href;
     private String jsonStr;
-    private final AbstractResourceCollection.InputDetails details;
+    private Item item;
+    private AbstractResourceCollection.InputDetails details;
 
     public final static ResourceFactory FACTORY = (config, details) -> new JSONResource(details);
 
@@ -45,6 +48,16 @@ public class JSONResource implements Resource {
         this.details = details;
     }
 
+    public JSONResource(String uri, MapItem map) {
+        this.item = map;
+        this.href = uri;
+    }
+
+    public JSONResource(String uri, ArrayItem array) {
+        this.item = array;
+        this.href = uri;
+    }
+
 
     @Override
     public String getResourceURI() {
@@ -53,6 +66,9 @@ public class JSONResource implements Resource {
 
     @Override
     public Item getItem(XPathContext context) throws XPathException {
+        if (item != null) {
+            return item;
+        }
         if (jsonStr == null) {
             jsonStr = details.obtainCharacterContent();
         }
@@ -60,7 +76,7 @@ public class JSONResource implements Resource {
         options.put("liberal", BooleanValue.FALSE);
         options.put("duplicates", StringValue.bmp("use-first"));
         options.put("escape", BooleanValue.FALSE);
-        return ParseJsonFn.parse(jsonStr, options, context);
+        return item = ParseJsonFn.parse(jsonStr, options, context);
     }
 
     /**

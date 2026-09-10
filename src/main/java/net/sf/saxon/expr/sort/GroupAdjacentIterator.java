@@ -40,10 +40,10 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     private final StringCollator collator;
     private final XPathContext baseContext;
     private final XPathContext runningContext;
-    private List<AtomicMatchKey> currentComparisonKey;
+    private CompositeAtomicKey currentComparisonKey;
     private AtomicSequence currentKey;
     private List<Item> currentMembers;
-    private List<AtomicMatchKey> nextComparisonKey;
+    private CompositeAtomicKey nextComparisonKey;
     private List<AtomicValue> nextKey = null;
     private Item nextItem;
     private Item current = null;
@@ -95,7 +95,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
         return key;
     }
 
-    private List<AtomicMatchKey> getComparisonKey(List<AtomicValue> key, XPathContext keyContext) throws XPathException {
+    private CompositeAtomicKey getComparisonKey(List<AtomicValue> key, XPathContext keyContext) throws XPathException {
         List<AtomicMatchKey> ckey = new ArrayList<>(key.size());
         for (AtomicValue aKey : key) {
             AtomicMatchKey comparisonKey;
@@ -106,7 +106,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
             }
             ckey.add(comparisonKey);
         }
-        return ckey;
+        return new CompositeAtomicKey(ckey);
     }
 
     private void advance() throws XPathException {
@@ -118,10 +118,10 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
                 break;
             }
             List<AtomicValue> newKey = getKey(runningContext);
-            List<AtomicMatchKey> newComparisonKey = getComparisonKey(newKey, baseContext);
+            CompositeAtomicKey newComparisonKey = getComparisonKey(newKey, baseContext);
 
             try {
-                if (currentComparisonKey.equals(newComparisonKey)) {
+                if (newComparisonKey.equals(currentComparisonKey)) {
                     currentMembers.add(nextCandidate);
                 } else {
                     nextItem = nextCandidate;

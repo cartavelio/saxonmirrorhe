@@ -144,10 +144,15 @@ public class TransformerImpl extends AbstractTransformerImpl {
      *             or "{uri}local")
      * @throws IllegalArgumentException if the argument is invalid, for example if the
      *                                  format of the name is incorrect or if there is no mode with this name
+     *                                  or if the mode is private
      */
 
     public void setInitialMode(String name) throws IllegalArgumentException {
-        xsltTransformer.setInitialMode(QName.fromClarkName(name));
+        try {
+            xsltTransformer.setInitialMode(QName.fromClarkName(name));
+        } catch (SaxonApiException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**

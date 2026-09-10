@@ -132,12 +132,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     private Predicate<URI> allowedUriTest = uri -> true;
 
-    private final CollectionFinder standardCollectionFinder
-            //#if CSHARP==false
-            = new StandardCollectionFinder()
-            //#endif
-            ;
-
+    private Map<String, ResourceCollection> registeredCollections = new HashMap<>();
     private CollectionFinder collectionFinder;
     private EnvironmentVariableResolver environmentVariableResolver = new StandardEnvironmentVariableResolver();
     private String defaultCollection = null;
@@ -211,9 +206,7 @@ public class Configuration implements SourceResolver, NotationSet {
     // Plug-in to allow media queries in an xml-stylesheet processing instruction to be evaluated
     private Comparator<String> mediaQueryEvaluator;
     private final Map<String, String> fileExtensions = new HashMap<>();
-    //#if CSHARP==false
     private final Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
-    //#endif
     private final Map<String, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
     protected int byteCodeThreshold = 100;
     private int regexBacktrackingLimit = 10000000;
@@ -395,7 +388,6 @@ public class Configuration implements SourceResolver, NotationSet {
         // Note that some initializations have been moved here because C# is more restrictive about
         // how fields can be initialized when first declared.
 
-        collectionFinder = standardCollectionFinder;
         defaultXsltCompilerInfo = makeCompilerInfo();
         systemURIResolver = new StandardURIResolver(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
@@ -424,7 +416,6 @@ public class Configuration implements SourceResolver, NotationSet {
         internalSetBooleanProperty(FeatureCode.DISABLE_XSL_EVALUATE, FeatureKeys.DISABLE_XSL_EVALUATE, false);
         //internalSetBooleanProperty(FeatureKeys.STABLE_COLLECTION_URI, true);
 
-        //#if CSHARP==false
         registerFileExtension("xml", "application/xml");
         registerFileExtension("html", "application/html");
         registerFileExtension("atom", "application/atom");
@@ -450,7 +441,6 @@ public class Configuration implements SourceResolver, NotationSet {
         registerMediaType("application/binary", BinaryResource.FACTORY);
         registerMediaType("application/json", JSONResource.FACTORY);
         registerMediaType("application/unknown", UnknownResource.FACTORY);
-        //#endif
 
         registerFunctionAnnotationHandler(new XQueryFunctionAnnotationHandler());
     }
@@ -795,7 +785,9 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void setParameterizedURIResolver() {
+        //#if CSHARP==false
         getSystemURIResolver().setRecognizeQueryParameters(true);
+        //#endif
     }
 
     /**
@@ -1672,42 +1664,32 @@ public class Configuration implements SourceResolver, NotationSet {
         return collectionFinder;
     }
 
-    //#if CSHARP==false
     /**
-     * Get the standard collection finder. This is always an instance of {@link StandardCollectionFinder}
-     * and there is no way of changing it. It is available for calling from a user-supplied collection
-     * finder as a way to delegate processing, in the event that the user-supplied collection finder
-     * wants to handle some collection URIs its own way, and others in the standard way
-     * @return the standard collection finder
-     */
-
-    public StandardCollectionFinder getStandardCollectionFinder() {
-        return (StandardCollectionFinder)standardCollectionFinder;
-    }
-
-    /**
-     * Register a specific URI and bind it to a specific ResourceCollection. This method modifies
-     * the standard collection finder (as returned by {@link #getStandardCollectionFinder()},
-     * and it also modifies the user-supplied collection finder (as returned by
-     * {@link #getCollectionFinder()} if and only if this is an instance of the class
-     * {@link StandardCollectionFinder}.
+     * Register a specific URI and bind it to a specific ResourceCollection. A collection that is
+     * registered in this way will be returned prior to calling any registered {@link CollectionFinder}.
+     * This method should only be used while the configuration is being initialized for use;
+     * the effect of adding or replacing collections dynamically while a configuration is in use
+     * is undefined.
      *
      * @param collectionURI the collection URI to be registered. Must not be null.
      * @param collection    the ResourceCollection to be associated with this URI. Must not be null.
-     * @since 9.7.0.2. Modified in 10.0 to work on the standard collection finder in all cases,
-     * so there is no failure if the user-supplied collection finder does not implement
-     * the {@link StandardCollectionFinder} interface.
+     * @since 9.7.0.2. Modified in 11.0 to work independently of (and prior to invoking) the
+     * registered {@link CollectionFinder}.
      */
 
     public void registerCollection(String collectionURI, ResourceCollection collection) {
-        ((StandardCollectionFinder)standardCollectionFinder).registerCollection(collectionURI, collection);
-        if (collectionFinder instanceof StandardCollectionFinder
-                && collectionFinder != standardCollectionFinder) {
-            ((StandardCollectionFinder) collectionFinder).registerCollection(collectionURI, collection);
-        }
+        registeredCollections.put(collectionURI, collection);
     }
 
-    //#endif
+    /**
+     * Get a registered collection with a given URI if there is one
+     * @param uri the collection URI
+     * @return the registered collection with this URI if there is one, or null otherwise
+     */
+
+    public ResourceCollection getRegisteredCollection(String uri) {
+        return registeredCollections.get(uri);
+    }
 
     /**
      * Set the media type to be associated with a file extension by the standard
@@ -1725,7 +1707,6 @@ public class Configuration implements SourceResolver, NotationSet {
         fileExtensions.put(extension, mediaType);
     }
 
-    //#if CSHARP==false
     /**
      * Associate a media type with a resource factory. This method may
      * be called to customize the behaviour of a collection to recognize different file extensions
@@ -1738,7 +1719,6 @@ public class Configuration implements SourceResolver, NotationSet {
     public void registerMediaType(String contentType, ResourceFactory factory) {
         resourceFactoryMapping.put(contentType, factory);
     }
-    //#endif
 
     /**
      * Get the media type to be associated with a file extension by the standard
@@ -1762,7 +1742,6 @@ public class Configuration implements SourceResolver, NotationSet {
         return mediaType;
     }
 
-    //#if CSHARP==false
     /**
      * Get the resource factory associated with a media type
      *
@@ -1774,7 +1753,6 @@ public class Configuration implements SourceResolver, NotationSet {
     public ResourceFactory getResourceFactoryForMediaType(String mediaType) {
         return resourceFactoryMapping.get(mediaType);
     }
-    //#endif
 
     /**
      * Set the localizer factory to be used
@@ -4469,11 +4447,14 @@ public class Configuration implements SourceResolver, NotationSet {
                     break;
                 //#endif
 
+                //#if CSHARP==false
                 case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS: {
                     boolean b = requireBoolean(name, value);
                     getSystemURIResolver().setRecognizeQueryParameters(b);
                     break;
                 }
+                //#endif
+
                 case FeatureCode.RECOVERY_POLICY:
                     // Obsolete: no action
                     break;
@@ -5104,8 +5085,10 @@ public class Configuration implements SourceResolver, NotationSet {
                 return getOutputURIResolver().getClass().getName();
             //#endif
 
+            //#if CSHARP==false
             case FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS:
                 return getSystemURIResolver().queryParametersAreRecognized();
+            //#endif
 
             case FeatureCode.RECOVERY_POLICY:
                 return 0;

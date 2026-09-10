@@ -914,7 +914,6 @@ public abstract class Calculator {
             if (B.signum() == 0) {
                 throw new XPathException("Integer division by zero", "FOAR0001", c);
             }
-            //BigInteger quot = A.divide(B, 0, BigDecimal.ROUND_DOWN).toBigInteger();
             BigInteger quot = A.divideToIntegralValue(B).toBigInteger();
             return BigIntegerValue.makeIntegerValue(quot);
         }

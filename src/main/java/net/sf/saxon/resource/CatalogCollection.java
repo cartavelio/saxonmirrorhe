@@ -21,17 +21,16 @@ import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
 
 import javax.xml.transform.Source;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,7 +76,7 @@ public class CatalogCollection extends AbstractResourceCollection {
 
     @Override
     public Iterator<String> getResourceURIs(XPathContext context) throws XPathException {
-        StandardCollectionFinder.checkNotNull(collectionURI, context);
+        AbstractResourceCollection.checkNotNull(collectionURI, context);
         return catalogContents(collectionURI, context);
     }
 
@@ -85,32 +84,33 @@ public class CatalogCollection extends AbstractResourceCollection {
     @Override
     public Iterator<? extends Resource> getResources(final XPathContext context) throws XPathException {
 
-        StandardCollectionFinder.checkNotNull(collectionURI, context);
+        AbstractResourceCollection.checkNotNull(collectionURI, context);
 
         Iterator<String> resourceURIs = getResourceURIs(context);
 
-        return new MappingJavaIterator<>(resourceURIs, in -> {
+        return new MappingJavaIterator<String, Resource>(resourceURIs, input -> {
+            String uri = input; // type information needed by transpiler
             try {
-                if (in.startsWith("data:")) {
+                if (uri.startsWith("data:")) {
                     try {
-                        Resource basicResource = DataURIScheme.decode(new URI(in));
+                        Resource basicResource = DataURIScheme.decode(new URI(uri));
                         return makeTypedResource(context.getConfiguration(), basicResource);
                     } catch (URISyntaxException | IllegalArgumentException e) {
                         throw new XPathException(e);
                     }
                 } else {
-                    InputDetails id = getInputDetails(in);
+                    InputDetails id = getInputDetails(uri);
                     id.parseOptions = new ParseOptions(context.getConfiguration().getParseOptions());
                     id.parseOptions.setSpaceStrippingRule(whitespaceRules);
-                    id.resourceUri = in;
+                    id.resourceUri = uri;
                     return makeResource(context.getConfiguration(), id);
                 }
             } catch (XPathException e) {
                 Optional<Integer> onError = params == null ? Optional.of(URIQueryParameters.ON_ERROR_FAIL) : params.getOnError();
                 if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_FAIL) {
-                    return new FailedResource(in, e);
+                    return new FailedResource(uri, e);
                 } else if (onError.isPresent() && onError.get() == URIQueryParameters.ON_ERROR_WARNING) {
-                    context.getController().warning("collection(): failed to parse " + in + ": " + e.getMessage(), e.getErrorCodeLocalPart(), null);
+                    context.getController().warning("collection(): failed to parse " + uri + ": " + e.getMessage(), e.getErrorCodeLocalPart(), null);
                     return null;
                 } else {
                     return null;
@@ -127,25 +127,22 @@ public class CatalogCollection extends AbstractResourceCollection {
     }
 
     /**
-     * Return a StringBuilder initialized to the contents of an InputStream
+     * Return a String initialized to the contents of an InputStream
      *
-     * @param in the input stream (which is consumed by this method)
-     * @return the StringBuilder, initialized to the contents of this InputStream
+     * @param input the input stream (which is consumed by this method)
+     * @param encoding the character encoding of the input stream
+     * @return the String, initialized to the contents of this InputStream
      * @throws IOException if an error occurs reading the resource
      */
 
-    public static StringBuilder makeStringBuilderFromStream(InputStream in, String encoding) throws IOException {
-        InputStreamReader is = new InputStreamReader(in, Charset.forName(encoding));
-        StringBuilder sb = new StringBuilder();
-        BufferedReader br = new BufferedReader(is);
-        String read = br.readLine();
-
-        while (read != null) {
-            sb.append(read);
-            read = br.readLine();
+    @CSharpReplaceBody(code="return new System.IO.StreamReader(input, System.Text.Encoding.GetEncoding(encoding)).ReadToEnd();")
+    public static String makeStringFromStream(InputStream input, String encoding) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        for (int length; (length = input.read(buffer)) != -1; ) {
+            result.write(buffer, 0, length);
         }
-        br.close();
-        return sb;
+        return result.toString(encoding);
     }
 
 

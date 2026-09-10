@@ -61,9 +61,6 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
     // corresponds one-to-one with the list of groups.
     protected List<AtomicSequence> groupKeys = new ArrayList<>(40);
 
-    // An AtomicComparer is used to do the comparisons of individual atomic values
-    //protected AtomicComparer comparer;
-
     protected boolean composite;
 
     /**
@@ -157,7 +154,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      */
 
     private void buildIndexedGroupsComposite() throws XPathException {
-        HashMap<List<AtomicMatchKey>, List<Item>> index = new HashMap<>(40);
+        HashMap<CompositeAtomicKey, List<Item>> index = new HashMap<>(40);
         XPathContext c2 = keyContext.newMinorContext();
         FocusIterator focus = c2.trackFocus(population);
         int implicitTimezone = c2.getImplicitTimezone();
@@ -181,13 +178,14 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
                 ckList.add(comparisonKey);
             }
 
-            List<Item> g = index.get(ckList);
+            CompositeAtomicKey cak = new CompositeAtomicKey(ckList);
+            List<Item> g = index.get(cak);
             if (g == null) {
                 List<Item> newGroup = new ArrayList<>(20);
                 newGroup.add(item);
                 groups.add(newGroup);
                 groupKeys.add(new AtomicArray(compositeKey));
-                index.put(ckList, newGroup);
+                index.put(cak, newGroup);
             } else {
                 g.add(item);
             }

@@ -255,9 +255,6 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         } else if (uri.equals(NamespaceConstant.XML)) {
             throw new IllegalArgumentException("Invalid prefix for XML namespace");
         }
-//        if (uri.isEmpty() && !allowsNamespaceUndeclarations()) {
-//            throw new IllegalArgumentException("URI must not be zero-length");
-//        }
         return false;
     }
 

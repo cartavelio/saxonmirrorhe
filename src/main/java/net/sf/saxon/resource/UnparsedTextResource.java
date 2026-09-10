@@ -10,9 +10,9 @@ package net.sf.saxon.resource;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
-import net.sf.saxon.lib.StandardUnparsedTextResolver;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.StringValue;
 
 import java.io.ByteArrayInputStream;
@@ -29,8 +29,8 @@ import java.net.URL;
  * @since 9.7
  */
 public class UnparsedTextResource implements Resource {
-    private final String contentType;
-    private final String encoding;
+    private String contentType;
+    private String encoding;
     private final String href;
     private String unparsedText = null;
 
@@ -51,17 +51,27 @@ public class UnparsedTextResource implements Resource {
             if (details.encoding == null) {
                 try {
                     InputStream is = new ByteArrayInputStream(details.binaryContent);
-                    details.encoding = StandardUnparsedTextResolver.inferStreamEncoding(is, null);
+                    details.encoding = EncodingDetector.inferStreamEncoding(is, null);
                     is.close();
                 } catch (IOException e) {
                     throw new XPathException(e); // cannot happen
                 }
             }
-            try {
-                this.unparsedText = new String(details.binaryContent, details.encoding);
-            } catch (UnsupportedEncodingException e) {
-                throw new XPathException(e);
-            }
+            this.unparsedText = makeString(details.binaryContent, details.encoding);
+        }
+    }
+
+    public UnparsedTextResource(String uri, String content) {
+        this.href = uri;
+        this.unparsedText = content;
+    }
+
+    @CSharpReplaceBody(code="return System.Text.Encoding.GetEncoding(encoding).GetString(bytes);")
+    private String makeString(byte[] bytes, String encoding) throws XPathException {
+        try {
+            return new String(bytes, encoding);
+        } catch (UnsupportedEncodingException e) {
+            throw new XPathException(e);
         }
     }
 
@@ -80,14 +90,11 @@ public class UnparsedTextResource implements Resource {
         if (unparsedText == null) {
             try {
                 InputStream stream = Loader.urlStream(new URL(href));
-                StringBuilder builder = null;
-
                 String enc = encoding;
                 if (enc == null) {
-                    enc = StandardUnparsedTextResolver.inferStreamEncoding(stream, null);
+                    enc = EncodingDetector.inferStreamEncoding(stream, null);
                 }
-                builder = CatalogCollection.makeStringBuilderFromStream(stream, enc);
-                unparsedText = builder.toString();
+                unparsedText = CatalogCollection.makeStringFromStream(stream, enc);
             } catch (IOException e) {
                 throw new XPathException(e);
             }
