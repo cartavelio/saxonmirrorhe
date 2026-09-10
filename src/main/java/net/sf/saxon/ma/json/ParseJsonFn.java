@@ -14,6 +14,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 public class ParseJsonFn extends JsonToXMLFn {
 
+    @CSharpModifiers(code={"public", "static", "new"})
     public static OptionsParameter OPTION_DETAILS;
     static {
         SpecificFunctionType fallbackType = new SpecificFunctionType(

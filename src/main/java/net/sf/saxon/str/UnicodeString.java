@@ -238,6 +238,19 @@ public abstract class UnicodeString extends CodePoints implements AtomicMatchKey
     }
 
     /**
+     * Compute a hashCode. All implementations of {@code UniString use compatible hash codes and the
+     * hashing algorithm is therefore identical to that for {@code java.lang.String}. This means
+     * that for strings containing Astral characters, the hash code needs to be computed by decomposing
+     * an Astral character into a surrogate pair.
+     *
+     * @return the hash code
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    /**
      * Get the codepoints of the string as a byte array, allocating three
      * bytes per character. (Max unicode codepoint = x10FFFF)
      *

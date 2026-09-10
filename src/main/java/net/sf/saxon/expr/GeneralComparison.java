@@ -394,6 +394,14 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 comparer.equals(((GeneralComparison) other).comparer);
     }
 
+    /**
+     * Get a hashCode for comparing two expressions. Note that this hashcode gives the same
+     * result for (A op B) and for (B op A), whether or not the operator is commutative.
+     */
+    @Override
+    protected int computeHashCode() {
+        return super.computeHashCode();
+    }
 
     /**
      * Optimize the expression

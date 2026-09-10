@@ -811,7 +811,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      * @throws XPathException if anything goes wrong
      */
 
-    protected void flatten(ArrayItem array, Location locationId, int copyNamespaces) throws XPathException {
+    private void flatten(ArrayItem array, Location locationId, int copyNamespaces) throws XPathException {
         for (Sequence member : array.members()) {
             SequenceTool.supply(member.iterate(), (ItemConsumer<? super Item>) it -> append(it, locationId, copyNamespaces));
         }
@@ -826,7 +826,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
      * @param copyNamespaces options for copying namespace nodes
      */
 
-    protected void decompose(Item item, Location locationId, int copyNamespaces) throws XPathException {
+    private void decompose(Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item != null) {
             Genre genre = item.getGenre();
             switch (genre) {
@@ -900,7 +900,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
     }
 
 
-    protected String getErrorCodeForDecomposingFunctionItems() {
+    private String getErrorCodeForDecomposingFunctionItems() {
         return getPipelineConfiguration().isXSLT() ? "XTDE0450" : "XQTY0105";
     }
 

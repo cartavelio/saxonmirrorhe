@@ -468,7 +468,7 @@ public class FloatingPointConverter {
             s.appendLatin(NEGATIVE_INFINITY);
         } else if (d == Double.POSITIVE_INFINITY) {
             s.appendLatin(POSITIVE_INFINITY);
-        } else if (d != d) {
+        } else if (Double.isNaN(d)) {
             s.appendLatin(NaN);
         } else if (d == 0.0) {
             if ((Double.doubleToLongBits(d) & DOUBLE_SIGN_MASK) != 0) {
@@ -530,7 +530,7 @@ public class FloatingPointConverter {
             s.append(NEGATIVE_INFINITY);
         } else if (f == Float.POSITIVE_INFINITY) {
             s.append(POSITIVE_INFINITY);
-        } else if (f != f) {
+        } else if (Float.isNaN(f)) {
             s.append(NaN);
         } else if (f == 0.0) {
             if ((Float.floatToIntBits(f) & FLOAT_SIGN_MASK) != 0) {

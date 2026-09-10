@@ -104,6 +104,14 @@ public class NestedIntegerValue extends AtomicValue implements XPathComparable, 
         return (o instanceof NestedIntegerValue) && Arrays.equals(value, ((NestedIntegerValue) o).value);
     }
 
+    /**
+     * Returns a hash code value for the object.
+     */
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(value);
+    }
+
     @Override
     public BuiltInAtomicType getPrimitiveType() {
         return BuiltInAtomicType.STRING;

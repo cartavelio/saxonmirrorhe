@@ -245,6 +245,7 @@ public class XPathException extends TransformerException {
      * @return A SourceLocator object, or null if none was specified.
      */
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public Location getLocator() {
         SourceLocator locator = super.getLocator();
         if (locator == null) {

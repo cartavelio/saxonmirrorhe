@@ -15,6 +15,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 
@@ -44,6 +45,7 @@ public class ArrayItemType extends AnyFunctionType {
      * @return the Genre to which this type belongs, specifically {@link Genre#ARRAY}
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Genre getGenre() {
         return Genre.ARRAY;
     }
@@ -216,6 +218,7 @@ public class ArrayItemType extends AnyFunctionType {
      */
     @SuppressWarnings("Convert2MethodRef")
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public String toExportString() {
         return makeString(st -> st.toExportString());
     }
@@ -291,6 +294,7 @@ public class ArrayItemType extends AnyFunctionType {
      * @return optionally, a message explaining why the item does not match the type
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof ArrayItem) {
             for (int i=0; i<((ArrayItem)item).arrayLength(); i++) {

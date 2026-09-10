@@ -1,6 +1,7 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * This class implements equality and identity comparisons between values of simple types:
@@ -16,6 +17,8 @@ import net.sf.saxon.om.AtomicSequence;
 public class SimpleTypeIdentityComparison extends SimpleTypeComparison {
 
     private static final SimpleTypeIdentityComparison INSTANCE = new SimpleTypeIdentityComparison();
+
+    @CSharpModifiers(code={"public", "static", "new"})
     public static SimpleTypeIdentityComparison getInstance() {
         return INSTANCE;
     }

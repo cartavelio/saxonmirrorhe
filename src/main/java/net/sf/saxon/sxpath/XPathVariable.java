@@ -10,7 +10,6 @@ package net.sf.saxon.sxpath;
 import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.IntegerValue;
@@ -50,7 +49,7 @@ public final class XPathVariable implements LocalBinding {
      * @return the constructed XPathVariable
      */
 
-    protected static XPathVariable make(StructuredQName name) {
+    public static XPathVariable make(StructuredQName name) {
         XPathVariable v = new XPathVariable();
         v.name = name;
         return v;

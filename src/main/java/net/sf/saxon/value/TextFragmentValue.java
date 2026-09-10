@@ -141,6 +141,15 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
     }
 
     /**
+     * Returns a hash code value for the object.
+     * @return a hash code value for this object.
+     */
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
+    /**
      * Ask whether this NodeInfo implementation holds a fingerprint identifying the name of the
      * node in the NamePool. If the answer is true, then the {@link #getFingerprint} method must
      * return the fingerprint of the node. If the answer is false, then the {@link #getFingerprint}
