@@ -313,6 +313,34 @@ public class XQueryEngine extends SaxonCAPI {
 
     }
 
+
+    @CEntryPoint(name = "j_executeQueryToString_c", exceptionHandler = SaxonCExceptionCCharHandler.class)
+        public static CCharPointer executeQueryToString_c(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
+            ProcessorDataAccumulator processorDataAccumulator = null;
+            String[] params = null;
+            Object[] values = null;
+            if(processorDataRef != WordFactory.nullPointer()) {
+                processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+                params = processorDataAccumulator.getParameterNames();
+                values = processorDataAccumulator.getValues();
+            }
+            if(processorRef == WordFactory.nullPointer()) {
+                throw new SaxonApiException("Processor pointer is null");
+            }
+            Processor processor = SaxonCAPI.objectHandles.get(processorRef);
+            String cwd = null;
+            if(ccwd != WordFactory.nullPointer()) {
+                cwd = CTypeConversion.toJavaString(ccwd);
+            }
+            ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+            Serializer serializer = processor.newSerializer(bStream);
+            XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, serializer);
+            eval.run(serializer);
+            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
+            return holder.get();
+
+        }
+
     @CEntryPoint(name = "j_executeQueryToValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long executeQueryToValue(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;

@@ -18,58 +18,6 @@
 EXTERN_SAXONC
 
 
-/*long long int j_makeStringValue(graal_isolatethread_t*, char * str);
-
-
-long long int j_makeIntegerValue(graal_isolatethread_t*, int i);
-
-
-
-long long int j_makeDoubleValue(graal_isolatethread_t*, double d);
-
-
-long long int j_makeFloatValue(graal_isolatethread_t*, float);
-
-
-long long int j_makeLongValue(graal_isolatethread_t*, long l);
-
-
-long long int j_makeBooleanValue(graal_isolatethread_t*, bool b);
-
-long long int j_makeQNameValue(graal_isolatethread_t*, char * itype, char *str);
-
-char * getStringValueForXdmItem(graal_isolatethread_t*, int64_t itemRef);
-
-char * getStringValueForXdmValue(graal_isolatethread_t*, int64_t valueRef);
-
-char * xdmItemToString(graal_isolatethread_t*, int64_t valueRef);
-
-char * xdmNodeToString(graal_isolatethread_t*, int64_t valueRef);
-
-char * j_getPrimitiveTypeName(graal_isolatethread_t*, int64_t valueRef);
-
-long j_getLongValue(graal_isolatethread_t*, int64_t valueRef);
-
-int j_getHashCode(graal_isolatethread_t*, int64_t valueRef);
-
-double j_getDoubleValue(graal_isolatethread_t*, int64_t valueRef);
-
-double j_getBooleanValue(graal_isolatethread_t*, int64_t valueRef);
-
-int j_getNodeKind(graal_isolatethread_t*, int64_t nodeRef);
-
-char * j_getLocalName(graal_isolatethread_t*, int64_t nodeRef);
-
-char * j_getNodeName(graal_isolatethread_t*, int64_t nodeRef);
-
-long j_getTypedValue(graal_isolatethread_t*, int64_t nodeRef);
-
-char * getBaseURIForXdmNode(graal_isolatethread_t*, int64_t nodeRef);
-
-long getParentForXdmNode(graal_isolatethread_t*, int64_t nodeRef);
-
-char * j_getAttributeValue(graal_isolatethread_t*, int64_t nodeRef, char * eqname); */
-
 
 
 

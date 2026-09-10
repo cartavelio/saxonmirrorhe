@@ -110,7 +110,12 @@ int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license)
     return createSaxonProcessor(thread, license);
 }
 
+sxnc_processor* c_createSaxonProcessor(graal_isolatethread_t *thread, sxnc_processor * proc, int license)
+{
+    int64_t result= createSaxonProcessor(thread, license);
 
+    (* proc).value = result;
+}
 
 
 

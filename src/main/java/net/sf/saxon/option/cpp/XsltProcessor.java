@@ -315,8 +315,8 @@ public class XsltProcessor extends SaxonCAPI {
      * @param params         - parameters and property names given as an array of stings
      * @param values         - the values of the paramaters and properties. given as a array of Java objects
      */
-    @CEntryPoint(name = "c_xsltSaveResultToFile")
-    public static void transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
+    @CEntryPoint(name = "c_xsltSaveResultToFile",exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         String cwd = CTypeConversion.toJavaString(ccwd);
         String sourceFilename = CTypeConversion.toJavaString(csourceFilename);
         String stylesheet = CTypeConversion.toJavaString(cstylesheet);
@@ -324,12 +324,18 @@ public class XsltProcessor extends SaxonCAPI {
 
         Processor processor = objectHandles.get(processorRef);
 
+         ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+         String[] params = null;
+         Object[] values = null;
+         if(processorDataAccumulator != null) {
+             params = processorDataAccumulator.getParameterNames();
+             values = processorDataAccumulator.getValues();
+         }
+
         if(processor == null) {
             throw new SaxonApiException("Processor object no found");
         }
 
-        String[] params = null;
-        Object[] values = null;
         XsltExecutable executable = null;
         Serializer serializer = null;
         Source source;
@@ -353,7 +359,7 @@ public class XsltProcessor extends SaxonCAPI {
             if (outFilename != null) {
                 serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             }
-            //applyXsltTransformerProperties(this, cwd, processor, transformer, params, values); TODO remove comment
+            applyXsltTransformerProperties(cwd, processor, transformer, params, values);
             /*if (sourceFilename == null && doc != null) {
                 transformer.setInitialContextNode(doc);
             } else */ if (sourceFilename != null) {
@@ -367,7 +373,7 @@ public class XsltProcessor extends SaxonCAPI {
             transformer.setDestination(serializer);
             transformer.transform();
             serializer = null;
-
+            return SaxonCAPI.STATUS_OK;
 
     }
 
@@ -658,7 +664,7 @@ public class XsltProcessor extends SaxonCAPI {
      * @param values     - the values of the paramaters and properties. given as a array of Java objects
      * @return result as a string representation
      */
-    @CEntryPoint(name = "c_xsltApplyStylesheet")
+    @CEntryPoint(name = "c_xsltApplyStylesheet", exceptionHandler = SaxonCExceptionCCharHandler.class)
     public static CCharPointer transformToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
 
         String cwd = CTypeConversion.toJavaString(ccwd);
@@ -686,7 +692,6 @@ public class XsltProcessor extends SaxonCAPI {
         }
 
             Source source;
-        System.err.println("Java: cp0");
             XsltTransformer transformer = null;
             if (stylesheet == null && executable != null) {
                 transformer = executable.load();
@@ -695,7 +700,6 @@ public class XsltProcessor extends SaxonCAPI {
 
                 throw ex;
             } else {
-                System.err.println("Java: cp1");
                 XsltCompiler compiler = processor.newXsltCompiler();
                 source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
                 if(source == null) {
@@ -726,7 +730,7 @@ public class XsltProcessor extends SaxonCAPI {
             }
             //transformer.setErrorListener(errorListener);
             transformer.transform();
-            serializer = null;
+
             final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(sw.toString());
             return holder.get();
 

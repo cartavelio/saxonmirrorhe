@@ -1,12 +1,19 @@
 #include "../../Saxon.C.API/SaxonCXPath.h"
-
+#include <stdio.h>  /* defines FILENAME_MAX */
+#ifdef WINDOWS
+#include <direct.h>
+#define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+#define GetCurrentDir getcwd
+#endif
 
 int main()
 {
-    HANDLE myDllHandle;
-    //JNIEnv *(environi.env);
-    //JavaVM *jvm;
-    jclass  myClassInDll;
+
+    char cwd[FILENAME_MAX]; //create string buffer to hold path
+    GetCurrentDir( cwd, FILENAME_MAX );
+    printf("CWD = %s\n",cwd);
     int cap = 10;
     sxnc_parameter * parameters; /*!< array of paramaters used for the transformation as (string, value) pairs */
     parameters;
@@ -22,18 +29,15 @@ int main()
     initSaxonc(&environi, &processor, &parameters, &properties, parCap, propCap);
 
     /*
-     * First of all, load required component.
-     * By the time of JET initialization, all components should be loaded.
-     */
-    environi->myDllHandle = loadDefaultDll ();
-	
-    /*
-     * Initialize JET run-time.
+     * Initialize Graalvm run-time.
      * The handle of loaded component is used to retrieve Invocation API.
      */
-    //initDefaultJavaRT (&environi);
-    initJavaRT (environi->myDllHandle, &(environi->jvm), &(environi->env));
-    const char *verCh = version(environi);
+
+    create_graalvm_isolate(environi);
+
+    c_createSaxonProcessor((environi->thread), processor, 0);
+
+    const char *verCh = version(environi, processor);
     printf("XPath Tests\n\nSaxon version: %s \n", verCh);
     setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
     
@@ -55,7 +59,7 @@ int main()
     }
       fflush(stdout);   
 
-    finalizeJavaRT (environi->jvm);
+    graal_tear_down (environi->thread);
     freeSaxonc(&environi, &processor, &parameters, &properties);
     return 0;
 

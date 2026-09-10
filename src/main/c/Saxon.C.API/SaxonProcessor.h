@@ -27,7 +27,7 @@
 #define CVERSION "@@VERSION@@"
 #define CVERSION_API_NO 1210
 
-typedef void* (*allocFn)(size_t length);
+
 
 
 #include <string>
