@@ -12,6 +12,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
@@ -240,61 +241,6 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
 
 
     /**
-     * Inner class containing information about a reference to a function whose declaration
-     * has not yet been encountered. The references gets fixed up later, once information
-     * about all user-declared functions is available.
-     */
-
-    public static class UnresolvedCallable implements UserFunctionResolvable, Callable {
-        SymbolicName.F symbolicName;
-        UserFunction function;
-
-        public UnresolvedCallable(SymbolicName.F symbolicName) {
-            this.symbolicName = symbolicName;
-        }
-
-        public StructuredQName getFunctionName() {
-            return symbolicName.getComponentName();
-        }
-
-        public int getArity() {
-            return symbolicName.getArity();
-        }
-
-        /**
-         * Evaluate the expression
-         *
-         * @param context   the dynamic evaluation context
-         * @param arguments the values of the arguments, supplied as Sequences
-         * @return the result of the evaluation, in the form of a Sequence
-         * @throws net.sf.saxon.trans.XPathException
-         *          if a dynamic error occurs during the evaluation of the expression
-         */
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            if (function == null) {
-                throw new XPathException("Forwards reference to XQuery function has not been resolved");
-            }
-
-            Sequence[] args = new Sequence[arguments.length];
-            for (int i = 0; i < arguments.length; i++) {
-                args[i] = arguments[i].materialize(); // TODO: is the copy needed?
-            }
-            return function.call(context.newCleanContext(), args);
-
-        }
-
-        @Override
-        public void setFunction(UserFunction function) {
-            this.function = function;
-        }
-
-        public UserFunction getFunction() {
-            return function;
-        }
-    }
-
-    /**
      * Identify a (namespace-prefixed) function appearing in the expression. This
      * method is called by the XQuery parser to resolve function calls found within
      * the query.
@@ -336,6 +282,23 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                 }
             }
             ufc.setStaticType(fd.getResultType());
+
+
+            // Inject any default value expressions
+            for (int i = 0; i < ufc.getArguments().length; i++) {
+                if (ufc.getArg(i) instanceof DefaultedArgumentExpression) {
+                    Supplier<Expression> def = fd.getParameterDefinitions()[i].getDefaultValueExpression();
+                    if (def == null) {
+                        throw new XPathException("Argument " + (i + 1) + " has no default value in function "
+                                                         + functionName.getComponentName().getEQName(), "XPST0017");
+                    }
+                    ufc.setArg(i, def.get().copy(new RebindingMap()));
+
+                }
+                ufc.adoptChildExpression(ufc.getArg(i));
+            }
+
+
             UserFunction fn = fd.getUserFunction();
             if (fn == null) {
                 // not yet compiled

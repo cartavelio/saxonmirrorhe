@@ -513,7 +513,6 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
             }
         }
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
-        Configuration config = staticContext.getConfiguration();
         Optimizer opt = visitor.obtainOptimizer();
         int arity = parameters.size();
         if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {

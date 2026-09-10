@@ -587,7 +587,7 @@ public abstract class Type {
 
     public static boolean isPossiblyComparable(/*@NotNull*/ BuiltInAtomicType t1, /*@NotNull*/ BuiltInAtomicType t2, boolean ordered, boolean allow40) {
         if (t1 == t2) {
-            return true; // short cut
+            return true; // shortcut
         }
         if (t1.equals(BuiltInAtomicType.ANY_ATOMIC) || t2.equals(BuiltInAtomicType.ANY_ATOMIC)) {
             return true; // meaning we don't actually know at this stage

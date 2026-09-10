@@ -9,7 +9,6 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.FunctionLibrary;
@@ -33,7 +32,7 @@ import java.util.function.Supplier;
 /**
  * This class represents a call to a function in its raw lexical form, before it has been resolved to an
  * actual function. Used in XQuery only, where function references can be forwards references to functions not
- *  * yet declared.
+ * yet declared.
  */
 @CSharpUsing(code="Saxon.Hej.trans")
 public class DraftFunctionCall extends DraftExpression {
@@ -257,19 +256,21 @@ public class DraftFunctionCall extends DraftExpression {
             }
             throw new XPathException(sb.toString(), "XPST0017").asStaticError();
         }
+//
+//        if (exp instanceof UserFunctionCall u && u.getFunction() == null) {
+//            // Target function exists, but is not yet compiled
+//            // Leave this as a DraftFunctionCall for now, and assume we'll get another chance
+//            // to resolve it later
+//            return this;
+//        }
 
         if (exp instanceof FunctionCall fc) {
 
             // Inject any default value expressions
             for (int i = 0; i < fc.getArguments().length; i++) {
                 if (fc.getArg(i) instanceof DefaultedArgumentExpression) {
-                    if (fc instanceof UserFunctionCall ufc) {
-                        UserFunction uf = ufc.getFunction();
-                        Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
-                        if (def == null) {
-                            throw new XPathException("Argument " + (i+1) + " has no default value in function " + qName.getEQName(), "XPST0017");
-                        }
-                        fc.setArg(i, def.get().copy(new RebindingMap()));
+                    if (fc instanceof UserFunctionCall) {
+                        // defaults already expanded by XQueryFunctionLibrary.bind()
                     } else if (fc instanceof SystemFunctionCall sfc) {
                         Supplier<Expression> def = sfc.getTargetFunction().getDetails().getDefaultValueExpression(i);
                         fc.setArg(i, def==null ? Literal.makeEmptySequence() : def.get());

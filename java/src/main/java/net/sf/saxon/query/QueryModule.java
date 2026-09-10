@@ -1045,10 +1045,8 @@ public class QueryModule implements StaticContext {
         }
         XQueryFunctionLibrary local = getLocalFunctionLibrary();
         local.declareFunction(function);
-        //if (!function.isPrivate()) {
         QueryModule main = getTopLevelModule();
         main.globalFunctionLibrary.declareFunction(function);
-        //}
     }
 
     private static void staticError(String message, String errorCode) throws XPathException {
