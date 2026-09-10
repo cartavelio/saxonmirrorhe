@@ -53,6 +53,18 @@ public class NodeKindTest extends NodeTest {
     }
 
     /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+        return AnyNodeTest.getInstance();
+    }
+
+
+    /**
      * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
      * types.
      *

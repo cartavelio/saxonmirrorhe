@@ -158,6 +158,18 @@ public class NameTestUnion extends NodeTest implements QNameTest {
     }
 
     /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+        return this;
+    }
+
+
+    /**
      * Get the fingerprint required
      */
 

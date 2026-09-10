@@ -822,7 +822,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         templateRule.setSystemId(getSystemId());
         templateRule.setLineNumber(getLineNumber());
         templateRule.setColumnNumber(getColumnNumber());
-        templateRule.setRequiredType(requiredType);
+        //templateRule.setRequiredType(requiredType);
         templateRule.setContextItemRequirements(requiredContextItemType, absentFocus);
     }
 
@@ -894,7 +894,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 int seq = mgr.allocateSequenceNumber();
                 for (Pattern subPattern : subPatterns) {
                     Pattern match1 = subPattern.copy(new RebindingMap());
-                    String typed = mode.getActivePart().getPropertyValue("typed");
+                    String typed = (String)mode.getActivePart().getPropertyValue("typed");
                     if ("strict".equals(typed) || "lax".equals(typed)) {
                         Pattern match2;
                         try {
@@ -935,8 +935,17 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                         }
                     }
 
-                    if (mode.getDefaultResultType() != null && !declaresRequiredType) {
-                        rule.setRequiredType(mode.getDefaultResultType());
+                    if (mode.getDefaultResultType() != null) {
+                        if (!declaresRequiredType) {
+                            rule.setRequiredType(mode.getDefaultResultType());
+                        } else {
+                            TypeHierarchy th = getConfiguration().getTypeHierarchy();
+                            Affinity aff = th.sequenceTypeRelationship(requiredType, mode.getDefaultResultType());
+                            if (aff != Affinity.SAME_TYPE && aff != Affinity.SUBSUMED_BY) {
+                                compileError("Type declared in xsl:template/@as must be a subtype of the type declared in xsl:mode/@as",
+                                             "XTSE4040");
+                            }
+                        }
                     }
 
                 }

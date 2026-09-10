@@ -21,9 +21,7 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntSet;
-import net.sf.saxon.z.IntUniversalSet;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -369,39 +367,42 @@ public class TypeHierarchy {
                         }
 
                         // Now find the relationship between the node names allowed.  See bug 3713
-                        Affinity nodeNameRelationship;
+                        Affinity nodeNameRelationship = nameTestRelationship(
+                                ((NodeTest)t1).getQNameTest(),
+                                ((NodeTest)t2).getQNameTest());
+
                         Optional<IntSet> on1 = ((NodeTest) t1).getRequiredNodeNames();
                         Optional<IntSet> on2 = ((NodeTest) t2).getRequiredNodeNames();
-
-                        if (t1 instanceof QNameTest && t2 instanceof QNameTest) {
-                            nodeNameRelationship = nameTestRelationship((QNameTest)t1, (QNameTest)t2);
-                        } else if (on1.isPresent() && on1.get() instanceof IntUniversalSet) {
-                            if (on2.isPresent() && on2.get() instanceof IntUniversalSet) {
-                                nodeNameRelationship = SAME_TYPE;
-                            } else {
-                                nodeNameRelationship = SUBSUMES;
-                            }
-                        } else if (on2.isPresent() && on2.get() instanceof IntUniversalSet) {
-                            nodeNameRelationship = SUBSUMED_BY;
-                        } else if (!(on1.isPresent() && on2.isPresent())) {
-                            nodeNameRelationship = t1.equals(t2) ? SAME_TYPE : OVERLAPS;
-                        } else {
-                            IntSet n1 = on1.get();
-                            IntSet n2 = on2.get();
-                            if (n1.containsAll(n2)) {
-                                if (n1.size() == n2.size()) {
-                                    nodeNameRelationship = SAME_TYPE;
-                                } else {
-                                    nodeNameRelationship = SUBSUMES;
-                                }
-                            } else if (n2.containsAll(n1)) {
-                                nodeNameRelationship = SUBSUMED_BY;
-                            } else if (IntHashSet.containsSome(n1, n2)) {
-                                nodeNameRelationship = OVERLAPS;
-                            } else {
-                                nodeNameRelationship = DISJOINT;
-                            }
-                        }
+//
+//                        if (t1 instanceof QNameTest && t2 instanceof QNameTest) {
+//                            nodeNameRelationship = nameTestRelationship((QNameTest)t1, (QNameTest)t2);
+//                        } else if (on1.isPresent() && on1.get() instanceof IntUniversalSet) {
+//                            if (on2.isPresent() && on2.get() instanceof IntUniversalSet) {
+//                                nodeNameRelationship = SAME_TYPE;
+//                            } else {
+//                                nodeNameRelationship = SUBSUMES;
+//                            }
+//                        } else if (on2.isPresent() && on2.get() instanceof IntUniversalSet) {
+//                            nodeNameRelationship = SUBSUMED_BY;
+//                        } else if (!(on1.isPresent() && on2.isPresent())) {
+//                            nodeNameRelationship = t1.equals(t2) ? SAME_TYPE : OVERLAPS;
+//                        } else {
+//                            IntSet n1 = on1.get();
+//                            IntSet n2 = on2.get();
+//                            if (n1.containsAll(n2)) {
+//                                if (n1.size() == n2.size()) {
+//                                    nodeNameRelationship = SAME_TYPE;
+//                                } else {
+//                                    nodeNameRelationship = SUBSUMES;
+//                                }
+//                            } else if (n2.containsAll(n1)) {
+//                                nodeNameRelationship = SUBSUMED_BY;
+//                            } else if (IntHashSet.containsSome(n1, n2)) {
+//                                nodeNameRelationship = OVERLAPS;
+//                            } else {
+//                                nodeNameRelationship = DISJOINT;
+//                            }
+//                        }
 
                         // now find the relationship between the content types allowed
 

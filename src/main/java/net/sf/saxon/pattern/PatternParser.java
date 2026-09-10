@@ -391,16 +391,22 @@ public class PatternParser extends XPathParser {
     /*@NotNull*/
     @Override
     public Expression parseFunctionCall(String fname, Expression prefixArgument) throws XPathException {
+        // The XSLT rules allow root() but not root(.). Unfortunately the XPath parser expands root() to root(.)
+        // So (in desperation) we count the arguments that are actually parsed
+        argumentsParsed = 0;
         Expression fn = super.parseFunctionCall(fname, prefixArgument);
         if (inPredicate <= 0 && !fn.isCallOn(SuperId.class) && !fn.isCallOn(KeyFn.class) &&
-                !fn.isCallOn(Doc.class) && !(fn.isCallOn(Root_1.class) && ((FunctionCall)fn).getArity() == 0)) {
+                !fn.isCallOn(Doc.class) && !(fn.isCallOn(Root_1.class) && argumentsParsed == 0)) {
             grumble("The " + fn + " function is not allowed in a pattern (unless in a predicate)");
         }
         return fn;
     }
 
+    private int argumentsParsed = 0;
+
     @Override
     public Expression parseFunctionArgument() throws XPathException {
+        argumentsParsed++;
         if (inPredicate > 0) {
             return super.parseFunctionArgument();
         } else {

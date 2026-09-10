@@ -166,6 +166,18 @@ public final class LocalNameTest extends NodeTest implements QNameTest {
     }
 
     /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+        return this;
+    }
+
+
+    /**
      * Get the local name used in this LocalNameTest
      *
      * @return the local name matched by the test

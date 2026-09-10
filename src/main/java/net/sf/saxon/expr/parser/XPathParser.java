@@ -3845,9 +3845,12 @@ public class XPathParser {
                 List<NodeTest> tests = parseNameTestUnion(nodeKind);
                 if (tests.size() == 1) {
                     nodeTest = tests.get(0);
+                    if (!allowXPath40Syntax && (nodeTest instanceof NamespaceTest || nodeTest instanceof LocalNameTest)) {
+                        grumble("Wildcard syntax in item types requires 4.0 to be enabled");
+                    }
                 } else {
                     if (!allowXPath40Syntax) {
-                        grumble("NameTestUnion syntax requires 4.0 to be enabled");
+                        grumble("NameTestUnion syntax in item types requires 4.0 to be enabled");
                     }
                     nodeTest = NameTestUnion.withTests(tests);
                 }

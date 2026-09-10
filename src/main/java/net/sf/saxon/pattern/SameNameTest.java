@@ -63,6 +63,17 @@ public class SameNameTest extends NodeTest implements QNameTest {
         return UType.fromTypeCode(origin.getNodeKind());
     }
 
+    /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+        return this;
+    }
+
 
     /**
      * Test whether this node test is satisfied by a given node. This method is only

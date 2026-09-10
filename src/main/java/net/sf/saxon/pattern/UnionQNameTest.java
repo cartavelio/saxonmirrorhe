@@ -11,6 +11,7 @@ import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,6 +23,10 @@ public class UnionQNameTest implements QNameTest {
 
     public UnionQNameTest(List<QNameTest> tests) {
         this.tests = new ArrayList<>(tests);
+    }
+
+    public UnionQNameTest(QNameTest... test1) {
+        this.tests = Arrays.asList(test1);
     }
 
     /**

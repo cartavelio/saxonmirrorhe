@@ -38,6 +38,7 @@ public class XSLMode extends StyleElement {
     private boolean prepared = false;
     private boolean streamable = false;
     private boolean traceMatching = false;
+    private SequenceType requiredType;
 
     /**
      * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
@@ -249,15 +250,14 @@ public class XSLMode extends StyleElement {
         mode.obtainDeclaringComponent(this);    // TODO: how does this work with multiple mode declarations?
         mode.setModeTracing(traceMatching);     // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
 
-        if (asAtt != null) {               // Saxon extension; ignore the complications of multiple xsl:mode declarations for now
-            SequenceType extraResultType;
+        if (asAtt != null) {               // TODO: ignore the complications of multiple xsl:mode declarations for now
             try {
-                extraResultType = makeExtendedSequenceType(asAtt);
+                requiredType = makeExtendedSequenceType(asAtt);
             } catch (XPathException e) {
                 compileErrorInAttribute(e, "saxon:as");
-                extraResultType = SequenceType.ANY_SEQUENCE; // error recovery
+                requiredType = SequenceType.ANY_SEQUENCE; // error recovery
             }
-            mode.setDefaultResultType(extraResultType);
+            //mode.setDefaultResultType(extraResultType);
         }
 
     }
@@ -308,6 +308,8 @@ public class XSLMode extends StyleElement {
                     allNames.append(name);
                 }
                 mode.getActivePart().setExplicitProperty(f, allNames.toString(), decl.getPrecedence());
+            } else if (f.equals("as")) {
+                mode.setExplicitProperty("as", requiredType, decl.getPrecedence());
             }
         }
         if (getCompilation().getCompilerInfo().getXsltVersion() != 40) {

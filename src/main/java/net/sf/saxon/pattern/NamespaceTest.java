@@ -153,6 +153,18 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
     }
 
     /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+        return this;
+    }
+
+
+    /**
      * Determine the types of nodes to which this pattern applies. Used for optimisation.
      * For patterns that match nodes of several types, return Type.NODE
      *
@@ -177,9 +189,9 @@ public final class NamespaceTest extends NodeTest implements QNameTest {
     public String toString() {
         switch (nodeKind) {
             case Type.ELEMENT:
-                return "Q{" + uri + "}*";
+                return "element(Q{" + uri + "}*)";
             case Type.ATTRIBUTE:
-                return "@Q{" + uri + "}*";
+                return "attribute(Q{" + uri + "}*)";
             default:
                 // should not happen
                 return "(*" + nodeKind + "*)Q{" + uri + "}*";

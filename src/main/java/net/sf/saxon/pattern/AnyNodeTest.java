@@ -126,6 +126,17 @@ public final class AnyNodeTest extends NodeTest implements QNameTest {
         return -0.5;
     }
 
+    /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+        return this;
+    }
+
     /*@NotNull*/
     public String toString() {
         return "node()";

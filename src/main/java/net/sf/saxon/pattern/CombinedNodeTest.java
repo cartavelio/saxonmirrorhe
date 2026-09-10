@@ -294,6 +294,39 @@ public class CombinedNodeTest extends NodeTest {
     }
 
     /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+
+        boolean b1 = nodetest1 instanceof QNameTest;
+        boolean b2 = nodetest2 instanceof QNameTest;
+
+        if (b1 && !b2) {
+            return (QNameTest) nodetest1;
+        }
+        if (b2 && !b1) {
+            return (QNameTest) nodetest2;
+        }
+        if (!b1) {
+            return AnyNodeTest.getInstance();
+        }
+        QNameTest test1 = nodetest1.getQNameTest();
+        QNameTest test2 = nodetest2.getQNameTest();
+        if (test1.equals(test2)) {
+            return test1;
+        }
+        if (operator == OperatorSymbol.UNION) {
+            return new UnionQNameTest(test1, test2);
+        }
+        return AnyNodeTest.getInstance();
+    }
+
+
+    /**
      * Get the content type allowed by this NodeTest (that is, the type annotation of the matched nodes).
      * Return AnyType if there are no restrictions. The default implementation returns AnyType.
      */

@@ -64,6 +64,16 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
     @Override
     public abstract double getDefaultPriority();
 
+    /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     * @return the strongest possible QNameTest
+     */
+
+    public QNameTest getQNameTest() {
+        return AnyNodeTest.getInstance();
+    }
+
 
     @Override
     public boolean matches(Item item, TypeHierarchy th) {

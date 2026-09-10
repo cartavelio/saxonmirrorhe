@@ -28,6 +28,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
@@ -68,7 +69,7 @@ public class SimpleMode extends Mode {
 
 
     private final Map<String, Integer> explicitPropertyPrecedences = new HashMap<>();
-    private final Map<String, String> explicitPropertyValues = new HashMap<>();
+    private final Map<String, Object> explicitPropertyValues = new HashMap<>();
 
 
 
@@ -126,9 +127,9 @@ public class SimpleMode extends Mode {
     public void resolveProperties(RuleManager manager) throws XPathException {
         boolean failOnMultipleMatch = false;
         boolean warningOnMultipleMatch = true;
-        for (Map.Entry<String, String> entry : getActivePart().explicitPropertyValues.entrySet()) {
+        for (Map.Entry<String, Object> entry : getActivePart().explicitPropertyValues.entrySet()) {
             String prop = entry.getKey();
-            String value = entry.getValue();
+            Object value = entry.getValue();
             if (value.equals("##conflict##")) {
                 throw new XPathException(
                         "For " + getLabel() +
@@ -153,7 +154,7 @@ public class SimpleMode extends Mode {
                     break;
                 case "on-no-match":
                     BuiltInRuleSet base = null;
-                    switch (value) {
+                    switch (value.toString()) {
                         case "text-only-copy":
                             base = TextOnlyCopyRuleSet.getInstance();
                             break;
@@ -182,27 +183,36 @@ public class SimpleMode extends Mode {
                     if ("yes".equals(explicitPropertyValues.get("warning-on-no-match"))) {
                         base = new RuleSetWithWarnings(base);
                     }
+                    SequenceType reqType = (SequenceType) explicitPropertyValues.get("as");
+                    if (reqType != null && !reqType.equals(SequenceType.ANY_SEQUENCE)) {
+                        base = new RuleSetWithTypeCheck(base, reqType);
+                    }
                     setBuiltInRuleSet(base);
                     break;
                 case "on-multiple-match":
-                    if (value.equals("fail")) {
+                    if ("fail".equals(value)) {
                         failOnMultipleMatch = true;
                     }
                     break;
                 case "warning-on-multiple-match":
-                    warningOnMultipleMatch = value.equals("yes");
+                    warningOnMultipleMatch = "yes".equals(value);
                     break;
                 case "use-accumulators":
                     AccumulatorRegistry registry = manager.getStylesheetPackage().getAccumulatorRegistry();
                     Set<Accumulator> accumulators = new HashSet<>();
-                    if (!value.isEmpty()) {
-                        String[] tokens = value.split("[ \t\r\n]+");
+                    String stringValue = value.toString();
+                    if (!stringValue.isEmpty()) {
+                        String[] tokens = stringValue.split("[ \t\r\n]+");
                         for (String eqname : tokens) {
                             Accumulator acc = registry.getAccumulator(StructuredQName.fromEQName(eqname));
                             accumulators.add(acc);
                         }
                     }
                     setAccumulators(accumulators);
+                    break;
+                case "as":
+                    SequenceType requiredType = (SequenceType)value;
+                    setDefaultResultType(requiredType);
                     break;
             }
         }
@@ -255,15 +265,15 @@ public class SimpleMode extends Mode {
      * @param precedence the import precedence of this property value
      */
 
-    public void setExplicitProperty(String name, String value, int precedence) {
+    public void setExplicitProperty(String name, Object value, int precedence) {
         int p = explicitPropertyPrecedences.getOrDefault(name, Integer.MIN_VALUE);
         if (p != Integer.MIN_VALUE) {
             if (p < precedence) {
                 explicitPropertyPrecedences.put(name, precedence);
                 explicitPropertyValues.put(name, value);
             } else if (p == precedence) {
-                String v = explicitPropertyValues.get(name);
-                if (v != null & !v.equals(value)) {
+                Object v = explicitPropertyValues.get(name);
+                if (v != null && !v.equals(value)) {
                     // We don't throw an exception, because the conflict is an error only if this
                     // is the highest-precedence declaration of this mode
                     explicitPropertyValues.put(name, "##conflict##");
@@ -276,7 +286,7 @@ public class SimpleMode extends Mode {
             explicitPropertyValues.put(name, value);
         }
 
-        final String typed = explicitPropertyValues.get("typed");
+        final String typed = (String)explicitPropertyValues.get("typed");
         mustBeTyped = "yes".equals(typed) || "strict".equals(typed) || "lax".equals(typed);
         mustBeUntyped = "no".equals(typed);
 
@@ -289,7 +299,7 @@ public class SimpleMode extends Mode {
      * @return the property value
      */
 
-    public String getPropertyValue(String name) {
+    public Object getPropertyValue(String name) {
         return explicitPropertyValues.get(name);
     }
 
