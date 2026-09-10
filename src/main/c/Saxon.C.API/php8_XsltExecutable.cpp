@@ -110,7 +110,7 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != NULL) {
-        try {
+        xsltExecutable->exceptionClear();
         std::map<std::string,XdmValue*> cpp_resultDocMap = xsltExecutable->getResultDocuments();
         if(cpp_resultDocMap.size() == 0) {
             RETURN_NULL();
@@ -145,10 +145,14 @@ PHP_METHOD(XsltExecutable, getResultDocuments)
         	                RETURN_NULL();
 
         	            }
-        } catch(SaxonApiException &e) {
-                      zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-         }
 
+        } else if(xsltExecutable->exceptionOccurred()){
+            SaxonApiException * exception = xsltExecutable->getException();
+            if(exception != nullptr) {
+                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
+                delete exception;
+            }
+            RETURN_NULL();
         }
         RETURN_NULL();
 }
@@ -170,11 +174,15 @@ PHP_METHOD(XsltExecutable, exportStylesheet)
     if (xsltExecutable != nullptr) {
 
         if(stylesheet != nullptr) {
-            try {
-                xsltExecutable->exportStylesheet(stylesheet);
-            }catch(SaxonApiException &e) {
-                        zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-                    }
+            xsltExecutable->exceptionClear();
+            xsltExecutable->exportStylesheet(stylesheet);
+            if(xsltExecutable->exceptionOccurred()){
+                SaxonApiException * exception = xsltExecutable->getException();
+                if(exception != nullptr) {
+                    zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
+                    delete exception;
+                }
+            }
         }
     }
 }
@@ -287,31 +295,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
             		XdmValue * value = nobj->xdmValue;
             		arguments[num_key] = value;
         	}
-	    } else if(strcmp(objName, "Saxon\\XdmFunctionItem")==0) {
-		zend_object* ooth = Z_OBJ_P(val);
-		xdmFunctionItem_object * nobj = (xdmFunctionItem_object *)((char *)ooth - XtOffsetOf(xdmFunctionItem_object, std));
-        	if(nobj != nullptr) {
-            		XdmValue * value = (XdmValue *)nobj->xdmFunctionItem;
-            		arguments[num_key] = value;
-        	}
-
-	    } else if (strcmp(objName, "Saxon\\XdmMap")==0) {
-		zend_object* ooth = Z_OBJ_P(val);
-		xdmMap_object * nobj = (xdmMap_object *)((char *)ooth - XtOffsetOf(xdmMap_object, std));
-        	if(nobj != nullptr) {
-            		XdmValue * value = (XdmValue *)nobj->xdmMap;
-            		arguments[num_key] = value;
-        	}
-
-	    } else if (strcmp(objName, "Saxon\\XdmArray")==0){
-		zend_object* ooth = Z_OBJ_P(val);
-		xdmArray_object * nobj = (xdmArray_object *)((char *)ooth - XtOffsetOf(xdmArray_object, std));
-        	if(nobj != nullptr) {
-            		XdmValue * value = (XdmValue *)nobj->xdmArray;
-            		arguments[num_key] = value;
-        	}
-
-	    }
+	}
 	else {//TODO error warning}
          }}else {
 		//TODO error warning
@@ -319,8 +303,8 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
       } ZEND_HASH_FOREACH_END();
 
 
-	try {
-    XdmValue * result = xsltExecutable->callFunctionReturningValue(functionName, arguments, argument_length);
+	    xsltExecutable->exceptionClear();
+        XdmValue * result = xsltExecutable->callFunctionReturningValue(functionName, arguments, argument_length);
 	if(result != nullptr) {
 	        result->incrementRefCount();
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
@@ -331,20 +315,17 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
 		xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmValue = result;
-                return;
             }
-        }
-    }catch(SaxonApiException &e) {
-                            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-                        }
+        } else {
+            if(obj->xsltExecutable->exceptionOccurred()){
+  		//TODO - create PHP exception
 	    }
-
 	    RETURN_NULL();
-
+        }
     }
 
 
-
+}
 
 PHP_METHOD(XsltExecutable, callFunctionReturningString){
     XsltExecutable *xsltExecutable;
@@ -415,18 +396,18 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 		//TODO error warning
         }
       } ZEND_HASH_FOREACH_END();
-    try {
+
         const char * result = xsltExecutable->callFunctionReturningString(functionName, arguments, argument_length);
-	    if(result != nullptr) {
+	if(result != nullptr) {
             //char *str = estrdup(result);
             _RETURN_STRING(result);
+        } else if(xsltExecutable->exceptionOccurred()){
+            //TODO: xsltExecutable->getException() then build PHP exception
+
         }
-    }catch(SaxonApiException &e) {
-        zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
 
-  }
-    RETURN_NULL();
+
 
 }
 
@@ -490,25 +471,22 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
             		arguments[num_key] = value;
         	}
 	}
-	else {
-	zend_throw_exception(zend_ce_exception, "unrecognised type of function argument", 0);
-	}
-         }else {
-		zend_throw_exception(zend_ce_exception, "Null found in function argument", 0);
+	else {//TODO error warning}
+         }}else {
+		//TODO error warning
         }
       } ZEND_HASH_FOREACH_END();
 
-     try{
+
         xsltExecutable->callFunctionReturningFile(functionName, arguments, argument_length, outfilename);
-         }catch(SaxonApiException &e) {
-                zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+	if(xsltExecutable->exceptionOccurred()){
+//TODO: xsltExecutable->getException() then build PHP exception
         }
     }
-    }
 
+}
 
-
-PHP_METHOD(XsltExecutable, callTemplateReturningValue){
+    PHP_METHOD(XsltExecutable, callTemplateReturningValue){
 
   XsltExecutable *xsltExecutable;
     char* templateName = NULL;
@@ -530,10 +508,10 @@ PHP_METHOD(XsltExecutable, callTemplateReturningValue){
     if (xsltExecutable != nullptr) {
 
 
-	try {
+	//php_printf(" argument_length= %d",argument_length);
         XdmValue * result = xsltExecutable->callTemplateReturningValue((len2 == 0 ? NULL :templateName));
 
-	    if(result != nullptr) {
+	if(result != nullptr) {
 	    result->incrementRefCount();
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                RETURN_NULL();
@@ -543,16 +521,15 @@ PHP_METHOD(XsltExecutable, callTemplateReturningValue){
 		xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmValue = result;
-                return;
+
             }
+        } else {
+            if(obj->xsltExecutable->exceptionOccurred()){
+  		//TODO
+	    }
+	    RETURN_NULL();
         }
-    } catch(SaxonApiException &e) {
-       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
-    }
-	RETURN_NULL();
-
-
    }
 
 
@@ -578,20 +555,21 @@ PHP_METHOD(XsltExecutable, callTemplateReturningValue){
     if (xsltExecutable != nullptr) {
 
 
-	try {
+	//php_printf(" argument_length= %d",argument_length);
         const char * result = xsltExecutable->callTemplateReturningString((len2 == 0 ? NULL :templateName));
 	if(result != nullptr) {
             _RETURN_STRING(result);
+        } else {
+            if(xsltExecutable->exceptionOccurred()){
+//TODO: xsltExecutable->getException() then build PHP exception
+           }
         }
-    } catch(SaxonApiException &e) {
-       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-    }
     }
 
      RETURN_NULL();
     }
 
-PHP_METHOD(XsltExecutable, callTemplateReturningFile){
+    PHP_METHOD(XsltExecutable, callTemplateReturningFile){
    XsltExecutable *xsltExecutable;
     char* templateName = nullptr;
     char * filename = nullptr;
@@ -608,14 +586,10 @@ PHP_METHOD(XsltExecutable, callTemplateReturningFile){
     zend_object* pobj = Z_OBJ_P(getThis());
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
-    try{
-        if (xsltExecutable != nullptr) {
-   	        xsltExecutable->callTemplateReturningFile((len2 == 0 ? NULL :templateName), filename);
-        }
-    } catch(SaxonApiException &e) {
-       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-    }
 
+    if (xsltExecutable != nullptr) {
+   	xsltExecutable->callTemplateReturningFile((len2 == 0 ? NULL :templateName), filename);
+    }
 
   }
 
@@ -633,26 +607,26 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningValue){
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != nullptr) {
-    try {
-   	    XdmValue * result = xsltExecutable->applyTemplatesReturningValue();
+   	XdmValue * result = xsltExecutable->applyTemplatesReturningValue();
 
-	    if(result != nullptr) {
+	if(result != nullptr) {
 	        result->incrementRefCount();
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
-		    zend_object *ooth =  Z_OBJ_P(return_value);
+		zend_object *ooth =  Z_OBJ_P(return_value);
         	xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmValue = result;
-                return;
             }
-        }  else {
-	        RETURN_NULL();
+        } else {
+            if(obj->xsltExecutable->exceptionOccurred()){
+  		//TODO
 	    }
-	} catch(SaxonApiException &e) {
-           zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-    }
+	    RETURN_NULL();
+        }
+
+
 
     } else {
      RETURN_NULL();
@@ -680,7 +654,7 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningString){
             _RETURN_STRING(result);
         }
     } catch(SaxonApiException &e){
-        zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        zend_throw_exception(zend_ce_exception, e.what(), 0);
 
     }
     }
@@ -711,13 +685,11 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
     zend_object* pobj = Z_OBJ_P(getThis());
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
-    try {
-        if (xsltExecutable != nullptr) {
-   	        xsltExecutable->applyTemplatesReturningFile(filename);
-        }
-    } catch(SaxonApiException &e) {
-       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+
+    if (xsltExecutable != nullptr) {
+   	    xsltExecutable->applyTemplatesReturningFile(filename);
     }
+    //TODO check for exception
 
 
 
@@ -748,7 +720,7 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
     xsltExecutable = obj->xsltExecutable;
     arr_hash = Z_ARRVAL_P(arguments_zval);
     argument_length = zend_hash_num_elements(arr_hash);
-   
+
     arguments = new const char*[argument_length];
 
   if (xsltExecutable != nullptr) {
@@ -756,8 +728,8 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
         if(Z_TYPE_P(val) != nullptr && Z_TYPE_P(val)== IS_STRING) {
 
 		arguments[num_key] = (const char*)Z_STRVAL_P(val);
-     		
-        } 
+
+        }
     }  ZEND_HASH_FOREACH_END();
 
         xsltExecutable->addPackages(arguments, argument_length);
@@ -768,7 +740,7 @@ PHP_METHOD(XsltExecutable, applyTemplatesReturningFile){
 }    */
 
 
-PHP_METHOD(XsltExecutable,setInitialTemplateParameters){
+    PHP_METHOD(XsltExecutable,setInitialTemplateParameters){
 
   XsltExecutable *xsltExecutable;
     HashTable *arr_hash;
@@ -897,8 +869,8 @@ PHP_METHOD(XsltExecutable, setInitialMatchSelection){
                valueX->incrementRefCount();
             } else {
 
-            php_error(E_WARNING, "XdmNode - seInitialMatchSelection - ERROR");
-        }
+php_error(E_WARNING, "XdmNode - seInitialMatchSelection - ERROR");
+}
         }
       } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
 	zend_object* vvobj = Z_OBJ_P(oth);
@@ -1061,10 +1033,10 @@ PHP_METHOD(XsltExecutable, transformFileToFile)
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != nullptr) {
-        try {
-            xsltExecutable->transformFileToFile(infilename, outfileName);
-        } catch(SaxonApiException &e) {
-            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+
+        xsltExecutable->transformFileToFile(infilename, outfileName);
+        if(xsltExecutable->exceptionOccurred()) {
+     	  // TODO: throw exception
         }
     }
 }
@@ -1084,7 +1056,7 @@ PHP_METHOD(XsltExecutable, transformFileToValue)
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != nullptr) {
-       try{
+
         XdmValue * node = xsltExecutable->transformFileToValue(infilename);
         if(node != nullptr) {
             node->incrementRefCount();
@@ -1097,9 +1069,10 @@ PHP_METHOD(XsltExecutable, transformFileToValue)
                 assert (vobj != nullptr);
                 vobj->xdmValue = node;
             }
-        } 
-    } catch(SaxonApiException &e) {
-            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        } else {
+            if(obj->xsltExecutable->exceptionOccurred()){
+  		//TODO
+	    }
         }
     }else {
         RETURN_NULL();
@@ -1122,13 +1095,13 @@ PHP_METHOD(XsltExecutable, transformFileToString)
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != nullptr) {
-        try {
-            const char * result = xsltExecutable->transformFileToString(infilename);
-	        if(result != nullptr) {
-                _RETURN_STRING(result);
-            }
-        } catch(SaxonApiException &e) {
-             zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+
+        const char * result = xsltExecutable->transformFileToString(infilename);
+	if(result != nullptr) {
+            //char *str = estrdup(result);
+            _RETURN_STRING(result);
+        } else if(xsltExecutable->exceptionOccurred()){
+//TODO: xsltExecutable->getException() then build PHP exception
         }
     }
 }
@@ -1156,7 +1129,7 @@ PHP_METHOD(XsltExecutable, transformToString)
     xsltExecutable_object *obj = (xsltExecutable_object *)((char *)pobj - XtOffsetOf(xsltExecutable_object, std));
     xsltExecutable = obj->xsltExecutable;
     if (xsltExecutable != nullptr) {
-     try {
+
      const char * result = nullptr;
      if(ZEND_NUM_ARGS() == 0 || !oth) {
         result = xsltExecutable->transformToString();
@@ -1191,9 +1164,7 @@ PHP_METHOD(XsltExecutable, transformToString)
            _RETURN_STRING(result);
         }
      }
-     } catch(SaxonApiException &e) {
-            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-      }
+
     }
 
     RETURN_NULL();
@@ -1220,7 +1191,7 @@ PHP_METHOD(XsltExecutable, transformToValue)
     xsltExecutable = obj->xsltExecutable;
 
     if (xsltExecutable != nullptr) {
-       try {
+
         XdmValue * node = nullptr;
         if(ZEND_NUM_ARGS() == 0 || !oth) {
             node = xsltExecutable->transformToValue();
@@ -1228,7 +1199,7 @@ PHP_METHOD(XsltExecutable, transformToValue)
         } else {
 
             if(Z_TYPE_P(oth) == IS_NULL){
-
+                //php_error(E_WARNING, "Error setting source value");
                 node = xsltExecutable->transformToValue();
 
             } else {
@@ -1262,9 +1233,7 @@ PHP_METHOD(XsltExecutable, transformToValue)
 		        return;
             }
         }
-        } catch(SaxonApiException &e) {
-                 zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-             }
+
     }
     RETURN_NULL();
 
@@ -1295,7 +1264,6 @@ PHP_METHOD(XsltExecutable, transformToFile)
 	php_error(E_WARNING, "Error setting source value");
 	return;
       } else {
-      try{
         if(ZEND_NUM_ARGS() == 0) {
             xsltExecutable->transformToFile();
         } else {
@@ -1320,9 +1288,6 @@ PHP_METHOD(XsltExecutable, transformToFile)
             }
 
         }
-           } catch(SaxonApiException &e) {
-                    zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
-                }
       }
     }
 }
@@ -1479,11 +1444,11 @@ if (xsltExecutable != nullptr) {
             }
 
         } catch(SaxonApiException &e) {
-            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+            zend_throw_exception(zend_ce_exception, e.what(), 0);
         }
         }
         RETURN_NULL();
-        
+
 }
 
 PHP_METHOD(XsltExecutable, clearParameters)
@@ -1719,4 +1684,3 @@ zend_function_entry XsltExecutable_methods[] = {
     PHP_ME(XsltExecutable,  getResultDocuments, arginfo_saxonc_xe_getResultDocuments, ZEND_ACC_PUBLIC)
 {nullptr, nullptr, nullptr}
 };
-

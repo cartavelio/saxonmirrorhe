@@ -490,8 +490,8 @@ public class SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_applyToConfiguration")
-    public static synchronized void applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) {
+    @CEntryPoint(name = "j_applyToConfiguration", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static synchronized long applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) throws SaxonApiException {
 
         Processor processor = objectHandles.get(processorRef);
         if (debug) {
@@ -499,7 +499,7 @@ public class SaxonCAPI {
         }
 
         if (processorDataRef == WordFactory.nullPointer()) {
-            return;
+            throw new SaxonApiException("Processor is null");
         }
 
         ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataRef);
@@ -574,7 +574,7 @@ public class SaxonCAPI {
             }
         }
 
-
+        return SaxonCAPI.STATUS_OK;
     }
 
 
@@ -1399,7 +1399,7 @@ public class SaxonCAPI {
         //processor.setConfigurationProperty("http://saxon.sf.net/feature/allowedProtocols", "http,https");
         processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
         Source source = SaxonCAPI.resolveFileToSource(processor, "file:///home/ond1/work/repository/temp/", "identity1.xsl", ResourceRequest.XSLT_NATURE);
-    }   
+    }
 
      /*public static void testj() throws SaxonApiException, URISyntaxException {
 
