@@ -30,7 +30,11 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
+import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.*;
@@ -917,7 +921,19 @@ public class Environment implements ResourceResolver {
                             ss = new StreamSource(fileLoc.toString());
                         } else {
                             fileInputStream = new FileInputStream(file);
-                            ss = new StreamSource(fileInputStream, res.uri);
+                            if (driver.usePullParser) {
+                                try {
+                                    InputStreamReader impsr = new InputStreamReader(fileInputStream);
+                                    System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+                                    XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(impsr);
+                                    ss = new StAXSource(parser);
+                                } catch (XMLStreamException e) {
+                                    driver.println("*** failed to pull-parse source document " + href);
+                                    continue;
+                                }
+                            } else {
+                                ss = new StreamSource(fileInputStream, res.uri);
+                            }
                         }
                         if ("true".equals(xinc)) {
                             AugmentedSource as = AugmentedSource.makeAugmentedSource(ss);

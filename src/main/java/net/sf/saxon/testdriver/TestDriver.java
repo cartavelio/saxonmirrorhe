@@ -54,6 +54,7 @@ public abstract class TestDriver {
     protected TreeModel treeModel = TreeModel.TINY_TREE;
     protected boolean debug = false;
     protected boolean export = false;
+    protected boolean usePullParser = false;
     protected boolean runWithJS = false;
     protected boolean relocatable = false;
     protected String[] jsPlatforms = null;
@@ -145,6 +146,9 @@ public abstract class TestDriver {
                 runWithJS = true;
                 treeModel = DOMObjectModel.getInstance();
                 jsPlatforms = new String[]{"browser", "nodejs"};
+            }
+            if (args[i].equals("-pullparser")) {
+                usePullParser = true;
             }
             if (args[i].equals("-unfolded")) {
                 unfolded = true;
