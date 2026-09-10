@@ -517,7 +517,7 @@
                         <tr>
                             <td>
                                 <p>
-                                    <code>XXX[@WIDTH and not(@width="20")]</code>
+                                    <code>XXX[@WIDTH and not(@WIDTH="20")]</code>
                                 </p>
                             </td>
                             <td>
@@ -2112,7 +2112,7 @@
                     <pre><code class="language-xml">&lt;xsl:function name="my:factorial" as="xs:integer"&gt;
     &lt;xsl:param name="number" as="xs:integer"/&gt; 
     &lt;xsl:sequence 
-         select="if ($number=0) then 1 else $number * my:factorial($number-1)"/&gt;
+         select="if ($number=0) then 1 else $number * my:factorial($number - 1)"/&gt;
 &lt;/xsl:function&gt;</code></pre>
                 </example>
                 <example>
@@ -2121,7 +2121,7 @@
                     <pre><code class="language-xml">&lt;xsl:function name="x:factorial"&gt;
     &lt;xsl:param name="acc" as="xs:integer?"/&gt;
     &lt;xsl:param name="n" as="xs:integer"/&gt;
-    &lt;xsl:sequence as="xs:integer" 
+    &lt;xsl:sequence 
          select="if ($n = 1) 
                  then $acc
                  else x:factorial($acc*$n, $n - 1)" /&gt;
@@ -2771,7 +2771,7 @@
                         timestamp:</p>
 
                     <pre><code class="language-xml">&lt;xsl:merge&gt;
-    &lt;xsl:merge-source for-each-item="collection('log-collection')" select="events/event"/&gt;
+    &lt;xsl:merge-source for-each-item="collection('log-collection')" select="events/event"&gt;
         &lt;xsl:merge-key select="@timestamp" order="ascending"/&gt;
     &lt;/xsl:merge-source&gt;
     &lt;xsl:merge-action&gt;
@@ -2783,11 +2783,11 @@
                     <p>Merges two log files with different internal structure:</p>
 
                     <pre><code class="language-xml">&lt;xsl:merge&gt;
-    &lt;xsl:merge-source select="doc('log1.xml')/transactions/transaction"/&gt;
-        &lt;xsl:merge-key select="xs:dateTime(@date, @time)" order="ascending"/&gt;
+    &lt;xsl:merge-source select="doc('log1.xml')/transactions/transaction"&gt;
+        &lt;xsl:merge-key select="dateTime(@date, @time)" order="ascending"/&gt;
     &lt;/xsl:merge-source&gt;
-    &lt;xsl:merge-source select="doc('log2.xml')/eventdata/transfer"/&gt;
-        &lt;xsl:merge-key select="@timestamp" order="ascending"/&gt;
+    &lt;xsl:merge-source select="doc('log2.xml')/eventdata/transfer"&gt;
+        &lt;xsl:merge-key select="xs:dateTime(@timestamp)" order="ascending"/&gt;
     &lt;/xsl:merge-source&gt;
     &lt;xsl:merge-action&gt;
         &lt;xsl:apply-templates select="current-merge-group()"/&gt;
@@ -3638,7 +3638,7 @@
                         containing <code>&lt;H1&gt;</code> element and the number of the containing
                             <code>&lt;H2&gt;</code> element.</p>
                     <pre><code class="language-xml">&lt;xsl:template match="H2/TITLE"&gt;
-    &lt;xsl:number count="H1"&gt;.&lt;xsl:number count="H2"&gt;
+    &lt;xsl:number count="H1"/&gt;.&lt;xsl:number count="H2"/&gt;
     &lt;xsl:text&gt; &lt;/xsl:text&gt;
     &lt;xsl:apply-templates/&gt;
 &lt;/xsl:template&gt;</code></pre>
@@ -4744,9 +4744,9 @@
                 <example>
                     <p>Constructing a sequence-valued variable:</p>
                     <pre><code class="language-xml">&lt;xsl:variable name="seq" as="xs:integer *"&gt;
-    &lt;xsl:for-each select="1 to 5"&gt;&gt;
+    &lt;xsl:for-each select="1 to 5"&gt;
        &lt;xsl:sequence select=". * ."/&gt;
-    &lt;/xsl:for-each/&gt;    
+    &lt;/xsl:for-each&gt;    
 &lt;/xsl:variable&gt;</code></pre>
 
                     <p>This produces the sequence <code>(1, 4, 9, 16, 25)</code> as the value of the
@@ -4845,7 +4845,7 @@
     &lt;h2&gt;
         &lt;xsl:apply-templates select="BOOK"&gt;
             &lt;xsl:sort select="AUTHOR"/&gt;
-            &lt;xsl:sort select="@DATE" order="descending" lang="GregorianDate"/&gt;
+            &lt;xsl:sort select="@DATE" order="descending"/&gt;
         &lt;/xsl:apply-templates&gt;            
     &lt;/h2&gt;
 &lt;/xsl:template&gt;</code></pre>
@@ -5699,8 +5699,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The character content of the first child <code>TITLE</code>
-                                    element if there is one</p>
+                                <p>The character content of all <code>TITLE</code> child elements if
+                                    there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5731,8 +5731,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The expanded character content of the first <code>TITLE</code>
-                                    child of the parent element, if there is one</p>
+                                <p>The expanded character content of all <code>TITLE</code> child
+                                    elements of the parent element, if there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5742,9 +5742,9 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The expanded character content of the first <code>TITLE</code>
-                                    child of the enclosing <code>SECTION</code> element, if there is
-                                    one</p>
+                                <p>The expanded character content of all <code>TITLE</code> child
+                                    elements of the enclosing <code>SECTION</code> element, if there
+                                    are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5754,9 +5754,9 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The expanded character content of the first <code>TITLE</code>
-                                    child of the nearest enclosing element that has a child element
-                                    named <code>TITLE</code></p>
+                                <p>The expanded character content of all <code>TITLE</code> child
+                                    elements of the nearest enclosing element that has a child
+                                    element named <code>TITLE</code></p>
                             </td>
                         </tr>
                         <tr>
@@ -5766,8 +5766,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The content of the first child <code>PERSON</code> element having
-                                    an <code>ID</code> attribute, if there is one</p>
+                                <p>The content of all <code>PERSON</code> child elements having an
+                                    <code>ID</code> attribute, if there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5778,7 +5778,7 @@
                             </td>
                             <td>
                                 <p>The value of the <code>ID</code> attribute of the last child
-                                    element of any type, if there are any </p>
+                                    element of any type, if there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5788,8 +5788,8 @@
                                 </p>
                             </td>
                             <td>
-                                <p>The content of the first descendant <code>TITLE</code> element if
-                                    there is one</p>
+                                <p>The content of all <code>TITLE</code> descendant elements if
+                                    there are any</p>
                             </td>
                         </tr>
                         <tr>
@@ -5879,7 +5879,7 @@
             <examples>
                 <example>
                     <pre><code class="language-xml">&lt;xsl:variable name="title"&gt;A really exciting document&lt;/xsl:variable&gt;
-&lt;xsl:variable name="backcolor" expr="'#FFFFCC'" /&gt;
+&lt;xsl:variable name="backcolor" select="'#FFFFCC'" /&gt;
 &lt;xsl:template match="/*"&gt;
     &lt;HTML&gt;&lt;TITLE&gt;&lt;xsl:value-of select="$title"/&gt;&lt;/TITLE&gt;
     &lt;BODY BGCOLOR='{$backcolor}'&gt;
