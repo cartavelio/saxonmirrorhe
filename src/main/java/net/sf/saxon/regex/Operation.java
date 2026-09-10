@@ -64,7 +64,7 @@ public abstract class Operation {
      * if the expression is statically known to match a zero-length string at the
      * start of the supplied input;</li>
      * <li>returns
-     * {@link #MATCHES_ZLS_AT_END} if it is statically known to return a zero-length
+     * {@link #MATCHES_ZLS_AT_END} if it is statically known to match a zero-length
      * string at the end of the supplied input;</li>
      * <li>returns {@link #MATCHES_ZLS_ANYWHERE}
      * if it is statically known to match a zero-length string anywhere in the input.

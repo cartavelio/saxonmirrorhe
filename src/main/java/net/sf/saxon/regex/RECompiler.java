@@ -387,6 +387,15 @@ public class RECompiler {
             case 'W':
                 return Categories.ESCAPE_W;
 
+            case 'b':
+            case 'B':
+                if (inSquareBrackets) {
+                    syntaxError("\\b and \\B are not allowed within square brackets");
+                }
+                if (!isXPath40) {
+                    syntaxError("\\b and \\B require XPath 4.0 extensions to be enabled");
+                }
+                return new BoundaryAssertion(escapeChar);
 
             case 'p':
             case 'P':
@@ -496,9 +505,20 @@ public class RECompiler {
      * For convenience a back-reference is treated as an CharacterClass, although this a fiction
      */
 
-    class BackReference extends SingletonCharacterClass {
+    private static class BackReference extends SingletonCharacterClass {
         public BackReference(int number) {
             super(number);
+        }
+    }
+
+    /**
+     * For convenience a boundary assertion (\b or \B) is treated as an CharacterClass,
+     * although this a fiction
+     */
+
+    private static class BoundaryAssertion extends SingletonCharacterClass {
+        public BoundaryAssertion(int codepoint) {
+            super(codepoint);
         }
     }
 
@@ -980,6 +1000,9 @@ public class RECompiler {
                         syntaxError("Bad backreference");
                     }
                     return trace(new OpBackReference(backreference));
+
+                } else if (esc instanceof BoundaryAssertion) {
+                    return trace(new OpBoundaryAssertion(((BoundaryAssertion) esc).getCodepoint() == 'b'));
 
                 } else if (esc instanceof IntSingletonSet) {
                     // We had a simple escape and we want to have it end up in
