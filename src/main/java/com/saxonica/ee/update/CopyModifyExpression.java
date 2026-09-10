@@ -16,6 +16,9 @@ import java.util.Set;
 
 /**
  * A copy-modify expression (called a "transform" expression in the XQuery Update specification)
+ *
+ * <p>Note that this expression doesn't actually perform the copy. It gets wrapped in a let expression
+ * that does let $var := $input.copy-of().</p>
  */
 public class CopyModifyExpression extends Expression {
 
