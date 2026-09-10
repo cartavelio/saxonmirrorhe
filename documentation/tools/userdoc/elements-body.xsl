@@ -210,7 +210,7 @@
         </xsl:if>
         <xsl:if test=". = 'xslt40'">
             <p>
-                <a href="https://qt4cg.org/branch/master/xslt-40/Overview.html#element-{$elemName}">XSLT 4.0
+                <a href="https://qt4cg.org/specifications/xslt-40/Overview.html#element-{$elemName}">XSLT 4.0
                     Specification</a>
             </p>
         </xsl:if>

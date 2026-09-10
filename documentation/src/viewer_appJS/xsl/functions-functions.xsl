@@ -139,8 +139,10 @@
             <xsl:when test="$p = 'xpath20'">XPath 2.0 Functions and Operators</xsl:when>
             <xsl:when test="$p = 'xpath30'">XPath 3.0 Functions and Operators</xsl:when>
             <xsl:when test="$p = 'xpath31'">XPath 3.1 Functions and Operators</xsl:when>
+            <xsl:when test="$p = 'xpath40'">XPath 4.0 Functions and Operators</xsl:when>
             <xsl:when test="$p = 'xslt20'">XSLT 2.0 Specification</xsl:when>
             <xsl:when test="$p = 'xslt30'">XSLT 3.0 Specification</xsl:when>
+            <xsl:when test="$p = 'xslt40'">XSLT 4.0 Specification</xsl:when>
             <xsl:when test="$p = 'xquery-update10'">XQuery Update 1.0</xsl:when>
             <xsl:when test="$p = 'expath-archive'">EXPath Archive Module</xsl:when>
             <xsl:when test="$p = 'expath-binary'">EXPath Binary Module</xsl:when>
@@ -166,8 +168,12 @@
                     >https://www.w3.org/TR/xpath-functions-30/#func-</xsl:when>
                 <xsl:when test="$p = 'xpath31'"
                     >https://www.w3.org/TR/xpath-functions-31/#func-</xsl:when>
+                <xsl:when test="$p = 'xpath40'"
+                    >https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-</xsl:when>
                 <xsl:when test="$p = 'xslt20'">https://www.w3.org/TR/xslt20/#function-</xsl:when>
                 <xsl:when test="$p = 'xslt30'">https://www.w3.org/TR/xslt-30/#func-</xsl:when>
+                <xsl:when test="$p = 'xslt40'"
+                    >https://qt4cg.org/specifications/xslt-40/Overview.html#func-</xsl:when>
                 <xsl:when test="$p = 'xquery-update10'"
                     >https://www.w3.org/TR/xquery-update-10/#id-func-</xsl:when>
                 <xsl:when test="$p = 'expath-archive'"

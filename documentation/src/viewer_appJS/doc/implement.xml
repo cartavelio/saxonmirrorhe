@@ -27,11 +27,12 @@
     <xpath version="3.0"> Requires support for XPath 3.0 to be enabled.</xpath> <!-- Expath functions message -->
     <xpath version="default"> Not implemented thus far in XPath.</xpath> <!-- Expath functions message -->
     
-    <spec value="xpath31"> Available in XPath 3.1, XSLT 3.0, and XQuery 3.1.</spec>
+    <spec value="xpath40"> Available in XPath 4.0, XSLT 4.0, and XQuery 4.1.</spec>
+    <spec value="xpath31"> Available in XPath 3.1, XSLT 3.0, XQuery 3.1, and later versions.</spec>
     <spec value="xpath30"> Available in XPath 3.0, XSLT 3.0, XQuery 3.0, and later versions.</spec>
     <spec value="xpath20"> Available in XPath 2.0, XSLT 2.0, XQuery 1.0, and later versions.</spec>
-    <spec value="xslt40"> Available in the XSLT 4.0 proposal.</spec>
-    <spec value="xslt30"> Available in XSLT 3.0.</spec>
+    <spec value="xslt40"> Available in XSLT 4.0.</spec>
+    <spec value="xslt30"> Available in XSLT 3.0 and later versions.</spec>
     <spec value="xslt20"> Available in XSLT 2.0 and later versions.</spec>  
     <spec value="xslt10"> Available in XSLT 1.0 and later versions.</spec> 
     <spec value="xquery-update10"> Available in XQuery Update 1.0.</spec>
@@ -50,6 +51,7 @@
     <saxon version="PARTIAL_9.6"> Partial experimental implementation in Saxon 9.6.</saxon>
     <saxon version="11_EXPERIMENTAL"> Implemented experimentally since Saxon 11.</saxon>
     
+    <saxon version="EE_13"> Implemented in Saxon-EE since Saxon 13.</saxon>
     <saxon version="EE_9.7"> Implemented in Saxon-EE since Saxon 9.7.</saxon>
     <saxon version="EE_9.6"> Implemented in Saxon-EE since Saxon 9.6.</saxon>
     <saxon version="EE_9.5"> Implemented in Saxon-EE since Saxon 9.5.</saxon>
