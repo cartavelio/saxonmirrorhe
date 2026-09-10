@@ -153,6 +153,26 @@ public class XPathEvaluator implements XPath {
     }
 
     /**
+     * Set XPath 1.0 backwards compatibility mode. Note that this does not disable use
+     * of features defined in XPath 2.0 or later versions; it merely causes selected
+     * features (as defined in the XPath specification) to retain 1.0 behavior
+     * @param enabled set to true to enable 1.0 compatibility mode (default is false).
+     */
+
+    public void setBackwardsCompatibilityMode(boolean enabled) {
+        staticContext.setBackwardsCompatibilityMode(enabled);
+    }
+
+    /**
+     * Ask if XPath 1.0 backwards compatibility mode is enabled.
+     * @return true if 1.0 compatibility mode is enabled (default is false).
+     */
+
+    public boolean isBackwardsCompatibilityMode() {
+        return staticContext.isInBackwardsCompatibleMode();
+    }
+
+    /**
      * Get the namespace context, if one has been set using {@link #setNamespaceContext}
      *
      * @return the namespace context if set, or null otherwise
