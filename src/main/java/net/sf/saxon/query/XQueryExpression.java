@@ -7,8 +7,6 @@
 
 package net.sf.saxon.query;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
@@ -16,6 +14,8 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
@@ -63,6 +63,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     protected Executable executable;
     protected QueryModule mainModule;
     protected PullEvaluator pullEvaluator = null;
+    protected PushEvaluator pushEvaluator = null;
 
 
     /**
@@ -397,13 +398,12 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     }
 
     protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
-        if (getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
+        synchronized(this) {
             if (pullEvaluator == null) {
-                pullEvaluator = Elaborator.makeElaborator(expression).elaborateForPull();
+                pullEvaluator = expression.makeElaborator().elaborateForPull();
             }
-            return pullEvaluator.iterate(context);
         }
-        return expression.iterate(context);
+        return pullEvaluator.iterate(context);
     }
 
     /**
@@ -492,7 +492,13 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
     }
 
     protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
-        expression.process(dest, context);
+        synchronized(this) {
+            if (pushEvaluator == null) {
+                pushEvaluator = expression.makeElaborator().elaborateForPush();
+            }
+        }
+        Expression.dispatchTailCall(
+                pushEvaluator.processLeavingTail(dest, context));
     }
 
     protected void closeStreamIfNecessary(StreamResult result, boolean mustClose) throws XPathException {

@@ -11,7 +11,6 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContextMajor;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
@@ -57,7 +56,7 @@ public class XPathExpression {
         expression = exp;
         this.env = env;
         this.executable = exec;
-        this.pullEvaluator = Elaborator.makeElaborator(exp).elaborateForPull();
+        this.pullEvaluator = exp.makeElaborator().elaborateForPull();
     }
 
     /**

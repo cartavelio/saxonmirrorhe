@@ -29,7 +29,6 @@ public class OptimizerOptions {
     public static final int VOID_EXPRESSIONS = 8192;
     public static final int TAIL_CALLS = 16384;
     public static final int CONSTANT_FOLDING = 32768;
-    public static final int ELABORATION = 65536;
 
     private final int options;
 
@@ -59,8 +58,6 @@ public class OptimizerOptions {
 
     private int decodeFlag(char flag) {
         switch (flag) {
-            case 'b':
-                return ELABORATION;
             case 'c':
                 return BYTE_CODE;
             case 'd':
@@ -112,9 +109,6 @@ public class OptimizerOptions {
 
     public String toString() {
         String result = "";
-        if (isSet(ELABORATION)) {
-            result += "b";
-        }
         if (isSet(BYTE_CODE)) {
             result += "c";
         }

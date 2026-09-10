@@ -212,12 +212,17 @@ public class LocalVariableReference extends VariableReference {
             LocalVariableReference varRef = (LocalVariableReference) getExpression();
             int slot = varRef.getSlotNumber();
             return (out, context) -> {
-                SequenceIterator value = context.evaluateLocalVariable(slot).iterate();
-                Item it;
-                while ((it = value.next()) != null) {
-                    out.append(it);
+                try {
+                    SequenceIterator value = context.evaluateLocalVariable(slot).iterate();
+                    for (Item it; (it = value.next()) != null; ) {
+                        out.append(it);
+                    }
+                    return null;
+                } catch (XPathException e) {
+                    e.maybeSetLocation(getExpression().getLocation());
+                    e.maybeSetContext(context);
+                    throw e;
                 }
-                return null;
             };
         }
 
@@ -225,7 +230,15 @@ public class LocalVariableReference extends VariableReference {
         public ItemEvaluator elaborateForItem() {
             LocalVariableReference varRef = (LocalVariableReference) getExpression();
             int slot = varRef.getSlotNumber();
-            return context -> context.evaluateLocalVariable(slot).head();
+            return context -> {
+                try {
+                    return context.evaluateLocalVariable(slot).head();
+                } catch (XPathException e) {
+                    e.maybeSetLocation(getExpression().getLocation());
+                    e.maybeSetContext(context);
+                    throw e;
+                }
+            };
         }
 
     }

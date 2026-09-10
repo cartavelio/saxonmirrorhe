@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.oper.OperandArray;
@@ -562,12 +561,12 @@ public abstract class FunctionCall extends Expression {
      */
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        return Elaborator.makeElaborator(this).elaborateForPull().iterate(context);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        return Elaborator.makeElaborator(this).elaborateForItem().eval(context);
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
     public Sequence[] evaluateArguments(XPathContext context) throws XPathException {
@@ -617,7 +616,7 @@ public abstract class FunctionCall extends Expression {
             int arity = expr.getArity();
             argumentEvaluators = new SequenceEvaluator[arity];
             for (int i = 0; i < arity; i++) {
-                argumentEvaluators[i] = makeElaborator(expr.getArg(i)).lazily(allowRepeatedUse);
+                argumentEvaluators[i] = expr.getArg(i).makeElaborator().lazily(allowRepeatedUse);
             }
         }
 

@@ -320,7 +320,7 @@ public class NumberInstruction extends Expression {
         @Override
         public PullEvaluator elaborateForPull() {
             NumberInstruction expr = (NumberInstruction) getExpression();
-            ItemEvaluator sourceEval = Elaborator.makeElaborator(expr.selectOp.getChildExpression()).elaborateForItem();
+            ItemEvaluator sourceEval = expr.selectOp.getChildExpression().makeElaborator().elaborateForItem();
             return context -> {
                 NodeInfo source = (NodeInfo)sourceEval.eval(context);
                 return expr.iterateSource(source, context);

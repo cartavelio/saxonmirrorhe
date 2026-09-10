@@ -848,10 +848,10 @@ public class Block extends Instruction {
                 for (int i=0; i < expr.size(); i++) {
                     Expression child = expr.getOperanda()[i].getChildExpression();
                     if (child instanceof VariableReference) {
-                        EagerEvaluator eval = makeElaborator(child).eagerly();
+                        EagerEvaluator eval = child.makeElaborator().eagerly();
                         actions[i] = (chain, context) -> chain.appendSequence(eval.evaluate(context));
                     } else {
-                        PullEvaluator pull = makeElaborator(child).elaborateForPull();
+                        PullEvaluator pull = child.makeElaborator().elaborateForPull();
                         actions[i] = (chain, context) -> {
                             SequenceIterator iter = pull.iterate(context);
                             for (Item item; (item = iter.next()) != null; ) {
@@ -879,7 +879,7 @@ public class Block extends Instruction {
             final int size = operanda.length;
             final PullEvaluator[] actions = new PullEvaluator[size];
             for (int i = 0; i < size; i++) {
-                actions[i] = makeElaborator(operanda[i].getChildExpression()).elaborateForPull();
+                actions[i] = operanda[i].getChildExpression().makeElaborator().elaborateForPull();
             }
             return context -> new BlockIterator(actions, context);
         }
@@ -905,18 +905,63 @@ public class Block extends Instruction {
             final int size = operanda.length;
             final PushEvaluator[] actions = new PushEvaluator[size];
             for (int i = 0; i < size; i++) {
-                actions[i] = makeElaborator(operanda[i].getChildExpression()).elaborateForPush();
+                actions[i] = operanda[i].getChildExpression().makeElaborator().elaborateForPush();
             }
-            return (out, context) -> {
-                TailCall tail = null;
-                for (int i = 0; i < size; i++) {
-                    while (tail != null) {
-                        tail = tail.processLeavingTail();
-                    }
-                    tail = actions[i].process(out, context);
+            switch (size) {
+                // Unroll loop for small sequence constructors
+                case 2: {
+                    PushEvaluator act0 = actions[0];
+                    return (out, context) -> {
+                        TailCall tail = act0.processLeavingTail(out, context);
+                        Expression.dispatchTailCall(tail);
+
+                        return actions[1].processLeavingTail(out, context);
+                    };
                 }
-                return tail;
-            };
+                case 3: {
+                    PushEvaluator act0 = actions[0];
+                    PushEvaluator act1 = actions[1];
+                    PushEvaluator act2 = actions[2];
+                    return (out, context) -> {
+                        TailCall tail = act0.processLeavingTail(out, context);
+                        Expression.dispatchTailCall(tail);
+
+                        tail = act1.processLeavingTail(out, context);
+                        Expression.dispatchTailCall(tail);
+
+                        return act2.processLeavingTail(out, context);
+                    };
+                }
+                case 4: {
+                    PushEvaluator act0 = actions[0];
+                    PushEvaluator act1 = actions[1];
+                    PushEvaluator act2 = actions[2];
+                    PushEvaluator act3 = actions[3];
+                    return (out, context) -> {
+                        TailCall tail = act0.processLeavingTail(out, context);
+                        Expression.dispatchTailCall(tail);
+
+                        tail = act1.processLeavingTail(out, context);
+                        Expression.dispatchTailCall(tail);
+
+                        tail = act2.processLeavingTail(out, context);
+                        Expression.dispatchTailCall(tail);
+
+                        return act3.processLeavingTail(out, context);
+                    };
+                }
+                default:
+                    return (out, context) -> {
+                        TailCall tail = null;
+                        for (int i = 0; i < size; i++) {
+                            while (tail != null) {
+                                tail = tail.processLeavingTail();
+                            }
+                            tail = actions[i].processLeavingTail(out, context);
+                        }
+                        return tail;
+                    };
+            }
         }
     }
 }

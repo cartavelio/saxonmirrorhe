@@ -34,7 +34,7 @@ public abstract class SimpleNodePushElaborator extends Elaborator {
     @Override
     public ItemEvaluator elaborateForItem() {
         final SimpleNodeConstructor instr = (SimpleNodeConstructor) getExpression();
-        final ItemEvaluator select = makeElaborator(instr.getSelect()).elaborateForItem();
+        final ItemEvaluator select = instr.getSelect().makeElaborator().elaborateForItem();
         final short kind = (short)instr.getItemType().getPrimitiveType();
         final Configuration config = getConfiguration();
         return context -> {

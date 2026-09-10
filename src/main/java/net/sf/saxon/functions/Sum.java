@@ -218,9 +218,9 @@ public class Sum extends FoldingFunction {
 
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            PullEvaluator puller = makeElaborator(fnc.getArg(0)).elaborateForPull();
+            PullEvaluator puller = fnc.getArg(0).makeElaborator().elaborateForPull();
             ItemEvaluator zero = fnc.getArity() == 2
-                    ? makeElaborator(fnc.getArg(1)).elaborateForItem()
+                    ? fnc.getArg(1).makeElaborator().elaborateForItem()
                     : context -> Int64Value.ZERO;
             return context -> {
                 SumFold fold = new SumFold(context, (AtomicValue)zero.eval(context));

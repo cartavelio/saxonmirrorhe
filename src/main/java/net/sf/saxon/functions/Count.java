@@ -131,7 +131,7 @@ public class Count extends SystemFunction {
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            PullEvaluator puller = makeElaborator(arg).elaborateForPull();
+            PullEvaluator puller = arg.makeElaborator().elaborateForPull();
             return context -> Int64Value.makeIntegerValue(count(puller.iterate(context)));
         }
 

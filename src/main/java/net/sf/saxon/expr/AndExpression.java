@@ -191,8 +191,8 @@ public class AndExpression extends BooleanExpression {
 
         public BooleanEvaluator elaborateForBoolean() {
             AndExpression expr = (AndExpression) getExpression();
-            BooleanEvaluator eval0 = makeElaborator(expr.getLhsExpression()).elaborateForBoolean();
-            BooleanEvaluator eval1 = makeElaborator(expr.getRhsExpression()).elaborateForBoolean();
+            BooleanEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForBoolean();
+            BooleanEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForBoolean();
             return context -> eval0.eval(context) && eval1.eval(context);
         }
 

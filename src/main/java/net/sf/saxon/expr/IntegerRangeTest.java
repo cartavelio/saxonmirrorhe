@@ -304,9 +304,9 @@ public class IntegerRangeTest extends Expression {
         @Override
         public BooleanEvaluator elaborateForBoolean() {
             IntegerRangeTest expr = (IntegerRangeTest) getExpression();
-            ItemEvaluator iv1 = Elaborator.makeElaborator(expr.getMin()).elaborateForItem();
-            ItemEvaluator iv2 = Elaborator.makeElaborator(expr.getMax()).elaborateForItem();
-            PullEvaluator iv3 = Elaborator.makeElaborator(expr.getValue()).elaborateForPull();
+            ItemEvaluator iv1 = expr.getMin().makeElaborator().elaborateForItem();
+            ItemEvaluator iv2 = expr.getMax().makeElaborator().elaborateForItem();
+            PullEvaluator iv3 = expr.getValue().makeElaborator().elaborateForPull();
             return (context) -> IntegerRangeTest.eval(iv1, iv2, iv3, context);
         }
     }

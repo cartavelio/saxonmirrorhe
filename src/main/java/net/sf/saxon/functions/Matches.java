@@ -134,12 +134,12 @@ public class Matches extends RegexFunction {
         public BooleanEvaluator elaborateForBoolean() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             final Matches fn = (Matches) fnc.getTargetFunction();
-            final UnicodeStringEvaluator arg0eval = makeElaborator(fnc.getArg(0)).elaborateForUnicodeString(true);
+            final UnicodeStringEvaluator arg0eval = fnc.getArg(0).makeElaborator().elaborateForUnicodeString(true);
             final RegularExpression staticRegex = fn.getStaticRegex();
             if (staticRegex == null) {
-                final UnicodeStringEvaluator arg1eval = makeElaborator(fnc.getArg(1)).elaborateForUnicodeString(true);
+                final UnicodeStringEvaluator arg1eval = fnc.getArg(1).makeElaborator().elaborateForUnicodeString(true);
                 final UnicodeStringEvaluator arg2eval = fn.getArity() == 3
-                        ? makeElaborator(fnc.getArg(2)).elaborateForUnicodeString(true)
+                        ? fnc.getArg(2).makeElaborator().elaborateForUnicodeString(true)
                         : cxt -> EmptyUnicodeString.getInstance();
                 return context -> fn.evalMatches(
                             arg0eval.eval(context),

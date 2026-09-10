@@ -88,7 +88,7 @@ public class StringLength_1 extends ScalarSystemFunction {
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(true);
+            UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(true);
             return context -> {
                 UnicodeString str = argEval.eval(context);
                 return Int64Value.makeIntegerValue(str.length());

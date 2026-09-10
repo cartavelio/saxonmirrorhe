@@ -7,6 +7,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
@@ -69,18 +70,6 @@ public abstract class Elaborator {
 
 
     /**
-     * Factory method to construct an {@code Elaborator} for a specific expression
-     * @param expression the expression to be elaborated
-     * @return an elaborator for the expression
-     */
-
-    public static Elaborator makeElaborator(Expression expression) {
-        Elaborator elab = expression.getElaborator();
-        elab.setExpression(expression);
-        return elab;
-    }
-
-    /**
      * Get a function that evaluates the underlying expression eagerly
      *
      * @return an evaluator for the expression that returns a {@link GroundedValue}
@@ -97,7 +86,7 @@ public abstract class Elaborator {
                     return item == null ? EmptySequence.getInstance() : item;
                 };
             } else {
-                ItemEvaluator itemEvaluator = makeElaborator(expr).elaborateForItem();
+                ItemEvaluator itemEvaluator = expr.makeElaborator().elaborateForItem();
                 return CSharp.methodRef(itemEvaluator::eval);
             }
 
@@ -118,7 +107,8 @@ public abstract class Elaborator {
                 SequenceCollector seq = controller.allocateSequenceOutputter();
                 ComplexContentOutputter out = new ComplexContentOutputter(seq);
                 out.open();
-                pushEvaluator.process(out, context);
+                TailCall tail = pushEvaluator.processLeavingTail(out, context);
+                Expression.dispatchTailCall(tail);
                 out.close();
                 GroundedValue val = seq.getSequence();
                 seq.reset();

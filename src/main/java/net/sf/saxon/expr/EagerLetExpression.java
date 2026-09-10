@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.trans.XPathException;
@@ -27,7 +26,7 @@ public class EagerLetExpression extends LetExpression {
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         Expression e = super.optimize(visitor, contextItemType);
         if (e == this) {
-            setEvaluator(Elaborator.makeElaborator(getSequence()).eagerly());
+            setEvaluator(getSequence().makeElaborator().eagerly());
         }
         return e;
     }

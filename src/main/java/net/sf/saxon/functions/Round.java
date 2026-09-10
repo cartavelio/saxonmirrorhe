@@ -80,7 +80,7 @@ public final class Round extends SystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            final ItemEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator argEval = fnc.getArg(0).makeElaborator().elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(fnc.getArg(0).getCardinality());
 
             if (fnc.getArity() == 1) {
@@ -96,7 +96,7 @@ public final class Round extends SystemFunction {
                     return context -> ((NumericValue) argEval.eval(context)).round(0);
                 }
             } else {
-                final ItemEvaluator scaleArg = makeElaborator(fnc.getArg(1)).elaborateForItem();
+                final ItemEvaluator scaleArg = fnc.getArg(1).makeElaborator().elaborateForItem();
                 return context -> {
                     NumericValue result = (NumericValue) argEval.eval(context);
                     if (result == null) {

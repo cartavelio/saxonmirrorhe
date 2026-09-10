@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -307,8 +308,8 @@ public class ForMemberExpression extends Assignation {
 
         public PullEvaluator elaborateForPull() {
             final ForMemberExpression expr = (ForMemberExpression) getExpression();
-            final ItemEvaluator arrayEval = makeElaborator(expr.getSequence()).elaborateForItem();
-            final PullEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPull();
+            final ItemEvaluator arrayEval = expr.getSequence().makeElaborator().elaborateForItem();
+            final PullEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPull();
             final int slot = expr.getLocalSlotNumber();
 
             return context -> {
@@ -326,14 +327,15 @@ public class ForMemberExpression extends Assignation {
         @Override
         public PushEvaluator elaborateForPush() {
             final ForExpression expr = (ForExpression) getExpression();
-            final ItemEvaluator selectEval = makeElaborator(expr.getSequence()).elaborateForItem();
-            final PushEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPush();
+            final ItemEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForItem();
+            final PushEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPush();
             final int slot = expr.getLocalSlotNumber();
             return (output, context) -> {
                 ArrayItem theArray = (ArrayItem)selectEval.eval(context);
                 for (GroundedValue member : theArray.members()) {
                     context.setLocalVariable(slot, member);
-                    actionEval.process(output, context);
+                    TailCall tail = actionEval.processLeavingTail(output, context);
+                    Expression.dispatchTailCall(tail);
                 }
                 return null;
             };

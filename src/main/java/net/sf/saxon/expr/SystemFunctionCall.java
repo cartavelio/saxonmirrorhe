@@ -465,7 +465,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        Elaborator.makeElaborator(this).elaborateForPush().process(output, context);
+        makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     @Override

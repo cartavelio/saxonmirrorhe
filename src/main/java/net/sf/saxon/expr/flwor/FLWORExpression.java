@@ -13,6 +13,7 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.QueryModule;
@@ -818,7 +819,7 @@ public class FLWORExpression extends Expression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        return Elaborator.makeElaborator(this).elaborateForPull().iterate(context);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
 
@@ -833,7 +834,8 @@ public class FLWORExpression extends Expression {
      */
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        Elaborator.makeElaborator(this).elaborateForPush().process(output, context);
+        TailCall tc = makeElaborator().elaborateForPush().processLeavingTail(output, context);
+        Expression.dispatchTailCall(tc);
     }
 
     /**
@@ -984,7 +986,7 @@ public class FLWORExpression extends Expression {
         @Override
         public PullEvaluator elaborateForPull() {
             FLWORExpression expr = (FLWORExpression)getExpression();
-            PullEvaluator returnPull = Elaborator.makeElaborator(expr.getReturnClause()).elaborateForPull();
+            PullEvaluator returnPull = expr.getReturnClause().makeElaborator().elaborateForPull();
             return context -> {
                 TuplePull stream = new SingularityPull();
                 for (Clause c : expr.clauses) {
@@ -997,7 +999,7 @@ public class FLWORExpression extends Expression {
         @Override
         public PushEvaluator elaborateForPush() {
             FLWORExpression expr = (FLWORExpression) getExpression();
-            expr.returnClausePush = Elaborator.makeElaborator(expr.getReturnClause()).elaborateForPush();
+            expr.returnClausePush = expr.getReturnClause().makeElaborator().elaborateForPush();
             return (output, context) -> {
                 TuplePush destination = new ReturnClausePush(output, expr.returnClausePush);
                 for (int i = expr.clauses.size() - 1; i >= 0; i--) {

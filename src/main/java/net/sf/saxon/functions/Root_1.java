@@ -88,7 +88,7 @@ public class Root_1 extends SystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            final ItemEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForItem();
             return context -> {
                 NodeInfo focus = (NodeInfo)arg0Eval.eval(context);
                 return focus == null ? null : focus.getRoot();

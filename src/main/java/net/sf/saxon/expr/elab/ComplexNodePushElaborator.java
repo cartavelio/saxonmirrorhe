@@ -20,7 +20,7 @@ public abstract class ComplexNodePushElaborator extends FallbackElaborator {
                 throw new NoDynamicContextException("No controller available");
             }
             SequenceCollector seq = controller.allocateSequenceOutputter(1);
-            TailCall tc = pushEval.process(new ComplexContentOutputter(seq), context);
+            TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
             Expression.dispatchTailCall(tc);
             seq.close();
             SequenceIterator result = seq.iterate();
@@ -38,7 +38,7 @@ public abstract class ComplexNodePushElaborator extends FallbackElaborator {
                 throw new NoDynamicContextException("No controller available");
             }
             SequenceCollector seq = controller.allocateSequenceOutputter(1);
-            TailCall tc = pushEval.process(new ComplexContentOutputter(seq), context);
+            TailCall tc = pushEval.processLeavingTail(new ComplexContentOutputter(seq), context);
             Expression.dispatchTailCall(tc);
             seq.close();
             Item result = seq.getFirstItem();

@@ -1285,9 +1285,9 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
         public PullEvaluator elaborateForPull() {
             final FilterExpression expr = (FilterExpression) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBase()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBase().makeElaborator().elaborateForPull();
             if (expr.isSimpleBooleanFilter()) {
-                final BooleanEvaluator conditionEval = makeElaborator(expr.getFilter()).elaborateForBoolean();
+                final BooleanEvaluator conditionEval = expr.getFilter().makeElaborator().elaborateForBoolean();
                 return context -> {
                     SequenceIterator base = baseEval.iterate(context);
                     XPathContext c2 = context.newMinorContext();
@@ -1295,7 +1295,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     return new SimpleFilteredIterator(c2, conditionEval);
                 };
             } else {
-                final PullEvaluator conditionEval = makeElaborator(expr.getFilter()).elaborateForPull();
+                final PullEvaluator conditionEval = expr.getFilter().makeElaborator().elaborateForPull();
                 return context -> {
                     SequenceIterator base = baseEval.iterate(context);
                     XPathContext c2 = context.newMinorContext();

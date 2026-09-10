@@ -217,7 +217,7 @@ public class CompareToStringConstant extends CompareToConstant {
         public BooleanEvaluator elaborateForBoolean() {
             final CompareToStringConstant expression = (CompareToStringConstant) getExpression();
             final Expression arg = expression.getBaseExpression();
-            final UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(false);
+            final UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(false);
             final boolean nullable = Cardinality.allowsZero(expression.getCardinality());
             final int operator = expression.getComparisonOperator();
             final UnicodeString comparand = expression.getComparand();

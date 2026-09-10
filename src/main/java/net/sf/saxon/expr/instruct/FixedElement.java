@@ -616,7 +616,7 @@ public class FixedElement extends ElementCreator {
         public PushEvaluator elaborateForPush() {
             final FixedElement instr = (FixedElement) getExpression();
             final PushEvaluator contentPusher =
-                    Elaborator.makeElaborator(instr.getContentExpression()).elaborateForPush();
+                    instr.getContentExpression().makeElaborator().elaborateForPush();
             final ElementCreationDetails details = new ElementCreationDetails() {
                 @Override
                 public NodeName getNodeName(XPathContext context) {
@@ -630,7 +630,7 @@ public class FixedElement extends ElementCreator {
 
                 @Override
                 public void processContent(Outputter output, XPathContext context) throws XPathException {
-                    TailCall tc = contentPusher.process(output, context);
+                    TailCall tc = contentPusher.processLeavingTail(output, context);
                     Expression.dispatchTailCall(tc);
                 }
             };

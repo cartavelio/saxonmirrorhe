@@ -259,7 +259,7 @@ public class DocumentInstr extends ParentNodeConstructor {
 
     @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
-        return (NodeInfo) Elaborator.makeElaborator(this).elaborateForItem().eval(context);
+        return (NodeInfo) makeElaborator().elaborateForItem().eval(context);
     }
 //        Controller controller = context.getController();
 //        Configuration config = controller.getConfiguration();
@@ -389,12 +389,12 @@ public class DocumentInstr extends ParentNodeConstructor {
 
         public PushEvaluator elaborateForPush() {
             DocumentInstr expr = (DocumentInstr) getExpression();
-            PushEvaluator content = makeElaborator(expr.getContentExpression()).elaborateForPush();
+            PushEvaluator content = expr.getContentExpression().makeElaborator().elaborateForPush();
             if (expr.preservingTypes && !expr.textOnly) {
                 return (output, context) -> {
                     output.setSystemId(expr.getStaticBaseURIString());
                     output.startDocument(ReceiverOption.NONE);
-                    TailCall tc = content.process(output, context);
+                    TailCall tc = content.processLeavingTail(output, context);
                     dispatchTailCall(tc);
                     output.endDocument();
                     return null;
@@ -423,7 +423,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     return context -> TextFragmentValue.makeTextFragment(
                             context.getConfiguration(), text, staticBaseUri);
                 } else {
-                    PullEvaluator contentEval = makeElaborator(expr.getContentExpression()).elaborateForPull();
+                    PullEvaluator contentEval = expr.getContentExpression().makeElaborator().elaborateForPull();
                     return context -> {
                         UnicodeBuilder sb = new UnicodeBuilder();
                         SequenceIterator iter = contentEval.iterate(context);
@@ -435,7 +435,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     };
                 }
             } else {
-                PushEvaluator contentEval = makeElaborator(expr.getContentExpression()).elaborateForPush();
+                PushEvaluator contentEval = expr.getContentExpression().makeElaborator().elaborateForPush();
                 HostLanguage hostLanguage = expr.getPackageData().getHostLanguage();
                 return context -> {
                     try {
@@ -463,7 +463,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                         out.open();
                         out.startDocument(ReceiverOption.NONE);
 
-                        TailCall tc = contentEval.process(out, context);
+                        TailCall tc = contentEval.processLeavingTail(out, context);
                         dispatchTailCall(tc);
                         out.endDocument();
                         out.close();

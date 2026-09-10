@@ -491,7 +491,7 @@ public class CastExpression extends CastingExpression implements Callable {
         public ItemEvaluator elaborateForItem() {
             CastExpression exp = (CastExpression) getExpression();
             Expression arg = exp.getBaseExpression();
-            ItemEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForItem();
+            ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
             return context -> {
                 AtomicValue value = (AtomicValue) argEval.eval(context);

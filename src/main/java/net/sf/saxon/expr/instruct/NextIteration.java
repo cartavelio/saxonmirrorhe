@@ -9,6 +9,9 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -114,20 +117,8 @@ public class NextIteration extends Instruction implements TailCallLoop.TailCallI
     /*@Nullable*/
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        XPathContextMajor cm = context.getMajorContext();
-        if (actualParams.length == 1) {
-            cm.setLocalVariable(actualParams[0].getSlotNumber(), actualParams[0].getSelectValue(context));
-        } else {
-            // we can't overwrite any of the parameters until we've evaluated all of them: test iterate012
-            Sequence[] oldVars = cm.getAllVariableValues();
-            Sequence[] newVars = Arrays.copyOf(oldVars, oldVars.length);
-            for (WithParam wp : actualParams) {
-                newVars[wp.getSlotNumber()] = wp.getSelectValue(context);
-            }
-            cm.resetAllVariableValues(newVars);
-        }
-        cm.requestTailCall(this, null);
-        return null;
+        PushEvaluator push = makeElaborator().elaborateForPush();
+        return push.processLeavingTail(output, context);
     }
 
 
@@ -140,6 +131,33 @@ public class NextIteration extends Instruction implements TailCallLoop.TailCallI
         out.endElement();
     }
 
+    public Elaborator getElaborator() {
+        return new NextIterationElaborator();
+    }
+
+    public static class NextIterationElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            NextIteration expr = (NextIteration)getExpression();
+            return (output, context) -> {
+                XPathContextMajor cm = context.getMajorContext();
+                if (expr.actualParams.length == 1) {
+                    cm.setLocalVariable(expr.actualParams[0].getSlotNumber(), expr.actualParams[0].getSelectValue(context));
+                } else {
+                    // we can't overwrite any of the parameters until we've evaluated all of them: test iterate012
+                    Sequence[] oldVars = cm.getAllVariableValues();
+                    Sequence[] newVars = Arrays.copyOf(oldVars, oldVars.length);
+                    for (WithParam wp : expr.actualParams) {
+                        newVars[wp.getSlotNumber()] = wp.getSelectValue(context);
+                    }
+                    cm.resetAllVariableValues(newVars);
+                }
+                cm.requestTailCall(expr, null);
+                return null;
+            };
+        }
+    }
 
 }
 

@@ -325,7 +325,7 @@ public class DocumentSorter extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
 
             final DocumentSorter expr = (DocumentSorter) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             final Comparator<? super NodeInfo> comparer = expr.getComparer();
 
             return context -> new DocumentOrderIterator(baseEval.iterate(context), comparer);

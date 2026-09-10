@@ -8,8 +8,10 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -27,6 +29,7 @@ public class AttributeSet extends Actor {
 
     StructuredQName attributeSetName;
     private boolean declaredStreamable;
+    private PushEvaluator bodyEvaluator;
 
     /**
      * Create an empty attribute set
@@ -105,12 +108,18 @@ public class AttributeSet extends Actor {
      */
 
     public void expand(Outputter output, XPathContext context) throws XPathException {
+        synchronized(this) {
+            if (bodyEvaluator == null) {
+                bodyEvaluator = getBody().makeElaborator().elaborateForPush();
+            }
+        }
+
         Stack<AttributeSet> stack = ((XsltController)context.getController()).getAttributeSetEvaluationStack();
         if (stack.contains(this)) {
             throw new XPathException("Attribute set " + getObjectName().getEQName() + " invokes itself recursively", "XTDE0640");
         }
         stack.push(this);
-        getBody().process(output, context);
+        Expression.dispatchTailCall(bodyEvaluator.processLeavingTail(output, context));
         stack.pop();
         if (stack.isEmpty()) {
             ((XsltController)context.getController()).releaseAttributeSetEvaluationStack();

@@ -168,7 +168,7 @@ public final class SimpleStepExpression extends SlashExpression {
         public PullEvaluator elaborateForPull() {
 
             final SimpleStepExpression forEach = (SimpleStepExpression) getExpression();
-            final ItemEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForItem();
+            final ItemEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForItem();
             final AxisExpression step = (AxisExpression) forEach.getStep();
             final boolean nullable = Cardinality.allowsZero(forEach.getSelectExpression().getCardinality());
 

@@ -336,16 +336,15 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         }
 
         StaticContext env = visitor.getStaticContext();
-        if (comparer == null) {
-            // In XSLT, only do this the first time through, otherwise default-collation may be missed
-            final String defaultCollationName = env.getDefaultCollationName();
-            StringCollator collation = config.getCollation(defaultCollationName);
-            if (collation == null) {
-                collation = CodepointCollator.getInstance();
-            }
-            comparer = GenericAtomicComparer.makeAtomicComparer(
-                    pt0, pt1, collation, config.getConversionContext());
+
+        final String defaultCollationName = getRetainedStaticContext().getDefaultCollationName();
+        StringCollator collation = config.getCollation(defaultCollationName);
+        if (collation == null) {
+            collation = CodepointCollator.getInstance();
         }
+        comparer = GenericAtomicComparer.makeAtomicComparer(
+                pt0, pt1, collation, config.getConversionContext());
+
 
         // evaluate the expression now if both arguments are constant
 
@@ -1045,18 +1044,18 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
             switch (cardinality) {
                 case ONE_TO_ONE: {
-                    final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
-                    final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+                    final ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+                    final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
                     return context -> exp.evaluateOneToOne((AtomicValue)p0.eval(context), (AtomicValue)p1.eval(context), context);
                 }
                 case MANY_TO_ONE: {
-                    final PullEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
-                    final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+                    final PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                    final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
                     return context -> exp.evaluateManyToOne(p0.iterate(context), (AtomicValue) p1.eval(context), context);
                 }
                 case MANY_TO_MANY: {
-                    final PullEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
-                    final PullEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForPull();
+                    final PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                    final PullEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForPull();
                     return context -> exp.evaluateManyToMany(p0.iterate(context), p1.iterate(context), context);
                 }
                 default:

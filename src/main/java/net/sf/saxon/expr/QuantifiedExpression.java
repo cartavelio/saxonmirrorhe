@@ -396,8 +396,8 @@ public class QuantifiedExpression extends Assignation {
         public BooleanEvaluator elaborateForBoolean() {
 
             final QuantifiedExpression expr = (QuantifiedExpression) getExpression();
-            final PullEvaluator selectEval = makeElaborator(expr.getSequence()).elaborateForPull();
-            final BooleanEvaluator satisfiesEval = makeElaborator(expr.getAction()).elaborateForBoolean();
+            final PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
+            final BooleanEvaluator satisfiesEval = expr.getAction().makeElaborator().elaborateForBoolean();
             final boolean some = expr.getOperator() == Token.SOME;
             final int slot = expr.getLocalSlotNumber();
 

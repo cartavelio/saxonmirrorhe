@@ -22,7 +22,7 @@ public interface PushEvaluator {
      * @throws XPathException if a dynamic error occurs during the evaluation.
      */
 
-    TailCall process(Outputter out, XPathContext context) throws XPathException;
+    TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException;
 
 }
 

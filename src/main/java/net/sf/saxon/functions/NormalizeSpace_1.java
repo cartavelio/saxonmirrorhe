@@ -82,14 +82,14 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
 
         public UnicodeStringEvaluator elaborateForUnicodeString(boolean zeroLengthWhenAbsent) {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-            UnicodeStringEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForUnicodeString(true);
+            UnicodeStringEvaluator argEval = fnc.getArg(0).makeElaborator().elaborateForUnicodeString(true);
             return context -> Whitespace.collapseWhitespace(argEval.eval(context));
         }
 
         public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            StringEvaluator argEval = makeElaborator(arg).elaborateForString(zeroLengthWhenAbsent);
+            StringEvaluator argEval = arg.makeElaborator().elaborateForString(zeroLengthWhenAbsent);
             return context -> {
                 String in = argEval.eval(context);
                 if (in == null || in.isEmpty()) {
@@ -115,7 +115,7 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
         public BooleanEvaluator elaborateForBoolean() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            UnicodeStringEvaluator argEval = makeElaborator(arg).elaborateForUnicodeString(false);
+            UnicodeStringEvaluator argEval = arg.makeElaborator().elaborateForUnicodeString(false);
             return context -> {
                 UnicodeString in = argEval.eval(context);
                 if (in == null || in.isEmpty()) {

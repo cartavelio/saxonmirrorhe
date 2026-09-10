@@ -190,8 +190,8 @@ public class SingletonIntersectExpression extends VennExpression {
         public ItemEvaluator elaborateForItem() {
 
             final SingletonIntersectExpression exp = (SingletonIntersectExpression) getExpression();
-            final ItemEvaluator lhs = Elaborator.makeElaborator(exp.getLhsExpression()).elaborateForItem();
-            final PullEvaluator rhs = Elaborator.makeElaborator(exp.getRhsExpression()).elaborateForPull();
+            final ItemEvaluator lhs = exp.getLhsExpression().makeElaborator().elaborateForItem();
+            final PullEvaluator rhs = exp.getRhsExpression().makeElaborator().elaborateForPull();
 
             return context -> {
                 NodeInfo node = (NodeInfo) lhs.eval(context);

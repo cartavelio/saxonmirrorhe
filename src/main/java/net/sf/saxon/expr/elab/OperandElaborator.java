@@ -35,35 +35,35 @@ public class OperandElaborator implements OperandEvaluator {
 
     public TailCall processLeavingTail(Outputter outputter, XPathContext context) throws XPathException {
         if (pushEvaluator == null) {
-            pushEvaluator = Elaborator.makeElaborator(expression).elaborateForPush();
+            pushEvaluator = expression.makeElaborator().elaborateForPush();
         }
-        return pushEvaluator.process(outputter, context);
+        return pushEvaluator.processLeavingTail(outputter, context);
     }
 
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         if (pullEvaluator == null) {
-            pullEvaluator = Elaborator.makeElaborator(expression).elaborateForPull();
+            pullEvaluator = expression.makeElaborator().elaborateForPull();
         }
         return pullEvaluator.iterate(context);
     }
 
     public Item evaluateItem(XPathContext context) throws XPathException {
         if (itemEvaluator == null) {
-            itemEvaluator = Elaborator.makeElaborator(expression).elaborateForItem();
+            itemEvaluator = expression.makeElaborator().elaborateForItem();
         }
         return itemEvaluator.eval(context);
     }
 
     public UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         if (stringEvaluator == null) {
-            stringEvaluator = Elaborator.makeElaborator(expression).elaborateForUnicodeString(true);
+            stringEvaluator = expression.makeElaborator().elaborateForUnicodeString(true);
         }
         return stringEvaluator.eval(context);
     }
 
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
         if (booleanEvaluator == null) {
-            booleanEvaluator = Elaborator.makeElaborator(expression).elaborateForBoolean();
+            booleanEvaluator = expression.makeElaborator().elaborateForBoolean();
         }
         return booleanEvaluator.eval(context);
     }

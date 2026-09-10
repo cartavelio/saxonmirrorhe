@@ -419,9 +419,9 @@ public class RangeExpression extends Expression {
         @Override
         public PullEvaluator elaborateForPull() {
             RangeExpression expr = (RangeExpression) getExpression();
-            ItemEvaluator iv1 = Elaborator.makeElaborator(expr.getStartExpression()).elaborateForItem();
-            ItemEvaluator iv2 = Elaborator.makeElaborator(expr.getStepExpression()).elaborateForItem();
-            ItemEvaluator iv3 = Elaborator.makeElaborator(expr.getEndExpression()).elaborateForItem();
+            ItemEvaluator iv1 = expr.getStartExpression().makeElaborator().elaborateForItem();
+            ItemEvaluator iv2 = expr.getStepExpression().makeElaborator().elaborateForItem();
+            ItemEvaluator iv3 = expr.getEndExpression().makeElaborator().elaborateForItem();
             return (context) -> {
                 IntegerValue av1 = (IntegerValue) iv1.eval(context);
                 IntegerValue av2 = (IntegerValue) iv2.eval(context);

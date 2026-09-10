@@ -345,7 +345,7 @@ public class SquareArrayConstructor extends Expression implements Consumer<Ping>
             SquareArrayConstructor expr = (SquareArrayConstructor)getExpression();
             List<EagerEvaluator> eagerEvaluators = new ArrayList<>(expr.getOperanda().getNumberOfOperands());
             for (Operand o : expr.operands()) {
-                eagerEvaluators.add(Elaborator.makeElaborator(o.getChildExpression()).eagerly());
+                eagerEvaluators.add(o.getChildExpression().makeElaborator().eagerly());
             }
             return context -> {
                 List<GroundedValue> members = new ArrayList<>(eagerEvaluators.size());

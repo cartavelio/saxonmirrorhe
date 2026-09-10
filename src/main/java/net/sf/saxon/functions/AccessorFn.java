@@ -297,7 +297,7 @@ public abstract class AccessorFn extends ScalarSystemFunction {
             final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             final AccessorFn fn = (AccessorFn) fnc.getTargetFunction();
             final Component component = fn.getComponentId();
-            final ItemEvaluator argEval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+            final ItemEvaluator argEval = fnc.getArg(0).makeElaborator().elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(fnc.getArg((0)).getCardinality());
             return context -> {
                 AtomicValue base = ((AtomicValue) argEval.eval(context));

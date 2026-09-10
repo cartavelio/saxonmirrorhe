@@ -10,7 +10,6 @@ package net.sf.saxon.expr.flwor;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -83,7 +82,7 @@ public class WhereClause extends Clause {
     @Override
     public TuplePull getPullStream(TuplePull base, XPathContext context) {
         if (predicateEvaluator == null) {
-            predicateEvaluator = Elaborator.makeElaborator(getPredicate()).elaborateForBoolean();
+            predicateEvaluator = getPredicate().makeElaborator().elaborateForBoolean();
         }
         return new WhereClausePull(base, predicateEvaluator);
     }
@@ -117,7 +116,7 @@ public class WhereClause extends Clause {
     @Override
     public TuplePush getPushStream(TuplePush destination, Outputter output, XPathContext context) {
         if (predicateEvaluator == null) {
-            predicateEvaluator = Elaborator.makeElaborator(getPredicate()).elaborateForBoolean();
+            predicateEvaluator = getPredicate().makeElaborator().elaborateForBoolean();
         }
         return new WhereClausePush(output, destination, predicateEvaluator);
     }

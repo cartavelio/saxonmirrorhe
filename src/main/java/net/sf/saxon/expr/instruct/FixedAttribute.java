@@ -336,7 +336,7 @@ public final class FixedAttribute extends AttributeCreator {
 
             if (collapse || expr.getSchemaType() != null
                     || expr.getValidationAction() == Validation.STRICT || expr.getValidationAction() == Validation.LAX) {
-                UnicodeStringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForUnicodeString(true);
+                UnicodeStringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForUnicodeString(true);
                 return (output, context) -> {
                     UnicodeString content = contentEval.eval(context);
                     SimpleType ann = expr.validate(name, content, context);
@@ -353,7 +353,7 @@ public final class FixedAttribute extends AttributeCreator {
                     return null;
                 };
             } else {
-                StringEvaluator contentEval = Elaborator.makeElaborator(expr.getSelect()).elaborateForString(true);
+                StringEvaluator contentEval = expr.getSelect().makeElaborator().elaborateForString(true);
                 return (output, context) -> {
                     String content = contentEval.eval(context);
                     try {

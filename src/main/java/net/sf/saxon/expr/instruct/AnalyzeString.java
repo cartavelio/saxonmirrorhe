@@ -517,13 +517,13 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         @Override
         public PullEvaluator elaborateForPull() {
             AnalyzeString insn = (AnalyzeString) getExpression();
-            UnicodeStringEvaluator input = makeElaborator(insn.getSelect()).elaborateForUnicodeString(true);
+            UnicodeStringEvaluator input = insn.getSelect().makeElaborator().elaborateForUnicodeString(true);
             PullEvaluator matching = insn.getMatching() == null
                     ? null
-                    : makeElaborator(insn.getMatching()).elaborateForPull();
+                    : insn.getMatching().makeElaborator().elaborateForPull();
             PullEvaluator nonMatching = insn.getNonMatching() == null
                     ? null
-                    : makeElaborator(insn.getNonMatching()).elaborateForPull();
+                    : insn.getNonMatching().makeElaborator().elaborateForPull();
             RegularExpression pattern = insn.getPatternExpression();
             return context -> {
                 RegularExpression re = pattern == null ? insn.getRegularExpression(context) : pattern;
@@ -552,13 +552,13 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         @Override
         public PushEvaluator elaborateForPush() {
             AnalyzeString insn = (AnalyzeString) getExpression();
-            UnicodeStringEvaluator input = makeElaborator(insn.getSelect()).elaborateForUnicodeString(true);
+            UnicodeStringEvaluator input = insn.getSelect().makeElaborator().elaborateForUnicodeString(true);
             PushEvaluator matching = insn.getMatching() == null
                     ? null
-                    : makeElaborator(insn.getMatching()).elaborateForPush();
+                    : insn.getMatching().makeElaborator().elaborateForPush();
             PushEvaluator nonMatching = insn.getNonMatching() == null
                     ? null
-                    : makeElaborator(insn.getNonMatching()).elaborateForPush();
+                    : insn.getNonMatching().makeElaborator().elaborateForPush();
             RegularExpression pattern = insn.getPatternExpression();
             return (out, context) -> {
                 RegularExpression re = pattern == null ? insn.getRegularExpression(context) : pattern;
@@ -572,12 +572,12 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
                 while(focus.next() != null) {
                     if (iter.isMatching()) {
                         if (matching != null) {
-                            TailCall tc = matching.process(out, c2);
+                            TailCall tc = matching.processLeavingTail(out, c2);
                             dispatchTailCall(tc);
                         }
                     } else {
                         if (nonMatching != null) {
-                            TailCall tc = nonMatching.process(out, c2);
+                            TailCall tc = nonMatching.processLeavingTail(out, c2);
                             dispatchTailCall(tc);
                         }
                     }
@@ -587,5 +587,6 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
 
         }
     }
+
 }
 

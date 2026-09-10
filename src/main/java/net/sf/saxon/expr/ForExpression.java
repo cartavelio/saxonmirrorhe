@@ -410,11 +410,7 @@ public class ForExpression extends Assignation {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        int slot = getLocalSlotNumber();
-        SequenceTool.supply(getSequence().iterate(context), (ItemConsumer<? super Item>) item -> {
-            context.setLocalVariable(slot, item);
-            getAction().process(output, context);
-        });
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
 
@@ -588,12 +584,12 @@ public class ForExpression extends Assignation {
 
         public PullEvaluator elaborateForPull() {
             final ForExpression expr = (ForExpression) getExpression();
-            final PullEvaluator selectEval = makeElaborator(expr.getSequence()).elaborateForPull();
+            final PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
             final int actionCardinality = expr.getAction().getCardinality();
             final int slot = expr.getLocalSlotNumber();
 
             if (Cardinality.allowsMany(actionCardinality)) {
-                final PullEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPull();
+                final PullEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPull();
                 return context -> {
                     SequenceIterator base = selectEval.iterate(context);
                     return new MappingIterator(base, item -> {
@@ -602,7 +598,7 @@ public class ForExpression extends Assignation {
                     });
                 };
             } else {
-                final ItemEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForItem();
+                final ItemEvaluator actionEval = expr.getAction().makeElaborator().elaborateForItem();
                 return context -> {
                     SequenceIterator base = selectEval.iterate(context);
                     return new ItemMappingIterator(base, item -> {
@@ -616,14 +612,14 @@ public class ForExpression extends Assignation {
         @Override
         public PushEvaluator elaborateForPush() {
             final ForExpression expr = (ForExpression) getExpression();
-            final PullEvaluator selectEval = makeElaborator(expr.getSequence()).elaborateForPull();
-            final PushEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPush();
+            final PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
+            final PushEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPush();
             final int slot = expr.getLocalSlotNumber();
             return (out, context) -> {
                 SequenceIterator base = selectEval.iterate(context);
                 for (Item item; (item = base.next()) != null; ) {
                     context.setLocalVariable(slot, item);
-                    TailCall tc = actionEval.process(out, context);
+                    TailCall tc = actionEval.processLeavingTail(out, context);
                     dispatchTailCall(tc);
                 }
                 return null;

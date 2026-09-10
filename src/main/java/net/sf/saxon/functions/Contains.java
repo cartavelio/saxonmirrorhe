@@ -7,24 +7,15 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.BooleanEvaluator;
-import net.sf.saxon.expr.elab.StringEvaluator;
-import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
-import net.sf.saxon.expr.elab.BooleanElaborator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.OptimizerOptions;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 
@@ -32,43 +23,6 @@ import net.sf.saxon.value.StringValue;
  * Implements the fn:contains() function, with the collation already known
  */
 public class Contains extends CollatingFunctionFixed {
-
-    /**
-     * Allow the function to create an optimized call based on the values of the actual arguments
-     *
-     * @param visitor     the expression visitor
-     * @param contextInfo information about the context item
-     * @param arguments   the supplied arguments to the function call. Note: modifying the contents
-     *                    of this array should not be attempted, it is likely to have no effect.
-     * @return either a function call on this function, or an expression that delivers
-     * the same result, or null indicating that no optimization has taken place
-     * @throws XPathException if an error is detected
-     */
-    @Override
-    public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, final Expression... arguments) throws XPathException {
-        if (getStringCollator() == CodepointCollator.getInstance() &&
-                !visitor.getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
-            // Performance fast path: bug 3209. Don't use this when using expression elaboration, which is smarter
-            return new SystemFunctionCall.Optimized(this, arguments) {
-                @Override
-                @CSharpModifiers(code = {"public", "override"})
-                public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-                    String s0 = getArg(0).evaluateAsString(context).toString();
-                    String s1 = getArg(1).evaluateAsString(context).toString();
-                    return s0.contains(s1);
-                }
-
-                @Override
-                @CSharpModifiers(code = {"public", "override"})
-                public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) {
-                    return this;
-                }
-            };
-        } else {
-            return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
-        }
-    }
-
 
     @Override
     public boolean isSubstringMatchingFunction() {
@@ -121,8 +75,8 @@ public class Contains extends CollatingFunctionFixed {
             assert collation != null;
             final String name = fnc.getFunctionName().getLocalPart();
             if (collation == CodepointCollator.getInstance()) {
-                final StringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForString(true);
-                final StringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForString(true);
+                final StringEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForString(true);
+                final StringEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForString(true);
                 switch (name) {
                     case "contains":
                         return context -> arg0Eval.eval(context).contains(arg1Eval.eval(context));
@@ -134,8 +88,8 @@ public class Contains extends CollatingFunctionFixed {
                         throw new UnsupportedOperationException();
                 }
             } else {
-                final UnicodeStringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForUnicodeString(true);
-                final UnicodeStringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForUnicodeString(true);
+                final UnicodeStringEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForUnicodeString(true);
+                final UnicodeStringEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForUnicodeString(true);
                 switch (name) {
                     case "contains":
                         return context -> {

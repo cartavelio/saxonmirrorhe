@@ -179,7 +179,7 @@ public class Exists extends Aggregate {
         public BooleanEvaluator elaborateForBoolean() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            PullEvaluator puller = makeElaborator(arg).elaborateForPull();
+            PullEvaluator puller = arg.makeElaborator().elaborateForPull();
             return context -> {
                 SequenceIterator iter = puller.iterate(context);
                 Item nextItem = iter.next();

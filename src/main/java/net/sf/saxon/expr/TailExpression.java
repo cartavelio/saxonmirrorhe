@@ -222,7 +222,7 @@ public class TailExpression extends UnaryExpression {
 
         public PullEvaluator elaborateForPull() {
             final TailExpression expr = (TailExpression) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             final int start = expr.getStart();
 
             return context -> {

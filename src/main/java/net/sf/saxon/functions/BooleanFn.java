@@ -172,7 +172,7 @@ public class BooleanFn extends SystemFunction {
         public BooleanEvaluator elaborateForBoolean() {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             Expression arg = fnc.getArg(0);
-            return makeElaborator(arg).elaborateForBoolean();
+            return arg.makeElaborator().elaborateForBoolean();
         }
 
     }

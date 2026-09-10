@@ -12,7 +12,6 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
@@ -297,9 +296,9 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
             // If this function contains tail calls, we evaluate it eagerly, because
             // the caller needs to know whether a tail call was returned or not: if we
             // return a Closure, the tail call escapes into the wild and can reappear anywhere...
-            bodyEvaluator = Elaborator.makeElaborator(getBody()).eagerly();
+            bodyEvaluator = getBody().makeElaborator().eagerly();
         } else {
-            bodyEvaluator = Elaborator.makeElaborator(getBody()).lazily(true);
+            bodyEvaluator = getBody().makeElaborator().lazily(true);
         }
     }
 

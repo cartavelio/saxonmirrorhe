@@ -221,7 +221,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
         public BooleanEvaluator elaborateForBoolean() {
             CompareToIntegerConstant expression = (CompareToIntegerConstant) getExpression();
             Expression arg = expression.getBaseExpression();
-            ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
+            ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
             int operator = expression.getComparisonOperator();
             long comparand = expression.getComparand();
 

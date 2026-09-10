@@ -682,8 +682,8 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         @Override
         public PullEvaluator elaborateForPull() {
             ForEach forEach = (ForEach) getExpression();
-            PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
-            PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
+            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+            PullEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPull();
             ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
             return context -> {
                 XPathContextMinor c2 = context.newMinorContext();
@@ -695,15 +695,15 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         @Override
         public PushEvaluator elaborateForPush() {
             ForEach forEach = (ForEach)getExpression();
-            PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
-            PushEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPush();
+            PullEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForPull();
+            PushEvaluator action = forEach.getActionExpression().makeElaborator().elaborateForPush();
             return (out, context) -> {
                 XPathContextMinor c2 = context.newMinorContext();
                 FocusIterator iter = c2.trackFocus(select.iterate(context));
                 TailCall tc = null;
                 while (iter.next() != null) {
                     dispatchTailCall(tc);
-                    tc = action.process(out, c2);
+                    tc = action.processLeavingTail(out, c2);
                 }
                 return tc;
             };

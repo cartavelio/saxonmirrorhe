@@ -9,6 +9,10 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.EagerEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -119,17 +123,18 @@ public class LocalParamBlock extends Instruction {
     /*@Nullable*/
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        for (Operand o : operands()) {
-            LocalParam param = (LocalParam)o.getChildExpression();
-            try {
-                context.setLocalVariable(param.getSlotNumber(), param.getSelectValue(context));
-            } catch (XPathException e) {
-                e.maybeSetLocation(param.getLocation());
-                e.maybeSetContext(context);
-                throw e;
-            }
-        }
-        return null;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
+//        for (Operand o : operands()) {
+//            LocalParam param = (LocalParam)o.getChildExpression();
+//            try {
+//                context.setLocalVariable(param.getSlotNumber(), param.getSelectValue(context));
+//            } catch (XPathException e) {
+//                e.maybeSetLocation(param.getLocation());
+//                e.maybeSetContext(context);
+//                throw e;
+//            }
+//        }
+//        return null;
     }
 
     /**
@@ -141,6 +146,30 @@ public class LocalParamBlock extends Instruction {
     @Override
     public int getImplementationMethod() {
         return PROCESS_METHOD;
+    }
+
+    public Elaborator getElaborator() {
+        return new LocalParamBlockElaborator();
+    }
+
+    public static class LocalParamBlockElaborator extends PushElaborator {
+
+        EagerEvaluator[] paramEval;
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            LocalParamBlock expr = (LocalParamBlock) getExpression();
+            paramEval = new EagerEvaluator[expr.operanda.length];
+            for (int i=0; i<expr.operanda.length; i++) {
+                paramEval[i] = expr.operanda[i].getChildExpression().makeElaborator().eagerly();
+            }
+            return (out, context) -> {
+                for (EagerEvaluator eagerEvaluator : paramEval) {
+                    eagerEvaluator.evaluate(context);
+                }
+                return null;
+            };
+        }
     }
 
 

@@ -93,8 +93,8 @@ public class QNameFn extends SystemFunction {
 
         public ItemEvaluator elaborateForItem() {
             SystemFunctionCall sfc = (SystemFunctionCall) getExpression();
-            ItemEvaluator arg0eval = makeElaborator(sfc.getArg(0)).elaborateForItem();
-            ItemEvaluator arg1eval = makeElaborator(sfc.getArg(1)).elaborateForItem();
+            ItemEvaluator arg0eval = sfc.getArg(0).makeElaborator().elaborateForItem();
+            ItemEvaluator arg1eval = sfc.getArg(1).makeElaborator().elaborateForItem();
             return context -> expandedQName((StringValue)arg0eval.eval(context), (StringValue)arg1eval.eval(context));
         }
 

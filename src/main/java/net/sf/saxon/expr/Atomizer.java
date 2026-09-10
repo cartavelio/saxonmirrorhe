@@ -650,7 +650,7 @@ public final class Atomizer extends UnaryExpression {
 
         public PullEvaluator elaborateForPull() {
             final Atomizer expr = (Atomizer) getExpression();
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             final boolean oneToOne = expr.isUntyped() && expr.getBaseExpression().getItemType() instanceof NodeTest;
             return context -> {
                 SequenceIterator base = baseEval.iterate(context);
@@ -661,7 +661,7 @@ public final class Atomizer extends UnaryExpression {
         @Override
         public ItemEvaluator elaborateForItem() {
             final Atomizer expr = (Atomizer) getExpression();
-            final ItemEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForItem();
+            final ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
             return context -> {
                 Item it = baseEval.eval(context);

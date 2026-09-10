@@ -298,7 +298,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
             if (expr.getRoleSupplier() != null) {
                 mapper.setErrorCode(expr.getRoleSupplier().get().getErrorCode());
             }
-            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final PullEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             return context -> {
                 SequenceIterator base = baseEval.iterate(context);
                 return new ItemMappingIterator(base, mapper, true);
@@ -308,7 +308,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         @Override
         public ItemEvaluator elaborateForItem() {
             final AtomicSequenceConverter expr = (AtomicSequenceConverter) getExpression();
-            final ItemEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForItem();
+            final ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
             final Converter converter = expr.getConverter();
             assert converter != null;
             final boolean nullable = Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
