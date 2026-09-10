@@ -315,11 +315,23 @@
 		<section id="maps" title="Maps">
 			<h1>Maps</h1>
 
-			<aside>Since Saxon 9.7, maps are available in all Saxon editions. Before this, maps were
-				available as an advanced feature in the XPath 3.0 implementation in Saxon-PE and higher, since
-				Saxon 9.5.</aside>
-
-			<p>An important new feature in XPath 3.1 was the definition of maps.</p>
+		
+			<p>Maps were first introduced in XSLT 3.0 and in XPath 3.1. They correspond to the structures
+				known as <emph>dictionaries</emph> or <emph>associative arrays</emph> in other languages,
+				(or as <emph>objects</emph> in Javascript). There were two main motivations:</p>
+			
+			<ul>
+				<li><p>In streaming applications, it is not possible to visit nodes in a streamed XML
+				document more than once. There is therefore a requirement for a flexible data structure
+				that can be used to retain data that will be needed later in the processing.</p></li>
+				<li><p>Maps are needed for faithful representation of JSON input.</p></li>
+			</ul>
+			
+			<p>Once established for these purposes, maps found other uses, notably as a way of passing
+			more complex options as function arguments, and for returning composite function results.</p>
+			
+			<aside>Maps appeared in Saxon as a vendor extension before finding their
+				way into the standards. They were first introduced in Saxon 9.5.</aside>
 
 			<p>A map is a kind of XDM item (alongside nodes and atomic values). In fact, a map is a
 				kind of function: you can think of it as a function defined extensionally (by tabulating
@@ -327,17 +339,23 @@
 				means of an algorithm).</p>
 
 			<p>A map is a set of entries. Each entry is a key-value pair. The <i>key</i> is always an
-				atomic item. The <i>value</i> is any XDM value: a sequence of nodes, atomic item,
+				atomic item (it does not have to be a string). 
+				The <i>value</i> is any XDM value: a sequence of nodes, atomic item,
 				functions, or maps.</p>
+			
+			<aside>The 4.0 specifications use the term <emph>atomic item</emph> where earlier
+			versions used <emph>atomic value</emph>.</aside>
 
 			<p>Maps, like sequences, are immutable. When you add an entry to a map, you get a new map;
 				the original is unchanged. Saxon provides an efficient implementation of maps that
 				achieves this without copying the whole map every time an entry is added.</p>
 
-			<p class="qt4">Since XPath 4.0, the entries in a map are ordered. Prior to that, order was not
-				preserved. </p>
+			<p class="qt4">Since XPath 4.0, the entries in a map are ordered. This means that when
+				a map is constructed using a map constructor expression, or by parsing JSON, the order
+				of entries is preserved. Prior to 4.0, order was not significant. In Saxon 13, map order
+			   is preserved whether or not XPath 4.0 features are enabled.</p>
 
-			<p>Also like sequences, maps do not have an intrinsic type of their own, but rather have a
+			<p>Like sequences, maps do not have an intrinsic type of their own, but rather have a
 				type that can be inferred from what they contain. A map conforms to the type
 					<code>map(K, V)</code> if all the keys are of type <code>K</code> and all the values
 				are of type <code>V</code>. For example if the keys are all strings, and the values are
@@ -348,9 +366,7 @@
 			<ul>
 				<li>
 					<p>If the number of entries is known, you can use the constructor syntax <code>map {
-							key : value, key : value, ... }</code>. (A previous version of the spec used
-							"<code>:=</code>" rather than <code>":"</code> as the separator, since Saxon
-						9.7 this alternative is no longer supported.) Here the keys and values can be any
+							key : value, key : value, ... }</code>. Here the keys and values can be any
 						"simple expression" (an expression not containing a top-level comma). If the keys
 						and values are all known statically, you might write: <code>map { "a" : 1, "e" :
 							2, "i" : 3, "o" : 4, "u" : 5 }</code>. You can use this construct anywhere an
@@ -364,22 +380,36 @@
 						used to construct a map where the number of entries is not known statically: for
 						example <code>map:merge(for $i in 49 to 57 return map{$i :
 							codepoints-to-string($i)})</code>.</p>
-					<p>(In previous working drafts, this function was named <code>map:new()</code>, but
-						this name is no longer supported since Saxon 9.7.)</p>
+					
 				</li>
 				<li>
 					<p>A single-entry map can also be constructed using the function
 							<code>map:entry($key, $value)</code>.</p>
 				</li>
+				<li>
+					<p class="qt4">XPath 4.0 introduces the function <a class="bodylink code" href="/functions/map/merge">map:build</a>
+					This constructs a map from an input sequence supplied as the first argument. The second argument
+					is a function that computes the key for each input item; the third argument (if present) is a function
+					that computes the corresponding value. For example, <code>map:build(//employee, fn{@ssn})</code>
+					constructs a map that indexes employee elements by the value of their <code>@ssn</code> attribute.</p>
+				</li>
 			</ul>
 
-			<p>It is also possible to create maps using the XSLT instructions <a class="bodylink code"
+			<p>It is also possible to create maps using the XSLT 3.0 instructions <a class="bodylink code"
 					href="/xsl-elements/map">xsl:map</a> and <a class="bodylink code"
-					href="/xsl-elements/map-entry">xsl:map-entry</a>.</p>
+					href="/xsl-elements/map-entry">xsl:map-entry</a>. XSLT 4.0 introduces additional options
+			to control the handling of duplicate keys.</p>
 
 			<p>Given a map <code>$M</code>, the value corresponding to a given key <code>$K</code> can
-				be found either by invoking the map as a function: <code>$M($K)</code>, or by calling
-					<code>map:get($M, $K)</code>.</p>
+				be found in several different ways:</p>
+			
+			<ul>
+				<li><p>By invoking the map as a function: <code>$M($K)</code></p></li>
+				<li><p>By calling <code>map:get($M, $K)</code></p></li>
+				<li><p>By using a lookup expression: <code>$M ? $K</code></p></li>
+				<li><p class="qt4">In XPath 4.0, with a path expression: <code>$M/child::get($K)</code></p></li>
+			</ul>
+			
 
 			<p>The summary of the full list of functions that operate on maps is as follows; for full
 				details see the <a class="bodylink" href="/functions/map">Functions library</a>. The
@@ -460,18 +490,33 @@
 			</ul>
 			
 			<div class="qt4">
-				<p>TODO give more details about 4.0 changes</p>
-				<p>XPath 4.0 introduces some changes for map items:</p>
+				<p>The main changes introduced for map items in XPath 4.0 and XSLT 4.0 are:</p>
 				<ul>
 					<li>
-						<p>constructors are added</p>
+						<p>The items in a map are now ordered.</p>
 					</li>
 					<li>
-						<p>the single accessor function is now an iterator over the key/value pairs in the
-							map</p>
+						<p>Various functions (<code>map:merge</code>, <code>map:build</code>) and
+						instructions (<code>xsl:map</code>) provide detailed control over how duplicate
+						entries are handled.</p>
 					</li>
 					<li>
-						<p>the items in a map are now ordered</p>
+						<p>A variant of the XPath <code>for</code> expression (or in XQuery, the
+							FLWOR expression) is introduced to allow iterative processing of the entries
+							in a map, in order: for example <code>string-join(for key $k value $v return `{$k}="{$v}"`)</code>
+							produces a string representation of the map contents.
+							(This example also uses the new XPath 4.0 construct of string templates).</p>
+					</li>
+					<li>
+						<p>Trees of maps and arrays (called JTrees, made up of JNodes) can be processed using
+						path expressions, in the same way as trees of XML nodes (now called XNodes when there
+						is a need to make the distinction).</p>
+					</li>
+					<li>
+						<p>The type system allows maps whose keys are statically known to be described
+						using a <emph>record type</emph>: for example <code>record(first, middle, last)</code>
+						describes the type of a map having three entries with keys <code>"first"</code>,
+						<code>"middle"</code>, and <code>"last"</code>.</p>
 					</li>
 				</ul>
 			</div>
@@ -482,9 +527,11 @@
 
 			<aside>Since Saxon 9.7, arrays are available in all Saxon editions.</aside>
 
-			<p>XPath 3.1 introduced arrays as a new data type. (Unlike maps, arrays are not defined for
-				use in XSLT 3.0 unless XPath 3.1 is supported. But Saxon's XSLT 3.0 implementation
-				always supports XPath 3.1.)</p>
+			<p>XPath 3.1 introduced arrays as a new data type, with limited support
+				in XSLT 3.0.</p>
+			
+			<aside>In Saxon, arrays were first introduced in Saxon 9.7, with additional XSLT support
+				available in Saxon-PE and Saxon-EE via vendor extensions.</aside>
 			<p>The main reason arrays were introduced was to allow JSON data structures to be
 				represented faithfully. However there are many other ways you can take advantage of
 				arrays.</p>
