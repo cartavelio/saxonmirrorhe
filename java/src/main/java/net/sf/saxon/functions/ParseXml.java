@@ -29,11 +29,12 @@ import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXParseException;
+import org.xml.sax.*;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,10 +45,13 @@ public class ParseXml extends SystemFunction implements Callable {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter parseOptions = new OptionsParameter(version);
+        parseOptions.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         parseOptions.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
         parseOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        parseOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.getInstance());
         parseOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
+        parseOptions.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return parseOptions;
     }
 
@@ -127,6 +131,34 @@ public class ParseXml extends SystemFunction implements Callable {
             } else {
                 throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "FODC0008");
             }
+
+            val = checkedOptions.get("allow-external-entities");
+            if (val != null && !val.effectiveBooleanValue()) {
+                parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
+
+                    @Override
+                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                        throw new SAXException(
+                                new XPathException("The parse-xml input references '" + systemId +
+                                                       "' but external entity expansion is disallowed", "FODC0006"));
+                    }
+                });
+//                parseOptions = parseOptions
+//                        .withParserFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false)
+//                        .withParserFeature("http://xml.org/sax/features/external-general-entities", false)
+//                        .withParserFeature("http://xml.org/sax/features/external-parameter-entities", false)
+//                        .withParserFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            }
+
+            val = checkedOptions.get("entity-expansion-limit").head();
+            if (val != null) {
+                parseOptions = parseOptions
+                        .withParserFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false)
+                        .withParserFeature("http://xml.org/sax/features/external-general-entities", false)
+                        .withParserFeature("http://xml.org/sax/features/external-parameter-entities", false)
+                        .withParserFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            }
+
             val = checkedOptions.get("strip-space");
             if (val != null) {
                 parseOptions = parseOptions.withSpaceStrippingRule(
@@ -135,6 +167,12 @@ public class ParseXml extends SystemFunction implements Callable {
                                     ? IgnorableSpaceStrippingRule.getInstance()
                                     : AllElementsSpaceStrippingRule.getInstance()
                                 : NoElementsSpaceStrippingRule.getInstance());
+            }
+
+            val = checkedOptions.get("xinclude");
+            if (val != null && val.effectiveBooleanValue()) {
+                parseOptions = parseOptions.withXIncludeAware(true);
+                //throw new XPathException("XIncude processing in fn:parse-xml is not supported", "FODC0013");
             }
         }
 
