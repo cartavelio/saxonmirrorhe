@@ -601,9 +601,7 @@ public class REMatcher {
         // Try a match at each position
         while (pos < len && match(in, pos)) {
             // Append chars from input string before match
-            for (int i = pos; i < getParenStart(0); i++) {
-                sb.append(in.codePointAt(i));
-            }
+            sb.append(in.substring(pos, getParenStart(0)));
 
             if (firstMatch) {
                 simpleReplacement = program.flags.isLiteral();
@@ -693,10 +691,13 @@ public class REMatcher {
 
         }
 
-        // If there's remaining input, append it
-        for (int i = pos; i < len; i++) {
-            sb.append(in.codePointAt(i));
+        // If no matches were found, return the input unchanged
+        if (firstMatch) {
+            return in;
         }
+
+        // If there's remaining input, append it
+        sb.append(in.substring(pos, len));
 
         // Return string buffer
         return sb.toUnicodeString();
