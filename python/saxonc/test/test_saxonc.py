@@ -565,6 +565,16 @@ def testXslMessageToListWithClear(saxonproc):
     assert messages is not None
     assert messages.size == 1
 
+def test_xpath_proc_get_property(saxonproc):
+    try:
+        xpath_proc = saxonproc.new_xpath_processor()
+        result = xpath_proc.get_property('s')
+        assert result is None
+    except Exception as e:
+        print(e)
+        assert False
+
+
 
 def testEmbeddedStylesheet(saxonproc, data_dir):
     trans = saxonproc.new_xslt30_processor()

@@ -3621,7 +3621,7 @@ cdef class PyXPathProcessor:
         """
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_name = py_name_string if name is not None else ""
-        cdef const char* c_string = self.thisxpptr.getProperty(name)
+        cdef const char* c_string = self.thisxpptr.getProperty(c_name)
         py_string_i = make_py_str(c_string)
         return py_string_i
 
