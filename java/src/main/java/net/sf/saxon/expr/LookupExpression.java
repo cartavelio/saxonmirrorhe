@@ -139,6 +139,9 @@ public class LookupExpression extends BinaryExpression {
         getLhs().typeCheck(visitor, contextInfo);
 
         ItemType containerType = getLhsExpression().getItemType();
+        if (containerType == ErrorType.getInstance()) {
+            return getLhsExpression();
+        }
         isArrayLookup = containerType instanceof ArrayItemType;
         isMapLookup = containerType instanceof MapType;
         //#if CSHARP==false

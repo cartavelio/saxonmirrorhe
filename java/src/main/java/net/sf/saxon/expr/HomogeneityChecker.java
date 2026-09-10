@@ -57,7 +57,7 @@ public class HomogeneityChecker extends UnaryExpression {
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         ItemType type = getBaseExpression().getItemType();
         if (type.equals(ErrorType.getInstance())) {
-            return Literal.makeEmptySequence();
+            return getBaseExpression();
         }
         Affinity rel = th.relationship(type, AnyGNodeType.getInstance());
         if (rel == Affinity.DISJOINT) {
