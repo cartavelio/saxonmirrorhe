@@ -22,7 +22,7 @@ import net.sf.saxon.trans.XPathException;
  * xsl:array-member element in stylesheet - XSLT 4.0 proposal.
  * The xsl:array-member element has the same content model as xsl:sequence. It evaluates the expression
  * in its select attribute or its contained sequence constructor, and wraps the resulting sequence
- * into an external object. This external object is recognized by the saxon:array instruction, and is
+ * into a value record. This value record is recognized by the xsl:array instruction, and is
  * converted into a single member of the array.
  * The instruction also allows xsl:extension-element-prefixes etc.
  */
@@ -44,7 +44,7 @@ public class XSLArrayMember extends XSLSequence {
         if (isInXsltNamespace()) {
             requireXslt40Element();
         } else if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-            compileError("xsl:array requires a Saxon-PE or -EE license");
+            compileError("xsl:array-member requires a Saxon-PE or -EE license");
         }
         if (getSelectExpression() == null) {
             setSelectExpression(compileSequenceConstructor(exec, decl, false));

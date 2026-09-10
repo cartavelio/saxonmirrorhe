@@ -1,8 +1,6 @@
 package com.saxonica.ee.trans;
 
 import com.saxonica.ee.xtupdate.*;
-import com.saxonica.trans.XSLArray;
-import com.saxonica.trans.XSLArrayMember;
 import com.saxonica.xsltextn.ExtensionElementCreator;
 import com.saxonica.xsltextn.style.*;
 
@@ -18,12 +16,6 @@ public abstract class SaxonElementFactoryEE {
      */
 
     public final static ExtensionElementCreator FACTORY = localname -> {
-        if (localname.equals("array")) {
-            return new XSLArray();
-        }
-        if (localname.equals("array-member")) {
-            return new XSLArrayMember();
-        }
         if (localname.equals("assign")) {
             return new SaxonAssign();
         }

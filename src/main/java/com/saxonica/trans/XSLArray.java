@@ -8,14 +8,8 @@
 package com.saxonica.trans;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StringLiteral;
-import net.sf.saxon.expr.instruct.ForEach;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.arrays.ArrayFunctionSet;
-import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.expr.instruct.ArrayInstr;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
@@ -33,7 +27,6 @@ import net.sf.saxon.trans.XPathException;
 
 public class XSLArray extends XSLSequence {
 
-    private Expression use;
 
     /**
      * Ask whether the element is in the XSLT namespace
@@ -55,16 +48,16 @@ public class XSLArray extends XSLSequence {
                 case "select":
                     setSelectExpression(makeExpression(value, att));
                     break;
-                case "use":
-                    use = makeExpression(value, att);
-                    break;
-                case "composite":
-                    compileWarning("XSLT 4.0 spec change: replace composite='yes' with use='?value'", "SXWN0001");
-                    boolean composite = processBooleanAttribute("composite", value);
-                    if (composite) {
-                        use = makeExpression("?value", att);
-                    }
-                    break;
+//                case "use":
+//                    use = makeExpression(value, att);
+//                    break;
+//                case "composite":
+//                    compileWarning("XSLT 4.0 spec change: replace composite='yes' with use='?value'", "SXWN0001");
+//                    boolean composite = processBooleanAttribute("composite", value);
+//                    if (composite) {
+//                        use = makeExpression("?value", att);
+//                    }
+//                    break;
                 default:
                     checkUnknownAttribute(attName);
                     break;
@@ -76,7 +69,6 @@ public class XSLArray extends XSLSequence {
 
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
-        use = typeCheck("use", use);
     }
 
     @Override
@@ -86,25 +78,27 @@ public class XSLArray extends XSLSequence {
         } else if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
             compileError("saxon:array requires a Saxon-PE or -EE license");
         }
-        if (getSelectExpression() == null) {
-            setSelectExpression(compileSequenceConstructor(exec, decl, false));
+        Expression select=getSelectExpression();
+        if (select == null) {
+            select = compileSequenceConstructor(exec, decl, false);
         }
+        return new ArrayInstr(select);
 
-        Expression functionCall;
-        if (use == null || use instanceof ContextItemExpression) {
-            SystemFunction build = ArrayFunctionSet.getInstance(40).makeFunction("build", 1);
-            functionCall = build.makeFunctionCall(getSelectExpression());
-        } else {
-            // compile xsl:array select="S" use="U" into array:of(S ! map:entry('value', U)).
-            SystemFunction mapEntry = MapFunctionSet.getInstance(40).makeFunction("entry", 2);
-            Expression mapEntryCall = mapEntry.makeFunctionCall(
-                    new StringLiteral("value"), use);
-            ForEach bangExpression = new ForEach(getSelectExpression(), mapEntryCall);
-            SystemFunction arrayOf = ArrayFunctionSet.getInstance(40).makeFunction("of-members", 1);
-            functionCall = arrayOf.makeFunctionCall(bangExpression);
-        }
-        ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);
-        return functionCall;
+//        Expression functionCall;
+//        if (use == null || use instanceof ContextItemExpression) {
+//            SystemFunction build = ArrayFunctionSet.getInstance(40).makeFunction("build", 1);
+//            functionCall = build.makeFunctionCall(getSelectExpression());
+//        } else {
+//            // compile xsl:array select="S" use="U" into array:of(S ! map:entry('value', U)).
+//            SystemFunction mapEntry = MapFunctionSet.getInstance(40).makeFunction("entry", 2);
+//            Expression mapEntryCall = mapEntry.makeFunctionCall(
+//                    new StringLiteral("value"), use);
+//            ForEach bangExpression = new ForEach(getSelectExpression(), mapEntryCall);
+//            SystemFunction arrayOf = ArrayFunctionSet.getInstance(40).makeFunction("of-members", 1);
+//            functionCall = arrayOf.makeFunctionCall(bangExpression);
+//        }
+//        ExpressionTool.copyLocationInfo(getSelectExpression(), functionCall);
+//        return functionCall;
     }
 
 }
