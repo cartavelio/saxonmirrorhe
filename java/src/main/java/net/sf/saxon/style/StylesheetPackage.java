@@ -43,7 +43,7 @@ import static net.sf.saxon.trans.Visibility.PRIVATE;
  */
 public class StylesheetPackage extends PackageData {
 
-    private final static boolean TRACING = true;
+    private final static boolean TRACING = false;
 
     private PackageVersion packageVersion = null;
     private String packageName;
