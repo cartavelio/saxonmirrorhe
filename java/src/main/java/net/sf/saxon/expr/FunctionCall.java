@@ -444,14 +444,11 @@ public abstract class FunctionCall extends Expression {
      */
 
     public static String plural(int num, String thing) {
-        switch (num) {
-            case 0:
-                return "no " + thing + "s";
-            case 1:
-                return "one " + thing;
-            default:
-                return num + " " + thing + "s";
-        }
+        return switch (num) {
+            case 0 -> "no " + thing + "s";
+            case 1 -> "one " + thing;
+            default -> num + " " + thing + "s";
+        };
     }
 
 
