@@ -118,7 +118,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
     val v = pythonVersion.version
     val buildDirectory = layout.buildDirectory.dir(v)
 
-    val venv = tasks.register<PythonVenv>("release_venv_${v}") {
+    val venvTask = tasks.register<PythonVenv>("release_venv_${v}") {
         pythonEnv = extension
         branch = manageBranches.currentBranch
         suffix = "${v}-release"
@@ -127,7 +127,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
     }
 
     val releaseWheelPlatformTagTask = tasks.register<WheelCompatibilityTags>("wheel_platform_tag_${v}") {
-        this.pythonExe = venv.map { it.pythonExe.get() }
+        this.pythonExe = venvTask.map { it.pythonExe.get() }
         manylinuxTarget = extension.manylinuxTarget
         macosxDeploymentTarget = pythonVersion.macOsMinVersion(targetHost)
     }
@@ -135,7 +135,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
     val repairDevWheel = wheelTasksBuilder {
         prefix = "${v}_release"
         sourceDir = pythonSrcDir
-        venvTask = venv
+        this.venvTask = venvTask
         buildDir = buildDirectory.map { it.dir("release") }
         platformTagTask = releaseWheelPlatformTagTask
         libsaxoncDir = libsaxoncReleaseArtifactsDir.elements
@@ -145,7 +145,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
     val installDevWheel = tasks.register<InstallLocalWheel>("install_${v}_release_wheel") {
         group = LifecycleBasePlugin.BUILD_GROUP
         description = "Install the release wheel into the branch's VENV"
-        pipExe = venv.map { it.pipExe.get() }
+        pipExe = venvTask.map { it.pipExe.get() }
         wheel = repairDevWheel.map { it.repairedWheel.get() }
         installedWheelDigest = layout.buildDirectory.file("installed-wheel-digest/${v}_release_wheel.txt")
     }
@@ -157,7 +157,7 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
     val pytestCopyDir = pytestCopy.map { it.destinationDir }
 
     val pipInstall = project.tasks.register<PipInstall>("${v}_pip_install") {
-        pipExe = venv.map { it.pipExe.get() }
+        pipExe = venvTask.map { it.pipExe.get() }
         requirements = pythonSrcDir.map { it.file("requirements.txt") }
     }
 
@@ -169,13 +169,26 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
         dependsOn(installDevWheel)
         dependsOn(pipInstall)
 
-        pytest = venv.map { it.venvBinHostedExe("pytest").get() }
+        pytest = venvTask.map { it.venvBinHostedExe("pytest").get() }
 
         workingDir = pythonSrcDir
         environment("SAXONC_HOME" to saxonBuild.saxonLicenseDir, "SAXONC_EDITION" to extension.edition)
 
         baseArgs("--import-mode=importlib", "--data-dir", pyTestData)
         tests("test")//, "tests")
+    }
+
+    val sphinxDocSources = createSphinxDocSourcesTask("${v}_sphinx-doc-sources", buildDirectory)
+
+    val sphinxDocTask = tasks.register<SphinxDoc>("${v}_sphinx-doc") {
+        group = LifecycleTasks.DOCUMENTATION_GROUP
+        description = "Build Sphinx docs for python ${v}"
+        venv = venvTask
+        overrides.put("version", saxonBuild.version)
+        overrides.put("release", saxonBuild.version)
+        docSrcDir = sphinxDocSources.map { it.destinationDir }
+        docBuildDir = buildDirectory.map { it.dir("doc/build") }
+        installedWheelDigest = installDevWheel.map { it.installedWheelDigest.get() }
     }
 
     releaseWheels {
@@ -339,17 +352,24 @@ val sourceFilesForRelease = tasks.register<Sync>("source_files_for_release") {
 }
 val venvTask = venv
 
-val sphinxDocSources = tasks.register<Sync>("sphinx-doc-sources") {
-    val autostarRegex = Regex("""^\.\.\s+(?<directive>auto[^:]+)::\s+saxonche\.""")
-    into(layout.buildDirectory.dir("doc/source"))
-    from(layout.projectDirectory.dir("../saxonc/doc")) {
-        filter { line ->
-            if (line == ".. automodule:: saxonche") ".. automodule:: saxonc${extension.edition.get()}"
-            else if (autostarRegex.containsMatchIn(line)) autostarRegex.replace(line, ".. \${directive}:: saxonc${extension.edition.get()}.")
-            else line
+fun createSphinxDocSourcesTask(name: String, buildDir: Provider<Directory>): TaskProvider<Sync> {
+    return tasks.register<Sync>(name) {
+        val autostarRegex = Regex("""^\.\.\s+(?<directive>auto[^:]+)::\s+saxonche\.""")
+        into(buildDir.map { it.dir("doc/source") })
+        from(layout.projectDirectory.dir("../saxonc/doc")) {
+            filter { line ->
+                if (line == ".. automodule:: saxonche") ".. automodule:: saxonc${extension.edition.get()}"
+                else if (autostarRegex.containsMatchIn(line)) autostarRegex.replace(
+                    line,
+                    ".. \${directive}:: saxonc${extension.edition.get()}."
+                )
+                else line
+            }
         }
     }
 }
+
+val sphinxDocSources = createSphinxDocSourcesTask("sphinx-doc-sources", layout.buildDirectory)
 
 val sphinxDocTask = tasks.register<SphinxDoc>("sphinx-doc") {
     venv = venvTask
