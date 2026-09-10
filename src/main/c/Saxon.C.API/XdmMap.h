@@ -10,8 +10,6 @@
 #ifndef SAXON_XDM_MAP_h
 #define SAXON_XDM_MAP_h
 
-#include <map>
-
 #include "XdmArray.h"
 #include "XdmFunctionItem.h"
 #include <string>
@@ -236,7 +234,6 @@ public:
    * The caller is responsible for memory deallocation using `operator delete`.
    */
   const char *toString();
-
 
 };
 

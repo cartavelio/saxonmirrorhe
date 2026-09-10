@@ -48,15 +48,6 @@ public:
    */
   XdmItem(const XdmItem &item);
 
-
- XdmItem& operator=(const XdmItem &d) {
-  std::cerr << "XdmItem::operator=(" << std::endl;
-  value = d.value;
-  stringValue = d.stringValue;
-  itemToString = d.itemToString;
-  return *this;
- }
-
  bool operator==(const XdmItem& other) const
  {
   std::cerr<<"C++ XdmItem equals operator called !!!!"<<std::endl;
@@ -67,7 +58,6 @@ public:
   }
   return result != 0;*/
  }
-
 
   /**
    * Destructor method for XdmItem

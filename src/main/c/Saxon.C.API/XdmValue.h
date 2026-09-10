@@ -187,17 +187,12 @@ public:
   /**
     * Reset associated reference counts on XdmItems that have been relinquished - internal use only
     */
-  virtual void resetRelinquishedItems();
+  void resetRelinquishedItems();
 
   /**
     * Increment the ref count for a relinquished item only once - internal use only
     */
   void incrementRefCountForRelinquishedValue(int i);
-
- /**
-* Internal method to reset the underlying ObjectHandle value
-*/
- virtual void resetValue(int64_t newValue);
 
 protected:
   /**
@@ -214,7 +209,7 @@ protected:
     relinquished_values = nullptr;
     // relinquished_values[0] = 0;
    if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "XdmValue initialize called:" << " ob ref=" << (this)  << "ref="<<((long)jValues)<< std::endl;
+    std::cerr << "XdmValue initialize called:" << " ob ref=" << (this) << " ref=" <<((long)jValues) << std::endl;
    }
   }
 

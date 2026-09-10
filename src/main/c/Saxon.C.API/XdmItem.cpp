@@ -99,13 +99,11 @@ XDM_TYPE XdmItem::getType() { return XDM_ITEM; }
 
 XdmItem::~XdmItem() {
   SaxonProcessor::attachCurrentThread();
-#ifdef DEBUG
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmItem destructor called:" << refCount
               << " ob ref=" << (this) << " value =" << ((long)value)
               << std::endl;
   }
-#endif
   if (value > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
   }
@@ -123,25 +121,13 @@ void XdmItem::incrementRefCount() {
 #endif
 }
 
-
-void XdmItem::resetValue(int64_t newValue) {
-#ifdef DEBUG
-	if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr << "XdmItem resetItem called ref="<<((long)value) << std::endl;
-    }
-#endif
-  value = newValue;
-}
-
-void XdmItem::resetRelinquishedItems(){}
-
 void XdmItem::decrementRefCount() {
     if (refCount > 0)
         refCount--;
 #ifdef DEBUG
     if (getenv("SAXONC_DEBUG_FLAG")) {
         std::cerr << "after refCount-dec-xdmItem=" << refCount
-                  << " ob ref=" << (this) <<" ref="<<((long)value)<< std::endl;
+                  << " ob ref=" << (this) << " ref=" << ((long)value) << std::endl;
     }
 #endif
 }

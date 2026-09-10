@@ -3,7 +3,7 @@
 #include "XdmMap.h"
 
 XdmArray::XdmArray() : XdmFunctionItem(), arrayLen(0) {
-  int64_t processorDataRef = processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread);
+  int64_t processorDataRef = createProcessorData(SaxonProcessor::sxn_environ->thread);
   value = j_makeXdmArray(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
 
   j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);

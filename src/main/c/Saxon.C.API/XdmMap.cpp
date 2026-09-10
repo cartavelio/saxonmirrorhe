@@ -16,7 +16,7 @@ XdmMap::XdmMap() : XdmFunctionItem() {
 XdmMap::XdmMap(const XdmMap &d): XdmFunctionItem(d) {
 }
 
-XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) {}
+XdmMap::XdmMap(int64_t obj) : XdmFunctionItem(obj) { }
 
 const char *XdmMap::toString() {
   if (value == SXN_UNSET) {
@@ -28,8 +28,6 @@ const char *XdmMap::toString() {
 
   return str;
 }
-
-
 
 int XdmMap::mapSize() {
   if (value == SXN_UNSET) {
