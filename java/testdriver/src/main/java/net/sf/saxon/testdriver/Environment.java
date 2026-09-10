@@ -1,0 +1,1229 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2023 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+package net.sf.saxon.testdriver;
+
+import net.sf.saxon.Configuration;
+import net.sf.saxon.dom.DocumentWrapper;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.SimpleCollation;
+import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.lib.*;
+import net.sf.saxon.om.*;
+import net.sf.saxon.query.QueryResult;
+import net.sf.saxon.resource.AbstractResourceCollection;
+import net.sf.saxon.resource.ExplicitCollection;
+import net.sf.saxon.resource.ResourceLoader;
+import net.sf.saxon.resource.XmlResource;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.DecimalFormatManager;
+import net.sf.saxon.trans.DecimalSymbols;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.PrecompiledSchemaSource;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.transform.stax.StAXSource;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+
+import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
+import static net.sf.saxon.s9api.streams.Predicates.not;
+import static net.sf.saxon.s9api.streams.Steps.child;
+import static net.sf.saxon.testdriver.Xslt30TestSuiteDriverHE.isTrue;
+
+/**
+ * This class represents a collection of resources (source documents, schemas, collections etc) used for a number
+ * of test cases.
+ */
+
+public class Environment implements ResourceResolver {
+
+    public static class CatalogResource {
+        public File file;
+        public URL url;
+        public String mediaType;
+        public String encoding;
+        public String uri;
+        public XdmNode doc;
+    }
+
+    public Processor processor;
+    public XdmNode envNode;
+    public Map<String, XdmNode> sourceDocs = new HashMap<>();
+    public Map<String, String> streamedSecondaryDocs = new HashMap<>();
+    public String streamedContent;
+    public File streamedFile;
+    public String streamedInputValidation = "skip";
+    public XPathCompiler xpathCompiler;
+    public XQueryCompiler xqueryCompiler;
+    public XsltCompiler xsltCompiler;
+    public XsltExecutable xsltExecutable;
+    public XsdSchema xsdSchema;
+    public File exportedStylesheet;
+    public XdmItem contextItem;
+    public HashMap<QName, XdmValue> params = new HashMap<>();
+    public boolean usable = true;
+    public boolean definesStaticBaseUri = false;
+    public boolean failedToBuild = false;
+    public StringBuilder paramDeclarations = new StringBuilder(256);
+    public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
+    public UnparsedTextURIResolver unparsedTextResolver;
+    public List<ResetAction> resetActions = new ArrayList<>();
+    public boolean outputTree = true;
+    public boolean outputSerialize = false;
+    public Map<String, CatalogResource> catalogResources = new HashMap<>();
+    public Map<String, List<String>> jsCollections;
+    public boolean schemaAware = false;
+    public boolean validateSources = false;
+    public String initialWorkingDirectory = null;
+    public String initialExpathBaseDirectory = null;
+    public File sandpit = null;
+
+    /**
+     * Construct a local default environment for a test set
+     */
+
+    public static Environment createDefaultEnvironment(URI baseURI, boolean unfolded, Spec spec, TestDriver testDriver) {
+        final Environment environment = new Environment();
+        environment.processor = new Processor(!testDriver.driverProc.getSaxonEdition().equals("HE"));
+
+        if (unfolded) {
+            if (!"-".equals(testDriver.optimizerFlags)) {
+                System.err.println("The -unfolded option overrides optimizer flags. Using -fmnsvw.");
+            }
+            testDriver.optimizerFlags = "-fmnsvw";
+        }
+
+        environment.processor.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, testDriver.optimizerFlags);
+        //environment.processor.setConfigurationProperty(Feature.TRACE_OPTIMIZER_DECISIONS, true);
+
+        environment.xpathCompiler = environment.processor.newXPathCompiler();
+        environment.xpathCompiler.setBaseURI(baseURI);
+
+        environment.xqueryCompiler = environment.processor.newXQueryCompiler();
+        if (spec == Spec.XQ40 || spec == Spec.XP40) {
+            environment.xqueryCompiler.setLanguageVersion("4.0");
+            environment.xpathCompiler.setLanguageVersion("4.0");
+        }
+        environment.xqueryCompiler.setBaseURI(baseURI);
+        environment.xsltCompiler = environment.processor.newXsltCompiler();
+        if (testDriver.runWithJS) {
+            environment.xsltCompiler.setTargetEdition("JS");
+        }
+        if (environment.processor.getSaxonEdition().equals("EE")) {
+            environment.xsltCompiler.setJustInTimeCompilation(testDriver.jitFlag);
+        }
+        environment.xsltCompiler.setRelocatable(testDriver.relocatable);
+        if (spec == Spec.XT30) {
+            environment.xsltCompiler.setXsltLanguageVersion("3.0");
+            environment.xpathCompiler.setLanguageVersion("3.1");
+        } else if (spec == Spec.XT40) {
+            environment.xsltCompiler.setXsltLanguageVersion("4.0");
+            environment.xpathCompiler.setLanguageVersion("4.0");
+        } else if (spec == Spec.XT20) {
+            throw new AssertionError("Unsupported spec: XSLT 2.0");
+        }
+        if (unfolded && !baseURI.toString().contains("/upd/")) {
+            // Don't use code injection for update queries because it affects "void" expressions
+            testDriver.addInjection(environment.xqueryCompiler);
+        }
+        if (testDriver.tracing) {
+            environment.xsltCompiler.setCompileWithTracing(true);
+        }
+        environment.processor.getUnderlyingConfiguration().setDefaultCollection(null);
+        environment.processor.setConfigurationProperty(Feature.STABLE_UNPARSED_TEXT, true);
+        return environment;
+    }
+
+    /**
+     * Construct an Environment
+     *
+     * @param xpc          the XPathCompiler used to process the catalog file
+     * @param envNode      the Environment element in the catalog file
+     * @param environments the set of environments to which this one should be added (may be null)
+     * @return the constructed Environment object
+     * @throws SaxonApiException if it fails
+     */
+
+    public static Environment processEnvironment(
+            final TestDriver driver,
+            XPathCompiler xpc, XdmNode envNode, Map<String, Environment> environments, Environment defaultEnvironment)
+            throws SaxonApiException {
+        Environment environment = new Environment();
+        environment.envNode = envNode;
+        String name = envNode.attribute("name");
+        if (name != null && !driver.quiet) {
+            System.err.println("Loading environment " + name);
+        }
+        boolean needsLicense = !driver.driverProc.getSaxonEdition().equals("HE");
+        environment.processor = new Processor(needsLicense);
+        if (needsLicense) {
+            environment.processor.getUnderlyingConfiguration()
+                    .importLicenseDetails(driver.driverProc.getUnderlyingConfiguration());
+        }
+        if (defaultEnvironment != null) {
+            environment.processor.setConfigurationProperty(Feature.XSD_VERSION,
+                    defaultEnvironment.processor.getConfigurationProperty(Feature.XSD_VERSION));
+        }
+        driver.prepareForSQL(environment.processor);
+        //AutoActivate.activate(environment.processor);
+
+        // TODO temporary
+        environment.processor.setConfigurationProperty(Feature.EXPATH_FILE_DELETE_TEMPORARY_FILES, true);
+        environment.processor.setConfigurationProperty(Feature.LINE_NUMBERING, true);
+
+        String xpVersion = driver.spec.version;
+        if (driver.spec.shortSpecName.equals("XT") && driver.spec.version.equals("3.0")) {
+            xpVersion = "3.1";
+        }
+        environment.xpathCompiler = environment.processor.newXPathCompiler();
+        environment.xpathCompiler.setBaseURI(envNode.getBaseURI());
+        environment.xpathCompiler.setLanguageVersion(xpVersion);
+        environment.xqueryCompiler = environment.processor.newXQueryCompiler();
+        environment.xqueryCompiler.setBaseURI(envNode.getBaseURI());
+        environment.xqueryCompiler.setLanguageVersion(xpVersion.equals("2.0") ? "3.1" : xpVersion);
+        if (driver.spec.shortSpecName.equals("XT")) {
+            environment.xsltCompiler = environment.processor.newXsltCompiler();
+            environment.xsltCompiler.setXsltLanguageVersion(driver.spec.version);
+            if (driver.runWithJS) {
+                environment.xsltCompiler.setTargetEdition("JS");
+            }
+            if (environment.processor.getSaxonEdition().equals("EE")) {
+                environment.xsltCompiler.setJustInTimeCompilation(driver.jitFlag);
+            }
+            environment.xsltCompiler.setRelocatable(driver.relocatable);
+        }
+
+        if (driver.unfolded && !envNode.getBaseURI().toString().contains("/upd/")) {
+            // Don't use code injection for update queries because it affects "void" expressions
+            driver.addInjection(environment.xqueryCompiler);
+        }
+
+        environment.sourceDocs = new HashMap<>();
+        if (environments != null && name != null) {
+            environments.put(name, environment);
+        }
+
+        for (XdmNode prop : envNode.children("http://saxon.sf.net/", "property")) {
+            String propName = prop.attribute("name");
+            String propValue = prop.attribute("value");
+            try {
+                environment.processor.setConfigurationProperty(propName, propValue);
+            } catch (Exception e) {
+                System.err.println("Failed to set property " + propName + ": " + e.getMessage());
+            }
+        }
+
+        // QT3 - dependency as sibling of environment
+        for (XdmNode dependency : envNode.getParent().children("dependency")) {
+            if (!driver.ensureDependencySatisfied(dependency, environment)) {
+                environment.usable = false;
+            }
+        }
+
+        // XSLT3 - dependencies as sibling of environment
+        for (XdmNode dependency : envNode.getParent().select(child("dependencies").then(child("*"))).asIterable()) {
+                //xpc.evaluate("../dependencies/*", env)) {
+            if (!driver.ensureDependencySatisfied(dependency, environment)) {
+                environment.usable = false;
+            }
+        }
+
+        // set the base URI if specified
+
+        setBaseUri(driver, xpc, envNode, environment);
+
+        // set any requested collations
+
+        registerCollations(xpc, envNode, environment);
+
+        // declare the requested namespaces
+
+        declareNamespaces(xpc, envNode, environment);
+
+        // load the requested schema documents
+
+        if (needsLicense && "EE".equals(driver.driverProc.getSaxonEdition()) /*xpc.isSchemaAware()*/) {
+            XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
+            environment.xsdSchema = loadSchemaDocuments(driver, xpc, envNode, environment, xsdCompiler);
+            if (environment.xsdSchema != null && environment.xsltCompiler != null) {
+                environment.xsltCompiler.setSchemaAware(true);
+            }
+        } else {
+            for (XdmNode schema : envNode.children("schema")) {
+                // If there's a schema, and we're in an HE/PE configuration, skip this test
+                environment.schemaAware = true;
+                environment.usable = false;
+            }
+        }
+
+        // set up the sandpit, if there is one
+        createSandpit(name, envNode, environment);
+
+        // load the requested source documents. Skip this step if exporting and schema-aware, as we will need to rebuild
+        // the documents with the schema contained in the imported stylesheet
+
+        if (!(driver.export && environment.schemaAware)) {
+            loadSourceDocuments(driver, environment, environment.xsdSchema);
+        }
+
+        // create a collection URI resolver to handle the requested collections
+
+        createCollectionUriResolver(driver, envNode, environment);
+
+        // create an unparsed text resolver to handle any unparsed text resources
+
+        createLocalResourceResolver(driver, xpc, envNode, environment);
+
+        // register any required decimal formats
+
+        registerDecimalFormats(driver, xpc, envNode, environment);
+
+        // declare any variables
+
+        declareExternalVariables(driver, xpc, envNode, environment);
+
+        // declare any output controls
+        declareOutputControls(driver, xpc, envNode, environment);
+
+        // handle requested context item
+        for (XdmNode param : envNode.children("context-item")) {
+            String select = param.attribute("select");
+            XdmValue value = xpc.evaluate(select, null);
+            environment.contextItem = value.itemAt(0);
+        }
+
+        // compile any stylesheet packages defined as part of the environment
+        // Support this only in EE - an unusable environment in PE/HE
+        for (XdmNode stylesheet : envNode.select(child("package")
+                                     .where(attributeEq("role", "secondary")))
+                                     .asIterable()) {
+            String fileName = stylesheet.attribute("file");
+            Source styleSource = new StreamSource(envNode.getBaseURI().resolve(fileName).toString());
+            try {
+                XsltPackage pkg = environment.xsltCompiler.compilePackage(styleSource);
+                environment.xsltCompiler.importPackage(pkg);
+                // Make the package available for use from fn:transform
+                environment.processor.getUnderlyingConfiguration().getDefaultXsltCompilerInfo().getPackageLibrary().addPackage(pkg.getUnderlyingPreparedPackage());
+            } catch (SaxonApiException e) {
+                e.printStackTrace();
+                driver.println("**** failure while compiling environment-defined stylesheet package " + fileName);
+                environment.failedToBuild = true;
+                environment.usable = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+                driver.println("****Failure " + e + " in compiling environment " + name);
+                environment.failedToBuild = true;
+                environment.usable = false;
+            }
+        }
+
+        // compile any stylesheet defined as part of the environment (only one allowed)
+        // use the XSLT processor version associated with the stylesheet/@version attribute
+        for (XdmNode stylesheet : envNode.select(child("stylesheet").where(not(attributeEq("role", "secondary")))).asIterable()) {
+            String fileName = stylesheet.attribute("file");
+            Source styleSource = new StreamSource(envNode.getBaseURI().resolve(fileName).toString());
+            try {
+                if (driver.export /* && !environment.schemaAware */) {
+                    if (driver.runWithJS) {
+                        String sourceFile = envNode.getBaseURI().resolve(fileName).toString();
+                        environment.exportedStylesheet = driver.exportStylesheet(environment.xsltCompiler, sourceFile);
+                    } else {
+                        File exportFile = new File(driver.resultsDir + "/export/" + name + ".sef");
+                        System.err.println("Exporting package to " + exportFile.getAbsolutePath());
+                        XsltPackage compiledPack = environment.xsltCompiler.compilePackage(styleSource);
+                        compiledPack.save(exportFile);
+                        environment.xsltExecutable = environment.xsltCompiler.loadExecutablePackage(exportFile.toURI());
+                        if (environment.schemaAware) {
+                            XsdSchema schema = environment.xsltExecutable.getImportedSchema("");
+                            Environment.loadSourceDocuments(driver, environment, schema);
+                        }
+                    }
+                } else {
+                    environment.xsltExecutable = environment.xsltCompiler.compile(styleSource);
+                }
+            } catch (SaxonApiException e) {
+                //e.printStackTrace();
+                driver.println(e.getMessage());
+                driver.println("**** failure while compiling environment-defined stylesheet " + fileName);
+                environment.failedToBuild = true;
+                environment.usable = false;
+            }
+        }
+
+        return environment;
+    }
+
+    private static void createSandpit(String name, XdmNode env, Environment environment) {
+        // handle sandpit
+        for (XdmNode param : env.children("sandpit")) {
+            String path = param.attribute("path");
+            try {
+                File tempdir = File.createTempFile(name + ".", ".sandpit");
+                boolean ok = tempdir.delete();
+                ok = ok && tempdir.mkdir();
+                File sandpit = new File(tempdir, "sandpit");
+                ok = ok && sandpit.mkdir();
+
+                if (ok) {
+                    environment.initialWorkingDirectory = System.getProperty("user.dir");
+                    environment.initialExpathBaseDirectory = System.getProperty("expath.base.directory");
+
+                    Path source = Paths.get(env.getBaseURI().resolve(path).getPath());
+                    Path dest = Paths.get(sandpit.getAbsolutePath());
+                    copyFolder(source, dest);
+                    environment.sandpit = sandpit;
+                    System.err.println("Sandpit: " + sandpit.getAbsolutePath());
+
+                    System.setProperty("user.dir", sandpit.getAbsolutePath());
+                    System.setProperty("expath.base.directory", sandpit.getAbsolutePath());
+                } else {
+                    System.err.println("Failed to make temporary directories for sandpit");
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to create sandpit: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void copyFolder(Path source, Path target,  CopyOption... options) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Files.createDirectories(target.resolve(source.relativize(dir).toString()));
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(file, target.resolve(source.relativize(file).toString()), options);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private static void declareOutputControls(TestDriver driver, XPathCompiler xpc, XdmItem env, Environment environment) throws SaxonApiException {
+        String needsSerialization = xpc.evaluate("string((output/@serialize,'no')[1])", env).toString();
+        environment.outputSerialize = "yes".equals(needsSerialization);
+        String needsTree = xpc.evaluate("string((output/@tree,'yes')[1])", env).toString();
+        environment.outputTree = "yes".equals(needsTree);
+
+    }
+
+    private static void setBaseUri(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) {
+        for (XdmNode base : env.children("static-base-uri")) {
+            String uri = base.attribute("uri");
+            if (uri == null || "#UNDEFINED".equals(uri)) {
+                environment.xqueryCompiler.setBaseURI(null);
+                driver.println("**** Error: The BaseURI values null and #UNDEFINED are not supported in this test driver");
+            } else {
+                try {
+                    environment.xpathCompiler.setBaseURI(new URI(uri));
+                    environment.xqueryCompiler.setBaseURI(new URI(uri));
+                } catch (URISyntaxException | IllegalArgumentException e) {
+                    driver.println("**** invalid base URI " + uri);
+                }
+            }
+            environment.definesStaticBaseUri = true;
+        }
+    }
+
+    private static void registerCollations(XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
+        for (XdmNode base : env.children("collation")) {
+            String uri = base.attribute("uri");
+            if (uri.equals("http://www.w3.org/2010/09/qt-fots-catalog/collation/caseblind") ||
+                    uri.equals("http://www.w3.org/xslts/collation/caseblind")) {
+                Configuration config = xpc.getProcessor().getUnderlyingConfiguration();
+                try {
+                    StringCollator collator = config.getCollation("http://saxon.sf.net/collation?ignore-case=yes");
+                    environment.processor.declareCollation(uri, ((SimpleCollation) collator).getComparator());
+                } catch (XPathException e) {
+                    throw new SaxonApiException(e);
+                }
+            }
+            String defaultAtt = base.attribute("default");
+            if (defaultAtt != null && (defaultAtt.trim().equals("true") || defaultAtt.trim().equals("1"))) {
+                environment.xpathCompiler.declareDefaultCollation(uri);
+                environment.xqueryCompiler.declareDefaultCollation(uri);
+                if (environment.xsltCompiler != null) {
+                    environment.xsltCompiler.declareDefaultCollation(uri);
+                }
+            }
+        }
+    }
+
+    private static void declareNamespaces(XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
+        for (XdmNode nsElement : env.children("namespace")) {
+            String prefix = nsElement.attribute("prefix");
+            String uri = nsElement.attribute("uri");
+            environment.xpathCompiler.declareNamespace(prefix, uri);
+            environment.xqueryCompiler.declareNamespace(prefix, uri);
+        }
+    }
+
+    private static XsdSchema loadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, XsdCompiler compiler) throws SaxonApiException {
+        if (!driver.hasEECapability()) {
+            return null;
+        }
+        environment.validateSources = false;
+        List<Source> sourceList = new ArrayList<>();
+        for (XdmNode schema : env.children("schema")) {
+            environment.schemaAware = true;
+            String role = schema.attribute("role");
+            String xsdVersion = schema.attribute("xsd-version");
+            if (compiler == null) {
+                driver.println("*** Processor is not schema aware");
+                environment.usable = false;
+                return null;
+            }
+            if (!driver.treeModel.isSchemaAware()) {
+                driver.println("*** Tree model is not schema aware");
+                environment.usable = false;
+                return null;
+            }
+            if (xsdVersion != null) {
+                compiler.setXsdVersion(xsdVersion);
+            } else {
+                compiler.setXsdVersion("1.0");
+            }
+            if (!"secondary".equals(role)) {
+                String href = schema.attribute("file");
+                String ns = schema.attribute("uri");
+                if (NamespaceConstant.FN.equals(ns)) {
+                    Configuration config = xpc.getProcessor().getUnderlyingConfiguration();
+                    compiler.setXsdVersion("1.1");
+                    sourceList.add(new PrecompiledSchemaSource(config.getSchemaForBuiltInNamespace(NamespaceUri.FN)));
+                }
+                if (href == null) {
+                    try {
+                        Source[] sources = compiler.getSchemaURIResolver().resolve(ns, null, new String[0]);
+                        sourceList.add(sources[0]);
+                        //manager.load(sources[0]);
+                    } catch (Exception e) {
+                        driver.println("*** Failed to load schema by URI: " + ns + " - " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else {
+                    File file = new File(env.getBaseURI().resolve(href));
+                    try {
+                        sourceList.add(new StreamSource(file));
+                    } catch (NullPointerException err) {
+                        err.printStackTrace();
+                        driver.println("*** NPE: Failed to load schema: " + href + " - " + err.getMessage());
+                    }
+                }
+                if ("source-reference".equals(role)) {
+                    environment.validateSources = true;
+                }
+                if ("stylesheet-import".equals(role)) {
+                    environment.xsltCompiler.setSchemaAware(true);
+                }
+            }
+        }
+        XsdSchema schema = null;
+        if (!sourceList.isEmpty()) {
+            try {
+                schema = compiler.compile(sourceList.toArray(new Source[0]));
+                if (environment.xqueryCompiler != null) {
+                    environment.xqueryCompiler.useSchema(schema);
+                }
+                if (environment.xsltCompiler != null) {
+                    environment.xsltCompiler.useSchema(schema);
+                }
+                if (environment.xpathCompiler != null) {
+                    environment.xpathCompiler.useSchema(schema);
+                }
+            } catch (SaxonApiException err) {
+                driver.println("*** Failed to load schema: " + err.getMessage());
+            }
+        }
+        return schema;
+    }
+
+    private static void declareExternalVariables(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
+        for (XdmNode param : env.children("param")) {
+            String varName = param.attribute("name");
+            XdmValue value;
+            String source = param.attribute("source");
+            if (source != null) {
+                XdmNode sourceDoc = environment.sourceDocs.get(source);
+                if (sourceDoc == null) {
+                    driver.println("**** Unknown source document " + source);
+                }
+                value = sourceDoc;
+            } else {
+                URI oldBase = xpc.getBaseURI();
+                xpc.setBaseURI(env.getBaseURI());
+                String select = param.attribute("select");
+                value = xpc.evaluate(select, null);
+                if (oldBase.isAbsolute()) {
+                    xpc.setBaseURI(oldBase);
+                }
+            }
+            boolean isStatic = isTrue("static").test(param);
+            QName varQName;
+            int colon = varName.indexOf(':');
+            if (colon >= 0) {
+                NamespaceResolver resolver = param.getUnderlyingNode().getAllNamespaces();
+                NamespaceUri namespace = resolver.getURIForPrefix(varName.substring(0, colon), false);
+                varQName = new QName(namespace.toString(), varName);
+            } else {
+                varQName = new QName(varName);
+            }
+            environment.xpathCompiler.declareVariable(varQName);
+            if (isTrue("declared").test(param)) {
+                // no action
+            } else {
+                environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+            }
+            if (isStatic) {
+                environment.xsltCompiler.setParameter(varQName, value);
+                System.err.println("set " + varQName + " = " + value);
+            } else {
+                environment.params.put(varQName, value);
+            }
+        }
+    }
+
+    private static void registerDecimalFormats(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
+        for (XdmNode decimalFormat : env.children("decimal-format")) {
+            DecimalFormatManager dfm = environment.xpathCompiler.getUnderlyingStaticContext().getDecimalFormatManager();
+
+            String formatName = decimalFormat.attribute("name");
+            StructuredQName formatQName = null;
+            if (formatName != null) {
+                if (formatName.indexOf(':') < 0) {
+                    formatQName = new StructuredQName("", NamespaceUri.NULL, formatName);
+                } else {
+                    try {
+                        formatQName = StructuredQName.fromLexicalQName((formatName), false, StructuredQName.QUPL,
+                                                                       decimalFormat.getUnderlyingNode().getAllNamespaces());
+                    } catch (XPathException e) {
+                        driver.println("**** Invalid QName as decimal-format name");
+                        formatQName = new StructuredQName("", NamespaceUri.NULL, "error-name");
+                    }
+                }
+                environment.paramDecimalDeclarations.append("declare decimal-format " + formatQName.getEQName() + " ");
+            } else {
+                environment.paramDecimalDeclarations.append("declare default decimal-format ");
+            }
+            DecimalSymbols symbols = formatQName == null ? dfm.getDefaultDecimalFormat() : dfm.obtainNamedDecimalFormat(formatQName);
+            symbols.setHostLanguage(HostLanguage.XQUERY, driver.spec.getNumericVersion());
+            for (XdmItem decimalFormatAtt : xpc.evaluate("@* except @name", (XdmNode) decimalFormat)) {
+                XdmNode formatAttribute = (XdmNode) decimalFormatAtt;
+                String property = formatAttribute.getNodeName().getLocalName();
+                UnicodeString value = formatAttribute.getUnicodeStringValue();
+                environment.paramDecimalDeclarations.append(property + "=\"" + value + "\" ");
+                try {
+                    symbols.setProperty(property, value);
+                } catch (XPathException e) {
+                    driver.println("**** " + e.getMessage());
+                }
+            }
+            environment.paramDecimalDeclarations.append(";");
+            try {
+                symbols.checkConsistency(formatQName);
+            } catch (XPathException err) {
+                driver.println("**** " + err.getMessage());
+            }
+
+        }
+    }
+
+    private static void createLocalResourceResolver(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
+        final HashMap<URI, Object> resources = new HashMap<>();
+        final HashMap<URI, String> encodings = new HashMap<>();
+        for (XdmNode resource : env.children("resource")) {
+            CatalogResource res = new CatalogResource();
+            res.uri = resource.attribute("uri");
+            String href = resource.attribute("file");
+            res.encoding = resource.attribute("encoding");
+            res.mediaType = resource.attribute("media-type");
+            if (href != null) {
+                Object obj = null;
+
+                if (href.startsWith("http")) {
+                    try {
+                        res.url = new URL(href);
+                        obj = res.url;
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    res.file = new File(env.getBaseURI().resolve(href));
+                    obj = res.file;
+                }
+                try {
+                    resources.put(new URI(res.uri), obj);
+                    encodings.put(new URI(res.uri), res.encoding);
+                    URI abs = resource.getBaseURI().resolve(res.uri);
+                    resources.put(abs, obj);
+                    encodings.put(abs, res.encoding);
+                    environment.catalogResources.put(abs.toString(), res);
+
+                } catch (URISyntaxException e) {
+                    driver.println("** Invalid URI in environment: " + e.getMessage());
+                }
+                if (res.mediaType != null && res.mediaType.endsWith("xquery")) {
+                    driver.registerXQueryModule(res.uri, res.file);
+                }
+            }
+
+        }
+        if (!resources.isEmpty()) {
+            environment.unparsedTextResolver = new LocalUnparsedTextResolver(resources, encodings);
+        }
+    }
+
+    private static class LocalUnparsedTextResolver extends StandardUnparsedTextResolver {
+
+        private final HashMap<URI, Object> resources;
+        private final HashMap<URI, String> encodings;
+
+        public LocalUnparsedTextResolver(HashMap<URI, Object> resources, HashMap<URI, String> encodings) {
+            this.resources = resources;
+            this.encodings = encodings;
+        }
+
+        @Override
+        public Reader resolve(URI absoluteURI, String encoding, Configuration config, boolean fallback) throws XPathException {
+            try {
+                Object obj = resources.get(absoluteURI);
+                String enc = encodings.get(absoluteURI);
+                if (encoding != null) {
+                    // If an encoding was supplied, check it even if we don't use it. Needed to pass QT3 test fn-unparsed-text-036
+                    try {
+                        Charset.forName(encoding);
+                    } catch (UnsupportedCharsetException e) {
+                        throw new XPathException("Unsupported encoding: " + encoding, "FOUT1190");
+                    }
+                }
+                if (enc == null) {
+                    enc = encoding;
+                }
+                if (obj instanceof File) {
+                    FileInputStream stream = new FileInputStream((File) obj);
+                    if (enc == null) {
+                        enc = "UTF-8";
+                    }
+                    return ResourceLoader.getReaderFromStream(stream, enc, fallback);
+                } else {
+                    return super.resolve(absoluteURI, encoding, config, fallback);
+                }
+            } catch (IOException e) {
+                throw new XPathException("Failed to resolve unparsed-text URI " + absoluteURI, e);
+            }
+        }
+    } 
+
+    private final static String DEFAULT_COLLECTION_URI = "http://www.w3.org/qt3-test-suite/default.collection.uri";
+
+    private static void createCollectionUriResolver(final TestDriver driver, XdmNode env, Environment environment) throws SaxonApiException {
+        if (!environment.usable) {
+            // Can't run collection tests with XQuery 1.0
+            return;
+        }
+
+        DocumentBuilder builder = environment.processor.newDocumentBuilder();
+        builder.setTreeModel(driver.treeModel);
+
+        final HashMap<String, ResourceCollection> collections = new HashMap<>();
+        AbstractResourceCollection collectioni = null;
+        final Configuration config = environment.processor.getUnderlyingConfiguration();
+        final XPathContext context = config.getConversionContext();
+        for (XdmNode coll : env.children("collection")) { //  xpc.evaluate("collection", env)) {
+            final List<Resource> resourcesi = new ArrayList<>();
+
+            String collectionURI = coll.attribute("uri");
+            if (collectionURI == null) {
+                collectionURI = "";
+            }
+
+            if (collectionURI.isEmpty()) {
+                collectionURI = DEFAULT_COLLECTION_URI;
+                config.setDefaultCollection(DEFAULT_COLLECTION_URI);
+            }
+            URI u;
+            try {
+                u = new URI(collectionURI);
+            } catch (URISyntaxException e) {
+                driver.println("**** Invalid collection URI " + collectionURI);
+                break;
+            }
+            if (!u.isAbsolute()) {
+                u = env.getBaseURI().resolve(collectionURI);
+                collectionURI = u.toString();
+            }
+
+            collectioni = new ExplicitCollection(config, collectionURI, resourcesi);
+
+            for (XdmNode source : coll.children("source")) {
+                String href = source.attribute("file");
+                String frag = null;
+                int hash = href.indexOf('#');
+                if (hash > 0) {
+                    frag = href.substring(hash + 1);
+                    href = href.substring(0, hash);
+                }
+                File file = new File(env.getBaseURI().resolve(href));
+                String xinc = source.attribute("xinclude");
+                XdmNode doc;
+                if ("true".equals(xinc)) {
+                    StreamSource ss = new StreamSource(file);
+                    AugmentedSource as = AugmentedSource.makeAugmentedSource(ss);
+                    as.setXIncludeAware(true);
+                    doc = builder.build(as);
+                } else {
+                    doc = builder.build(file);
+                }
+                if (frag != null) {
+                    XdmNode selected = (XdmNode) environment.xpathCompiler.evaluateSingle("id('" + frag + "')", doc);
+                    if (selected == null) {
+                        driver.println("**** Fragment not found: " + frag);
+                        break;
+                    }
+
+                    resourcesi.add(new XmlResource(context, selected.getUnderlyingNode()));
+                } else {
+                    resourcesi.add(new XmlResource(context, doc.getUnderlyingNode()));
+                }
+                environment.sourceDocs.put(href, doc);
+            }
+            for (XdmNode resource : coll.children("resources")) {
+                String uri = resource.attribute("uri");
+                String href = resource.attribute("file");
+                String encoding = resource.attribute("encoding");
+                String media = resource.attribute("media-type");
+                AbstractResourceCollection.InputDetails details = new AbstractResourceCollection.InputDetails();
+                details.encoding = encoding;
+                details.contentType = media;
+                if (href != null) {
+                    if (href.startsWith("http")) {
+                        try {
+                            details.resourceUri = href;
+                            URL url = new URL(href);
+                            URLConnection connection = url.openConnection();
+                            if (details.contentType == null) {
+                                details.contentType = connection.getContentType();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        File file = new File(env.getBaseURI().resolve(href));
+                        details.resourceUri = file.toURI().toString();
+                        try {
+                            Resource resourcej = collectioni.makeResource(context, details);
+                            if (resourcej != null) {
+                                resourcesi.add(resourcej);
+                            } else {
+                                driver.println("** Error in building collection environment: Resource " + href + " not found: ");
+                            }
+
+                        } catch (XPathException e) {
+                            driver.println("** Error in building collection environment: " + e.getMessage());
+                        }
+                        if (media != null && href.endsWith("xquery")) {
+                            driver.registerXQueryModule(uri, file);
+                        }
+                    }
+
+                }
+            }
+            for (XdmNode query : coll.children("query")) {
+                String queryExpr = query.getStringValue();
+                XQueryEvaluator evaluator = environment.xqueryCompiler.compile(queryExpr).load();
+                XdmValue result = evaluator.evaluate();
+
+                for (final XdmItem itemi : result) {
+                    resourcesi.add(new Resource() {
+                        @Override
+                        public String getResourceURI() {
+                            return "";
+                        }
+
+                        @Override
+                        public Item getItem() {
+                            return itemi.getUnderlyingValue();
+                        }
+
+                        @Override
+                        public String getContentType() {
+                            return null;
+                        }
+                    });
+                }
+            }
+            collections.put(collectionURI, collectioni);
+
+        }
+
+        if (collections != null) {
+            environment.processor.getUnderlyingConfiguration().setCollectionFinder(
+                    (cxt, collectionURI) -> {
+                        if (collectionURI == null) {
+                            collectionURI = "";
+                        }
+                        return collections.get(collectionURI);
+                    });
+
+        }
+
+        if (driver.runWithJS) {
+            environment.jsCollections = new HashMap<>();
+            for (Map.Entry<String, ResourceCollection> entry : collections.entrySet()) {
+                String uri = entry.getKey();
+                List<String> lexicalContents = new ArrayList<>();
+                ResourceCollection contents = entry.getValue();
+                try {
+                    Iterator<? extends Resource> iter = contents.getResources(context);
+                    while (iter.hasNext()) {
+                        Resource resource = iter.next();
+                        Item item = resource.getItem();
+                        if (item instanceof NodeInfo) {
+                            String lexicalXml = QueryResult.serialize((NodeInfo) item);
+                            lexicalContents.add(lexicalXml);
+                        }
+                    }
+                } catch (XPathException e) {
+                    e.printStackTrace();
+                }
+                environment.jsCollections.put(uri, lexicalContents);
+            }
+        }
+    }
+
+    public static void loadSourceDocuments(TestDriver driver, Environment environment, XsdSchema schema) throws SaxonApiException {
+
+        DocumentBuilder builder = environment.processor.newDocumentBuilder();
+        builder.setTreeModel(driver.treeModel);
+
+        XdmNode envNode = environment.envNode;
+
+        for (XdmNode source : envNode.children("source")) {
+
+            CatalogResource res = new CatalogResource();
+            String rawUri = source.attribute("uri");
+            String role = source.attribute("role");
+            boolean mutable = isTrue("mutable").test(source);
+            if (rawUri != null) {
+                res.uri = envNode.getBaseURI().resolve(rawUri).toString();
+                environment.catalogResources.put(res.uri, res);
+            } else if (".".equals(role)) {
+                environment.catalogResources.put("", res);
+            }
+            res.mediaType = source.attribute("media-type");
+            if ("application/xml".equals(res.mediaType)) {
+                // MHK 2016-04-07: why??
+                continue;
+            }
+            String validation = source.attribute("validation");
+            if (validation == null) {
+                validation = "skip";
+            }
+            String streaming = source.attribute("streaming");
+            TreeModel selectedTreeModel = builder.getTreeModel();
+            if (mutable && !selectedTreeModel.isMutable()) {
+                selectedTreeModel = TreeModel.LINKED_TREE;
+                builder.setTreeModel(selectedTreeModel);
+            }
+            if (!environment.validateSources && validation.equals("skip")) {
+                builder.setSchemaValidator(null);
+            } else if (schema == null) {
+                System.err.println("Validation requested but no schema supplied");
+                environment.usable = false;
+            } else {
+                if (!selectedTreeModel.isSchemaAware()) {
+                    builder.setTreeModel(TreeModel.TINY_TREE);
+                }
+                SchemaValidator validator = schema.newValidator();
+                validator.setLax("lax".equals(validation));
+                builder.setSchemaValidator(validator);
+                environment.xpathCompiler.setSchemaAware(true);
+                environment.xqueryCompiler.setSchemaAware(true);
+                if (environment.xsltCompiler != null) {
+                    environment.xsltCompiler.setSchemaAware(true);
+                }
+            }
+
+            String href = source.attribute("file");
+            String select = source.attribute("select");
+            String xinc = source.attribute("xinclude");
+            if ("true".equals(streaming)) {
+                if (".".equals(role)) {
+                    if (href == null) {
+                        environment.streamedContent = source.select("content").asNode().getStringValue();
+                    } else {
+                        environment.streamedFile = new File(envNode.getBaseURI().resolve(href));
+                        res.file = environment.streamedFile;
+                    }
+                    environment.streamedInputValidation = validation;
+                } else {
+                    File file = new File(envNode.getBaseURI().resolve(href));
+                    environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
+                    res.file = file;
+                }
+            } else if (driver.runWithJS || driver.isAltova) {
+                if (select != null) {
+                    driver.println("source select=path not supported by this test driver");
+                    environment.usable = false;
+                }
+                if (".".equals(role)) {
+                    if (href == null) {
+                        environment.streamedContent = source.select("content").asNode().getStringValue();
+                    } else {
+                        environment.streamedFile = new File(envNode.getBaseURI().resolve(href));
+                        res.file = environment.streamedFile;
+                    }
+                    environment.streamedInputValidation = validation;
+                } else {
+                    File file = new File(envNode.getBaseURI().resolve(href));
+                    environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
+                    res.file = file;
+                }
+            } else {
+                Source ss = null;
+                File file = null;
+                FileInputStream fileInputStream = null;
+                StringReader stringReader = null;
+                String baseUri = null;
+                if (href != null) {
+                    URI fileLoc = envNode.getBaseURI().resolve(href);
+                    baseUri = fileLoc.toString();
+                    if (fileLoc.getScheme().equals("file")) {
+                        file = new File(envNode.getBaseURI().resolve(href));
+                        if (res.uri == null) {
+                            res.uri = file.toURI().toString();
+                        }
+                        res.file = file;
+                    }
+                    try {
+                        if (file == null) {
+                            ss = new StreamSource(fileLoc.toString());
+                        } else {
+                            fileInputStream = new FileInputStream(file);
+                            if (driver.usePullParser && !"true".equals(xinc)) {
+                                try {
+                                    System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+                                    XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(
+                                            res.uri, fileInputStream);
+                                    ss = new StAXSource(parser);
+                                } catch (XMLStreamException e) {
+                                    driver.println("*** failed to pull-parse source document " + href);
+                                    continue;
+                                }
+                            } else {
+                                ss = new StreamSource(fileInputStream, res.uri);
+                            }
+                        }
+                        if ("true".equals(xinc)) {
+                            AugmentedSource as = AugmentedSource.makeAugmentedSource(ss);
+                            as.setXIncludeAware(true);
+                            ss = as;
+                        }
+                    } catch (FileNotFoundException e) {
+                        driver.println("*** failed to find source document " + href);
+                        continue;
+                    }
+                } else if (!source.select("content").asListOfNodes().isEmpty()) {
+                    // content is inline in the catalog
+                    baseUri = res.uri;
+                    if (res.uri == null) {
+                        baseUri = envNode.getBaseURI().toString();
+                    }
+                    String content = source.select("content").asNode().getStringValue();
+                    stringReader = new StringReader(content);
+                    ss = new StreamSource(stringReader, baseUri);
+                } else {
+                    // No href or content, construct an empty document
+                    ss = new StreamSource(new StringReader("<dummySource/>"));
+                }
+
+                if (selectedTreeModel.getName().equals("DOM") || selectedTreeModel.getName().equals("DOMINO")) {
+                    // create the DOM directly. Using a SAX parser plus document builder loses
+                    // entities and doctype nodes, which will be encountered in real life
+                    Document doc = null;
+                    try {
+                        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                        factory.setNamespaceAware(true);
+                        javax.xml.parsers.DocumentBuilder db = factory.newDocumentBuilder();
+                        if (file != null) {
+                            doc = db.parse(file);
+                        } else if (fileInputStream != null) {
+                            InputSource is = new InputSource(fileInputStream);
+                            is.setSystemId(baseUri);
+                            doc = db.parse(is);
+                        } else if (stringReader != null) {
+                            InputSource is = new InputSource(stringReader);
+                            is.setSystemId(baseUri);
+                            doc = db.parse(is);
+                        }
+                    } catch (ParserConfigurationException | IOException | SAXException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (selectedTreeModel.getName().equals("DOM")) {
+                        NodeInfo root = new DocumentWrapper(doc, res.uri, environment.processor.getUnderlyingConfiguration()).getRootNode();
+                        res.doc = (XdmNode) XdmValue.wrap(root);
+                    } else {
+                        res.doc = driver.makeDominoTree(doc, environment.processor.getUnderlyingConfiguration(), res.uri);
+                    }
+                    environment.sourceDocs.put(res.uri, res.doc);
+                } else { // Not DOM, typically create a TinyTree
+                    try {
+                        builder.setLineNumbering(true);
+                        res.doc = builder.build(ss);
+                        environment.sourceDocs.put(res.uri, res.doc);
+                        environment.sourceDocs.put(rawUri, res.doc);
+
+                    } catch (Exception e) {
+                        //e.printStackTrace();
+                        driver.println("*** failed to build source document " + href + " - " + e.getMessage());
+                    }
+                }
+
+                builder.setTreeModel(selectedTreeModel);
+
+                XdmItem selectedItem = res.doc;
+
+                if (select != null) {
+                    XPathSelector selector = environment.xpathCompiler.compile(select).load();
+                    selector.setContextItem(selectedItem);
+                    selectedItem = selector.evaluateSingle();
+                }
+
+                if (role != null) {
+                    if (".".equals(role)) {
+                        environment.contextItem = selectedItem;
+                    } else if (role.startsWith("$")) {
+                        String varName = role.substring(1);
+                        environment.params.put(new QName(varName), selectedItem);
+                        environment.xpathCompiler.declareVariable(new QName(varName));
+                        if (!isTrue("declared").test(source)) {
+                            environment.paramDeclarations.append("declare variable $" + varName + " external; ");
+                        }
+                    }
+                }
+            }
+
+            String definesStylesheet = source.attribute("defines-stylesheet");
+            if (definesStylesheet != null) {
+                definesStylesheet = definesStylesheet.trim();
+            }
+            if (("true".equals(definesStylesheet) || "1".equals(definesStylesheet)) && !driver.runWithJS) {
+                // try using an embedded stylesheet from the source document
+                try {
+                    Source styleSource = environment.xsltCompiler.getAssociatedStylesheet(
+                            ((XdmNode) environment.contextItem).asSource(), null, null, null);
+                    environment.xsltExecutable = environment.xsltCompiler.compile(styleSource);
+                } catch (SaxonApiException e) {
+                    driver.println("*** failed to compile stylesheet referenced in source document " + href);
+                    environment.failedToBuild = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * The environment acts as a ResourceResolver
+     */
+
+    @Override
+    public Source resolve(ResourceRequest request) throws XPathException {
+        XdmNode node = sourceDocs.get(request.relativeUri);
+        if (node == null) {
+            String uri;
+            String base = request.baseUri;
+            String href = request.relativeUri;
+            if (base == null) {
+                base = href;
+                href = "";
+            }
+            try {
+                uri = ResolveURI.makeAbsolute(href, base).toString();
+            } catch (URISyntaxException | IllegalArgumentException e) {
+                uri = href;
+            }
+            String val = streamedSecondaryDocs.get(uri);
+            if (val != null) {
+                Source source = new StreamSource(uri);
+                if (!val.equals("skip")) {
+                    source = AugmentedSource.makeAugmentedSource(source);
+                    ((AugmentedSource) source).setSchemaValidationMode(Validation.getCode(val));
+                }
+                return source;
+            } else {
+                return null;
+            }
+        } else {
+            return node.asSource();
+        }
+    }
+
+    public CatalogResource getContextDocument() {
+        return catalogResources.get("");
+    }
+
+
+    public abstract static class ResetAction {
+        public abstract void reset(Environment env);
+    }
+
+    public boolean cleanup() {
+        if (initialWorkingDirectory != null) {
+            System.setProperty("user.dir", initialWorkingDirectory);
+        }
+
+        if (initialExpathBaseDirectory != null) {
+            System.setProperty("expath.base.directory", initialExpathBaseDirectory);
+        }
+
+        if (sandpit != null) {
+            try {
+                deleteFolder(sandpit.toPath());
+            } catch (IOException e) {
+                System.err.println("Failed to cleanup sandpit: " + sandpit + ": " + e.getMessage());
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private void deleteFolder(Path folder) throws IOException {
+        Files.walkFileTree(folder, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+}
+
