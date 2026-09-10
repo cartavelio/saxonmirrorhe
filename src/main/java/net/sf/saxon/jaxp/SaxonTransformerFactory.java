@@ -17,6 +17,7 @@ import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.ConfigurationReader;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.XMLFilter;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.*;
@@ -328,6 +329,12 @@ public class SaxonTransformerFactory extends SAXTransformerFactory implements Co
                 break;
             case XMLConstants.ACCESS_EXTERNAL_STYLESHEET:
                 getConfiguration().setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, value.toString());
+                ResourceResolver resolver = getConfiguration().getResourceResolver();
+                if (resolver instanceof CatalogResourceResolver) {
+                    CatalogResourceResolver catres = (CatalogResourceResolver) resolver;
+                    catres.setFeature(ResolverFeature.ACCESS_EXTERNAL_DOCUMENT, value.toString());
+                    catres.setFeature(ResolverFeature.ACCESS_EXTERNAL_ENTITY, value.toString());
+                }
                 break;
             default:
                 getConfiguration().setConfigurationProperty(name, value);
