@@ -748,12 +748,14 @@
 
    </xsl:template>
    
-   <!-- Special-case Character.getType() -->
-   <!-- Note, the result is of type UnicodeCategory, which will cause problems if it is bound to a variable -->
+   <!-- Special-case methods on java.lang.Character -->
+   <!-- Note, the result fofr getType() is of type UnicodeCategory, which will cause problems if it is bound to a variable -->
    <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.lang.Character')]" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'getType#1':           'System.Globalization.CharUnicodeInfo.GetUnicodeCategory(%args%)',
+         'toLowerCase#1':     'System.Char.ToLowerInvariant(%args%)',
+         'toUpperCase#1':     'System.Char.ToUpperInvariant(%args%)',
          '*':                   '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
