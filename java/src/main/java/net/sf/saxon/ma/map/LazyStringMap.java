@@ -10,7 +10,6 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.MappedAtomicIterator;
@@ -176,7 +175,6 @@ public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePai
 
     private synchronized void prepare() {
         if (baseMap == null) {
-            Instrumentation.count("Map indexed");
             baseMap = new HashMap<>(keyList.size());
             for (int i = 0; i < keyList.size(); i++) {
                 baseMap.put(keyList.get(i), valueList.get(i));
@@ -365,7 +363,6 @@ public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePai
 
     private MapItem toGeneralMap() {
         //System.err.println("Dictionary rewrite!!!!");
-        Instrumentation.count("Map rewrite");
         io.vavr.collection.LinkedHashMap<UnicodeString, GroundedValue> baseMap = emptyBaseMap();
         for (int i = 0; i < keyList.size(); i++) {
             baseMap = baseMap.put(keyList.get(i), valueList.get(i));

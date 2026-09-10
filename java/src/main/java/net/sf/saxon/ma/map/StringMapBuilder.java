@@ -3,7 +3,6 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
@@ -182,7 +181,6 @@ public class StringMapBuilder {
             int hash1 = (int) (hash >> 20 & mask);
             int hash2 = (int) hash & mask;
             if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
-                Instrumentation.count("Bloom clash");
                 return true;
             }
             bloom.set(hash0);
