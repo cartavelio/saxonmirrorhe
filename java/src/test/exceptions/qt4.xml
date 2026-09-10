@@ -115,6 +115,19 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
+   <exception test-set="app-spec-examples" 
+      test-case=" fo-test-fn-build-dateTime-001
+                  fo-test-fn-build-dateTime-002
+                  fo-test-fn-build-dateTime-003
+                  fo-test-fn-parse-dateTime-001
+                  fo-test-fn-parse-dateTime-002
+                  fo-test-fn-parse-dateTime-003
+                  " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-02-10"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
    <exception test-set="fn-serialize" 
       test-case="serialize-xhtml-149" 
       run="false" report="n/a">
@@ -146,6 +159,8 @@
    <exception test-set="misc-BuiltInKeywords" 
       test-case=" Keywords-fn-scan-left-1
                   Keywords-fn-scan-right-1
+                  Keywords-fn-build-dateTime-1
+                  Keywords-fn-parts-of-dateTime-1
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-05"/>
@@ -179,6 +194,18 @@
       <created by="Michael Kay" on="2026-02-06"/>
       <reason>Test result challenged - see spec issue #1948</reason>
    </exception>
+   
+   <!--<exception test-set="bin-decode-string" 
+      test-case="bin-decode-string-032
+                  bin-decode-string-039
+                  bin-decode-string-046
+                  bin-decode-string-053" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-02-11"/>
+      <reason>Test result challenged - see qt4tests issue #325</reason>
+   </exception>-->
+   
+
    
    
    <!--<exception test-set="prod-PathExpr.J" 
