@@ -46,7 +46,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
         SequenceIterator base = getBaseIterator();
         int allocated = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 100;
 
-        values = new GroupToBeSorted[allocated];
+        values = new ObjectToBeSorted[allocated];
         count = 0;
 
         XPathContextMajor c2 = context.newContext();
@@ -89,8 +89,7 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        GroupToBeSorted[] groupArray = (GroupToBeSorted[]) values;
-        GroupToBeSorted thisGroup = groupArray[position - 1];
+        GroupToBeSorted thisGroup = (GroupToBeSorted)values[position - 1];
         ManualGroupIterator iter = new ManualGroupIterator(thisGroup.value, position);
         iter.setCurrentGroup(thisGroup.currentGroup);
         iter.setCurrentGroupingKey(thisGroup.currentGroupingKey);
