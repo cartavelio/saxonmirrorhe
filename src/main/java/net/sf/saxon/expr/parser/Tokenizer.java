@@ -48,14 +48,26 @@ public final class Tokenizer {
     @CSharpModifiers(code={"public", "const"})    // The transpiler handles this for int but not for char??
     public final static char NUL = (char)0;
 
+    /**
+     * Predicate indicating that tokenization should stop when the end of the input is reached
+     */
     public static Predicate<Tokenizer> END_OF_INPUT =
             tok -> tok.inputOffset >= tok.inputLength;
 
+    /**
+     * Predicate indicating that tokenization should stop when a "matching" closing curly brace is found
+     */
     public static Predicate<Tokenizer> CLOSING_CURLY =
             tok -> tok.inputOffset < tok.inputLength
                     && tok.input.charAt(tok.inputOffset) == '}'
                     && tok.braceDepth <= 0;
 
+    /**
+     * Get a predicate to indicate that tokenization should stop when a particular keyword is encountered. Used
+     * specifically in Gizmo.
+     * @param keyword the keyword that signals the end of an expression
+     * @return a suitable predicate
+     */
     public static Predicate<Tokenizer> finishOnKeyword(String keyword) {
         return tok -> tok.nextToken instanceof Token.NameToken
                 && ((Token.NameToken)tok.nextToken).getValue().equals(keyword);
@@ -63,19 +75,19 @@ public final class Tokenizer {
 
 
     /**
-     * The number identifying the most recently read token
+     * Token indicating end of tokenized input (not necessarily the end of the input string)
      */
     public Token currentToken = Token.EOF;
     /**
-     * The position in the input expression where the current token starts
+     * The position in the input string where the current token starts
      */
     public int currentTokenStartOffset = 0;
     /**
-     * The number of the next token to be returned
+     * The next token to be returned
      */
     private Token nextToken = Token.EOF;
     /**
-     * The position in the expression of the start of the next token
+     * The position in the input string of the start of the next token
      */
     private int nextTokenStartOffset = 0;
     /**
@@ -87,7 +99,7 @@ public final class Tokenizer {
      */
     public int inputOffset = 0;
     /**
-     * The length of the input string (in 2-byte chars)
+     * The length of the input string (Java characters)
      */
     private int inputLength;
     /**
@@ -104,25 +116,31 @@ public final class Tokenizer {
      */
 
     private int braceDepth = 0;
-    private Stack<Integer> braceDepthStack = new Stack<>();
-    private Stack<Predicate<Tokenizer>> finishConditionStack = new Stack<>();
+
     /**
-     * List containing the positions (offsets in the input string) at which newline characters
+     * A stack allowing the previous depth-of-curly-brace nesting to be saved. This is used
+     * when embedded expressions are nested (for example a string template within an embedded
+     * expression within another string template).
+     */
+    private final Stack<Integer> braceDepthStack = new Stack<>();
+
+    /**
+     * A stack allowing the previous finish condition to be saved. This is used
+     * when embedded expressions are nested (for example a string template within an embedded
+     * expression within another string template).
+     */
+    private final Stack<Predicate<Tokenizer>> finishConditionStack = new Stack<>();
+
+    /**
+     * A list containing the positions (offsets in the input string) at which newline characters
      * occur
      */
-
     private List<Integer> newlineOffsets = null;
 
     /**
      * The token that preceded the current token
      */
     private Token precedingToken = Token.UNKNOWN;
-
-    /**
-     * The content of the preceding token
-     */
-
-    private String precedingTokenValue = "";
 
     /**
      * Flag to disallow "union" as a synonym for "|" when parsing XSLT 2.0 patterns
@@ -137,7 +155,7 @@ public final class Tokenizer {
     public boolean isXQuery = false;
 
     /**
-     * XPath language level: e.g. 2.0, 3.0, or 3.1
+     * XPath (or XQuery) language level: e.g. 2.0, 3.0, 3.1, 4.0 (times ten, as an integer)
      */
 
     public int languageLevel = 20;
@@ -148,18 +166,21 @@ public final class Tokenizer {
 
     public boolean allowSaxonExtensions = false;
 
+    /**
+     * Predicate used to decide that tokenization is complete
+     */
     private Predicate<Tokenizer> finishCondition = END_OF_INPUT;
 
     public Tokenizer() {
     }
 
+    /**
+     * Set the condition that is used to decide when tokenization is complete
+     * @param condition the completion condition
+     */
     public void setFinishCondition(Predicate<Tokenizer> condition) {
         finishCondition = condition;
     }
-
-    //
-    // Lexical analyser for expressions, queries, and XSLT patterns
-    //
 
     /**
      * Prepare a string for tokenization.
@@ -245,9 +266,7 @@ public final class Tokenizer {
 
     /**
      * Peek ahead at the next token
-     * @return the identifier of the token that is next in the queue. Note that this is not
-     * always the token returned by a call on {@link #next()}, because that may return the
-     * next token in a context-dependent form.
+     * @return the identifier of the token that is next in the queue.
      */
 
     public Token peekAhead() {
@@ -529,7 +548,6 @@ public final class Tokenizer {
                         }
                     }
                     nextToken = Token.LT;
-                    nextTokenValue = c + "";  // The parser needs to know which character was used
                     return;
                 case FULL_WIDTH_LT:
                     if (languageLevel < 40) {
@@ -546,7 +564,6 @@ public final class Tokenizer {
                         return;
                     }
                     nextToken = Token.LT;
-                    nextTokenValue = c + "";  // The parser needs to know which character was used
                     return;
                 case '|':
                     if (isFollowedBy('|')) {
@@ -702,19 +719,19 @@ public final class Tokenizer {
                     return;
                 case '"':
                 case '\'':
-                    nextTokenValue = "";
+                    StringBuilder litStr = new StringBuilder(32);
                     while (true) {
                         inputOffset = input.indexOf(c, inputOffset);
                         if (inputOffset < 0) {
                             inputOffset = nextTokenStartOffset + 1;
                             throw new XPathException("Unmatched quote in expression");
                         }
-                        nextTokenValue += input.substring(nextTokenStartOffset + 1, inputOffset++);
+                        litStr.append(input, nextTokenStartOffset + 1, inputOffset++);
                         if (inputOffset < inputLength) {
                             char n = input.charAt(inputOffset);
                             if (n == c) {
                                 // Doubled delimiters
-                                nextTokenValue += c;
+                                litStr.append(c);
                                 nextTokenStartOffset = inputOffset;
                                 inputOffset++;
 
@@ -727,15 +744,13 @@ public final class Tokenizer {
                     }
 
                     // maintain line number if there are newlines in the string
-                    if (nextTokenValue.indexOf('\n') >= 0) {
-                        for (int i = 0; i < nextTokenValue.length(); i++) {
-                            if (nextTokenValue.charAt(i) == '\n') {
-                                incrementLineNumber(nextTokenStartOffset + i + 1);
-                            }
+
+                    for (int i = 0; i < litStr.length(); i++) {
+                        if (litStr.charAt(i) == '\n') {
+                            incrementLineNumber(nextTokenStartOffset + i + 1);
                         }
                     }
-                    //nextTokenValue = nextTokenValue.intern();
-                    nextToken = new Token.StringLiteral(nextTokenValue);
+                    nextToken = new Token.StringLiteral(litStr.toString());
                     return;
                 case '`':
                     if (isFollowedBy("`[")) {
@@ -948,7 +963,15 @@ public final class Tokenizer {
     private boolean isGreaterThanChar(char c) {
         return c == '>' || (languageLevel >= 40 && c == FULL_WIDTH_GT);
     }
-    
+
+    /**
+     * Indicate that we are starting to parse an embedded expression (enclosed in braces) within
+     * content that is being read character-by-character. The current position must be immediately
+     * after an opening brace. The current tokenization status is saved on a stack, and a new tokenization
+     * is started at the current position, with the termination condition set to be the matching closing
+     * brace.
+     * @throws XPathException if, for example, a malformed comment is found
+     */
 
     public void startEmbeddedExpression() throws XPathException {
         if (input.charAt(inputOffset - 1) != '{') {
@@ -963,8 +986,13 @@ public final class Tokenizer {
         next();
     }
 
+    /**
+     * Indicate that we have finished parsing an embedded expression (within curly braces). The input
+     * position must be the closing curly brace, and it is advanced to the next following character. The
+     * tokenization state is reset from the saved stack.
+     */
 
-    public void endEmbeddedExpression() throws XPathException {
+    public void endEmbeddedExpression() {
         if (input.charAt(inputOffset++) != '}') {
             throw new AssertionError("Embedded expression must end at '}'");
         }
@@ -973,7 +1001,8 @@ public final class Tokenizer {
     }
 
     /**
-     * Read next character directly. Used by the XQuery parser when parsing pseudo-XML syntax
+     * Read the next character directly. Used by the XQuery parser when parsing pseudo-XML syntax,
+     * and also when processing string templates
      *
      * @return the next character from the input, or NUL at the end of the input
      */
@@ -981,7 +1010,6 @@ public final class Tokenizer {
     public char nextChar() {
         if (inputOffset < inputLength) {
             char c = input.charAt(inputOffset++);
-            //c = normalizeLineEnding(c);
             if (c == '\n') {
                 incrementLineNumber();
                 lineNumber++;
@@ -1005,6 +1033,10 @@ public final class Tokenizer {
         }
     }
 
+    /**
+     * Look ahead to see what the next character but one will be, without changing the current state
+     * @return the next character but one, or NUL at the end of the input.
+     */
     public char peekChar2() {
         if (inputOffset < inputLength - 1) {
             return input.charAt(inputOffset + 1);
@@ -1237,35 +1269,3 @@ public final class Tokenizer {
 
 }
 
-/*
-
-The following copyright notice is copied from the licence for xt, from which the
-original version of this module was derived:
---------------------------------------------------------------------------------
-Copyright (c) 1998, 1999 James Clark
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL JAMES CLARK BE LIABLE FOR ANY CLAIM, DAMAGES OR
-OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
-Except as contained in this notice, the name of James Clark shall
-not be used in advertising or otherwise to promote the sale, use or
-other dealings in this Software without prior written authorization
-from James Clark.
----------------------------------------------------------------------------
-*/

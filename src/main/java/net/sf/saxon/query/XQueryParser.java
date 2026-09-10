@@ -1471,7 +1471,7 @@ public class XQueryParser extends XPathParser {
         Set<String> propertyNames = new HashSet<>(10);
         while (t.currentToken != Token.SEMICOLON) {
             int offset = t.currentTokenStartOffset;
-            String propertyName = expectStringLiteral();
+            String propertyName = expectName();
             if (propertyNames.contains(propertyName)) {
                 grumble("Property name " + propertyName + " is defined more than once", "XQST0114", offset);
             }
@@ -5214,22 +5214,6 @@ public class XQueryParser extends XPathParser {
 
     public String uriLiteral(/*@NotNull*/ String in) throws XPathException {
         return Whitespace.collapse(unescape(in)).toString();
-    }
-
-    /**
-     * Lookahead one token, catching any exception thrown by the tokenizer. This
-     * method is only called from the query parser when switching from character-at-a-time
-     * mode to tokenizing mode
-     *
-     * @throws XPathException if parsing fails
-     */
-
-    protected void lookAhead() throws XPathException {
-        try {
-            t.lookAhead();
-        } catch (XPathException err) {
-            grumble(err.getMessage());
-        }
     }
 
     @Override
