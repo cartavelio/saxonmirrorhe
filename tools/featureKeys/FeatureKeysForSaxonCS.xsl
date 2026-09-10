@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xs"
+    xmlns:f="http://local.functions/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xs f"
     xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" version="3.0">
 
     <xd:doc scope="stylesheet">
@@ -159,12 +160,19 @@ public class Feature<T> {
         <xsl:apply-templates mode="#current"/>
         <xsl:text>&lt;/item&gt;</xsl:text>
     </xsl:template>
+    
+    <xsl:function name="f:rename-class" as="xs:string">
+        <xsl:param name="class" as="xs:string"/>
+        <xsl:sequence select="$class 
+            => replace('com\.saxonica\.', 'Saxon.Eej.')
+            => replace('net\.sf\.saxon\.', 'Saxon.Hej.')"/>
+    </xsl:function>
 
     <xsl:template match="desc//link" priority="2" mode="Feature.cs">
         <xsl:text>&lt;see cref="</xsl:text>
-        <xsl:value-of select="replace(., 'net.sf.saxon.lib.Feature#', '')"/>
-        <!--<xsl:value-of select="."/>-->
-        <xsl:text>" /&gt;</xsl:text>
+        <xsl:value-of select="replace(., 'net.sf.saxon.lib.Feature#', '') 
+            => f:rename-class()"/>
+        <xsl:text>"/></xsl:text>
     </xsl:template>
 
     <xsl:template match="desc//link" priority="2" mode="FeatureKeys.cs">
@@ -197,27 +205,36 @@ public class Feature<T> {
     </xsl:template>
 
     <xsl:template match="type[.='boolean']">
-        <xsl:text><![CDATA[bool]]></xsl:text>
+        <xsl:text>bool</xsl:text>
     </xsl:template>
 
     <xsl:template match="type[starts-with(., 'integer')]">
-        <xsl:text><![CDATA[int]]></xsl:text>
+        <xsl:text>int</xsl:text>
     </xsl:template>
 
     <xsl:template match="type[starts-with(., 'string') or starts-with(., 'Absolute URI')]">
-        <xsl:text><![CDATA[String]]></xsl:text>
+        <xsl:text>string</xsl:text>
     </xsl:template>
 
     <xsl:template match="type[starts-with(., 'Instance of')]" expand-text="yes">
-        <xsl:text>{(link|code)[1]}</xsl:text>
+        <xsl:text>{f:rename-class((link|code)[1])}</xsl:text>
     </xsl:template>
 
     <xsl:template match="type[starts-with(., 'Name of a class')]" expand-text="yes">
-        <xsl:text><![CDATA[String]]></xsl:text>
+        <xsl:text>string</xsl:text>
     </xsl:template>
+    
+    <xsl:template match="type[starts-with(., 'com.saxonica.') ]">
+        <xsl:text>{replace(., 'com\.saxonica\.', 'Saxon.Eej.')</xsl:text>
+    </xsl:template>
+    
+    <xsl:template match="type[starts-with(., 'net.sf.saxon.') ]">
+        <xsl:text>{replace(., 'net\.sf\.saxon\.', 'Saxon.Hej.')</xsl:text>
+    </xsl:template>
+    
 
     <xsl:template match="type">
-        <xsl:text><![CDATA[Object]]></xsl:text>
+        <xsl:text>object</xsl:text>
     </xsl:template>
 
 
