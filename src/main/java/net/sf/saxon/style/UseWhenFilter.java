@@ -360,8 +360,10 @@ public class UseWhenFilter extends ProxyReceiver {
         if (languageLevel == 30) {
             languageLevel = 305; // XPath 3.0 + XSLT extensions
         }
+        staticContext.setXPathLanguageLevel(languageLevel);
+
         if (asStr != null) {
-            XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false, languageLevel);
+            XPathParser parser = compilation.getConfiguration().newExpressionParser("XP", false);
             requiredType = parser.parseSequenceType(asStr, staticContext);
         }
 

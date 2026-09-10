@@ -61,7 +61,6 @@ public class ItemTypeFactory {
     public ItemType parseItemType(String typeDesignation) throws SaxonApiException {
         try {
             XPathParser parser = new XPathParser();
-            parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 40);
             IndependentContext env = new IndependentContext();
             env.setXPathLanguageLevel(40);
             env.declareNamespace("xs", NamespaceConstant.SCHEMA);

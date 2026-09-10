@@ -361,7 +361,7 @@ public class XPathParser {
      *                 the extensions defined in XSLT 3.0
      */
 
-    public void setLanguage(ParsedLanguage language, int version) {
+    protected void setLanguage(ParsedLanguage language, int version) {
         if (version == 0) {
             version = 30; // default
         }
@@ -570,6 +570,7 @@ public class XPathParser {
 
     public SequenceType parseSequenceType(String input, /*@NotNull*/ StaticContext env) throws XPathException {
         this.env = env;
+        setLanguage(ParsedLanguage.SEQUENCE_TYPE, env.getXPathVersion());
         if (qNameParser == null) {
             qNameParser = new QNameParser(env.getNamespaceResolver());
             if (languageVersion >= 30) {
@@ -578,7 +579,7 @@ public class XPathParser {
         }
         language = ParsedLanguage.SEQUENCE_TYPE;
         t = new Tokenizer();
-        t.languageLevel = env.getXPathVersion();
+        t.languageLevel = languageVersion;
         allowXPath40Syntax =
                 t.allowSaxonExtensions =
                         env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;

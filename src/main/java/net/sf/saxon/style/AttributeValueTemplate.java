@@ -47,7 +47,6 @@ public abstract class AttributeValueTemplate {
 
     public static Expression make(String avt, StaticContext env) throws XPathException {
 
-        int languageLevel = env.getXPathVersion();
         List<Expression> components = new ArrayList<>(5);
 
         int i0, i1, i8, i9;
@@ -80,9 +79,9 @@ public abstract class AttributeValueTemplate {
                     addStringComponent(components, avt, last, i0);
                 }
                 Expression exp;
-                XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, languageLevel);
+                XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
                 //parser.setDefaultContainer(container);
-                parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
+                //parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
                 parser.setAllowAbsentExpression(true);
                 exp = parser.parse(avt, i0 + 1, Token.RCURLY, env);
                 exp.setRetainedStaticContext(env.makeRetainedStaticContext());

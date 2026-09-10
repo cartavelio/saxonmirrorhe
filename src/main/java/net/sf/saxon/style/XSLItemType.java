@@ -114,8 +114,7 @@ public class XSLItemType extends StyleElement {
     private ItemType makeItemType(StaticContext env) throws XPathException {
         try {
             XPathParser parser =
-                    getConfiguration().newExpressionParser("XP", false, env.getXPathVersion());
-            //parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
+                    getConfiguration().newExpressionParser("XP", false);
             QNameParser qp = new QNameParser(env.getNamespaceResolver())
                     .withAcceptEQName(true)
                     .withErrorOnBadSyntax("XPST0003")

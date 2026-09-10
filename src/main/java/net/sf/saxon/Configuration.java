@@ -3338,40 +3338,22 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param language        set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
      * @param updating        indicates whether or not XQuery update syntax may be used. Note that XQuery Update
      *                        is supported only in Saxon-EE
-     * @param languageVersion the required version (e.g 10 for "1.0", 30 for "3.0", 31 for "3.1").
-     *                        A request for XQuery 1.0 or 3.0 delivers an XQuery 3.1 parser. The values
-     *                        supported for XPath are 20 (=2.0), 30 (=3.0), 31 (=3.1), and 305 (=XPath 3.0
-     *                        plus the syntax extensions defined in XSLT 3.0).
-     * @return the QueryParser
+     * @return the XPath or Query parser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
      */
 
-    public XPathParser newExpressionParser(String language, boolean updating, int languageVersion) throws XPathException {
+    public XPathParser newExpressionParser(String language, boolean updating) throws XPathException {
         if ("XQ".equals(language)) {
             if (updating) {
                 throw new XPathException("XQuery Update is supported only in Saxon-EE");
-            } else if (languageVersion == 40 || languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
-                XQueryParser parser = new XQueryParser(31);
-                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, Math.max(languageVersion, 31));
-                return parser;
             } else {
-                throw new XPathException("Unknown XQuery version " + languageVersion);
+                return new XQueryParser();
             }
         } else if ("XP".equals(language)) {
-            if (languageVersion == 40 || languageVersion == 31 || languageVersion == 30 || languageVersion == 305 || languageVersion == 20) {
-                XPathParser parser = new XPathParser();
-                parser.setLanguage(XPathParser.ParsedLanguage.XPATH, languageVersion);
-                return parser;
-            } else {
-                throw new XPathException("Unknown XPath version " + languageVersion);
-            }
+            return new XPathParser();
         } else if ("PATTERN".equals(language)) {
-            if (languageVersion == 30 || languageVersion == 20 || languageVersion == 305 || languageVersion == 31) {
-                return new PatternParser();
-            } else {
-                throw new XPathException("Unknown XPath version " + languageVersion);
-            }
+            return new PatternParser();
         } else {
             throw new XPathException("Unknown expression language " + language);
         }
@@ -4688,9 +4670,10 @@ public class Configuration implements SourceResolver, NotationSet {
 
                 case FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE:
                     XPathParser parser = new XPathParser();
-                    parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 31);
+                    IndependentContext env = new IndependentContext(this);
+                    env.setXPathLanguageLevel(31);
                     try {
-                        SequenceType type = parser.parseSequenceType(value.toString(), new IndependentContext(this));
+                        SequenceType type = parser.parseSequenceType(value.toString(), env);
                         if (type.getCardinality() != StaticProperty.EXACTLY_ONE) {
                             throw new IllegalArgumentException("Context item type must have no occurrence indicator");
                         }
