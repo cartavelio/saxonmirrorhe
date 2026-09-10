@@ -16,9 +16,12 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.ValidationException;
+import net.sf.saxon.value.BigIntegerValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
+
+import java.math.BigInteger;
 
 /**
  * * This class is to use with Saxon on C++
@@ -61,13 +64,10 @@ public class XdmValueForCpp {
         type = BuiltInAtomicType.BOOLEAN;
     }
 
-    public XdmValueForCpp(int i) throws SaxonApiException {
-        try {
-            value = XdmValue.wrap(IntegerValue.makeIntegerValue(i).asAtomic());
+    public XdmValueForCpp(int i) {
+            BigInteger bigInt = BigInteger.valueOf(i);
+            value = XdmValue.wrap(IntegerValue.makeIntegerValue(bigInt).asAtomic());
             type = BuiltInAtomicType.INT;
-        } catch (ValidationException e) {
-            throw new SaxonApiException(e);
-        }
     }
 
     public XdmValueForCpp(XdmNode node) {
