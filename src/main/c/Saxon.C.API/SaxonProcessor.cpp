@@ -712,7 +712,10 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
         return;
     }
 
-    setCatalogFile(sxn_environ->thread, (void *)procRef, (char *)catalogFile);
+    long result = j_setCatalogFile(sxn_environ->thread, (void *)procRef, (char *)catalogFile);
+    if(result == -1) {
+        std::cerr<<"setCatalogFile failed"<<std::endl;
+    }
 }
 
 
