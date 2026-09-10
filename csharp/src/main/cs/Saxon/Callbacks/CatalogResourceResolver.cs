@@ -108,25 +108,30 @@ namespace Saxon.Callbacks {
                     }
                 }
 
-                catch (WebException) {
-                    throw new XPathException("Failed to load document " + request.uri, "FODC0002");
+                catch (Exception err) {
+                    throw new XPathException("Failed to load document " + request.uri + ". " + err.Message, "FODC0002");
                 }
-                catch (System.Net.Http.HttpRequestException) {
-                    throw new XPathException("Failed to load document " + request.uri, "FODC0002");
-                }
-                catch (System.ArgumentException) {
-                    // Thrown for an unknown URI scheme
-                }
-                catch (System.UriFormatException u) {
-                    // Thrown for an invalid URI
-                    throw new XPathException("Invalid URI: ", u);
-                }
-                catch (System.IO.FileNotFoundException) {
-                    throw new XPathException("Failed to load document " + request.uri, "FODC0002");
-                }
-                catch (System.IO.DirectoryNotFoundException) {
-                    // The resolver code is throwing this for a non-existent directory
-                }
+
+                // catch (WebException) {
+                //     throw new XPathException("Failed to load document " + request.uri, "FODC0002");
+                // }
+                // catch (System.Net.Http.HttpRequestException) {
+                //     throw new XPathException("Failed to load document " + request.uri, "FODC0002");
+                // }
+                // catch (System.ArgumentException) {
+                //     // Thrown for an unknown URI scheme
+                // }
+                // catch (System.UriFormatException u) {
+                //     // Thrown for an invalid URI
+                //     throw new XPathException("Invalid URI: ", u);
+                // }
+                // catch (System.IO.FileNotFoundException) {
+                //     throw new XPathException("Failed to load document " + request.uri, "FODC0002");
+                // }
+                // catch (System.IO.DirectoryNotFoundException) {
+                //     throw new XPathException("Failed to load document " + request.uri, "FODC0002");
+                //     // The resolver code is throwing this for a non-existent directory
+                // }
             }
 
             return null;
