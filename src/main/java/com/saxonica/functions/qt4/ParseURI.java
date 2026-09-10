@@ -1,24 +1,15 @@
 package com.saxonica.functions.qt4;
 
-import net.sf.saxon.expr.DefaultedArgumentExpression;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.s9api.XdmAtomicValue;
-import net.sf.saxon.s9api.XdmMap;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringValue;
 
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +25,11 @@ public class ParseURI extends URIFunctions {
         map = map.addEntry(URI, new StringValue(uristr));
         uristr = uristr.replaceAll("\\\\", "/");
 
-        checkOptions(arguments);
+        try {
+            checkOptions(arguments);
+        } catch (IllegalArgumentException e) {
+            throw new XPathException(e);
+        }
 
         int pos = uristr.indexOf("#");
         if (pos >= 0) {
@@ -205,9 +200,10 @@ public class ParseURI extends URIFunctions {
 
                 GroundedValue currentValue = querySegments.get(key);
                 if (currentValue == null) {
-                    querySegments = querySegments.addEntry(key, value);
+                    // Cast needed for transpiled C#
+                    querySegments = (HashTrieMap) querySegments.addEntry(key, value);
                 } else {
-                    querySegments = querySegments.addEntry(key, currentValue.concatenate(value));
+                    querySegments = (HashTrieMap) querySegments.addEntry(key, currentValue.concatenate(value));
                 }
             }
             map = map.addEntry(QUERY_PARAMETERS, querySegments);

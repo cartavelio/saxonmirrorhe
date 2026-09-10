@@ -81,7 +81,12 @@ abstract public class URIFunctions extends SystemFunction {
         chars.add(':');
         chars.add('@');
 
-        unescapedUriCharacters = Collections.unmodifiableSet(chars);
+        unescapedUriCharacters = unmodifiable(chars);
+    }
+
+    @CSharpReplaceBody(code="return chars;")
+    private static Set<Character> unmodifiable(Set<Character> chars) {
+        return Collections.unmodifiableSet(chars);
     }
 
     protected char pathSeparator = '/';

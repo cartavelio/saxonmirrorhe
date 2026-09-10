@@ -4,16 +4,15 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntIterator;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Implements the fn:decode-from-uri function.
@@ -53,7 +52,7 @@ public class DecodeFromURI extends SystemFunction {
         byte[] octets = value.getBytes(StandardCharsets.UTF_8);
         int idx = 0;
         while (idx < octets.length) {
-            switch (octets[idx]) {
+            switch ((char)octets[idx]) {
                 case '+':
                     output.add((byte) 0x20);
                     idx++;
@@ -95,18 +94,17 @@ public class DecodeFromURI extends SystemFunction {
             utf8[idx] = output.get(idx);
         }
 
-        String result = new String(utf8, StandardCharsets.UTF_8);
+        UnicodeString result = StringView.of(new String(utf8, StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
 
-        idx = 0;
-        while (idx < result.length()) {
-            int cp = result.codePointAt(idx);
+        IntIterator iter = result.codePoints();
+        while (iter.hasNext()) {
+            int cp = iter.next();
             if (XMLCharacterData.isValid10(cp)) {
                 sb.appendCodePoint(cp);
             } else {
                 sb.appendCodePoint(0xFFFD);
             }
-            idx += Character.charCount(cp);
         }
 
         return sb.toString();
