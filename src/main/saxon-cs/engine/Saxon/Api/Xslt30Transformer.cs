@@ -403,7 +403,7 @@ namespace Saxon.Api {
                 transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
             }
             catch (SaxonApiException exp) {
-                throw new DynamicError(exp.getMessage());
+                throw new DynamicError(exp);
             }
         }
 
@@ -428,7 +428,7 @@ namespace Saxon.Api {
                 transformer.transform(streamSource, destination.GetUnderlyingDestination());
             }
             catch (SaxonApiException exp) {
-                throw new DynamicError(exp.getMessage());
+                throw new DynamicError(exp);
             }
         }
 
@@ -454,7 +454,7 @@ namespace Saxon.Api {
                 transformer.transform(streamSource, destination.GetUnderlyingDestination());
             }
             catch (SaxonApiException exp) {
-                throw new DynamicError(exp.getMessage());
+                throw new DynamicError(exp);
             }
         }
 

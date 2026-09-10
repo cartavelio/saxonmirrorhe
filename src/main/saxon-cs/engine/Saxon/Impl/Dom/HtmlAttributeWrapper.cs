@@ -1,5 +1,3 @@
-using System;
-using System.Xml;
 using HtmlAgilityPack;
 using net.sf.saxon.om;
 using net.sf.saxon.str;
@@ -140,7 +138,7 @@ namespace Saxon.Impl.Dom {
             Navigator.appendSequentialKey(this, buffer, true);
         }
 
-        public void copy(net.sf.saxon.@event.Receiver @out, int copyOptions, net.sf.saxon.s9api.Location locationId) {
+        public override void copy(net.sf.saxon.@event.Receiver @out, int copyOptions, net.sf.saxon.s9api.Location locationId) {
             net.sf.saxon.@event.Receiver r = new net.sf.saxon.@event.NamespaceReducer(@out);
             Navigator.copy(this, r, copyOptions, locationId);
         }

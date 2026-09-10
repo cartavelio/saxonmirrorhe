@@ -1,126 +1,90 @@
+using System;
+using System.Collections;
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
-using com.saxonica.config;
+using SysCollGen = System.Collections.Generic;
+using net.sf.saxon.expr;
 using net.sf.saxon.om;
+using net.sf.saxon.trans;
+using net.sf.saxon.tree.iter;
 
 namespace Saxon.Impl.Parallel {
+    
+    // Implementation of xsl:for-each with saxon:threads="n".
+    // Note that unlike the Java implementation, this implementation fully evaluates both the input
+    // and output sequences as lists in memory. This enables the C# Parallel.For construct to be used.
+    // It also makes implementation of last() rather straightforward. But it is memory-hungry.
     public sealed class MultithreadedContextMappingIterator : net.sf.saxon.om.SequenceIterator {
-        private readonly net.sf.saxon.om.FocusIterator contextIterator;
-        private readonly net.sf.saxon.expr.Expression action;
-        private readonly net.sf.saxon.expr.XPathContextMinor context;
-        private net.sf.saxon.om.SequenceIterator stepIterator = null;
-        private readonly java.util.function.Supplier<System.Int32> lastPositionFinder;
-        private readonly java.util.concurrent.ExecutorService service;
         
-        private readonly ConcurrentQueue<Task<GroundedValue>> resultQueue = new();
-        private readonly CancellationTokenSource tokenSource = new();
-        private readonly CancellationToken token;
+        private readonly SysCollGen.List<Item>[] outputSequence;
+        private SequenceIterator stepIterator;
+        private int index = 0;
 
-        
         public MultithreadedContextMappingIterator(net.sf.saxon.expr.Expression action,
                 net.sf.saxon.expr.XPathContextMinor context, int threads) {
-            token = tokenSource.Token;
-            contextIterator = context.getCurrentIterator();
-            this.action = action;
-            this.context = context;
-            lastPositionFinder = context.getLast;
-            EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
-            service = config.getMultithreadingFactory().makeExecutorService(threads);
-            int n = 0;
-            int max = (threads * 3);
+            SysCollGen.List<Item> inputSequence = new SysCollGen.List<Item>();
+            SequenceIterator inputIter = context.currentIterator;
+            for (Item item; (item = inputIter.next()) != null;) {
+                inputSequence.Add(item);
+            }
+            outputSequence = new SysCollGen.List<Item>[inputSequence.Count];
+            ParallelOptions options = new() {
+                MaxDegreeOfParallelism = threads
+            };
             try {
-                while ((++n <= max)) {
-                    net.sf.saxon.om.Item item = contextIterator.next();
-                    if ((item == null)) {
-                        return;
+                System.Threading.Tasks.Parallel.For(0, inputSequence.Count, options, (i) => {
+                    XPathContext c3 = XPathContextMajor.newThreadContext(context);
+                    ManualIterator manualIterator = new (inputSequence[i], i+1);
+                    manualIterator.setLengthFinder(() => inputSequence.Count);
+                    c3.setCurrentIterator(manualIterator);
+                    SequenceIterator oneOutputIter = action.iterate(c3);
+                    SysCollGen.List<Item> oneOutput = new SysCollGen.List<Item>();
+                    for (Item item; (item = oneOutputIter.next()) != null;) {
+                        oneOutput.Add(item);
                     }
-
-                    mapOneItem(context);
+                    outputSequence[i] = oneOutput;
+                });
+            }
+            catch (System.AggregateException e) {
+                foreach (Exception ie in e.InnerExceptions) {
+                    switch (ie) {
+                        case XPathException:
+                            throw ie;
+                        case UncheckedXPathException uxe:
+                            throw uxe.getXPathException();
+                    }
                 }
+                throw;
             }
-            catch (net.sf.saxon.trans.UncheckedXPathException e) {
-                close();
-                throw e.getXPathException();
-            }
+
         }
 
-        public net.sf.saxon.om.Item next() {
-            net.sf.saxon.om.Item nextItem;
+        public Item next() {
             while (true) {
-                if ((stepIterator != null)) {
-                    nextItem = stepIterator.next();
-                    if ((nextItem != null)) {
-                        break;
-                    }
-                    else {
-                        stepIterator = null;
+                if (stepIterator != null) {
+                    Item nextStep = stepIterator.next();
+                    if (nextStep != null) {
+                        return nextStep;
                     }
                 }
-                
-                // Get the next stepIterator off the queue
-                bool available = resultQueue.TryDequeue(out Task<GroundedValue> first);
-                if (!available) {
-                    close();
+
+                if (index >= outputSequence.Length) {
                     return null;
-                } else {
-                    
-                    
-                    GroundedValue seq = first.Result;
-                    stepIterator = seq.iterate();
-                    
-                    if ((contextIterator.current() != null)) {
-                        net.sf.saxon.om.Item item = contextIterator.next();
-                        if ((item != null)) {
-                            mapOneItem(context);
-                        }
-                    }
-
-                    nextItem = stepIterator.next();
-                    if ((nextItem == null)) {
-                        stepIterator = null;
-                    }
-                    else {
-                        break;
-                    }
-                    
                 }
+
+                SysCollGen.List<Item> subList = outputSequence[index++];
+                stepIterator = new ListIterator.Of<Item>(subList);
             }
-
-            return nextItem;
         }
-
+        
         public void close() {
-            contextIterator.close();
-            service.shutdown();
-        }
-
-        private void mapOneItem(net.sf.saxon.expr.XPathContextMinor c2) {
-            net.sf.saxon.expr.XPathContext c3 = net.sf.saxon.expr.XPathContextMajor.newThreadContext(c2);
-            net.sf.saxon.om.FocusIterator inputIterator = c2.getCurrentIterator();
-            net.sf.saxon.tree.iter.ManualIterator manualIterator =
-                new net.sf.saxon.tree.iter.ManualIterator(inputIterator.current(), inputIterator.position());
-            manualIterator.setLengthFinder(lastPositionFinder);
-            c3.setCurrentIterator(manualIterator);
-            net.sf.saxon.@event.PipelineConfiguration pipe = c2.getController().makePipelineConfiguration();
-            pipe.setXPathContext(c2);
-
-
-            Task<GroundedValue> task = Task.Run(() => {
-                try {
-                    return net.sf.saxon.om.SequenceTool.toGroundedValue(action.iterate(c3));
-                }
-                catch (net.sf.saxon.trans.XPathException err) {
-                    close();
-                    throw;
-                }
-                catch (net.sf.saxon.trans.UncheckedXPathException err) {
-                    close();
-                    throw err.getXPathException();
-                }
-            }, token);
-
-            resultQueue.Enqueue(task);
+            //
         }
     }
+
+
+
+    
+    
+    
 }

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 
-namespace net.sf.saxon.dotnet {
-    public class DotNetDomBuilder : net.sf.saxon.@event.Receiver {
+namespace Saxon.Impl.Dom {
+    public class DomBuilder : net.sf.saxon.@event.Receiver {
         private net.sf.saxon.@event.PipelineConfiguration pipe;
         private net.sf.saxon.om.NamePool namePool;
         private string _systemId;
