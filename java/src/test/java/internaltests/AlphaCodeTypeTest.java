@@ -70,9 +70,8 @@ public class AlphaCodeTypeTest {
     public void testSequenceTypes() {
         try {
             Configuration config = new EnterpriseConfiguration();
-            IndependentContext ic = new IndependentContext(config);
+            IndependentContext ic = new IndependentContext(config, 40);
             ic.declareNamespace("foo", NamespaceUri.of("http://foo.com/"));
-            ic.setXPathLanguageLevel(31);
             XPathParser parser = new XPathParser(ic);
             String[] testCases = new String[]{
                     "item()",
@@ -80,6 +79,9 @@ public class AlphaCodeTypeTest {
                     "xs:anyAtomicType?",
                     "xs:string*",
                     "xs:integer+",
+                    "enum('a1', 'a2', 'a3')",
+                    "enum('a space', 'a\nnewline', 'a\\backslash', 'a|bar')",
+                    "enum('', ' ', '\n')",
                     "node()",
                     "element(foo)",
                     "element(foo:bar)",
