@@ -30,10 +30,7 @@ import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntToIntHashMap;
 
 import javax.xml.transform.OutputKeys;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Implementation of the fn:elements-to-maps function proposed for 4.0
@@ -56,6 +53,9 @@ public class ElementsToMaps extends SystemFunction {
                                  SequenceType.one(EnumerationUnionType.of("local", "lexical", "eqname", "default")));
         options.addAllowedOption("layouts",
                                  layoutMapType, EmptyMap.getInstance());
+        options.addAllowedOption("disable-layouts",
+                                 SequenceType.zeroOrMore(EnumerationUnionType.of(
+                                         "empty", "empty-plus", "simple", "simple-plus", "list", "list-plus", "record", "sequence")));
         OPTION_DETAILS = options;
     }
 
@@ -71,6 +71,7 @@ public class ElementsToMaps extends SystemFunction {
         public Schema schema;
         public IntToIntHashMap uniformityData = null;
         public IntHashMap<String> layoutMap = new IntHashMap<>();
+        public Set<String> disabledLayouts = Collections.emptySet();
         public NameFormat nameFormat = NameFormat.DEFAULT;
         public String attributeMarker = "@";
         public Stack<StructuredQName> elementNameStack = new Stack<>();
@@ -187,6 +188,13 @@ public class ElementsToMaps extends SystemFunction {
                     default:
                         cc.nameFormat = NameFormat.DEFAULT;
                         break;
+                }
+            }
+            GroundedValue disabledLayouts = checkedOptions.get("disable-layouts");
+            if (disabledLayouts != null) {
+                cc.disabledLayouts = new HashSet<>();
+                for (Item d : disabledLayouts.asIterable()) {
+                    cc.disabledLayouts.add(d.getStringValue());
                 }
             }
             initLayoutMap(cc, checkedOptions, context.getConfiguration());
@@ -406,10 +414,18 @@ public class ElementsToMaps extends SystemFunction {
             SchemaType type = element.getSchemaType();
             if (!(type == AnyType.getInstance() || type == Untyped.getInstance())) {
                 if (type instanceof SimpleType) {
-                    return makeSimpleElementContent(element, cc);
+                    // Rule 7b
+                    if (!cc.disabledLayouts.contains("empty") && ((SimpleType)type).isZeroLength()) {
+                        return makeEmptyElementContent(element, cc);
+                    }
+                    if (!cc.disabledLayouts.contains("simple")) {
+                        return makeSimpleElementContent(element, cc);
+                    }
+                    return makeMixedElementContent(element, cc, false);
                 } else {
+                    // Rule 7c
                     ComplexType cType = (ComplexType) type;
-                    String layout = cType.getPreferredJsonLayout(cc.schema);
+                    String layout = cType.getPreferredJsonLayout(cc.schema, cc.disabledLayouts);
                     String suffix = "";
                     int sep = layout.indexOf("/");
                     if (sep > 0) {
@@ -446,51 +462,50 @@ public class ElementsToMaps extends SystemFunction {
                 } else {
                     properties = getElementProperties(element, 0);
                 }
-                // TODO: there must be a simpler way of expressing the following tortuous logic...
-                if ((properties & HAS_NON_WHITESPACE_TEXT_NODES) == 0) {
-                    if ((properties & HAS_CHILD_ELEMENTS) == 0) {
-                        if ((properties & HAS_WHITESPACE_TEXT_NODES) == 0) {
-                            if ((properties & HAS_ATTRIBUTES) == 0) {
-                                return makeEmptyElementContent(element, cc);
-                            } else {
-                                return makeEmptyPlusElementContent(element, cc);
-                            }
-                        } else {
-                            if ((properties & HAS_ATTRIBUTES) == 0) {
-                                return makeSimpleElementContent(element, cc);
-                            } else {
-                                return makeSimplePlusElementContent(element, cc);
-                            }
-                        }
-                    } else {
-                        if ((properties & HAS_WHITESPACE_TEXT_NODES) != 0 && (properties & HAS_CHILD_ELEMENTS) == 0) {
-                            if ((properties & HAS_ATTRIBUTES) == 0) {
-                                return makeSimpleElementContent(element, cc);
-                            } else {
-                                return makeSimplePlusElementContent(element, cc);
-                            }
-                        } else if ((properties & HAS_DIVERSE_CHILD_ELEMENTS) == 0
-                                && ((properties & HAS_REPEATED_CHILD_ELEMENTS) != 0)) {
-                            if ((properties & HAS_ATTRIBUTES) == 0) {
-                                return makeListElementContent(element, cc);
-                            } else {
-                                return makeListPlusElementContent(element, cc, properties & NamePool.FP_MASK);
-                            }
-                        } else if ((properties & HAS_UNIQUE_CHILD_ELEMENTS) != 0) {
-                            return makeRecordElementContent(element, cc);
-                        } else {
-                            return makeSequenceElementContent(element, cc);
-                        }
+
+
+                if ((properties & (HAS_CHILD_ELEMENTS | HAS_WHITESPACE_TEXT_NODES | HAS_NON_WHITESPACE_TEXT_NODES)) == 0) {
+                    // Rule 6a
+                    if ((properties & HAS_ATTRIBUTES) == 0 && !cc.disabledLayouts.contains("empty")) {
+                        return makeEmptyElementContent(element, cc);
                     }
-                } else if ((properties & HAS_CHILD_ELEMENTS) == 0) {
-                    if ((properties & HAS_ATTRIBUTES) == 0) {
+                    if (!cc.disabledLayouts.contains("empty-plus")) {
+                        return makeEmptyPlusElementContent(element, cc);
+                    }
+                }
+                if ((properties & HAS_CHILD_ELEMENTS) == 0) {
+                    // Rule 6b
+                    if ((properties & HAS_ATTRIBUTES) == 0 && !cc.disabledLayouts.contains("simple")) {
                         return makeSimpleElementContent(element, cc);
-                    } else {
+                    }
+                    if (!cc.disabledLayouts.contains("simple-plus")) {
                         return makeSimplePlusElementContent(element, cc);
                     }
-                } else {
-                    return makeMixedElementContent(element, cc, false);
                 }
+                if ((properties & HAS_NON_WHITESPACE_TEXT_NODES) == 0) {
+                    // Rule 6c
+                    if ((properties & HAS_DIVERSE_CHILD_ELEMENTS) == 0
+                            && ((properties & HAS_REPEATED_CHILD_ELEMENTS) != 0)) {
+                        // Rule 6c(i)
+                        if ((properties & HAS_ATTRIBUTES) == 0 && !cc.disabledLayouts.contains("list")) {
+                            return makeListElementContent(element, cc);
+                        }
+                        if (!cc.disabledLayouts.contains("list-plus")) {
+                            return makeListPlusElementContent(element, cc, properties & NamePool.FP_MASK);
+                        }
+                    }
+                    if ((properties & HAS_UNIQUE_CHILD_ELEMENTS) != 0 && !cc.disabledLayouts.contains("record")) {
+                        // Rule 6c(ii)
+                        return makeRecordElementContent(element, cc);
+                    }
+                    if (!cc.disabledLayouts.contains("sequence")) {
+                        // Rule 6c(iii)
+                        return makeSequenceElementContent(element, cc);
+                    }
+                }
+                // Rule 6d
+                return makeMixedElementContent(element, cc, false);
+
             }
         }
     }

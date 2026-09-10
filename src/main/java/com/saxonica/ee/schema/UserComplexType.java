@@ -2722,48 +2722,86 @@ public class UserComplexType extends UserDefinedType
 
     /**
      * Decide what kind of layout to use when formatting an element of this type using the
-     * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
+     * elements-to-maps function. The result is a layout name, such as "record", "list", "mixed", "sequence"
+     *
+     * @param schema          the schema containing this type (needed to expand the content model)
+     * @param disabledLayouts layouts that cannot be used because they have been disabled
      */
 
-    public String getPreferredJsonLayout(Schema schema) {
-        if (isSimpleContent()) {
-            return "simple-plus";
-        } else if (isEmptyContent()) {
-            if (allowsAttributes(schema)) {
-                return "empty-plus";
-            } else {
+    public String getPreferredJsonLayout(Schema schema, Set<String> disabledLayouts) {
+        boolean noAttributes = !allowsAttributes(schema);
+        if (isEmptyContent()) {
+            // Rule 7c(ii)
+            if (noAttributes && !disabledLayouts.contains("empty")) {
                 return "empty";
             }
-        } else if (isAllContent()) {
-            return "record";
-        } else if (isMixedContent()) {
-            return "mixed";
-        } else if (containsElementWildcard(schema)
-                || openContentMode == OpenContentVariety.SUFFIX
-                || openContentMode == OpenContentVariety.INTERLEAVE) {
-            return "sequence";
-        } else {
+            if (!disabledLayouts.contains("empty-plus")) {
+                return "empty-plus";
+            }
+        }
+        if (isSimpleContent() && !disabledLayouts.contains("simple-plus")) {
+            // Rule 7c(iii)
+            SimpleType st = getSimpleContentType();
+            if (st.isZeroLength()) {
+                if (noAttributes && !disabledLayouts.contains("empty")) {
+                    return "empty";
+                }
+                if (!disabledLayouts.contains("empty-plus")) {
+                    return "empty-plus";
+                }
+            }
+            if (noAttributes && !disabledLayouts.contains("simple")) {
+                return "simple";
+            }
+            if (!disabledLayouts.contains("simple-plus")) {
+                return "simple-plus";
+            }
+        }
+        if (!isMixedContent()) { // implies element-only content
+            // Rule 7c(iv)
+            boolean noWildcards = !containsElementWildcard(schema)
+                    && openContentMode != OpenContentVariety.SUFFIX
+                    && openContentMode != OpenContentVariety.INTERLEAVE;
             IntHashSet children = new IntHashSet();
             try {
                 gatherAllPermittedChildren(schema, children, false);
             } catch (SchemaException e) {
                 return "mixed";
             }
-            if (children.size() == 1) {
+            boolean uniqueChildren = true;
+            if (noWildcards) {
                 IntIterator iter = children.iterator();
-                iter.hasNext();
-                int fp = iter.next();
-                int card = getElementParticleCardinality(fp, schema, true);
-                if (Cardinality.allowsMany(card)) {
-                    return (allowsAttributes(schema) ? "list-plus" : "list") + "/" + fp;
-                } else {
-                    return "record";
+                while (iter.hasNext()) {
+                    int fp = iter.next();
+                    int card = getElementParticleCardinality(fp, schema, true);
+                    if (Cardinality.allowsMany(card)) {
+                        uniqueChildren = false;
+                        break;
+                    }
                 }
             } else {
-                return "sequence";
+                uniqueChildren = false;
             }
+
+            if (children.size() == 1 && noWildcards && !uniqueChildren) {
+                if (noAttributes && !disabledLayouts.contains("list")) {
+                    return "list";
+                }
+                if (!disabledLayouts.contains("list-plus")) {
+                    IntIterator iter = children.iterator();
+                    int fp = iter.hasNext() ? iter.next() : -1;
+                    return "list-plus/" + fp;
+                }
+            }
+            if (noWildcards && uniqueChildren && !disabledLayouts.contains("record")) {
+                return "record";
+            }
+            return "sequence";
         }
+
+        return "mixed";
+
     }
 }
 
-// Copyright (c) 2004-2023 Saxonica Limited
+// Copyright (c) 2004-2024 Saxonica Limited

@@ -497,6 +497,39 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
         }
     }
 
+    /**
+     * Ask whether this type only allows zero-length content
+     *
+     * @return true if this is a list type with a length or maxLength of zero, or an atomic type
+     * that restricts the content to be empty
+     */
+    @Override
+    public boolean isZeroLength() {
+        Facet lengthFacet = getFacet(LengthFacet.class);
+        if (lengthFacet != null && lengthFacet.toLong() == 0) {
+            return true;
+        }
+        Facet maxLengthFacet = getFacet(MaxLengthFacet.class);
+        if (maxLengthFacet != null && maxLengthFacet.toLong() == 0) {
+            return true;
+        }
+        EnumerationFacetSet enumerationFacet = (EnumerationFacetSet)getFacet(EnumerationFacetSet.class);
+        boolean nonEmpty = false;
+        if (enumerationFacet != null) {
+            List<String> values = enumerationFacet.getStringValues();
+            for (String v : values) {
+                if (!v.isEmpty()) {
+                    nonEmpty = true;
+                    break;
+                }
+            }
+            if (!nonEmpty) {
+                return true;
+            }
+        }
+        Facet patternFacet = getFacet(PatternFacet.class);
+        return patternFacet.getValue().isEmpty();
+    }
 
     /**
      * Get the item type of the atomic values that will be produced when an item

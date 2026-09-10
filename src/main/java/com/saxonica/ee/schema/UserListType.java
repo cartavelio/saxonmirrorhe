@@ -392,6 +392,22 @@ public class UserListType extends UserSimpleType implements ListType {
     }
 
     /**
+     * Ask whether this type only allows zero-length content
+     *
+     * @return true if this is a list type with a length or maxLength of zero, or an atomic type
+     * that restricts the content to be empty
+     */
+    @Override
+    public boolean isZeroLength() {
+        Facet lengthFacet = getFacet(LengthFacet.class);
+        if (lengthFacet != null && lengthFacet.toLong() == 0) {
+            return true;
+        }
+        Facet maxLengthFacet = getFacet(MaxLengthFacet.class);
+        return maxLengthFacet != null && maxLengthFacet.toLong() == 0;
+    }
+
+    /**
      * Serialize the schema component
      */
 
