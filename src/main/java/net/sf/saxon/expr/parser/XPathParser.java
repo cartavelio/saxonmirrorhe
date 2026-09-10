@@ -1305,14 +1305,27 @@ public class XPathParser {
         if (t.currentToken == Token.FOR_MEMBER && !allowXPath40Syntax) {
             grumble("'for member' requires XPath 4.0 to be enabled");
         }
+        if (t.currentToken == Token.LET) {
+            return parseLetExpression();
+        } else {
+            return parseForExpression();
+        }
+    }
+
+    private Expression parseForExpression() throws XPathException {
         int clauses = 0;
         int offset;
         int operator = t.currentToken;
         Assignation first = null;
         Assignation previous = null;
         do {
+            boolean forMember = false;
             offset = t.currentTokenStartOffset;
             nextToken();
+            if (isKeyword("member") && clauses > 0) {
+                forMember = true;
+                nextToken();
+            }
             expect(Token.DOLLAR);
             nextToken();
             expect(Token.NAME);
@@ -1321,7 +1334,6 @@ public class XPathParser {
             // declare the range variable
             Assignation firstClause;
             Assignation lastClause;
-            boolean forMember = false;
             if (operator == Token.FOR) {
                 firstClause = lastClause = new ForExpression();
                 firstClause.setRequiredType(SequenceType.SINGLE_ITEM);
@@ -1380,6 +1392,59 @@ public class XPathParser {
         }
         return makeTracer(first, first.getVariableQName());
     }
+
+    private Expression parseLetExpression() throws XPathException {
+        int clauses = 0;
+        int offset;
+        Assignation first = null;
+        Assignation previous = null;
+        do {
+            offset = t.currentTokenStartOffset;
+            nextToken();
+            expect(Token.DOLLAR);
+            nextToken();
+            expect(Token.NAME);
+            String var = t.currentTokenValue;
+
+            // declare the range variable
+            Assignation firstClause;
+            Assignation lastClause;
+            firstClause = lastClause = new LetExpression();
+            firstClause.setRequiredType(SequenceType.ANY_SEQUENCE);
+
+            clauses++;
+            setLocation(firstClause, offset);
+            setLocation(lastClause, offset);
+            lastClause.setVariableQName(makeStructuredQName(var, NamespaceUri.NULL));
+            nextToken();
+
+            // process the  ":=" clause
+            expect(Token.ASSIGN);
+            nextToken();
+            Expression collection = parseExprSingle();
+            firstClause.setSequence(collection);
+            declareRangeVariable(lastClause);
+            if (previous == null) {
+                first = firstClause;
+            } else {
+                previous.setAction(firstClause);
+            }
+            previous = lastClause;
+        } while (t.currentToken == Token.COMMA || (allowXPath40Syntax && t.currentToken == Token.LET));
+
+        // process the "return" expression (called the "action")
+        expect(Token.RETURN);
+        nextToken();
+        previous.setAction(parseExprSingle());
+
+        // undeclare all the range variables
+
+        for (int i = 0; i < clauses; i++) {
+            undeclareRangeVariable();
+        }
+        return makeTracer(first, first.getVariableQName());
+    }
+
 
     /**
      * Parse a quantified expression:
