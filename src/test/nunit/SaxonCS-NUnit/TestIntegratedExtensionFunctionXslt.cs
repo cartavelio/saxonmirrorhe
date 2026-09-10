@@ -276,16 +276,16 @@ namespace SaxonCS_NUnit {
                 Console.WriteLine("Processor version = " + staticContext.Processor.ProductTitle);
             }
 
-            /**
-             * Copy local data from one copy of the function to another. This method must be implemented
-             * in any subclass that maintains local data retained from the static context; the job of the
-             * method is to copy this local data to the supplied destination function.
-             * @param destination the function to which the local data must be copied. This will always
-             *                    be an instance of the same function class as the source function.
-             */
-            public override void CopyLocalData(ExtensionFunctionCall destination) {
-                ((InscopePrefixFunctionCall)destination).staticContext = staticContext;
-            }
+            // /**
+            //  * Copy local data from one copy of the function to another. This method must be implemented
+            //  * in any subclass that maintains local data retained from the static context; the job of the
+            //  * method is to copy this local data to the supplied destination function.
+            //  * @param destination the function to which the local data must be copied. This will always
+            //  *                    be an instance of the same function class as the source function.
+            //  */
+            // public override void CopyLocalData(ExtensionFunctionCall destination) {
+            //     ((InscopePrefixFunctionCall)destination).staticContext = staticContext;
+            // }
 
             public override XdmValue Call(XdmValue[] arguments, DynamicContext context) {
                 String val = null;
@@ -615,12 +615,12 @@ return
                 return processor.NewDocumentBuilder().Build(new StringReader(inputString));
             }
 
-            public override void CopyLocalData(ExtensionFunctionCall destination)
-            {
-                base.CopyLocalData(destination);
-                var castedDestination = (ExtensionFunctionUsingProcessorCall)destination;
-                castedDestination.processor = processor;
-            }
+            // public override void CopyLocalData(ExtensionFunctionCall destination)
+            // {
+            //     base.CopyLocalData(destination);
+            //     var castedDestination = (ExtensionFunctionUsingProcessorCall)destination;
+            //     castedDestination.processor = processor;
+            // }
 
             public override void SupplyStaticContext(StaticContext context)
             {
