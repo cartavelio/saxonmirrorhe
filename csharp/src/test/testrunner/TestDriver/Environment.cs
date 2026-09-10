@@ -1126,29 +1126,33 @@ namespace TestDriver {
                         }
 
                         string content = xpc.Evaluate("string(content)", source).ToString();
-                        Uri absUri = builder.BaseUri = new Uri(resolver.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
-                        try {
-                            if (useTreeModel == "dom") {
-                                // Create the validating reader and specify DTD validation.
-                                XmlReaderSettings settings = new ();
-                                settings.DtdProcessing = DtdProcessing.Parse;
-                                settings.XmlResolver = resolver;
-                                        
-                                XmlReader reader = XmlReader.Create(new StringReader(content), settings, builder.BaseUri.ToString());
-                                XmlDocument dom = new();
-                                dom.PreserveWhitespace = true;
-                                dom.Load(reader);
-                                doc = builder.Wrap(dom);
-                            }
-                            else {
-                                doc = builder.Build(new StringReader(content));
-                            }
+                        if (content.Length > 0) {
+                            Uri absUri = builder.BaseUri =
+                                new Uri(resolver.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
+                            try {
+                                if (useTreeModel == "dom") {
+                                    // Create the validating reader and specify DTD validation.
+                                    XmlReaderSettings settings = new();
+                                    settings.DtdProcessing = DtdProcessing.Parse;
+                                    settings.XmlResolver = resolver;
 
-                            environment.sourceDocs.Add(absUri.OriginalString, doc);
-                        }
-                        catch (Exception e) {
-                            driver.println("*** failed to parse inline source document, Exception:" + e.Message);
-                            continue;
+                                    XmlReader reader = XmlReader.Create(new StringReader(content), settings,
+                                        builder.BaseUri.ToString());
+                                    XmlDocument dom = new();
+                                    dom.PreserveWhitespace = true;
+                                    dom.Load(reader);
+                                    doc = builder.Wrap(dom);
+                                }
+                                else {
+                                    doc = builder.Build(new StringReader(content));
+                                }
+
+                                environment.sourceDocs.Add(absUri.OriginalString, doc);
+                            }
+                            catch (Exception e) {
+                                driver.println("*** failed to parse inline source document, Exception:" + e.Message);
+                                continue;
+                            }
                         }
 
                     }
@@ -1157,7 +1161,9 @@ namespace TestDriver {
                     string select = ((XdmNode)source).GetAttributeValue(new QName("select"));
                     if (select != null) {
                         XPathSelector selector = environment.xpathCompiler.Compile(select).Load();
-                        selector.ContextItem = selectedItem;
+                        if (selectedItem != null) {
+                            selector.ContextItem = selectedItem;
+                        }
                         selectedItem = selector.EvaluateSingle();
                     }
 

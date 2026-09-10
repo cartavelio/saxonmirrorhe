@@ -668,7 +668,7 @@ namespace TestDriver {
 
                         Stream src = null;
                         Uri srcBaseUri = new Uri("http://uri");
-                        XdmNode srcNode = null;
+                        XdmItem srcItem = null;
                         DocumentBuilder builder2 = env.processor.NewDocumentBuilder();
 
                         if (env.streamedPath != null) {
@@ -681,12 +681,12 @@ namespace TestDriver {
                             builder2.BaseUri = new Uri("http://uri");
                         }
                         else if (initialTemplate == null && contextItem != null) {
-                            srcNode = (XdmNode) (contextItem);
+                            srcItem = contextItem;
                         }
 
                         SchemaValidator validator = null;
                         if (src != null && !"skip".Equals(env.streamedInputValidation)) {
-                            validator = env.processor.SchemaManager.NewSchemaValidator();
+                            validator = env.schema.NewValidator();
                         }
 
                         if (initialMode != null) {
@@ -708,7 +708,7 @@ namespace TestDriver {
                             }
                         }
 
-                        if (src == null && srcNode == null && initialFunction == null && initialTemplateName == null &&
+                        if (src == null && srcItem == null && initialFunction == null && initialTemplateName == null &&
                             initialModeName == null) {
                             initialTemplateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
                         }
@@ -763,7 +763,7 @@ namespace TestDriver {
                                     result = transformer.ApplyTemplates(src, srcBaseUri);
                                 }
                                 else {
-                                    result = transformer.ApplyTemplates(srcNode);
+                                    result = transformer.ApplyTemplates(srcItem);
                                 }
                             }
                             else {
@@ -772,8 +772,8 @@ namespace TestDriver {
                                     validator.Validate(src, srcBaseUri);
                                 } else if (src != null) {
                                     transformer.ApplyTemplates(src, srcBaseUri, dest);
-                                } else if (srcNode != null) {
-                                    transformer.ApplyTemplates(srcNode, dest);
+                                } else if (srcItem != null) {
+                                    transformer.ApplyTemplates(srcItem, dest);
                                 }
                                 else {
                                     throw new SaxonApiException(new XPathException("(In test driver) No Source supplied", "XTDE0044"));
