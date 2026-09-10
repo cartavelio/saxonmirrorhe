@@ -730,7 +730,7 @@ public abstract class Mode extends Actor {
         return mustBeTyped;
     }
 
-    abstract boolean isCopyNamespaces();
+    public abstract boolean isCopyNamespaces();
 
     public void explain(ExpressionPresenter presenter) throws XPathException {
         int s = presenter.startElement("mode");

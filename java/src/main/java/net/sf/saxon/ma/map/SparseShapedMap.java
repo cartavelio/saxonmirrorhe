@@ -94,7 +94,7 @@ public class SparseShapedMap extends ShapedMap {
                 list.add(new StringValue(shape.getKey(i)));
             }
         }
-        return new ListIterator.OfAtomic<>(list);
+        return new ListIterator.OfAtomic<AtomicValue>(list);
     }
 
     /**

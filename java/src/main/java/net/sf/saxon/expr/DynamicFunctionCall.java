@@ -38,7 +38,8 @@ import java.util.function.Supplier;
  * The fn:apply function is also used internally to implement dynamic function calls.
  */
 
-public class DynamicFunctionCall extends Expression {
+public class
+DynamicFunctionCall extends Expression {
 
     private final Operand targetFunction;
     private final OperandArray suppliedArguments;
@@ -393,7 +394,7 @@ public class DynamicFunctionCall extends Expression {
                     }
                     // TODO: optimize for the case where all the called functions require the same coercions
 
-                    MappingFunction mapper = item -> {
+                    return new MappingIterator(new PrependSequenceIterator(first, fnIter), item -> {
                         FunctionItem fn = (FunctionItem) item;
                         FunctionItemType fit = fn.getFunctionItemType();
                         if (fn.getArity() != argEvaluators.length) {
@@ -420,10 +421,8 @@ public class DynamicFunctionCall extends Expression {
                         XPathContext c2 = fn.makeNewContext(context, null);
                         Sequence rawResult = fn.call(c2, coercedArgs);
                         return rawResult.iterate();
-                    };
+                    });
 
-                    return new MappingIterator(new PrependSequenceIterator(first, fnIter),
-                                               mapper);
                 };
 
             }

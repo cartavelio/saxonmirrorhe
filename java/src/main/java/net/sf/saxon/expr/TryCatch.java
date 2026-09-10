@@ -25,7 +25,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -422,12 +421,10 @@ public class TryCatch extends Expression {
         public PullEvaluator elaborateForPull() {
             TryCatch expr = (TryCatch)getExpression();
             SequenceEvaluator tryEval = expr.getTryExpr().makeElaborator().eagerly();
-            SequenceEvaluator finallyEval;
-            if (expr.finallyOp == null) {
-                finallyEval = (context) -> EmptySequence.getInstance();
-            } else {
-                finallyEval = expr.finallyOp.getChildExpression().makeElaborator().eagerly();
-            }
+            SequenceEvaluator finallyEval =
+                    expr.finallyOp == null
+                            ? null
+                            : expr.finallyOp.getChildExpression().makeElaborator().eagerly();
             return context -> {
                 XPathContextMajor c1 = context.newContext();
                 c1.createThreadManager();
@@ -465,7 +462,9 @@ public class TryCatch extends Expression {
                                 if (tci instanceof BreakInstr) {
                                     ((BreakInstr) tci).markContext(context);
                                 }
-                                finallyEval.evaluate(context);
+                                if (finallyEval != null) {
+                                    finallyEval.evaluate(context);
+                                }
                                 return v.iterate();
                             }
                         }
@@ -473,7 +472,9 @@ public class TryCatch extends Expression {
                     err.setHasBeenReported(false);
                     throw err;
                 }
-                finallyEval.evaluate(context);
+                if (finallyEval != null) {
+                    finallyEval.evaluate(context);
+                }
                 return result.iterate();
             };
         }
@@ -482,12 +483,10 @@ public class TryCatch extends Expression {
         public ItemEvaluator elaborateForItem() {
             TryCatch expr = (TryCatch) getExpression();
             SequenceEvaluator tryEval = expr.getTryExpr().makeElaborator().eagerly();
-            SequenceEvaluator finallyEval;
-            if (expr.finallyOp == null) {
-                finallyEval = (context) -> EmptySequence.getInstance();
-            } else {
-                finallyEval = expr.finallyOp.getChildExpression().makeElaborator().eagerly();
-            }
+            SequenceEvaluator finallyEval =
+                    expr.finallyOp == null
+                            ? null
+                            : expr.finallyOp.getChildExpression().makeElaborator().eagerly();
             return context -> {
                 XPathContext c1 = context.newMinorContext();
                 Item result;
@@ -510,14 +509,20 @@ public class TryCatch extends Expression {
                                 Expression caught = clause.catchOp.getChildExpression();
                                 XPathContextMajor c2 = context.newContext();
                                 c2.setCurrentException(err);
-                                return caught.evaluateItem(c2);
+                                Item resultItem = caught.evaluateItem(c2);
+                                if (finallyEval != null) {
+                                    finallyEval.evaluate(context);
+                                }
+                                return resultItem;
                             }
                         }
                     }
                     err.setHasBeenReported(false);
                     throw err;
                 }
-                finallyEval.evaluate(context);
+                if (finallyEval != null) {
+                    finallyEval.evaluate(context);
+                }
                 return result;
             };
         }

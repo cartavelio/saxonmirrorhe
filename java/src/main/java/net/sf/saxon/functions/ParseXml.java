@@ -139,6 +139,7 @@ public class ParseXml extends SystemFunction implements Callable {
 
             val = checkedOptions.get("allow-external-entities");
             if (val != null && !val.effectiveBooleanValue()) {
+                //#if CSHARP==false
                 parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
 
                     @Override
@@ -148,20 +149,18 @@ public class ParseXml extends SystemFunction implements Callable {
                                                        "' but external entity expansion is disallowed", "FODC0006"));
                     }
                 });
-//                parseOptions = parseOptions
-//                        .withParserFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false)
-//                        .withParserFeature("http://xml.org/sax/features/external-general-entities", false)
-//                        .withParserFeature("http://xml.org/sax/features/external-parameter-entities", false)
-//                        .withParserFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                //#endif
             }
 
             val = checkedOptions.get("entity-expansion-limit").head();
             if (val != null) {
+                //#if CSHARP==false
                 parseOptions = parseOptions
                         .withParserFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false)
                         .withParserFeature("http://xml.org/sax/features/external-general-entities", false)
                         .withParserFeature("http://xml.org/sax/features/external-parameter-entities", false)
                         .withParserFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                //#endif
             }
 
             val = checkedOptions.get("strip-space");

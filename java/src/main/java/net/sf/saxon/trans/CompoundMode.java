@@ -210,7 +210,7 @@ public class CompoundMode extends Mode {
     }
 
     @Override
-    boolean isCopyNamespaces() {
+    public boolean isCopyNamespaces() {
         return base.isCopyNamespaces();
     }
 

@@ -294,7 +294,7 @@ public class SimpleMode extends Mode {
     }
 
     @Override
-    boolean isCopyNamespaces() {
+    public boolean isCopyNamespaces() {
         return !"no".equals(explicitPropertyValues.get("copy-namespaces"));
     }
 
