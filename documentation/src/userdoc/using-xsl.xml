@@ -421,7 +421,7 @@
                   <li>j: just-in-time compilation of template rules</li>
                   <li>k: create keys</li>
                   <li>l: loop lifting</li>
-                  <li>m: miscellaneous</li>
+                  <li>m: miscellaneous (see below)</li>
                   <li>n: constant folding</li>
                   <li>p: predicate reordering</li>
                   <li>r: template rule-sets</li>
@@ -438,6 +438,7 @@
                   debugging, or causes extension functions with side-effects to behave
                   unpredictably. (Note however, that even with no optimization, lazy evaluation may
                   still cause the evaluation order to be not as expected.) </p>
+               <p>The <code>-m</code> (miscellaneous) flag is a prerequisite for some of the more specific optimizations.</p>
                <aside>Disabling optimizations may in some cases prevent streamed evaluation. For example, some expressions
                only become streamable because the optimizer is able to work out that sorting nodes into document order is unnecessary.</aside>
                <aside>Most of these flags enable optimizations that cause extra work at compile time to improve run-time performance.

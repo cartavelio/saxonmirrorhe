@@ -305,7 +305,7 @@
                   <li>j: just-in-time compilation of template rules (currently XSLT-only)</li>
                   <li>k: create keys</li>
                   <li>l: loop lifting</li>
-                  <li>m: miscellaneous</li>
+                  <li>m: miscellaneous (see below)</li>
                   <li>n: constant folding</li>
                   <li>p: predicate reordering</li>
                   <li>r: template rule-sets (not relevant to XQuery)</li>
@@ -323,6 +323,7 @@
                   debugging, or causes extension functions with side-effects to behave
                   unpredictably. (Note however, that even with no optimization, lazy evaluation may
                   still cause the evaluation order to be not as expected.) </p>
+               <p>The <code>-m</code> (miscellaneous) flag is a prerequisite for some of the more specific optimizations.</p>
             </td>
          </tr>
          <tr>
