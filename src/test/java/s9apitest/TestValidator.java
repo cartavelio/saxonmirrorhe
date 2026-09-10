@@ -1,5 +1,6 @@
 package s9apitest;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
@@ -13,6 +14,7 @@ import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trace.Instrumentation;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
@@ -77,7 +79,7 @@ public class TestValidator {
         try {
             out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
             ErrorListener listener = new ErrorListener() {
@@ -97,9 +99,9 @@ public class TestValidator {
                 }
             };
 
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(source_xsd);
+            SchemaValidator sv = schema.getValidator();
             sv.setErrorListener(listener);
-            sm.load(source_xsd);
             StreamSource source = new StreamSource(new StringReader(source_xml));
 
 
@@ -142,9 +144,9 @@ public class TestValidator {
             assertEquals(3, getAllBaseUris(doc).size(), "3 distinct base URIs in input");
             assertTrue(doc.getBaseURI().toString().endsWith("book-wrapper.xml"), "input doc base URI");
 
-            SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
-            SchemaValidator v = mgr.newSchemaValidator();
+            XsdCompiler mgr = proc.newXsdCompiler();
+            XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            SchemaValidator v = schema.getValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
             v.setDestinationBaseURI(doc.getBaseURI());
@@ -169,9 +171,9 @@ public class TestValidator {
             XdmNode doc = builder.build(new File(configTest.getDataDir() + "books.xml"));
             assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), doc.getTypeAnnotationName());
 
-            SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
-            SchemaValidator v = mgr.newSchemaValidator();
+            XsdCompiler mgr = proc.newXsdCompiler();
+            XsdSchema schema = mgr.compile(new File(configTest.getDataDir() + "books.xsd"));
+            SchemaValidator v = schema.getValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
             v.setDestinationBaseURI(doc.getBaseURI());
@@ -270,11 +272,12 @@ public class TestValidator {
     }
 
     private void cycleMultipleSchemaImports(boolean on) {
-        SchemaManager sm = null;
+        XsdCompiler sm = null;
+        XsdSchema schema = null;
         try {
             Processor p = new Processor(true);
             p.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, on);
-            sm = p.getSchemaManager();
+            sm = p.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>\n" +
                     "<xs:import namespace='ns:b' schemaLocation='file:///1'/>" +
                     "<xs:element name='a'/>\n" +
@@ -298,12 +301,12 @@ public class TestValidator {
                         }
                         return null;
                     });
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            schema = sm.compile(new StreamSource(new StringReader(xsd0), "file:///0"));
         } catch (SaxonApiException err) {
             fail(err.getMessage());
         }
 
-        SchemaValidator sv = sm.newSchemaValidator();
+        SchemaValidator sv = schema.getValidator();
         final String xml0 = "<a xmlns='ns:a'/>";
         final String xml1 = "<b xmlns='ns:b'/>";
         final String xml2 = "<c xmlns='ns:a'/>";
@@ -334,12 +337,13 @@ public class TestValidator {
     public void testSchemaAwareQueryUsingSCM() {
         try {
             Processor proc = new Processor(true);
-            proc.getSchemaManager().importComponents(new StreamSource(new File(configTest.getDataDir() + "dita/concept.scm")));
+            XsdSchema schema = proc.newXsdCompiler().importComponents(
+                    new StreamSource(new File(configTest.getDataDir() + "dita/concept.scm")));
             // define a ns prefix to be associated with a default attribute added to the instance during validation
             proc.getUnderlyingConfiguration().getNamePool().suggestPrefix("dita", NamespaceUri.of("http://dita.oasis-open.org/architecture/2005/"));
             XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new File(configTest.getDataDir() + "dita/concept.xml")));
             XQueryCompiler c = proc.newXQueryCompiler();
-            c.setSchemaAware(true);
+            c.useSchema(schema);
             XQueryEvaluator e = c.compile("validate{.}").load();
             e.setContextItem(doc);
             Serializer s = proc.newSerializer();
@@ -568,9 +572,9 @@ public class TestValidator {
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             SchemaManager sm = proc.getSchemaManager();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
-
-            SchemaValidator sv = sm.newSchemaValidator();
             sm.load(source_xsd);
+            SchemaValidator sv = sm.newSchemaValidator();
+            
             StreamSource source = new StreamSource(new StringReader(valid_xml));
 
             XdmDestination destination = new XdmDestination();
@@ -579,7 +583,6 @@ public class TestValidator {
             sv.validate(source);
 
             XPathCompiler xp = proc.newXPathCompiler();
-            xp.setSchemaAware(true);
             xp.useSchema(sv.getSchema());
             XdmAtomicValue result = (XdmAtomicValue) xp.evaluate("count(//comment())", destination.getXdmNode());
             assertEquals(1, result.getLongValue());
@@ -778,31 +781,66 @@ public class TestValidator {
                     "  <element name=\"Cousin\" type=\"string\" substitutionGroup=\"fam:FamilyMember\"/>\n" +
                     "</schema>";
 
-//            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
-//                "  <Parent>John</Parent>\n" +
-//                "  <Child>Alice</Child>\n" +
-//                "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
-//                "</Family>";
+            String doc2 = "<Family xmlns=\"http://myexample/family\" xmlns:fam2=\"http://myexample/family_ext\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://myexample/family_ext http://www.valid.nl/taxo3/family_ext.xsd\" >\n" +
+                "  <Parent>John</Parent>\n" +
+                "  <Child>Alice</Child>\n" +
+                "  <fam2:Cousin>Pete</fam2:Cousin>\n" +
+                "</Family>";
 
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new StringReader(sch1)));
+            XsdCompiler sm = proc.newXsdCompiler();
+            sm.setSchemaURIResolver(new SchemaURIResolver() {
+                /**
+                 * Set the configuration information for use by the resolver
+                 *
+                 * @param config the Saxon Configuration (which will always be an {@link EnterpriseConfiguration})
+                 */
+                @Override
+                public void setConfiguration(Configuration config) {
+
+                }
+
+                /**
+                 * Resolve a URI identifying a schema document, given the target namespace URI and
+                 * a set of associated location hints.
+                 *
+                 * @param targetNamespace the target namespace of the schema to be imported. The "null namesapce"
+                 *                        is identified by a zero-length string. In the case of an xs:include directive, where no
+                 *                        target namespace is specified, the parameter is null.
+                 * @param baseURI         The base URI of the module containing the "import schema" declaration;
+                 *                        null if no base URI is known
+                 * @param locations       The set of URIs identified as schema location hints. In most cases (xs:include, xs:import,
+                 *                        xsi:schemaLocation, xsl:import-schema) there is only one URI in this list. With an XQuery "import schema"
+                 *                        declaration, however, a list of URIs may be specified.
+                 * @return an array of Source objects each identifying a schema document to be loaded.
+                 * These need not necessarily correspond one-to-one with the location hints provided.
+                 * Returning a zero-length array indicates that no schema documents should be loaded (perhaps because
+                 * the relevant schema components are already present in the schema cache).
+                 * The method may also return null to indicate that resolution should be delegated to the standard
+                 * (Saxon-supplied) SchemaURIResolver.
+                 * @throws XPathException if the module cannot be located, and if delegation to the default
+                 *                        module resolver is not required.
+                 */
+                @Override
+                public Source[] resolve(String targetNamespace, String baseURI, String[] locations) throws XPathException {
+                    if (targetNamespace.equals("http://myexample/family")) {
+                        return new StreamSource[]{new StreamSource(new StringReader(sch1))};
+                    } else if (targetNamespace.equals("http://myexample/family_ext")) {
+                        return new StreamSource[]{new StreamSource(new StringReader(sch2))};
+                    } else {
+                        return null;
+                    }
+                }
+            });
+            XsdSchema schema1 = sm.compile(new StreamSource(new StringReader(sch1)));
             System.err.println("Schema 1 OK");
-            sm.newSchemaValidator().validate(new StreamSource(new StringReader(doc1)));
+            schema1.getValidator().validate(new StreamSource(new StringReader(doc1)));
             System.err.println("Doc 1 OK");
-            try {
-                sm.load(new StreamSource(new StringReader(sch2)));
-                fail("Unexpected success");
-            } catch (SaxonApiException e) {
-                assertTrue(e.getMessage().contains("It is not possible to add to the substitution group"), "expectedError");
-            }
-//            System.err.println("Schema 2 OK");
-//            try {
-//                sm.newSchemaValidator().validate(new StreamSource(new StringReader(doc2)));
-//                fail("Unexpected success");
-//            } catch (SaxonApiException e) {
-//                assertTrue("expectedError", e.getMessage().contains("It is not possible to add to the substitution group"));
-//            }
+
+            XsdSchema schema2 = sm.compile(new StreamSource(new StringReader(sch1)), new StreamSource(new StringReader(sch2)));
+            System.err.println("Schema 2 OK");
+            schema2.getValidator().validate(new StreamSource(new StringReader(doc2)));
+            System.err.println("Doc 2 OK");
 
         } catch (SaxonApiException sapie) {
             System.err.println(sapie.getMessage());
@@ -851,8 +889,8 @@ public class TestValidator {
 
                 }
             });
-            sm.load(new StreamSource(new StringReader(xsd1)));
-            sm.load(new StreamSource(new StringReader(xsd2)));
+            sm.setErrorReporter(error -> fail(error.getMessage()));
+            sm.load(new StreamSource(new StringReader(xsd1)), new StreamSource(new StringReader(xsd2)));
 
             SchemaValidator sv = sm.newSchemaValidator();
 
@@ -1231,21 +1269,24 @@ public class TestValidator {
         try {
             final Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, "lax");
-            processor.getSchemaManager().load(new StreamSource(new File(configTest.getDataDir() + "leak/schema.xsd")));
+            SchemaManager manager = processor.getSchemaManager();
+            XsdSchema schema = manager.load(new StreamSource(new File(configTest.getDataDir() + "leak/schema.xsd")));
 
             final DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
+            builder.setSchemaValidator(manager.newSchemaValidator());
 
             XdmNode node = builder.build(new StreamSource(new File(configTest.getDataDir() + "leak/instance.xml")));
             WeakReference<TinyTree> tinyTree = new WeakReference<>(((TinyDocumentImpl) node.getUnderlyingNode()).getTree());
 
             final XPathCompiler compiler = processor.newXPathCompiler();
-            compiler.importSchemaNamespace("http://example.org");
+            compiler.useSchema(schema);
             compiler.evaluate("namespace-uri-from-QName(//*/foo)", node);
             node = builder.build(new StreamSource(new File(configTest.getDataDir() + "leak/instance.xml")));
             System.gc();
             assertNull(tinyTree.get());
         } catch (SaxonApiException e) {
+            e.printStackTrace();
             fail();
         }
     }
@@ -1849,7 +1890,6 @@ public class TestValidator {
     public void testParallelSchemaCompile() {   // Bug 5978
         try {
             Processor proc = new Processor(true);
-            SchemaManager manager = proc.getSchemaManager();
             ExecutorService executor = Executors.newFixedThreadPool(10);
             for (int i = 0; i < 30; i++) {
                 executor.execute(new Runnable() {
@@ -1857,7 +1897,9 @@ public class TestValidator {
                     @Override
                     public void run() {
                         try {
-                            manager.load(new File(configTest.getDataDir() + "../bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
+                            XsdCompiler manager = proc.newXsdCompiler();
+                            XsdSchema schema = manager.compile(
+                                    new File(configTest.getDataDir() + "../bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
                         } catch (Throwable ex) {
                             System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
                             ex.printStackTrace();

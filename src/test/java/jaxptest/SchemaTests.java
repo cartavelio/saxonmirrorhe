@@ -4,10 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.SchemaURIResolver;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.SchemaManager;
-import net.sf.saxon.s9api.SchemaValidator;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -242,7 +239,7 @@ public class SchemaTests {
             String data = "<root><mele/></root>";
 
             Processor proc = new Processor(true);
-            SchemaManager mgr = proc.getSchemaManager();
+            XsdCompiler mgr = proc.newXsdCompiler();
             mgr.setXsdVersion("1.1");
             mgr.setSchemaURIResolver(new SchemaURIResolver() {
                 @Override
@@ -261,8 +258,8 @@ public class SchemaTests {
 
                 }
             });
-            mgr.load(new StreamSource(new StringReader(over), "http://dummy/over"));
-            SchemaValidator val = mgr.newSchemaValidator();
+            XsdSchema schema = mgr.compile(new StreamSource(new StringReader(over), "http://dummy/over"));
+            SchemaValidator val = schema.getValidator();
             val.validate(new StreamSource(new StringReader(data)));
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -291,12 +288,12 @@ public class SchemaTests {
             String data = "<root><mele/></root>";
 
             Processor proc = new Processor(true);
-            SchemaManager mgr = proc.getSchemaManager();
+            XsdCompiler mgr = proc.newXsdCompiler();
             mgr.setXsdVersion("1.1");
             proc.setCatalogFiles(catalog);
 
-            mgr.load(new StreamSource(new StringReader(over), "http://dummy/over"));
-            SchemaValidator val = mgr.newSchemaValidator();
+            XsdSchema schema = mgr.compile(new StreamSource(new StringReader(over), "http://dummy/over"));
+            SchemaValidator val = schema.getValidator();
             val.validate(new StreamSource(new StringReader(data)));
         } catch (SaxonApiException e) {
             // expected failure

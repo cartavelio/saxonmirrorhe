@@ -10,7 +10,7 @@ public abstract class XsdSchema {
      * @since 13.0
      */
 
-    public abstract SchemaValidator newSchemaValidator();
+    public abstract SchemaValidator getValidator();
 
     /**
      * Create an {@link ItemTypeFactory} which can be used to create {@link ItemType}
@@ -41,5 +41,17 @@ public abstract class XsdSchema {
      */
 
     public abstract Schema getUnderlyingSchema();
+
+    /**
+     * Export a precompiled Schema Component Model containing all the components (except built-in components)
+     * that have been loaded into this Processor.
+     *
+     * @param destination the destination to recieve the precompiled Schema Component Model in the form of an
+     *                    XML document
+     * @throws SaxonApiException if a failure occurs writing the schema components to the supplied destination
+     */
+
+    public abstract void exportComponents(Destination destination) throws SaxonApiException;
+
 }
 

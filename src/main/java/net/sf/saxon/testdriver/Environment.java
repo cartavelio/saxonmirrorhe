@@ -245,6 +245,7 @@ public class Environment implements ResourceResolver {
         // load the requested schema documents
 
         SchemaManager manager = environment.processor.getSchemaManager();
+        manager.clear();
         boolean validateSources = loadSchemaDocuments(driver, xpc, env, environment, manager);
 
         // load the requested source documents
@@ -463,13 +464,13 @@ public class Environment implements ResourceResolver {
                     environment.xsltCompiler.setSchemaAware(true);
                 }
             }
-            try {
-                manager.load(sourceList.toArray(new Source[0]));
-            } catch (SaxonApiException err) {
-                driver.println("*** Failed to load schema: " + err.getMessage());
-            }
-            environment.xqueryCompiler.useSchema(manager.getXsdSchema());
         }
+        try {
+            manager.load(sourceList.toArray(new Source[0]));
+        } catch (SaxonApiException err) {
+            driver.println("*** Failed to load schema: " + err.getMessage());
+        }
+        environment.xqueryCompiler.useSchema(manager.getXsdSchema());
         return validateSources;
     }
 

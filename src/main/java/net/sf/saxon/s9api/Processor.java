@@ -34,7 +34,6 @@ import java.text.RuleBasedCollator;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The <code>Processor</code> class serves three purposes: it allows global Saxon configuration options to be set;
@@ -51,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Processor implements Configuration.ApiProvider {
 
     private Configuration config;
-    private ConcurrentHashMap<String, SchemaManager> schemaManagerCache;
+    private SchemaManager schemaManager;
 
 
     /**
@@ -83,7 +82,7 @@ public class Processor implements Configuration.ApiProvider {
         if (licensedEdition) {
             config = Configuration.newConfiguration();
             if (config.getEditionCode().equals("EE")) {
-                schemaManagerCache =  initSchemaManagerCache();
+                schemaManager = makeSchemaManager();
             }
         } else {
             config = new Configuration();
@@ -106,7 +105,7 @@ public class Processor implements Configuration.ApiProvider {
     public Processor(/*@NotNull*/ Configuration config) {
         this.config = config;
         if (config.getEditionCode().equals("EE")) {
-            schemaManagerCache = initSchemaManagerCache();
+            schemaManager = makeSchemaManager();
         }
     }
 
@@ -121,9 +120,9 @@ public class Processor implements Configuration.ApiProvider {
     public Processor(Source source) throws SaxonApiException {
         try {
             config = Configuration.readConfiguration(source);
-            //#if CSHARP==false
-            schemaManagerCache = initSchemaManagerCache();
-            //#endif
+            if (config.getEditionCode().equals("EE")) {
+                schemaManager = makeSchemaManager();
+            }
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
@@ -307,36 +306,37 @@ public class Processor implements Configuration.ApiProvider {
     //#endif
 
     /**
-     * Get the SchemaManager for the global schema. The SchemaManager provides capabilities to load and cache
-     * XML schema definitions. There is exactly one global SchemaManager in a schema-aware Processor, and none
-     * in a Processor that is not schema-aware. The global SchemaManager is created automatically when first
-     * accessed.
+     * Create an {@link XsdCompiler}. This provides capabilities to load
+     * XML schema definitions.
      *
-     * @return the global SchemaManager, or null if the Processor is not schema-aware.
+     * @return a new {@code XsdCompiler}. In Saxon-HE and Saxon-PE the resulting {@code XsdCompiler}
+     * will be a dummy implementation that throws {@link UnsupportedOperationException} from most methods.
+     * @since 13.0.
      */
 
-    public SchemaManager getSchemaManager() {
-        return getSchemaManager("#global");
+    public XsdCompiler newXsdCompiler() {
+        return config.makeXsdCompiler(this);
     }
 
     /**
-     * Get the SchemaManager for a named schema. The SchemaManager is created if it does not already exist.
-     * @param name An name in the form of an NCName, used to identify the schema within the {@link Processor}
-     *             and its underlying {@link Configuration}. Two names are specially recognised: "#global"
-     *             returns the global schema (as does {@link #getSchemaManager()} with no argument; and
-     *             "#local"  returns a new uninitialised schema for purely local use. Any other name allows
-     *             the construction of an independent schema which is registered by name with the {@link Processor}
-     *             and {@link Configuration}.
+     * Get the associated {@code SchemaManager}. The {@code SchemaManager} provides capabilities to load and cache
+     * XML schema definitions. There is exactly one {@code SchemaManager} in a schema-aware Processor, and none
+     * in a Processor that is not schema-aware. The {@code SchemaManager} is created automatically by the system.
      *
-     * @return the requested {@link SchemaManager}, or null if the processor is not schema-aware.
+     * <p>The {@code SchemaManager} is retained in Saxon 13 to provide a degree of compatibility with
+     * older releases. However, the model of schema processing has changed. In previous releases, all
+     * compiled schema information was held globally in the {@link Configuration} (that is, at the
+     * level of the {@link Processor}. From Saxon 13, schemas are more modular, which means that
+     * it becomes an application responsibility to ensure that the correct schema is used for each
+     * aspect of processing. To take advantage of this flexibility, use of the central {@link SchemaManager}
+     * should be replaced with the {@link XsdCompiler}.</p>
+     *
+     * @return the associated SchemaManager, or null if the Processor is not schema-aware.
+     * @deprecated since 13.0. Use {@link #newXsdCompiler}.
      */
 
-    public SchemaManager getSchemaManager(String name) {
-        SchemaManager manager = schemaManagerCache.get(name);
-        if (manager == null) {
-            manager = makeSchemaManager(name);
-        }
-        return manager;
+    public SchemaManager getSchemaManager() {
+        return schemaManager;
     }
 
     /**
@@ -771,20 +771,10 @@ public class Processor implements Configuration.ApiProvider {
     }
     //#endif
 
-    private ConcurrentHashMap<String, SchemaManager> initSchemaManagerCache() {
-        //#if EE==true
-        schemaManagerCache = new ConcurrentHashMap<>();
-        SchemaManager manager = makeSchemaManager("#global");
-        schemaManagerCache.put("#global", manager);
-        //#endif
-        return schemaManagerCache;
-    }
-
-    private SchemaManager makeSchemaManager(String name) {
+    private SchemaManager makeSchemaManager() {
         SchemaManager manager = null;
         //#if EE==true
-        manager = new com.saxonica.ee.s9api.SchemaManagerImpl(this, name);
-        schemaManagerCache.put(name, manager);
+        manager = new com.saxonica.ee.s9api.SchemaManagerImpl(this);
         //#endif
         return manager;
     }

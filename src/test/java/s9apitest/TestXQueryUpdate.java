@@ -227,9 +227,10 @@ public class TestXQueryUpdate {
                     "<xs:attribute name='a' type='xs:integer' default='42'/></xs:extension></xs:simpleContent></xs:complexType>" +
                     "</xs:element></xs:schema>";
 
-            SchemaManager manager = proc.getSchemaManager();
-            manager.load(new StreamSource(new StringReader(xsd)));
-            SchemaValidator validator = manager.newSchemaValidator();
+            XsdCompiler manager = proc.newXsdCompiler();
+            XsdSchema schema = manager.compile(new StreamSource(new StringReader(xsd)));
+            comp.useSchema(schema);
+            SchemaValidator validator = schema.getValidator();
             XdmDestination docDest = new XdmDestination();
             docDest.setTreeModel(TreeModel.LINKED_TREE);
             validator.setDestination(docDest);

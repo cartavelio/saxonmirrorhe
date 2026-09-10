@@ -732,7 +732,7 @@ public class TestXPathCompiler {
     private boolean trySchemaAwareEquality(boolean isSchemaAware) throws SaxonApiException {
 
         Processor processor = new Processor(true);
-        SchemaManager sm = processor.getSchemaManager();
+        XsdCompiler sm = processor.newXsdCompiler();
         String xsd = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" \n" +
                 "           targetNamespace=\"http://www.xpathtest.com/test\" \n" +
                 "           xmlns:test=\"http://www.xpathtest.com/test\" \n" +
@@ -753,8 +753,8 @@ public class TestXPathCompiler {
                 "    </xs:complexType>\n" +
                 "  </xs:element>\n" +
                 "</xs:schema>";
-        sm.load(new StreamSource(new StringReader(xsd)));
-        SchemaValidator sv = sm.newSchemaValidator();
+        XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
+        SchemaValidator sv = schema.getValidator();
         XdmDestination xdmDest = new XdmDestination();
         sv.setDestination(xdmDest);
         String xml = "<comparables xmlns=\"http://www.xpathtest.com/test\">\n" +

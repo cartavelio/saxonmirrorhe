@@ -116,6 +116,8 @@ public class XQueryCompiler {
      * Any <code>import schema</code> declarations within the query itself
      * must be consistent with the supplied schema.</p>
      *
+     * @param schema the schema to be imported
+     * @since 13.0
      */
 
     public void useSchema(XsdSchema schema) {

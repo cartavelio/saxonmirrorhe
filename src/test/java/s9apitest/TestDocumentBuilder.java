@@ -453,9 +453,9 @@ public class TestDocumentBuilder {
         try {
             Processor proc = new Processor(true);
 
-            SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
-            SchemaValidator v = mgr.newSchemaValidator();
+            XsdCompiler mgr = proc.newXsdCompiler();
+            XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            SchemaValidator v = schema.getValidator();
             v.setExpandAttributeDefaults(expandDefaults);
 
             Serializer serializer = proc.newSerializer();
@@ -588,9 +588,9 @@ public class TestDocumentBuilder {
                     super.error(message);
                 }
             });
-            SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
-            SchemaValidator v = mgr.newSchemaValidator();
+            XsdCompiler mgr = proc.newXsdCompiler();
+            XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            SchemaValidator v = schema.getValidator();
 
             v.setInvalidityHandler(new InvalidityHandler() {
                 @Override

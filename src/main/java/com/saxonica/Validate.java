@@ -303,7 +303,7 @@ public class Validate {
 
             long startTime = now();
 
-            SchemaManager manager = processor.getSchemaManager();
+            XsdCompiler compiler = processor.newXsdCompiler();
 
             List<Source> schemaSources = new ArrayList<>();
             for (String schemaFileName : schemaFileNames) {
@@ -354,8 +354,9 @@ public class Validate {
                 schemaSources.add(schemaSource);
             }
 
+            XsdSchema schema;
             try {
-                manager.load(schemaSources.toArray(new Source[0]));
+                schema = compiler.compile(schemaSources.toArray(new Source[0]));
             } catch (SaxonApiException e) {
                 if (e.getCause() instanceof SchemaException) {
                     // bug 2351
@@ -368,7 +369,7 @@ public class Validate {
 
             if (scmInput != null) {
                 Source scm = new StreamSource(new File(scmInput));
-                manager.importComponents(scm);
+                schema = compiler.importComponents(scm);
             }
 
             if (showTime && !schemaFileNames.isEmpty()) {
@@ -380,7 +381,7 @@ public class Validate {
 
             // Validate the document instances
 
-            final SchemaValidator validator = manager.newSchemaValidator();
+            final SchemaValidator validator = schema.getValidator();
             validator.setLax("lax".equals(validationMode));
             if (topLevelElementName != null) {
                 validator.setDocumentElementName(QName.fromClarkName(topLevelElementName));
@@ -492,7 +493,7 @@ public class Validate {
                 Serializer scmSerializer = processor.newSerializer(scmOutputFile);
                 scmSerializer.setOutputProperty(Serializer.Property.METHOD, "xml");
                 scmSerializer.setOutputProperty(Serializer.Property.INDENT, "yes");
-                manager.exportComponents(scmSerializer);
+                schema.exportComponents(scmSerializer);
                 if (showTime) {
                     config.getLogger().info("Schema component model written to " + scmOutputFile.getAbsolutePath());
                 }

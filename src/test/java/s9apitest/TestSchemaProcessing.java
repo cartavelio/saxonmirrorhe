@@ -22,11 +22,12 @@ public class TestSchemaProcessing {
     public void testBug6050() {
         try {
             Processor processor = new Processor(true);
-            SchemaManager mgr = processor.getSchemaManager();
-            mgr.load(new File(configTest.getDataDir() + "bug6050/person.xsd"));
+            XsdCompiler mgr = processor.newXsdCompiler();
+            XsdSchema schema = mgr.compile(new File(configTest.getDataDir() + "bug6050/person.xsd"));
             //mgr.load(new File("src/test/java/bugs/bug6050/simple.xsd"));
 
             XQueryCompiler compiler = processor.newXQueryCompiler();
+            compiler.useSchema(schema);
             XQueryExecutable exec = compiler.compile(new File(configTest.getDataDir() + "bug6050/common.xq"));
             XQueryEvaluator eval = exec.load();
             eval.setExternalVariable(new QName("phoneNumber"), new XdmAtomicValue("1189482766"));

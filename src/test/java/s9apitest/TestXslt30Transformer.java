@@ -549,10 +549,10 @@ public class TestXslt30Transformer {
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer transformer = exec.load30();
 
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
-            builder.setSchemaValidator(sm.newSchemaValidator());
+            builder.setSchemaValidator(schema.getValidator());
             XdmNode books = builder.build(new File(configTest.getDataDir() + "books.xml"));
             // Create a serializer
             //String outfile = @"C:/MyJava/users/caffo/Output.xml";
@@ -788,9 +788,9 @@ public class TestXslt30Transformer {
     public void testValidationWarnings() {
         try {
             Processor processor = new Processor(true);
-            SchemaManager schemaManager = processor.getSchemaManager();
+            XsdCompiler sm = processor.newXsdCompiler();
             processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
-            XsdSchema schema = schemaManager.load(
+            XsdSchema schema = sm.compile(
                     new StreamSource(configTest.getDataDir() + "books.xsd"));
 
             Serializer serializer = processor.newSerializer();
@@ -1629,10 +1629,11 @@ public class TestXslt30Transformer {
                                                        "   </xslt:template>\n" +
                                                        "</xslt:transform>");
 
-            SchemaManager manager = proc.getSchemaManager();
+            XsdCompiler manager = proc.newXsdCompiler();
             comp.setSchemaAware(true);
 
-            manager.load(new StreamSource(new File(configTest.getDataDir() + "varietyOfTypes.xsd")));
+            XsdSchema schema = manager.compile(
+                    new StreamSource(new File(configTest.getDataDir() + "varietyOfTypes.xsd")));
 
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer xsl = exec.load30();
@@ -1642,7 +1643,7 @@ public class TestXslt30Transformer {
                     "\t\t  xmlns:my=\"http://ns.example.com/strip-type\"\n" +
                     "\t \t  specialPart=\"123-AB\" listParts=\"000-SS 000-RR\" xsi:nil=\"true\"/>";
 
-            SchemaValidator validator = manager.newSchemaValidator();
+            SchemaValidator validator = schema.getValidator();
             validator.setLax(false);
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(validator);
@@ -2257,11 +2258,11 @@ public class TestXslt30Transformer {
         try {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, true);
-            SchemaManager sm = processor.getSchemaManager();
+            XsdCompiler sm = processor.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>\n" +
                     "<xs:element name='a'/>\n" +
                     "</xs:schema>";
-            sm.load(new StreamSource(new StringReader(xsd0)));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0)));
             String s = "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
                     + "       <xsl:import-schema>"
                     + "        <xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>\n"
@@ -2273,6 +2274,7 @@ public class TestXslt30Transformer {
                     + "        </xsl:template>"
                     + "        </xsl:transform>";
             XsltCompiler comp = processor.newXsltCompiler();
+            comp.useSchema(schema);
             Xslt30Transformer transformer = comp.compile(new StreamSource(new StringReader(s))).load30();
             XdmDestination dest = new XdmDestination();
             transformer.callTemplate(null, dest);
@@ -2288,14 +2290,14 @@ public class TestXslt30Transformer {
         try {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, false);
-            SchemaManager sm = processor.getSchemaManager();
+            XsdCompiler sm = processor.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>\n" +
                     "<xs:element name='a'/>\n" +
                     "</xs:schema>";
             String xsd1 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace='ns:a'>\n" +
                     "<xs:element name='b'/>\n" +
                     "</xs:schema>";
-            sm.load(new StreamSource(new StringReader(xsd0)));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0)));
             String s = "<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
                     + "       <xsl:import-schema namespace='ns:a' schema-location='ns:a'/>"
                     + "       <xsl:template name='xsl:initial-template' as='xs:string'> "
@@ -2303,6 +2305,7 @@ public class TestXslt30Transformer {
                     + "        </xsl:template>"
                     + "        </xsl:transform>";
             XsltCompiler comp = processor.newXsltCompiler();
+            comp.useSchema(schema);
             comp.setURIResolver(new URIResolver() {
                 @Override
                 public Source resolve(String href, String base) throws TransformerException {

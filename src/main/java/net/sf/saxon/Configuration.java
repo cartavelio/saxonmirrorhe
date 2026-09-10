@@ -33,9 +33,7 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.resource.*;
-import net.sf.saxon.s9api.HostLanguage;
-import net.sf.saxon.s9api.Location;
-import net.sf.saxon.s9api.Xslt30Transformer;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
@@ -55,6 +53,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
@@ -412,8 +411,7 @@ public class Configuration implements SourceResolver {
         // that their override wins.
 
         commonResolver = new CatalogResourceResolver();
-        defaultXsltCompilerInfo = makeCompilerInfo();
-        //systemURIResolver = new StandardURIResolver(this);
+        defaultXsltCompilerInfo = new CompilerInfo(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
         serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
         sourceResolver = this;
@@ -5442,28 +5440,9 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
-    /**
-     * Make an XSLT CompilerInfo object - can be overridden in a subclass to produce variants
-     * capable of optimization
-     *
-     * @return a new CompilerInfo object
-     */
-
-    public CompilerInfo makeCompilerInfo() {
-        return new CompilerInfo(this);
+    public XsdCompiler makeXsdCompiler(Processor proc) {
+        return new XsdCompiler();
     }
-
-    /**
-     * Make a CompilerService object, to handle byte code generation, or null if byte code
-     * generation is not available
-     *
-     * @param hostLanguage eg Configuration.XSLT
-     * @return a CompilerService, or null
-     */
-    public ICompilerService makeCompilerService(HostLanguage hostLanguage) {
-        return null;
-    }
-
 
     /**
      * Set a label for this configuration

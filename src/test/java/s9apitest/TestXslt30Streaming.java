@@ -205,11 +205,11 @@ public class TestXslt30Streaming {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.TIMING, true);
 
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
 
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
+            comp.useSchema(schema);
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
                             "<xsl:mode streamable='yes' on-no-match='shallow-copy'/>" +
@@ -220,7 +220,7 @@ public class TestXslt30Streaming {
             Xslt30Transformer transformer = exec.load30();
 
             Source books = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
-            Source validBooks = sm.newSchemaValidator().asSource(books);
+            Source validBooks = schema.getValidator().asSource(books);
 
             // Create a serializer
             //String outfile = @"C:/MyJava/users/caffo/Output.xml";
@@ -628,10 +628,9 @@ public class TestXslt30Streaming {
                     "   <xslt:mode streamable='yes'/>" +
                     "</xslt:transform>");
 
-            SchemaManager manager = proc.getSchemaManager();
-            comp.setSchemaAware(true);
-
-            manager.load(new StreamSource(new File(configTest.getDataDir() + "varietyOfTypes.xsd")));
+            XsdCompiler manager = proc.newXsdCompiler();
+            XsdSchema schema = manager.compile(new StreamSource(new File(configTest.getDataDir() + "varietyOfTypes.xsd")));
+            comp.useSchema(schema);
 
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer xsl = exec.load30();
@@ -641,7 +640,7 @@ public class TestXslt30Streaming {
                     "\t\t  xmlns:my=\"http://ns.example.com/strip-type\"\n" +
                     "\t \t  specialPart=\"123-AB\" listParts=\"000-SS 000-RR\" xsi:nil=\"true\"/>";
 
-            SchemaValidator validator = manager.newSchemaValidator();
+            SchemaValidator validator = schema.getValidator();
             validator.setLax(false);
             StreamSource sDoc = new StreamSource(new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
             Source vDoc = validator.asSource(sDoc);

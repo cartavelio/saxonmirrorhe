@@ -32,7 +32,6 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.ElementImpl;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -97,8 +96,20 @@ public class XsltCompiler {
         compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
     }
 
+    /**
+     * Set the {@link XsdSchema} to be used with this XQueryCompiler.
+     *
+     * <p>This is equivalent to importing the schema from within the stylesheet.
+     * Any <code>xsl:import-schema</code> declarations within the stylesheet itself
+     * must be consistent with the supplied schema.</p>
+     *
+     * @param schema the schema to be imported
+     * @since 13.0
+     */
+
     public void useSchema(XsdSchema schema) {
-        throw new NotImplementedException();
+        compilerInfo.setSchemaAware(true);
+        //compilerInfo.preLoadSchema(schema.getUnderlyingSchema());
     }
 
     /**

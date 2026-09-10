@@ -6,6 +6,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.SchemaValidator;
+import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +46,7 @@ public class TestInvalidityHandler {
 
         try {
             Processor processor = new Processor(true);
-            processor.getSchemaManager().load(new StreamSource(new StringReader(SCHEMA)));
+            XsdSchema schema = processor.newXsdCompiler().compile(new StreamSource(new StringReader(SCHEMA)));
 
             processor.getUnderlyingConfiguration().setLogger(new Logger() {
                 @Override
@@ -54,7 +55,7 @@ public class TestInvalidityHandler {
                 }
             });
 
-            SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+            SchemaValidator validator = schema.getValidator();
             validator.setInvalidityHandler(new CustomInvalidityHandler());
 
             validator.validate(new StreamSource(new StringReader(INVALID_INPUT)));

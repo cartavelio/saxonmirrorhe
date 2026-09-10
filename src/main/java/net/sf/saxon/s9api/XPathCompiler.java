@@ -151,11 +151,12 @@ public class XPathCompiler {
     }
 
     /**
-     * Set the {@link XsdSchema} to be used with this XQueryCompiler.
+     * Set the {@link XsdSchema} to be used with this XPathCompiler.
      *
-     * <p>This is equivalent to importing the schema from within the query.
-     * Any <code>import schema</code> declarations within the query itself
-     * must be consistent with the supplied schema.</p>
+     * <p>This automatically marks the XPath expression as schema-aware.</p>
+     * <p>The method should only be called once; supplying a schema cancels the effect
+     * of any previous call. The method must be called before the XPath expression is compiled.</p>
+     * @param schema the schema to be imported
      * @since 13.0
      */
 
@@ -328,6 +329,9 @@ public class XPathCompiler {
      * @param uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      * @since 9.1
+     * @deprecated in 13.0. Since there is no longer a global schema at {@link Processor} level,
+     * the schema needs to be made available to the {@code XPathCompiler} by calling the
+     * {@link #useSchema(XsdSchema)} method.
      */
 
     public void importSchemaNamespace(String uri) {
