@@ -281,16 +281,6 @@ public abstract class TestDriver {
         TreeModel tree = null;
         if (s.equalsIgnoreCase("dom")) {
             tree = new DOMObjectModel();
-        } else if (s.equalsIgnoreCase("xom")) {
-            tree = new XOMObjectModel();
-        } else if (s.equalsIgnoreCase("jdom2")) {
-            tree = new JDOM2ObjectModel();
-        } else if (s.equalsIgnoreCase("dom4j")) {
-            tree = new DOM4JObjectModel();
-        } else if (s.equalsIgnoreCase("domino")) {
-            tree = new DominoTreeModel();
-        } else if (s.equalsIgnoreCase("axiom")) {
-            tree = new AxiomObjectModel();
         } else if (s.equalsIgnoreCase("tinytree")) {
             tree = TreeModel.TINY_TREE;
         } else if (s.equalsIgnoreCase("condensed")) {
