@@ -209,14 +209,27 @@ public class StyleNodeFactory implements NodeFactory {
             // Detect an unrecognized element in the Saxon namespace
 
             if (uri.equals(NamespaceUri.SAXON)) {
-                String message = elemName.getDisplayName() + " is not recognized as a Saxon instruction";
-                if (config.getEditionCode().equals("HE")) {
-                    message += ". Saxon extensions require Saxon-PE or higher";
-                } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                    message += ". No Saxon-PE or -EE license was found";
+                switch (elemName.getLocalPart()) {
+                    case "array":
+                    case "array-member":
+                    case "assign":
+                    case "deep-update":
+                    case "do":
+                    case "doctype":
+                    case "entity-ref":
+                    case "import-query":
+                    case "item-type":
+                    case "while":
+                        String message = elemName.getDisplayName() + " is not recognized as a Saxon instruction";
+                        if (config.getEditionCode().equals("HE")) {
+                            message += ". Saxon extensions require Saxon-PE or higher";
+                        } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                            message += ". No Saxon-PE or -EE license was found";
+                        }
+                        XmlProcessingIncident err = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9008, location.saveLocation()).asWarning();
+                        pipe.getErrorReporter().report(err);
                 }
-                XmlProcessingIncident err = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9008, location.saveLocation()).asWarning();
-                pipe.getErrorReporter().report(err);
+
             }
 
             // We can't work out the final class of the node until we've examined its attributes
