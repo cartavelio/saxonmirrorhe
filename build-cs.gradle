@@ -428,7 +428,8 @@ task dotnetTestDrivers(
   doLast {
     exec {
       workingDir = "${projectDir}/build/testdrivers"
-      commandLine dotnetex, 'restore', 'TestDrivers.sln', '--verbosity', 'Normal'
+      commandLine dotnetex, 'restore', 'TestDrivers.sln', '--verbosity', 'Normal',
+        '-p:Platform=Any CPU'
     }
   }
 
@@ -437,7 +438,8 @@ task dotnetTestDrivers(
       workingDir = "${projectDir}/build/testdrivers"
       commandLine dotnetex, 'build', 'TestDrivers.sln', '--verbosity', 'Normal',
         '--configuration', csconfiguration,  '/nodereuse:false', '--no-restore',
-        "-p:Version=${csver}", "-p:PackageVersion=${csver}"
+        "-p:Version=${csver}", "-p:PackageVersion=${csver}",
+        '-p:Platform=Any CPU'
     }
   }
 
