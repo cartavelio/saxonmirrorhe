@@ -150,6 +150,11 @@ public class FilterIterator implements SequenceIterator {
         base.close();
     }
 
+    @Override
+    public void discharge() {
+        base.discharge();
+    }
+
 
     /**
      * Subclass to handle the common special case where it is statically known

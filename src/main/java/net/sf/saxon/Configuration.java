@@ -142,11 +142,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private StaticQueryContextFactory staticQueryContextFactory = new StaticQueryContextFactory();
     protected OptimizerOptions optimizerOptions = OptimizerOptions.FULL_HE_OPTIMIZATION;
     protected CompilerInfo defaultXsltCompilerInfo;
-    private java.util.function.Function<Configuration, ? extends ErrorReporter> errorReporterFactory = config -> {
-        StandardErrorReporter reporter = new StandardErrorReporter();
-        reporter.setLogger(config.getLogger());
-        return reporter;
-    };
+    private java.util.function.Function<Configuration, ? extends ErrorReporter> errorReporterFactory;
     protected IndependentContext staticContextForSystemFunctions;
 
     private String label = null;
@@ -824,6 +820,13 @@ public class Configuration implements SourceResolver, NotationSet {
     }
     
     public ErrorReporter makeErrorReporter() {
+        if (errorReporterFactory == null) {
+            errorReporterFactory = config -> {
+                StandardErrorReporter reporter = new StandardErrorReporter();
+                reporter.setLogger(config.getLogger());
+                return reporter;
+            };
+        }
         return errorReporterFactory.apply(this);
     }
 

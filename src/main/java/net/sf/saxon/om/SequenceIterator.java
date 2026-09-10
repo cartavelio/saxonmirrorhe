@@ -60,12 +60,27 @@ public interface SequenceIterator extends Closeable {
      * another thread. Closing the iterator terminates that thread and means that it needs to do
      * no additional work. Indeed, failing to close the iterator may cause the push thread to hang
      * waiting for the buffer to be emptied.</p>
+     * <p>Closing an iterator is not necessary if the iterator is read to completion: if a call
+     * on {@link #next()} returns null, the iterator will be closed automatically. An explicit
+     * call on {@link #close()} is needed only when iteration is abandoned prematurely.</p>
      *
      * @since 9.1. Default implementation added in 9.9.
      */
 
     @Override
     default void close() {
+    }
+
+    /**
+     * Calling this method instructs the iterator to release any resources it holds, while still
+     * remaining able to deliver the remaining items in the sequence. This may require
+     * the iterator to calculate the rest of the sequence eagerly. The method is called by a client
+     * if it anticipates that it might not read the iterator to completion, but it cannot
+     * guarantee that {@link #close()} will be called when no more items are needed.
+     * @since 10.7
+     */
+
+    default void discharge() {
     }
 
 }

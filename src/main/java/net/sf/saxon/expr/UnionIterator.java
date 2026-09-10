@@ -142,5 +142,12 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
         }
     }
 
+    @Override
+    public void discharge() {
+        for (Intake intake : intakes) {
+            intake.iter.discharge();
+        }
+    }
+
 }
 

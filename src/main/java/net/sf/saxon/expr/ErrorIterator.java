@@ -43,10 +43,6 @@ public class ErrorIterator implements SequenceIterator {
         throw new UncheckedXPathException(exception);
     }
 
-    @Override
-    public void close() {
-
-    }
 
 
 }

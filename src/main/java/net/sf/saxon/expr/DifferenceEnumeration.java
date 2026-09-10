@@ -119,5 +119,11 @@ public class DifferenceEnumeration implements SequenceIterator {
         p2.close();
     }
 
+    @Override
+    public void discharge() {
+        p1.discharge();
+        p2.discharge();
+    }
+
 }
 

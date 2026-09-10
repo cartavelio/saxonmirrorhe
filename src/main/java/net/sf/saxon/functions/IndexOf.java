@@ -93,6 +93,11 @@ public class IndexOf extends CollatingFunctionFixed  {
             base.close();
         }
 
+        @Override
+        public void discharge() {
+            base.discharge();
+        }
+
         /**
          * Get the next item in the sequence. This method changes the state of the
          * iterator, in particular it affects the result of subsequent calls of

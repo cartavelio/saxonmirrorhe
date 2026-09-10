@@ -44,6 +44,11 @@ public class HomogeneityCheckerIterator implements SequenceIterator {
         base.close();
     }
 
+    @Override
+    public void discharge() {
+        base.discharge();
+    }
+
     /*@NotNull*/
     private UncheckedXPathException reportMixedItems() {
         XPathException err = new XPathException("Cannot mix nodes and atomic values in the result of a path expression");

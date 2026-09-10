@@ -60,5 +60,10 @@ public class LookaheadIteratorImpl implements LookaheadIterator {
         base.close();
     }
 
+    @Override
+    public void discharge() {
+        base.discharge();
+    }
+
 }
 

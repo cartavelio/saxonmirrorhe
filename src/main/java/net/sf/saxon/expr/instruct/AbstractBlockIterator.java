@@ -26,6 +26,7 @@ public abstract class AbstractBlockIterator implements SequenceIterator {
     protected int currentOperand;
     protected SequenceIterator currentIter;
     protected XPathContext context;
+    private boolean releaseResources;
 
     // Zero-argument constructor for use from bytecode
     public AbstractBlockIterator() {}
@@ -46,6 +47,11 @@ public abstract class AbstractBlockIterator implements SequenceIterator {
         this.currentOperand = 0;
     }
 
+    @Override
+    public void discharge() {
+        releaseResources = true;
+    }
+
     /**
      * Get the next item in the sequence.
      *
@@ -61,6 +67,9 @@ public abstract class AbstractBlockIterator implements SequenceIterator {
             if (currentIter == null) {
                 try {
                     currentIter = getNthChildIterator(currentOperand++);
+                    if (releaseResources) {
+                        currentIter.discharge();
+                    }
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);
                 }

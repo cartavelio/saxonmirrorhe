@@ -103,6 +103,11 @@ public class DistinctValues extends CollatingFunctionFixed {
             base.close();
         }
 
+        @Override
+        public void discharge() {
+            base.discharge();
+        }
+
     }
 
     @Override

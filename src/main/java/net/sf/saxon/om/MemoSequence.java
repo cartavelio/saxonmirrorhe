@@ -242,11 +242,6 @@ public class MemoSequence implements Sequence {
         }
 
         @Override
-        public void close() {
-        }
-
-
-        @Override
         public boolean supportsGetLength() {
             return true;
         }

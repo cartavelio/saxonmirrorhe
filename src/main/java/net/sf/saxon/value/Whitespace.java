@@ -525,10 +525,5 @@ public class Whitespace {
             return new StringValue(input.substring(start, end));
         }
 
-        @Override
-        public void close() {
-            // no action
-        }
-
     }
 }
