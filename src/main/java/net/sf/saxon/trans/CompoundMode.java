@@ -48,7 +48,7 @@ public class CompoundMode extends Mode {
         if (base.getModeName().equals(Mode.UNNAMED_MODE_NAME)) {
             throw new AssertionError("Cannot override an unnamed mode");
         }
-        if (base.getModeName().equals(Mode.OMNI_MODE)) {
+        if (base.getModeName().equals(Mode.OMNI_MODE_NAME)) {
             throw new AssertionError("Cannot override mode='#all'");
         }
         this.base = base;

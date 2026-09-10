@@ -1206,6 +1206,7 @@ public abstract class StyleElement extends ElementImpl {
         final StructuredQName checkedName = defaultMode;
         if (psm != null && psm.isDeclaredModes()) {
             // It will be null on the xsl:package element itself
+            getContainingPackage().getRuleManager().registerModeName(checkedName);
             psm.addFixupAction(() -> {
                 if (psm.getRuleManager().obtainMode(checkedName, false) == null) {
                     throw new XPathException("Mode " + checkedName.getDisplayName()

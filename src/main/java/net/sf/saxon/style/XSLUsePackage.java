@@ -279,7 +279,7 @@ public class XSLUsePackage extends StyleElement {
                             overridingDeclaration.getAttributeValue(NamespaceUri.NULL, "match") != null) {
                         StructuredQName[] modeNames = ((XSLTemplate) overridingDeclaration).getModeNames();
                         for (StructuredQName modeName : modeNames) {
-                            if (modeName.equals(Mode.OMNI_MODE)) {
+                            if (modeName.equals(Mode.OMNI_MODE_NAME)) {
                                 ((StyleElement) overridingDeclaration).compileError(
                                         "The mode name #all must not appear in an overriding template rule", "XTSE3440");
                                 continue;

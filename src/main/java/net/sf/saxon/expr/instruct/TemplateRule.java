@@ -20,6 +20,7 @@ import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
+import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
@@ -49,12 +50,10 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
 
     // The body of the template is represented by an expression,
     // which is responsible for any type checking that's needed.
-
+    protected Mode mode;
     protected Expression body;
     protected PushEvaluator bodyEvaluator;
     protected Pattern matchPattern;
-    private boolean _hasRequiredParams;
-    //private boolean bodyIsTailCallReturner;
     private SequenceType requiredType;
     private boolean declaredStreamable;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
@@ -67,7 +66,6 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
 
 
     private final List<Rule> rules = new ArrayList<>();
-    protected List<TemplateRule> slaveCopies = new ArrayList<>();
 
     /**
      * Create a template
@@ -89,7 +87,22 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
             }
         }
         matchPattern = pattern;
+    }
 
+    /**
+     * Set the mode used by this template rule
+     * @param m the mode
+     */
+    public void setMode(Mode m) {
+        this.mode = m;
+    }
+
+    /**
+     * Get the mode used by this template rule
+     * @return the mode
+     */
+    public Mode getMode() {
+        return mode;
     }
 
     @Override
@@ -156,7 +169,6 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     @Override
     public void setBody(Expression body) {
         this.body = body;
-        //bodyIsTailCallReturner = (body instanceof TailCallReturner);
     }
 
     public void setStackFrameMap(SlotManager map) {
@@ -165,34 +177,6 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
 
     public SlotManager getStackFrameMap() {
         return stackFrameMap;
-    }
-
-//    @Override
-//    public void allocateAllBindingSlots(StylesheetPackage pack) {
-//        super.allocateAllBindingSlots(pack);
-//        if (matchPattern != null) {
-//            allocateBindingSlotsRecursive(pack, this, matchPattern);
-//        }
-//    }
-
-    /**
-     * Set whether this template has one or more required parameters
-     *
-     * @param has true if the template has at least one required parameter
-     */
-
-    public void setHasRequiredParams(boolean has) {
-        _hasRequiredParams = has;
-    }
-
-    /**
-     * Ask whether this template has one or more required parameters
-     *
-     * @return true if this template has at least one required parameter
-     */
-
-    public boolean hasRequiredParams() {
-        return _hasRequiredParams;
     }
 
     /**
@@ -325,10 +309,9 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      *
      * @param compilation the XSLT compilation
      * @param decl        the component declaration of this template rule
-     * @param modeName    the mode name
      */
 
-    public void prepareInitializer(Compilation compilation, ComponentDeclaration decl, StructuredQName modeName) {
+    public void prepareInitializer(Compilation compilation, ComponentDeclaration decl) {
         // No action in Saxon-HE
     }
 
@@ -471,37 +454,6 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         }
     }
 
-    /**
-     * Create a copy of a template rule. This is needed when copying a rule from the "omniMode" (mode=#all)
-     * to a specific mode. Because we want the rules to be chained in the right order within the mode object,
-     * we create the copy as soon as we know it is needed. The problem is that at this stage many of the properties
-     * of the template rule are still uninitialised. So we mark the new copy as a slave of the original, and at
-     * the end of the compilation process we update all the slave copies to match the properties of the original.
-     *
-     * @return a copy of the template rule
-     */
-
-    public TemplateRule copy() {
-        TemplateRule tr = new TemplateRule();
-        if (body == null || matchPattern == null) {
-            slaveCopies.add(tr);
-        } else {
-            copyTo(tr);
-        }
-        return tr;
-    }
-
-    /**
-     * Update the properties of template rules that have been marked as slave copies of this one (typically the same
-     * template, but in a different mode).
-     */
-
-    public void updateSlaveCopies() {
-        for (TemplateRule tr : slaveCopies) {
-            copyTo(tr);
-        }
-    }
-
     protected void copyTo(TemplateRule tr) {
         if (body != null) {
             tr.body = body.copy(new RebindingMap());
@@ -509,8 +461,6 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         if (matchPattern != null) {
             tr.matchPattern = matchPattern.copy(new RebindingMap());
         }
-        tr._hasRequiredParams = _hasRequiredParams;
-        //tr.bodyIsTailCallReturner = bodyIsTailCallReturner;
         tr.requiredType = requiredType;
         tr.declaredStreamable = declaredStreamable; // ? this can vary from one mode to another
         tr.requiredContextItemType = requiredContextItemType;

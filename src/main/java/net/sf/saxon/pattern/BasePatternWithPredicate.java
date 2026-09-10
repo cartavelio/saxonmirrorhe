@@ -122,6 +122,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
      */
     @Override
     public boolean matches(Item item, XPathContext context) throws XPathException {
+        //System.err.println("Testing " + this + " -- " + System.identityHashCode(this));
         if (!getBasePattern().matches(item, context)) {
             return false;
         }
@@ -298,6 +299,8 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
                 getBasePattern().copy(rebindings), getPredicate().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, n);
         n.setOriginalText(getOriginalText());
+        //System.err.println("Copy " + this + " -- from " + System.identityHashCode(this) + " to " + System.identityHashCode(n));
+
         return n;
     }
 
