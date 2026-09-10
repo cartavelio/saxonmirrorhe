@@ -14,14 +14,18 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -174,7 +178,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                     if (cache != null) {
                         UnicodeString existing = cache.get(absoluteURI);
                         if (existing != null) {
-                            if (existing.length() > 0 && existing.codePointAt(0) == errorValue) {
+                            if (!existing.isEmpty() && existing.codePointAt(0) == errorValue) {
                                 throw new XPathException(existing.substring(1).toString(), "FOUT1170");
                             }
                             return new StringValue(existing);
@@ -232,9 +236,9 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                 System.out.println(sb2);
                 break;
             }
-            sb1.append(Integer.toHexString(b) + " ");
-            sb2.append((char) b + " ");
-            if (sb1.length() > 80) {
+            sb1.append(Integer.toHexString(b)).append(" ");
+            sb2.append(b <= 32 ? "%" + Integer.toHexString(b) : (char) b).append(" ");
+            if (sb1.length() > 200 || b == 10) {
                 System.out.println(sb1);
                 System.out.println(sb2);
                 sb1 = new StringBuilder(256);
