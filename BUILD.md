@@ -30,6 +30,12 @@ configure access to these items.
 * `W3C_XSLT40_TEST_SUITE_DIR`, the path to a local clone of the XSLT 4.0 test suite repo from
   `git@github.com:qt4cg/xslt40-test.git`.
 
+To build and run the SaxonCS unit tests, the path to the repo is needed, and
+currently the easiest way to manage that is to provide it via an environment
+variable:
+
+* `SAXONDEV_DIR`, the absolute path to the `saxondev` repository.
+
 
 ## Build targets
 
