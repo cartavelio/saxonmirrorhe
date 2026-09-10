@@ -411,7 +411,7 @@
             <p>The SaxonCS product, available from Saxon 11, is a complete redesign. The previous
             .NET product was built using the IKVM technology, which confined it to .NET Framework 4.x.
             SaxonCS is built by converting Java source code to C#, and runs on .NET 5 (SaxonCS 11),
-            .NET 6 (SaxonCS 12.0 to 12.5), .NET 8 (from SaxonCS 12.6) fitting
+            .NET 6 (SaxonCS 12.0 to 12.5), or .NET 8 (from SaxonCS 12.6) fitting
             in with Microsoft's strategic direction. The API for the new product retains many of the
             classes and methods from the older product, but we have taken the opportunity to modernize
             the design (for example by using delegates rather than interfaces for callbacks), and it's therefore
