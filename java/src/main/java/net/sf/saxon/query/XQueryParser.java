@@ -2410,7 +2410,7 @@ public class XQueryParser extends XPathParser {
      */
     private void parseForClause(FLWORExpression flwor, List<Clause> clauseList) throws XPathException {
         boolean first = true;
-        ForQualifier iterand = ForQualifier.FOR_ITEM;
+        ForQualifier iterand;
 
         // "for member $x as T in $array" compiles to
         // "for $temp in array:members($array) let $x as T := $temp?value"
@@ -2423,19 +2423,18 @@ public class XQueryParser extends XPathParser {
             nextToken();
             if (isKeyword("member")) {
                 iterand = ForQualifier.FOR_MEMBER;
+                checkLanguageVersion40("a 'for member' clause");
                 nextToken();
             } else if (isKeyword("key")) {
                 iterand = ForQualifier.FOR_KEY;
+                checkLanguageVersion40("a 'for key' clause");
                 nextToken();
             } else if (isKeyword("value")) {
                 iterand = ForQualifier.FOR_VALUE;
+                checkLanguageVersion40("a 'for value' clause");
                 nextToken();
             } else {
                 iterand = ForQualifier.FOR_ITEM;
-            }
-
-            if (iterand != ForQualifier.FOR_ITEM) {
-                checkLanguageVersion40("a for member/key/value clause");
             }
 
             int offset = t.currentTokenStartOffset;
@@ -2454,19 +2453,20 @@ public class XQueryParser extends XPathParser {
                         new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "fm" + clause.hashCode());
             }
             SequenceType iterandType;
-            if (iterand == ForQualifier.FOR_MEMBER || iterand == ForQualifier.FOR_VALUE) {
-                iterandType = SequenceType.ANY_SEQUENCE;
-            } else if (iterand == ForQualifier.FOR_KEY) {
-                iterandType = SequenceType.SINGLE_ATOMIC;
-            } else {
-                iterandType = SequenceType.SINGLE_ITEM;
-            }
 
             boolean explicitType = false;
             if (isKeyword("as")) {
                 explicitType = true;
                 nextToken();
                 iterandType = parseSequenceType();
+            } else {
+                if (iterand == ForQualifier.FOR_MEMBER || iterand == ForQualifier.FOR_VALUE) {
+                    iterandType = SequenceType.ANY_SEQUENCE;
+                } else if (iterand == ForQualifier.FOR_KEY) {
+                    iterandType = SequenceType.SINGLE_ATOMIC;
+                } else {
+                    iterandType = SequenceType.SINGLE_ITEM;
+                }
             }
 
             boolean allowingEmpty = false;
@@ -2532,11 +2532,27 @@ public class XQueryParser extends XPathParser {
             }
             readKeyword("in");
             Expression collection = parseExprSingle();
-            if (iterand == ForQualifier.FOR_MEMBER) {
-                collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
-            } else if (iterand == ForQualifier.FOR_KEY || iterand == ForQualifier.FOR_VALUE) {
-                collection = MapFunctionSet.getInstance(40).makeFunction("entries", 1).makeFunctionCall(collection);
+
+            // Generate "for $temp in $arr!array:members(.) let $x := $temp?value
+            // or       "for $temp in $map!map:entries(.) let $x := $temp?key
+
+            if (iterand != ForQualifier.FOR_ITEM) {
+                Expression components;
+                if (iterand == ForQualifier.FOR_MEMBER) {
+                    components = ArrayFunctionSet.getInstance(40).makeFunction("members", 1)
+                            .makeFunctionCall(new ContextItemExpression());
+                } else {
+                    components = MapFunctionSet.getInstance(40).makeFunction("entries", 1)
+                            .makeFunctionCall(new ContextItemExpression());
+                }
+                collection = new ForEach(collection, components);
             }
+//
+//            if (iterand == ForQualifier.FOR_MEMBER) {
+//                collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
+//            } else if (iterand == ForQualifier.FOR_KEY || iterand == ForQualifier.FOR_VALUE) {
+//                collection = MapFunctionSet.getInstance(40).makeFunction("entries", 1).makeFunctionCall(collection);
+//            }
             clause.initSequence(flwor, collection);
             declareRangeVariable(binding);
             if (clause.getPositionVariable() != null) {
@@ -2545,7 +2561,18 @@ public class XQueryParser extends XPathParser {
             if (allowingEmpty) {
                 checkForClauseAllowingEmpty(flwor, clause);
             }
-            if (iterand == ForQualifier.FOR_MEMBER || iterand == ForQualifier.FOR_VALUE) {
+            if (iterand == ForQualifier.FOR_MEMBER) {
+                // Generate "let $x as T := $temp?value"
+                LetClause letClause = new LetClause();
+                final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
+                letClause.setRangeVariable(letBinding);
+                LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
+                LookupExpression lookup = new LookupExpression(tempRef,
+                                                               new StringLiteral("value"));
+                letClause.initSequence(flwor, lookup);
+                declareRangeVariable(letBinding);
+                clauseList.add(letClause);
+            } else if (iterand == ForQualifier.FOR_VALUE) {
                 // Generate "let $x as T := map:items($temp"
                 LetClause letClause = new LetClause();
                 final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);

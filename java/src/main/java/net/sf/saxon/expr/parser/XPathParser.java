@@ -1564,17 +1564,21 @@ public class XPathParser {
         Expression collection = parseExprSingle();
 
         // "for member $m in $array" compiles to
-        // "for $temp in array:members($array) let $m := $temp?value"
+        // "for $temp in $array!array:members(.) let $m := $temp?value"
 
         // "for key $k value $v in $map" compiles to
-        // "for $temp in map:pairs($map) let $k := $temp?key, $v := $temp?value"
+        // "for $temp in $map!map:entries(.) let $k := $temp?key, $v := $temp?value"
 
         if (iterand != ForQualifier.FOR_ITEM) {
+            Expression components;
             if (iterand == ForQualifier.FOR_MEMBER) {
-                collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
+                components = ArrayFunctionSet.getInstance(40).makeFunction("members", 1)
+                        .makeFunctionCall(new ContextItemExpression());
             } else {
-                collection = MapFunctionSet.getInstance(40).makeFunction("entries", 1).makeFunctionCall(collection);
+                components = MapFunctionSet.getInstance(40).makeFunction("entries", 1)
+                        .makeFunctionCall(new ContextItemExpression());
             }
+            collection = new ForEach(collection, components);
             result.setRequiredType(SequenceType.SINGLE_ITEM);
             result.setVariableQName(
                     new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "fm" + result.hashCode()));
