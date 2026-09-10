@@ -554,7 +554,7 @@ public final class Navigator {
         NodePredicate filter;
         if (from == null) {
             filter = countTest;
-        } else if (from.getUType() == UType.ELEMENT && count.getUType() == UType.ELEMENT) {
+        } else if (from.getUType() == UType.ELEMENT && (count == null || count.getUType() == UType.ELEMENT)) {
             filter = NodeKindType.ELEMENT;
         } else {
             filter = AnyXNodeType.getInstance();
