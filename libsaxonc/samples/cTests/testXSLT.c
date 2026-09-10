@@ -66,6 +66,7 @@ void test_xinclude(sxnc_environment *environi, sxnc_processor *processor, char *
     else {
         printf("Test 2 - Fail: xinclude-xslt-result.xml not found \n");
     }
+    free(catalogFiles);
 
 
 }
