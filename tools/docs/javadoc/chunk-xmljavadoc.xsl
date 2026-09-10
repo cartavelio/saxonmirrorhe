@@ -254,9 +254,12 @@ History
     </xsl:template>
     
     <xsl:template match="(h:a|h:span)[@class eq 'ref']" mode="comment purpose #unnamed">
+        <xsl:variable name="parent-enum" select="if (starts-with(@href, '#')) then
+            (ancestor::d:enum)[1] else ()" as="element()?"/>
         <span>
             <xsl:attribute name="class" select="'javalink'"/>
-            <xsl:attribute name="data-href" select="@href"/>
+            <xsl:attribute name="data-href" select="if (exists($parent-enum)) then
+                concat($parent-enum/@fullname, @href) else @href"/>
             <xsl:apply-templates select="node()" mode="comment"/>
         </span>
     </xsl:template>
