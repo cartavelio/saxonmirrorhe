@@ -18,6 +18,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a system function whose implementation is written in XSLT, and which
+ * is implemented here by loading the pre-compiled code from a system SEF file.
+ */
+
 public class SefFunction extends SystemFunction {
 
     private final static String FN_ALIAS = "http://ns.saxonica.com/xpath-functions";

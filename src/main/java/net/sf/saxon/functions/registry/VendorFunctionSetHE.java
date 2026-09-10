@@ -90,13 +90,13 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
 
-        RecordTest arrayRepresentation = new RecordTest(
-                Collections.singletonList("value"),
-                Collections.singletonList(SequenceType.ANY_SEQUENCE),
-                Collections.emptyList(),
-                false);
-        register("array-as-sequence-of-maps", 1, ArrayAsSequenceOfMaps.class, arrayRepresentation, STAR, 0)
-                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE,null);
+//        RecordTest arrayRepresentation = new RecordTest(
+//                Collections.singletonList("value"),
+//                Collections.singletonList(SequenceType.ANY_SEQUENCE),
+//                Collections.emptyList(),
+//                false);
+//        register("array-as-sequence-of-maps", 1, ArrayAsSequenceOfMaps.class, arrayRepresentation, STAR, 0)
+//                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE,null);
 
         @SuppressWarnings("RedundantArrayCreation") RecordTest mapRepresentation = new RecordTest(
                 Arrays.asList("key", "value"),

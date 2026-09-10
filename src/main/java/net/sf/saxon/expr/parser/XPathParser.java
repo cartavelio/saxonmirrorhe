@@ -512,9 +512,9 @@ public class XPathParser {
             charChecker = env.getConfiguration().getValidCharacterChecker();
             t = new Tokenizer();
             t.languageLevel = env.getXPathVersion();
-            allowSaxonExtensions =
+            allowXPath40Syntax =
                     t.allowSaxonExtensions =
-                            env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+                            env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
             offset = t.currentTokenStartOffset;
             customizeTokenizer(t);
             try {
@@ -579,9 +579,9 @@ public class XPathParser {
         language = ParsedLanguage.SEQUENCE_TYPE;
         t = new Tokenizer();
         t.languageLevel = env.getXPathVersion();
-        allowSaxonExtensions =
+        allowXPath40Syntax =
                 t.allowSaxonExtensions =
-                        env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
+                        env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || t.languageLevel == 40;
         try {
             t.tokenize(input, 0, -1);
         } catch (XPathException err) {
@@ -3446,7 +3446,7 @@ public class XPathParser {
      */
 
     public void checkSyntaxExtensions(String construct) throws XPathException {
-        if (!allowSaxonExtensions) {
+        if (!allowXPath40Syntax) {
             grumble("Saxon XPath syntax extensions have not been enabled: " + construct + " is not allowed");
         }
     }

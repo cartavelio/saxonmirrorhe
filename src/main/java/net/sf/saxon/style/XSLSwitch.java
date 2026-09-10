@@ -46,7 +46,7 @@ public class XSLSwitch extends XSLChooseOrSwitch {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        requireXslt40(null);
+        requireXslt40("switch");
         select = typeCheck("select", select);
         super.validate(decl);
     }

@@ -1078,7 +1078,7 @@ public final class Tokenizer {
             case "type":
             case "union":
             case "enum":
-                return languageLevel == 40 ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
+                return allowSaxonExtensions ? Token.NODEKIND : Token.FUNCTION; // Saxon extension types
             case "switch":
                 // Reserved in XPath 3.0, even though only used in XQuery
                 return languageLevel == 20 ? Token.FUNCTION : Token.SWITCH;

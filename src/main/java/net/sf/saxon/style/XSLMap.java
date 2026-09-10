@@ -77,6 +77,7 @@ public class XSLMap extends StyleElement {
             if (attName.hasURI(NamespaceConstant.SAXON)) {
                 if (isExtensionAttributeAllowed(attName.getDisplayName())) {
                     if (attName.getLocalPart().equals("on-duplicates")) {
+                        requireXslt40("on-duplicates");
                         onDuplicates = makeExpression(value, att);
                     }
                 }

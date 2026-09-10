@@ -19,6 +19,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.s9api.HostLanguage;
@@ -1487,8 +1488,8 @@ public abstract class StyleElement extends ElementImpl {
      */
     protected Expression arrayToSequence(Expression arrayExpr) {
         try {
-            return VendorFunctionSetHE.getInstance()
-                    .makeFunction("array-as-sequence-of-maps", 1)
+            return ArrayFunctionSet.getInstance()
+                    .makeFunction("members", 1)
                     .makeFunctionCall(arrayExpr);
         } catch (XPathException e) {
             throw new UncheckedXPathException(e);
