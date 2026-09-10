@@ -1,0 +1,1746 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://ns.saxonica.com/xslt/export" xmlns:export="http://ns.saxonica.com/xslt/export"
+    xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" vc:minVersion="1.1">
+  
+  <xs:element name="package">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="export:package"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="export:schema"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="export:glob"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="export:co"/>
+        <xs:element ref="export:overridden"/>
+        <xs:element ref="export:key" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="export:accumulator" minOccurs="0" maxOccurs="unbounded"/>       
+        <xs:element ref="export:output" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="export:charMap" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" ref="export:strip"/>
+        <xs:element ref="export:decimalFormat" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="declaredModes" type="xs:integer"/>
+      <xs:attribute name="defaultMode" type="export:QName"/>
+      <xs:attribute name="dmk" type="xs:string"/>
+      <xs:attribute name="expiry" type="xs:date"/>
+      <xs:attribute name="name" type="xs:anyURI"/>
+      <xs:attribute name="packageVersion" use="required" type="xs:NMTOKEN"/>
+      <xs:attribute name="relocatable" type="xs:boolean"/>
+      <xs:attribute name="saxonVersion" use="required" type="xs:NMTOKEN"/>
+      <xs:attribute name="schemaAware" type="xs:boolean"/>
+      <xs:attribute name="stripType" type="xs:boolean"/>
+      <xs:attribute name="timeStamp" type="xs:dateTimeStamp"/>
+      <xs:attribute name="version" use="required" type="xs:integer"/>
+    </xs:complexType>
+    <xs:unique name="unique-component-id">
+      <xs:selector xpath="export:co"/>
+      <xs:field xpath="@id"/>
+    </xs:unique>
+  </xs:element>
+  
+  <xs:element name="schema">
+    <xs:complexType>
+      <xs:attribute name="ns" use="required" type="xs:anyURI"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="overridden">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="export:co"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="output">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="export:property"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="charMap">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="m" maxOccurs="unbounded" >
+          <xs:complexType>
+            <xs:attribute name="c" type="export:oneChar" use="required"/>
+            <xs:attribute name="s" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="name" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="property">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="export:ClarkName"/>
+      <xs:attribute name="value" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="strip">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="s" type="export:strip-or-preserve-type"/>
+        <xs:element name="p" type="export:strip-or-preserve-type"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  
+    <xs:complexType name="strip-or-preserve-type">
+      <xs:attribute name="prec" use="required" type="xs:integer"/>
+      <xs:attribute name="test" use="required"/>
+    </xs:complexType>
+   
+  <xs:element name="decimalFormat">
+    <xs:complexType>
+      <xs:attribute name="name" type="export:QName"/>
+      <xs:attribute name="decimal-separator"/>
+      <xs:attribute name="grouping-separator"/>
+      <xs:attribute name="infinity"/>
+      <xs:attribute name="minus-sign"/>
+      <xs:attribute name="exponent-separator"/>
+      <xs:attribute name="NaN"/>
+      <xs:attribute name="percent"/>
+      <xs:attribute name="per-mille"/>
+      <xs:attribute name="zero-digit"/>
+      <xs:attribute name="digit"/>
+      <xs:attribute name="pattern-separator"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="glob">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="use"/>
+      <xs:attribute name="type"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="co">
+    <xs:complexType>
+      <xs:choice minOccurs="0">
+        <xs:element ref="export:attributeSet"/>
+        <xs:element ref="export:function"/>
+        <xs:element ref="export:globalVariable"/>
+        <xs:element ref="export:globalParam"/>
+        <xs:element ref="export:mode"/>
+        <xs:element ref="export:template"/>
+      </xs:choice>
+      <xs:attribute name="base" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="binds" use="required" type="export:intList"/>
+      <xs:attribute name="dpack" type="xs:anyURI"/>
+      <xs:attribute name="id" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="vis" type="export:visibilityType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="accumulator">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction"/>
+        <xs:element name="pre" type="export:accumulator-rules-type"/>
+        <xs:element name="post" type="export:accumulator-rules-type"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as" type="xs:string"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="name" type="export:QName"/>
+      <xs:attribute name="streamable" type="xs:boolean"/>
+      <xs:attribute name="binds"  type="export:intList"/>
+      <xs:attribute name="slots" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:complexType name="accumulator-rules-type">
+    <xs:sequence>
+      <xs:element name="accRule" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="export:pattern"/>
+            <xs:element ref="export:instruction"/>
+          </xs:sequence>
+          <xs:attribute name="rank" type="xs:nonNegativeInteger"/>
+          <xs:attribute name="slots" type="xs:nonNegativeInteger"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="slots" type="xs:nonNegativeInteger"/>
+  </xs:complexType>
+  
+  <xs:element name="key">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:pattern"/>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="collation" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="binds"  type="export:intList"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="slots"  type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="attributeSet">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attribute name="binds" use="required" type="export:intList"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="line" use="required" type="xs:integer"/>
+      <xs:attribute name="module" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="slots" use="required" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="function" substitutionGroup="export:instruction">
+    <!-- Used both for global functions and for literal function items -->
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:arg" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attribute name="as" use="required" type="xs:anyURI"/>
+      <xs:attribute name="eval" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="flags" use="required" type="export:flagsType"/>
+      <xs:attribute name="line" use="required" type="xs:integer"/>
+      <xs:attribute name="module" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="slots" use="required" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="arg">
+    <xs:complexType>
+      <xs:attribute name="as" use="required" type="xs:string"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="instruction" abstract="true"/>
+  
+  <xs:group name="unary">
+    <xs:sequence>
+      <xs:element ref="export:instruction"/>
+    </xs:sequence>
+  </xs:group>
+  
+  <xs:group name="optional-unary">
+    <xs:sequence>
+      <xs:element ref="export:instruction" minOccurs="0"/>
+    </xs:sequence>
+  </xs:group>
+  
+  <xs:group name="binary">
+    <xs:sequence>
+      <xs:element ref="export:instruction"/>
+      <xs:element ref="export:instruction"/>
+    </xs:sequence>
+  </xs:group>
+  
+  <xs:group name="ternary">
+    <xs:sequence>
+      <xs:element ref="export:instruction"/>
+      <xs:element ref="export:instruction"/>
+      <xs:element ref="export:instruction"/>
+    </xs:sequence>
+  </xs:group>
+  
+  <xs:group name="N-ary">
+    <xs:sequence>
+      <xs:element ref="export:instruction" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:group>
+  
+  <xs:attributeGroup name="exprMisc">
+    <xs:attribute name="baseUri" type="xs:anyURI"/>
+    <xs:attribute name="defaultCollation" type="xs:anyURI"/>
+    <xs:attribute name="defaultElementNS" type="xs:anyURI"/>
+    <xs:attribute name="role" type="xs:string"/>
+    <xs:attribute name="line" type="xs:integer"/>
+    <xs:attribute name="module" type="xs:anyURI"/>
+    <xs:attribute name="ns" type="xs:string"/>
+    <xs:attribute name="vn" type="xs:integer"/>
+  </xs:attributeGroup>
+  
+  <xs:element name="globalVariable">
+    <xs:complexType>
+      <xs:group ref="export:optional-unary"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="line" use="required" type="xs:integer"/>
+      <xs:attribute name="module" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="slots" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="type" use="required" type="xs:anyURI"/>
+      <xs:attribute name="visibility" use="required" type="export:visibilityType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="globalParam">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="line" use="required" type="xs:integer"/>
+      <xs:attribute name="module" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="slots" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="type" use="required" type="xs:anyURI"/>
+      <xs:attribute name="visibility" use="required" type="export:visibilityType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="mode">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="export:templateRule"/>
+      </xs:sequence>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="name"/>
+      <xs:attribute name="onNo" use="required" type="xs:string"/>
+      <xs:attribute name="patternSlots" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="streamable" type="xs:boolean"/>
+      <xs:attribute name="useAcc" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="templateRule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:pattern"/>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attribute name="as" type="xs:string"/>
+      <xs:attribute name="cxt" type="xs:string"/>
+      <xs:attribute name="flags" use="required" type="export:flagsType"/>
+      <xs:attribute name="line" use="required" type="xs:integer"/>
+      <xs:attribute name="minImp" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="module" type="xs:anyURI"/>
+      <xs:attribute name="prec" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="prio" use="required" type="xs:double"/> <!-- May be NaN: see match-049 -->
+      <xs:attribute name="rank" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="seq" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="slots" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="streamable" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="template">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:param" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:group ref="export:optional-unary"/>
+      </xs:sequence>     
+      <xs:attribute name="as" type="xs:string"/>
+      <xs:attribute name="cxt" type="xs:string"/>
+      <xs:attribute name="flags" use="required" type="export:flagsType"/>
+      <xs:attribute name="line" use="required" type="xs:integer"/>
+      <xs:attribute name="module" use="required" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="slots" use="required" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="acFnRef" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  
+  <xs:element name="among" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" fixed="among"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="analyzeString" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="and" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" fixed="and"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="applyImports" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:withParam" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="applyT" substitutionGroup="export:instruction">
+    <xs:complexType>     
+      <xs:sequence>
+        <xs:group ref="export:unary"/>
+        <xs:element ref="export:withParam" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="bSlot" use="required" type="export:slotNumber"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="mode" />
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="arith" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op"/>
+      <xs:attribute name="calc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="arith10" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op"/>
+      <xs:attribute name="calc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="arrayBlock" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element> 
+  
+  <xs:element name="assign" substitutionGroup="export:instruction" type="xs:anyType"/>
+  <!-- TODO: saxon:assign extension -->
+  
+  <xs:element name="atomic" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="val" use="required"/>
+      <xs:attribute name="type" type="export:QName" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="atomSing" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="card" type="xs:string"/>
+      <xs:attribute name="diag" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="att" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="nsuri" type="xs:anyURI"/>
+      <xs:attribute name="validation" type="export:validationType"/>
+      <xs:attribute name="type" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="attVal" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="chk" type="xs:integer" use="required"/>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:assert test="@chk = (0 to 3)"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="axis" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="nodeTest" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="break" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:optional-unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+    
+  <xs:element name="callT" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:withParam" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="bSlot" type="export:slotNumber" use="required"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="name" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="cast" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as" use="required" type="xs:NMTOKEN"/>
+      <xs:attribute name="emptiable" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="castable" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as" use="required" type="xs:NMTOKEN"/>
+      <xs:attribute name="emptiable" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="check" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="card" use="required"/>
+      <xs:attribute name="diag" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="choose" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="coercedFn" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:element name="comment" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="compareToInt" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" use="required" type="xs:NCName"/>
+      <xs:attribute name="val" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="compAtt" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction" minOccurs="2" maxOccurs="3"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:attribute name="validation" type="export:validationType"/>
+      <xs:assert test="deep-equal(*/@role/string(), ('name', 'namespace', 'select')) or
+        deep-equal(*/@role/string(), ('name', 'select'))"/>
+    </xs:complexType>   
+  </xs:element>
+  
+  <xs:element name="compElem" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction" minOccurs="2" maxOccurs="3"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:attribute name="validation" type="export:validationType"/>     
+      <xs:assert test="deep-equal(*/@role/string(), ('name', 'namespace', 'content')) or
+        deep-equal(*/@role/string(), ('name', 'content'))"/>
+    </xs:complexType>   
+  </xs:element>
+  
+  <xs:element name="condCont" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="conditionalSort" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="condSeq" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="consume" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="convert" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="from" use="required" type="export:QName"/>
+      <xs:attribute name="to" use="required" type="export:QName"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="copy" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="validation" type="export:validationType"/>
+      <xs:attribute name="type" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="copyOf" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="validation" type="export:validationType"/>
+      <xs:attribute name="type" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="currentGroup" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="currentGroupingKey" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="curriedFunc" substitutionGroup="export:instruction" type="xs:anyType"/> <!-- TODO -->
+  
+  <xs:element name="cvUntyped" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="to" use="required" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="data" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="dbl" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="val" use="required" type="xs:double"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="dec" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="val" use="required" type="xs:decimal"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="doc" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="base" type="xs:anyURI"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="text" type="xs:string"/>
+      <xs:attribute name="validation" type="export:validationType"/>
+      <xs:attribute name="type" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="docOrder" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="intra" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="dot" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="type" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="elem" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="namespaces" type="export:NCNameList"/>
+      <xs:attribute name="nsuri" use="required"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:attribute name="validation" type="export:validationType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="empty" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="emptyTextNodeRemover" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="error" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="message"/>
+      <xs:attribute name="code"/>
+      <xs:attribute name="isTypeErr" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="evaluate" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="export:withParam"/>
+          <xs:element ref="export:instruction"/>
+      </xs:choice>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as"/>
+      <xs:attribute name="dxns"/>
+      <xs:attribute name="schNS"/>
+      <xs:assert test="every $r in */@role satisfies $r = ('xpath', 'cxt', 'baseUri', 'nsCxt', 'sa', 'wp')"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="every" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="var" type="export:QName"/>
+      <xs:attribute name="slot" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="except" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="false" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="filter" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="first" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="fn" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="collation" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="fnCoercer" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="to" use="required" type="xs:string"/>
+      <xs:attribute name="diag" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="fnRef" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="arity" use="required" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="follows" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="for" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as" type="xs:string"/>
+      <xs:attribute name="var" type="export:QName"/>
+      <xs:attribute name="slot" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="forEach" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="forEachGroup" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="export:sortKey"/>
+        <xs:element ref="export:instruction"/>
+        <xs:element ref="export:pattern"/>
+      </xs:choice>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="algorithm" use="required" type="xs:NCName"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:assert test="every $r in */@role satisfies $r = ('select', 'key', 'match', 'sort', 'collation', 'content')"/>
+      <xs:assert test="some $r in */@role satisfies $r = ('select')"/>
+      <xs:assert test="some $r in */@role satisfies $r = ('content')"/>
+      <xs:assert test="@algorithm = ('by', 'adjacent', 'starting', 'ending')"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="fork" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="gc" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="onEmpty"/>
+      <xs:attribute name="op"/>
+      <xs:attribute name="comp"/>
+      <xs:attribute name="card"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="gc10" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="onEmpty"/>
+      <xs:attribute name="op"/>
+      <xs:attribute name="comp"/>
+      <xs:attribute name="cardinality"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="gcEE" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="onEmpty"/>
+      <xs:attribute name="op"/>
+      <xs:attribute name="comp"/>
+      <xs:attribute name="card"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="gVarRef" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="bSlot" use="required" type="export:slotNumber"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="homCheck" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="ifCall" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="dyn" type="xs:string"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="type" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="indexedFilter2" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:ternary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="comp" type="xs:anyURI"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:assert test="deep-equal(*/@role/string(), ('base', 'use', 'search'))"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="inlineFn" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="instance" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="of" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="int" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="val" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="intersect" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="intRangeTest" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:ternary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="is" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" fixed="is"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="isLast" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="test" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="iterate" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction"/>
+        <xs:element name="params" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element ref="export:param" minOccurs="0" maxOccurs="unbounded"/>             
+            </xs:sequence>
+            <xs:attributeGroup ref="export:exprMisc"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="export:instruction" minOccurs="1" maxOccurs="2"/>
+      </xs:sequence>     
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:assert test="deep-equal(*/@role/string(), ('select', 'params', 'action'))
+        or deep-equal(*/@role/string(), ('select', 'params', 'on-completion', 'action'))"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="javaCall" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="lastOf" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="let" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as" use="required" type="xs:anyURI"/>
+      <xs:attribute name="eval" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="indexable" type="xs:boolean"/>
+      <xs:attribute name="slot" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="var" use="required" type="export:QName"/>
+    </xs:complexType>
+  </xs:element>
+ 
+  <xs:element name="literal" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="count" type="xs:nonNegativeInteger"/>
+      <xs:assert test="count(*) eq @count"/>
+    </xs:complexType>
+  </xs:element> 
+  
+  <xs:element name="map" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="size" type="xs:nonNegativeInteger"/>
+      <xs:assert test="count(*) eq 2*@size"/>
+    </xs:complexType>
+  </xs:element> 
+  
+  <xs:element name="merge" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:mergeSrc" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element> 
+  
+  <xs:element name="mergeSrc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction" minOccurs="1" maxOccurs="3"/>
+        <xs:element ref="export:sortKey" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="accum" type="xs:string"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="name" type="xs:NCName"/>
+      <xs:attribute name="validation" type="export:validationType"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:assert test="every $r in */@role satisfies $r = ('forEachItem', 'forEachStream', 'selectRows', 'action')"/>
+    </xs:complexType>   
+  </xs:element>
+  
+  <xs:element name="mergeAdj" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="message" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="minus" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="namespace" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>   
+  </xs:element>
+  
+  <xs:element name="nextIteration" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:withParam" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="nextMatch" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:withParam" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="node" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="kind" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="content" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="numSeqFmt" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="nodeNum" type="xs:anyType" minOccurs="0"/> <!-- TODO!! -->
+        <xs:group ref="export:N-ary"/>
+      </xs:sequence>     
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="onEmpty" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="onNonEmpty" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="or" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" fixed="or"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="origF" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="arity" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="pack" use="required" type="xs:anyURI"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="origFC" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="pack" use="required" type="xs:anyURI"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="param">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction" minOccurs="1" maxOccurs="2"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as" type="xs:string"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="slot" type="xs:nonNegativeInteger"/>
+      <xs:assert test="every $x in */@role/string() satisfies $x = ('select', 'conversion')"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="partialApply" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element ref="export:instruction"/>
+          <xs:element name="null">
+            <xs:complexType/>
+          </xs:element>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="precedes" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="procInst" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="qName" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="loc" use="required" type="xs:NCName"/>
+      <xs:attribute name="pre" use="required" type="export:NCNameOrNothing"/>
+      <xs:attribute name="uri" use="required" type="xs:anyURI"/>
+      <xs:attribute name="type" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="range" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="from" use="required" type="xs:integer"/>
+      <xs:attribute name="to" use="required" type="xs:integer"/>
+      <xs:assert test="@from le @to"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="resultDoc" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="local" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <p>Serialization properties specified as attributes of the xsl:result-document instruction,
+            excluding any that are computed dynamically.</p>
+            <p>The format is that of java.util.Properties.store()</p>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>     
+      <xs:attribute name="global" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>
+            <p>Serialization properties specified as attributes of the relevant xsl:output declaration(s)</p>
+            <p>The format is that of java.util.Properties.store()</p>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="validation" type="export:validationType"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:assert test="every $r in */@role satisfies
+        ($r = ('href', 'format', 'content')
+        or matches($r, 'Q\{[^}]*\}[\i-[:]][\c-[:]]*'))"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="root" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="sequence" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:param" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:group ref="export:N-ary"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="slash" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="simple" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="some" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="var" type="export:QName"/>
+      <xs:attribute name="slot" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="sort" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction"/>
+        <xs:element ref="export:sortKey" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="sortKey">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="comp"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="str" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="val" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="stream" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="accum" type="xs:string"/>
+      <xs:attribute name="flags" use="required" type="export:flagsType"/>
+      <xs:attribute name="schemaType" type="xs:string"/>
+      <xs:attribute name="validation" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="subscript" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="supplied" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="slot" type="xs:nonNegativeInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="switch" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction"/>
+        <xs:element name="case" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:group ref="export:binary"/>
+            <xs:attributeGroup ref="export:exprMisc"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="coll" type="xs:anyURI"/>
+      <xs:assert test="*[last()]/@role = 'default'"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="tail" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="start" type="xs:positiveInteger"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="tailCallLoop" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="to" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" fixed="to"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="treat" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="as" use="required" type="xs:string"/>
+      <xs:attribute name="diag" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="true" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="try" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:group ref="export:unary"/>
+        <xs:element name="catch" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:group ref="export:unary"/>
+            <xs:attributeGroup ref="export:exprMisc"/>
+            <xs:attribute name="err" use="required" type="xs:string"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="ufCall" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:N-ary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="bSlot" use="required" type="export:slotNumber"/>
+      <xs:attribute name="eval" type="export:intList"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="tailCall" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="ufRef" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="arity" use="required" type="xs:nonNegativeInteger"/>
+      <xs:attribute name="bSlot"  use="required" type="export:slotNumber"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="union" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" fixed="|"/>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="useAS" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="bSlot" use="required" type="export:slotNumber"/>
+      <xs:attribute name="name" use="required" type="xs:NMTOKEN"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="valueOf" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="varRef" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" use="required" type="export:QName"/>
+      <xs:attribute name="slot" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="vc" substitutionGroup="export:instruction">
+    <xs:complexType>
+      <xs:group ref="export:binary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="onEmpty"/>
+      <xs:attribute name="op"/>
+      <xs:attribute name="comp"/>
+      <xs:assert test="@op = ('eq', 'ne', 'le', 'lt', 'ge', 'gt')"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="while" substitutionGroup="export:instruction" type="xs:anyType"/>
+  <!-- TODO: saxon:while extension -->
+  
+  <xs:element name="withParam">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="name" use="required"/>
+      <xs:attribute name="as" type="xs:string"/>
+      <xs:attribute name="flags" type="export:flagsType"/>
+      <xs:attribute name="slot" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+ 
+ 
+  <xs:element name="pattern" abstract="true"/>
+  
+  <xs:element name="p.any" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.booleanExp" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="test"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.genNode" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="test"/>
+      <xs:attribute name="type"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.genPos" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="type" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.nodeSet" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:group ref="export:unary"/>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="test"/>
+      <xs:attribute name="type"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.nodeTest" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="test" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.simPos" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="test" use="required"/>
+      <xs:attribute name="pos" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.venn" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:pattern"/>
+        <xs:element ref="export:pattern"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="op" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.withCurrent" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:pattern"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.withPredicate" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:pattern"/>
+        <xs:element ref="export:instruction"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="p.withUpper" substitutionGroup="export:pattern">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="export:pattern"/>
+        <xs:element ref="export:pattern"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="export:exprMisc"/>
+      <xs:attribute name="axis" use="required"/>
+      <xs:attribute name="upFirst" use="required" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:simpleType name="flagsType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Za-z0-9]*"/>
+    </xs:restriction>   
+  </xs:simpleType>
+  
+  <xs:simpleType name="intList">
+    <xs:annotation>
+      <xs:documentation>
+        <p>A space-separated list of integers.</p>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:list itemType="xs:integer"/>
+  </xs:simpleType>
+  
+  <xs:simpleType name="NCNameList">
+    <xs:annotation>
+      <xs:documentation>
+        <p>A list of space-separated tokens, each of which is either an xs:NCName, or the special value "#".</p>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:list itemType="export:NCNameOrHash"/>
+  </xs:simpleType>
+  
+  <xs:simpleType name="NCNameOrHash">
+    <xs:annotation>
+      <xs:documentation>
+        <p>Allows either an xs:NCName, or the special value "#".</p>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="xs:NCName">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="#"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>       
+  </xs:simpleType>
+  
+  <xs:simpleType name="NCNameOrNothing">
+    <xs:annotation>
+      <xs:documentation>
+        <p>Allows either an xs:NCName, or a zero-length string.</p>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:union memberTypes="xs:NCName">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value=""/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>       
+  </xs:simpleType>
+  
+  <xs:simpleType name="QName">
+    <xs:union memberTypes="xs:NCName xs:QName">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:pattern value="Q\{[^}]*\}[\i-[:]][\c-[:]]*"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>       
+  </xs:simpleType>
+  
+  <xs:simpleType name="ClarkName">
+    <xs:annotation>
+      <xs:documentation>
+        <p>An expanded name in Clark notation: "{uri}local". A no-namespace name may
+        be represented either as "local" or "{}local".</p>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(\{[^}]*\})?[\i-[:]][\c-[:]]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="oneChar">
+    <xs:annotation>
+      <xs:documentation>
+        <p>An integer representing a Unicode codepoint</p>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:positiveInteger">
+      <xs:maxInclusive value="1114111"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="slotNumber">
+    <xs:annotation>
+      <xs:documentation>
+        <p>An integer representing a slot number, or -1 meaning null/absent</p>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="-1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="validationType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="strict"/>
+      <xs:enumeration value="lax"/>
+      <xs:enumeration value="preserve"/>
+      <xs:enumeration value="strip"/>
+      <xs:enumeration value="by type"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="visibilityType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PUBLIC"/>
+      <xs:enumeration value="PRIVATE"/>
+      <xs:enumeration value="FINAL"/>
+      <xs:enumeration value="ABSTRACT"/>
+      <xs:enumeration value="HIDDEN"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+</xs:schema>
