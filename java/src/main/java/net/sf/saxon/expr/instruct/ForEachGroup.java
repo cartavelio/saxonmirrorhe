@@ -29,6 +29,8 @@ import net.sf.saxon.value.StringValue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -49,7 +51,7 @@ public class ForEachGroup extends Instruction
     private final byte algorithm;
     private StringCollator collator;             // collation used for the grouping comparisons
     private AtomicComparer[] sortComparators = null;    // comparators used for sorting the groups
-    private ItemEvaluator[] sortKeyEvaluators = null;
+    private PullEvaluator[] sortKeyEvaluators = null;
     private boolean composite = false;
     private boolean inFork = false;
 
@@ -624,10 +626,10 @@ public class ForEachGroup extends Instruction
 
     private synchronized void makeSortKeyEvaluators() {
         if (sortKeyEvaluators == null && getSortKeyDefinitions() != null) {
-            sortKeyEvaluators = new ItemEvaluator[getSortKeyDefinitions().size()];
+            sortKeyEvaluators = new PullEvaluator[getSortKeyDefinitions().size()];
             for (int s = 0; s < getSortKeyDefinitions().size(); s++) {
                 sortKeyEvaluators[s] = getSortKeyDefinitions().getSortKeyDefinition(s)
-                        .getSortKey().makeElaborator().elaborateForItem();
+                        .getSortKey().makeElaborator().elaborateForPull();
             }
         }
     }
@@ -664,8 +666,26 @@ public class ForEachGroup extends Instruction
      */
 
     @Override
-    public AtomicValue evaluateSortKey(int n, XPathContext c) throws XPathException {
-        return (AtomicValue) sortKeyEvaluators[n].eval(c);
+    public AtomicSequence evaluateSortKey(int n, XPathContext c) throws XPathException {
+        // Identical code to SortExpression.evaluateSortKey
+        PullEvaluator eval = sortKeyEvaluators[n];
+        SequenceIterator iter = eval.iterate(c);
+        AtomicValue first = (AtomicValue) iter.next();
+        if (first == null) {
+            return AtomicArray.EMPTY_ATOMIC_ARRAY;
+        }
+        AtomicValue second = (AtomicValue) iter.next();
+        if (second == null) {
+            return first;
+        }
+        List<AtomicValue> compositeKey = new ArrayList<>();
+        compositeKey.add(first);
+        compositeKey.add(second);
+        AtomicValue it;
+        while ((it = (AtomicValue) iter.next()) != null) {
+            compositeKey.add(it);
+        }
+        return new AtomicArray(compositeKey);
     }
 
 

@@ -730,9 +730,10 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
 
             if (fractionalPartGroupingPositions != null) {
                 // grouping separators are at irregular positions.
+                point += dfs.getProperty(DecimalSymbols.Property.DECIMAL_SEPARATOR_RENDITION).length32();
                 UnicodeString separator = dfs.getProperty(DecimalSymbols.Property.GROUPING_SEPARATOR_RENDITION);
                 for (int i = 0; i < fractionalPartGroupingPositions.length; i++) {
-                    int p = point + 1 + fractionalPartGroupingPositions[i] + i;
+                    int p = point + fractionalPartGroupingPositions[i] + i * separator.length32();
                     if (p < ib.length32()) {
                         ib = ib.insert(p, separator);
                     } else {

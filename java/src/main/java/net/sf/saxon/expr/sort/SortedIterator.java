@@ -9,7 +9,6 @@ package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -224,7 +223,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
         public int compare(ThingToBeSorted a, ThingToBeSorted b) {
             try {
                 for (int k = 0; k < comparators.length; k++) {
-                    int result = ArraySort.compareSortKeys(a.sortkeys()[k], b.sortkeys()[k], comparators[k]);
+                    int result = SortExpression.compareSortKeys(a.sortkeys()[k], b.sortkeys()[k], comparators[k]);
                     if (result != 0) {
                         return result;
                     }

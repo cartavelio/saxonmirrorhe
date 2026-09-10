@@ -13,13 +13,11 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
-import net.sf.saxon.expr.sort.DescendingComparer;
 import net.sf.saxon.functions.SortBy;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
@@ -77,35 +75,4 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
 
     }
 
-    /**
-     * Lexicographic sort: given two atomic sequences, compare them by comparing individual
-     * items until a pair of items is found that differs.
-     * @param a the first sequence (must be a sequence of atomic items)
-     * @param b the second sequence  (must be a sequence of atomic items)
-     * @param comparer comparer for individual items
-     * @return -1, 0, or +1 depending on the magnitude relationship
-     */
-    public static int compareSortKeys(GroundedValue a, GroundedValue b, AtomicComparer comparer) {
-        SequenceIterator iteratora = a.iterate();
-        SequenceIterator iteratorb = b.iterate();
-        while (true) {
-            AtomicValue a0 = (AtomicValue) iteratora.next();
-            AtomicValue b0 = (AtomicValue) iteratorb.next();
-            if (a0 == null) {
-                if (b0 == null) {
-                    return 0;
-                }
-                else {
-                    return comparer instanceof DescendingComparer ? +1 : -1;
-                }
-            } else if (b0 == null) {
-                return comparer instanceof DescendingComparer ? -1 : +1;
-            } else {
-                int first = comparer.compareAtomicValues(a0, b0);
-                if (first != 0) {
-                    return first;
-                }
-            }
-        }
-    }
 }

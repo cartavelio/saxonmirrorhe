@@ -13,7 +13,6 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
 import java.util.ArrayList;
@@ -72,10 +71,9 @@ public class SortedGroupIterator extends SortedIterator implements GroupIterator
 
         // initialise the array with data
 
-        Item item;
-        while ((item = base.next()) != null) {
+        while (base.next() != null) {
 
-            AtomicSequence[] sortKeyValues = new AtomicValue[comparators.length];
+            AtomicSequence[] sortKeyValues = new AtomicSequence[comparators.length];
             for (int n = 0; n < comparators.length; n++) {
                 sortKeyValues[n] = sortKeyEvaluator.evaluateSortKey(n, c2);
             }

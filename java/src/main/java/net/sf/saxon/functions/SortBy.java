@@ -11,12 +11,8 @@ import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.AtomicSortComparer;
-import net.sf.saxon.expr.sort.DescendingComparer;
-import net.sf.saxon.expr.sort.ThingToBeSorted;
+import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
@@ -138,7 +134,7 @@ public class SortBy extends SystemFunction {
         try {
             inputList.sort((ThingToBeSorted a, ThingToBeSorted b) -> {
                 for (int k = 0; k < comparers.size(); k++) {
-                    int result = ArraySort.compareSortKeys(a.sortkeys()[k], b.sortkeys()[k], comparers.get(k));
+                    int result = SortExpression.compareSortKeys(a.sortkeys()[k], b.sortkeys()[k], comparers.get(k));
                     if (result != 0) {
                         return result;
                     }

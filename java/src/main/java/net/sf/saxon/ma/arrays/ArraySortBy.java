@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DescendingComparer;
+import net.sf.saxon.expr.sort.SortExpression;
 import net.sf.saxon.functions.SortBy;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.StringCollator;
@@ -121,7 +122,7 @@ public class ArraySortBy extends SystemFunction {
         try {
             inputList.sort((MemberToBeSorted a, MemberToBeSorted b) -> {
                 for (int k = 0; k < sortKeys.size(); k++) {
-                    int result = ArraySort.compareSortKeys(a.sortKeys()[k], b.sortKeys()[k], comparers.get(k));
+                    int result = SortExpression.compareSortKeys(a.sortKeys()[k], b.sortKeys()[k], comparers.get(k));
                     if (result != 0) {
                         return result;
                     }

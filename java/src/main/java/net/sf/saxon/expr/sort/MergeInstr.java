@@ -23,7 +23,6 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.ma.arrays.ArraySort;
 import net.sf.saxon.om.*;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
@@ -759,7 +758,7 @@ public class MergeInstr extends Instruction {
                 ItemWithMergeKeys bItem = b.getObject();
 
                 for (int i = 0; i < sKeys.size(); i++) {
-                    int val = ArraySort.compareSortKeys(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i), comps[i]);
+                    int val = SortExpression.compareSortKeys(aItem.sortKeyValues.get(i), bItem.sortKeyValues.get(i), comps[i]);
                     if (val != 0) {
                         return val;
                     }
