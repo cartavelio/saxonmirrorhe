@@ -26,6 +26,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -161,7 +162,7 @@ public class SchemaTests {
             fail("Unexpected success");
 
         } catch (SAXException e) {
-            assertTrue(reports.size() == 1, "size");
+            assertEquals(1, reports.size(), "size");
             assertTrue(reports.get(0).startsWith("E:"), "E:");
         }
     }

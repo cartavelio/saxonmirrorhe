@@ -434,6 +434,7 @@ public class ConfigTest {
 
     @Test
     public void testSchemaConfiguration() {
+        // From Saxon 13 the schemaDocument element in the configuration file is ignored
         try {
             String config =
                         "<configuration xmlns='http://saxon.sf.net/ns/configuration' edition='EE'>\n" +
@@ -445,12 +446,11 @@ public class ConfigTest {
                         "</configuration>";
             Processor proc = new Processor(new StreamSource(new StringReader(config)));
             SchemaManager sm = proc.getSchemaManager();
-            SchemaValidator v = sm.newSchemaValidator();
-            v.validate(new StreamSource(new File(getDataDir() + "books.xml")));
             try {
-                v.validate(new StreamSource(new File(getDataDir() + "config.xml")));
+                SchemaValidator v = sm.newSchemaValidator();
+                v.validate(new StreamSource(new File(getDataDir() + "books.xml")));
                 fail("invalidity not detected");
-            } catch (SaxonApiException verr) {
+            } catch (SaxonApiException|IllegalStateException verr) {
                 System.err.println("Failed as expected: " + verr.getMessage());
                 // OK, failure was expected
             }
