@@ -41,8 +41,8 @@ zend_class_entry *xdmArray_ce;
 
 zend_class_entry *xsltExecutable_ce;
 
-#include "php8_DocumentBuilder.cpp"
 #include "php8_SchemaValidator.cpp"
+#include "php8_DocumentBuilder.cpp"
 #include "php8_XPathProcessor.cpp"
 #include "php8_XQueryProcessor.cpp"
 #include "php8_Xslt30Processor.cpp"
