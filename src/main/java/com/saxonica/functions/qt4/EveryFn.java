@@ -27,8 +27,12 @@ public class EveryFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        FunctionItem predicate = null;
+        if (arguments.length > 1) {
+            predicate = (FunctionItem) arguments[1].head();
+        }
         SequenceIterator iter = arguments[0].iterate();
-        if (arguments.length == 1) {
+        if (predicate == null) {
             for (Item item; (item = iter.next()) != null; ) {
                 if (item instanceof BooleanValue) {
                     if (!((BooleanValue) item).getBooleanValue()) {
@@ -41,7 +45,6 @@ public class EveryFn extends SystemFunction {
             }
             return BooleanValue.TRUE;
         } else {
-            FunctionItem predicate = (FunctionItem) arguments[1].head();
             switch (predicate.getArity()) {
                 case 0: {
                     boolean condition = (((BooleanValue) dynamicCall(predicate, context).head()).getBooleanValue());

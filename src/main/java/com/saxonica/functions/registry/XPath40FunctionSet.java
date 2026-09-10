@@ -128,7 +128,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("contains-subsequence", 3, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
-                .arg(2, compareFnType, ONE, null));
+                .arg(2, compareFnType, OPT, null));
 
         register("contains-token", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, STAR, null)
@@ -163,7 +163,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("ends-with-subsequence", 3, e -> e.populate(SequenceMatching.EndsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
-                .arg(2, compareFnType, ONE, null));
+                .arg(2, compareFnType, OPT, null));
 
         register("error", 2, e -> e.populate(Error::new, Type.ITEM_TYPE, OPT, LATE)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null)
@@ -179,7 +179,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("every", 2, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
-                .arg(1, predicate2, ONE, null));
+                .arg(1, predicate2, OPT, null));
 
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
@@ -370,7 +370,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
-                .arg(1, predicate2, ONE, null));
+                .arg(1, predicate2, OPT, null));
 
         register("starts-with", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
@@ -384,7 +384,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("starts-with-subsequence", 3, e -> e.populate(SequenceMatching.StartsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
-                .arg(2, compareFnType, ONE, null));
+                .arg(2, compareFnType, OPT, null));
 
         register("subsequence", 3, e -> e.populate(Subsequence_3::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY)
