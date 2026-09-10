@@ -1151,16 +1151,30 @@
       </description>
       <details>
         <div>
-          <p>For documents supplied in the form of a JAXP <code>Source</code> object, this will normally
-            be the absolutized value of the <code>SystemId</code> property of the <code>Source</code> object.</p>
+          <p>The W3C specification requires that if <code>document-uri(D) = U</code>, then <code>doc(U) is D</code>.
+            A consequence of this rule is that two different documents cannot have the same document URI. This realisation
+            led to a significant change in the implementation of the function beween Saxon 10 and 11, with the effect that
+            many documents no longer have a document URI. For example, at one time a document built from a JAXP <code>Source</code>
+            object would automatically have a <code>document-uri()</code> based on the <code>systemID</code> property of the
+            <code>Source</code>. This is no longer the case, because there is no way of preventing two different <code>Source</code>         
+            objects having the same <code>systemID</code> property.</p>
+          
           <p>For documents read using the XPath <code>doc()</code> or <code>document()</code> functions,
             or the XSLT <code>&lt;xsl:source-document&gt;</code> instruction,
             it will normally be the absolutized URI that was used to read the document, even if a user-supplied
             <code>URIResolver</code> redirected the request to some other URI. By contrast, the <code>base-uri()</code>
-          function returns the URI of the actual document returned by the <code>URIResolver</code>.</p>
-          <p>The value can be set programmatically on the <code>TreeInfo</code> for the relevant document tree
-            using the call <code>node.getTreeInfo().setUserData("saxon:document-uri", URI)</code>, where URI is a string.
-            Setting the value to a zero-length string causes <code>document-uri()</code> to return the empty sequence, ().</p>
+            function returns the URI of the actual document returned by the <code>URIResolver</code>.</p>
+          
+          <p>Internally, Saxon maintains a document pool whose scope is a particular transformation (or query). The document
+            pool is a set of (URI, document) pairs, and a document has a <code>document-uri()</code> property if and only if
+            there is an entry for this pair in the document pool.</p>
+          
+          <p>Documents read using the <code>collection()</code> function are added to the document pool (and therefore
+            have a <code>document-uri()</code> property) if and only if the collection is stable. In Saxon, for performance
+            reasons, collections are not stable unless the configuration option <code>STABLE_COLLECTION_URI</code>
+            is set, or unless stability is requested in some other way, for example by including the parameter
+            <code>stable=yes</code> in the collection URI.</p>
+          
         </div>
       </details>
     </function>
