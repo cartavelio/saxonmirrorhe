@@ -7,107 +7,53 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.Controller;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.GroupIterator;
-import net.sf.saxon.expr.sort.MergeGroupingIterator;
-import net.sf.saxon.expr.sort.MergeInstr;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.instruct.ParameterSet;
+import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.ma.map.EmptyMap;
+import net.sf.saxon.ma.map.KeyValuePair;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.om.FocusTrackingIterator;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
+import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.trans.rules.RuleManager;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ChoiceItemType;
+import net.sf.saxon.type.EnumerationUnionType;
+import net.sf.saxon.value.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
+import java.util.Map;
 
 /**
- * Implements the XSLT 3.0 function current-merge-group()
+ * Implements the XSLT 4.0 function apply-templates()
  */
 
-public class CurrentMergeGroup extends SystemFunction {
+public class ApplyTemplatesFn extends SystemFunction {
 
-    private boolean inLoop = false;
-    private MergeInstr controllingInstruction = null; // may be unknown, when current group has dynamic scope
-    private final Set<String> allowedNames = new HashSet<>();
 
-    /**
-     * Set the containing xsl:merge instruction, if there is one
-     * @param instruction the (innermost) containing xsl:merge instruction
-     * @param isInLoop true if the current-merge-group() expression is evaluated more than once during
-     * evaluation of the body of the xsl:merge instruction
-     */
-
-    public void setControllingInstruction(MergeInstr instruction, boolean isInLoop) {
-        this.controllingInstruction = instruction;
-        this.inLoop = isInLoop;
-        for (MergeInstr.MergeSource m : instruction.getMergeSources()) {
-            String name = m.sourceName;
-            if (name != null) {
-                allowedNames.add(name);
-            }
-        }
+    public static OptionsParameter makeOptionsParameter() {
+        EnumerationUnionType specialModes =
+                EnumerationUnionType.of("#current", "#unnamed", "#default");
+        ChoiceItemType modeType = ChoiceItemType.of(BuiltInAtomicType.QNAME, specialModes);
+        SequenceType paramsType = SequenceType.optional(
+                new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE));
+        OptionsParameter options = new OptionsParameter(40);
+        options.addAllowedOption("mode", SequenceType.optional(modeType), EmptySequence.getInstance());
+        options.addAllowedOption("params", paramsType, EmptyMap.getInstance());
+        options.addAllowedOption("tunnel-params", paramsType, EmptyMap.getInstance());
+        return options;
     }
 
-    /**
-     * Get the innermost containing xsl:merge instruction, if there is one
-     * @return the innermost containing xsl:merge instruction
-     */
-
-    public MergeInstr getControllingInstruction() {
-        return controllingInstruction;
-    }
-
-    /**
-     * Determine whether the current-group() function is executed repeatedly within a single iteration
-     * of the containing xsl:for-each-group
-     * @return true if it is evaluated repeatedly
-     */
-
-    public boolean isInLoop() {
-        return inLoop;
-    }
-
-    /**
-     * Determine the item type of the value returned by the function
-     */
-
-    @Override
-    public ItemType getResultItemType() {
-        return AnyItemType.getInstance();
-    }
-
-    /**
-     * Determine the special properties of this expression.
-     *
-     * @return {@link net.sf.saxon.expr.StaticProperty#NO_NODES_NEWLY_CREATED} (unless the variable is assignable using saxon:assign)
-     * @param arguments the actual arguments supplied to the function call
-     */
-    @Override
-    public int getSpecialProperties(Expression[] arguments) {
-        return 0;
-    }
-
-    /**
-     * Make an expression that either calls this function, or that is equivalent to a call
-     * on this function
-     *
-     * @param arguments the supplied arguments to the function call
-     * @return either a function call on this function, or an expression that delivers
-     * the same result
-     */
-    @Override
-    public Expression makeFunctionCall(Expression... arguments) {
-        return new SystemFunctionCall(this, arguments) {
-            @Override
-            public Expression getScopingExpression() {
-                return getControllingInstruction();
-            }
-        };
-    }
 
     /**
      * Evaluate the expression
@@ -115,52 +61,80 @@ public class CurrentMergeGroup extends SystemFunction {
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as SequenceIterators
      * @return the result of the evaluation, in the form of a SequenceIterator
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a dynamic error occurs during the evaluation of the expression
+     * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        String source = null;
-        if (arguments.length > 0) {
-            Item value = arguments[0].head();
-            if (value != null) {
-                // Empty sequence allowed in 4.0
-                source = value.getStringValue();
+        Controller controller = context.getController();
+        if (!(controller instanceof XsltController)) {
+            throw new XPathException("fn:apply-templates() function is only available in XSLT");
+        }
+        RuleManager ruleManager = controller.getRuleManager();
+        Mode mode;
+        Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
+        if (getArity() >= 2) {
+            MapItem options = (MapItem) arguments[1].head();
+            if (options != null) {
+                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
             }
         }
-        return SequenceTool.toLazySequence(currentGroup(source, context));
-    }
-
-    /**
-     * Private method to perform the evaluation
-     * @param source the first argument to the function, the name of the merge source; or null if not supplied
-     * @param c the dynamic evaluation context
-     * @return an iterator over the selected items
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    private SequenceIterator currentGroup(String source, XPathContext c) throws XPathException {
-        GroupIterator gi = c.getCurrentMergeGroupIterator();
-        if (gi == null) {
-            throw new XPathException("There is no current merge group", "XTDE3480");
-        }
-        if (source == null) {
-            return gi.currentGroup().iterate();
+        AtomicValue modeVal = (AtomicValue) checkedOptions.get("mode");
+        if (modeVal instanceof QNameValue) {
+            StructuredQName modeName = ((QNameValue) modeVal).getStructuredQName();
+            mode = ruleManager.obtainMode(modeName, false);
+            if (mode == null) {
+                throw new XPathException("Unknown mode " + modeName.getEQName());
+            }
+        } else if (modeVal instanceof StringValue) {
+            String modeToken = modeVal.getStringValue();
+            switch (modeToken) {
+                case "#default":
+                    throw new XPathException("Mode=#default not yet implemented");
+                case "#unnamed":
+                    mode = ruleManager.obtainMode(Mode.UNNAMED_MODE_NAME, false);
+                    break;
+                case "#current":
+                    mode = context.getCurrentMode().getActor();
+                    break;
+                default:
+                    throw new XPathException("Invalid mode requested: " + modeToken);
+            }
         } else {
-            if (!allowedNames.contains(source)) {
-                throw new XPathException("Supplied argument (" + source +
-                        ") is not the name of any xsl:merge-source in the containing xsl:merge instruction", "XTDE3490");
-            }
-            return ((MergeGroupingIterator)gi).iterateCurrentGroup(source);
+            mode = context.getCurrentMode().getActor();
+            //throw new XPathException("Mode=#default not yet implemented");
         }
 
+        ParameterSet params = makeParameterSet(null, checkedOptions,"params");
+        ParameterSet existingTunnelParams = context.getTunnelParameters();
+        ParameterSet tunnels = makeParameterSet(existingTunnelParams, checkedOptions, "tunnel-params");
+
+        XPathContextMajor newContext = context.newContext();
+        newContext.setCurrentIterator(new FocusTrackingIterator(arguments[0].iterate()));
+        SequenceCollector seq = new SequenceCollector(controller.makePipelineConfiguration());
+        ComplexContentOutputter cco = new ComplexContentOutputter(seq);
+        mode.applyTemplates(params, tunnels, null, cco, newContext, Loc.NONE);
+        return seq.getSequence();
+
     }
 
-    @Override
-    public String getStreamerName() {
-        return "CurrentMergeGroup";
+    private ParameterSet makeParameterSet(ParameterSet existing,
+                                          Map<String, GroundedValue> checkedOptions,
+                                          String optionName) {
+        if (checkedOptions == null) {
+            return existing;
+        }
+        MapItem supplied = (MapItem)checkedOptions.get(optionName);
+        if (supplied == null) {
+            return existing;
+        }
+        ParameterSet params = existing == null
+                ? new ParameterSet(supplied.size())
+                : new ParameterSet(existing, supplied.size());
+        for (KeyValuePair pair : supplied.keyValuePairs()) {
+            params.put(((QNameValue)pair.key).getStructuredQName(), pair.value, false);
+        }
+        return params;
     }
-
-}
+};
 
 
