@@ -320,13 +320,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 if (matchAtt == null) {
                     compileError("The mode attribute must be absent if the match attribute is absent", "XTSE0500");
                 }
-                StructuredQName[] names = getModeNames();
-                RuleManager mgr = getContainingPackage().getRuleManager();
-                if (!appliesToAllModes()) {
-                    for (StructuredQName name : names) {
-                        mgr.registerModeName(name);
-                    }
-                }
             }
         } catch (XPathException err) {
             XPathException e2 = err.replacingErrorCode("XTSE0020", "XTSE0550");
@@ -418,6 +411,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 
     @Override
     public void processAllAttributes() throws XPathException {
+        // With JIT compilation enabled, we don't process the attributes of descendant elements
         if (!isDeferredCompilation(getCompilation())) {
             super.processAllAttributes();      //TODO - sort out the duplicated code. This repeats the code below
         } else {
@@ -560,8 +554,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             }
             if (getPrincipalStylesheetModule().isDeclaredModes()) {
                 RuleManager manager = getPrincipalStylesheetModule().getRuleManager();
-                if (modeNames != null) {
-                    for (StructuredQName name : modeNames) {
+                StructuredQName[] modes = getModeNames();
+                if (modes != null) {
+                    for (StructuredQName name : modes) {
                         if (name.equals(Mode.UNNAMED_MODE_NAME) && !manager.isUnnamedModeExplicit()) {
                             compileError("The unnamed mode has not been declared in an xsl:mode declaration", "XTSE3085");
                         }
@@ -879,7 +874,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             ExpressionVisitor visitor = ExpressionVisitor.make(getStaticContext());
             Iterable<StructuredQName> modeNames = Arrays.asList(getModeNames());
             if (appliesToAllModes()) {
-                modeNames = getContainingPackage().getRuleManager().getAllModeNames();
+                modeNames = getCompilation().getAllKnownModeNames();
             }
             for (StructuredQName modeName : modeNames) {
                 Mode mode = mgr.obtainMode(modeName, true);
