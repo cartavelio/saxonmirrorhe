@@ -1,9 +1,38 @@
 <exceptions>
+
+  <exception run="false" report="known restriction"
+             test-case="id-003 id-005 id-006 id-007 id-008 id-009 id-012
+                        id-020 id-021 id-022 id-023 id-024 id-025 id-026 id-027 id-028 id-029
+                        id-030 id-031 id-036 id-039 id-040 id-042 id-043
+                        axes-197 axes-201 match-013 match-014 match-053
+                        number-4501">
+    <created by="Norm Tovey-Walsh" on="2026-05-08"/>
+    <reason>Microsoft parser doesn’t report ID attributes</reason>
+  </exception>
+
+  <exception run="false" report="known restriction"
+             test-case="sf-unparsed-entity-01 sf-unparsed-entity-02 sf-unparsed-entity-03
+                        sf-unparsed-entity-04 sf-unparsed-entity-05 sf-unparsed-entity-06
+                        sf-unparsed-entity-07 sf-unparsed-entity-08
+                        unparsed-entity-01 unparsed-entity-02 unparsed-entity-03
+                        unparsed-entity-04 unparsed-entity-05 unparsed-entity-06
+                        unparsed-entity-07 unparsed-entity-08 unparsed-entity-09
+                        unparsed-entity-10 unparsed-entity-50">
+    <created by="Norm Tovey-Walsh" on="2026-05-08"/>
+    <reason>Microsoft parser doesn’t report unparsed entities</reason>
+  </exception>
+
+  <exception run="false" report="known restriction" when="XT30"
+             test-case="format-date-en-020 format-date-en-021 format-date-en-022
+                        format-date-en-026 format-date-en-028">
+    <created by="Norm Tovey-Walsh" on="2026-05-08"/>
+    <reason>The formats are less constrained in XT40</reason>
+  </exception>
   
-  <exception test-case="su-absorbing-204" run="false" report="error">
+  <!--<exception test-case="su-absorbing-204" run="false" report="error">
     <created by="Norm Tovey-Walsh" on="2026-01-22"/>
     <reason>Work around temporary stack overflow</reason>
-  </exception>
+  </exception>-->
 
   <!--<exception test-case="function-available-1008" run="false" report="bug">
     <created by="Michael Kay" on="2021-10-01"/>
