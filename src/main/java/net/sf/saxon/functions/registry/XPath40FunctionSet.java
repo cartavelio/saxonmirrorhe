@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions.registry;
 
+import com.saxonica.functions.extfn.CharactersFn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.ma.Parcel;
@@ -58,6 +59,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("all", 2, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null);
+
+        register("characters", 1, CharactersFn.class, BuiltInAtomicType.STRING, STAR, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
         // codepoints-to-string becomes variadic in 4.0:
         register("codepoints-to-string", 1, CodepointsToString.class, BuiltInAtomicType.STRING, ONE, SEQV)

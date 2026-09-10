@@ -66,6 +66,10 @@ public class StandardCollationURIResolver implements CollationURIResolver {
             }
             Properties props = new Properties();
             String query = uuri.getRawQuery();
+            if (query.startsWith("?")) {
+                // Happens on .NET
+                query = query.substring(1);
+            }
             StringTokenizer queryTokenizer = new StringTokenizer(query, ";&");
             while (queryTokenizer.hasMoreTokens()) {
                 String param = queryTokenizer.nextToken();

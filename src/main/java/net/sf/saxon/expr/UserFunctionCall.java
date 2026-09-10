@@ -651,7 +651,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
         for (int i = 0; i < numArgs; i++) {
             Evaluator eval = argumentEvaluators[i];
-            if (eval == Evaluator.StreamingArgument.INSTANCE && !streamed) {
+            if (eval == null || eval == Evaluator.StreamingArgument.INSTANCE && !streamed) {
                 eval = Evaluator.EagerSequence.INSTANCE;
             }
             actualArgs[i] = eval.evaluate(getArg(i), c);

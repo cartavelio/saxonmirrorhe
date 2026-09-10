@@ -71,6 +71,10 @@ public class JSONResource implements Resource {
         }
         if (jsonStr == null) {
             jsonStr = details.obtainCharacterContent();
+            if (jsonStr == null) {
+                // implies errors are being ignored
+                return null;
+            }
         }
         Map<String, Sequence> options = new HashMap<>();
         options.put("liberal", BooleanValue.FALSE);
