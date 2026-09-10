@@ -15,9 +15,7 @@ import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.DocumentNodeTest;
-import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.pattern.SameNameTest;
+import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
@@ -25,10 +23,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.sf.saxon.type.Affinity.DISJOINT;
@@ -152,8 +147,8 @@ public class TypeHierarchy {
     public Affinity relationship(/*@Nullable*/ ItemType t1, /*@NotNull*/ ItemType t2) {
         Objects.requireNonNull(t1);
         Objects.requireNonNull(t2);
-        t1 = stabilize(t1);
-        t2 = stabilize(t2);
+        t1 = normalizeItemType(t1);
+        t2 = normalizeItemType(t2);
         if (t1.equals(t2)) {
             return SAME_TYPE;
         }
@@ -197,13 +192,37 @@ public class TypeHierarchy {
      * @return either the supplied item type, or an equivalent that can safely be cached.
      */
 
-    private static ItemType stabilize(ItemType in) {
+    private static ItemType normalizeItemType(ItemType in) {
         if (in instanceof SameNameTest) {
             // we don't want to put a SameNameTest in the cache because it locks down the referenced document
             return ((SameNameTest)in).getEquivalentNameTest();
-        } else {
-            return in;
         }
+        // Convert element(a|b) to element(a)|element(b)
+        if (in instanceof NameTestUnion) {
+            Set<QNameTest> tests = ((UnionQNameTest)((NameTestUnion)in).getQNameTest()).getTests();
+            int nodeKind = ((NameTestUnion) in).getNodeKind();
+            List<ItemType> memberTypes = new ArrayList<>();
+            for (QNameTest test : tests) {
+                memberTypes.add(test.makeNodeTest(nodeKind));
+            }
+            return new ChoiceItemType(memberTypes);
+        }
+        // Convert element(a|b, T) to element(a, T) | element(b, T)
+        if (in instanceof ContentTypeTest && ((ContentTypeTest)in).getQNameTest() instanceof UnionQNameTest) {
+            Configuration config = ((ContentTypeTest) in).getConfiguration();
+            Set<QNameTest> tests = ((UnionQNameTest) ((ContentTypeTest) in).getQNameTest()).getTests();
+            SchemaType contentType = ((ContentTypeTest)in).getContentType();
+            int nodeKind = ((ContentTypeTest) in).getNodeKind();
+            List<ItemType> memberTypes = new ArrayList<>();
+            boolean nillable = ((ContentTypeTest) in).isNillable();
+            for (QNameTest test : tests) {
+                ContentTypeTest contentTypeTest = new ContentTypeTest(
+                        nodeKind, test, contentType, nillable, config);
+                memberTypes.add(contentTypeTest);
+            }
+            return new ChoiceItemType(memberTypes);
+        }
+        return in;
     }
 
     /**
@@ -811,10 +830,6 @@ public class TypeHierarchy {
             default:
                 throw new IllegalArgumentException();
         }
-    }
-
-    public ItemType getGenericFunctionItemType() {
-        return AnyFunctionType.getInstance();
     }
 
 

@@ -64,6 +64,9 @@ public class ContentTypeTest extends NodeTest {
         return kind == Type.ELEMENT ? UType.ELEMENT : UType.ATTRIBUTE;
     }
 
+    public Configuration getConfiguration() {
+        return config;
+    }
 
     @Override
     public QNameTest getQNameTest() {

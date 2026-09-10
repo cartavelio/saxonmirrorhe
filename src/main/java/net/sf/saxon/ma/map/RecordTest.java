@@ -487,6 +487,16 @@ public class RecordTest extends AnyFunctionType implements RecordType {
         for (String key : keys) {
             SequenceType t1 = fieldTypes.get(key);
             SequenceType t2 = other.fieldTypes.get(key);
+            boolean optional1 = isOptionalField(key);
+            boolean optional2 = other.isOptionalField(key);
+            if (optional1 != optional2) {
+                if (optional1) {
+                    foundSubsuming = true;
+                }
+                if (optional2) {
+                    foundSubsumed = true;
+                }
+            }
             if (t1 == null) {
                 if (isExtensible()) {
                     foundSubsuming = true;
