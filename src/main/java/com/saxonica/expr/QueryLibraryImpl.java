@@ -5,8 +5,6 @@ import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.query.*;
 import net.sf.saxon.trans.XPathException;
 
-import java.util.Iterator;
-
 /**
  * Concrete implementation of a separately-compiled XQuery library
  */
@@ -26,8 +24,7 @@ public class QueryLibraryImpl extends QueryLibrary {
     public void link(QueryModule importer) throws XPathException {
         // Import the global functions and variables from this library to the importing module
         XQueryFunctionLibrary lib = getGlobalFunctionLibrary();
-        for (Iterator<XQueryFunction> iter = lib.getFunctionDefinitions(); iter.hasNext(); ) {
-            XQueryFunction fn = iter.next();
+        for (XQueryFunction fn : lib.getFunctionDefinitions()) {
             importer.getTopLevelModule().getGlobalFunctionLibrary().declareFunction(fn);
         }
         for (GlobalVariable libvar : getGlobalVariables()) {

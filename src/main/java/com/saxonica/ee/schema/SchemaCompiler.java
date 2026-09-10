@@ -393,7 +393,7 @@ public class SchemaCompiler {
      * @throws SchemaException if reading a schema document fails
      */
 
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, Collection<String> schemaLocations, String expected)
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, String expected)
             throws SchemaException {
         String[] locations = new String[schemaLocations.size()];
         int loc = 0;

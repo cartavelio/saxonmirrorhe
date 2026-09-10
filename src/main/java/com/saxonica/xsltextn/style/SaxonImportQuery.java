@@ -14,9 +14,6 @@ import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 
 /**
  * The class implements a saxon:import-query declaration in a stylesheet. This
@@ -91,9 +88,7 @@ public class SaxonImportQuery extends StyleElement {
 
             // Now import the functions
 
-            Iterator it = importedModule.getGlobalFunctionLibrary().getFunctionDefinitions();
-            while (it.hasNext()) {
-                XQueryFunction def = (XQueryFunction) it.next();
+            for (XQueryFunction def : importedModule.getGlobalFunctionLibrary().getFunctionDefinitions()) {
                 // don't import functions transitively
                 if (def.getFunctionName().hasURI(moduleURI) && !def.isPrivate()) {
                     top1.declareXQueryFunction(def);
@@ -122,7 +117,7 @@ public class SaxonImportQuery extends StyleElement {
 
     private QueryLibrary getQueryLibrary(String namespace) {
         CompilerInfo info = getCompilation().getCompilerInfo();
-        Collection<QueryLibrary> libs = info.getQueryLibraries();
+        Iterable<QueryLibrary> libs = info.getQueryLibraries();
         if (libs != null) {
             for (QueryLibrary lib : libs) {
                 if (lib.getModuleNamespace().equals(namespace)) {

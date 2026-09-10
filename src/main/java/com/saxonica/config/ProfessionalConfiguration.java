@@ -37,8 +37,10 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.PatternParser;
 import net.sf.saxon.pull.PullProvider;
+import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryParser;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StyleNodeFactory;
@@ -936,14 +938,14 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    public Source resolveSource(Source source, Configuration config) throws XPathException {
-        Source s = super.resolveSource(source, config);
+    public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
+        ActiveSource s = super.resolveSource(source, config);
         if (s != null) {
             return s;
         }
         if (source instanceof PullProvider) {
             checkLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION, "pull processing", -1);
-            return source;
+            return new PullSource((PullProvider)source);
         }
         return null;
     }

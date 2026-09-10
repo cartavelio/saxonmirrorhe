@@ -21,7 +21,7 @@ public class DocumentSorterCompiler extends ToIteratorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "DocumentSorterCompiler");
         DocumentSorter docSorterExpr = ((DocumentSorter) expression);
-        ItemOrderComparer comparer = docSorterExpr.getComparer();
+        ItemOrderComparer comparer = (ItemOrderComparer)docSorterExpr.getComparer();
         Expression operand = docSorterExpr.getBaseExpression();
         ga.newInstance(Type.getType(DocumentOrderIterator.class));
         ga.dup();

@@ -6,13 +6,12 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.MultiIterator;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.jiter.ConcatenatingIterator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -82,8 +81,9 @@ public class ConstraintChecker extends WatchManager {
                 //addWatch(watch);
                 prearrangedWatches.add(watch);
                 // for each active KeyRef with the same name, tell the key/unique constraint about the keyref constraint
-                List<Iterator<Watch>> iterators = Arrays.asList(watchList.iterator(), prearrangedWatches.iterator());
-                Iterator<Watch> watches = new MultiIterator<>(iterators);
+                @SuppressWarnings("Convert2MethodRef")
+                Iterator<Watch> watches = new ConcatenatingIterator<>(
+                        watchList.iterator(), () -> prearrangedWatches.iterator());
                 while (watches.hasNext()) {
                     Watch ref = watches.next();
                     if (ref instanceof RefSelectorWatch) {

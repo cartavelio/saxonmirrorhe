@@ -610,16 +610,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     /**
      * Read schema documents from a list of schema locations
-     *
      * @param pipe            the pipeline configuration
      * @param baseURI         the base URI for resolving relative URIs
      * @param schemaLocations the list of location "hints" where to find the schema document. Must not be null.
      * @param expected        the target namespace expected in each of the schema documents; null if there is no
-     *                        expected namespace
      */
 
     @Override
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, Collection<String> schemaLocations, String expected)
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, String expected)
             throws SchemaException {
         newSchemaCompiler().readMultipleSchemas(pipe, baseURI, schemaLocations, expected);
     }

@@ -226,7 +226,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
             if (atStart) {
                 NodeInfo first = (NodeInfo)nonConsumingIterator.next();
                 if (first != null) {
-                    if (GlobalOrderComparer.getInstance().compare(item, first) < 0) {
+                    if (GlobalOrderComparer.getInstance().compare((NodeInfo)item, first) < 0) {
                         nonConsumingIterator = new PrependSequenceIterator(first, nonConsumingIterator);
                         emitNonConsumingOperandAtEnd = true;
                     } else {

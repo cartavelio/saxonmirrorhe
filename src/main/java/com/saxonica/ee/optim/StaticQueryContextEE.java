@@ -18,7 +18,6 @@ import net.sf.saxon.trans.XPathException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -251,7 +250,7 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
     }
 
     @Override
-    public Collection<QueryLibrary> getCompiledLibraries() {
+    public Iterable<QueryLibrary> getCompiledLibraries() {
         return compiledLibraries.values();
     }
 

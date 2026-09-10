@@ -1,7 +1,7 @@
 package com.saxonica.ee.domino;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.dom.DOMObjectModel;
+import net.sf.saxon.dom.ActiveDOMSource;
 import net.sf.saxon.dom.DOMWriter;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -12,6 +12,7 @@ import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -72,21 +73,22 @@ public class DominoTreeModel extends TreeModel implements ExternalObjectModel {
     }
 
 
-
     /**
-     * Test whether this object model recognizes a particular kind of JAXP Source object,
-     * and if it does, send the contents of the document to a supplied Receiver, and return true.
-     * Otherwise, return false.
+     * Give this ExternalObjectModel the opportunity of recognising a Source object and returning
+     * an ActiveSource, which will be used to send an instance of this external model to a supplied
+     * Receiver. The default implementation returns null.
+     *
+     * @param supplied a supplied Source
+     * @return an ActiveSource object if the source is recognised, or null if not
      */
-
     @Override
-    public boolean sendSource(Source source, Receiver receiver) throws XPathException {
-        if (source instanceof DOMSource) {
-            DOMObjectModel.sendDOMSource((DOMSource) source, receiver);
-            return true;
+    public ActiveSource getActiveSource(Source supplied) {
+        if (supplied instanceof DOMSource) {
+            return new ActiveDOMSource((DOMSource) supplied);
         }
-        return false;
+        return null;
     }
+
 
     /**
      * A Builder class for the Domino tree model
