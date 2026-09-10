@@ -26,6 +26,7 @@ import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.AccumulatorFn;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.Pattern;
@@ -117,6 +118,8 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
 
         if (accumulator.getAccumulatorName() == null) {
             reportAbsence("name");
+            // recovery: bug 5585
+            accumulator.setAccumulatorName(new StructuredQName("anon", NamespaceConstant.ANONYMOUS, "acc" + hashCode()));
         }
 
     }
