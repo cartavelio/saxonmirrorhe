@@ -73,7 +73,7 @@ public class Concat31 extends SystemFunction implements PushableFunction {
      */
     @Override
     public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, final Expression... arguments) throws XPathException {
-        if (OperandArray.every(arguments,
+        if (arguments.length >= 2 && OperandArray.every(arguments,
                 arg -> arg.getCardinality() == StaticProperty.EXACTLY_ONE && arg.getItemType() == BuiltInAtomicType.BOOLEAN)) {
             // Warning if all the arguments are booleans: probably a misuse of the '||' operator
             visitor.getStaticContext().issueWarning(
