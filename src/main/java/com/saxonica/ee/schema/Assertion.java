@@ -15,6 +15,7 @@ import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathStaticContext;
 import net.sf.saxon.sxpath.XPathVariable;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.SchemaComponent;
@@ -277,6 +278,10 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
                     result.add(contextItem);
                 }
             }
+        } catch (UncheckedXPathException err) {
+            // Treat an error in evaluating the assertion as false
+            context.getErrorReporter().report(new XmlProcessingException(err.getXPathException()).asWarning());
+            result.add(contextItem);
         } catch (XPathException err) {
             // Treat an error in evaluating the assertion as false
             context.getErrorReporter().report(new XmlProcessingException(err).asWarning());

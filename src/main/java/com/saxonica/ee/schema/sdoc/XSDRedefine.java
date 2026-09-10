@@ -52,11 +52,13 @@ public class XSDRedefine extends SchemaElement {
         PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
         //SchemaDocumentManager manager = getXSDSchema().getSchemaDocumentManager();
         SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
-
-        Source source = SchemaReader.getSource(documentBase,
-                schemaLocation,
-                pipe,
-                null);
+        
+        Source source = null;
+        try {
+            source = SchemaReader.getSource(documentBase, schemaLocation, manager.getPipelineConfiguration(), null);
+        } catch (SchemaException e) {
+            handleSchemaException(schemaLocation, e);
+        }
 
         //-- Have we already imported this XML Schema file? We can't handle
         //   this at present.
@@ -78,16 +80,20 @@ public class XSDRedefine extends SchemaElement {
                 externalSchema = redefined.getSchema();
                 externalSchemaDocumentURI = redefined.getSystemId();
             } catch (SchemaException e) {
-                Throwable cause = e.getException();
-                if (cause instanceof java.io.IOException) {
-                    warning("Failed to locate redefined schema document " + schemaLocation);
-                    externalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
-                    // We will get a hard error if any components are actually redefined
-                } else {
-                    // the error has already been reported
-                    throw e;
-                }
+                handleSchemaException(schemaLocation, e);
             }
+        }
+    }
+
+    private void handleSchemaException(String schemaLocation, SchemaException e) throws SchemaException {
+        Throwable cause = e.getException();
+        if (XSDInclude.isFileNotFoundException(cause)) {
+            warning("Failed to locate redefined schema document " + schemaLocation);
+            externalSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+            // We will get a hard error if any components are actually redefined
+        } else {
+            // the error has already been reported
+            throw e;
         }
     }
 

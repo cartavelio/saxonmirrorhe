@@ -6,6 +6,7 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaException;
 
 import javax.xml.transform.Source;
@@ -49,14 +50,11 @@ public class XSDInclude extends AnnotationParent {
 
         SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
 
-        Source source;
+        Source source = null;
         try {
             source = SchemaReader.getSource(getBaseURI(), schemaLocation, manager.getPipelineConfiguration(), null);
         } catch (SchemaException e) {
-            e.setLocator(this);
-            error(e);
-            includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
-            return;
+            handleSchemaException(schemaLocation, e);
         }
         if (source != null) {
             XSDSchema existing = manager.getExistingSchemaDocument(source.getSystemId(), getXSDSchema().getTargetNamespace());
@@ -81,21 +79,31 @@ public class XSDInclude extends AnnotationParent {
                 includedSchema = includedXSDSchema.getSchema();
                 manager.markAsRead(source.getSystemId(), includedXSDSchema);
             } catch (SchemaException e) {
-                Throwable cause = e.getException();
-                if (cause instanceof java.io.IOException) {
-                    // It is not an error if the schemaLocation cannot be resolved; this is equivalent
-                    // to including an empty schema document. But we give a warning, because otherwise the
-                    // subsequent errors are likely to be obscure
-                    warning("Included schema document " + schemaLocation + " cannot be located: " +
-                            cause.getClass().getName() + " (" + cause.getMessage() + ")");
-                    includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
-                } else {
-                    error("Failed to process included schema document " + schemaLocation);
-                    throw e;
-                }
+                handleSchemaException(schemaLocation, e);
             }
         }
 
+    }
+
+    private void handleSchemaException(String schemaLocation, SchemaException e) throws SchemaException {
+        Throwable cause = e.getException();
+        if (isFileNotFoundException(cause)) {
+            // It is not an error if the schemaLocation cannot be resolved; this is equivalent
+            // to including an empty schema document. But we give a warning, because otherwise the
+            // subsequent errors are likely to be obscure
+            warning("Included schema document " + schemaLocation + " cannot be located: " +
+                            cause.getClass().getName() + " (" + cause.getMessage() + ")");
+            includedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), "");
+        } else {
+            error("Failed to process included schema document " + schemaLocation);
+            throw e;
+        }
+
+    }
+
+    @CSharpReplaceBody(code="return cause.InnerException is System.IO.FileNotFoundException || cause.InnerException is System.Net.Http.HttpRequestException;")
+    public static boolean isFileNotFoundException(Throwable cause) {
+        return cause instanceof java.io.IOException;
     }
 
     /**

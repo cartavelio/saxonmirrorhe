@@ -415,16 +415,14 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 compiler.error("A simple type cannot be derived by restricting xs:anySimpleType", this);
                 setFixupStatus(INVALID);
                 setBaseTypeReference(new TypeReference(BuiltInAtomicType.STRING.getFingerprint(), getConfiguration(), this));
-                //return false;
             }
             if (base != null && base.getFingerprint() == StandardNames.XS_ANY_ATOMIC_TYPE &&
                     !getTypeName().hasURI(NamespaceConstant.SCHEMA)) {
-                // XSDL 1.1 makes clear that you can't derive a type directly from XS_ANY_ATOMIC_TYPE
+                // XSD 1.1 makes clear that you can't derive a type directly from XS_ANY_ATOMIC_TYPE
                 // We make an exception for types in the schema namespace, the S4S has special privileges
                 compiler.error("A simple type cannot be derived by restricting xs:anyAtomicType", this);
                 setFixupStatus(INVALID);
                 setBaseTypeReference(new TypeReference(BuiltInAtomicType.STRING.getFingerprint(), getConfiguration(), this));
-                //return false;
             }
             if (base instanceof SimpleType) {
                 try {

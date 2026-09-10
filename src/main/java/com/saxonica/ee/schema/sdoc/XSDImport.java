@@ -93,7 +93,7 @@ public class XSDImport extends AnnotationParent {
                         manager.getPipelineConfiguration(),
                         namespace);
             } catch (SchemaException e) {
-                error("xs:import failed: " + e.getMessage());
+                processSchemaException(schemaLocation, namespace, e);
                 return;
             }
         }
@@ -207,7 +207,7 @@ public class XSDImport extends AnnotationParent {
             }
         }
 
-        SchemaDocument importee;
+        SchemaDocument importee = null;
         int errors;
         try {
             PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
@@ -217,16 +217,7 @@ public class XSDImport extends AnnotationParent {
             errors = importee.getXSDSchema().getErrorCount();
             importedSchema = s.getSchema();
         } catch (SchemaException e) {
-            Throwable cause = e.getException();
-            if (cause instanceof java.io.IOException) {
-                warning("Imported schema document " + schemaLocation + " cannot be located: " +
-                        cause.getClass().getName() + " (" + cause.getMessage() + ")");
-            } else {
-                error("Failed to process imported schema document: " + e.getMessage());
-            }
-            // create a dummy imported schema for error recovery
-            importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), namespace);
-            errors = 0;
+            processSchemaException(schemaLocation, namespace, e);
             return;
         }
 
@@ -262,6 +253,20 @@ public class XSDImport extends AnnotationParent {
         //-- Add schema to list of imported schemas (if not already present)
         //importedSchema.setSchemaLocation(schemaLocation);
         config.addSchema(importedSchema);
+    }
+
+    private void processSchemaException(String schemaLocation, String namespace, SchemaException e)
+    throws SchemaException {
+        Throwable cause = e.getException();
+        if (XSDInclude.isFileNotFoundException(cause)) {
+            warning("Imported schema document " + schemaLocation + " cannot be located: " +
+                            cause.getClass().getName() + " (" + cause.getMessage() + ")");
+        } else {
+            error("Failed to process imported schema document: " + e.getMessage());
+        }
+        // create a dummy imported schema for error recovery
+        importedSchema = new SingleNamespaceSchema((EnterpriseConfiguration) getConfiguration(), namespace);
+        return;
     }
 
     /**
