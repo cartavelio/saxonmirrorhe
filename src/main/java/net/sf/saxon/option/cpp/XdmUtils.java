@@ -259,6 +259,31 @@ public class XdmUtils {
         return a;
     }
 
+
+    @CEntryPoint(name = "j_xdmNodeEquals")
+    public static byte xdmNodeEquals(IsolateThread thread, ObjectHandle node1, ObjectHandle node2) {
+        if (node1 == WordFactory.nullPointer()) {
+            return CTypeConversion.toCBoolean(false);
+        }
+        if (node2 == WordFactory.nullPointer()) {
+            return CTypeConversion.toCBoolean(false);
+        }
+        try {
+            XdmNode j_node1 = SaxonCAPI.objectHandles.get(node1);
+            XdmNode j_node2 = SaxonCAPI.objectHandles.get(node2);
+
+            if(SaxonCAPI.debug) {
+                System.out.println("Java Debug: j_xdmNodeEquals called result=" + j_node1.equals(j_node2));
+            }
+
+            return CTypeConversion.toCBoolean(j_node1.equals(j_node2));
+
+        } catch (Exception ex) {
+            SaxonCCurrentException.getInstance().setThrowable(ex);
+            return -2;
+        }
+    }
+
     /**
      * Attempt to Downcast XdmItem to XdmNode. If this is not possible then return null
      *

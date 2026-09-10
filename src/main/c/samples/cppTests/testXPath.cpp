@@ -1030,6 +1030,52 @@ void testXPathOnFile2(XPathProcessor *xpath, sResultCount *sresult) {
   }
 }
 
+
+
+// Test case on the evaluate method in XPathProcessor. Here we test that we have
+// morethan one XdmItem.
+void testXdmNodeEquals(XPathProcessor *xpath, sResultCount *sresult) {
+  cout << endl << "Test testXdmNodeEquals:" << endl;
+  xpath->clearParameters();
+  xpath->clearProperties();
+  xpath->setContextFile("../data/cat.xml");
+  try {
+    XdmNode *result = (XdmNode *)xpath->evaluateSingle("//person[1]");
+    XdmNode *result2 = (XdmNode *)xpath->evaluateSingle("//person[1]");
+
+    if (result == nullptr) {
+      printf("result is null \n");
+
+      sresult->failure++;
+      sresult->failureList.push_back("testXdmNodeEquals");
+      return;
+    } else {
+      cout << "Number of items=" << result->size() << endl;
+
+      if (result == result2) {
+        cout << "Results are equal" << endl;
+        cout << "Node name: " << node->getNodeName() << endl;
+        sresult->success++;
+      } else {
+        cout << "Results are not equal" << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testXdmNodeEquals");
+      }
+
+
+    }
+    delete result;
+
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testXdmNodeEquals2");
+  }
+}
+
 XdmValue *good(XPathProcessor *xpath, sResultCount *sresult, XdmNode *document,
                const char *expr) {
   try {
@@ -1189,6 +1235,13 @@ int main() {
        << "============================================================="
        << endl
        << endl;
+  testXdmNodeEquals(xpathProc, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
   testXPathValues2(processor, xpathProc, sresult);
   cout << endl
        << "============================================================="
