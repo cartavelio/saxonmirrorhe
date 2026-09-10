@@ -8,12 +8,12 @@
          href="http://saxonica.com/documentation/index.html#!configuration/config-features"
          target="_blank">Saxon 9.9 documentation</a>.</p>
 
-   <aside>Note that a small number of the features are not available with Saxon/C. Please see the <a
+   <aside>Note that a small number of the features are not available with SaxonC. Please see the <a
          href="/technical">Technical Information</a> Limitations section for details.</aside>
 
    <h2 class="subtitle">Setting properties on the SaxonProcessor</h2>
 
-   <p>In the Saxon/C API in C++, PHP and Python, these configuration features can be set at a global
+   <p>In the SaxonC API in C++, PHP and Python, these configuration features can be set at a global
       level when the <code>SaxonProcessor</code> is created, using the
          <code>setConfigurationProperty()</code> method. For example:</p>
 
@@ -30,7 +30,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       properties and parameters can be configured in the different XSLT, XQuery, XPath or XML Schema
       processors, using the <code>setProperty()</code> and <code>setParameter()</code> methods.
       Depending on the specific processor the exact purpose of these methods may differ. Further
-      details can be found in the <a href="/api">Saxon/C API documentation</a>.</p>
+      details can be found in the <a href="/api">SaxonC API documentation</a>.</p>
 
    <nav>
       <ul/>
@@ -194,7 +194,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <code>setProperty("extc", "dir/saxonc")</code>
             </td>
             <td>
-               <p>Specifies the full path to the Saxon/C API library for extension functions. (For
+               <p>Specifies the full path to the SaxonC API library for extension functions. (For
                   more information on extension functions, see <a href="/extensibility">Extension
                      Functions in C++/PHP</a>.)</p>
             </td>
@@ -204,7 +204,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
             <td>
                <code>setProperty("m", "")</code>
             </td>
-            <td>Creates a message listener which is available in the Saxon/C API.</td>
+            <td>Creates a message listener which is available in the SaxonC API.</td>
          </tr>
       </table>
    </section>
@@ -351,7 +351,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <code>setProperty("sa", "true")</code>
             </td>
             <td>
-               <p>Invoke a schema-aware query. Requires Saxon-EE/C.</p>
+               <p>Invoke a schema-aware query. Requires SaxonC-EE.</p>
             </td>
          </tr>
          <tr>
@@ -360,7 +360,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <code>setProperty("extc", "dir/saxonc")</code>
             </td>
             <td>
-               <p>Specifies the full path to the Saxon/C API library for extension functions. (For
+               <p>Specifies the full path to the SaxonC API library for extension functions. (For
                   more information on extension functions, see <a href="/extensibility">Extension
                      Functions in C++/PHP</a>.)</p>
             </td>
@@ -481,7 +481,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <code>setProperty("extc", "dir/saxonc")</code>
             </td>
             <td>
-               <p>Specifies the full path to the Saxon/C API library for extension functions. (For
+               <p>Specifies the full path to the SaxonC API library for extension functions. (For
                   more information on extension functions, see <a href="/extensibility">Extension
                      Functions in C++/PHP</a>.)</p>
             </td>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="api" title="Saxon/C API">
-   <h1>Saxon/C API</h1>
+<article id="api" title="SaxonC API">
+   <h1>SaxonC API</h1>
 
-   <p>This section describes the Saxon/C API. The APIs support the XSLT 3.0, XQuery 3.1, XPath 3.1
-      and Schema Validation 1.0/1.1 specifications. Saxon/C can be used in C/C++, PHP and Python,
+   <p>This section describes the SaxonC API. The APIs support the XSLT 3.0, XQuery 3.1, XPath 3.1
+      and Schema Validation 1.0/1.1 specifications. SaxonC can be used in C/C++, PHP and Python,
       and links to the APIs in each of these languages are provided below.</p>
 
-   <p>The Saxon/C API provides six main classes:</p>
+   <p>The SaxonC API provides six main classes:</p>
 
    <table>
       <thead>
@@ -28,7 +28,7 @@
                   and Schema compilers. This class creates the JET run time in a static struct
                   object which is shared across all <code>SaxonProcessor</code> objects created. For
                   C++ programs the static method <code>SaxonProcessor::release()</code> needs to be
-                  called at the end of a program to clean up the JET threads. In the Saxon/C Python
+                  called at the end of a program to clean up the JET threads. In the SaxonC Python
                   and PHP extensions this release method is called internally.</p>
             </td>
             <td>
@@ -148,12 +148,12 @@
    </table>
 
 
-   <section id="saxon_c_cpp_api" title="Saxon/C C++ API">
-      <h1>Saxon/C C++ API</h1>
+   <section id="saxon_c_cpp_api" title="SaxonC C++ API">
+      <h1>SaxonC C++ API</h1>
 
-      <p>Saxon/C 1.2 is built from the Saxon 9.9.1.5 Java product by cross compiling using Excelsior
+      <p>SaxonC 1.2 is built from the Saxon 9.9.1.5 Java product by cross compiling using Excelsior
          JET Enterprise 15.3 edition (MP1). This generates platform specific machine code, which is
-         interfaced with C/C++ using the Java Native Interace (JNI). The following Saxon/C API
+         interfaced with C/C++ using the Java Native Interace (JNI). The following SaxonC API
          classes are available in C++ to process XSLT, XQuery, XPath and Schema validation:</p>
       <ul>
          <li>
@@ -212,9 +212,9 @@
    </section>
 
 
-   <section id="saxon_c_php_api" title="Saxon/C PHP API">
+   <section id="saxon_c_php_api" title="SaxonC PHP API">
 
-      <h1>Saxon/C PHP API</h1>
+      <h1>SaxonC PHP API</h1>
 
       <p>The following classes are available in the PHP API:</p>
 
@@ -424,7 +424,7 @@
                <td>
                   <span class="signature">registerPHPFunctions(string $library)</span>
                   <div class="fcomment">Enables the ability to use PHP functions as XSLT functions.
-                     Accepts as parameter the full path of the Saxon/C PHP Extension library. This
+                     Accepts as parameter the full path of the SaxonC PHP Extension library. This
                      is needed to do the callbacks.</div>
                </td>
             </tr>
@@ -1974,11 +1974,11 @@
 
 
 
-   <section id="saxon_c_python_api" title="Saxon/C Python API">
-      <h1>Saxon/C Python API</h1>
+   <section id="saxon_c_python_api" title="SaxonC Python API">
+      <h1>SaxonC Python API</h1>
 
-      <p>The Saxon/C Python extension API has been developed using <a href="https://cython.org/"
-            target="_blank">Cython</a>. Saxon/C only supports Python3. Cython is required to build
+      <p>The SaxonC Python extension API has been developed using <a href="https://cython.org/"
+            target="_blank">Cython</a>. SaxonC only supports Python3. Cython is required to build
          the extension library.</p>
 
       <p>The following classes are available in the Python API:</p>
