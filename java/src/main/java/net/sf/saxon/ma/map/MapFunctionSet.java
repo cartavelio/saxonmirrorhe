@@ -26,6 +26,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -204,8 +205,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
             register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, AnyItemType.getInstance(), STAR, null)
-                    .arg(1, mapBuildKeyArg, ONE, null)
-                    .arg(2, mapBuildValueArg, ONE, null)
+                    .arg(1, mapBuildKeyArg, OPT, null)
+                    .arg(2, mapBuildValueArg, OPT, null)
                     .arg(3, MapType.ANY_MAP_TYPE, OPT, null)
                     .setOptionDetails(mergeOptionDetails));
 
@@ -220,11 +221,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
 
-            register("pair", 2, e -> e.populate(MapPair::new, KVP_TYPE_INEXTENSIBLE, ONE, 0)
+            register("pair", 2, e -> e.populate(MapPair::new, KVP_TYPE_EXTENSIBLE, ONE, 0)
                     .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | INS, null)
                     .arg(1, AnyItemType.getInstance(), STAR | INS, null));
 
-            register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_INEXTENSIBLE, STAR, 0)
+            register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_EXTENSIBLE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("empty", 1, e -> e.populate(MapEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
@@ -661,9 +662,19 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             int position = 1;
             for (Item item; (item = iter.next()) != null; ) {
                 IntegerValue posValue = Int64Value.makeIntegerValue(position++);
-                SequenceIterator keys = dynamicCall(keyFunction, context, item, posValue).iterate();
+                SequenceIterator keys;
+                if (keyFunction != null) {
+                    keys = dynamicCall(keyFunction, context, item, posValue).iterate();
+                } else {
+                    keys = SingletonIterator.makeIterator(item);
+                }
                 AtomicValue key;
-                GroundedValue value = dynamicCall(valueFunction, context, item, posValue).materialize();
+                GroundedValue value;
+                if (valueFunction != null) {
+                    value = dynamicCall(valueFunction, context, item, posValue).materialize();
+                } else {
+                    value = item;
+                }
                 while ((key = (AtomicValue)keys.next()) != null) {
                     mapBuilder.put(key, value);
                 }
