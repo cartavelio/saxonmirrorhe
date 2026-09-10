@@ -736,7 +736,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
         return value;
     }else if(result== -2){
 
-        //TODO create exception
+        exceptionFound = true;
 
 
     }
@@ -872,7 +872,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
         return value;
     }else if(result == -2) {
 
-        //createException();
+        exceptionFound = true;
 
 
     }
@@ -1123,9 +1123,13 @@ void XsltExecutable::transformToFile(XdmNode *source) {
 
 
 SaxonApiException *XsltExecutable::getException() {
-    
-    SaxonApiException * exception = new SaxonApiException();
-    return exception;
+
+    if(exceptionFound) {
+        SaxonApiException *exception = new SaxonApiException();
+        return exception;
+    } else {
+        return nullptr;
+    }
 }
 
 

@@ -560,7 +560,7 @@ public class XdmUtils {
         return addr;
     }
 
-    @CEntryPoint(name = "j_getXdmObjectType")
+    @CEntryPoint(name = "j_getXdmObjectType", exceptionHandler = SaxonCExceptionIntHandler.class)
     public  static int getXdmObjectType(IsolateThread thread, ObjectHandle valueRef){
         Object value = SaxonCAPI.objectHandles.get(valueRef);
         if(value instanceof XdmAtomicValue) {

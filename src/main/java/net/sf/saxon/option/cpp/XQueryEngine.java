@@ -17,6 +17,7 @@ import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import java.io.*;
@@ -271,30 +272,46 @@ public class XQueryEngine extends SaxonCAPI {
 
 
     @CEntryPoint(name = "j_executeQueryToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer executeQueryToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
-
-        ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
-        String[] params = processorDataAccumulator.getParameterNames();
-        Object[] values = processorDataAccumulator.getValues();
+    public static CCharPointer executeQueryToString(IsolateThread thread, AllocatorCCharFn alloc, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
+        ProcessorDataAccumulator processorDataAccumulator = null;
+        String[] params = null;
+        Object[] values = null;
+        if(processorDataRef != WordFactory.nullPointer()) {
+            processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
+        if(processorRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor pointer is null");
+        }
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
-        String cwd = CTypeConversion.toJavaString(ccwd);
-
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd = CTypeConversion.toJavaString(ccwd);
+        }
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
         Serializer serializer = processor.newSerializer(bStream);
         XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, serializer);
         eval.run(serializer);
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
-        return holder.get();
+        return SaxonCAPI.stringToNative(alloc, bStream);
 
     }
 
     @CEntryPoint(name = "j_executeQueryToValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long executeQueryToValue(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
-        ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
-        String[] params = processorDataAccumulator.getParameterNames();
-        Object[] values = processorDataAccumulator.getValues();
+        ProcessorDataAccumulator processorDataAccumulator = null;
+        String[] params = null;
+        Object[] values = null;
+        if(processorDataRef != WordFactory.nullPointer()) {
+            processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
-        String cwd = CTypeConversion.toJavaString(ccwd);
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd = CTypeConversion.toJavaString(ccwd);
+        }
         XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, null);
         XdmValue value = eval.evaluate();
         ObjectHandle handle = objectHandles.create(value);
@@ -303,12 +320,25 @@ public class XQueryEngine extends SaxonCAPI {
 
     @CEntryPoint(name = "j_executeQueryToFile", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long executeQueryToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer c_outFilename, ObjectHandle processorDataRef) throws SaxonApiException {
-        ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
-        String[] params = processorDataAccumulator.getParameterNames();
-        Object[] values = processorDataAccumulator.getValues();
+        ProcessorDataAccumulator processorDataAccumulator = null;
+        String[] params = null;
+        Object[] values = null;
+        if(processorDataRef != WordFactory.nullPointer()) {
+            processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
+
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
-        String cwd = CTypeConversion.toJavaString(ccwd);
-        String outFilename = CTypeConversion.toJavaString(c_outFilename);
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd = CTypeConversion.toJavaString(ccwd);
+        }
+        String outFilename = null;
+
+        if(c_outFilename != WordFactory.nullPointer()) {
+            outFilename = CTypeConversion.toJavaString(c_outFilename);
+        }
 
         Serializer serializer = null;
             if(outFilename != null) {

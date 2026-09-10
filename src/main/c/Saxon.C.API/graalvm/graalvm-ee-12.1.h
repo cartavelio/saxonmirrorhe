@@ -134,7 +134,7 @@ long long int j_createXQueryEngine(graal_isolatethread_t*);
 
 long long int j_createXQueryEngineWithProcessor(graal_isolatethread_t*, void *);
 
-char* j_executeQueryToString(graal_isolatethread_t*, void *, char*, void *);
+char* j_executeQueryToString(graal_isolatethread_t*, void *, void *, char*, void *);
 
 long long int j_executeQueryToValue(graal_isolatethread_t*, void *, char*, void *);
 

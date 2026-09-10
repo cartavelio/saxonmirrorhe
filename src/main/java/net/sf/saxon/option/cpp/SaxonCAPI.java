@@ -102,7 +102,7 @@ public class SaxonCAPI {
         processor = proc;
 
         if (debug) {
-            System.err.println("New processor created in SaxonCAPI(l), Processor: " + System.identityHashCode(processor));
+            System.err.println("Reused processor in SaxonCAPI(l), Processor: " + System.identityHashCode(processor));
         }
     }
 
@@ -443,6 +443,8 @@ public class SaxonCAPI {
         ProcessorDataAccumulator processorDataAccumulator = null;
         if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
             processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+        } else {
+            return map;
         }
         String[] params = null;
         Object[] values = null;

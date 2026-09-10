@@ -235,7 +235,7 @@ void testReusability(SaxonProcessor * processor, sResultCount *sresult){
  	XdmNode * input = processor->parseXmlFromString("<foo xmlns='http://one.uri/'><bar xmlns='http://two.uri'>12</bar></foo>");
 
  	if(input == nullptr) {
-        cout << "Source document is null." << endl;
+        cout << "testReusability failure - Source document is null." << endl;
         if(processor->exceptionOccurred()) {
             cerr<<processor->getErrorMessage()<<endl;
         }
@@ -248,13 +248,10 @@ void testReusability(SaxonProcessor * processor, sResultCount *sresult){
 	queryProc2->declareNamespace("", "http://one.uri/");
 	queryProc2->setQueryContent("declare variable $p as xs:boolean external; exists(/foo) = $p");
 
-	queryProc2->declareNamespace("", "http://two.uri");
-	queryProc2->setQueryContent("declare variable $p as xs:integer external; /*/bar + $p");
-
 	queryProc2->setContextItem((XdmItem *)input);
 
-	XdmAtomicValue * value1 = processor->makeBooleanValue(true);
-  	queryProc2->setParameter("p",(XdmValue *)value1);
+    XdmAtomicValue * value1 = processor->makeBooleanValue(true);
+    queryProc2->setParameter("p",(XdmValue *)value1);
 	XdmValue * val = queryProc2->runQueryToValue();
 
 	if(val != nullptr){
@@ -266,14 +263,25 @@ void testReusability(SaxonProcessor * processor, sResultCount *sresult){
             cout << "Test2: Result value=" << (result1 == true ? "true" : "false") << endl;
             cout << "PrimitiveTypeName of  atomic=" << atomic->getPrimitiveTypeName() << endl;
         } else {
+	        cerr<<"failure in testReusability-1"<<endl;
             sresult->failure++;
             sresult->failureList.push_back("testReusability");
+            if(queryProc2->exceptionOccurred()) {
+                SaxonApiException * exception = queryProc2->getException();
+                if(exception != nullptr) {
+                    cout << "Exception found. " << endl;
+                    const char *message = queryProc2->getErrorMessage();
+                    cout << "Error Message = " << message << endl;
+                    queryProc2->exceptionClear();
+                }
+            }
 	    }
 	    delete val;
 	} else {
         if (queryProc2->exceptionOccurred()) {
+            cerr<<"failure in testReusability-1"<<endl;
             sresult->failure++;
-            sresult->failureList.push_back("testReusability");
+            sresult->failureList.push_back("testReusability-1");
             SaxonApiException * exception = queryProc2->getException();
             if(exception != nullptr) {
                 cout << "Exception found. " << endl;
@@ -286,13 +294,17 @@ void testReusability(SaxonProcessor * processor, sResultCount *sresult){
         return;
 	}
 
-	queryProc2->setContextItem((XdmItem *)input);
+    XQueryProcessor * queryProc3 = processor->newXQueryProcessor();
+    queryProc3->declareNamespace("", "http://two.uri");
+    queryProc3->setQueryContent("declare variable $p as xs:integer external; /*/bar + $p");
 
-	XdmAtomicValue * value2 = processor->makeLongValue(6);
+	queryProc3->setContextItem((XdmItem *)input);
+
+	XdmAtomicValue * value2 = processor->makeIntegerValue(6);
     cout<<"PrimitiveTypeName of  value2="<<value2->getPrimitiveTypeName()<<endl;
-	queryProc2->setParameter("p",(XdmValue *)value2);
+	queryProc3->setParameter("p",(XdmValue *)value2);
 
-	XdmValue * val2 = queryProc2->runQueryToValue();
+	XdmValue * val2 = queryProc3->runQueryToValue();
 
 
 	if(val2 != nullptr){
@@ -307,36 +319,30 @@ void testReusability(SaxonProcessor * processor, sResultCount *sresult){
         }
 	    delete val2;
 	} else {
-        if (queryProc2->exceptionOccurred()) {
+        if (queryProc3->exceptionOccurred()) {
+            cerr<<"failure in testReusability-2"<<endl;
             sresult->failure++;
             sresult->failureList.push_back("testReusability-2");
-            SaxonApiException * exception = queryProc2->getException();
+            SaxonApiException * exception = queryProc3->getException();
             if(exception != nullptr) {
                 cout << "Exception found. " << endl;
-                const char *message = queryProc2->getErrorMessage();
+                const char *message = queryProc3->getErrorMessage();
                 cout << "Error Message = " << message << endl;
-                queryProc2->exceptionClear();
+                queryProc3->exceptionClear();
             }
         }
+        delete value1;
 	    delete value2;
 	    delete queryProc2;
+        delete queryProc3;
 	    return;
 	}
 
-    if (queryProc2->exceptionOccurred()) {
-        sresult->failure++;
-        sresult->failureList.push_back("testReusability-3");
-        SaxonApiException * exception = queryProc2->getException();
-        if(exception != nullptr) {
-            cout << "Exception found. " << endl;
-            const char *message = queryProc2->getErrorMessage();
-            cout << "Error Message = " << message << endl;
-            queryProc2->exceptionClear();
-        }
-    }
+    delete value1;
     delete value2;
     delete input;
     delete queryProc2;
+    delete queryProc3;
 	
 }
 
@@ -424,6 +430,7 @@ int main(int argc, char* argv[])
     }
 
     SaxonProcessor * processor = new SaxonProcessor(true);
+    setDebugMode(SaxonProcessor::sxn_environ->thread, 1);
     cout<<"Test: XQueryProcessor with Saxon version="<<processor->version()<<endl<<endl;
 
     char buff[FILENAME_MAX]; //create string buffer to hold path
