@@ -1,0 +1,104 @@
+package com.saxonica.xsltextn.instruct;
+
+import net.sf.saxon.Controller;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.expr.instruct.Instruction;
+import net.sf.saxon.expr.instruct.TailCall;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.om.*;
+import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.SequenceType;
+
+/**
+ * Compiled instruction deriving from saxon:assign element in stylesheet.
+ * <p>The saxon:assign element has mandatory attribute name and optional attribute expr.
+ * It also allows xsl:extension-element-prefixes etc.</p>
+ */
+
+public class Assign extends Instruction implements BindingReference {
+
+    private Operand selectOp;
+    private GlobalVariable binding;    // link to the variable declaration
+
+    public Assign(Expression select) {
+        selectOp = new Operand(this, select, OperandRole.NAVIGATE);
+    }
+
+    public void setStaticType(SequenceType type, GroundedValue<?> constantValue, int properties) {
+    }
+
+    public void setSelectExpr(Expression select) {
+        selectOp.setChildExpression(select);
+    }
+
+    public Expression getSelectExpr() {
+        return selectOp.getChildExpression();
+    }
+
+    @Override
+    public Iterable<Operand> operands() {
+        return selectOp;
+    }
+
+    public void fixup(Binding binding) {
+        this.binding = (GlobalVariable) binding;
+    }
+
+
+    public int getIntrinsicDependencies() {
+        return StaticProperty.HAS_SIDE_EFFECTS;
+    }
+
+    /**
+     * Copy an expression. This makes a deep copy.
+     *
+     * @return the copy of the original expression
+     * @param rebindings variables that need to be re-bound
+     */
+    /*@NotNull*/
+    @Override
+    public Expression copy(RebindingMap rebindings) {
+        Assign a2 = new Assign(getSelectExpr().copy(rebindings));
+        ExpressionTool.copyLocationInfo(this, a2);
+        a2.binding = binding;
+        return a2;
+    }
+
+    /**
+     * Get the name of this instruction for diagnostic and tracing purposes
+     */
+
+    public int getInstructionNameCode() {
+        return StandardNames.SAXON_ASSIGN;
+    }
+
+
+    /*@Nullable*/
+    public TailCall processLeavingTail(XPathContext context) throws XPathException {
+        if (binding == null) {
+            throw new IllegalStateException("saxon:assign binding has not been fixed up");
+        }
+        GroundedValue<?> value = getSelectExpr().iterate(context).materialize();
+        final Controller controller = context.getController();
+        assert controller != null;
+        controller.getBindery(getPackageData()).setGlobalVariable(binding, value);
+        return null;
+    }
+
+    /**
+     * Diagnostic print of expression structure. The abstract expression tree
+     * is written to the supplied output destination.
+     */
+
+    public void export(ExpressionPresenter out) throws XPathException {
+        out.startElement("assign", this);
+        out.emitAttribute("name", binding.getVariableQName());
+        getSelectExpr().export(out);
+        out.endElement();
+    }
+}
+
+// Copyright (c) 2011 Saxonica Limited.

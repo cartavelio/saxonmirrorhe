@@ -1,0 +1,150 @@
+package com.saxonica.ee.validate;
+
+import com.saxonica.ee.schema.ElementDecl;
+import com.saxonica.ee.schema.UserComplexType;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.type.AnyType;
+import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.ValidationFailure;
+
+/**
+ * This class is a filter that is used to validate that an element has empty content.
+ * The element is allowed to have attributes, these are validated by the Validator
+ * superclass.
+ */
+
+
+public class EmptyContentValidator extends AttributeValidator {
+
+    private boolean allowTextNodes;
+    private Location locationId;
+    /*@Nullable*/ private FastStringBuffer buffer;
+    private SchemaType schemaType;
+
+    /**
+     * Create a validator for an empty content model
+     *
+     * @param type the empty content type
+     * @param next the next receiver in the pipeline
+     * @throws MissingComponentException if the schema is incomplete or incorrect
+     */
+
+    public EmptyContentValidator(UserComplexType type, Receiver next) throws MissingComponentException {
+        super(next);
+        schemaType = type;
+        setAttributeGroup(type.getCombinedAttributeGroup());
+        allowTextNodes = type.isMixedContent();
+        setAnnotation(type);
+    }
+
+    /**
+     * Get the schema type against which we are validating, if any
+     *
+     * @return the schema type that this validator is validating against, or null
+     */
+
+    public SchemaType getSchemaType() {
+        return schemaType;
+    }
+
+    public ContentValidator getChildValidator() {
+        // error paths only
+        return new AnyTypeValidator(getNextReceiver());
+    }
+
+    /**
+     * Output element start tag (for a child of the element being validated)
+     */
+
+    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties)
+            throws XPathException {
+        this.locationId = location.saveLocation();
+        String message = "Invalid child element " +
+                Err.wrap(nameCode.getDisplayName(), Err.ELEMENT) +
+                ", " + getContainingElementName() + " has an empty content model";
+        ValidationFailure ve = new ValidationFailure(message);
+        ve.setConstraintReference(1, "cvc-complex-type", "2.1");
+        ve.setSchemaType(getSchemaType());
+        reportValidationError(ve, true, location);
+        buffer = null;
+        super.startElement(nameCode, AnyType.getInstance(), location, properties);
+    }
+
+    /**
+     * Character data
+     */
+
+    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+        checkNoCharactersWhenNil(locationId);
+        if (allowTextNodes) {
+            ElementDecl decl = getElementDeclaration();
+            if (decl != null && (decl.getFixedValue() != null || decl.getDefaultValueLexicalForm() != null)) {
+                if (buffer == null) {
+                    buffer = new FastStringBuffer(chars.length());
+                }
+                buffer.append(chars);
+            }
+        } else {
+            String message = "Character data is not allowed: " + getContainingElementName() +
+                    " has an empty content model";
+            ValidationFailure ve = new ValidationFailure(message);
+            ve.setConstraintReference(1, "cvc-complex-type", "2.1");
+            ve.setSchemaType(getSchemaType());
+            reportValidationError(ve, true, locationId);
+        }
+        nextReceiver.characters(chars, locationId, properties);
+    }
+
+    /**
+     * End of element
+     */
+
+    public void endElement() throws XPathException {
+        if (isNil()) {
+            ElementDecl decl = getElementDeclaration();
+            if (decl != null && decl.getFixedValue() != null) {
+                String message = "An element with xsi:nil='true' must not have a fixed value";
+                ValidationFailure ve = new ValidationFailure(message);
+                ve.setConstraintReference(1, "cvc-elt", "3.2.2");
+                ve.setSchemaType(getSchemaType());
+                reportValidationError(ve, true, locationId);
+            }
+        }
+        if (allowTextNodes) {
+            ElementDecl decl = getElementDeclaration();
+            if (decl != null) {
+                String defaultValue = decl.getDefaultValueLexicalForm();
+                CharSequence fixedValue = decl.getFixedValueLexicalForm();
+                if (defaultValue != null && (buffer == null || buffer.isEmpty())) {
+                    characters(defaultValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                } else if (fixedValue != null) {
+                    FastStringBuffer fsb = buffer;
+                    if (fsb == null || fsb.isEmpty()) {
+                        // if no value was supplied, "fixed" is treated as "default"
+                        characters(fixedValue, ExplicitLocation.UNKNOWN_LOCATION, 0);
+                    } else if (!fsb.toString().equals(fixedValue)) {
+                        String message = "The content " + Err.wrap(buffer, Err.VALUE) + " of " +
+                                getContainingElementName() +
+                                " does not match the fixed value " +
+                                Err.wrap(fixedValue, Err.VALUE);
+                        ValidationFailure ve = new ValidationFailure(message);
+                        ve.setConstraintReference(1, "cvc-elt", "5.2.2.2");
+                        ve.setSchemaType(getSchemaType());
+                        reportValidationError(ve, true, getContainingElementLocationId());
+                    }
+                }
+            }
+        }
+        super.endElement();
+    }
+
+}
+
+// Copyright � 2004-2012 Saxonica Limited. No warranty.

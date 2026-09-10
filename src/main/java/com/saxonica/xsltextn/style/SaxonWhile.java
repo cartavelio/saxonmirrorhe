@@ -1,0 +1,68 @@
+package com.saxonica.xsltextn.style;
+
+import com.saxonica.xsltextn.instruct.While;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.style.Compilation;
+import net.sf.saxon.style.ComponentDeclaration;
+import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.XSLIf;
+import net.sf.saxon.trans.XPathException;
+
+
+/**
+ * Handler for saxon:while elements in stylesheet.
+ * The saxon:while element has a mandatory attribute test, a boolean expression.
+ * The content is output repeatedly so long as the test condition is true.
+ */
+
+public class SaxonWhile extends StyleElement {
+
+    private Expression test;
+
+    /**
+     * Determine whether this node is an instruction.
+     *
+     * @return true - it is an instruction
+     */
+
+    public boolean isInstruction() {
+        return true;
+    }
+
+    /**
+     * Determine whether this type of element is allowed to contain a template-body
+     *
+     * @return true: yes, it may contain a template-body
+     */
+
+    public boolean mayContainSequenceConstructor() {
+        return true;
+    }
+
+    public void prepareAttributes() throws XPathException {
+        test = XSLIf.prepareTestAttribute(this);
+        if (test == null) {
+            reportAbsence("test");
+        }
+    }
+
+    public void validate(ComponentDeclaration decl) throws XPathException {
+        getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION,
+                                                "saxon:while",
+                                                getPackageData().getLocalLicenseId());
+        test = typeCheck("test", test);
+    }
+
+    public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
+        Expression action = compileSequenceConstructor(exec, decl, true);
+        if (action == null) {
+            action = Literal.makeEmptySequence();
+        }
+        return new While(test, action);
+    }
+
+}
+
+// Copyright (c) 2009 Saxonica Limited.

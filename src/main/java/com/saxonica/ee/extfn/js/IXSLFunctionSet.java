@@ -1,0 +1,279 @@
+
+package com.saxonica.ee.extfn.js;
+
+//import jdk.nashorn.api.scripting.JSObject;
+
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.PackageData;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.functions.DocumentFn;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.*;
+
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * The IXSLFunctionSet represents additions to the set of Saxon vendor-supplied
+ * extension functions that are available on Saxon-JS.
+ */
+
+public class IXSLFunctionSet extends BuiltInFunctionSet {
+
+    private static IXSLFunctionSet THE_INSTANCE = new IXSLFunctionSet();
+
+    public static IXSLFunctionSet getInstance() {
+        return THE_INSTANCE;
+    }
+
+    private IXSLFunctionSet() {
+        init();
+    }
+
+    private void init() {
+
+        register("page", 0, Stub.class, NodeKindTest.DOCUMENT, OPT, 0, SIDE|LATE);
+
+        register("source", 0, Source.class, AnyItemType.getInstance(), OPT, 0, LATE);
+
+        register("window", 0, Stub.class, AnyItemType.getInstance(), OPT, 0, LATE);
+
+        register("query-params", 0, Stub.class, MapType.ANY_MAP_TYPE, ONE, 0, SIDE|LATE);
+
+        register("event", 0, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE);
+
+        register("location", 0, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE);
+
+        register("style", 1, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), OPT, null);
+
+        register("get", 2, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+
+        register("call", 3, Call.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, ArrayItemType.getInstance(), ONE, null);
+
+        register("eval", 1, Eval.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null);
+
+        register("apply", 2, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), ONE, null)
+                .arg(1, ArrayItemType.getInstance(), ONE, null);
+
+        register("schedule-action", 3, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+                .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                .arg(2, AnyItemType.getInstance(), STAR, null);
+
+        register("schedule-action", 4, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|LATE)
+                .arg(0, BuiltInAtomicType.INTEGER, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                .arg(2, AnyItemType.getInstance(), STAR, null)
+                .arg(3, MapType.ANY_MAP_TYPE, OPT, null);
+
+        register("set-attribute", 2, Stub.class, AnyItemType.getInstance(), STAR, 0, SIDE|FOCUS|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+
+        register("remove-attribute", 2, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|FOCUS|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null);
+
+        register("set-property", 3, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|FOCUS|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, AnyItemType.getInstance(), OPT, null)
+                .arg(2, AnyItemType.getInstance(), ONE, null);
+
+        register("set-style", 3, Stub.class, AnyItemType.getInstance(), OPT, 0, SIDE|FOCUS|LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                .arg(2, AnyItemType.getInstance(), ONE, null);
+
+    }
+
+    @Override
+    public String getNamespace() {
+        return NamespaceConstant.IXSL;
+    }
+
+    @Override
+    public String getConventionalPrefix() {
+        return "ixsl";
+    }
+
+    public static ScriptEngine engine = null;
+
+    public static ScriptEngine obtainEngine() throws XPathException {
+        if (engine == null) {
+            ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+            if (engine == null) {
+                throw new XPathException("Javascript extensions not available (needs Java 8)");
+            }
+        }
+        return engine;
+    }
+
+
+    /**
+     * Most of the functions in this library will only run in Saxon-JS, some of them only in the browser
+     */
+    public static class Stub extends SystemFunction {
+        @Override
+        public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+            throw new XPathException("ixsl:" + getDetails().name.getLocalPart() + " is available only in Saxon-JS");
+        }
+    }
+
+    public static class Source extends SystemFunction {
+        @Override
+        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            Item<?> source = context.getController().getGlobalContextItem();
+            return new ZeroOrOne<Item<?>>(source);
+        }
+    }
+
+    public static class ScheduleActionFn extends SystemFunction {
+
+        Location location;
+
+        @Override
+        public Expression makeFunctionCall(Expression... arguments) {
+            // The "action" argument must not be pre-evaluated. Wrap it in an ObjectValue
+            Expression[] copiedArgs = Arrays.copyOf(arguments, arguments.length);
+            copiedArgs[2] = Literal.makeLiteral(new ObjectValue<>(arguments[2]));
+            ExpressionTool.copyLocationInfo(arguments[2], copiedArgs[2]);
+            location = arguments[0].getLocation();
+            return super.makeFunctionCall(copiedArgs);
+        }
+
+        @Override
+        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            IntegerValue wait = (IntegerValue)arguments[0].head();
+            StringValue documents = (StringValue)arguments[1].head();
+            ObjectValue wrappedActionObject = (ObjectValue) arguments[2].head();
+            Expression action = (Expression)wrappedActionObject.getObject();
+            if (documents != null) {
+                SequenceIterator<StringValue> tokenIter = new Whitespace.Tokenizer(documents.getStringValueCS());
+                String baseURI = getRetainedStaticContext().getStaticBaseUriString();
+                PackageData pd = getRetainedStaticContext().getPackageData();
+                ParseOptions options = context.getConfiguration().getParseOptions();
+                SequenceIterator<NodeInfo> mapped = context.getConfiguration().getMultithreadedItemMappingIterator(
+                        tokenIter,
+                        token -> DocumentFn.makeDoc(
+                                token.getStringValue(), baseURI, pd,
+                                options, context, location, false));
+                mapped.materialize();  // discard the result; the aim was to put the documents in the document pool
+                return new LazySequence(action.iterate(context));
+            } else {
+                return EmptySequence.getInstance();
+            }
+
+        }
+    }
+
+    public static class Call extends SystemFunction {
+
+        @Override
+        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ScriptEngine engine = obtainEngine();
+            Object target = convertToJavaScript((Sequence<?>)arguments[0]);
+            String method = convertToJavaScript((Sequence<?>)arguments[1]).toString();
+            Object[] args = new Object[arguments.length - 2];
+            for (int i=2; i<arguments.length; i++) {
+                args[i-2] = convertToJavaScript((Sequence<?>)arguments[i]);
+            }
+            try {
+                Object result = ((Invocable)engine).invokeMethod(target, method, args);
+                return convertFromJavaScript(result);
+            } catch (ScriptException e) {
+                throw new XPathException("Failure in ixsl:call(): ", e);
+            } catch (NoSuchMethodException e) {
+                throw new XPathException("Failure in ixsl:call(): method " + method + " is not defined", e);
+            }
+        }
+
+    }
+
+    public static class Eval extends SystemFunction {
+
+        @Override
+        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ScriptEngine engine = obtainEngine();
+            try {
+                engine.eval(arguments[0].head().getStringValue());
+            } catch (ScriptException e) {
+                throw new XPathException("Failure in ixsl:eval(): ", e);
+            }
+            return EmptySequence.getInstance();
+        }
+
+    }
+
+    private static Sequence<?> convertFromJavaScript(Object result) throws XPathException {
+        //try {
+            if (result instanceof String) {
+                return new StringValue((String)result);
+            } else if (result instanceof Double) {
+                return new DoubleValue((Double)result);
+            } else if (result instanceof Boolean) {
+                return BooleanValue.get((Boolean) result);
+            } else if (result instanceof Collection) {
+                List<Item<?>> items = new ArrayList<>();
+                for (Object val : (Collection)result) {
+                    SequenceIterator<?> converted = convertFromJavaScript(val).iterate();
+                    converted.forEachOrFail(items::add);
+                }
+                return new SequenceExtent<>(items);
+            } else {
+                return EmptySequence.getInstance();
+            }
+        //} catch ()
+    }
+
+
+    private static Object convertToJavaScript(Sequence<?> supplied) throws XPathException {
+        if (supplied instanceof NumericValue) {
+            return ((NumericValue)supplied).getDoubleValue();
+        } else if (supplied instanceof BooleanValue) {
+            return ((BooleanValue)supplied).getBooleanValue();
+        } else if (supplied instanceof AtomicValue) {
+            return ((AtomicValue)supplied).getStringValue();
+        } else {
+            List<Object> list = new ArrayList<>();
+            SequenceIterator<?> iter = supplied.iterate();
+            iter.forEachOrFail(next -> list.add(convertToJavaScript(next)));
+            if (list.isEmpty()) {
+                return null;
+            } else if (list.size() > 1) {
+                return list;
+            } else {
+                return list.get(0);
+            }
+        }
+    }
+
+}
+
+// Copyright (c) 2018 Saxonica Limited.

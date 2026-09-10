@@ -1,0 +1,120 @@
+package com.saxonica.ee.update;
+
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.MutableNodeInfo;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SimpleType;
+
+import java.util.Set;
+
+/**
+ * A pending update action representing the insert attribute action.
+ */
+public class InsertAttributeAction extends PendingUpdateAction {
+
+    private NodeInfo element;
+    NodeName name;
+    SimpleType typeCode;
+    CharSequence value;
+    int properties;
+
+    /**
+     * Create a InsertAttributeAction
+     *
+     * @param element    the element into which it is to be inserted
+     * @param name       the name of the new attribute
+     * @param typeCode   the type annotation of the new attribute
+     * @param value      the string value of the new attribute
+     * @param properties properties including IS_ID and IS_IDREF properties
+     */
+
+    public InsertAttributeAction(NodeInfo element, NodeName name, SimpleType typeCode, CharSequence value, int properties) {
+        this.element = element;
+        this.name = fixNodeName(name);
+        this.typeCode = typeCode;
+        this.value = value;
+        this.properties = properties;
+    }
+
+    /**
+     * Apply the pending update action to the affected nodes
+     *
+     * @param context         the XPath evaluation context
+     * @param affectedRootSet the set of roots of trees that have been modified, which
+     *                        this action should add to as necessary
+     * @throws net.sf.saxon.trans.XPathException
+     *          if any error occurs applying the update
+     */
+
+    public void apply(XPathContext context, Set affectedRootSet) throws XPathException {
+        if (!(element instanceof MutableNodeInfo)) {
+            throw new XPathException("Attempting to update a non-updateable element");
+        }
+        if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
+            throw new XPathException("Attempt to insert an attribute " +
+                    name.getDisplayName() +
+                    " that is already present on the target element", "XUDY0021");
+        }
+        affectedRootSet.add(element.getRoot());
+        ((MutableNodeInfo) element).addAttribute(name, typeCode, value, properties);
+        ((MutableNodeInfo) element).removeTypeAnnotation();
+    }
+
+    /**
+     * Get the target node of the update action
+     *
+     * @return the target node, the node to which this update action applies. Returns null in the
+     *         case of a delete action, which affects multiple nodes.
+     */
+
+    public NodeInfo getTargetNode() {
+        return element;
+    }
+
+    /**
+     * Get the name of the attribute to be inserted
+     *
+     * @return the attribute name
+     */
+
+    public NodeName getAttributeName() {
+        return name;
+    }
+
+    /**
+     * Get the type code of the inserted attribute
+     *
+     * @return the type annotation as an integer namecode of a type
+     */
+
+    public SimpleType getNewTypeCode() {
+        return typeCode;
+    }
+
+    /**
+     * Get the string value of the inserted attribute
+     *
+     * @return the string value of the new attribute
+     */
+
+    public CharSequence getNewStringValue() {
+        return value;
+    }
+
+
+    /**
+     * Get the phase of operation in which this pending update action is applied. See 3.2.2 upd:applyUpdates,
+     * Semantics, rule 2.
+     *
+     * @return the phase of operation, an integer in the range 1 to 5 representing the stages labelled a-e
+     *         in the specification
+     */
+
+    public int getApplyPhase() {
+        return 2;
+    }
+}
+
+// Copyright (c) 2008 Saxonica Limited.

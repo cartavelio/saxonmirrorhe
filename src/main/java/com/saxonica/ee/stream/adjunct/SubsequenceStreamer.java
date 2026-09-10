@@ -1,0 +1,68 @@
+package com.saxonica.ee.stream.adjunct;
+
+import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.FilteringFeed;
+import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.Subsequence_3;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.NumericValue;
+
+
+/**
+ * Generate streaming code for a subsequence() function call. Also used for expressions such as tail() that compile
+ * into a subsequence() call
+ */
+public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
+
+
+    public FeedMaker getFeedMaker(int arg) throws XPathException {
+        return arg == 0 ? this : getDefaultFeedMaker(arg);
+    }
+
+    @Override
+    public FilteringFeed.Filter makeFilter(XPathContext context, Feed out) throws XPathException {
+        SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
+        Subsequence_3 fn = (Subsequence_3) fnc.getTargetFunction();
+        int first, last;
+        NumericValue startD = (NumericValue) fnc.getArg(1).evaluateItem(context);
+        first = (int)startD.round(0).longValue();
+        if (fn.getArity() == 3) {
+            NumericValue lenD = (NumericValue) fnc.getArg(2).evaluateItem(context);
+            int len = (int)lenD.round(0).longValue();
+            last = first + len - 1;
+        } else {
+            last = Integer.MAX_VALUE;
+        }
+
+        return new SubsequenceFilter(first, last);
+    }
+
+
+    public static class SubsequenceFilter implements FilteringFeed.Filter {
+
+        private int first;
+        private int last;
+
+        public SubsequenceFilter(int first, int last) {
+            this.first = first;
+            this.last = last;
+        }
+
+        public int matches(Item item, int position) throws XPathException {
+            if (position < first) {
+                return SKIP;
+            } else if (position <= last) {
+                return MATCHES;
+            } else {
+                return DONE;
+            }
+        }
+
+    }
+
+}
+
+// Copyright (c) 2013 Saxonica Limited.

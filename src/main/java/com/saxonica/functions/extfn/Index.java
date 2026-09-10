@@ -1,0 +1,75 @@
+package com.saxonica.functions.extfn;
+
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.om.*;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AtomizingIterator;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.ExternalObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * This class supports the extension function saxon:index, which returns an indexed sequence
+ */
+
+public class Index extends SystemFunction {
+
+
+        /**
+         * Evaluate this function call at run-time
+         *
+         * @param context   The XPath dynamic evaluation context
+         * @param arguments The values of the arguments to the function call.
+         * @return the results of the function.
+         * @throws net.sf.saxon.trans.XPathException
+         *          if a dynamic error occurs during evaluation of the function. The Saxon run-time
+         *          code will add information about the error location.
+         */
+
+        public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+            Item arg1 = arguments[1].head();
+            if (arg1 instanceof ExternalObject && ((ExternalObject) arg1).getObject() instanceof Evaluate.PreparedExpression) {
+                throw new XPathException("The function saxon:index() has changed to expect a function as its second argument");
+            } else if (arg1 instanceof Function) {
+                Function function = (Function) arg1;
+                HashTrieMap imap = new HashTrieMap();
+                Sequence<?>[] functionArgs = SequenceTool.makeSequenceArray(1);
+                SequenceIterator<?> iter = arguments[0].iterate();
+                Item<?> next;
+                while ((next = iter.next()) != null) {
+                    functionArgs[0] = next;
+                    Sequence<?> keys = dynamicCall(function, context, functionArgs);
+                    SequenceIterator<AtomicValue> keyIterator = new AtomizingIterator(keys.iterate());
+                    AtomicValue key;
+                    while ((key = keyIterator.next()) != null) {
+                        Sequence<?> existingVal = imap.get(key);
+                        if (existingVal == null) {
+                            imap.initialPut(key, next);
+                        } else if (existingVal instanceof Chain) {
+                            ((Chain) existingVal).append(next);
+                        } else {
+                            List<GroundedValue<?>> list = new ArrayList<>();
+                            list.add(existingVal.materialize());
+                            list.add(next.materialize());
+                            imap.initialPut(key, new Chain(list));
+                        }
+                    }
+                }
+                return imap;
+            } else {
+                XPathException err = new XPathException("Second argument of saxon:index must be a function item");
+                err.setXPathContext(context);
+                throw err;
+            }
+        }
+
+
+
+
+}
+
+// Copyright (c) 2005-2016 Saxonica Limited.

@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>Package overview: com.saxonica.ee.stream.feed</title>
+
+</head>
+<body>
+<p>This package contains classes used to support streaming. For many kinds of expression
+    that support streaming, there is a <code>Feed</code>class in this
+    package that evaluates the expression in composed push mode, one item at a time.</p>
+
+<p>None of these classes will be used directly by typical user applications.</p>
+
+<p>These classes generally implement the interface {@link com.saxonica.stream.feed.ItemFeed},
+    whose main methods are <code>open()</code>, <code>append(item)</code>, and <code>close()</code>.
+    These methods are called to supply the sequence of items representing the streamed operand of the
+    expression. The feed class can either deliver the result incrementally during calls of the
+    <code>append(item)</code> method, or it can deliver the entire result during the <code>close()</code>
+    method. (It is the responsibility of the class, however, to minimize the amount of data that it buffers).
+</p>
+
+<p>The <code>Feed</code> class for evaluating an expression is created by calling the <code>FeedMaker</code>,
+    which in turn is returned by the streaming adjunct class for the particular kind of expression.</p>
+
+
+
+</body>
+</html>
+
+

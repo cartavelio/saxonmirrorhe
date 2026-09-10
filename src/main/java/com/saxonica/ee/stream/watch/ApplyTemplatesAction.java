@@ -1,0 +1,353 @@
+package com.saxonica.ee.stream.watch;
+
+import com.saxonica.ee.stream.ComponentInversion;
+import com.saxonica.ee.stream.Streamability;
+import com.saxonica.ee.stream.StreamingSequenceWriter;
+import com.saxonica.ee.stream.Sweep;
+import com.saxonica.ee.stream.feed.*;
+import com.saxonica.ee.stream.om.FleetingNode;
+import com.saxonica.ee.stream.om.FleetingParentNode;
+import com.saxonica.ee.trans.TemplateRuleEE;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.event.SequenceWriter;
+import net.sf.saxon.expr.Component;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.expr.parser.ExplicitLocation;
+import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.lib.TraceListener;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.pattern.AncestorQualifiedPattern;
+import net.sf.saxon.pattern.AnchorPattern;
+import net.sf.saxon.pattern.AnyChildNodeTest;
+import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.trans.Mode;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.rules.BuiltInRuleSet;
+import net.sf.saxon.trans.rules.Rule;
+import net.sf.saxon.trans.rules.RuleSetWithWarnings;
+import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.Type;
+
+/**
+ * This watch implements xsl:apply-templates in streaming mode. It watches for the nodes selected by the
+ * xsl:apply-templates instruction; when such a node is encountered, it locates the relevant (inverted)
+ * template, and activates it.
+ */
+
+
+public class ApplyTemplatesAction extends ItemFeed {
+
+    private Component.M mode;
+
+    // localContext contains the iterator over the nodes selected by the apply-templates instruction,
+    // and is the context in which the matched template rules are evaluated
+    private XPathContextMajor localContext;
+    private WatchManager watchManager;
+
+    private ParameterSet actualParams = null;
+    private ParameterSet tunnelParams = null;
+
+    boolean tracing;
+
+
+    public ApplyTemplatesAction(Expression expression, Feed result, XPathContext context) {
+        super(expression, result, context);
+        tracing = context.getController().isTracing();
+    }
+
+    public void open(Terminator terminator) throws XPathException {
+        super.open(terminator);
+        // TODO: make tracing work
+//        if (tracing && getExpression() != null) {
+//            getContext().getController().getTraceListener().enter(getExpression(), getContext());
+//        }
+        ITemplateCall exp = (ITemplateCall) getExpression();
+        if (exp != null) {
+            // Not a built-in template
+            computeActualParams(exp.getActualParams());
+            computeTunnelParams(exp.getTunnelParams());
+        }
+        localContext = getContext().newContext();
+        ManualIterator<?> iter = new ManualIterator<>();
+        localContext.setCurrentIterator(iter);
+        localContext.setCurrentComponent(mode);
+        localContext.setLocalParameters(actualParams);
+        localContext.setTunnelParameters(tunnelParams);
+        localContext.setCurrentMode(mode);
+        localContext.setCurrentComponent(mode);
+        localContext.setCurrentGroupIterator(null);
+        localContext.setCurrentMergeGroupIterator(null);
+    }
+
+    public void computeActualParams(WithParam[] params) throws XPathException {
+        this.actualParams = Instruction.assembleParams(getContext(), params);
+    }
+
+    public void computeTunnelParams(WithParam[] params) throws XPathException {
+        this.tunnelParams = Instruction.assembleTunnelParams(getContext(), params);
+    }
+
+    public void setActualParams(ParameterSet params) throws XPathException {
+        this.actualParams = params;
+    }
+
+    public void setTunnelParams(ParameterSet params) throws XPathException {
+        this.tunnelParams = params;
+    }
+
+    protected XPathContext getLocalContext() {
+        return localContext;
+    }
+
+    public void setMode(Component.M mode) {
+        this.mode = mode;
+    }
+
+    public Component getMode() {
+        return mode;
+    }
+
+    public void setWatchManager(WatchManager watchManager) {
+        this.watchManager = watchManager;
+    }
+
+    /**
+     * Signal that an element or document node has been found that matches the selection that this
+     * Watch is looking for. This method is called by the WatchManager while
+     * processing the startElement or startDocument event that matches the selection.
+     *
+     *
+     * @param node       the element or document node whose start event has been matched
+     * @param locationId the location associated with the element or document node (may be
+     *                   the location of the instruction that created it)
+     * @return a Receiver to be notified of all events starting with the startElement/startDocument event
+     *         for the matched element, and ending with the endElement event for that element; or null if this
+     *         feature is not required.
+     * @throws XPathException May be raised if a dynamic error occurs
+     */
+
+    public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
+        if (tracing) {
+            TraceListener listener = getContext().getController().getTraceListener();
+            listener.startCurrentItem(node);
+        }
+        ManualIterator iter = (ManualIterator) localContext.getCurrentIterator();
+        iter.setContextItem(node);
+        iter.incrementPosition();
+
+        ComponentInversion inversion = null;
+        Rule rule = getRule(node);
+        if (rule == null) {
+            BuiltInRuleSet builtInRuleSet = ((Mode)mode.getActor()).getBuiltInRuleSet();
+            if (builtInRuleSet instanceof RuleSetWithWarnings) {
+                ((RuleSetWithWarnings)builtInRuleSet).outputWarning(node, localContext);
+            }
+            int[] action = builtInRuleSet.getActionForParentNodes(node.getNodeKind());
+            switch (action[0]) {
+                case BuiltInRuleSet.DEEP_COPY: {
+                    //currentActivation.isSkipped = true;
+                    Feed out = new NoOpenOrCloseFeed(getResult(), getContext());
+                    Watch copyWatch = CopyOfFeed.getWatch(out, AnchorPattern.getInstance(), watchManager, getContext());
+                    watchManager.addWatch(copyWatch, true);
+                    return null;
+                }
+                case BuiltInRuleSet.FAIL: {
+                    XPathException err = new XPathException("No user-defined template rule matches the node " +
+                        Navigator.getPath(node), "XTDE0555");
+                    err.setLocator(locationId);
+                    throw err;
+                }
+                case BuiltInRuleSet.DEEP_SKIP: {
+                    //currentActivation.isSkipped = true;
+                    return null;
+                }
+                case BuiltInRuleSet.SHALLOW_COPY: {
+                    //currentActivation.shallowCopiedNode = node;
+                    XPathContext context = localContext;
+                    //currentActivation.isSkipped = false;
+                    //activation.template = inversion;
+                    //currentActivation.context = context;
+                    //currentActivation.isDocumentNode = (node instanceof FleetingDocumentNode);
+                    Receiver receiver = getResult().getReceiver();
+                    ShallowCopyEventFeed copyFeed = new ShallowCopyEventFeed(mode.getActor(), new DecomposingFeed(receiver), context);
+                    ApplyTemplatesAction actor = new ApplyTemplatesAction(null, copyFeed, context);
+                    actor.setMode(mode);
+                    actor.setWatchManager(watchManager);
+                    actor.setActualParams(actualParams);
+                    actor.setTunnelParams(tunnelParams);
+                    watchManager.addWatch(new Trigger(CHILD_NODE_SELECTION, actor, context), true);
+                    return null;
+                }
+                default: {
+                    boolean applyTemplatesToAttributes = false;
+                    boolean applyTemplatesToChildren = false;
+                    for (int i : action) {
+                        if (i == BuiltInRuleSet.APPLY_TEMPLATES_TO_ATTRIBUTES) {
+                            applyTemplatesToAttributes = true;
+                        } else if (i == BuiltInRuleSet.APPLY_TEMPLATES_TO_CHILDREN) {
+                            applyTemplatesToChildren = true;
+                        }
+                    }
+                    if (applyTemplatesToAttributes && node.getNodeKind() == Type.ELEMENT) {
+                        AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);  // See bug 2874
+                        XPathContextMajor c2 = localContext.newContext();
+                        c2.trackFocus(atts);
+                        SequenceWriter sw = new StreamingSequenceWriter(getPipelineConfiguration(), getResult());
+                        c2.setReceiver(sw);
+                        mode.getActor().applyTemplates(actualParams, tunnelParams, c2, locationId);
+                    }
+                    if (applyTemplatesToChildren) {
+                        Feed out = new NoOpenOrCloseFeed(getResult(), localContext);
+                        ApplyTemplatesAction actor = new ApplyTemplatesAction(null, out, getContext());
+                        actor.setMode(mode);
+                        actor.setWatchManager(watchManager);
+                        actor.setActualParams(actualParams);
+                        actor.setTunnelParams(tunnelParams);
+                        Watch watch = new Trigger(CHILD_NODE_SELECTION, actor, localContext);
+                        watchManager.addWatch(watch, true);
+                    }
+                }
+            }
+
+        } else {
+            TemplateRuleEE template = (TemplateRuleEE)rule.getAction();
+            template.initialize();
+            Expression body = template.getBody();
+            if (Streamability.getSweep(body) != Sweep.CONSUMING) {
+                // a non-consuming template body
+                localContext.openStackFrame(template.getStackFrameMap());
+                localContext.setLocalParameters(actualParams);
+                localContext.setTunnelParameters(tunnelParams);
+                localContext.setCurrentTemplateRule(rule);
+                localContext.setCurrentMode(mode);
+                localContext.setCurrentComponent(mode);
+                localContext.setCurrentMergeGroupIterator(null);
+                localContext.setReceiver(new StreamingSequenceWriter(getPipelineConfiguration(), getResult()));
+                body.process(localContext);
+            } else {
+                inversion = template.getInversion();
+                localContext.openStackFrame(inversion.getStackFrame());
+                localContext.setLocalParameters(actualParams);
+                localContext.setTunnelParameters(tunnelParams);
+                localContext.setCurrentTemplateRule(rule);
+                localContext.setCurrentMode(mode);
+                localContext.setCurrentComponent(mode);
+                localContext.setCurrentMergeGroupIterator(null);
+            }
+        }
+
+        if (inversion != null) {
+            //Watch watch = inversion.getWatch(watchManager, new DecomposingFeed(context.getReceiver()), activation.context);
+            Watch watch = inversion.getWatch(watchManager, new NoOpenOrCloseFeed(getResult(), getContext()), localContext);
+            watch.setAnchorNode(node);
+            watchManager.addWatch(watch, true);
+        }
+        return null;
+    }
+
+    /**
+     * Get the template rule matching a specific node
+     *
+     * @param node the node (in a streamed input document) to be matched
+     * @return the best-fit template rule used to process this node
+     * @throws XPathException if a dynamic error occurs
+     */
+
+    protected Rule getRule(FleetingNode node) throws XPathException {
+        return mode.getActor().getRule(node, localContext);
+    }
+
+    /**
+     * Signal that a item (other than a streamed element) that matches the selection
+     * has been found.
+     *
+     * @param item       the item that was matched.
+     *
+     */
+
+    public void processItem(Item<?> item) throws XPathException {
+        if (!hasFailed()) {
+            if (tracing) {
+                TraceListener listener = getContext().getController().getTraceListener();
+                listener.startCurrentItem(item);
+            }
+
+            ManualIterator iter = (ManualIterator) localContext.getCurrentIterator();
+            iter.setContextItem(item);
+            iter.incrementPosition();
+
+            Rule rule = mode.getActor().getRule(item, localContext);
+            localContext.setCurrentTemplateRule(rule);
+            localContext.setCurrentComponent(mode);
+            localContext.setCurrentMode(mode);
+
+
+            if (rule == null) {
+                BuiltInRuleSet rules = mode.getActor().getBuiltInRuleSet();
+                XPathContext c2 = localContext.newMinorContext();
+                c2.setReceiver(new StreamingSequenceWriter(getPipelineConfiguration(), getResult()));
+                try {
+                    rules.process(item, actualParams, tunnelParams, c2, ExplicitLocation.UNKNOWN_LOCATION);
+                } catch (XPathException e) {
+                    dynamicError(e);
+                    return;
+                }
+
+            } else {
+                TemplateRule template = (TemplateRule) rule.getAction();
+                template.initialize();
+                localContext.openStackFrame(template.getStackFrameMap());
+                localContext.setReceiver(new StreamingSequenceWriter(getPipelineConfiguration(), getResult()));
+                try {
+                    template.apply(localContext);
+                } catch (XPathException e) {
+                    dynamicError(e);
+                    return;
+                }
+            }
+            if (tracing) {
+                TraceListener listener = getContext().getController().getTraceListener();
+                listener.endCurrentItem(item);
+            }
+        }
+    }
+
+    /**
+     * Signal that the endElement event has occurred for the element whose startElement
+     * event caused the Watch to be activated.
+     *
+     * @throws net.sf.saxon.type.ValidationException
+     *          May be raised if the constraint implemented by this
+     *          Watch is violated @param locationId the location of the node in the source, or of the instruction that created it
+     * @param locationId the location of the node in the source, or of the instruction that created it
+     */
+
+    public void endSelectedParentNode(Location locationId) throws XPathException {
+        if (tracing) {
+            TraceListener listener = getContext().getController().getTraceListener();
+            listener.endCurrentItem(getContext().getContextItem());
+        }
+
+    }
+
+    public void close() throws XPathException {
+        // TODO: make tracing work
+//        if (tracing && getExpression() != null) {
+//            getContext().getController().getTraceListener().leave(getExpression());
+//        }
+        super.close();
+    }
+
+    private static AncestorQualifiedPattern CHILD_NODE_SELECTION =
+            new AncestorQualifiedPattern(
+                new NodeTestPattern(AnyChildNodeTest.getInstance()), AnchorPattern.getInstance(), AxisInfo.PARENT);
+
+}
+
+// Copyright (c) 2009 Saxonica Limited.

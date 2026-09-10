@@ -1,0 +1,101 @@
+package com.saxonica.serialize;
+
+import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.NamespaceBindingSet;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.serialize.Emitter;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.SimpleType;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+/**
+ * This is an abstract superclass for the two binary output methods saxon:base64Binary and saxon:hexBinary.
+ */
+public abstract class BinaryEmitter extends Emitter {
+
+    /**
+     * Determine whether the Emitter wants a Writer for character output or
+     * an OutputStream for binary output. The standard Emitters all use a Writer, so
+     * this returns true; but a subclass can override this if it wants to use an OutputStream
+     *
+     * @return false: this Emitter uses an OutputStream
+     */
+
+    public boolean usesWriter() {
+        return false;
+    }
+
+    public void open() throws XPathException {
+
+    }
+
+    public void startDocument(int properties) throws XPathException {
+
+    }
+
+    public void endDocument() throws XPathException {
+
+    }
+
+    public void startElement(NodeName nameCode, SchemaType typeCode, Location location, int properties) throws XPathException {
+
+    }
+
+    public void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
+
+    }
+
+    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties) throws XPathException {
+
+    }
+
+    public void startContent() throws XPathException {
+
+    }
+
+    public void endElement() throws XPathException {
+
+    }
+
+    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+        if (outputStream == null) {
+            if (streamResult == null) {
+                throw new IllegalStateException("BinaryEmitter must have a StreamResult to write to");
+            }
+            OutputStream os = streamResult.getOutputStream();
+            if (os == null) {
+                os = makeOutputStream();
+            }
+            if (os != null) {
+                setOutputStream(os);
+            } else {
+                throw new IllegalStateException("BinaryEmitter's StreamResult must have an OutputStream to write to");
+            }
+        }
+        byte[] bytes = textNodeToBinary(chars);
+        try {
+            outputStream.write(bytes);
+        } catch (IOException err) {
+            throw new XPathException(err);
+        }
+    }
+
+    protected abstract byte[] textNodeToBinary(CharSequence chars) throws XPathException;
+
+    public void processingInstruction(String name, CharSequence data, Location locationId, int properties) throws XPathException {
+
+    }
+
+    public void comment(CharSequence content, Location locationId, int properties) throws XPathException {
+
+    }
+
+    public boolean usesTypeAnnotations() {
+        return false;
+    }
+}
+
+// Copyright (c) 2010 Saxonica Limited.

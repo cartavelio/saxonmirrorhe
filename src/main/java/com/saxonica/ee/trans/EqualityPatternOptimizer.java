@@ -1,0 +1,63 @@
+package com.saxonica.ee.trans;
+
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.pattern.BasePatternWithPredicate;
+import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.PatternWithPredicate;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * A PatternOptimizer is an agent responsible for optimizing a particular class
+ * of patterns. It has two parts: a meta-pattern which determines which kinds of
+ * pattern it recognizes, and an action part which extracts characteristics and
+ * preconditions whose evaluation can be shared by all the rules in a rule chain
+ */
+public class EqualityPatternOptimizer extends PatternOptimizer {
+
+    private static EqualityPatternOptimizer THE_INSTANCE = new EqualityPatternOptimizer();
+
+    public static EqualityPatternOptimizer getInstance() {
+        return THE_INSTANCE;
+    }
+
+    public boolean appliesTo(Pattern pattern) {
+        if (pattern instanceof PatternWithPredicate) {
+            Expression exp = ((PatternWithPredicate) pattern).getPredicate();
+            if (exp instanceof ComparisonExpression) {
+                if (exp instanceof GeneralComparison && ((ComparisonExpression) exp).getRhsExpression() instanceof StringLiteral
+                        && ((GeneralComparison) exp).getSingletonOperator() == Token.FEQ) {
+                    return true;
+                }
+                if (exp instanceof ValueComparison && ((ComparisonExpression) exp).getRhsExpression() instanceof StringLiteral
+                        && ((ValueComparison) exp).getSingletonOperator() == Token.FEQ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics) {
+        Expression exp = ((PatternWithPredicate) pattern).getPredicate();
+
+        Expression lhs = ((ComparisonExpression) exp).getLhsExpression();
+        StringCollator collator = ((ComparisonExpression) exp).getAtomicComparer().getCollator();
+        GeneralComparisonOperand chic = new GeneralComparisonOperand(collator, lhs);
+        chic = (GeneralComparisonOperand) allocateCharacteristic(characteristics, chic);
+        AtomicMatchKey key = collator.getCollationKey(((StringLiteral) ((ComparisonExpression) exp).getRhsExpression()).getStringValue());
+        Precondition.StringHashPrecondition p = new Precondition.StringHashPrecondition(chic, key, collator);
+        addPrecondition(rule, preconditions, p);
+
+        if (pattern instanceof BasePatternWithPredicate) {
+            Pattern base = ((BasePatternWithPredicate) pattern).getBasePattern();
+            GeneralPatternOptimizer.getInstance().process(rule, base, preconditions, characteristics);
+        }
+    }
+}
+
+// Copyright (c) 2018 Saxonica Limited

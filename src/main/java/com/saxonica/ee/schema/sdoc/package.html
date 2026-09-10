@@ -1,0 +1,46 @@
+<html>
+
+<head>
+    <title>Package overview: com.saxonica.ee.schema.sdoc</title>
+
+</head>
+
+<body>
+<p>This package contains code used to import a schema.</p>
+
+<p>Its task is to read a schema provided as a source XML document, to validate that it
+    conforms to all the XML representation rules defined in the W3C XML Schema specification,
+    and to construct a representation of the schema using the classes in package
+    {@link com.saxonica.schema}. The classes in the importer package are transient,
+    they are used only during the course of constructing the schema object model.</p>
+
+<p>The process is analogous to the way stylesheets are built. Each schema document results
+    in a Saxon tree. Each kind of element in the
+    source schema is assigned to a specific class (a subclass of SchemaElement), which constructs
+    the representation of the corresponding object in the schema object model.</p>
+
+<p>Processing is in a number of phases:</p>
+
+<ol>
+    <li>The tree is constructed (which performs XML validation and namespace validation)</li>
+    <li>Attributes are processed and validated. At this stage the parent of a node is available
+        but its siblings and children should not be accessed.
+    </li>
+    <li>Structural validation is performed by the validate() method. This is essentially responsible
+        for checking that the schema document is structurally valid according to the schema for schemas.
+    </li>
+    <li>Semantic validation is carried out by the checkRepresentation() method. This is responsible
+        for checking the rules in the XML Representation constraints.
+    </li>
+    <li>Schema components are constructed by the buildComponents() method.</li>
+</ol>
+
+
+<p>There should be no need for user applications to use any of the classes in this
+    package.</p>
+
+
+</body>
+</html>
+
+

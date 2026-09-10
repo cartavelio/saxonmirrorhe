@@ -1,0 +1,91 @@
+package com.saxonica.ee.stream.adjunct;
+
+import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.watch.Terminator;
+import com.saxonica.ee.stream.watch.WatchManager;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.functions.DistinctValues;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
+
+import java.util.HashSet;
+
+
+/**
+ * Implement the distinct-values function in streaming mode.
+ */
+
+public class DistinctValuesStreamer
+        extends StreamingAdjunct implements FeedMaker {
+
+    public FeedMaker getFeedMaker(int arg) throws XPathException {
+        return arg == 0 ? this : getDefaultFeedMaker(arg);
+    }
+
+    public Feed makeItemFeed(WatchManager watchManager, Feed out, XPathContext context) throws XPathException {
+        return new DistinctValuesFeed(getExpression(), out, context);
+    }
+
+    private static class DistinctValuesFeed extends ItemFeed {
+
+        private StringCollator collator;
+        private HashSet<AtomicMatchKey> lookup;
+        int implicitTimezone;
+
+        public DistinctValuesFeed(Expression expr, Feed result, XPathContext context) {
+            super(expr, result, context);
+            implicitTimezone = context.getImplicitTimezone();
+            SystemFunctionCall call = (SystemFunctionCall)expr;
+            SystemFunction fn = call.getTargetFunction();
+            if (fn instanceof DistinctValues) {
+                collator = ((DistinctValues)fn).getStringCollator();
+            }
+        }
+
+        public void open(Terminator terminator) throws XPathException {
+            lookup = new HashSet<AtomicMatchKey>(40);
+            if (collator == null) {
+                SystemFunctionCall call = (SystemFunctionCall) getExpression();
+                Expression collationArg = call.getArg(call.getArity()-1);
+                String collationName = collationArg.evaluateAsString(getContext()).toString();
+                collator = getContext().getConfiguration().getCollation(collationName);
+                if (collator == null) {
+                    dynamicError(new XPathException("Unknown collation " + collationName, "FOCH0002"));
+                }
+            }
+            getResult().open(terminator);
+        }
+
+        /**
+         * Supply an item to the feed
+         *
+         * @param item the item being fed
+         * @throws net.sf.saxon.trans.XPathException
+         *          to report any failure
+         */
+
+        public void processItem(Item<?> item) throws XPathException {
+            if (!hasFailed()) {
+                AtomicValue next = (AtomicValue) item;
+                AtomicMatchKey key = next.getXPathComparable(false, collator, implicitTimezone);
+                if (lookup.add(key)) {
+                    // returns true if newly added
+                    getResult().processItem(item);
+                }
+            }
+        }
+
+    }
+
+
+}
+
+// Copyright (c) 2009-2013 Saxonica Limited.

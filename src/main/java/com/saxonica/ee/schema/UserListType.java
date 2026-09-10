@@ -1,0 +1,380 @@
+package com.saxonica.ee.schema;
+
+import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.expr.MappingFunction;
+import net.sf.saxon.expr.MappingIterator;
+import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.type.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.Whitespace;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents a SimpleType that is a list of a given
+ * SimpleType, known as its itemType. A ListType may be a restriction
+ * of another ListType; the itemType must either be an AtomicType or
+ * a UnionType whose members are not list types.
+ * <p>This class is not used to implement the built-in
+ * list types NMTOKENS, ENTITIES, IDREFS.</p>
+ */
+
+public class UserListType extends UserSimpleType implements ListType {
+
+    /**
+     * A reference to the SimpleType of the items in the list.
+     */
+
+    private TypeReference itemType = null;
+
+    /**
+     * Create a new user-defined ListType.
+     *
+     * @param config the Saxon configuration
+     */
+
+    public UserListType(EnterpriseConfiguration config) {
+        setConfiguration(config);
+    }
+
+    /**
+     * Test whether this Simple Type is an atomic type
+     *
+     * @return false, this is not an atomic type
+     */
+
+    public boolean isAtomicType() {
+        return false;
+    }
+
+    /**
+     * Ask whether this type is an ID type. This is defined to be any simple type
+     * who typed value may contain atomic values of type xs:ID: that is, it includes types derived
+     * from ID by restriction, list, or union. Note that for a node to be treated
+     * as an ID in XSD 1.0, its typed value must be a *single* atomic value of type ID; the type of the
+     * node, however, can still allow a list. But in XSD 1.1, a list of IDs is permitted
+     */
+
+    public boolean isIdType() throws MissingComponentException {
+        return getItemType().isIdType();
+    }
+
+    /**
+     * Ask whether this type is an IDREF or IDREFS type. This is defined to be any simple type
+     * who typed value may contain atomic values of type xs:IDREF: that is, it includes types derived
+     * from IDREF or IDREFS by restriction, list, or union
+     */
+
+    public boolean isIdRefType() throws MissingComponentException {
+        return getItemType().isIdRefType();
+    }
+
+    /**
+     * Determine whether this is a built-in type or a user-defined type
+     */
+
+    public boolean isBuiltInType() {
+        return false;
+    }
+
+
+    /**
+     * Returns true if this type is derived by list, or if it is derived by restriction
+     * from a list type, or if it is a union that contains a list as one of its members
+     */
+
+    public boolean isListType() {
+        return true;
+    }
+
+    /**
+     * Get the extended facet list, creating it if necessary. The extended facet
+     * list includes facets inherited from supertypes, unless they are redundant
+     *
+     * @return the extended facet list
+     */
+
+    protected List<Facet> addInheritedFacets(List<Facet> localFacets) {
+        localFacets = super.addInheritedFacets(localFacets);
+        for (int i = 0; i < localFacets.size(); i++) {
+            Facet f = localFacets.get(i);
+            if (f instanceof LengthFacet || f instanceof MinLengthFacet) {
+                return localFacets;
+            }
+        }
+
+        SchemaType base = this;
+        while (base != null) {
+            base = base.getBaseType();
+            if (base instanceof BuiltInListType) {
+                // All the built-in list types have a minLength facet of 1
+                List<Facet> extendedFacets = new ArrayList<>(localFacets);
+                MinLengthFacet minLength = new MinLengthFacet();
+                minLength.setNumericValue(1);
+                extendedFacets.add(minLength);
+                return extendedFacets;
+            }
+        }
+        return localFacets;
+    }
+
+    public void elaborate(SchemaCompiler compiler) throws SchemaException {
+        // before elaborating a list type we must elaborate its item type
+        SimpleType st = (SimpleType) itemType.getTarget();
+        if (st instanceof UserSimpleType) {
+            ((UserSimpleType) st).elaborate(compiler);
+        }
+        super.elaborate(compiler);
+    }
+
+
+    /**
+     * Get the reference to the item type of the list
+     *
+     * @return the type reference
+     */
+
+    public TypeReference getItemTypeReference() {
+        return itemType;
+    }
+
+    /**
+     * Returns the simpleType of the items in this ListType. This method assumes that the
+     * item type has been fully resolved
+     *
+     * @return the simpleType of the items in this ListType. This will either be an AtomicType
+     *         or a UnionType
+     * @throws MissingComponentException if the item type has not been fully resolved
+     */
+
+    /*@NotNull*/
+    public SimpleType getItemType() throws MissingComponentException {
+        return (SimpleType) itemType.getTarget();
+    }
+
+    /**
+     * Sets the itemType for this ListType (the type of
+     * item that instances of this list type contain).
+     * For internal use only.
+     *
+     * @param type the SimpleType for this ListType.
+     */
+
+    public void setItemTypeReference(TypeReference type) {
+        itemType = type;
+    }
+
+    /**
+     * Check whether a given input string is valid according to this SimpleType
+     *
+     * @param value      the input string to be checked
+     * @param nsResolver a namespace resolver used to resolve namespace prefixes if the type
+     *                   is namespace sensitive. The value supplied may be null; in this case any namespace-sensitive
+     *                   content will throw an UnsupportedOperationException.
+     * @param rules      the conversion rules used in this configuration
+     * @return null if validation succeeds; return a ValidationException describing the validation failure
+     *         if validation fails, unless throwException is true, in which case the exception is thrown rather than
+     *         being returned.
+     * @throws UnsupportedOperationException if the type is namespace-sensitive and no namespace
+     *                                       resolver is supplied
+     */
+
+    /*@Nullable*/
+    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+        SimpleType itemType = null;
+        try {
+            itemType = getItemType();
+        } catch (MissingComponentException e) {
+            return new ValidationFailure(e.getMessage());
+        }
+        Whitespace.Tokenizer iter = new Whitespace.Tokenizer(value);
+        int count = 0;
+        StringValue val;
+        while ((val = iter.next()) != null) {
+            ValidationFailure err = itemType.validateContent(val.getStringValueCS(), nsResolver, rules);
+            if (err != null) {
+                return err;
+            }
+            count++;
+        }
+        return checkAgainstListFacets(value, nsResolver, rules, count);
+    }
+
+    /**
+     * Check whether a supplied value is valid against the facets defined on the list type. This method does NOT check
+     * that the items in the list are valid against the item type of the list
+     *
+     * @param value      the supplied value
+     * @param nsResolver the namespace context
+     * @param rules      the conversion rules
+     * @param count      the number of items in the list
+     * @return either null if the value is valid, or a ValidationFailure giving diagnostics
+     */
+
+    public ValidationFailure checkAgainstListFacets(CharSequence value, NamespaceResolver nsResolver, ConversionRules rules, int count) {
+        for (Facet f : getExtendedFacetList()) {
+            if (f instanceof PatternFacet) {
+                boolean match = f.testAtomicValue(
+                        StringValue.makeStringValue(
+                                Whitespace.collapseWhitespace(value)));
+                if (!match) {
+                    ValidationFailure vf = new ValidationFailure(
+                            "List " + Err.wrap(value) + " contravenes the pattern facet " +
+                                    Err.wrap(f.getValue()));
+                    vf.setConstraintReference(2, "cvc-pattern-valid", "1");
+                    return vf;
+                }
+            } else if (f instanceof EnumerationFacetSet) {
+                try {
+                    AtomicSequence typedValue = ((SimpleType) getBaseType()).getTypedValue(value, nsResolver, rules);
+                    boolean match = f.testListValue(typedValue);
+                    if (!match) {
+                        String message = "List " + Err.wrap(value) +
+                                " does not match any of the values in the enumeration facet " + Err.wrap(f.getValue());
+                        if (f.getMessage() != null) {
+                            message += ". " + f.getMessage();
+                        }
+                        ValidationFailure vf = new ValidationFailure(message);
+                        vf.setConstraintReference(2, "cvc-enumeration-valid", "1");
+                        return vf;
+                    }
+                } catch (XPathException e) {
+                    ValidationFailure vf = new ValidationFailure(
+                            "List " + Err.wrap(value) + " cannot be compared against the enumeration facet " +
+                                    Err.wrap(f.getValue()) + ": " + e.getMessage());
+                    vf.setConstraintReference(2, "cvc-enumeration-valid", "1");
+                    return vf;
+                }
+            } else if (f instanceof AssertionFacet) {
+                try {
+                    AtomicSequence typedValue = ((SimpleType) getBaseType()).getTypedValue(value, nsResolver, rules);
+                    boolean match = ((AssertionFacet) f).testListValue(typedValue, rules);
+                    if (!match) {
+                        String message = f.getMessage();
+                        if (message == null) {
+                            message = "List " + Err.wrap(value) + " does not satisfy the assertion " + Err.wrap(f.getValue());
+                        }
+                        ValidationFailure vf = new ValidationFailure(message);
+                        vf.setConstraintReference(2, "cvc-assertions-valid", "1");
+                        return vf;
+                    }
+                } catch (XPathException e) {
+                    ValidationFailure vf = new ValidationFailure(
+                            "List " + Err.wrap(value) + " cannot be compared against the assertion facet " +
+                                    Err.wrap(f.getValue()) + ": " + e.getMessage());
+                    vf.setConstraintReference(2, "cvc-assertions-valid", "1");
+                    return vf;
+                }
+            }
+            if (!f.testLength(count)) {
+                ValidationFailure vf = new ValidationFailure(
+                        "Length of list " + Err.wrap(count + "") + " contravenes " +
+                                f.getName() + " facet " + Err.wrap(f.getValue()));
+                vf.setConstraintReference(2, f.getConstraintName(), "1");
+                return vf;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the typed value of a given input string. This method assumes that the input value
+     * is valid according to this SimpleType
+     *
+     * @param value    the string whose typed value is required
+     * @param resolver namespace resolver
+     * @param rules    the conversion rules used in this configuration
+     * @return the typed value as an iterator
+     * @throws ValidationException if the input is invalid against this type
+     */
+
+    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
+            throws ValidationException {
+        Whitespace.Tokenizer iter = new Whitespace.Tokenizer(value);
+        UserListMappingFunction map = new UserListMappingFunction();
+        map.resolver = resolver;
+        try {
+            map.itemType = getItemType();
+        } catch (MissingComponentException e) {
+            throw new ValidationException(e);
+        }
+        map.rules = rules;
+        try {
+            return new AtomicArray(new MappingIterator<>(iter, map));
+        } catch (XPathException err) {
+            // should not occur
+            throw new ValidationException(err);
+        }
+    }
+
+    /**
+     * Test whether this simple type is namespace-sensitive, that is, whether
+     * the item types is derived from xs:QName or xs:NOTATION
+     *
+     * @return true if the item type is derived from xs:QName or xs:NOTATION; or if the item type
+     * cannot be determined (because it is missing from the schema)
+     */
+
+    public boolean isNamespaceSensitive() {
+        try {
+            return getItemType().isNamespaceSensitive();
+        } catch (MissingComponentException e) {
+            return true;
+        }
+    }
+
+    private static class UserListMappingFunction implements MappingFunction<StringValue, AtomicValue> {
+
+        public NamespaceResolver resolver;
+        public SimpleType itemType;
+        public ConversionRules rules;
+
+        /**
+         * The typed value of a list-valued node is obtained by tokenizing the string value and
+         * applying a mapping function to the sequence of tokens.
+         * This method implements the mapping function. It is for internal use only.
+         * For details see {@link MappingFunction}
+         */
+
+        public AtomicIterator map(StringValue item) throws XPathException {
+            try {
+                return itemType.getTypedValue(item.getStringValueCS(), resolver, rules).iterate();
+            } catch (ValidationException err) {
+                throw new XPathException(err);
+            }
+        }
+    }
+
+    /**
+     * Serialize the schema component
+     */
+
+    public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
+        serializer.emitAttribute("variety", "list");
+        serializer.emitAttribute("itemType", serializer.getTypeLink(getItemType()));
+    }
+
+
+    /**
+     * Produce a string representation of the type name. If the type is anonymous, an internally-allocated
+     * type name will be returned.
+     *
+     * @return the name of the atomic type in the form Q{uri}local
+     */
+
+    @Override
+    public String toString() {
+        return getStructuredQName().getEQName();
+    }
+
+}
+
+// Copyright (c) 2004-2006 Saxonica Limited.

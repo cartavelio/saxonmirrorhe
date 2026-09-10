@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title>Package overview: com.saxonica.ee.update</title>
+
+</head>
+<body>
+<p>This package contains classes used to support XQuery Update.
+    This includes both compile-time classes and run-time support.</p>
+
+<p>None of these classes will be used directly by typical user applications.</p>
+
+<p>The {@link com.saxonica.ee.update.UpdateParser} is a subclass of
+    {@link net.sf.saxon.query.QueryParser}, and contains the additional code
+    needed to parse the Update extensions to the XQuery grammar.</p>
+
+<p>Classes such as {@link com.saxonica.ee.update.InsertExpression}, {@link com.saxonica.ee.update.DeleteExpression}
+    , {@link com.saxonica.ee.update.RenameExpression} represent
+    updating expressions on the expression tree.</p>
+
+<p>The class {@link com.saxonica.ee.update.PendingUpdateListImpl} represents the run-time pending update list, and the
+    classes {@link com.saxonica.ee.update.InsertAction}, {@link com.saxonica.ee.update.DeleteAction},
+    {@link com.saxonica.ee.update.RenameAction} and so on are entries on this list.</p>
+
+<p>From Saxon 9.9 the functionality of XQuery Update is also offered to Saxon-EE XSLT users in the form
+of custom extension instructions.</p>
+
+</body>
+</html>
+
+

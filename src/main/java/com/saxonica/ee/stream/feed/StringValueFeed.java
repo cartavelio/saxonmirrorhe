@@ -1,0 +1,82 @@
+package com.saxonica.ee.stream.feed;
+
+import com.saxonica.ee.stream.om.FleetingParentNode;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.value.StringValue;
+
+/**
+ * This class is used when a streamed template requests evaluation of the string value
+ * of the nodes selected by a path expression, typically in response to an xsl:value-of instruction.
+ * The expression delivers a sequence of strings, one for each selected node.
+ */
+
+
+public class StringValueFeed extends AbsorptionFeed {
+
+
+    public StringValueFeed(Feed result, XPathContext context) {
+        super(result, context);
+    }
+
+    protected PendingItem makePendingItem(int sequenceNr, FleetingParentNode node) {
+        return new PendingStringValue(valuesReadyToBeOutput.size(), node);
+
+    }
+
+    @Override
+    protected Sequence<?> processGroundedItem(Item item) throws XPathException {
+        return StringValue.makeStringValue(item.getStringValueCS());
+    }
+
+    /**
+     * The close() method is called immediately before the Watch is destroyed, that is,
+     * when the element whose declaration scopes the constraint implemented by this
+     * Watch goes out of scope.
+     *
+     * @throws net.sf.saxon.trans.XPathException
+     *          May be raised if a dynamic error occurs
+     */
+    public void close() throws XPathException {
+        if (!hasFailed()) {
+            getResult().close();
+        }
+    }
+
+    /**
+     * A pending item represents either a tree under construction.
+     * The sequence number represents its position relative to other trees under construction.
+     * The builder is the builder being used to construct the tree.
+     */
+
+    private class PendingStringValue extends PendingItem {
+        public FastStringBuffer buffer;
+        public FleetingParentNode node;
+
+        public PendingStringValue(int sequence, FleetingParentNode node) {
+            super(sequence);
+            buffer = new FastStringBuffer(100);
+            this.node = node;
+        }
+
+        public Receiver getGatherer() {
+            return new StringValueGatherer(buffer);
+        }
+
+        @Override
+        public Sequence deliver() throws XPathException {
+            return StringValue.makeStringValue(buffer);
+        }
+
+        @Override
+        public void rollback() {
+            buffer.setLength(0);
+        }
+    }
+}
+
+// Copyright (c) 2009-2014 Saxonica Limited.

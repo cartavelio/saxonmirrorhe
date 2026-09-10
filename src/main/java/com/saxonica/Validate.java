@@ -1,0 +1,666 @@
+package com.saxonica;
+
+import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
+import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.InvalidityReportGenerator;
+import net.sf.saxon.lib.StandardInvalidityHandler;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trace.Instrumentation;
+import net.sf.saxon.trans.CommandLineOptions;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.ValidationException;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.StringTokenizer;
+
+/**
+ * This <b>Validate</b> class provides a command line interface that allows validation of a source
+ * document against a schema, and/or checking that a source schema is a valid schema.
+ * <p>Apart from error and optional progress messages, no output is produced.</p>
+ */
+
+public class Validate {
+
+    protected Processor processor;
+    protected EnterpriseConfiguration config;
+    protected boolean useURLs = false;
+    protected boolean showTime = false;
+    protected int repeat = 1;   // for performance testing
+    protected String validationMode = "strict";
+    protected int xsdLanguageVersion = Configuration.XSD11;
+    /*@Nullable*/ protected String topLevelElementName = null;
+    private boolean allowExit = true;
+
+    /**
+     * Main program, can be used directly from the command line.
+     *
+     * @param args List of arguments supplied on operating system command line
+     * @throws java.lang.Exception Indicates that a compile-time or
+     *                             run-time error occurred
+     */
+
+    public static void main(String args[])
+            throws Exception {
+        // the real work is delegated to another routine so that it can be used in a subclass
+        final Validate validate = new Validate();
+        int rc = validate.doValidate(args);
+        if (rc != 0 && validate.allowExit) {
+            System.exit(rc);
+        }
+    }
+
+    /**
+     * Create the configuration. This method is intended to be overridden in a subclass
+     */
+
+    protected void setConfiguration() {
+        config = new EnterpriseConfiguration();
+    }
+
+    /**
+     * Set the options that are recognized on the command line. This method can be overridden in a subclass
+     * to define additional command line options.
+     *
+     * @param options the CommandLineOptions in which the recognized options are to be registered.
+     */
+
+    public void setPermittedOptions(/*@NotNull*/ CommandLineOptions options) {
+        options.addRecognizedOption("config", (CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED),
+                "Use specified configuration file");
+        options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                "Use specified catalog file to resolve URIs");
+        options.addRecognizedOption("dtd", CommandLineOptions.TYPE_ENUMERATION,
+                "Validate using DTD");
+        options.setPermittedValues("dtd", new String[]{"on", "off", "recover"}, "on");
+        options.addRecognizedOption("export", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "Schema output file in SCM format");
+        options.addRecognizedOption("ext", CommandLineOptions.TYPE_BOOLEAN,
+                "Allow calls to Java extension functions");
+        options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
+                "User-supplied net.sf.saxon.lib.Initializer class to initialize the Saxon Configuration");
+        options.addRecognizedOption("limits", CommandLineOptions.TYPE_INTEGER_PAIR,
+                "Limits for correct processing of minOccurs and maxOccurs");
+        options.addRecognizedOption("opt", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
+                "Use optimization level 0..10");
+        options.addRecognizedOption("quit", CommandLineOptions.TYPE_BOOLEAN | CommandLineOptions.VALUE_REQUIRED,
+                "Quit JVM if execution fails");
+        options.addRecognizedOption("r", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
+                "Use named URIResolver class");
+        options.addRecognizedOption("report", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
+                "Report XML file name for validation error reporting");
+        options.addRecognizedOption("s", CommandLineOptions.TYPE_FILENAME_LIST | CommandLineOptions.VALUE_REQUIRED,
+                "List of source files to be validated");
+        options.addRecognizedOption("scmin", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                "Schema input file in SCM format");
+        options.addRecognizedOption("scmout", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "Retained synonym of -export");
+        options.addRecognizedOption("stats", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                "Statistics output file");
+        options.addRecognizedOption("t", CommandLineOptions.TYPE_BOOLEAN,
+                "Display version and timing information, and names of schema documents loaded");
+        options.addRecognizedOption("top", CommandLineOptions.TYPE_QNAME,
+                "QName of required outermost element node");
+        options.addRecognizedOption("u", CommandLineOptions.TYPE_BOOLEAN,
+                "Interpret filename arguments as URIs");
+        options.setPermittedValues("u", new String[]{"on", "off"}, "on");
+        options.addRecognizedOption("val", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
+                "Apply strict or lax validation");
+        options.setPermittedValues("val", new String[]{"strict", "lax"}, "strict");
+        options.addRecognizedOption("x", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
+                "Use named XMLReader class for parsing source documents");
+        options.addRecognizedOption("xi", CommandLineOptions.TYPE_BOOLEAN,
+                "Expand XInclude directives in source documents");
+        options.addRecognizedOption("xmlversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
+                "Indicate whether XML 1.1 is supported");
+        options.setPermittedValues("xmlversion", new String[]{"1.0", "1.1"}, null);
+        options.addRecognizedOption("xsd", CommandLineOptions.TYPE_FILENAME_LIST | CommandLineOptions.VALUE_REQUIRED,
+                "List of schema documents to be preloaded");
+        options.addRecognizedOption("xsdversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
+                "Indicate whether XSD 1.1 is supported");
+        options.setPermittedValues("xsdversion", new String[]{"1.0", "1.1"}, null);
+        options.addRecognizedOption("xsiloc", CommandLineOptions.TYPE_BOOLEAN,
+                "Load schemas named in xsi:schemaLocation (default on)");
+        options.addRecognizedOption("y", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
+                "Use named XMLReader class for parsing schema documents");
+        options.addRecognizedOption("?", CommandLineOptions.VALUE_PROHIBITED,
+                "Display command line help text");
+
+    }
+
+
+    /**
+     * Support method for main program. This support method can also be invoked from subclasses
+     * that support the same command line interface. It also provides a surrogate for the command line
+     * interface that is amenable to JUnit testing. Calling this method never throws a checked Exception
+     * and never does a System.exit();
+     *
+     * @param args the command-line arguments
+     * @return a return code to be returned. Zero indicates success, +1 indicates that validation completed
+     *         successfully and found the schema or instance to be invalid, +2 indicates that validation was not
+     *         carried out successfully.
+     */
+
+    public int doValidate(String args[]) {
+
+        List<String> sourceFileNames = new ArrayList<String>();
+        List<String> schemaFileNames = new ArrayList<String>();
+        String scmInput;
+        String scmOutput;
+        int validCount = 0;
+        int invalidCount = 0;
+        int unreadableCount = 0;
+        String reportFileName = null;
+        InvalidityReportGenerator reportHandler = null;
+        CommandLineOptions options = new CommandLineOptions();
+        setPermittedOptions(options);
+        try {
+            options.setActualOptions(args);
+        } catch (XPathException err) {
+            return quit(err.getMessage(), 2);
+        }
+
+        String configFile = options.getOptionValue("config");
+        if (configFile != null) {
+            try {
+                Configuration fconfig = Configuration.readConfiguration(new StreamSource(configFile));
+                if (!(fconfig instanceof EnterpriseConfiguration)) {
+                    return quit("Configuration produced from the configuration file is an instance of " +
+                            fconfig.getClass() + " (not EnterpriseConfiguration): check the value of configuration/@edition", 2);
+                }
+                config = (EnterpriseConfiguration) fconfig;
+            } catch (XPathException e) {
+                return quit(e.getMessage(), 2);
+            }
+        }
+
+        // Check the command-line arguments.
+
+        if (config == null) {
+            setConfiguration();
+        }
+        processor = new Processor(config);
+        //config.setHostLanguage(Configuration.XML_SCHEMA);
+
+        try {
+
+            // Apply those options which simply update the Configuration
+
+            options.applyToConfiguration(processor);
+
+            // Apply options that are processed locally
+
+            allowExit = !"off".equals(options.getOptionValue("quit"));
+
+            String value = options.getOptionValue("?");
+            if (value != null) {
+                badUsage("");
+                return 0;
+            }
+
+            value = options.getOptionValue("limits");
+            if (value != null) {
+                int comma = value.indexOf(',');
+                if (comma < 1) {
+                    badUsage("format: -limits:min,max");
+                    return 2;
+                }
+                int min = Integer.parseInt(value.substring(0, comma));
+                int max = Integer.parseInt(value.substring(comma + 1));
+                config.setOccurrenceLimits(min, max);
+            }
+
+            scmInput = options.getOptionValue("scmin");
+            scmOutput = options.getOptionValue("export");
+            if (scmOutput == null) {
+                scmOutput = options.getOptionValue("scmout");
+            }
+
+            value = options.getOptionValue("s");
+            if (value != null) {
+                StringTokenizer tokenizer = new StringTokenizer(value, File.pathSeparator);
+                while (tokenizer.hasMoreTokens()) {
+                    sourceFileNames.add(tokenizer.nextToken());
+                }
+            }
+
+            value = options.getOptionValue("t");
+            if (value != null) {
+                processor.setConfigurationProperty(FeatureKeys.TIMING, true);
+                showTime = true;
+            }
+
+            topLevelElementName = options.getOptionValue("top");
+            useURLs = "on".equals(options.getOptionValue("u"));
+
+            value = options.getOptionValue("val");
+            if (value != null) {
+                validationMode = value;
+            }
+
+            value = options.getOptionValue("xsd");
+            if (value != null) {
+                StringTokenizer tokenizer = new StringTokenizer(value, ";");
+                while (tokenizer.hasMoreTokens()) {
+                    schemaFileNames.add(tokenizer.nextToken());
+                }
+            }
+
+
+            xsdLanguageVersion = "1.1".equals(processor.getConfigurationProperty(FeatureKeys.XSD_VERSION)) ?
+                    Configuration.XSD11 : Configuration.XSD10;
+
+
+            for (String s : options.getPositionalOptions()) {
+                sourceFileNames.add(s);
+            }
+
+            // Customization hook for subclasses
+            applyLocalOptions(options, config);
+
+            if (!schemaFileNames.isEmpty() && scmInput != null) {
+                badUsage("Cannot mix xsd and scm input");
+                return 2;
+            }
+
+            if (schemaFileNames.isEmpty() && scmInput == null && sourceFileNames.isEmpty()) {
+                badUsage("No action requested");
+                return 2;
+            }
+
+            if (showTime) {
+                System.err.println(config.getProductTitle());
+                System.err.println(Version.platform.getPlatformVersion());
+            }
+            config.displayLicenseMessage();
+            processor.setConfigurationProperty(FeatureKeys.SCHEMA_VALIDATION_MODE, validationMode);
+            //processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
+
+            long startTime = new Date().getTime();
+
+            SchemaManager manager = processor.getSchemaManager();
+
+            for (String schemaFileName : schemaFileNames) {
+                Source schemaSource;
+                if (useURLs || CommandLineOptions.isImplicitURI(schemaFileName)) {
+                    schemaSource = config.getURIResolver().resolve(schemaFileName, null);
+                    if (schemaSource == null) {
+                        schemaSource = config.getSystemURIResolver().resolve(schemaFileName, null);
+                    }
+                } else if (schemaFileName.equals("-")) {
+                    // take input from stdin
+                    String sysID = new File(System.getProperty("user.dir")).toURI().toASCIIString();
+                    if (Version.platform.isJava()) {
+                        final InputSource inputSource = new InputSource(System.in);
+                        inputSource.setSystemId(sysID);
+                        schemaSource = new SAXSource(config.getStyleParser(), inputSource);
+                    } else {
+                        schemaSource = new StreamSource(System.in, sysID);
+                    }
+                } else {
+                    File schemaFile = new File(schemaFileName);
+                    if (!schemaFile.exists()) {
+                        return quit("Schema file " + schemaFile + " does not exist", 2);
+                    }
+                    if (Version.platform.isJava()) {
+                        InputSource eis = new InputSource(schemaFile.toURI().toString());
+                        schemaSource = new SAXSource(config.getStyleParser(), eis);
+                    } else {
+                        schemaSource = new StreamSource(schemaFile.toURI().toString());
+                    }
+                }
+
+                if (schemaSource == null) {
+                    return quit("URIResolver for schema file must return a Source", 2);
+                }
+
+                try {
+                    manager.load(schemaSource);
+                } catch (SaxonApiException e) {
+                    if (e.getCause() instanceof SchemaException) {
+                        // bug 2351
+                        throw (SchemaException) e.getCause();
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+
+            if (scmInput != null) {
+                Source scm = new StreamSource(new File(scmInput));
+                manager.importComponents(scm);
+            }
+
+            if (showTime && !schemaFileNames.isEmpty()) {
+                long endTime = new Date().getTime();
+                System.err.println("Schema checking successful. Time: " + (endTime - startTime) +
+                                           "ms. Memory: " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) /1000000 + "Mb.");
+                //TimeUnit.MINUTES.sleep(1); // Useful for getting a heap dump
+            }
+
+            // Validate the document instances
+
+            final SchemaValidator validator = manager.newSchemaValidator();
+            validator.setLax("lax".equals(validationMode));
+            if (topLevelElementName != null) {
+                validator.setDocumentElementName(QName.fromClarkName(topLevelElementName));
+            }
+
+            if (options.definesParameterValues()) {
+                options.setParams(processor, new CommandLineOptions.ParamSetter() {
+                    public void setParam(QName qName, XdmValue value) {
+                        validator.setParameter(qName, value);
+                    }
+                });
+            }
+
+            Serializer statsSerializer = null;
+            value = options.getOptionValue("stats");
+            if (value != null) {
+                validator.setCollectStatistics(true);
+                File statsFile = new File(value);
+                statsSerializer = processor.newSerializer(statsFile);
+                statsSerializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+                statsSerializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            }
+
+            value = options.getOptionValue("report");
+
+
+            if (value != null) {
+                reportFileName = value;
+
+                Serializer reportDestination = processor.newSerializer();
+                reportDestination.setOutputProperty(Serializer.Property.INDENT, "yes");
+                reportDestination.setOutputFile(new File(reportFileName));
+
+                validator.setValidityReporting(reportDestination);
+                reportHandler = (InvalidityReportGenerator) validator.getInvalidityHandler();
+                String reportSchemaNames = options.getOptionValue("xsd");
+                if (reportSchemaNames != null) {
+                    reportHandler.setSchemaName(reportSchemaNames);
+                }
+                String reportXsdVersion = options.getOptionValue("xsdversion");
+                if (reportXsdVersion != null) {
+                    reportHandler.setXsdVersion(reportXsdVersion);
+                }
+            } else {
+                validator.setInvalidityHandler(new StandardInvalidityHandler(config));
+            }
+
+            if (sourceFileNames.size() > 1) {
+                List<Source> sources = new ArrayList<Source>(sourceFileNames.size());
+                for (String sourceFileName : sourceFileNames) {
+                    Source source = loadDocument(sourceFileName, useURLs, config);
+                    sources.add(source);
+
+                }
+
+                validator.validateMultiple(sources);
+
+
+            } else {
+                for (String sourceFileName : sourceFileNames) {
+
+                    try {
+                        Source source = loadDocument(sourceFileName, useURLs, config);
+                        processFile(source, validator);
+                        if (showTime) {
+                            System.err.println("Validation successful");
+                        }
+                        validCount++;
+                        if (source instanceof SAXSource) {
+                            XMLReader parser = ((SAXSource) source).getXMLReader();
+                            if (parser != null) {
+                                config.reuseSourceParser(parser);
+                            }
+                        }
+                    } catch (SaxonApiException e) {
+                        if (e.getCause() instanceof ValidationException) {
+                            if (showTime) {
+                                System.err.println("Validation complete: errors found");
+                            } else {
+                                System.err.println("Validation of file " + sourceFileName + " completed: errors found");
+                            }
+                            invalidCount++;
+                        } else {
+                            System.err.println("Failed to process file " + sourceFileName + ": " + e.getMessage());
+                            unreadableCount++;
+                        }
+                    }
+                }
+
+
+                if (showTime && validCount + invalidCount > 1) {
+                    System.err.println(validCount + " valid document" + (validCount == 1 ? "" : "s") + "; " +
+                            invalidCount + " invalid document" + (invalidCount == 1 ? "" : "s") +
+                            (unreadableCount == 0 ? "" : "; " + unreadableCount + " unreadable or ill-formed document"
+                                    + (unreadableCount == 1 ? "" : "s")));
+                }
+
+            }
+            // If requested, produce the statistics
+
+            if (statsSerializer != null) {
+                validator.reportValidationStatistics(statsSerializer);
+            }
+
+            if (Instrumentation.ACTIVE) {
+                Instrumentation.report();
+                Instrumentation.reset();
+            }
+
+            // If requested, produce the serialized Schema Component Model
+
+            if (scmOutput != null) {
+                final File scmOutputFile = new File(scmOutput);
+                Serializer scmSerializer = processor.newSerializer(scmOutputFile);
+                scmSerializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+                scmSerializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+                manager.exportComponents(scmSerializer);
+                if (showTime) {
+                    System.err.println("Schema component model written to " + scmOutputFile.getAbsolutePath());
+                }
+            }
+        } catch (SchemaException err) {
+            //err.printStackTrace();
+            return quit("Schema processing failed: " + err.getMessage(), 2);
+        } catch (ValidationException err) {
+            config.reportFatalError(err);
+            return quit("Validation of source document failed", 2);
+        } catch (XPathException err) {
+            config.reportFatalError(err);
+//            if (reportHandler != null) {
+//                try {
+//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endElement();
+//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endDocument();
+//                    reportSerializer.close();
+//                } catch (XPathException e) {
+//                } catch (SaxonApiException e) {
+//                }
+//            }
+            return quit("Processing failed", 2);
+        } catch (TransformerFactoryConfigurationError err) {
+            //err.printStackTrace();
+//            if (reportHandler != null) {
+//                try {
+//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endElement();
+//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endDocument();
+//                    reportSerializer.close();
+//                } catch (XPathException e) {
+//                } catch (SaxonApiException e) {
+//                }
+//            }
+            return quit("Validation failed: " + err.getMessage(), 2);
+        } catch (Exception err2) {
+            err2.printStackTrace();
+//            if (reportHandler != null) {
+//                try {
+//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endElement();
+//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endDocument();
+//                    reportSerializer.close();
+//                } catch (XPathException e) {
+//                } catch (SaxonApiException e) {
+//                }
+//            }
+            return quit("Fatal error during validation: " + err2.getMessage(), 2);
+        }
+        if (unreadableCount > 0) {
+            return 2;
+        } else if (invalidCount > 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Customisation hook: apply options defined locally in a subclass
+     *
+     * @param options the CommandLineOptions
+     * @param config  the Saxon Configuration
+     */
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    protected void applyLocalOptions(CommandLineOptions options, Configuration config) {
+        // no action: provided for subclasses to override
+    }
+
+
+    /**
+     * Exit with a message
+     *
+     * @param message The message to be output
+     * @param code    The result code to be returned to the operating
+     *                system shell
+     * @return the requested return code
+     */
+
+    protected static int quit(String message, int code) {
+        System.err.println(message);
+        return code;
+    }
+
+    /**
+     * Load a document, given a filename or URL
+     *
+     * @param sourceFileName the name of the source file
+     * @param useURLs        true if name is to be treated as a URI
+     * @param config         the Saxon configuration
+     * @return the Source object that results from loading the document
+     * @throws XPathException if a document cannot be loaded
+     */
+
+    public static Source loadDocument(/*@NotNull*/ String sourceFileName, boolean useURLs, /*@NotNull*/ Configuration config)
+            throws XPathException {
+        Source sourceInput;
+        if (useURLs || CommandLineOptions.isImplicitURI(sourceFileName)) {
+            try {
+                sourceInput = config.getURIResolver().resolve(sourceFileName, null);
+            } catch (TransformerException e) {
+                throw XPathException.makeXPathException(e);
+            }
+            if (sourceInput == null) {
+                sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
+            }
+        } else if (sourceFileName.equals("-")) {
+            // take input from stdin
+            String sysID = new File(System.getProperty("user.dir")).toURI().toASCIIString();
+            if (Version.platform.isJava()) {
+                final InputSource inputSource = new InputSource(System.in);
+                inputSource.setSystemId(sysID);
+                sourceInput = new SAXSource(config.getSourceParser(), inputSource);
+            } else {
+                sourceInput = new StreamSource(System.in, sysID);
+            }
+        } else {
+            File sourceFile = new File(sourceFileName);
+            if (!sourceFile.exists()) {
+                throw new XPathException("Source file " + sourceFile + " does not exist");
+            }
+            if (Version.platform.isJava()) {
+                InputSource eis = new InputSource(sourceFile.toURI().toString());
+                sourceInput = new SAXSource(config.getSourceParser(), eis);
+            } else {
+                sourceInput = new StreamSource(sourceFile.toURI().toString());
+            }
+        }
+        return sourceInput;
+    }
+
+
+    /**
+     * Process a single file using a supplied schema
+     *
+     * @param source    The source XML document to be validated
+     * @param validator The schema validator used to perform the validation
+     * @throws SaxonApiException If the validation fails (or if validation could not be attempted)
+     */
+
+    public void processFile(/*@NotNull*/ Source source, SchemaValidator validator)
+            throws SaxonApiException {
+
+        if (showTime) {
+            System.err.println("Processing " + source.getSystemId());
+        }
+        long startTime = new Date().getTime();
+
+        try {
+            for (int r = 0; r < repeat; r++) {      // repeat is for internal testing/timing
+                validator.validate(source);
+            }
+        } finally {
+            if (showTime) {
+                long endTime = new Date().getTime();
+                System.err.println("Validation time: " + (endTime - startTime) + "ms. Memory: "
+                                           + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())) / 1000000 + "Mb.");
+            }
+        }
+    }
+
+
+    /**
+     * Report incorrect usage of the command line, with a list of the options and arguments that are available
+     *
+     * @param message The error message
+     */
+    protected void badUsage(String message) {
+        if (!"".equals(message)) {
+            System.err.println(message);
+        }
+        if (!showTime) {
+            System.err.println(config.getProductTitle());
+        }
+        System.err.println("Usage: see http://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
+        System.err.println("Format: " + getClass().getName() + " options");
+        CommandLineOptions options = new CommandLineOptions();
+        setPermittedOptions(options);
+        System.err.println("Options available:" + options.displayPermittedOptions());
+        System.err.println("Use -XYZ:? for details of option XYZ");
+        if (allowExit) {
+            if ("".equals(message)) {
+                System.exit(0);
+            } else {
+                System.exit(2);
+            }
+        } else {
+            throw new RuntimeException(message);
+        }
+    }
+
+
+}
+
+// Copyright (C) 2004-2012 Saxonica Limited.

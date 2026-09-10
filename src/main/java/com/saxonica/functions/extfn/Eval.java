@@ -1,0 +1,32 @@
+package com.saxonica.functions.extfn;
+
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.om.*;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.ExternalObject;
+
+/**
+ * This class implements the saxon:eval() extension function
+ */
+
+public class Eval extends Evaluate {
+
+    public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        XPathContextMajor c2 = context.newCleanContext();
+        Item head = arguments[0].head();
+        ExternalObject oval = (ExternalObject)head;
+        Evaluate.PreparedExpression pexpr = (Evaluate.PreparedExpression)oval.getObject();
+        c2.setOrigin(pexpr);
+        c2.openStackFrame(pexpr.stackFrameMap);
+        for (int i = 1; i < arguments.length; i++) {
+            int slot = pexpr.variables[i - 1].getLocalSlotNumber();
+            c2.setLocalVariable(slot, arguments[i].iterate().materialize());
+        }
+        c2.setCurrentIterator(context.getCurrentIterator());
+        return SequenceTool.toLazySequence(pexpr.expression.iterate(c2));
+    }
+
+}
+
+// Copyright (c) 2009-2016 Saxonica Limited.

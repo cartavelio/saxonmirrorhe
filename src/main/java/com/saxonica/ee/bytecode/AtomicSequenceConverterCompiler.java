@@ -1,0 +1,213 @@
+package com.saxonica.ee.bytecode;
+
+import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.expr.AtomicSequenceConverter;
+import net.sf.saxon.expr.AtomicSequenceConverter.ToStringMappingFunction;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.ItemMappingFunction;
+import net.sf.saxon.expr.ItemMappingIterator;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.Converter;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.*;
+import org.objectweb.asm.Type;
+
+/**
+ * Generate bytecode for an AtomicSequenceConverter or UntypedSequenceConverter expression, performing run-time type checking
+ */
+public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
+
+
+    /*
+      *
+      * Item item = operand.evaluateItem(context);
+         if (item==null) {
+             return null;
+         }
+         return converter.convert((AtomicValue) item).asAtomic();
+      */
+    @Override
+    public void compileToItem(CompilerService compiler,
+                              Expression expression) throws CannotCompileException {
+        Expression operand = ((AtomicSequenceConverter) expression).getBaseExpression();
+        Converter converter = ((AtomicSequenceConverter) expression).getConverter();
+        if (converter == null) {
+            converter = ((AtomicSequenceConverter) expression).allocateConverter(compiler.getConfiguration(), false);
+        }
+        Generator ga = compiler.getCurrentGenerator();
+        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
+        visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Item");
+        visitLineNumber(compiler, ga, expression);
+
+        LabelInfo end = methodInfo.newLabel("endASC");
+
+        compiler.compileToItem(operand);
+        visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Item-Returned");
+        if (Cardinality.allowsZero(operand.getCardinality())) {
+            LabelInfo notNull = methodInfo.newLabel("notNullASC");
+            ga.dup();
+            ga.ifNonNull(notNull.label());
+            ga.pop();
+            ga.pushNull();
+            ga.goTo(end);
+            methodInfo.placeLabel(notNull);
+        }
+        if (converter instanceof Converter.ToStringConverter) {
+            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+        } else {
+            allocateStatic(compiler, converter);
+            ga.swap();
+            ga.checkClass(AtomicValue.class);
+            ga.invokeInstanceMethod(Converter.class, "convert", AtomicValue.class);
+            ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
+        }
+        methodInfo.placeLabel(end);
+    }
+
+    @Override
+    public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty) throws CannotCompileException {
+        if (requiredClass == String.class || requiredClass == CharSequence.class) {
+            TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
+            Expression operand = ((AtomicSequenceConverter) expression).getBaseExpression();
+            Generator ga = compiler.getCurrentGenerator();
+            GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
+            visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Item");
+            visitLineNumber(compiler, ga, expression);
+
+            int operandType = operand.getItemType().getPrimitiveType();
+            OnEmpty oe2 = onEmpty;
+            boolean needToHandleEmpty =
+                    Cardinality.allowsZero(operand.getCardinality()) && !(oe2 instanceof OnEmpty.UnwindAndJump);
+            LabelInfo handleEmpty = (needToHandleEmpty ? methodInfo.newLabel("handleEmpty") : null);
+            if (operandType == StandardNames.XS_INTEGER && compiler.isInRangeForInt(operand)) {
+                oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
+                compiler.compileToPrimitive(operand, Integer.TYPE, oe2);
+                ga.invokeStaticMethod(Integer.class, "toString", Integer.TYPE);
+                postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
+
+            } else if (operandType == StandardNames.XS_INTEGER && compiler.isInRangeForLong(operand)) {
+                oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
+                compiler.compileToPrimitive(operand, Long.TYPE, oe2);
+                ga.invokeStaticMethod(Long.class, "toString", Long.TYPE);
+                postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
+
+            } else if (operandType == StandardNames.XS_DOUBLE) {
+                oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
+                compiler.compileToPrimitive(operand, Double.TYPE, oe2);
+                ga.invokeStaticMethod(DoubleValue.class, "doubleToString", Double.TYPE);
+                postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
+
+            } else if (operandType == StandardNames.XS_FLOAT) {
+                oe2 = prepareForEmptiness(oe2, needToHandleEmpty, handleEmpty);
+                compiler.compileToPrimitive(operand, Float.TYPE, oe2);
+                ga.invokeStaticMethod(FloatValue.class, "floatToString", Float.TYPE);
+                postpareForEmptiness(onEmpty, ga, methodInfo, needToHandleEmpty, handleEmpty);
+
+            } else if (operandType == StandardNames.XS_STRING || operandType == StandardNames.XS_UNTYPED_ATOMIC) {
+                compiler.compileToPrimitive(operand, requiredClass, onEmpty);
+
+            } else {
+
+                LabelInfo end = methodInfo.newLabel("endASC");
+
+                compiler.compileToItem(operand);
+                visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Item-Returned");
+                if (Cardinality.allowsZero(operand.getCardinality())) {
+                    LabelInfo notNull = methodInfo.newLabel("notNullASC");
+                    ga.dup();
+                    ga.ifNonNull(notNull.label());
+                    handleEmptyStringResult(onEmpty, ga, methodInfo, end);
+                    methodInfo.placeLabel(notNull);
+                }
+                ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+                if (requiredClass == String.class) {
+                    ga.invokeInstanceMethod(Object.class, "toString");
+                }
+                methodInfo.placeLabel(end);
+            }
+        } else {
+            super.compileToPrimitive(compiler, expression, requiredClass, onEmpty);
+        }
+    }
+
+    private OnEmpty prepareForEmptiness(OnEmpty oe2, boolean needToHandleEmpty, LabelInfo handleEmpty) {
+        if (needToHandleEmpty) {
+            oe2 = new OnEmpty.UnwindAndJump(handleEmpty);
+        }
+        return oe2;
+    }
+
+    private void postpareForEmptiness(OnEmpty onEmpty, Generator ga, GeneratedMethodInfo methodInfo, boolean needToHandleEmpty, LabelInfo handleEmpty) {
+        if (needToHandleEmpty) {
+            LabelInfo exit = methodInfo.newLabel("exit");
+            ga.goTo(exit);
+            methodInfo.placeLabel(handleEmpty);
+            //ga.pop();
+            if (onEmpty instanceof OnEmpty.ReturnEmptyString) {
+                ga.push("");
+            } else if (onEmpty instanceof OnEmpty.ReturnNull) {
+                ga.pushNull();
+            } else {
+                throw new AssertionError();
+            }
+            methodInfo.placeLabel(exit);
+        }
+    }
+
+    @Override
+    public void compileToIterator(CompilerService compiler,
+                                  /*@NotNull*/ Expression expression) throws CannotCompileException {
+
+        Expression operand = ((AtomicSequenceConverter) expression).getBaseExpression();
+        Converter converter = ((AtomicSequenceConverter) expression).getConverter();
+        if (converter == null) {
+            converter = ((AtomicSequenceConverter) expression).allocateConverter(compiler.getConfiguration(), false);
+        }
+        Generator ga = compiler.getCurrentGenerator();
+        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
+        visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Itr");
+
+        if (converter == Converter.ToStringConverter.INSTANCE) {
+            visitAnnotation(compiler, "AtomicSequenceConverterCompiler-string");
+            // special-case this because it's the most common case
+
+            // return new ItemMappingIterator(base.iterate(), AtomicSequenceConverter.TO_STRING, true)
+
+            ga.newInstance(Type.getType(ItemMappingIterator.class));
+            ga.dup();
+            compiler.compileToIterator(operand);
+            visitLineNumber(compiler, ga, expression);
+            ga.getStaticField(AtomicSequenceConverter.class, "TO_STRING_MAPPER", ToStringMappingFunction.class);
+            ga.push(true);
+            ga.invokeConstructor(ItemMappingIterator.class, SequenceIterator.class, ItemMappingFunction.class, Boolean.TYPE);
+
+        } else {
+
+            visitAnnotation(compiler, "AtomicSequenceConverterCompiler-1");
+            visitLineNumber(compiler, ga, expression);
+
+            /* AtomicSequenceMappingFunction mapper = new AtomicSequenceMappingFunction();
+               mapper.setConverter(converter);
+               return new ItemMappingIterator(base, mapper, true);
+            */
+
+            AtomicSequenceConverter.AtomicSequenceMappingFunction amf = new AtomicSequenceConverter.AtomicSequenceMappingFunction();
+            amf.setConverter(converter);
+
+            ga.newInstance(Type.getType(ItemMappingIterator.class));
+            ga.dup();
+            compiler.compileToIterator(operand);
+            allocateStatic(compiler, amf);
+            ga.push(true);
+            ga.invokeConstructor(ItemMappingIterator.class, SequenceIterator.class, ItemMappingFunction.class, Boolean.TYPE);
+        }
+    }
+
+
+}
+
+//Copyright (c) 2011 Saxonica Limited.

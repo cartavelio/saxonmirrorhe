@@ -1,0 +1,118 @@
+package com.saxonica.ee.bytecode;
+
+import com.saxonica.ee.bytecode.util.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.LocalVariableReference;
+import net.sf.saxon.expr.StackFrame;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.*;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+
+
+/**
+ * Generate code for a LocalVariableReference
+ */
+public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
+
+
+    /**
+     * Generate bytecode to get the LocalVariable from the Context as a ValueRepresentation
+     * Precondition: none.
+     * Postcondition: the stack contains an ValueRepresentation representing the LocalVariable
+     *
+     * @param compiler   the compiler service
+     * @param expression the expression to be compiled
+     */
+    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+        LocalVariableReference varRef = (LocalVariableReference) expression;
+
+        Generator ga = compiler.getCurrentGenerator();
+        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
+        visitAnnotation(compiler, "LocalVariableReference-Item - " + varRef.getDisplayName());
+        visitLineNumber(compiler, ga, expression);
+        int localSlot = varRef.getSlotNumber();
+        compiler.generateGetContext();
+        ga.invokeInstanceMethod(XPathContext.class, "getStackFrame");
+        ga.invokeInstanceMethod(StackFrame.class, "getStackFrameValues");
+        ga.push(localSlot);
+        ga.arrayLoad(Type.getType(Sequence.class));
+        ga.invokeInstanceMethod(Sequence.class, "head");
+        visitAnnotation(compiler, "LocalVariableReferenceCompiler, localSlotNumber: " + localSlot);
+    }
+
+
+    public void compileToPush(CompilerService compiler, Expression expression) throws CannotCompileException {
+        LocalVariableReference varRef = (LocalVariableReference) expression;
+
+        Generator ga = compiler.getCurrentGenerator();
+        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
+        visitAnnotation(compiler, "LocalVariableReference-Push - " + varRef.getDisplayName());
+        visitLineNumber(compiler, ga, expression);
+        int localSlot = varRef.getSlotNumber();
+
+        compiler.generateGetContext();
+        ga.invokeInstanceMethod(XPathContext.class, "getStackFrame");
+        ga.invokeInstanceMethod(StackFrame.class, "getStackFrameValues");
+        ga.push(localSlot);
+        ga.arrayLoad(Type.getType(Sequence.class));
+//        ga.push(localSlot);
+//        ga.invokeInstanceMethod(XPathContext.class, "evaluateLocalVariable", Integer.TYPE);
+
+        LabelInfo notInstance = methodInfo.newLabel("notInstance");
+
+        int actualVar = methodInfo.allocateLocal(Sequence.class);
+        ga.storeLocal(actualVar);
+        ga.loadLocal(actualVar);
+        ga.instanceOf(Type.getType(NodeInfo.class));
+        ga.ifZCmp(GeneratorAdapter.EQ, notInstance.label());
+        ga.newInstance(Type.getType(ZeroOrOne.class));
+        ga.dup();
+        ga.loadLocal(actualVar);
+        ga.checkClass(NodeInfo.class);
+        ga.invokeConstructor(ZeroOrOne.class, Item.class);
+        ga.storeLocal(actualVar);
+
+        methodInfo.placeLabel(notInstance);
+        ga.loadLocal(actualVar);
+        ga.checkClass(Sequence.class);
+        compiler.generateGetContext();
+        allocateStatic(compiler, varRef.getLocation());
+        ga.invokeStaticMethod(SequenceTool.class, "process", Sequence.class, XPathContext.class, Location.class);
+
+        methodInfo.releaseLocal(actualVar);
+
+    }
+
+    /**
+     * Generate bytecode to get the LocalVariable from the Context as a ValueRepresentation
+     * Precondition: none.
+     * Postcondition: the stack contains an ValueRepresentation as a SingletonIterator representing the LocalVariable
+     *
+     * @param compiler   the compiler service
+     * @param expression the expression to be compiled
+     */
+    public void compileToIterator(CompilerService compiler,
+                                  Expression expression) throws CannotCompileException {
+
+        LocalVariableReference varRef = (LocalVariableReference) expression;
+
+        Generator ga = compiler.getCurrentGenerator();
+        visitAnnotation(compiler, "LocalVariableReference-Itr - " + varRef.getDisplayName());
+        visitLineNumber(compiler, ga, expression);
+        int localSlot = varRef.getSlotNumber();
+
+        compiler.generateGetContext();
+        ga.invokeInstanceMethod(XPathContext.class, "getStackFrame");
+        ga.invokeInstanceMethod(StackFrame.class, "getStackFrameValues");
+        ga.push(localSlot);
+        ga.arrayLoad(Type.getType(Sequence.class));
+//        ga.push(localSlot);
+//        ga.invokeInstanceMethod(XPathContext.class, "evaluateLocalVariable", Integer.TYPE);
+        ga.invokeInstanceMethod(Sequence.class, "iterate");
+    }
+
+}
+
+//Copyright (c) 2011 Saxonica Limited.

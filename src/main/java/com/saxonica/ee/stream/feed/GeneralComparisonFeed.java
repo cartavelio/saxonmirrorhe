@@ -1,0 +1,237 @@
+package com.saxonica.ee.stream.feed;
+
+import com.saxonica.ee.stream.watch.Terminator;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.GeneralComparison;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.z.IntHashMap;
+import net.sf.saxon.z.IntIterator;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * This class is used when a streaming template requests a general comparison with one operand
+ * being pushed from the streamed input document, and the other being evaluated in pull mode.
+ */
+
+
+public class GeneralComparisonFeed extends ItemFeed {
+
+    private StringCollator collator;
+    /*@Nullable*/ private IntHashMap<Set<AtomicMatchKey>> lookupTable;
+    private List<UntypedAtomicValue> untypedValues;
+    private int operator;
+    private boolean done = false;
+    private Expression pullOperand;
+    private int implicitTimezone;
+
+    public GeneralComparisonFeed(Expression expr, int pushedArg, Feed result, XPathContext context) {
+        super(expr, result, context);
+        final GeneralComparison gc = (GeneralComparison) getExpression();
+        collator = gc.getAtomicComparer().getCollator();
+        operator = gc.getSingletonOperator();
+        if (pushedArg == 1) {
+            operator = Token.inverse(operator);
+        }
+        pullOperand = pushedArg==0 ? gc.getRhsExpression() : gc.getLhsExpression();
+        implicitTimezone = context.getImplicitTimezone();
+    }
+
+    public void open(Terminator terminator) throws XPathException {
+        super.open(terminator);
+        done = false;
+        lookupTable = null;
+    }
+
+    /**
+     * Supply an item to the feed
+     *
+     * @param item the item being fed (in this case, an item in the "pushed" operand
+     *             sequence that is being compared
+     * @throws net.sf.saxon.trans.XPathException
+     *          to report any failure
+     */
+
+    public void processItem(Item<?> item) throws XPathException {
+        if (!done) {
+            // If we haven't already reported a result of true
+            XPathContext context = getContext();
+            ConversionRules rules = context.getConfiguration().getConversionRules();
+            boolean ordered = operator != Token.FEQ && operator != Token.FNE;
+            AtomicValue next = (AtomicValue) item;
+            AtomicMatchKey k1 = next.getXPathComparable(ordered, collator, implicitTimezone);
+            BuiltInAtomicType matchType;
+            if (next instanceof NumericValue) {
+                matchType = BuiltInAtomicType.DOUBLE;
+//            } else if (next instanceof UntypedAtomicValue) {
+//                matchType = BuiltInAtomicType.STRING;
+            } else {
+                matchType = ((AtomicValue) item).getPrimitiveType();
+            }
+            if (lookupTable == null) {
+                lookupTable = new IntHashMap<Set<AtomicMatchKey>>(4);
+                untypedValues = new ArrayList<UntypedAtomicValue>(4);
+                Set<AtomicMatchKey> strings = new HashSet<AtomicMatchKey>(10);
+                lookupTable.put(StandardNames.XS_UNTYPED_ATOMIC, strings);
+                Set<AtomicMatchKey> typed = null;
+                if (!(next instanceof UntypedAtomicValue)) {
+                    typed = new HashSet<>(10);
+                    lookupTable.put(matchType.getFingerprint(), typed);
+                }
+                SequenceIterator comparand = pullOperand.iterate(context);
+                AtomicValue val;
+                while ((val = (AtomicValue) comparand.next()) != null) {
+                    if (val instanceof UntypedAtomicValue) {
+                        untypedValues.add((UntypedAtomicValue)val);
+                        strings.add(((UntypedAtomicValue)val).getXPathComparable(ordered, collator, implicitTimezone));
+                        if (typed != null) {
+                            AtomicValue cval = Converter.convert(val, matchType, rules);
+                            typed.add(cval.getXPathComparable(ordered, collator, implicitTimezone));
+                            if (matchType != BuiltInAtomicType.UNTYPED_ATOMIC) {
+                                strings.add(val.getXPathComparable(ordered, collator, implicitTimezone));
+                            }
+                        }
+                    } else {
+                        BuiltInAtomicType prim;
+                        if (val instanceof NumericValue) {
+                            prim = BuiltInAtomicType.DOUBLE;
+                        } else {
+                            prim = val.getPrimitiveType();
+                        }
+                        Set<AtomicMatchKey> keys = lookupTable.get(prim.getFingerprint());
+                        if (keys == null) {
+                            keys = new HashSet<>(10);
+                            lookupTable.put(prim.getFingerprint(), keys);
+                        }
+                        keys.add(val.getXPathComparable(ordered, collator, implicitTimezone));
+                    }
+                }
+                for (UntypedAtomicValue untypedVal : untypedValues) {
+                    IntIterator types = lookupTable.keyIterator();
+                    while (types.hasNext()) {
+                        int type = types.next();
+                        Set<AtomicMatchKey> keys = lookupTable.get(type);
+                        BuiltInAtomicType atomicType = (BuiltInAtomicType)BuiltInType.getSchemaType(type);
+                        keys.add(Converter.convert(untypedVal, atomicType, rules)
+                                .getXPathComparable(ordered, collator, implicitTimezone));
+                    }
+                }
+            } else {
+                Set<AtomicMatchKey> typed = lookupTable.get(matchType.getFingerprint());
+                if (typed == null) {
+                    // This is the first value of this type found in the stream; convert all the untyped
+                    // values from the other operand
+                    typed = new HashSet<AtomicMatchKey>(10);
+                    lookupTable.put(matchType.getFingerprint(), typed);
+                    for (UntypedAtomicValue val : untypedValues) {
+                        AtomicValue cval = Converter.convert(val, matchType, rules);
+                        typed.add(cval.getXPathComparable(ordered, collator, implicitTimezone));
+                    }
+                }
+            }
+            Set<AtomicMatchKey> lookup = lookupTable.get(matchType.getFingerprint());
+            if (next instanceof UntypedAtomicValue) {
+                IntIterator types = lookupTable.keyIterator();
+                while (types.hasNext() && !done) {
+                    int t = types.next();
+                    AtomicValue converted = Converter.convert(next, (AtomicType)BuiltInType.getSchemaType(t), rules);
+                    lookup = lookupTable.get(t);
+                    if (lookup != null) {
+                        testValue(lookup, converted.getXPathComparable(ordered, collator, implicitTimezone));
+                    }
+                }
+            } else {
+                IntIterator types = lookupTable.keyIterator();
+                while (types.hasNext() && !done) {
+                    int t = types.next();
+                    if (t != StandardNames.XS_UNTYPED_ATOMIC) {
+                        BuiltInAtomicType u = (BuiltInAtomicType)BuiltInType.getSchemaType(t);
+                        if (matchType != u && !Type.isGuaranteedComparable(matchType, u, ordered)) {
+                            throw new XPathException("Comparison between " + matchType.getDisplayName() +
+                                " and " + u.getDisplayName() + " is not allowed", "XPTY0004", getExpression().getLocation());
+                        }
+                    }
+                }
+                testValue(lookup, k1);
+            }
+        }
+    }
+
+    private void testValue(Set<AtomicMatchKey> lookup, AtomicMatchKey k) throws XPathException {
+        if (operator == Token.FEQ) {
+            if (lookup.contains(k)) {
+                //System.err.println("Matched on " + k);
+                done = true;
+                getResult().processItem(BooleanValue.TRUE);
+                getResult().close();
+                lookupTable = null;
+                getTerminator().terminate();
+            }
+        } else if (operator == Token.FNE) {
+            if (lookup.size() > 1 || !lookup.contains(k)) {
+                done = true;
+                getResult().processItem(BooleanValue.TRUE);
+                getResult().close();
+                lookupTable = null;
+                getTerminator().terminate();
+            }
+        } else {
+            for (AtomicMatchKey k2 : lookup) {
+                int c = ((Comparable) k).compareTo(k2);
+                boolean result;
+                switch (operator) {
+                    case Token.FLE:
+                        result = c <= 0;
+                        break;
+                    case Token.FLT:
+                        result = c < 0;
+                        break;
+                    case Token.FGE:
+                        result = c >= 0;
+                        break;
+                    case Token.FGT:
+                        result = c > 0;
+                        break;
+                    default:
+                        result = false;
+                }
+                if (result) {
+                    done = true;
+                    getResult().processItem(BooleanValue.TRUE);
+                    getResult().close();
+                    lookupTable = null;
+                    getTerminator().terminate();
+                    break;
+                }
+            }
+        }
+    }
+
+    public void close() throws XPathException {
+        if (!done) {
+            // If we've come to the end without finding an item that meets the conditions, report the result false
+            getResult().processItem(BooleanValue.FALSE);
+            super.close();
+            lookupTable = null;
+        }
+
+    }
+}
+
+// Copyright (c) 2010 Saxonica Limited.

@@ -1,0 +1,90 @@
+package com.saxonica.ee.stream.adjunct;
+
+import com.saxonica.ee.stream.PostureAndSweep;
+import com.saxonica.ee.stream.Streamability;
+import com.saxonica.ee.stream.feed.Feed;
+import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.om.FleetingParentNode;
+import com.saxonica.ee.stream.watch.WatchManager;
+import com.saxonica.ee.trans.ContextItemStaticInfoEE;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.expr.parser.Location;
+import net.sf.saxon.om.*;
+import net.sf.saxon.trans.XPathException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+
+/**
+ * Handle streaming for calls to user-defined functions with streamability="filter"
+ */
+
+public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
+
+    @Override
+    public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
+        if (reasons == null) {
+            reasons = new ArrayList<String>();
+        }
+
+        UserFunctionCall exp = (UserFunctionCall)getExpression();
+        UserFunction target = exp.getFunction();
+
+
+        Operand[] operanda = exp.getOperanda().copy();
+        operanda[0].setUsage(OperandUsage.TRANSMISSION);
+        for (int i = 1; i < operanda.length; i++) {
+            operanda[i].setUsage(Operand.typeDeterminedUsage(target.getArgumentType(i).getPrimaryType()));
+        }
+
+        return Streamability.generalStreamabilityRules(
+                exp, Arrays.asList(operanda), contextInfo, reasons);
+
+    }
+
+    @Override
+    public Feed makeItemFeed(WatchManager watchManager, final Feed out, final XPathContext context) throws XPathException {
+        UserFunctionCall exp = (UserFunctionCall) getExpression();
+        final Component targetComponent = exp.getTargetComponent(context);
+        final UserFunction target = exp.getTargetFunction(context);
+        final Sequence<?>[] argValues = SequenceTool.makeSequenceArray(target.getArity());
+        for (int i=1; i<argValues.length; i++) {
+            argValues[i] = exp.getArg(i).iterate(context).materialize();
+        }
+        return new ItemFeed(out, context) {
+
+            @Override
+            public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
+                argValues[0] = node;
+                XPathContextMajor c2 = context.newCleanContext();
+                c2.setCurrentComponent(targetComponent);
+                Sequence<?> result =
+                        ((UserFunction)targetComponent.getActor()).call(c2, argValues);
+                result.iterate().forEachOrFail(it -> {
+                    if (it instanceof FleetingParentNode) {
+                        out.startSelectedParentNode((FleetingParentNode) it, locationId);
+                    } else {
+                        out.processItem(it);
+                    }
+                });
+                return null;
+            }
+
+            @Override
+            public void processItem(Item<?> item) throws XPathException {
+                argValues[0] = item;
+                XPathContext c2 = context.newCleanContext();
+                Sequence<?> result = target.call(c2, argValues);
+                processItems(result.iterate(), out);
+            }
+        };
+    }
+
+
+}
+
+// Copyright (c) 2018 Saxonica Limited.

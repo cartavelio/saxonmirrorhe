@@ -1,0 +1,73 @@
+package com.saxonica.ee.schema.fsa;
+
+import com.saxonica.ee.schema.UserComplexType;
+
+import java.util.Collections;
+import java.util.Iterator;
+
+/**
+ * The state of a finite state machine that is processing "suffix" open content. In this state
+ * no terms from the original content model are accepted.
+ */
+public class SuffixState implements State {
+
+    private SuffixState() {
+    }
+
+    public static SuffixState getInstance() {
+        return THE_INSTANCE;
+    }
+
+    private static final SuffixState THE_INSTANCE = new SuffixState();
+
+    /**
+     * Find the edge representing the transition from this state to another state, that is
+     * triggered by a given input token
+     *
+     * @param token the input token, specifically the fingerprint of an element name
+     * @param type  the complex type we are validating against
+     * @return the Edge representing the selected transition of the finite state machine,
+     *         or null if this token is not accepted when in this State (which implies a validation error).
+     */
+
+    /*@Nullable*/
+    public Edge getTransition(int token, UserComplexType type) {
+        return null;
+    }
+
+    public boolean isFinalState() {
+        return true;
+    }
+
+    public CharSequence listAllowedElements() {
+        return "";
+    }
+
+    /**
+     * Get all the wildcard transitions (edges) allowed from this state.
+     *
+     * @return an array of the edges that represent element wildcards. The objects
+     *         returned by this Iterator are {@link com.saxonica.ee.schema.fsa.Edge} objects.
+     */
+
+    public Edge[] getWildcardEdges() {
+        return new Edge[0];
+    }
+
+    /**
+     * Get an iterator over all the transitions (edges) allowed from this state
+     *
+     * @return an Iterator over all the edges from this state. The objects
+     *         returned by this Iterator are {@link com.saxonica.ee.schema.fsa.Edge} objects.
+     */
+
+    /*@NotNull*/
+    public Iterator<Edge> getEdges() {
+        return Collections.EMPTY_LIST.iterator();
+    }
+}
+
+// Copyright (c) 2009 Saxonica Limited.
+
+
+

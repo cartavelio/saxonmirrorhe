@@ -1,0 +1,148 @@
+package com.saxonica.functions.extfn.cpp;
+
+
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.om.*;
+import net.sf.saxon.option.cpp.SaxonCAPI;
+import net.sf.saxon.option.cpp.XdmValueForCpp;
+import net.sf.saxon.s9api.XdmItem;
+import net.sf.saxon.s9api.XdmValue;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The PHPFunctionSet represents additions to the set of Saxon vendor-supplied
+ * extension functions that are available on Saxon-PE/C and Saxon-EE/C
+ */
+public class PHPFunctionSet extends BuiltInFunctionSet {
+
+    private static PHPFunctionSet THE_INSTANCE = new PHPFunctionSet();
+
+    private PHPFunctionSet() {
+        init();
+    }
+
+    public static PHPFunctionSet getInstance() {
+        return THE_INSTANCE;
+    }
+
+    private void init() {
+        register("function", 2, PHPFunction.class, AnyItemType.getInstance(), OPT, 0, SIDE | LATE)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, ArrayItemType.getInstance(), STAR, null);
+
+    }
+
+    @Override
+    public String getNamespace() {
+        return NamespaceConstant.PHP;
+    }
+
+
+    public static class PHPFunction extends SystemFunction {
+
+        // Declare a native method _native()
+        public native Object _phpCall(String name, Object[] args, String[] types);
+
+        @Override
+        public Sequence<?> call(XPathContext context, Sequence[] args) throws XPathException {
+            String phpFuncName = args[0].head().getStringValue();
+            int len = args.length;
+            Object[] funcArgs = null;
+            String[] funcArgTypes = null;
+            if (SaxonCAPI.debug) {
+                System.err.println("PHPCall.call: function name: " + phpFuncName + " Argument length: " + len);
+            }
+            SimpleArrayItem seqArray = (SimpleArrayItem) args[1].materialize();
+            int seqLength = seqArray.arrayLength();
+
+
+            funcArgs = new Object[seqLength];
+            funcArgTypes = new String[seqLength];
+            Sequence<?> seq = null;
+
+            for (int i = 0; i < seqLength; i++) {
+                seq = seqArray.get(i);
+                if (SequenceTool.getLength(seq) == 1) {
+                    if (seq instanceof NodeInfo) {
+                        funcArgTypes[i] = "node";
+                        funcArgs[i] = XdmValue.wrap(seq);
+                    } else if (seq instanceof AtomicValue) {
+                        AtomicValue value = (AtomicValue) seq;
+                        BuiltInAtomicType operandType = value.getPrimitiveType();
+                        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+                        boolean isInteger = th.isSubType(operandType, BuiltInAtomicType.INTEGER);
+                        if (th.isSubType(operandType, BuiltInAtomicType.STRING)) {
+                            funcArgTypes[i] = "string";
+                            funcArgs[i] = value.getStringValue();
+                        } else if (isInteger) {
+                            funcArgTypes[i] = "integer";
+                            funcArgs[i] = new Integer((int) ((IntegerValue) value).longValue());
+                        } else if (th.isSubType(operandType, BuiltInAtomicType.DOUBLE)) {
+                            funcArgTypes[i] = "double";
+                            funcArgs[i] = new Double(((DoubleValue) value).getDoubleValue());
+                        } else if (th.isSubType(operandType, BuiltInAtomicType.LONG)) {
+                            funcArgTypes[i] = "long";
+                            funcArgs[i] = new Long(((Int64Value) value).longValue());
+                        } else if (th.isSubType(operandType, BuiltInAtomicType.FLOAT)) {
+                            funcArgTypes[i] = "float";
+                            funcArgs[i] = new Float(((FloatValue) value).getFloatValue());
+
+                        } else if ((!isInteger) && th.isSubType(operandType, BuiltInAtomicType.DECIMAL)) {
+                            funcArgTypes[i - 1] = "double";
+                            funcArgs[i - 1] = new Double(((DecimalValue) value).getDoubleValue());
+                        } else if (th.isSubType(operandType, BuiltInAtomicType.BOOLEAN)) {
+                            funcArgTypes[i - 1] = "boolean";
+                            funcArgs[i - 1] = new Boolean(((BooleanValue) value).getBooleanValue());
+                        }
+                    } else {
+
+                        funcArgs[i] = XdmValueForCpp.makeArrayFromXdmValue(XdmValue.wrap(seq));
+                        funcArgTypes[i] = "[xdmvalue";
+
+                    }
+                }
+
+            }
+
+            if (SaxonCAPI.debug) {
+                System.err.println("Phpcall.call: Before call to _phpCall ");
+            }
+            Object obj;
+            try {
+                obj = _phpCall(phpFuncName, funcArgs, funcArgTypes);
+            } catch (UnsatisfiedLinkError ex){
+                throw new XPathException("UnsatisfiedLinkError: "+ex.getLocalizedMessage());
+            }
+            if (SaxonCAPI.debug) {
+                System.err.println("Phpcall.call: After call to _phpCall ");
+            }
+            if (obj instanceof Object[]) {
+                Object[] objects = (Object[]) obj;
+                List<XdmItem> nodeList = new ArrayList<XdmItem>(objects.length);
+
+                for (int i = 0; i < objects.length; i++) {
+                    nodeList.add((XdmItem) XdmItem.wrap(NativeCall.convertValueObject(obj, phpFuncName)));
+                }
+                XdmValue values = new XdmValue(nodeList);
+                return values.getUnderlyingValue();
+
+            } else {
+                return NativeCall.convertValueObject(obj, phpFuncName);
+            }
+        }
+    }
+
+
+}

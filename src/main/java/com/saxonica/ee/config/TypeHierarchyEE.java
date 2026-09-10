@@ -1,0 +1,140 @@
+package com.saxonica.ee.config;
+
+import com.saxonica.ee.validate.SchemaElementTest;
+import com.saxonica.functions.hof.TypeHierarchyPE;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.pattern.DocumentNodeTest;
+import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.IntSet;
+
+import java.util.Optional;
+
+/**
+ * Refinement of the TypeHierarchy class to handle function items and schema-aware types such as schema-element(A).
+ */
+
+public class TypeHierarchyEE extends TypeHierarchyPE {
+
+    public TypeHierarchyEE(Configuration config) {
+        super(config);
+    }
+
+    public ItemType getGenericFunctionItemType() {
+        return AnyFunctionType.getInstance();
+    }
+
+
+    /**
+     * Compute the relationship between the allowed content-types of two types
+     *
+     * @param t1 the first type
+     * @param t2 the second types
+     * @param on1 the set of element names allowed by the first type
+     * @param on2 the set of element names allowed by the second type
+     * @return the relationship (same type, subsumes, overlaps, subsumed-by)
+     */
+    protected int computeContentRelationship(ItemType t1, ItemType t2, Optional<IntSet> on1, Optional<IntSet> on2) {
+        int contentRelationship = DISJOINT;
+        boolean nillable1 = true;
+        boolean nillable2 = true;
+
+        if (t1 instanceof DocumentNodeTest) {
+            if (t2 instanceof DocumentNodeTest) {
+                contentRelationship = relationship(((DocumentNodeTest) t1).getElementTest(),
+                        ((DocumentNodeTest) t2).getElementTest());
+            } else {
+                contentRelationship = SUBSUMED_BY;
+            }
+        } else if (t2 instanceof DocumentNodeTest) {
+            contentRelationship = SUBSUMES;
+        } else {
+            // This is changed as a result of spec bug 10065. If t2 is schema-element(e2), it is
+            // no longer sufficient to check the content type of t1 against the declared type of e2
+            // (which might be xs:anyType, as in test schvalid010). Instead it must be checked against
+            // the declared type of the element declaration corresponding to the actual name N of
+            // the element being tested.
+            SchemaType s1 = ((NodeTest) t1).getContentType();
+            SchemaType s2 = ((NodeTest) t2).getContentType();
+            try {
+                if (t1 instanceof SchemaElementTest && on2.isPresent() && on2.get().size() == 1) {
+                    IntIterator ii2 = on2.get().iterator();
+                    int name2 = ii2.hasNext() ? ii2.next() : -1;
+                    SchemaDeclaration decl2 = config.getElementDeclaration(name2);
+                    if (decl2 != null) {
+                        s1 = decl2.getType();
+                    }
+                }
+            } catch (MissingComponentException e) {
+                return OVERLAPS;
+            }
+            try {
+                if (t2 instanceof SchemaElementTest && on1.isPresent() && on1.get().size() == 1) {
+                    IntIterator ii1 = on1.get().iterator();
+                    int name1 = ii1.hasNext() ? ii1.next() : -1;
+                    SchemaDeclaration decl1 = config.getElementDeclaration(name1);
+                    if (decl1 != null) {
+                        s2 = decl1.getType();
+                    }
+                }
+            } catch (MissingComponentException e) {
+                return OVERLAPS;
+            }
+
+            contentRelationship = schemaTypeRelationship(s1, s2);
+
+            nillable1 = ((NodeTest) t1).isNillable();
+            if (nillable1 && t1 instanceof SchemaElementTest && on2.isPresent() && on2.get().size() < 1000) {
+                for (IntIterator fp = on2.get().iterator(); fp.hasNext(); ) {
+                    nillable1 = ((SchemaElementTest) t1).isNillable(fp.next());
+                    if (!nillable1) {
+                        break;
+                    }
+                }
+            }
+            nillable2 = ((NodeTest) t2).isNillable();
+            if (nillable2 && t2 instanceof SchemaElementTest && on1.isPresent() && on1.get().size() < 1000) {
+                for (IntIterator fp = on1.get().iterator(); fp.hasNext(); ) {
+                    nillable2 = ((SchemaElementTest) t2).isNillable(fp.next());
+                    if (!nillable2) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Adjust the results to take nillability into account
+
+        if (nillable1 != nillable2) {
+            switch (contentRelationship) {
+                case SUBSUMES:
+                    if (nillable2) {
+                        contentRelationship = OVERLAPS;
+                        break;
+                    }
+                    break;
+                case SUBSUMED_BY:
+                    if (nillable1) {
+                        contentRelationship = OVERLAPS;
+                        break;
+                    }
+                    break;
+                case SAME_TYPE:
+                    if (nillable1) {
+                        contentRelationship = SUBSUMES;
+                    } else {
+                        contentRelationship = SUBSUMED_BY;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return contentRelationship;
+    }
+
+
+}
+
+// Copyright (c) 2018 Saxonica Limited.

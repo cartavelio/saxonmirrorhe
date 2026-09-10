@@ -1,0 +1,203 @@
+package com.saxonica.ee.schema;
+
+import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.sxpath.XPathDynamicContext;
+import net.sf.saxon.sxpath.XPathExpression;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.*;
+import net.sf.saxon.value.*;
+
+/**
+ * Represents the preprocess facet on a schema-defined simple type. This is a pre-lexical facet
+ * defined as a Saxon extension to XML Schema 1.1: it allows an XPath expression to be used to convert
+ * the value as written (after whitespace normalization) to a different form, which is then validated
+ * using the constraining facets. For example the preprocessing action translate($value, ',', '.') allows
+ * the input value 3,14159 to be converted to 3.14159 which then validates as a double.
+ */
+public class PreprocessFacet extends Facet {
+
+    Configuration config;
+    Assertion action;
+    Assertion reverseAction;
+
+    public PreprocessFacet() {
+    }
+
+    public PreprocessFacet(Assertion action, Assertion reverseAction) {
+        this.action = action;
+        this.reverseAction = reverseAction;
+    }
+
+    /**
+     * Ask whether this is a constraining facet (as distinct from a pre-lexical facet)
+     *
+     * @return true if this is a constraining facet
+     */
+
+    public boolean isConstraining() {
+        return false;
+    }
+
+    public String getName() {
+        return "preprocess";
+    }
+
+    /**
+     * Returns the lexical representation of this facet
+     *
+     * @return the value of this facet
+     */
+
+    /*@Nullable*/
+    public String getValue() {
+        return null;
+    }
+
+    /**
+     * Get the XPath expression representing the action performed by this facet, represented as
+     * an Assertion object
+     */
+
+    public Assertion getAction() {
+        return action;
+    }
+
+    /**
+     * Get the XPath expression representing the reverse action performed by this facet, represented as
+     * an Assertion object
+     */
+
+    public Assertion getReverseAction() {
+        return reverseAction;
+    }
+
+    /**
+     * Set the XPath expression representing the action performed by this facet, represented as
+     * an Assertion object
+     */
+
+    public void setAction(Assertion action) {
+        this.action = action;
+    }
+
+    /**
+     * Set the XPath expression representing the reverse action performed by this facet, represented as
+     * an Assertion object
+     */
+
+    public void setReverseAction(Assertion action) {
+        this.reverseAction = action;
+    }
+
+    /**
+     * Check that this facet is legal when used on a type derived by restriction
+     *
+     * @param base     the type from which the restricted type is derived
+     * @param compiler
+     * @throws net.sf.saxon.type.SchemaException
+     *          if the facet is not legal
+     */
+
+    public void checkFacetRestriction(UserSimpleType type, SimpleType base, SchemaCompiler compiler) throws SchemaException, ValidationException {
+        // TODO: do we need any rules here? What happens if there is a preprocess facet on the base type?
+    }
+
+    /**
+     * Apply the preprocessing defined by this facet
+     *
+     * @param input the lexical value, after whitespace normalization, to be converted
+     * @return the value after preprocessing using the XPath expression defined in this facet
+     */
+
+    public CharSequence preprocess(CharSequence input) throws ValidationException {
+        XPathExpression exp = action.getCondition();
+        try {
+            XPathDynamicContext context = exp.createDynamicContext();
+            if (action.getValueVariable() != null) {
+                context.setVariable(action.getValueVariable(), new StringValue(input));
+            }
+            return exp.evaluateSingle(context).getStringValueCS();
+        } catch (XPathException err) {
+            throw new ValidationException(err);
+        }
+    }
+
+    /**
+     * Apply the postprocessing defined by this facet
+     *
+     * @param input the lexical value to be converted
+     * @return the value after postprocessing using the reverse XPath expression defined in this facet
+     */
+
+    public CharSequence postprocess(CharSequence input) throws ValidationException {
+        if (reverseAction == null) {
+            return input;
+        }
+        XPathExpression exp = reverseAction.getCondition();
+        try {
+            XPathDynamicContext context = exp.createDynamicContext();
+            if (action.getValueVariable() != null) {
+                context.setVariable(reverseAction.getValueVariable(), new StringValue(input));
+            }
+            return exp.evaluateSingle(context).getStringValueCS();
+        } catch (XPathException err) {
+            throw new ValidationException(err);
+        }
+    }
+
+
+    /**
+     * Test whether an atomic value conforms to this facet
+     *
+     * @param value the value to be tested
+     * @return true if the value conforms; false if it doesn't conform, or if the test
+     *         fails
+     */
+
+    public boolean testAtomicValue(AtomicValue value) {
+        return true;
+    }
+
+    public void serializeFacet(SchemaModelSerializer serializer) throws XPathException {
+        serializer.startElement(getName());
+        if (isFixed()) {
+            serializer.emitAttribute("fixed", "true");
+        }
+        action.serialize(serializer);
+        if (reverseAction != null) {
+            reverseAction.serialize(serializer);
+        }
+        serializer.endElement();
+    }
+
+    @Override
+    public Function getFacetAsFunctionItem() {
+        Callable callable = new Callable() {
+            public Sequence<?> call(XPathContext context, Sequence[] arguments) throws XPathException {
+                String key = arguments[0].head().getStringValue();
+                switch (key) {
+                    case "class":
+                        return new StringValue(getName());
+                    case "implementation":
+                        return new ObjectValue<>(PreprocessFacet.this);
+                    case "action":
+                        return action.getComponentAsFunction();
+                    case "reverse action":
+                        return reverseAction.getComponentAsFunction();
+                    case "fixed":
+                        return BooleanValue.get(isFixed());
+                    default:
+                        return EmptySequence.getInstance();
+                }
+            }
+        };
+        return new CallableFunction(1, callable, SchemaComponent.COMPONENT_FUNCTION_TYPE);
+    }
+}
+
+// Copyright (c) 2008 Saxonica Limited. All Rights Reserved
