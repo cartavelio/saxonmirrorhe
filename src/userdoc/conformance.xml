@@ -728,9 +728,10 @@
                   <p>For calendar data types, the year 
                   must be in the range of a signed 32-bit integer; seconds are supported to a
                   fractional precision of nine digits (that is, nanosecond precision). </p>
-                  <p>For durations, the number of months must fit in a 
-                  signed 32-bit integer; the integer number of seconds must fit in a signed 64-bit integer, and the 
-                  precision is to nanoseconds.</p>
+                  <p>For durations, the number of months (that is, <code>years*12 + months</code>) must fit in a 
+                  signed 32-bit integer. From Saxon 13 the seconds component of a duration (the combined
+                  days, hours, minutes, and seconds) is held as a Java <code>BigDecimal</code>, meaning that
+                  there is no practical limit on the range or precision.</p>
                   <p>The maximum length of a sequence (or array) is limited to 2<sup>31</sup>-1 items.</p>
             </li>
             <li>

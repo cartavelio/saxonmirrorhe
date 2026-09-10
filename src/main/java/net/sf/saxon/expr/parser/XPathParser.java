@@ -152,8 +152,8 @@ public class XPathParser {
     private static void initializeOperatorPrecedenceTable() {
         operatorPrecedenceTable.setDefaultValue(-1);
         IntToIntHashMap m = operatorPrecedenceTable;
-        m.put(Token.QMARK_QMARK, 3);
-        m.put(Token.BANG_BANG, 3);
+        m.put(Token.QMARK_QMARK, 3);  // residue of ternary conditionals, no longer supported but still detected
+        m.put(Token.BANG_BANG, 3);    // ditto
         m.put(Token.OR, 4);
         m.put(Token.OR_ELSE, 4);
         m.put(Token.AND, 5);
@@ -862,12 +862,9 @@ public class XPathParser {
                 CSharp.emitCode("goto default;");
             default:
                 Expression e1 = parseBinaryExpression(parseUnaryExpression(), 4);
-                // Process ternary conditional
+                // Process ternary conditional (no longer supported)
                 if (t.currentToken == Token.QMARK_QMARK) {
-                    if (!allowXPath40Syntax) {
-                        grumble("Ternary conditionals (A ?? B !! C) require XPath 4.0 to be enabled (also, note this syntax will be withdrawn)");
-                    }
-                    return parseTernaryExpression(e1);
+                    grumble("Ternary conditionals (A ?? B !! C) have been dropped from the specification");
                 }
                 return e1;
         }

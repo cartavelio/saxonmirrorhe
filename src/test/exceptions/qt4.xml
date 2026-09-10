@@ -153,15 +153,11 @@ Keywords-fn-some-1
    
   
    
-   <exception test-set="prod-ThinArrow"  run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Not yet implemented</reason>
-   </exception>
-   
-   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
+ 
+   <!--<exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
-   </exception>
+   </exception>-->
    
    <!--<exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
@@ -274,7 +270,7 @@ Keywords-fn-some-1
       <reason>Implementation is ahead of the spec</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-array-partition-001
       fo-test-array-partition-002
       fo-test-array-partition-003
@@ -284,7 +280,7 @@ Keywords-fn-some-1
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Function has been dropped from spec</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-spec-examples" 
       test-case=" fo-test-array-values-001
