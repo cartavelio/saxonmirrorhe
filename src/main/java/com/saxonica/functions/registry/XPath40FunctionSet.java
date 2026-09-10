@@ -7,6 +7,7 @@ import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
@@ -44,6 +45,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType ft = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
+
+        SpecificFunctionType navigator = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_NODE},
+                SequenceType.NODE_SEQUENCE);
 
         register("all", 1, e -> e.populate(AllFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
@@ -263,6 +268,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
+
+        register("transitive-closure", 2, e -> e.populate(TransitiveClosure::new, AnyNodeTest.getInstance(), STAR, 0)
+                .arg(0, AnyNodeTest.getInstance(), STAR, EmptySequence.getInstance())
+                .arg(1, navigator, ONE, null));
 
         register("trunk", 1, e -> e.populate(Trunk::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
