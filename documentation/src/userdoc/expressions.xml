@@ -2352,52 +2352,69 @@ return `{$key}={$value}`]]></code></pre>
 
 	<section id="types" title="Types">
 		<h1>Types</h1>
-		<?source https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types ?>
-
-		<p>There are two main categories of type: schema types and item types.</p>
-		<!--<p>TODO add more of an introduction to what is included in this section.</p>-->
 		
-		<p class="qt4">From XPath 4.0, for the purpose of comparing atomic items, the primitive atomic types are
-			divided into a number of type families: atomic items belonging to types in the same family are
-			mutually comparable, items belonging to different type families are not.</p>
-		<!--<p>TODO In the table below, "comparison families" includes families for nodes, and function types
-			not just atomic types, this reflects comparisons using <code>fn:deep-equal</code></p>-->
+		<?source https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#schemas-and-types ?>
+		<p>"Type" is a word that gets used a lot in the XPath specifications and others related to them. The type system of the <i>XQuery and XPath Data Model (XDM)</i> is based on the Schema Component Model described in <i>XML Schema (XSD)</i>.  Most types are pre-defined but in some contexts its is also possible for a user to define a custom type.</p>
+		
+		<aside class="qt4">The type system of <i>XDM 4.0</i> is based on <i>XSD 1.1</i>, rather than <i>XSD 1.0</i>.  For more detail, see the <i>XDM 4.0</i> section on <a class="bodylink" href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xsd-versions">XSD versions</a>.</aside>		
 
-		<h2>Pre-defined types</h2>
+		<div class="qt4">
+			<p>From 4.0, there are several options for a user to define a custom type:</p>
+			<ul>
+				<li>a <a class="bodylink" href="#choice-types">choice</a> type, which is the union of 2 or more types</li>
+				<li>a <a class="bodylink" href="#record-types">record</a> type, which can be used to contrain the structure and contents of a map</li>
+				<li>an <a class="bodylink" href="#enum-types">enumeration</a> type, which can be used to constrain string values</li>
+				<li>a <a class="bodylink" href="#node-types">node type</a> (element, attribute or document), which can be used to constrain the contents of a sequence</li>
+				<li>a <a class="bodylink" href="#named-item-types">named item type</a>, which enables a user to assign a name to a custom type, for easier re-use</li>
+			</ul>
+		</div>
+		
+		<p>As the type system is hierarchical, in some contexts it is necessary or useful for a sub-type to be recognised as belonging to its super-type or vice versa.  The XDM defines <a href="#coercion">coercion rules</a> to assist with this being handled consistently across implementations.</p>
 
-		<!-- See documentation/tools/xml/datatypes.xml for the source that this table will be generated from at build time. -->
-		<xi:include href="datatypes/datatypes_table.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />	
+		<section id="pre-defined-datatypes" title="Pre-defined types">
+			<h2>Pre-defined types</h2>
 
-		<p>For more detailed information about types, see:</p>
-		<ul>
-			<li>
-				<p>
-					<a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types">Types</a> in the
-					XPath 4.0 specification
-				</p>
-			</li>
-			<li>
-				<p>
-					<a
-						href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#schemas-and-types"
-						>Schemas and Types</a> in the XDM 4.0 specification
-				</p>
-			</li>
-			<li>
-				<p>
-					<a
-						href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#atomic-items"
-						>Atomic Items</a> in the XDM 4.0 specification
-				</p>
-			</li>
-			<li>
-				<p>
-					<a
-						href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-atomic-comparisons"
-						>Atomic Comparisons: An Overview (Non-Normative)</a> in the XPath 4.0 specification
-				</p>
-			</li>
-		</ul>
+			<p>Most pre-defined types are defined in the XSD but the XDM and XPath specifications augment these with additional types, such as:</p>
+			<ul>
+				<li><code>xs:dateTimeStamp</code></li>
+				<li><code>xs:error</code></li>
+				<li><code>xs:numeric</code></li>		
+				<li>items types</li>										
+			</ul>
+			
+			<p>For more detailed information about types, see:</p>
+			<ul>
+				<li>
+					<p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#schemas-and-types">Schemas and Types</a> in the XDM 4.0 specification</p>
+				</li>
+				<li>
+					<p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types">Types</a> in the XPath 4.0 specification</p>
+				</li>
+				<li>
+					<p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#atomic-items">Atomic Items</a> in the XDM 4.0 specification</p>
+				</li>
+				<li>
+					<p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-atomic-comparisons">Atomic Comparisons: An Overview (Non-Normative)</a> in the XPath 4.0 specification</p>
+				</li>
+			</ul>
+		
+			<h3>Table of pre-defined types</h3>
+			
+			<p>The table below is an attempt to create an alphabetical list of all the types, how they relate to each other and the categories they are formally or colloquially assigned to in the specification documents.</p>
+			
+			<p>There are two main categories of pre-defined type: schema types (which are mostly prefixed with <code>xs:</code>) and item types (which are suffixed with a pair of round brackets).  In the table below, additional categories are listed.  These are classes of type defined in one or more the specifications; see abbreviations brackets.</p>
+			
+			
+			
+			<p class="qt4">From XPath 4.0, for the purpose of comparing atomic items, the primitive atomic types are
+				divided into a number of comparison families: atomic items belonging to types in the same family are
+				mutually comparable, items belonging to different type families are not.</p>
+
+
+			<!-- See documentation/tools/xml/datatypes.xml for the source that this table will be generated from at build time. -->
+			<xi:include href="datatypes/datatypes_table.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />	
+		</section>
+
 
 
 		<section id="choice-types" title="Choice types" class="qt4">
