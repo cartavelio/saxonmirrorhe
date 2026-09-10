@@ -83,6 +83,11 @@ public class ProcessorDataAccumulator {
         String paramNamei = CTypeConversion.toJavaString(cparamName);
         Object object = SaxonCAPI.objectHandles.get(objectRef);
 
+        if(SaxonCAPI.debug) {
+            System.err.println("ProcessorDataAccumulator - data-pair - addProcessor paramName= " + paramNamei);
+            System.err.println("ProcessorDataAccumulator - data-pair - addProcessorValue= " +object.getClass().getName());
+        }
+
         processorData.paramNames.add(paramNamei);
         processorData.values.add(object);
 
@@ -97,6 +102,11 @@ public class ProcessorDataAccumulator {
         String paramNamei = CTypeConversion.toJavaString(cpropName);
         String object = CTypeConversion.toJavaString(cpropvalue);
 
+        if(SaxonCAPI.debug) {
+            System.err.println("ProcessorDataAccumulator - pair - addProcessor paramName= " + paramNamei);
+            System.err.println("ProcessorDataAccumulator - pair - addProcessorValue= " +object);
+        }
+
         processorData.paramNames.add(paramNamei);
         processorData.values.add(object);
 
@@ -108,6 +118,10 @@ public class ProcessorDataAccumulator {
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
         Object object = SaxonCAPI.objectHandles.get(objectRef);
+
+        if(SaxonCAPI.debug) {
+            System.err.println("ProcessorDataAccumulator - addProcessorValue type= " + object.getClass().getName());
+        }
 
         processorData.values.add(object);
 

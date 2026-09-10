@@ -645,6 +645,12 @@ public class SaxonCAPI {
         if (processorDataAccumulator != null) {
             params = processorDataAccumulator.getParameterNames();
             values = processorDataAccumulator.getValues();
+            if(debug) {
+                for(int i = 0 ; i < values.length; i++) {
+                    System.err.println("value ["+i+"] = "+values[i].getClass().getName());
+                }
+
+            }
         }
 
         if (params == null || values == null) {
@@ -798,6 +804,13 @@ public class SaxonCAPI {
             //fast track for primitive values
             valueForCpp = getXdmValue(value);
             if (debug) {
+                if(value != null) {
+                    System.err.println("Java DEBUG: value type = " + value.getClass().getName());
+                    System.err.println("Java DEBUG: value = " + value);
+                }
+                if(valueForCpp == null) {
+                    System.err.println("Java DEBUG: value is null");
+                }
                 System.err.println("DEBUG: primitive value found");
             }
         }
