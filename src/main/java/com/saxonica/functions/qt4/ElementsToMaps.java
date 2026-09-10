@@ -411,6 +411,7 @@ public class ElementsToMaps extends SystemFunction {
                     }
                     if (knownChild == 0) {
                         properties |= childFingerprint;
+                        knownChild = childFingerprint;
                     }
                 }
             }
