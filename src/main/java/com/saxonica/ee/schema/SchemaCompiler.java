@@ -61,8 +61,8 @@ public class SchemaCompiler {
     private SchemaDocumentTransformer chameleonTransformer = null;
     private SchemaDocumentTransformer overrideTransformer = null;
     private final Set<String> componentsReportedMissing = new HashSet<>();
-    private final Set<UserComplexType> scheduledForAutomaton = new HashSet<>();
-    private final Set<UserComplexType[]> scheduledForAutomatonCheck = new HashSet<>();
+    private final Set<CompiledComplexType> scheduledForAutomaton = new HashSet<>();
+    private final Set<CompiledComplexType[]> scheduledForAutomatonCheck = new HashSet<>();
 
 
     /**
@@ -135,8 +135,12 @@ public class SchemaCompiler {
     public PreparedSchema loadSources(Iterable<Source> sources) throws SchemaException {
         try {
             PreparedSchema scmSchema = null;
-            PreparedSchema xsdSchema = null;
+            PreparedSchema xsdSchema = new PreparedSchema(getConfiguration());
+            setPreparedSchema(xsdSchema);
+
             int numberOfSources = 0;
+            List<SchemaDocument> schemaDocuments = new ArrayList<>();
+
             for (Source source : sources) {
                 numberOfSources++;
 
@@ -164,13 +168,7 @@ public class SchemaCompiler {
                         throw new SchemaException(e);
                     }
                 } else {
-                    // TODO: defer validation until all documents have been read
-                    if (xsdSchema == null) {
-                        xsdSchema = new PreparedSchema(getConfiguration());
-                    }
-                    PreparedSchema ps = validate(schemadoc);
-                    xsdSchema.addSchema(ps);
-                    xsdSchema.setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
+                    schemaDocuments.add(schemadoc);
                 }
             }
             if (scmSchema != null) {
@@ -179,10 +177,24 @@ public class SchemaCompiler {
                 }
                 return scmSchema;
             }
-            if (xsdSchema != null) {
-                return xsdSchema;
+
+            for (SchemaDocument doc : schemaDocuments) {
+                XSDSchemaElement schemaRoot = doc.getXSDSchemaElement();
+                int errors = schemaRoot.getErrorCount();
+                if (errors > 0) {
+                    String msg = errors == 1 ? "One error was" : errors + " errors were";
+                    throw new SchemaException(msg + " found while processing the schema");
+                }
+                xsdSchema.setNamespaceStatus(doc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
+                doc.getXSDSchemaElement().getSchema().copyTo(xsdSchema, this);
             }
-            return new PreparedSchema(getConfiguration());
+            boolean valid = xsdSchema.validate(this);
+            if (!valid) {
+                throw new SchemaException("The schema is invalid");
+            }
+            makeAllAutomata();
+            checkAllAutomata();
+            return xsdSchema;
 
         } catch (UncheckedXPathException e) {
             // indicates that the error reporter asked for termination
@@ -613,12 +625,16 @@ public class SchemaCompiler {
             preparedSchema.addGlobalParam(param);
         }
 
-        compile();
-        makeAllAutomata();
-        checkAllAutomata();
+        recompile();
         PreparedSchema ps = preparedSchema;
         preparedSchema = null;
         return ps;
+    }
+
+    public void recompile() throws SchemaException {
+        compile();
+        makeAllAutomata();
+        checkAllAutomata();
     }
 
     /**
@@ -744,7 +760,7 @@ public class SchemaCompiler {
      * @param type the complex type for which an FSA is needed
      */
 
-    public void scheduleAutomaton(UserComplexType type) {
+    public void scheduleAutomaton(CompiledComplexType type) {
         scheduledForAutomaton.add(type);
     }
 
@@ -755,8 +771,8 @@ public class SchemaCompiler {
      * @param base the base (super-) complex type
      * @param sub the derived complex type
      */
-    public void scheduleAutomatonCheck(UserComplexType base, UserComplexType sub) {
-        scheduledForAutomatonCheck.add(new UserComplexType[]{base, sub});
+    public void scheduleAutomatonCheck(CompiledComplexType base, CompiledComplexType sub) {
+        scheduledForAutomatonCheck.add(new CompiledComplexType[]{base, sub});
     }
 
     /**
@@ -766,7 +782,7 @@ public class SchemaCompiler {
      */
 
     public void makeAllAutomata() throws SchemaException {
-        for (UserComplexType type : scheduledForAutomaton) {
+        for (CompiledComplexType type : scheduledForAutomaton) {
             type.makeAutomaton(this);
         }
     }
@@ -777,24 +793,24 @@ public class SchemaCompiler {
      * @throws SchemaException if any restricted type is not validly derived from its base type
      */
     public void checkAllAutomata() throws SchemaException {
-        for (UserComplexType[] pair : scheduledForAutomatonCheck) {
-            UserComplexType sub = pair[1];
-            UserComplexType base = pair[0];
+        for (CompiledComplexType[] pair : scheduledForAutomatonCheck) {
+            CompiledComplexType sub = pair[1];
+            CompiledComplexType base = pair[0];
             String subsumeError = FiniteStateMachine.subsumesMachine(
                     base.getFiniteStateMachine(), sub.getFiniteStateMachine(), this);
             if (subsumeError != null) {
                 String message;
                 if (subsumeError.startsWith("?")) {
                     message = "Saxon is unable to determine whether or not the" +
-                                           " content model of the complex type " + sub.getDescription() +
-                                           " is a valid restriction of the content model of the type " + base.getDescription() + ". "
+                                           " content model of the complex type " + sub.getType().getDescription() +
+                                           " is a valid restriction of the content model of the type " + base.getType().getDescription() + ". "
                                            + subsumeError.substring(1);
                 } else {
-                    message = "The content model of the complex type " + sub.getDescription() +
-                                           " is not a valid restriction of the content model of the type " + base.getDescription()
+                    message = "The content model of the complex type " + sub.getType().getDescription() +
+                                           " is not a valid restriction of the content model of the type " + base.getType().getDescription()
                                            + ". " + subsumeError;
                 }
-                error(message, sub);
+                error(message, sub.getType());
                 throw new SchemaException(message);
             }
         }

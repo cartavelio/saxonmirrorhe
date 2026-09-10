@@ -578,23 +578,14 @@ public class SchemaTestSuiteDriver {
         List<Source> sources = new ArrayList<>(4);
         for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
             XdmNode schemaDocumentRef = (XdmNode) schemaDocRefItem;
+            String role = schemaDocumentRef.attribute("role");
+            if ("overridden".equals(role) || "imported".equals(role)) {
+                // Ignore schema documents marked as overridden or imported
+                continue;
+            }
             println("Loading schema at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
             XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, processor);
-            XdmSequenceIterator<XdmNode> si = schemaDoc.axisIterator(Axis.CHILD);
-            XdmNode schemaElement = (si.hasNext() ? si.next() : null);
-            String targetNamespace = (schemaElement == null ? null : schemaElement.getAttributeValue(QN_targetNamespace));
-            if (targetNamespace != null && processor.getUnderlyingConfiguration().isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
-                // do nothing
-                // TODO: this is the only way I can get MS additional test addB132 to work.
-                // This test has two schema documents, A and B; A imports B, and the test catalog
-                // requests both A and B to be loaded.
-                // It's not ideal: addSchemaSource() ought to be a no-op if the schema components
-                // are already loaded, but in fact recompiling the imported schema document on its
-                // own is losing the substitution group membership that was defined in the
-                // importing document.
-            } else {
-                 sources.add(schemaDoc.asSource());
-            }
+            sources.add(schemaDoc.asSource());
         }
         try {
             processor.getSchemaManager().load(sources.toArray(new Source[0])); // TODO: use an ErrorListener
@@ -676,7 +667,7 @@ public class SchemaTestSuiteDriver {
             props.setProperty(OutputKeys.INDENT, "yes");
             Receiver serializer = config.getSerializerFactory().getReceiver(result, props);
 
-            schema.exportComponents(serializer);
+            //schema.exportComponents(serializer);
             String scm = sw.toString();
             try {
                 scmValidator.validate(new StreamSource(new StringReader(scm)));

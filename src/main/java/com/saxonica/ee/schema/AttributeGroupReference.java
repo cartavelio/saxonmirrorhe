@@ -235,9 +235,6 @@ public final class AttributeGroupReference extends SchemaStructure
                 target = schema.getAttributeGroup(getTargetComponentName());
             }
             if (target == null) {
-                target = getConfiguration().getUnnamedSchema().getAttributeGroup(getTargetComponentName());
-            }
-            if (target == null) {
                 if (compiler.isAllowDanglingReferences()) {
                     compiler.warning("Unknown attribute group " + qName.getEQName()
                                              + " (substituting an empty attribute group)", SaxonErrorCode.SXSD1000, this);

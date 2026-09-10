@@ -707,6 +707,7 @@ public class SchemaModelLoader extends ProxyReceiver {
     private static class ComplexTypeHandler extends SCMNodeHandler {
 
         UserComplexType complexType;
+        CompiledComplexType compiledComplexType;
 
         @Override
         public SCMNodeHandler handleChildElement(String localName) {
@@ -726,7 +727,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 case "modelGroupParticle":
                     return new ParticleHandler(complexType);
                 case "finiteStateMachine":
-                    return new FiniteStateMachineHandler(complexType);
+                    return new FiniteStateMachineHandler(compiledComplexType);
                 case "assertion":
                     return new AssertionHandler(complexType);
                 default:
@@ -1658,8 +1659,8 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         private final FiniteStateMachine fsm;
 
-        public FiniteStateMachineHandler(UserComplexType complexType) {
-            fsm = new FiniteStateMachine(complexType, true);
+        public FiniteStateMachineHandler(CompiledComplexType complexType) {
+            fsm = new FiniteStateMachine(complexType.getType(), true);
             complexType.setFiniteStateMachine(fsm);
         }
 
@@ -1936,8 +1937,10 @@ public class SchemaModelLoader extends ProxyReceiver {
                 }
                 case FIXUP_COMPLEX_TYPE_OPEN_CONTENT_SUFFIX: {
                     Wildcard wildcard = (Wildcard) loader.components.get(targetId);
-                    ((UserComplexType) source).setOpenContentWildcard(wildcard, "suffix", true);
-                    FiniteStateMachine fsm = ((UserComplexType) source).getFiniteStateMachine();
+                    UserComplexType type = ((UserComplexType) source);
+                    type.setOpenContentWildcard(wildcard, "suffix", true);
+                    CompiledComplexType cct = loader.getSchema().getCompiledComplexType(type);
+                    FiniteStateMachine fsm = cct.getFiniteStateMachine();
                     if (fsm != null) {
                         fsm.setOpenContentWildcard(wildcard, false);
                     }
@@ -1945,8 +1948,10 @@ public class SchemaModelLoader extends ProxyReceiver {
                 }
                 case FIXUP_COMPLEX_TYPE_OPEN_CONTENT_INTERLEAVE: {
                     Wildcard wildcard = (Wildcard) loader.components.get(targetId);
-                    ((UserComplexType) source).setOpenContentWildcard(wildcard, "interleave", true);
-                    FiniteStateMachine fsm = ((UserComplexType) source).getFiniteStateMachine();
+                    UserComplexType type = ((UserComplexType) source);
+                    type.setOpenContentWildcard(wildcard, "interleave", true);
+                    CompiledComplexType cct = loader.getSchema().getCompiledComplexType(type);
+                    FiniteStateMachine fsm = cct.getFiniteStateMachine();
                     if (fsm != null) {
                         fsm.setOpenContentWildcard(wildcard, true);
                     }

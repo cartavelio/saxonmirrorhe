@@ -119,10 +119,25 @@ public class PreparedSchema implements Schema, NotationSet {
     private IntHashMap<ElementDecl> elementsByFingerprint = null;
 
     /**
-     * A table of substitution group members for each element, indexed by fingerprint
+     * A table of substitution group members for each element declaration. Note that the set of substitution
+     * group members for an element can vary from one schema to another, depending on what other element
+     * declarations are present
      */
 
     private final IdentityHashMap<ElementDecl, Set<ElementDecl>> substitutionGroups = new IdentityHashMap<>();
+
+    /**
+     * A table of compiled complex types in this schema. There should be one entry for every
+     * {@code UserComplexType} present in the schema.
+     */
+
+    private final IdentityHashMap<UserComplexType, CompiledComplexType> compiledComplexTypes = new IdentityHashMap<>();
+
+    /**
+     * A table holding, for each user-defined type T, a set of complex types derived from T by extension
+     */
+
+    private final IdentityHashMap<UserDefinedType, Set<UserComplexType>> typeExtensions = new IdentityHashMap<>();
 
     /**
      * Index of identity constraints (indexed by their name)
@@ -200,27 +215,16 @@ public class PreparedSchema implements Schema, NotationSet {
     }
 
     /**
-     * Create a new Schema definition, loading a supplied schema
-     *
-     * @param config The configuration object holding system configuration information
+     * Create a new schema by loading a set of schema components from an SCM file
+     * @param scm the SCM file
+     * @return a schema built from the SCM file
      */
 
-    public PreparedSchema(EnterpriseConfiguration config, Source schemaSource) throws SchemaException {
-        this(config);
-        addSchemaSource(schemaSource, null, new SchemaCompiler(config));
-    }
-
-    /**
-     * Create a new Schema definition, loading a supplied schema
-     *
-     * @param config The configuration object holding system configuration information
-     */
-
-    public PreparedSchema(EnterpriseConfiguration config, Source schemaSource, ErrorReporter reporter) throws SchemaException {
-        this(config);
-        SchemaCompiler compiler = new SchemaCompiler(config);
-        compiler.setErrorReporter(reporter);
-        addSchemaSource(schemaSource, null, compiler);
+    public static PreparedSchema fromScm(Configuration config, Source scm) throws XPathException {
+        config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
+        PreparedSchema ps = new PreparedSchema((EnterpriseConfiguration)config);
+        ps.importComponents(scm);
+        return ps;
     }
 
     /**
@@ -541,6 +545,14 @@ public class PreparedSchema implements Schema, NotationSet {
         return null;
     }
 
+    public CompiledComplexType getCompiledComplexType(UserComplexType type) {
+        return compiledComplexTypes.get(type);
+    }
+
+    public CompiledComplexType getCompiledComplexType(StructuredQName typeName) {
+        return compiledComplexTypes.get(typesByName.get(typeName));
+    }
+
     /**
      * Get all the named simple and complex types defined in this schema.
      * This iterable will not include built-in types or anonymous types.
@@ -605,6 +617,24 @@ public class PreparedSchema implements Schema, NotationSet {
     }
 
     /**
+     * Get the set of complex types that have been defined as extensions of a given type.
+     * Note that we do not seal the schema namespace, so this list is not necessarily final; we must
+     * assume that new extensions of built-in simple types can be added at any time
+     *
+     * @param type the type whose extensions are required
+     */
+
+    @Override
+    public Set<UserComplexType> getExtensionsOfType(SchemaType type) {
+        if (type instanceof UserDefinedType) {
+            Set<UserComplexType> types = typeExtensions.get(((UserDefinedType)type));
+            return types == null ? Collections.emptySet() : types;
+        } else {
+            return getExtensionsOfBuiltInType(type.getFingerprint());
+        }
+    }
+
+    /**
      * Register a complex type that extends a built-in simple type
      *
      * @param fp        the fingerprint of the built-in type
@@ -620,6 +650,18 @@ public class PreparedSchema implements Schema, NotationSet {
             set = new HashSet<>(4);
             extensionsOfBuiltInTypes.put(fp, set);
         }
+        set.add(extension);
+    }
+
+    /**
+     * Register a complex type that extends a user-defined type
+     *
+     * @param baseType  the user-defined type that is extended
+     * @param extension the complex type that extends the base type
+     */
+
+    public void registerExtensionOfUserDefinedType(UserDefinedType baseType, UserComplexType extension) {
+        Set<UserComplexType> set = typeExtensions.computeIfAbsent(baseType, k -> new HashSet<>(4));
         set.add(extension);
     }
 
@@ -669,12 +711,7 @@ public class PreparedSchema implements Schema, NotationSet {
      */
 
     public ElementDecl getElementDecl(StructuredQName name) {
-        ElementDecl decl = elementsByName.get(name);
-//        if (decl == null && isBuiltInNamespace(name.getNamespaceUri()) ) {
-//            config.getSchemaForBuiltInNamespace(name.getNamespaceUri());
-//            decl = elementsByName.get(name);
-//        }
-        return decl;
+        return elementsByName.get(name);
     }
 
     /**
@@ -1177,10 +1214,10 @@ public class PreparedSchema implements Schema, NotationSet {
                 if (result && (s instanceof SimpleTypeDefinition)) {
                     UserSimpleType st = ((SimpleTypeDefinition) s).getWorkingType();
                     typesByName.put(st.getTypeName(), st);
-                    PreparedSchema superSchema = compiler.getConfiguration().getUnnamedSchema();
-                    if (superSchema.getSchemaType(st.getTypeName()) == s) {
-                        superSchema.typesByName.put(st.getTypeName(), st);
-                    }
+//                    PreparedSchema superSchema = compiler.getConfiguration().getUnnamedSchema();
+//                    if (superSchema.getSchemaType(st.getTypeName()) == s) {
+//                        superSchema.typesByName.put(st.getTypeName(), st);
+//                    }
                 }
             }
         }
@@ -1216,7 +1253,7 @@ public class PreparedSchema implements Schema, NotationSet {
             throws SchemaException {
         if (ref.isDangling()) {
             // we've been here before and failed; don't repeat the error message
-            return ref.getTarget();
+            return null;
         }
         ref.tryToResolve(compiler, fatal);
         if (ref.isResolved()) {
@@ -1447,8 +1484,8 @@ public class PreparedSchema implements Schema, NotationSet {
     }
 
     public void exportComponents(Receiver out) throws XPathException {
-        SchemaModelSerializer serializer = new SchemaModelSerializer(getConfiguration(), out);
-        serializer.serialize(this);
+        SchemaModelSerializer serializer = new SchemaModelSerializer(this, out);
+        serializer.serialize();
     }
 
     /**
@@ -1712,7 +1749,7 @@ public class PreparedSchema implements Schema, NotationSet {
         ContentValidator contentValidator = null;
         if (validation == Validation.BY_TYPE) {
             List<ValidationFailure> failures = new ArrayList<>(1);
-            contentValidator = ContentValidator.makeValidatorForType(null, schemaType, pipe, destination, failures);
+            contentValidator = ContentValidator.makeValidatorForType(null, schemaType, vc, destination, failures);
             if (!failures.isEmpty()) {
                 throw failures.get(0).makeException();
             }
@@ -1844,6 +1881,18 @@ public class PreparedSchema implements Schema, NotationSet {
         }
         return type;
     }
+
+    public CompiledComplexType compileComplexType(SchemaCompiler compiler, UserComplexType type) throws SchemaException {
+        CompiledComplexType cct = getCompiledComplexType(type);
+        if (cct != null) {
+            return cct;
+        }
+        cct = new CompiledComplexType(this, type);
+        cct.compile(compiler);
+        compiledComplexTypes.put(type, cct);
+        return cct;
+    }
+
 
 
 }

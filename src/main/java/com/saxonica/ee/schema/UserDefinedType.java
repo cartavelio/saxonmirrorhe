@@ -6,10 +6,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.type.*;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * This class represents a user-defined simple type or complex type as defined in XML Schema.
  */
@@ -59,11 +55,6 @@ public abstract class UserDefinedType extends SchemaStructure
 
     private StructuredQName qName = null;
 
-    /**
-     * The set of all the types that are derived by extension from this type
-     */
-
-    protected Set<UserComplexType> extendedTypes;
 
     /**
      * Default constructor. For internal use only.
@@ -467,43 +458,7 @@ public abstract class UserDefinedType extends SchemaStructure
         return s1.equals(s2);
     }
 
-    /**
-     * Register another type as an extension of this type
-     *
-     * @param derived the type that is derived from this one by extension
-     */
 
-    protected void registerExtensionType(UserComplexType derived) {
-        if (extendedTypes == null) {
-            extendedTypes = new HashSet<UserComplexType>(5);
-        }
-        extendedTypes.add(derived);
-    }
-
-    /**
-     * Get all the types defined as extensions of this type, transitively
-     *
-     * @return the set of complex types derived by extension from this type, either directly
-     *         or indirectly
-     */
-
-    public Set<UserComplexType> getExtensionTypes() {
-        if (extendedTypes == null) {
-            return Collections.emptySet();
-        } else {
-            return extendedTypes;
-        }
-    }
-
-    /**
-     * Set the set of types derived by extension from this one
-     *
-     * @param types the set of extended types
-     */
-
-    public void setExtendedTypes(Set<UserComplexType> types) {
-        extendedTypes = types;
-    }
 }
 
 // Copyright (c) 2004-2023 Saxonica Limited

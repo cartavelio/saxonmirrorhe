@@ -213,9 +213,12 @@ public abstract class IdentityConstraint extends SchemaStructure
 
     public void typeCheck(final SchemaCompiler compiler, SchemaType contextType) throws XPathException {
         final EnterpriseConfiguration config = compiler.getConfiguration();
+
         IndependentContext env = new IndependentContext(config);
         env.setWarningHandler((message, code, loc) -> compiler.warning(message, code, this));
         env.setSchemaAware(true);
+        env.getPackageData().setImportedSchema(compiler.getPreparedSchema());
+
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
         ItemType contextItemType = new ContentTypeTest(Type.ELEMENT, contextType, config, false);
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, true);

@@ -10,6 +10,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class JSFunctionLibrary implements FunctionLibrary {
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
         return NamespaceUri.GLOBAL_JS.equals(functionName.getComponentName().getNamespaceUri());
     }
 

@@ -30,6 +30,7 @@ public class ComplexContentValidator extends AttributeValidator {
 
     // The complex type that we are validating against
     private UserComplexType type;
+    private CompiledComplexType compiledType;
 
     // Boolean to indicate whether mixed content is allowed. If not, all non-whitespace
     // character data is rejected
@@ -66,7 +67,7 @@ public class ComplexContentValidator extends AttributeValidator {
      * @throws MissingComponentException if the schema is incomplete or invalid
      */
 
-    public ComplexContentValidator(/*@Nullable*/ ElementDecl declaration, UserComplexType type, Receiver next) throws MissingComponentException {
+    public ComplexContentValidator(/*@Nullable*/ ElementDecl declaration, CompiledComplexType type, Receiver next) throws MissingComponentException {
         super(next);
         setSchemaType(type);
         if (declaration != null) {
@@ -87,14 +88,15 @@ public class ComplexContentValidator extends AttributeValidator {
     /**
      * Set the schema type against which this validator is to validate the instance element
      *
-     * @param type the schema type used for validation
+     * @param compiledType the schema type used for validation
      * @throws MissingComponentException if there is a problem with the schema
      */
 
-    public void setSchemaType(UserComplexType type) throws MissingComponentException {
-        this.type = type;
+    public void setSchemaType(CompiledComplexType compiledType) throws MissingComponentException {
+        this.compiledType = compiledType;
+        this.type = compiledType.getType();
         mixed = type.isMixedContent();
-        state = type.getInitialState();
+        state = compiledType.getInitialState();
         setAnnotation(type);
         setAttributeGroup(type.getCombinedAttributeGroup());
     }
@@ -142,7 +144,7 @@ public class ComplexContentValidator extends AttributeValidator {
         final Edge edge = state.getTransition(fingerprint, type, getValidationContext().getSchema());
         if (edge == null) {
 
-            FiniteStateMachine machine = type.getFiniteStateMachine();
+            FiniteStateMachine machine = compiledType.getFiniteStateMachine();
             Wildcard openContentWildcard = machine.getOpenContentWildcard();
             if (openContentWildcard != null &&
                     openContentWildcard.matches(elemName, true, getValidationContext().getSchema(), type)) {
@@ -482,7 +484,7 @@ public class ComplexContentValidator extends AttributeValidator {
     private void recover(NodeName elemName, AttributeMap attributes,
                          NamespaceMap namespaces, Location locationId, int properties) throws XPathException {
         childValidator = null;
-        SchemaType childType = type.getContextDeterminedTypeForElement(elemName.getStructuredQName());
+        SchemaType childType = compiledType.getContextDeterminedTypeForElement(elemName.getStructuredQName());
         if (childType != null && !(childType.isComplexType() && ((ComplexType) childType).isAbstract())) {
             List<ValidationFailure> failures = new ArrayList<>(1);
             childValidator = makeValidator(null, elemName.getStructuredQName(), locationId, getValidationContext(), childType,

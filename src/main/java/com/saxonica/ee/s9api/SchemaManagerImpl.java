@@ -9,6 +9,7 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -153,44 +154,6 @@ public class SchemaManagerImpl extends SchemaManager {
      *                                              with the schema components already held by this SchemaManager.
      */
 
-    //@Override
-    public synchronized XsdSchema loadXXXX(Source... sources) throws SaxonApiException {
-        if (sealed) {
-            throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
-        }
-        sealed = true;
-        try {
-            final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
-            schema = new PreparedSchema(config);
-            schema.setXsdVersion(xsdVersion);
-            SchemaCompiler compiler = new SchemaCompiler(config);
-            compiler.setLanguageVersion(xsdVersion);
-            compiler.setPreparedSchema(schema);
-            for (Source source : sources) {
-                if (source instanceof StreamSource) {
-                    if (((StreamSource) source).getInputStream() == null &&
-                            ((StreamSource) source).getReader() == null &&
-                            source.getSystemId() != null) {
-                        ResourceRequest request = new ResourceRequest();
-                        request.uri = source.getSystemId();
-                        request.nature = ResourceRequest.XSD_NATURE;
-                        Source s2 = processor.getUnderlyingConfiguration().getResourceResolver().resolve(request);
-                        if (s2 != null) {
-                            source = s2;
-                        }
-                    }
-                }
-                schema.addSchemaSource(source, errorReporter, compiler);
-            }
-            if (!schemaName.equals("#local")) {
-                config.registerNamedSchema(schemaName, schema);
-            }
-            return new XsdSchemaImpl(schema);
-        } catch (XPathException e) {
-            throw new SaxonApiException(e);
-        }
-    }
-
     @Override
     public synchronized XsdSchema load(Source... sources) throws SaxonApiException {
         if (sealed) {
@@ -201,11 +164,11 @@ public class SchemaManagerImpl extends SchemaManager {
             final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
             SchemaCompiler compiler = new SchemaCompiler(config);
             compiler.setLanguageVersion(xsdVersion);
-            PreparedSchema ps = compiler.loadSources(Arrays.asList(sources));
+            schema = compiler.loadSources(Arrays.asList(sources));
             if (!schemaName.equals("#local")) {
-                config.registerNamedSchema(schemaName, ps);
+                config.registerNamedSchema(schemaName, schema);
             }
-            return new XsdSchemaImpl(ps);
+            return new XsdSchemaImpl(schema);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
@@ -225,12 +188,13 @@ public class SchemaManagerImpl extends SchemaManager {
             throw new SaxonApiException("The schema for this SchemaManager has already been loaded");
         }
         sealed = true;
-        try {
-            processor.getUnderlyingConfiguration().importComponents(source);    // TODO: make it local
-        } catch (XPathException err) {
-            throw new SaxonApiException(err);
-        }
-        return new XsdSchemaImpl(schema);
+        throw new NotImplementedException();
+//        try {
+//            processor.getUnderlyingConfiguration().importComponents(source);    // TODO: make it local
+//        } catch (XPathException err) {
+//            throw new SaxonApiException(err);
+//        }
+        //return new XsdSchemaImpl(schema);
     }
 
     public void clear() {

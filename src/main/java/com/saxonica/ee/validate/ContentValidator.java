@@ -1,9 +1,6 @@
 package com.saxonica.ee.validate;
 
-import com.saxonica.ee.schema.Assertion;
-import com.saxonica.ee.schema.ElementDecl;
-import com.saxonica.ee.schema.TypeAlternative;
-import com.saxonica.ee.schema.UserComplexType;
+import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -288,13 +285,13 @@ public abstract class ContentValidator extends ValidatingFilter {
         if (validation == Validation.STRIP && governingType == null) {
             val = new SkipValidator(nextReceiver);
         } else if (validation == Validation.BY_TYPE) {
-            val = makeValidatorForType(null, governingType, pipe, nextReceiver, failures);
+            val = makeValidatorForType(null, governingType, validationContext, nextReceiver, failures);
             if (!failures.isEmpty()) {
                 return null;
             }
         } else if (decl == null) {
             if (governingType != null) {
-                val = makeValidatorForType(null, governingType, pipe, nextReceiver, failures);
+                val = makeValidatorForType(null, governingType, validationContext, nextReceiver, failures);
                 if (!failures.isEmpty()) {
                     return null;
                 }
@@ -360,7 +357,7 @@ public abstract class ContentValidator extends ValidatingFilter {
                 if (governingType == null) {
                     val = new AnyTypeValidator(nextReceiver);
                 } else {
-                    val = makeValidatorForType(decl, governingType, pipe, nextReceiver, failures);
+                    val = makeValidatorForType(decl, governingType, validationContext, nextReceiver, failures);
                     if (!failures.isEmpty()) {
                         return null;
                     }
@@ -374,14 +371,14 @@ public abstract class ContentValidator extends ValidatingFilter {
                     failures.add(ve);
                     return null;
                 } else {
-                    val = makeValidatorForType(decl, governingType, pipe, nextReceiver, failures);
+                    val = makeValidatorForType(decl, governingType, validationContext, nextReceiver, failures);
                     if (!failures.isEmpty()) {
                         return null;
                     }
                 }
             } else {
                 governingType = elType;
-                val = makeValidatorForType(decl, elType, pipe, nextReceiver, failures);
+                val = makeValidatorForType(decl, elType, validationContext, nextReceiver, failures);
                 if (!failures.isEmpty()) {
                     return null;
                 }
@@ -467,7 +464,7 @@ public abstract class ContentValidator extends ValidatingFilter {
      *                     against an xsi:type)
      * @param schemaType   the simple or complex type against which the content of the
      *                     element is to be validated
-     * @param pipe         the pipeline configuration
+     * @param validationContext  the validation context
      * @param nextReceiver the next receiver in the pipeline
      * @param failures     a list which the method will populate with any validity errors discovered by the method
      * @return a Validator that can sit in the event pipeline to perform
@@ -478,7 +475,7 @@ public abstract class ContentValidator extends ValidatingFilter {
 
     public static ContentValidator makeValidatorForType(/*@Nullable*/ ElementDecl elementDecl,
                                                         SchemaType schemaType,
-                                                        PipelineConfiguration pipe,
+                                                        ValidationContext validationContext,
                                                         Receiver nextReceiver,
                                                         List<ValidationFailure> failures)
     throws MissingComponentException {
@@ -506,7 +503,9 @@ public abstract class ContentValidator extends ValidatingFilter {
             } else if (complexType.isAllContent()) {
                 val = new AllElementValidator((UserComplexType) complexType, nextReceiver);
             } else {
-                val = new ComplexContentValidator(elementDecl, (UserComplexType) complexType, nextReceiver);
+                PreparedSchema schema = validationContext.getSchema();
+                CompiledComplexType compiledType = schema.getCompiledComplexType((UserComplexType) complexType);
+                val = new ComplexContentValidator(elementDecl, compiledType, nextReceiver);
             }
         }
         return val;

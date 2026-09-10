@@ -253,7 +253,7 @@ public class XSDSchemaElement extends SchemaElement {
                 chameleon = true;
             } else {
                 targetNamespace = NamespaceUri.NULL;
-                ((EnterpriseConfiguration) config).addSurrogateSchema(NamespaceUri.NULL);
+                //((EnterpriseConfiguration) config).addSurrogateSchema(NamespaceUri.NULL);
                 // targetNamespace absent: no action needed.
                 // In the case of a top-level or imported schema,
                 // the targetNamespace is null; in the case of an included schema,

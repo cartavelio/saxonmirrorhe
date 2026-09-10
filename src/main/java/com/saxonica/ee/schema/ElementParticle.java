@@ -145,6 +145,9 @@ public class ElementParticle extends Particle {
     @Override
     public void lookForCycles(Stack<SchemaComponent> references, SchemaCompiler compiler) throws SchemaException, MissingComponentException {
         tryToResolve(compiler, false);
+        if (!isResolved()) {
+            throw new MissingComponentExceptionImpl(this);
+        }
     }
 
 
@@ -234,7 +237,7 @@ public class ElementParticle extends Particle {
         SchemaType type = getDeclaration().getType();
         if (type instanceof UserComplexType) {
             UserComplexType complexType = (UserComplexType) type;
-            complexType.compile(compiler);
+            compiler.getPreparedSchema().compileComplexType(compiler, complexType);
         }
     }
 

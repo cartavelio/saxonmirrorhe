@@ -6,7 +6,10 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
@@ -20,6 +23,7 @@ import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 /**
@@ -282,11 +286,9 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     @Override
     public Schema newSchema(Source[] sources) throws SAXException {
         SchemaCompiler compiler = config.newSchemaCompiler();
-        PreparedSchema ps = new PreparedSchema(config);
+        PreparedSchema ps;
         try {
-            for (Source source : sources) {
-                ps.addSchemaSource(source, errorReporter, compiler);
-            }
+            ps = compiler.loadSources(Arrays.asList(sources));
         } catch (SchemaException e) {
             throw toSAXException(e);
         }

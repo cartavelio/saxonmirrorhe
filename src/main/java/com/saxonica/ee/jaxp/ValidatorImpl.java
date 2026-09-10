@@ -1,6 +1,5 @@
 package com.saxonica.ee.jaxp;
 
-import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -11,14 +10,16 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.validation.Validator;
 import java.io.IOException;
 
@@ -31,6 +32,7 @@ public class ValidatorImpl extends Validator {
 
     private final PipelineConfiguration pipe;
     private LSResourceResolver resourceResolver;
+    private PreparedSchema schema;
 
     /**
      * Create the Validator
@@ -40,15 +42,9 @@ public class ValidatorImpl extends Validator {
      */
 
     public ValidatorImpl(PipelineConfiguration pipe, PreparedSchema schema) {
-        try {
-            this.pipe = pipe;
-            EnterpriseConfiguration config = (EnterpriseConfiguration) pipe.getConfiguration();
-            config.addSchema(schema);
-            setErrorHandler(null);
-        } catch (SchemaException e) {
-            // this only happens if using an incorrect license file
-            throw new UnsupportedOperationException(e.getMessage());
-        }
+        this.pipe = pipe;
+        this.schema = schema;
+        setErrorHandler(null);
     }
 
     @Override
@@ -82,6 +78,7 @@ public class ValidatorImpl extends Validator {
                 out = sf.getReceiver(result, new SerializationProperties(), pipe);
             }
             ParseOptions options = pipe.getParseOptions()
+                    .withSchema(schema)
                     .withSchemaValidationMode(Validation.STRICT)
                     .withContinueAfterValidationErrors(true);
             pipe.setParseOptions(options);

@@ -555,8 +555,10 @@ public abstract class AttributeValidator extends ContentValidator {
             // In XSD 1.1, the governing type declaration must be a subtype of the context-determined type
             // See rule 5 of Element Locally Valid (Complex Type)
             UserComplexType containingType = (UserComplexType) getSchemaType();
+            CompiledComplexType compiledContainingType =
+                    getValidationContext().getSchema().getCompiledComplexType(containingType);
             if (getValidationContext().getSchema().getXsdVersion() != Configuration.XSD10) {
-                SchemaType contextDeterminedType = containingType.getContextDeterminedTypeForElement(elementQName);
+                SchemaType contextDeterminedType = compiledContainingType.getContextDeterminedTypeForElement(elementQName);
                 SchemaType governingType = childValidator.getSchemaType();
                 if (contextDeterminedType != null && governingType != null) {
                     try {

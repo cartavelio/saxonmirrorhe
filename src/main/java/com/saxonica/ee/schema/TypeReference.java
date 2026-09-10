@@ -138,9 +138,6 @@ public class TypeReference extends SchemaStructure implements ComponentReference
                 target = compiler.getPreparedSchema().getType(qName);
             }
             if (target == null) {
-                target = getConfiguration().getUnnamedSchema().getType(qName);
-            }
-            if (target == null) {
                 if (compiler.isAllowDanglingReferences() && !fatal) {
                     dangling = true;
                     compiler.warning("Unknown type " + qName.getEQName() + " (substituting xs:error)", SaxonErrorCode.SXSD1008, this);

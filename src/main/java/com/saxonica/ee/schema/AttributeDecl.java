@@ -2,12 +2,10 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
-import com.saxonica.ee.validate.SchemaAttributeTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -460,9 +458,12 @@ public final class AttributeDecl extends SchemaStructure
 
     public boolean isSameDeclaration(AttributeDecl other) {
         return this == other ||
-                (getFingerprint() == other.getFingerprint() && hasSameLocation(other)) ||
-                 // assume that declarations in the XML namespace are consistent
-                getTargetNamespace().equals(NamespaceUri.XML);
+                (getFingerprint() == other.getFingerprint() && (
+                        hasSameLocation(other) ||
+                         // assume that declarations in the XML, XS, and XSI namespaces are consistent
+                        getTargetNamespace().equals(NamespaceUri.XML) ||
+                        getTargetNamespace().equals(NamespaceUri.SCHEMA) ||
+                        getTargetNamespace().equals(NamespaceUri.SCHEMA_INSTANCE)));
     }
 
     /**

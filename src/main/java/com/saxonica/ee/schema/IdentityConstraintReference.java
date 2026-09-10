@@ -160,9 +160,6 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
                 target = compiler.getPreparedSchema().getIdentityConstraint(getTargetComponentName());
             }
             if (target == null) {
-                target = getConfiguration().getUnnamedSchema().getIdentityConstraint(getTargetComponentName());
-            }
-            if (target == null) {
                 dangling = true;
             }
         }

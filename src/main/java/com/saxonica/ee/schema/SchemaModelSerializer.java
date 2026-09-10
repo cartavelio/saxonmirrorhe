@@ -26,6 +26,7 @@ import java.util.LinkedList;
 public class SchemaModelSerializer {
 
     private final EnterpriseConfiguration config;
+    private final PreparedSchema schema;
     private final Receiver receiver;
     private final ComplexContentOutputter cco;
     private final LinkedList<SchemaComponent> pendingComponents = new LinkedList<>();
@@ -39,17 +40,22 @@ public class SchemaModelSerializer {
     /**
      * Create a SchemaModelSerializer
      *
-     * @param config the Saxon Configuration. This must be a schema-aware configuration
+     * @param schema the schema to be serialized
      * @param out    the receiver to which the compiled schema document will be written
      * @throws IllegalArgumentException if the configuration is not schema-aware
      */
 
-    public SchemaModelSerializer(Configuration config, Receiver out) {
+    public SchemaModelSerializer(PreparedSchema schema, Receiver out) {
+        this.schema = schema;
+        config = schema.getConfiguration();
         config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
-        this.config = (EnterpriseConfiguration) config;
         NamespaceReducer reducer = new NamespaceReducer(out);
         this.receiver = new CheckSumFilter(reducer);
         this.cco = new ComplexContentOutputter(this.receiver);
+    }
+
+    public PreparedSchema getSchema() {
+        return schema;
     }
 
     /**
@@ -58,7 +64,7 @@ public class SchemaModelSerializer {
      * @throws XPathException if any failure occurs
      */
 
-    public void serialize(PreparedSchema schema) throws XPathException {
+    public void serialize() throws XPathException {
         cco.open();
         cco.startDocument(ReceiverOption.NONE);
         startElement("schema");

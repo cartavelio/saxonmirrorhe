@@ -104,9 +104,6 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
         if (!dangling) {
             target = compiler.getPreparedSchema().getIdentityConstraint(getTargetComponentName());
             if (target == null) {
-                target = compiler.getConfiguration().getUnnamedSchema().getIdentityConstraint(getTargetComponentName());
-            }
-            if (target == null) {
                 dangling = true;
             }
         }

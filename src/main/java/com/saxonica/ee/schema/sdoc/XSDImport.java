@@ -61,7 +61,6 @@ public class XSDImport extends AnnotationParent {
         NamespaceUri targetNamespace = NamespaceUri.of(namespace);
 
         XSDSchemaElement thisSchemaDocument = getXSDSchema();
-        //DocumentInfo thisRoot = thisSchemaDocument.getDocumentRoot();
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
 
         SchemaCompiler compiler = thisSchemaDocument.getSchemaCompiler();
@@ -124,7 +123,7 @@ public class XSDImport extends AnnotationParent {
 
         }
 
-        // Is another document for the same schema namespace already loaded?
+        // Is another document for the same schema namespace already cached in the Configuration?
         int status = config.getNamespaceStatus(targetNamespace);
         if (status == PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
             // This implies a cycle of imports. Alternatively, it means that a concurrent

@@ -478,7 +478,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
                 atomic.setLineNumber(getLineNumber());
                 atomic.setGeneratedId(getGeneratedId());
                 atomic.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
-                atomic.setExtendedTypes(extendedTypes);
+                //atomic.setExtendedTypes(extendedTypes);
                 atomic.setRedefinitionLevel(getRedefinitionLevel());
                 atomic.setSchemaDocumentURI(getSchemaDocumentURI());
                 workingType = atomic;
@@ -495,10 +495,10 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
             setFixupStatus(VALIDATED);
         }
 
-        if (getName() == null) {
-            // the type is anonymous
-            getConfiguration().getUnnamedSchema().addAnonymousType(workingType);
-        }
+//        if (getName() == null) {
+//            // the type is anonymous
+//            getConfiguration().getUnnamedSchema().addAnonymousType(workingType);
+//        }
         return true;
     }
 
@@ -514,7 +514,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         union.setLineNumber(getLineNumber());
         union.setGeneratedId(getGeneratedId());
         union.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
-        union.setExtendedTypes(extendedTypes);
+        //union.setExtendedTypes(extendedTypes);
         union.setRedefinitionLevel(getRedefinitionLevel());
         union.setSchemaDocumentURI(getSchemaDocumentURI());
         return union;
@@ -532,7 +532,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         list.setLineNumber(getLineNumber());
         list.setGeneratedId(getGeneratedId());
         list.setContainingDeclaration(getContainingDeclarationName(), containingDeclarationIsElement());
-        list.setExtendedTypes(extendedTypes);
+        //list.setExtendedTypes(extendedTypes);
         list.setRedefinitionLevel(getRedefinitionLevel());
         list.setSchemaDocumentURI(getSchemaDocumentURI());
         list.setTokenSeparator(tokenSeparator);

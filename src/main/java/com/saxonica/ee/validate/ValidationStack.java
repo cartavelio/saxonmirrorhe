@@ -1,9 +1,6 @@
 package com.saxonica.ee.validate;
 
-import com.saxonica.ee.schema.Assertion;
-import com.saxonica.ee.schema.ElementDecl;
-import com.saxonica.ee.schema.PreparedSchema;
-import com.saxonica.ee.schema.UserComplexType;
+import com.saxonica.ee.schema.*;
 import com.saxonica.ee.stream.Inversion;
 import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.stream.adjunct.BooleanFnFeed;
@@ -203,7 +200,7 @@ public class ValidationStack extends ValidatingFilter {
                         if (initialReceiver instanceof EmptyContentValidator ||
                                 initialReceiver instanceof LaxValidator) {
                             initial = ContentValidator.makeValidatorForType(
-                                    null, xsiType, pipe, outputReceiver, failures);
+                                    null, xsiType, getValidationContext(), outputReceiver, failures);
                         } else if (initialReceiver instanceof SimpleContentValidator) {
                             SchemaType type = ((SimpleContentValidator) initialReceiver).getSchemaType();
                             try {
@@ -220,7 +217,8 @@ public class ValidationStack extends ValidatingFilter {
                             } catch (SchemaException e) {
                                 throw new XPathException(e);
                             }
-                            ((ComplexContentValidator) initialReceiver).setSchemaType((UserComplexType) xsiType);
+                            CompiledComplexType compiledType = schema.getCompiledComplexType((UserComplexType) xsiType);
+                            ((ComplexContentValidator) initialReceiver).setSchemaType(compiledType);
                             initial = (ContentValidator) getNextReceiver();
                         } else {
                             ElementDecl decl = schema.getElementDecl(fp);
@@ -233,7 +231,7 @@ public class ValidationStack extends ValidatingFilter {
                         initial = (ContentValidator) getNextReceiver();
                     } else if (initialType != null) {
                         initial = ContentValidator.makeValidatorForType(
-                                null, initialType, pipe, outputReceiver, failures);
+                                null, initialType, getValidationContext(), outputReceiver, failures);
                     } else {
                         ElementDecl decl = schema.getElementDecl(fp);
                         initial = ContentValidator.makeValidator(

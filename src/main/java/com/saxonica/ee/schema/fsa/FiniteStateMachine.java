@@ -139,9 +139,11 @@ public class FiniteStateMachine {
      *          if unresolved references in the schema are found
      */
 
-    public static NonDeterminizedState compileParticle(SchemaCompiler compiler, Particle particle,
+    public static NonDeterminizedState compileParticle(SchemaCompiler compiler,
+                                                       Particle particle,
                                                        NonDeterminizedState endState,
-                                                       UserComplexType subjectType, FiniteStateMachine machine)
+                                                       UserComplexType subjectType,
+                                                       FiniteStateMachine machine)
             throws SchemaException, MissingComponentException {
 
         NonDeterminizedState n = endState;

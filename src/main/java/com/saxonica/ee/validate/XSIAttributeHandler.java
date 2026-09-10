@@ -6,18 +6,16 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XmlProcessingException;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 
 import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -39,6 +37,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
     private final HashMap<NamespaceUri, URI> schemaDocumentsRead;
     private boolean useXsiSchemaLocation;
     private final List<ValidationFailure> xsiValidationErrors = new ArrayList<>(4);
+    private final static String NULL_NAMESPACE_MARKER = ((char)31 + "");
 
     /**
      * Create a handler for xsi: attributes
@@ -87,6 +86,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
         if (hasXsiAttributes) {
             String xsiTypeValue = null;
             List<AttributeInfo> list = new ArrayList<>(attributes.size());
+            String fullSchemaLocation = "";
             for (AttributeInfo att : attributes) {
                 NodeName attName = att.getNodeName();
                 SimpleType attType = att.getType();
@@ -97,12 +97,15 @@ public class XSIAttributeHandler extends ValidatingFilter {
                     if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
                         attType = BuiltInAtomicType.ANY_URI;
                         if (useXsiSchemaLocation) {
-                            processXsiNoNamespaceSchemaLocation(value, location);
+                            fullSchemaLocation += " " + NULL_NAMESPACE_MARKER + " " + value;
+                            // treat noNamespaceSchemaLocation and schemaLocation together
+                            //processXsiNoNamespaceSchemaLocation(value, location);
                         }
                     } else if (fp == StandardNames.XSI_SCHEMA_LOCATION) {
                         attType = BuiltInListType.ANY_URIS;
                         if (useXsiSchemaLocation) {
-                            processXsiSchemaLocation(value, location);
+                            fullSchemaLocation += value;
+                            //processXsiSchemaLocation(value, location);
                         }
                     } else if (fp == StandardNames.XSI_TYPE) {
                         attType = BuiltInAtomicType.QNAME;
@@ -120,6 +123,9 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
             if (xsiTypeValue != null) {
                 xsiType = processXsiType(xsiTypeValue, namespaces);
+            }
+            if (!fullSchemaLocation.isEmpty()) {
+                processXsiSchemaLocation(fullSchemaLocation, location);
             }
             attMap2 = SequenceTool.attributeMapFromList(list);
         }
@@ -146,13 +152,17 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
     private void processXsiSchemaLocation(String value, Location locationId) throws XPathException {
         // value is a list of pairs of (target namespace, href)
+        // In the constructed value, `~` represents the null namespace.
         StringTokenizer tokenizer = new StringTokenizer(value, " \t\n\r", false);
         NamespaceUri targetNS = null;
+        List<Source> locationHints = new ArrayList<>();
         while (tokenizer.hasMoreTokens()) {
             String tok = tokenizer.nextToken();
             if (targetNS == null) {
                 // odd-numbered tokens
-                targetNS = NamespaceUri.of(tok);
+                targetNS = tok.equals(NULL_NAMESPACE_MARKER) ? NamespaceUri.NULL : NamespaceUri.of(tok);
+                // Note, there is no check that the schema that is loaded actually uses this
+                // target namespace. This appears to be consistent with the spec.
             } else {
                 // even-numbered tokens
                 boolean ignore;
@@ -182,8 +192,28 @@ public class XSIAttributeHandler extends ValidatingFilter {
                             reportValidationError(ve, false, locationId);
                         }
                     }
-                    loadSchema(absoluteLocation, targetNS);
+                    // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
+
+                    int status = getValidationContext().getSchema().getNamespaceStatus(targetNS);
+
+                    // There are three possibilities. Either this schema is previously
+                    // unknown, and we carry on to load it. Or it was a normal PreparedSchema, in which case we can
+                    // make a quick return. Or it was a SurrogateSchema, which shouldn't really
+                    // happen, unless (a) the schema is currently being loaded in another thread, or (b) someone
+                    // started to load the schema, didn't finish, and didn't tidy up. In this case, we just
+                    // pretend it wasn't there, and reload it from scratch.
+
+                    if (status != PreparedSchema.NAMESPACE_UNKNOWN && status != PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
+                        continue;
+                    }
+                    locationHints.add(new StreamSource(absoluteLocation.toString()));
+                    //loadSchema(absoluteLocation, targetNS);
                 }
+                SchemaCompiler compiler = new SchemaCompiler((EnterpriseConfiguration)getConfiguration());
+                PreparedSchema instanceSchema = compiler.loadSources(locationHints);
+                getValidationContext().getSchema().copyTo(instanceSchema, compiler);
+                //instanceSchema.recompile();
+                getValidationContext().setSchema(instanceSchema);
                 targetNS = null;
             }
         }
@@ -207,29 +237,29 @@ public class XSIAttributeHandler extends ValidatingFilter {
         }
     }
 
-    private void processXsiNoNamespaceSchemaLocation(String value, Location locationId) throws XPathException {
-        boolean ignore;
-        URI absoluteLocation = null;
-        try {
-            absoluteLocation = ResolveURI.makeAbsolute(value, locationId.getSystemId());
-            // ignore a duplicate xsi:noNamespaceSchemaLocation (can occur with XInclude, for example)
-            ignore = absoluteLocation.equals(schemaDocumentsRead.get(NamespaceUri.NULL));
-            schemaDocumentsRead.put(NamespaceUri.NULL, absoluteLocation);
-        } catch (URISyntaxException err) {
-            // we'll deal with this later
-            ignore = false;
-        }
-        if (!ignore) {
-            if (namespacesEncountered.contains(NamespaceUri.NULL)) {
-                String message = "xsi:noNamespaceSchemaLocation cannot appear after the " +
-                        "first no-namespace element or attribute";
-                ValidationFailure ve = new ValidationFailure(message);
-                ve.setConstraintReference(1, "schema-loc", "4");
-                reportValidationError(ve, false, locationId);
-            }
-            loadSchema(absoluteLocation, NamespaceUri.NULL);
-        }
-    }
+//    private void processXsiNoNamespaceSchemaLocation(String value, Location locationId) throws XPathException {
+//        boolean ignore;
+//        URI absoluteLocation = null;
+//        try {
+//            absoluteLocation = ResolveURI.makeAbsolute(value, locationId.getSystemId());
+//            // ignore a duplicate xsi:noNamespaceSchemaLocation (can occur with XInclude, for example)
+//            ignore = absoluteLocation.equals(schemaDocumentsRead.get(NamespaceUri.NULL));
+//            schemaDocumentsRead.put(NamespaceUri.NULL, absoluteLocation);
+//        } catch (URISyntaxException err) {
+//            // we'll deal with this later
+//            ignore = false;
+//        }
+//        if (!ignore) {
+//            if (namespacesEncountered.contains(NamespaceUri.NULL)) {
+//                String message = "xsi:noNamespaceSchemaLocation cannot appear after the " +
+//                        "first no-namespace element or attribute";
+//                ValidationFailure ve = new ValidationFailure(message);
+//                ve.setConstraintReference(1, "schema-loc", "4");
+//                reportValidationError(ve, false, locationId);
+//            }
+//            loadSchema(absoluteLocation, NamespaceUri.NULL);
+//        }
+//    }
 
     /**
      * Process an xsi:nil attribute. Report a validation error if it is invalid
@@ -299,70 +329,53 @@ public class XSIAttributeHandler extends ValidatingFilter {
     }
 
 
-    /**
-     * Load a schema identified in an xsi:schemaLocation or xsi:noNamespaceSchemaLocation attribute
-     *
-     * @param locationHint    The absolute URI of the location hint
-     * @param targetNS The required target namespace
-     * @throws XPathException If the schema is invalid for any reason
-     */
-    private void loadSchema(URI locationHint, NamespaceUri targetNS) throws XPathException {
-
-        PreparedSchema schema = getValidationContext().getSchema();
-        EnterpriseConfiguration config = schema.getConfiguration();
-
-        // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
-
-        int status = schema.getNamespaceStatus(targetNS);
-
-        // There are three possibilities. Either this schema is previously
-        // unknown, and we carry on to load it. Or it was a normal PreparedSchema, in which case we can
-        // make a quick return. Or it was a SurrogateSchema, which shouldn't really
-        // happen, unless (a) the schema is currently being loaded in another thread, or (b) someone
-        // started to load the schema, didn't finish, and didn't tidy up. In this case, we just
-        // pretend it wasn't there, and reload it from scratch.
-
-        if (status != PreparedSchema.NAMESPACE_UNKNOWN && status != PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
-            return;
-        }
-
-        PipelineConfiguration pipe;
-        try {
-            pipe = new PipelineConfiguration(getPipelineConfiguration());
-            InvalidityHandler handler = getValidationContext().getInvalidityHandler();
-            if (handler instanceof InvalidityHandlerWrappingErrorReporter) {
-                ErrorReporter listener = ((InvalidityHandlerWrappingErrorReporter) handler).getErrorReporter();
-                pipe.setErrorReporter(listener);
-            }
-
-            ResourceRequest request = new ResourceRequest();
-            request.uri = locationHint.toString();
-            request.nature = ResourceRequest.XSD_NATURE;
-            Source s2 = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
-            SchemaCompiler compiler = new SchemaCompiler(config);
-            schema.addSchemaSource(s2, getValidationContext().getController().getErrorReporter(), compiler);
-
-        } catch (SchemaException e) {
-            // Recovery path. At this point we MAY have added components to the schema pool that have not
-            // been fully validated/compiled. This is unfortunate, because it means that the whole
-            // Configuration needs to be brought down. We'll attempt to validate what's been added.
-            try {
-                pipe = new PipelineConfiguration(getPipelineConfiguration());
-                SchemaCompiler compiler = config.newSchemaCompiler();
-                compiler.setPreparedSchema(config.getUnnamedSchema());
-                config.getUnnamedSchema().validate(compiler);
-                // Revalidation succeeded
-                ErrorReporter reporter = pipe.getErrorReporter();
-                reporter.report(new XmlProcessingException(e).asWarning());
-                reporter.report(
-                        new XmlProcessingIncident("Validation will continue without the schema at " + locationHint).asWarning());
-            } catch (SchemaException err) {
-                // Revalidation failed
-                throw XPathException.makeXPathException(e);
-            }
-
-        }
-    }
+//    /**
+//     * Load a schema identified in an xsi:schemaLocation or xsi:noNamespaceSchemaLocation attribute
+//     *
+//     * @param locationHint    The absolute URI of the location hint
+//     * @param targetNS The required target namespace
+//     * @throws XPathException If the schema is invalid for any reason
+//     */
+//    private void loadSchema(URI locationHint, NamespaceUri targetNS) throws XPathException {
+//
+//        PreparedSchema schema = getValidationContext().getSchema();
+//        EnterpriseConfiguration config = schema.getConfiguration();
+//
+//        // First see if we already have a loaded schema for this namespace. If so, assume it's the same one.
+//
+//        int status = schema.getNamespaceStatus(targetNS);
+//
+//        // There are three possibilities. Either this schema is previously
+//        // unknown, and we carry on to load it. Or it was a normal PreparedSchema, in which case we can
+//        // make a quick return. Or it was a SurrogateSchema, which shouldn't really
+//        // happen, unless (a) the schema is currently being loaded in another thread, or (b) someone
+//        // started to load the schema, didn't finish, and didn't tidy up. In this case, we just
+//        // pretend it wasn't there, and reload it from scratch.
+//
+//        if (status != PreparedSchema.NAMESPACE_UNKNOWN && status != PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
+//            return;
+//        }
+//
+//        PipelineConfiguration pipe;
+//        try {
+//            pipe = new PipelineConfiguration(getPipelineConfiguration());
+//            InvalidityHandler handler = getValidationContext().getInvalidityHandler();
+//            if (handler instanceof InvalidityHandlerWrappingErrorReporter) {
+//                ErrorReporter listener = ((InvalidityHandlerWrappingErrorReporter) handler).getErrorReporter();
+//                pipe.setErrorReporter(listener);
+//            }
+//
+//            ResourceRequest request = new ResourceRequest();
+//            request.uri = locationHint.toString();
+//            request.nature = ResourceRequest.XSD_NATURE;
+//            Source s2 = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
+//            SchemaCompiler compiler = new SchemaCompiler(config);
+//            schema.addSchemaSource(s2, getValidationContext().getController().getErrorReporter(), compiler);
+//
+//        } catch (SchemaException e) {
+//            throw XPathException.makeXPathException(e);
+//        }
+//    }
 
 }
 

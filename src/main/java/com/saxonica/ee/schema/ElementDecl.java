@@ -749,7 +749,7 @@ public class ElementDecl extends SchemaStructure
 
     @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
-        // System.err.println("Validate " + getName());
+        //System.err.println("Validate " + getName());
         // check for circularities and for previous validation
 
         // check for previous validation

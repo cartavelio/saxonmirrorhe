@@ -12,6 +12,7 @@ import javax.xml.transform.SourceLocator;
 import java.util.List;
 import java.util.Stack;
 
+import static net.sf.saxon.type.SchemaValidationStatus.INCOMPLETE;
 import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
@@ -86,7 +87,12 @@ public class ModelGroupParticle extends Particle {
             setFixupStatus(INVALID);
             return false;
         }
-        lookForCycles(new Stack<SchemaComponent>(), compiler);
+        try {
+            lookForCycles(new Stack<>(), compiler);
+        } catch (MissingComponentException e) {
+            setFixupStatus(INCOMPLETE);
+            return false;
+        }
         setFixupStatus(VALIDATED);
         return true;
     }
@@ -147,9 +153,6 @@ public class ModelGroupParticle extends Particle {
     public void tryToResolve(SchemaCompiler compiler, boolean fatal) throws SchemaException {
         if (target == null) {
             target = compiler.getPreparedSchema().getGroup(getTargetComponentName());
-        }
-        if (target == null) {
-            target = compiler.getConfiguration().getUnnamedSchema().getGroup(getTargetComponentName());
         }
         if (target == null) {
             String name = getTargetComponentName().getEQName();

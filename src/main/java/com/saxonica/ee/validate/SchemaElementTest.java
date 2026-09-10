@@ -27,6 +27,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
     // a ContentTypeTest. This was changed as a consequence of the change to the specification introduced
     // by the resolution of specification bug 10065
 
+    private final PreparedSchema schema;
     private final ElementDecl head;
     private final IntHashMap<ElementDecl> groupByFingerprint;
     private final HashMap<NodeName, ElementDecl> groupByName;
@@ -40,6 +41,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
 
     public SchemaElementTest(PreparedSchema schema, ElementDecl element) throws MissingComponentException {
         head = element;
+        this.schema = schema;
         Collection<ElementDecl> subsGroup = schema.getSubstitutionGroupMembers(element);
         groupByFingerprint = new IntHashMap<>(subsGroup.size());
         groupByName = new HashMap<>(subsGroup.size());
@@ -60,6 +62,15 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
 
     public ElementDecl getElementDeclaration() {
         return head;
+    }
+
+    /**
+     * Get the schema from the static context of this type designation
+     * @return the in-scope schema
+     */
+
+    public Schema getSchema() {
+        return schema;
     }
 
     @Override

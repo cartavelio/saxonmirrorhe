@@ -122,7 +122,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         optimizerOptions = OptimizerOptions.FULL_EE_OPTIMIZATION;
         defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
         standardSchemaResolver = new StandardSchemaResolver(this);
-        unnamedSchema = new PreparedSchema(this);
     }
 
     @Override
@@ -543,7 +542,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     public Schema loadSchema(String absoluteURI) throws SchemaException {
-        return new PreparedSchema(this, new StreamSource(absoluteURI));
+        SchemaCompiler compiler = new SchemaCompiler(this);
+        List<Source> sources = new ArrayList<>(1);
+        sources.add(new StreamSource(absoluteURI));
+        return compiler.loadSources(sources);
     }
 
     /**
@@ -671,32 +673,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 throw new SchemaException(xe);
             }
         }
-    }
-
-    /**
-     * Add a schema (a collection of schema components) to the cache
-     *
-     * @param pschema The schema to be added
-     * @throws net.sf.saxon.type.SchemaException if the schema cannot be added because components in the schema
-     *                                           are incompatible with components already in the cache
-     */
-
-    public synchronized void addSchema(PreparedSchema pschema) throws SchemaException {
-        checkLicensedFeature(LicenseFeature.SCHEMA_VALIDATION, "schema processing", pschema.getLocalLicenseId());
-        if (pschema == unnamedSchema) {
-            return;
-        }
-        if (pschema instanceof SingleNamespaceSchema) {
-            NamespaceUri targetNamespace = ((SingleNamespaceSchema) pschema).getTargetNamespace();
-            setNamespaceStatus(targetNamespace, PreparedSchema.NAMESPACE_KNOWN);
-        } else {
-            for (NamespaceUri ns : pschema.getTargetNamespaces()) {
-                setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
-            }
-        }
-        pschema.copyTo(unnamedSchema, newSchemaCompiler());
-        unnamedSchema.setLocalLicenseId(pschema.getLocalLicenseId());
-
     }
 
     /**
@@ -847,27 +823,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public Collection<GlobalParam> getDeclaredSchemaParameters() {
-        return getUnnamedSchema().getGlobalParams();
+        return Collections.emptySet();  // TODO: reinstate schema paramters
     }
 
-    /**
-     * Get the set of complex types that have been defined as extensions of a given type.
-     * Note that we do not seal the schema namespace, so this list is not necessarily final; we must
-     * assume that new extensions of built-in simple types can be added at any time
-     *
-     * @param type the type whose extensions are required
-     */
-
-    @Override
-    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type, Schema schema) {
-        if (type instanceof UserDefinedType) {
-            return ((UserDefinedType) type).getExtensionTypes();
-        } else {
-            return ((PreparedSchema)schema).getExtensionsOfBuiltInType(type.getFingerprint());
-        }
-    }
-
-//    /**
+    //    /**
 //     * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
 //     * document are added to the cache of schema components maintained by this SchemaManager
 //     *
@@ -903,10 +862,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 //        SchemaModelSerializer serializer = new SchemaModelSerializer(this, out);
 //        serializer.serialize();
 //    }
-
-    public Schema getSchema() {
-        return unnamedSchema;
-    }
 
     public Schema getSchemaForNamespace(NamespaceUri uri) {
         return schemaCache.get(uri);
