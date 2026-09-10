@@ -29,14 +29,15 @@ import java.util.function.Function;
  */
 public class MathFunctionSet extends BuiltInFunctionSet {
 
-    private static final MathFunctionSet THE_INSTANCE = new MathFunctionSet();
+    private static final MathFunctionSet THE_INSTANCE_31 = new MathFunctionSet(31);
+    private static final MathFunctionSet THE_INSTANCE_40 = new MathFunctionSet(40);
 
-    public static MathFunctionSet getInstance() {
-        return THE_INSTANCE;
+    public static MathFunctionSet getInstance(int version) {
+        return version >= 40 ? THE_INSTANCE_40 : THE_INSTANCE_31;
     }
 
-    private MathFunctionSet() {
-        init();
+    private MathFunctionSet(int xpathVersion) {
+        init(xpathVersion);
     }
 
     private void reg1(String name, Function<Double, Double> method) {
@@ -45,7 +46,7 @@ public class MathFunctionSet extends BuiltInFunctionSet {
     }
 
 
-    private void init() {
+    private void init(int xpathVersion) {
 
         // Arity 0 functions
 
@@ -75,6 +76,13 @@ public class MathFunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.DOUBLE, ONE, null)
                 .arg(1, BuiltInAtomicType.DOUBLE, ONE, null));
 
+        // Version 4.0 function
+        if (xpathVersion >= 40) {
+            register("e", 0, e -> e.populate(EFn::new, BuiltInAtomicType.DOUBLE, ONE, 0));
+            reg1("sinh", Math::sinh);
+            reg1("cosh", Math::cosh);
+            reg1("tanh", Math::tanh);
+        }
     }
 
     @Override
@@ -100,6 +108,22 @@ public class MathFunctionSet extends BuiltInFunctionSet {
         @Override
         public DoubleValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             return new DoubleValue(Math.PI);
+        }
+    }
+
+    /**
+     * Implement math:e
+     */
+
+    public static class EFn extends SystemFunction {
+        @Override
+        public Expression makeFunctionCall(Expression... arguments) {
+            return Literal.makeLiteral(new DoubleValue(Math.E));
+        }
+
+        @Override
+        public DoubleValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+            return new DoubleValue(Math.E);
         }
     }
 

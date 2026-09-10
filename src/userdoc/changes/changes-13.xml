@@ -213,6 +213,9 @@
         <p>The rules for the <code>number-parser</code> callback in <code>fn:parse-json</code> and 
             <code>fn:json-doc</code> have been changed to reflect changes in the specification.</p>
         
+        <p>The functions <code>math:e</code>, <code>math:sinh</code>, <code>math:cosh</code>,
+        and <code>math:tanh</code> are implemented.</p>
+        
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
         as a representation of the JSON null value.</p>
         
