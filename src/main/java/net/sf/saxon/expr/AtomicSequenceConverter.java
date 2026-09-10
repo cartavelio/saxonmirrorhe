@@ -495,7 +495,19 @@ public class AtomicSequenceConverter extends UnaryExpression {
         if (getRoleSupplier() != null) {
             destination.emitAttribute("diag", getRoleSupplier().get().save());
         }
-        getBaseExpression().export(destination);
+        if (converter.isPromoter() && "JS".equals(destination.getOptions().target) && destination.getOptions().targetVersion == 2) {
+            // See bug 6239. For backwards compatibility, output a cvUntyped instruction. This is no longer needed for SaxonJ
+            // because the promoting converter does promotion and conversion from untypedAtomic in a single operation.
+            destination.startElement("cvUntyped");
+            destination.emitAttribute("to", AlphaCode.fromItemType(requiredItemType));
+            if (getRoleSupplier() != null) {
+                destination.emitAttribute("diag", getRoleSupplier().get().save());
+            }
+            getBaseExpression().export(destination);
+            destination.endElement();
+        } else {
+            getBaseExpression().export(destination);
+        }
         destination.endElement();
     }
 

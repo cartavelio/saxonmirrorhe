@@ -180,13 +180,13 @@ public class TypeChecker {
 
             // rule 3: type promotion (combined with untypedAtomic conversion)
 
-            if (reqItemType instanceof AtomicType && !itemTypeOK) {
-                int rt = ((AtomicType) reqItemType).getFingerprint();
+            if (reqItemType instanceof BuiltInAtomicType && !itemTypeOK) {
+                int rt = reqItemType.getPrimitiveType();
                 ConversionRules rules = config.getConversionRules();
                 Expression promoted = null;
                 Converter converter = makePromotingConverter(allow40, rt, rules);
                 if (converter != null) {
-                    promoted = makePromoter(exp, converter, BuiltInAtomicType.DOUBLE);
+                    promoted = makePromoter(exp, converter, (BuiltInAtomicType)reqItemType);
                 }
 
                 if (promoted != null) {
@@ -487,26 +487,6 @@ public class TypeChecker {
 
         }
         return null;
-    }
-
-
-    /**
-     * Make an expression that performs type promotion on a supplied sequence
-     * @param exp the base expression (which delivers the supplied sequence)
-     * @param allow40 true if XPath 4.0 is enabled
-     * @param requiredType the required type, the target of promotion
-     * @param rules the conversion rules
-     * @return the promoter, if available for the required type, or null. Note that promoters not only implement
-     * type promotion (for example from decimal to double) but also perform conversion of untypedAtomic values
-     * to the target type.
-     */
-    public static Expression makePromoter(Expression exp, boolean allow40, int requiredType, ConversionRules rules) {
-        Converter converter = makePromotingConverter(allow40, requiredType, rules);
-        if (converter != null) {
-            return makePromoter(exp, converter, BuiltInAtomicType.DOUBLE);
-        } else {
-            return null;
-        }
     }
 
     public Expression makeArithmeticExpression(Expression lhs, int operator, Expression rhs) {
