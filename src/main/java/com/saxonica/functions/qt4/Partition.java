@@ -1,4 +1,53 @@
-package com.saxonica.functions.qt4;public class Partition {
+package com.saxonica.functions.qt4;
+
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceExtent;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Function fn:partition, new in 4.0
+ */
+public class Partition extends SystemFunction {
+
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        SequenceIterator iterator = arguments[0].iterate();
+        List<ArrayItem> completePartitions = new ArrayList<>();
+        List<Item> lastPartition = new ArrayList<>();
+        FunctionItem breakWhen = (FunctionItem) arguments[1].head();
+        Item next;
+        while ((next = iterator.next()) != null) {
+            if (lastPartition.isEmpty()) {
+                // this is the first item in the sequence
+                lastPartition.add(next);
+            } else {
+                Sequence val = dynamicCall(
+                        breakWhen, context, SequenceExtent.makeSequenceExtent(lastPartition), next);
+                if (((BooleanValue) val.head()).getBooleanValue()) {
+                    completePartitions.add(SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(lastPartition)));
+                    lastPartition.clear();
+                }
+                lastPartition.add(next);
+            }
+        }
+        if (!lastPartition.isEmpty()) {
+            completePartitions.add(SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(lastPartition)));
+        }
+        return SequenceExtent.makeSequenceExtent(completePartitions);
+    }
+
 }
 
 //

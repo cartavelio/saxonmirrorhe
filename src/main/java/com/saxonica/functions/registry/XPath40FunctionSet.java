@@ -8,10 +8,12 @@ import net.sf.saxon.functions.Concat;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
@@ -222,6 +224,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
         //#endif
+
+        ItemType partitionFunctionType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_BOOLEAN);
+
+        register("partition", 2, e -> e.populate(Partition::new, ArrayItemType.ANY_ARRAY_TYPE, STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR | INS, null)
+                .arg(1, partitionFunctionType, ONE | INS, null));
 
         register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
