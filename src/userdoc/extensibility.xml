@@ -1802,9 +1802,16 @@ public static int lineNumber(XPathContext c) {
       <samp>proc.RegisterExtensionFunction(
                        new QName("urn:math", "sqrt"), 
                        proc.ParseItemType("function(xs:double) as xs:double"), 
-                       val => new XdmAtomicValue(Math.sqrt(val.AsDouble()))</samp>
+                       val => new XdmAtomicValue(Math.sqrt((XdmAtomicValue)val[0][0].AsDouble()))</samp>
         
-        <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>.</p>
+        <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>, or as <code>m:sqrt(2)</code>
+          if the namespace prefix <code>m</code> has been bound to the URI <code>urn:math</code>.</p>
+        
+        <aside>The expression <code>val[0][0]</code> selects the first item in the sequence that was supplied as
+        the first argument; this is then cast to an <code>XdmAtomicValue</code> to make the <code>AsDouble()</code> method available;
+          this extracts the value as a C# <code>double</code>. Saxon takes care of the type checking (and where necessary, type conversion)
+        to ensure that there will be exactly one argument, and that it will be a single item of type <code>xs:double</code>:
+        the function implementation does not need to repeat these checks.</aside>
         
         
         <p>The main restrictions of the simple interface are that the extension function has no
@@ -1821,7 +1828,7 @@ public static int lineNumber(XPathContext c) {
         <p>The full API for integrated .NET extension functions is available via the .NET classes
           <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a> and 
           <a class="cslink" href="Saxon.Api.ExtensionFunctionCall">ExtensionFunctionCall</a>, both
-          defined in the <code>Saxon.Api</code> module. Here is a simple example that defines an extension function
+          defined in the <code>Saxon.Api</code> module. Here is a worked example that defines an extension function
           to calculate square roots, registers this extension function with the 
           <a class="cslink" href="Saxon.Api.Processor">Processor</a>, and then invokes it from an XPath expression:</p>
         
@@ -1842,9 +1849,7 @@ public static int lineNumber(XPathContext c) {
         return new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?');
     }
                 
-    public override bool TrustResultType {
-        get { return true };
-    }
+    public override bool TrustResultType => true;
                 
     public override ExtensionFunctionCall MakeFunctionCall() {
         return new SqrtCall();
@@ -1872,7 +1877,9 @@ XPathCompiler xpc = proc.NewXPathCompiler();
 xpc.DeclareNamespace("mf", "http://math.com/");
 XdmItem result = xpc.EvaluateSingle("mf:sqrt(2)", null);
 Console.WriteLine("Square root of 2 is " + result);]]></samp>
-        
+ 
+        <aside>This example does not take advantage of the full power of the interface, for example the ability to pick up details
+        of the static context (such as the static base URI or the default collation), or the dynamic context (such as the context item).</aside>
         
         <p>Full details of the interface are defined in the <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
       
