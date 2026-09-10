@@ -370,8 +370,8 @@ public final class IndexedFilterExpression extends Expression {
     public int computeDependencies() {
         // not all dependencies in the filter expression matter, because the context node,
         // position, and size are not dependent on the outer context.
-        int b = getBaseExpression().getDependencies();
-        int f = getUseExpression().getDependencies() | getSearchExpression().getDependencies();
+        int b = getBaseExpression().getDependencies() | getSearchExpression().getDependencies();
+        int f = getUseExpression().getDependencies();
         return b | (f & (StaticProperty.DEPENDS_ON_XSLT_CONTEXT |
                                  StaticProperty.DEPENDS_ON_LOCAL_VARIABLES |
                                  StaticProperty.DEPENDS_ON_USER_FUNCTIONS));
