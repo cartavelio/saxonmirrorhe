@@ -1216,7 +1216,7 @@ public abstract class SchemaElement extends ElementImpl {
 
             FunctionLibraryList lib = new FunctionLibraryList();
             lib.addFunctionLibrary(XPath20FunctionSet.getInstance());
-            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList());
+            lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
             lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
             lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
             config.addExtensionBinders(lib);

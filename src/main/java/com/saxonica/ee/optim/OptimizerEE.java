@@ -520,7 +520,7 @@ public class OptimizerEE extends Optimizer {
             TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
             SystemFunction containsFn;
             if (allStrings || th.relationship(exp.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT) {
-                containsFn = MapFunctionSet.getInstance().makeFunction("contains", 2);
+                containsFn = MapFunctionSet.getInstance(31).makeFunction("contains", 2);
             } else {
                 containsFn = VendorFunctionSetHE.getInstance().makeFunction("map-untyped-contains", 2);
             }

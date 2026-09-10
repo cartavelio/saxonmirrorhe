@@ -726,39 +726,41 @@ public class ProfessionalConfiguration extends Configuration {
 
     @Override
     public FunctionItem getSystemFunction(StructuredQName name, int arity) {
-        try {
-            if (staticContextForSystemFunctions == null) {
-                staticContextForSystemFunctions = new IndependentContext(this);
-            }
-            FunctionLibraryList lib = new FunctionLibraryList();
-            lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
-            lib.addFunctionLibrary(getBuiltInExtensionLibraryList());
-            lib.addFunctionLibrary(new ConstructorFunctionLibrary(this));
-            lib.addFunctionLibrary(getIntegratedFunctionLibrary());
-            lib.addFunctionLibrary(getExtensionBinder("java"));
-            SymbolicName.F symbolicName = new SymbolicName.F(name, arity);
-            return lib.getFunctionItem(symbolicName, staticContextForSystemFunctions);
-        } catch (XPathException e) {
-            return null;
+        FunctionItem result = super.getSystemFunction(name, arity);
+        if (result != null) {
+            return result;
         }
+        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+            try {
+                if (staticContextForSystemFunctions == null) {
+                    staticContextForSystemFunctions = new IndependentContext(this);
+                }
+                FunctionLibrary lib = getExtensionBinder("java");
+                SymbolicName.F symbolicName = new SymbolicName.F(name, arity);
+                return lib.getFunctionItem(symbolicName, staticContextForSystemFunctions);
+            } catch (XPathException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
-    public FunctionLibraryList getBuiltInExtensionLibraryList() {
+    public FunctionLibraryList getBuiltInExtensionLibraryList(int version) {
         if (!isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return super.getBuiltInExtensionLibraryList();
+            return super.getBuiltInExtensionLibraryList(version);
         }
         if (builtInExtensionLibraryList == null) {
-            builtInExtensionLibraryList = makeBuiltInExtensionLibraryList();
+            builtInExtensionLibraryList = makeBuiltInExtensionLibraryList(version);
         }
         return builtInExtensionLibraryList;
     }
 
-    private synchronized FunctionLibraryList makeBuiltInExtensionLibraryList() {
+    private synchronized FunctionLibraryList makeBuiltInExtensionLibraryList(int version) {
         FunctionLibraryList result = new FunctionLibraryList();
         result.addFunctionLibrary(getVendorFunctionSet());
         result.addFunctionLibrary(MathFunctionSet.getInstance());
-        result.addFunctionLibrary(MapFunctionSet.getInstance());
-        result.addFunctionLibrary(ArrayFunctionSet.getInstance());
+        result.addFunctionLibrary(MapFunctionSet.getInstance(version));
+        result.addFunctionLibrary(ArrayFunctionSet.getInstance(version));
         result.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
         result.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
         if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {

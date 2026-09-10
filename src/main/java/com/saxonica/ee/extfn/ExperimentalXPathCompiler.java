@@ -100,8 +100,8 @@ public class ExperimentalXPathCompiler {
 
         FunctionLibraryList libraryList = new FunctionLibraryList();
         libraryList.addFunctionLibrary(XSLT30FunctionSet.getInstance());
-        libraryList.addFunctionLibrary(MapFunctionSet.getInstance());
-        libraryList.addFunctionLibrary(ArrayFunctionSet.getInstance());
+        libraryList.addFunctionLibrary(MapFunctionSet.getInstance(31));
+        libraryList.addFunctionLibrary(ArrayFunctionSet.getInstance(31));
         libraryList.addFunctionLibrary(new ConstructorFunctionLibrary(context.getConfiguration()));
         libraryList.addFunctionLibrary(context.getConfiguration().getVendorFunctionSet());
         libraryList.addFunctionLibrary(javaLib);
