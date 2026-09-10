@@ -35,41 +35,6 @@ import java.util.*;
 
 public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyValuePair> {
 
-//    /**
-//     * Class representing the index of offsets. Implemented this way because maps with
-//     * int values behave rather differently in C#.
-//     */
-//    public static class OffsetIndex extends HashMap<AtomicMatchKey, Integer> {
-//
-//        public OffsetIndex(int size) {
-//            super(size);
-//        }
-//
-//        /**
-//         * Get the value associated with the given key if present, or -1 if absent
-//         * @param key the given key
-//         * @return the associated value, or -1
-//         */
-//        public int getOffset(AtomicMatchKey key) {
-//            Integer i = get(key);
-//            return (i==null ? -1 : i);
-//        }
-//
-//        /**
-//         * Put an entry in the map if the key is currently absent
-//         * @param key the new key
-//         * @param value the new value
-//         * @return true if an entry was added, false if the key was already present
-//         */
-//        public boolean putIfAbsent(AtomicMatchKey key, int value) {
-//            if (!containsKey(key)) {
-//                put(key, value);
-//                return true;
-//            }
-//            return false;
-//        }
-//    }
-
     protected GroundedValue[] values;
     protected HashMap<AtomicMatchKey, Integer> index;
 

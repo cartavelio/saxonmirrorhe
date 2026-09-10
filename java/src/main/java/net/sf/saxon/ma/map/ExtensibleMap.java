@@ -85,27 +85,11 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        Integer offset = index.get(key.asMapKey());
-        if (offset == null || removals.contains(offset)) {
+        int offset = getOffset(index, key.asMapKey());
+        if (offset == -1 || removals.contains(offset)) {
             return null;
         }
         return valueList.get(offset);
-    }
-
-    /**
-     * Get the offset of an entry in the map (that is, its 0-based position
-     * in the map ordering
-     * @param key the required key
-     * @return the 0-based position of the relevant entry in the map, or -1
-     * if the key is not present
-     */
-
-    public int getOffset(AtomicValue key) {
-        Integer offset = index.get(key.asMapKey());
-        if (offset == null || removals.contains(offset)) {
-            return -1;
-        }
-        return offset;
     }
 
     /**
@@ -205,7 +189,8 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        int offset = getOffset(key);
+        AtomicMatchKey matchKey = key.asMapKey();
+        int offset = getOffset(index, matchKey);
         if (offset >= 0) {
             // Key is already present. Modify the values array, leave the keys and the index
             // unchanged.
@@ -216,7 +201,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
             int last = keyList.size();
             ZenoChain<AtomicValue> keys2 = keyList.add(key);
             ZenoChain<GroundedValue> values2 = valueList.add(value);
-            ImmutableHashTrieMap<AtomicMatchKey, Integer> index2 = index.put(key.asMapKey(), last);
+            ImmutableHashTrieMap<AtomicMatchKey, Integer> index2 = index.put(matchKey, last);
             return new ExtensibleMap(keys2, values2, index2, removals);
         }
 
@@ -231,7 +216,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        int offset = getOffset(key);
+        int offset = getOffset(index, key.asMapKey());
         if (offset == -1) {
             return this;
         }
@@ -241,6 +226,21 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
             return ExtensibleMap.copyOf(result);
         }
         return result;
+    }
+
+    /**
+     * Get the offset of an entry in the map (that is, its 0-based position
+     * in the map ordering
+     *
+     * @param key the required key
+     * @return the 0-based position of the relevant entry in the map, or -1
+     * if the key is not present
+     */
+
+    @CSharpReplaceBody(code = "return index.TryGetValue(key, out var result) ? result : -1;")
+    public static int getOffset(ImmutableHashTrieMap<AtomicMatchKey, Integer> index, AtomicMatchKey key) {
+        Integer offset = index.get(key);
+        return offset == null ? -1 : offset;
     }
 
 }
