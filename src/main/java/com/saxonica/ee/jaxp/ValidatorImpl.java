@@ -56,6 +56,21 @@ public class ValidatorImpl extends Validator {
         //
     }
 
+    /**
+     * Validate a source document, sending the validated output to a specified
+     * destination. Note that unlike the abstract parent method, this implementation
+     * imposes no restrictions on the type of the source and result: any kind of
+     * source can be used with any kind of result.
+     * @param source
+     *      XML to be validated. Must be an XML document or
+     *      XML element and must not be null.
+     *
+     * @param result
+     *      The {@code Result} object that receives (possibly augmented)
+     *      XML. This parameter can be null if the caller is not interested
+     *      in it.
+     *
+     */
     @Override
     public void validate(Source source, Result result) throws SAXException, IOException {
         Receiver out;
