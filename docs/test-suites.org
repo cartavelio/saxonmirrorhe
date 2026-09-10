@@ -1,0 +1,72 @@
+#+TITLE: Test Suites
+
+The tests suites can be run in a wide variety of configurations. They
+are all controlled by the table at the top of =test-suites.gradle=. The
+table is organized by product, test suite, language, and then an ad
+hoc collection of specific options.
+
+For each entry in the table, a Gradle task is created to run the test
+suite. The name of the task is derived from the keys that identify the
+entry in the table. For example, the =XP31= version of the =qt3= test
+suite run with the =hej= processor is named
+
+    hej_qt3_XP31_test_suite
+
+The =XT30= version of the =xslt30extra= test suite run with the =eej=
+processor using the bytecode, export, and JIT options is named:
+
+    eej_xslt30_XT30_bc_ex_jit_test_suite
+
+There are some higher-level tasks that run sets of test suites:
+
++ all_test_suites - Runs all the test suites; this one sometimes fails
+  because the JVM runs out of memory. You can restart it, or run
+  several tasks to achieve the same thing.
+
++ all_[product]_test_suites - Runs all the test suites for a product
+
++ all_[product]_[suite]_test_suits - Runs all the tests for a
+  particular test suite on a particular product.
+
+* Ad hoc options
+
+You can pass any options you want for a particular run with “magically
+named” properties. The proprty “td_xxx” will become the test driver
+option “xxx”. For example, to run just the =map-remove-004= test in the
+=map-remove= test set with the =pej_qt3_XP31_test_suite=, you would run:
+
+    ./gradlew -Ptd_s=map-remove -Ptd_t=map-remove-004 pej_qt3_XP31_test_suite
+
+Also, the setting =saxonicaTestDriverDebugExec= to true will cause the
+script to print the exact command used to run the test driver.
+
+* Test outputs
+
+Test outputs are saved in
+
+    =build/test-results/[product]/[suite]/[language]/[YYYYMMDD]/[taskname].xml=
+
+If you specify an archive directory in the Gradle property
+=saxonicaTestDriverReportArchive=, the test suites will be saved there
+as well and each run of a test suite will compare the results of the
+current run with the most recently archived run. The build will fail
+if the current run fails any test that previously passed.
+
+(If you run a test with ad hoc options, its results are not saved.)
+
+If you set the property =saxonicaTestDriverOutputRedirect= to =true=,
+standard output and standard error will also be redirected to the
+=build/test-results/…= directory. This *greatly* reduces the volume of
+output produced by the build.
+
+* Cumulative errors
+
+If you run one of the higher-level tasks to run a series of tests, you
+can accumulate the results by setting the property =accumulateFailures= to =true=.
+For example,
+
+    ./gradlew -PaccumulateFailures=true all_eedotnet_test_suites
+
+That property will prevent individual tests from failing the build,
+and will print the accumulated errors at the end. And then fail the
+build :-)
