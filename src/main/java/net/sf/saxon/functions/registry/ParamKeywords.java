@@ -161,6 +161,7 @@ public class ParamKeywords {
         fnParamNames.put("innermost", "nodes");
         fnParamNames.put("insert-before", "input|position|insert");
         fnParamNames.put("intersperse", "input|separator");
+        fnParamNames.put("invisible-xml", "grammar|options");
         fnParamNames.put("iri-to-uri", "value");
         fnParamNames.put("is-NaN", "value");
         fnParamNames.put("items-after", "input|predicate");
