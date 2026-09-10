@@ -120,14 +120,14 @@ function catalogTest($saxonProc)
     echo '<b>catalogTest:</b><br/>';
     //$proc->clearParameters();
     try {
-        $catalogFiles = array("php/xml/catalog.xml", "php/xml/catalog2.xml");
+        $catalogFiles = array("xml/catalog.xml", "xml/catalog2.xml");
         $saxonProc->setCatalogFiles($catalogFiles);
         //$saxonProc->setcwd("../");
         $trans = $saxonProc->newXslt30Processor();
         $executable = $trans->compileFromFile("http://example.com/books.xsl");
 
-        $executable->setInitialMatchSelectionAsFile("php/xml/books.xml");
-        $executable->setGlobalContextFromFile("php/xml/books.xml");
+        $executable->setInitialMatchSelectionAsFile("xml/books.xml");
+        $executable->setGlobalContextFromFile("xml/books.xml");
 
         $result = $executable->applyTemplatesReturningString();
         echo '<b>catalogTest</b>:<br/>';
@@ -526,7 +526,7 @@ function testPerformance()
      $cities_xml = "xml/cities.xml";
      $embedded_xml = "xml/embedded.xml";
      $multidoc_xsl = "xsl/multidoc.xsl";
-     $identity_xsl = "xsl/identity.xsl";
+     $identity_xsl = "  xsl/identity.xsl";
 
      $saxonProc = new Saxon\SaxonProcessor(true);
 
