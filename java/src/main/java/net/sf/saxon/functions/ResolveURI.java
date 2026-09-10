@@ -355,17 +355,10 @@ public class ResolveURI extends SystemFunction {
      * @return the input string with each space replaced by %20
      */
 
-    /*@NotNull*/
-    public static String escapeSpaces(/*@NotNull*/ String s) {
+    public static String escapeSpaces(String s) {
         // It's not entirely clear why we have to escape spaces by hand, and not other special characters;
         // it's just that tests with a variety of filenames show that this approach seems to work.
-        int i = s.indexOf(' ');
-        if (i < 0) {
-            return s;
-        }
-        return (i == 0 ? "" : s.substring(0, i))
-                + "%20"
-                + (i == s.length() - 1 ? "" : escapeSpaces(s.substring(i + 1)));
+        return s.replace(" ", "%20");
     }
 
     /**
@@ -375,8 +368,7 @@ public class ResolveURI extends SystemFunction {
      * @return the input URI with each %20 replaced by space
      */
 
-    /*@NotNull*/
-    public static String unescapeSpaces(/*@NotNull*/ String uri) {
+    public static String unescapeSpaces(String uri) {
         return uri.replace("%20", " ");
     }
 
