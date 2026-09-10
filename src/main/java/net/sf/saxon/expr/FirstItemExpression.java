@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -138,5 +142,34 @@ public final class FirstItemExpression extends SingleItemFilter {
         return "FirstItemExpression";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new FirstItemExprElaborator();
+    }
+
+    /**
+     * An elaborator for a "first-item" expression, typically written as {@code X[1]} or as {@code head(X)}.
+     */
+
+    public static class FirstItemExprElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            final FirstItemExpression expr = (FirstItemExpression) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            return context -> {
+                final SequenceIterator iter = baseEval.eval(context);
+                Item result = iter.next();
+                iter.close();
+                return result;
+            };
+        }
+
+    }
 }
 

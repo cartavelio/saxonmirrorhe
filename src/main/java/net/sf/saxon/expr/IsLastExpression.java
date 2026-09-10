@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
+import com.saxonica.ee.elab.gen.BooleanElaborator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -209,6 +212,36 @@ public final class IsLastExpression extends Expression {
     @Override
     public String getStreamerName() {
         return "IsLastExpr";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new IsLastElaborator();
+    }
+
+
+    /**
+     * Elaborator for an "isLast" expression, equivalent to {@code position() = last()} or {@code position() != last()}
+     */
+
+    public static class IsLastElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            IsLastExpression expr = (IsLastExpression) getExpression();
+            if (expr.getCondition()) {
+                //noinspection Convert2MethodRef
+                return context -> context.isAtLast();
+            } else {
+                return context -> !context.isAtLast();
+            }
+        }
+
     }
 }
 

@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -18,6 +22,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -142,6 +147,40 @@ public final class SimpleStepExpression extends SlashExpression {
         return "simpleStep";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
 
+    @Override
+    public Elaborator getElaborator() {
+        return new SimpleStepExprElaborator();
+    }
+
+    /**
+     * Elaborator for a simple step expression, that is X/axis::Y where X evaluates to a singleton
+     */
+
+    public static class SimpleStepExprElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+
+            final SimpleStepExpression forEach = (SimpleStepExpression) getExpression();
+            final ItemEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForItem();
+            final AxisExpression step = (AxisExpression) forEach.getStep();
+            final boolean nullable = Cardinality.allowsZero(forEach.getSelectExpression().getCardinality());
+
+            return context -> {
+                NodeInfo origin = (NodeInfo) select.eval(context);
+                if (nullable && origin == null) {
+                    return EmptyIterator.getInstance();
+                }
+                return step.iterate(origin);
+            };
+        }
+
+    }
 }
 

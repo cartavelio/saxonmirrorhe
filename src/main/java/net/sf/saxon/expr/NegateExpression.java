@@ -7,12 +7,16 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceType;
@@ -166,6 +170,49 @@ public class NegateExpression extends UnaryExpression {
         }
         getBaseExpression().export(out);
         out.endElement();
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new NegateElaborator();
+    }
+
+    /**
+     * Elaborator for a negate expression (that is, unary minus)
+     */
+
+    public static class NegateElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+
+            final NegateExpression exp = (NegateExpression)getExpression();
+            final ItemEvaluator argEval = makeElaborator(exp.getBaseExpression()).elaborateForItem();
+            final boolean maybeEmpty = Cardinality.allowsZero(exp.getBaseExpression().getCardinality());
+            final boolean backwardsCompatible = exp.isBackwardsCompatible();
+
+            if (maybeEmpty) {
+                if (backwardsCompatible) {
+                    return context -> {
+                        NumericValue v1 = (NumericValue) argEval.eval(context);
+                        return v1 == null ? DoubleValue.NaN : v1.negate();
+                    };
+                } else {
+                    return context -> {
+                        NumericValue v1 = (NumericValue) argEval.eval(context);
+                        return v1 == null ? null : v1.negate();
+                    };
+                }
+            } else {
+                return context -> ((NumericValue) argEval.eval(context)).negate();
+            }
+        }
+
     }
 }
 

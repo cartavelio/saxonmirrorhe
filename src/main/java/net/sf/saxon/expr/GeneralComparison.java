@@ -7,6 +7,11 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.BooleanElaborator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
@@ -1017,5 +1022,51 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
         out.emitAttribute("comp", comparer.save());
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new GeneralComparisonElaborator();
+    }
+
+    /**
+     * Elaborator for a general comparison expression such as (A = B).
+     */
+
+    public static class GeneralComparisonElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            final GeneralComparison exp = (GeneralComparison)getExpression();
+            ComparisonCardinality cardinality = exp.getComparisonCardinality();
+
+            switch (cardinality) {
+                case ONE_TO_ONE: {
+                    final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
+                    final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+                    return context -> exp.evaluateOneToOne((AtomicValue)p0.eval(context), (AtomicValue)p1.eval(context), context);
+                }
+                case MANY_TO_ONE: {
+                    final PullEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
+                    final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
+                    return context -> exp.evaluateManyToOne(p0.eval(context), (AtomicValue) p1.eval(context), context);
+                }
+                case MANY_TO_MANY: {
+                    final PullEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForPull();
+                    final PullEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForPull();
+                    return context -> exp.evaluateManyToMany(p0.eval(context), p1.eval(context), context);
+                }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+
+        }
+
+
+
+    }
 }
 

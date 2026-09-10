@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.BooleanElaborator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.BooleanFn;
 import net.sf.saxon.functions.SystemFunction;
@@ -372,7 +376,45 @@ public class QuantifiedExpression extends Assignation {
         out.endElement();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
 
+    @Override
+    public Elaborator getElaborator() {
+        return new QuantifiedExprElaborator();
+    }
 
+    /**
+     * Elaborator for a quantified expression ({@code some|every X in Y satisfies Z})
+     */
+
+    public static class QuantifiedExprElaborator extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+
+            final QuantifiedExpression expr = (QuantifiedExpression) getExpression();
+            final PullEvaluator selectEval = makeElaborator(expr.getSequence()).elaborateForPull();
+            final BooleanEvaluator satisfiesEval = makeElaborator(expr.getAction()).elaborateForBoolean();
+            final boolean some = expr.getOperator() == Token.SOME;
+            final int slot = expr.getLocalSlotNumber();
+
+            return context -> {
+                SequenceIterator base = selectEval.eval(context);
+                Item it;
+                while ((it = base.next()) != null) {
+                    context.setLocalVariable(slot, it);
+                    if (some == satisfiesEval.eval(context)) {
+                        base.close();
+                        return some;
+                    }
+                }
+                return !some;
+            };
+        }
+
+    }
 }
 

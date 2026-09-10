@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.instruct.AnalyzeString;
@@ -579,5 +583,40 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         }
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
 
+    @Override
+    public Elaborator getElaborator() {
+        return new SystemFunctionCallElaborator();
+    }
+
+    /**
+     * Elaborator for a system function call, used in cases where the specific function call has no custom support
+     */
+
+    public static class SystemFunctionCallElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+            final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
+            return context -> {
+                Sequence[] arguments = expr.evaluateArguments(context);
+                Sequence result = expr.call(context, arguments);
+                return result.iterate();
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            final SystemFunctionCall expr = (SystemFunctionCall) getExpression();
+            return context -> {
+                Sequence[] arguments = expr.evaluateArguments(context);
+                Sequence result = expr.call(context, arguments);
+                return result.head();
+            };
+        }
+    }
 }

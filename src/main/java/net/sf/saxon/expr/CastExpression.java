@@ -8,6 +8,9 @@
 package net.sf.saxon.expr;
 
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.String_1;
@@ -468,7 +471,34 @@ public class CastExpression extends CastingExpression implements Callable {
         return "cast";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
 
+    @Override
+    public Elaborator getElaborator() {
+        return new CastExprElaborator();
+    }
 
+    /**
+     * Elaborator for {@code cast as} expression, or the equivalent constructor function call
+     */
+
+    public static class CastExprElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            CastExpression exp = (CastExpression) getExpression();
+            Expression arg = exp.getBaseExpression();
+            ItemEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForItem();
+
+            return context -> {
+                AtomicValue value = (AtomicValue) argEval.eval(context);
+                return exp.doCast(value, context);
+            };
+        }
+
+    }
 }
 

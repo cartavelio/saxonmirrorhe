@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
@@ -362,6 +366,44 @@ public class ContextItemExpression extends Expression {
     @Override
     public String toShortString() {
         return ".";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ContextItemElaborator();
+    }
+
+    /**
+     * Elaborator for the context item expression, "dot".
+     */
+
+    public static class ContextItemElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            ContextItemExpression cie = (ContextItemExpression) getExpression();
+            if (cie.isContextPossiblyUndefined()) {
+                return context -> {
+                    Item current = context.getContextItem();
+                    if (current == null) {
+                        cie.reportAbsentContext(context);
+                    }
+                    return current;
+                };
+            } else {
+                return XPathContext::getContextItem;
+            }
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            return super.elaborateForPull();
+        }
     }
 }
 

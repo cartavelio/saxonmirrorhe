@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -163,6 +167,42 @@ public class SingletonIntersectExpression extends VennExpression {
     @Override
     protected String tag() {
         return "among";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new SingletonIntersectElaborator();
+    }
+
+    /**
+     * Elaborator for a Venn expression: that is {@code A union B}, {@code A intersect B},
+     * or {@code A except B}
+     */
+
+    public static class SingletonIntersectElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+
+            final SingletonIntersectExpression exp = (SingletonIntersectExpression) getExpression();
+            final ItemEvaluator lhs = Elaborator.makeElaborator(exp.getLhsExpression()).elaborateForItem();
+            final PullEvaluator rhs = Elaborator.makeElaborator(exp.getRhsExpression()).elaborateForPull();
+
+            return context -> {
+                NodeInfo node = (NodeInfo) lhs.eval(context);
+                if (node == null) {
+                    return null;
+                }
+                SequenceIterator nodeSet = rhs.eval(context);
+                return containsNode(nodeSet, node) ? node : null;
+            };
+
+        }
     }
 }
 

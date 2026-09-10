@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
@@ -624,6 +628,48 @@ public final class Atomizer extends UnaryExpression {
     protected void emitExtraAttributes(ExpressionPresenter out) {
         if (roleSupplier != null) {
             out.emitAttribute("diag", roleSupplier.get().save());
+        }
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new AtomizerElaborator();
+    }
+
+    /**
+     * Elaborator for an Atomizer
+     */
+
+    public static class AtomizerElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+            final Atomizer expr = (Atomizer) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final boolean oneToOne = expr.isUntyped() && expr.getBaseExpression().getItemType() instanceof NodeTest;
+            return context -> {
+                SequenceIterator base = baseEval.eval(context);
+                return getAtomizingIterator(base, oneToOne);
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            final Atomizer expr = (Atomizer) getExpression();
+            final ItemEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForItem();
+            final boolean nullable = Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
+            return context -> {
+                Item it = baseEval.eval(context);
+                if (nullable && it == null) {
+                    return null;
+                }
+                return it.atomize().head();
+            };
         }
     }
 }

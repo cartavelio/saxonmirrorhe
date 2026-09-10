@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
@@ -325,7 +328,6 @@ public class RootExpression extends Expression {
         return getNode(context) != null;
     }
 
-
     /**
      * Get the (partial) name of a class that supports streaming of this kind of expression
      *
@@ -335,6 +337,30 @@ public class RootExpression extends Expression {
     @Override
     public String getStreamerName() {
         return "RootExpression";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new RootExprElaborator();
+    }
+
+    /**
+     * Elaborator for a root expression ({@code /})
+     */
+
+    public static class RootExprElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+            final RootExpression expr = (RootExpression) getExpression();
+            return expr::getNode;
+        }
+
     }
 }
 

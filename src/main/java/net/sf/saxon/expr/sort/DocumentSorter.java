@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr.sort;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
@@ -300,6 +303,34 @@ public class DocumentSorter extends UnaryExpression {
     @Override
     public String getStreamerName() {
         return "DocumentSorterAdjunct";
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new DocumentSorterElaborator();
+    }
+
+    /**
+     * Elaborator for a docOrder expression - sorts nodes into document order and eliminates duplicates
+     */
+
+    public static class DocumentSorterElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+
+            final DocumentSorter expr = (DocumentSorter) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            final Comparator<? super NodeInfo> comparer = expr.getComparer();
+
+            return context -> new DocumentOrderIterator(baseEval.eval(context), comparer);
+        }
+
     }
 }
 

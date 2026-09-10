@@ -7,18 +7,24 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
 
 /**
  * An UntypedSequenceConverter is an expression that performs a cast on each member of
@@ -264,5 +270,57 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         destination.endElement();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new UntypedSequenceConverterElaborator();
+    }
+
+    /**
+     * Elaborator for an UntypedSequenceConverter
+     */
+
+    public static class UntypedSequenceConverterElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+            final UntypedSequenceConverter expr = (UntypedSequenceConverter) getExpression();
+            final UntypedConverter converter =
+                    (UntypedConverter)expr.getConverter();
+            assert converter != null;
+            final AtomicSequenceMappingFunction mapper =
+                    new AtomicSequenceMappingFunction();
+            mapper.setConverter(converter);
+            if (expr.getRoleSupplier() != null) {
+                mapper.setErrorCode(expr.getRoleSupplier().get().getErrorCode());
+            }
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            return context -> {
+                SequenceIterator base = baseEval.eval(context);
+                return new ItemMappingIterator(base, mapper, true);
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            final AtomicSequenceConverter expr = (AtomicSequenceConverter) getExpression();
+            final ItemEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForItem();
+            final UntypedConverter converter =
+                    (UntypedConverter) expr.getConverter();
+            assert converter != null;
+            final boolean nullable = Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
+            return context -> {
+                AtomicValue baseValue = (AtomicValue)baseEval.eval(context);
+                if (nullable && baseValue == null) {
+                    return null;
+                }
+                return converter.convert(baseValue).asAtomic();
+            };
+        }
+    }
 }
 

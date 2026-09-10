@@ -7,6 +7,9 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
@@ -135,5 +138,31 @@ public class EmptyTextNodeRemover extends UnaryExpression implements ItemMapping
         return "emptyTextNodeRemover";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new EmptyTextNodeRemoverElaborator();
+    }
+
+    /**
+     * Elaborator for an empty text node remove expression - inserted into a pipeline for node construction
+     */
+
+    public static class EmptyTextNodeRemoverElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+
+            final EmptyTextNodeRemover expr = (EmptyTextNodeRemover) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+
+            return context -> new ItemMappingIterator(baseEval.eval(context), expr);
+        }
+
+    }
 }
 

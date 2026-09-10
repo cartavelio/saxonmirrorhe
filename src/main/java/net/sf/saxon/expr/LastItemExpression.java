@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
@@ -87,5 +91,45 @@ public final class LastItemExpression extends SingleItemFilter {
         return "lastOf";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return a suitable elaborator
+     */
+
+    @Override
+    public Elaborator getElaborator() {
+        return new LastItemExprElaborator();
+    }
+
+    /**
+     * Elaborator for a "last item expression" (typically {@code SEQ[last()]})
+     */
+
+    public static class LastItemExprElaborator extends ItemElaborator {
+
+        public ItemEvaluator elaborateForItem() {
+
+            final LastItemExpression expr = (LastItemExpression) getExpression();
+            final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
+
+            return context -> {
+                final SequenceIterator forwards = baseEval.eval(context);
+                if (forwards instanceof ReversibleIterator) {
+                    return ((ReversibleIterator) forwards).getReverseIterator().next();
+                } else {
+                    Item current = null;
+                    while (true) {
+                        Item item = forwards.next();
+                        if (item == null) {
+                            return current;
+                        }
+                        current = item;
+                    }
+                }
+            };
+        }
+
+    }
 }
 
