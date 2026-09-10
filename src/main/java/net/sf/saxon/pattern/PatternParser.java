@@ -295,30 +295,11 @@ public class PatternParser extends XPathParser {
             Token tok = t.currentToken;
             if (tok == Token.DOLLAR) {
                 if (!firstInPattern) {
-                    grumble("In an XSLT 3.0 pattern, a variable reference is allowed only as the first step in a path");
+                    grumble("In an XSLT pattern, a variable reference is allowed only as the first step in a path");
                     return null;
                 } else {
                     return super.parseBasicStep(firstInPattern);
                 }
-                // TODO: reinstate these restrictions
-//                case Token.STRING_LITERAL:
-//                case Token.NUMBER:
-//                case Token.HEX_INTEGER:
-//                case Token.BINARY_INTEGER:
-//                case Token.ELEMENT_QNAME:
-//                case Token.ATTRIBUTE_QNAME:
-//                case Token.NAMESPACE_QNAME:
-//                case Token.PI_QNAME:
-//                case Token.START_TAG:
-//                case Token.NAMED_FUNCTION_REF:
-//                case Token.DOTDOT:
-//                    grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
-//                    return null;
-//                case Token.FUNCTION_CALL:
-//                    if (!firstInPattern) {
-//                        grumble("In an XSLT pattern, a function call is allowed only as the first step in a path");
-//                    }
-//                    return super.parseBasicStep(firstInPattern);
             }
             if (tok instanceof Token.NameToken) {
                 if (t.peekAhead() == Token.LPAREN) {
@@ -333,12 +314,18 @@ public class PatternParser extends XPathParser {
                         default:
                             return super.parseBasicStep(firstInPattern);
                     }
-                } else if (t.peekAhead() == Token.LCURLY) {
+                } else if (t.peekAhead() == Token.LCURLY || t.peekAhead() == Token.HASH) {
                     grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
                     return null;
                 } else {
                     return super.parseBasicStep(firstInPattern);
                 }
+            } else if (t.currentToken instanceof Token.StringLiteral
+                    || t.currentToken instanceof Token.NumericLiteral
+                    || t.currentToken instanceof Token.StringTemplate
+                    || t.currentToken instanceof Token.StringConstructor) {
+                grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
+                return null;
             } else {
                 return super.parseBasicStep(firstInPattern);
             }
@@ -358,7 +345,7 @@ public class PatternParser extends XPathParser {
         if (!(arg instanceof VariableReference || arg instanceof Literal)
                 || arg instanceof FunctionLiteral
                 || Literal.isEmptySequence(arg)) {
-            grumble("Expression " + arg + " is not allowed as function argument in XSLT pattern");
+            grumble("Expression " + arg + " is not allowed as a function argument in an XSLT pattern");
         }
     }
 
@@ -367,7 +354,7 @@ public class PatternParser extends XPathParser {
         super.testPermittedAxis(axis, errorCode);
         if (inPredicate == 0) {
             if (!AxisInfo.isSubtreeAxis[axis]) {
-                grumble("The " + AxisInfo.axisName[axis] + " is not allowed in a pattern");
+                grumble("The " + AxisInfo.axisName[axis] + " axis is not allowed in a pattern");
             }
         }
     }
@@ -406,8 +393,8 @@ public class PatternParser extends XPathParser {
     public Expression parseFunctionCall(String fname, Expression prefixArgument) throws XPathException {
         Expression fn = super.parseFunctionCall(fname, prefixArgument);
         if (inPredicate <= 0 && !fn.isCallOn(SuperId.class) && !fn.isCallOn(KeyFn.class) &&
-                !fn.isCallOn(Doc.class) && !fn.isCallOn(Root_1.class)) {
-            grumble("The " + fn + " function is not allowed at the head of a pattern");
+                !fn.isCallOn(Doc.class) && !(fn.isCallOn(Root_1.class) && ((FunctionCall)fn).getArity() == 0)) {
+            grumble("The " + fn + " function is not allowed in a pattern (unless in a predicate)");
         }
         return fn;
     }

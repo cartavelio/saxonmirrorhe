@@ -4265,7 +4265,7 @@ public class XPathParser {
                         placeMarkerArgs.add(paramName);
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
-                        arg = parseStandaloneExpr();
+                        arg = parseFunctionArgument();
                     }
                     if (keywordArgs == null) {
                         keywordArgs = new HashMap<>();
@@ -4287,7 +4287,7 @@ public class XPathParser {
                         placeMarkerArgs.add(position);
                         arg = Literal.makeEmptySequence(); // a convenient fiction
                     } else {
-                        arg = parseStandaloneExpr();
+                        arg = parseFunctionArgument();
                     }
                     checkAllowedFunctionArgument(arg);
                     args.add(arg);
