@@ -468,25 +468,14 @@ for (buildArch in architectures) {
     arch = buildArch
     inputs.files(layout.projectDirectory.file("../tools/generateCSProj.xsl"))
     inputs.files(layout.projectDirectory.file("../tools/generateTestDriverCSProj.xsl"))
-    inputs.files(layout.projectDirectory.file("../tools/generateNUnitCSProj.xsl"))
     outputs.files(layout.buildDirectory.file("${buildArch}/SaxonCS/SaxonCS.csproj"))
     outputs.files(layout.buildDirectory.file("${buildArch}/TestDrivers/TestDrivers.csproj"))
-    outputs.files(layout.buildDirectory.file("${buildArch}/NUnitTests/NUnitTests.csproj"))
   }
   configure_task { dependsOn(configure) }
-
-  val nunit = tasks.register<Copy>("dotnetNUnit_${buildArch}") {
-    from(layout.projectDirectory.dir("../src/test/nunit/SaxonCS-NUnit")) {
-      include("**/*.cs")
-    }
-    into(layout.buildDirectory.dir("${buildArch}/NUnitTests"))
-  }
-  build_task { dependsOn(nunit) }
 
   val build = tasks.register<DotNetBuild>("dotnetBuild_${buildArch}") {
     group = LifecycleBasePlugin.BUILD_GROUP
     dependsOn(configure)
-    dependsOn(nunit)
     target = "SaxonCS"
     arch = buildArch
     inputs.files(configure)
@@ -761,13 +750,15 @@ tasks.register<Exec>("ecsTest") {
   group = "Verification"
   description = "Run SaxonCS nUnit tests"
   dependsOn("dotnetBuild")
+  dependsOn("nunit-template")
 
   val reportDir = layout.buildDirectory.dir("reports/tests/eecsTest")
   inputs.dir(layout.projectDirectory.dir("../src/test/nunit"))
   outputs.dir(reportDir)
 
   workingDir = layout.projectDirectory.dir("../src/test/nunit").asFile
-  commandLine("${saxonBuild.dotnet.get()}", "test", "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
+  commandLine("${saxonBuild.dotnet.get()}", "test", "SaxonCSEE.sln",
+              "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
 }
 
 // ============================================================
@@ -807,6 +798,30 @@ tasks.register<JavaExec>("csproj-template") {
        "platform=${saxonCS.platform.get()}",
        "arch=${saxonCS.arch.get()}",
        "edition=${saxonCS.edition.get()}",
+       "framework=net${saxonBuild.dotnetversion.get()}",
+       "saxonVersion=${findProperty("saxonVersion")!!}",
+       "uuid1=${UUID.randomUUID()}",
+       "uuid2=${UUID.randomUUID()}",
+       "uuid3=${UUID.randomUUID()}",
+       "uuid4=${UUID.randomUUID()}")
+}
+
+tasks.register<JavaExec>("nunit-template") {
+  val edition = saxonCS.edition.get()
+  val EDITION = edition.uppercase()
+
+  inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
+  outputs.file(layout.projectDirectory.file("../src/test/nunit/${templateName}${EDITION}.csproj"))
+  outputs.file(layout.projectDirectory.file("../src/test/nunit/${templateName}${EDITION}.sln"))
+  classpath = preprocessorClasspath
+  mainClass = "net.sf.saxon.Transform"
+  args("-it",
+       "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
+       "-o:${layout.projectDirectory.file("../src/test/nunit/${templateName}${EDITION}.sln")}",
+       "nunitBuild=true",
+       "platform=${saxonCS.platform.get()}",
+       "arch=${saxonCS.arch.get()}",
+       "edition=${edition}",
        "framework=net${saxonBuild.dotnetversion.get()}",
        "saxonVersion=${findProperty("saxonVersion")!!}",
        "uuid1=${UUID.randomUUID()}",

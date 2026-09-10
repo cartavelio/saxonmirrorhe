@@ -8,6 +8,7 @@
 <xsl:output method="text" encoding="utf-8"/>
 
 <xsl:param name="releaseBuild" as="xs:string?" select="()"/>
+<xsl:param name="nunitBuild" as="xs:string?" select="'false'"/>
 
 <xsl:param name="platform" as="xs:string" required="yes"/>
 <xsl:param name="arch" as="xs:string" required="yes"/>
@@ -15,7 +16,8 @@
 <xsl:param name="edition" as="xs:string" required="yes"/>
 <xsl:param name="framework" as="xs:string" required="yes"/>
 
-<xsl:param name="includeTestDriver" as="xs:boolean" select="empty($releaseBuild)"/>
+<xsl:param name="includeTestDriver" as="xs:boolean"
+           select="empty($releaseBuild) and not($nunitBuild = 'true')"/>
 <xsl:param name="core.csproj" as="xs:string" select="'core.csproj'"/>
 
 <!-- what. a. hack. -->
@@ -71,7 +73,17 @@ EndGlobal
   <xsl:result-document href="{$core.csproj}" method="xml" indent="yes">
     <Project>
       <PropertyGroup>
-        <LangVersion>9.0</LangVersion>
+        <xsl:choose>
+          <xsl:when test="$nunitBuild = 'true'">
+            <LangVersion>10.0</LangVersion>
+            <PackageSummary>NUnit tests for {upper-case($edition)}</PackageSummary>
+          </xsl:when>
+          <xsl:otherwise>
+            <LangVersion>9.0</LangVersion>
+            <PackageSummary>An XSLT 3.0 processor for .NET</PackageSummary>
+          </xsl:otherwise>
+        </xsl:choose>
+
         <TargetFramework>{$framework}</TargetFramework>
         <Version>{$saxonVersion}</Version>
         <AssemblyVersion>{$saxonVersion}</AssemblyVersion>
@@ -94,23 +106,25 @@ EndGlobal
         <PackageTags>XML,XSLT,Saxonica</PackageTags>
         <Copyright>Copyright © 2021-{year-from-date(current-date())} Saxonica, Ltd.</Copyright>
         <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
-        <PackageSummary>An XSLT 3.0 processor for .NET</PackageSummary>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <DefineConstants>{upper-case($edition)}</DefineConstants>
+        <xsl:if test="not($nunitBuild = 'true')">
+          <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+          <PackageReadmeFile>README.md</PackageReadmeFile>
+          <DefineConstants>{upper-case($edition)}</DefineConstants>
+        </xsl:if>
       </PropertyGroup>    
       
-      <ItemGroup>
-        <None Include="../LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
-        <None Include="../README.md" Pack="true" PackagePath="README.md"/>
-      </ItemGroup>
+      <xsl:if test="not($nunitBuild = 'true')">
+        <ItemGroup>
+          <None Include="../LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+          <None Include="../README.md" Pack="true" PackagePath="README.md"/>
+        </ItemGroup>
 
-      <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
-        <PublishSingleFile>true</PublishSingleFile>
-        <IncludeSymbolsInSingleFile>false</IncludeSymbolsInSingleFile>
-        <Optimize>true</Optimize>
-      </PropertyGroup>
-
+        <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+          <PublishSingleFile>true</PublishSingleFile>
+          <IncludeSymbolsInSingleFile>false</IncludeSymbolsInSingleFile>
+          <Optimize>true</Optimize>
+        </PropertyGroup>
+      </xsl:if>
 
       <ItemGroup>
         <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
@@ -118,6 +132,11 @@ EndGlobal
 
       <ItemGroup>
         <xsl:choose>
+          <xsl:when test="$nunitBuild = 'true'">
+            <EmbeddedResource Include="..\..\..\ee\build\resources\**\*">
+              <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
+            </EmbeddedResource>
+          </xsl:when>
           <xsl:when test="exists($releaseBuild)">
             <EmbeddedResource Include="..\..\resources\**\*">
               <LogicalName>$(AssemblyName).$([System.IO.Path]::GetFullPath('%(Identity)'))</LogicalName>
@@ -161,6 +180,35 @@ EndGlobal
 
   <xsl:result-document href="{$templateName}.csproj" method="xml" indent="yes">
     <xsl:choose>
+      <xsl:when test="$nunitBuild = 'true'">
+        <Project Sdk="Microsoft.NET.Sdk">
+          <Import Project="core.csproj"/>
+          <PropertyGroup>
+            <Description>SaxonCS NUnit tests.</Description>
+            <IsTestProject>true</IsTestProject>
+            <DefineConstants>{upper-case($edition)}</DefineConstants>
+          </PropertyGroup>
+          <ItemGroup>
+            <Compile Include="SaxonCS-NUnit\**\*.cs"/>
+            <Compile Remove="SaxonCS-NUnit\**\.DS_Store"/>
+          </ItemGroup>
+          <ItemGroup>
+            <Reference Include="SaxonCS">
+              <HintPath>../../../{$edition}/build/{$arch}/SaxonCS/bin/Debug/{$framework}/{$platform}-{$arch}/SaxonCS.dll</HintPath>
+            </Reference>
+          </ItemGroup>
+          <ItemGroup>
+            <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+            <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+            <PackageReference Include="NUnit" Version="4.3.2"/>
+            <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
+            <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+          </ItemGroup>
+          <ItemGroup>
+            <Using Include="NUnit.Framework"/>
+          </ItemGroup>
+        </Project>
+      </xsl:when>
       <xsl:when test="$releaseBuild = 'TestDriver'">
         <Project Sdk="Microsoft.NET.Sdk">
           <Import Project="{$core.csproj}"/>
