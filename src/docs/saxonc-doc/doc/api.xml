@@ -390,10 +390,11 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
                </td>
                <td>
-                  <span class="signature">parseXmlFromString(string $value)</span>
+                  <span class="signature">parseXmlFromString(string $value, string $encoding=NULL, SchemaValidator $validator=NULL)</span>
                   <div class="fcomment">Create an <a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a> object. The $value is a lexical
-                     representation of the XML document.</div>
+                     representation of the XML document. The optional $encoding argument if supplied is the source string argument.
+                     If not specified then platform default encoding is used. The optional $validator is the SchemaValidator object if it exists. Default is NULL.</div>
                </td>
             </tr>
             <tr>
@@ -401,11 +402,12 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
                </td>
                <td>
-                  <span class="signature">parseXmlFromFile(string $fileName)</span>
+                  <span class="signature">parseXmlFromFile(string $fileName,  SchemaValidator $validator=NULL)</span>
                   <div class="fcomment">Create an <a class="bodylink code"
                         href="../saxon_c_php_xdmnode">XdmNode</a> object by parsing an XML document,
                      as specified by the $fileName argument. The file name can be relative or
-                     absolute. If relative the cwd is used to resolve the file.</div>
+                     absolute. If relative the cwd is used to resolve the file.
+                     The optional $validator is the SchemaValidator object if it exists. Default is NULL.</div>
                </td>
             </tr>
             <tr>
@@ -835,8 +837,9 @@
                   <code><a class="bodylink code" href="../saxon_c_php_xsltexecutable">Saxon\XsltExecutable</a></code>
                </td>
                <td>
-                  <span class="signature">compileFromString(string $str)</span>
-                  <div class="fcomment">Compile a stylesheet received as a string.</div>
+                  <span class="signature">compileFromString(string $str, string $encoding=NULL)</span>
+                  <div class="fcomment">Compile a stylesheet received as a string. The optional $encoding argument if supplied is the source string argument.
+                     If not specified then platform default encoding is used.</div>
                </td>
             </tr>
             <tr>
@@ -1975,6 +1978,26 @@
                   <code>void</code>
                </td>
                <td>
+                  <span class="signature">setUnprefixedElementMatchingPolicy(long $policy)</span>
+                  <div class="fcomment"><p>Set the policy for matching unprefixed element names in XPath expressions.</p>
+                  <p> DEFAULT_NAMESPACE = 0 - The standard W3C policy, whereby element names are implicitly qualified by
+                     the default namespace for elements and types, as defined in the XPath
+                      static context. This is set with the number value 0.</p>
+                  <p>ANY_NAMESPACE = 1 - Under this policy, unprefixed element names match on the local part only;
+                      an element with this local name is matched regardless of its namespace
+                      (that is, it can have any namespace, or none). This is set with the number value 1.</p>
+                  <p>DEFAULT_NAMESPACE_OR_NONE = 2 - his policy is provided primarily for use with HTML, where it can be
+                      unpredictable whether HTML elements are in the XHTML namespace or in no
+                      namespace. It is also useful with other vocabularies where instances are
+                      sometimes in a namespace and sometimes not. The policy approximates to the
+                      special rules defined in the HTML5 specification. This is set with the number value 2.</p></div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
                   <span class="signature">setBaseURI(string $uri)</span>
                   <div class="fcomment">Set the static base URI for XPath expressions compiled using
                      this XPath processor. The base URI is part of the static context, and is used
@@ -2422,8 +2445,9 @@
                   <a class="bodylink code" href="../saxon_c_php_xdmnode">Saxon\XdmNode</a>
                </td>
                <td>
-                  <span class="signature">parseXmlFromString(string $content)</span>
-                  <div class="fcomment">Build a document from a lexical string representation, to create a tree representation of the document in memory.</div>
+                  <span class="signature">parseXmlFromString(string $content, string $encoding=NULL)</span>
+                  <div class="fcomment">Build a document from a lexical string representation, to create a tree representation of the document in memory.
+                     The optional $encoding argument if supplied is the source string argument. If not specified then platform default encoding is used.</div>
                </td>
             </tr>
             
