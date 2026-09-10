@@ -47,6 +47,7 @@ public class SchemaURIResolverTest {
             Source[] sources = resolver.resolve("urn:oasis:names:tc:entity:xmlns:xml:catalog", null, null);
             Assert.assertNotNull(sources);
         } catch (Exception ex) {
+            ex.printStackTrace();
             fail();
         }
     }

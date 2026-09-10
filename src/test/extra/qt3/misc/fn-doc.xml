@@ -67,6 +67,8 @@
       <description>Query parameters, strip-space=no</description>
       <created by="Michael Kay, Saxonica" on="2021-12-19"/>
       <dependency type="spec" value="XP31+ XQ31+"/>
+      <dependency type="feature" value="schemaImport" satisfied="false"/>
+      <dependency type="saxon:config" name="http://saxon.sf.net/feature/preEvaluateDocFunction" value="false"/>
       <test>doc('docs/atomic.xml?strip-space=no')</test>
       <result>
          <assert>$result//*:duration/following-sibling::node()[1][self::text()]</assert>        
@@ -139,6 +141,21 @@
          <assert>$result/a/Q{http://www.w3.org/XQueryTest}root/Q{http://www.w3.org/XQueryTest}duration[self::element(*, xs:duration)]</assert>        
       </result>
    </test-case>
+   
+   <test-case name="fn-doc-301">
+      <description>Data URI scheme</description>
+      <created by="Michael Kay, Saxonica" on="2021-12-21"/>
+      <dependency type="spec" value="XP20+ XQ20+"/>
+      <test>
+         doc('data:text/xml;base64,PGRvYy8+') (: represents <doc/> :)
+      </test>
+      <result>
+         <assert>$result/doc[not(child::node())]</assert>        
+      </result>
+   </test-case>
+   
+   
+   data:text/xml;base64,PGRvYy8+
  
 
 </test-set>
