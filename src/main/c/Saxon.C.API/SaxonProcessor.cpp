@@ -945,7 +945,11 @@ void SaxonProcessor::deleteXdmValueArray(XdmValue **arr, int len) {
 void SaxonProcessor::deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len) {
     if(arr != nullptr && len > 0) {
         for (int i = 0; i < len; i++) {
-            delete arr[i];
+            if(arr[i]->getRefCount() < 1) {
+                delete arr[i];
+            } else {
+                arr[i]->decrementRefCount();
+            }
         }
         delete[] arr;
     }
