@@ -1,5 +1,6 @@
 package com.saxonica.xsltextn.style;
 
+import com.saxonica.expr.DeepUpdate2;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
