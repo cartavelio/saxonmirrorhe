@@ -366,7 +366,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR, null));
 
         register("invisible-xml", 1, 2, e -> e.populate(InvisibleXmlFn::new, InvisibleXmlFn.RETURN_TYPE, OPT, 0)
-                .arg(0, AnyItemType.getInstance(), OPT, null)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(InvisibleXmlFn.getOptionDetails()));
 
