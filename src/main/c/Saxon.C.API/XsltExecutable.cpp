@@ -563,7 +563,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
 const char *XsltExecutable::applyTemplatesReturningString() {
     SaxonProcessor::attachCurrentThread();
-    std::cerr<<"appltTemplatesReturningString cp0"<<std::endl;
+
     if (selection == nullptr) {
         std::cerr
                 << "Error: The initial match selection has not been set. Please set it using setInitialMatchSelection or setInitialMatchSelectionFile."
@@ -606,13 +606,13 @@ const char *XsltExecutable::applyTemplatesReturningString() {
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF("rd"));
             SaxonProcessor::sxn_environ->env->SetObjectArrayElement(comboArrays.objectArray, parameters.size() + properties.size()+iadd,saxonResultDocObj);
         }
-        std::cerr<<"appltTemplatesReturningString cp1"<<std::endl;
+
         jbyteArray result = nullptr;
         jobject obj = (SaxonProcessor::sxn_environ->env->CallStaticObjectMethod(cppClass, atsmID,
                                                                                 SaxonProcessor::sxn_environ->env->NewStringUTF(
                                                                                         cwdXE.c_str()), executableObject,selection,
                 comboArrays.stringArray, comboArrays.objectArray));
-        std::cerr<<"appltTemplatesReturningString cp2"<<std::endl;
+
         if (obj) {
             result = (jbyteArray) obj;
         }
@@ -620,7 +620,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.stringArray);
             SaxonProcessor::sxn_environ->env->DeleteLocalRef(comboArrays.objectArray);
         }
-        std::cerr<<"appltTemplatesReturningString cp3"<<std::endl;
+
         if (result) {
             jboolean isCopy = false;
             jbyte* b = SaxonProcessor::sxn_environ->env->GetByteArrayElements(result, &isCopy);
@@ -1201,7 +1201,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
                                                                                           comboArrays.objectArray));
 
          if(!result) {
-            std::cerr<<"Error found in calltemplateReturningValue"<<std::endl;
+            std::cerr<<"Error found in callTemplateReturningValue"<<std::endl;
             SaxonProcessor::sxn_environ->env->ExceptionDescribe();
          }
 
@@ -1278,7 +1278,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
                                                                                  "(Ljava/lang/String;Lnet/sf/saxon/option/cpp/Xslt30Processor;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
     }
     if (!tfvMID) {
-        std::cerr << "Error: " << getDllname() << ".transformtoValue" << " not found\n"
+        std::cerr << "Error: " << getDllname() << ".transformToValue" << " not found\n"
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
