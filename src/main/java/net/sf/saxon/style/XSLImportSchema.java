@@ -150,9 +150,6 @@ public class XSLImportSchema extends StyleElement {
             }
             if (!namespaceKnown) {
                 PipelineConfiguration pipe = config.makePipelineConfiguration();
-//                SchemaURIResolver schemaResolver = config.makeSchemaURIResolver(
-//                        getCompilation().getCompilerInfo().getResourceResolver());
-//                pipe.setSchemaURIResolver(schemaResolver);
                 pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
                 targetNamespace = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
             }

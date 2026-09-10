@@ -1,6 +1,7 @@
 package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
 import jaxptest.ConfigTest;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Sender;
@@ -53,14 +54,18 @@ public class ValidationTest {
         LocalErrorListener listener = new LocalErrorListener();
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.addSchemaSource(new StreamSource(new File(configTest.getDataDir() + "books.xsd")), listener);
+            PreparedSchema schema = new PreparedSchema(
+                    config,
+                    new StreamSource(new File(configTest.getDataDir() + "books.xsd")),
+                    listener);
             StringWriter sw = new StringWriter();
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
             ParseOptions options = new ParseOptions()
+                    .withSchema(schema)
                     .withSchemaValidationMode(Validation.STRICT)
                     .withValidationErrorLimit(1)
                     .withErrorReporter(listener);
-            Receiver val = config.getDocumentValidator(out, "", options, null);
+            Receiver val = schema.getDocumentValidator(out, "", options, null);
             val.setPipelineConfiguration(out.getPipelineConfiguration());
             String badBooks = "<BOOKLIST><BOOKS/><CATEGORIES><CATEGORY/></CATEGORIES></BOOKLIST>";
             Sender.send(new StreamSource(new StringReader(badBooks)), val, null);
@@ -83,14 +88,18 @@ public class ValidationTest {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             config.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
-            config.addSchemaSource(new StreamSource(new File(configTest.getDataDir() + "books.xsd")), listener);
+            PreparedSchema schema = new PreparedSchema(
+                    config,
+                    new StreamSource(new File(configTest.getDataDir() + "books.xsd")),
+                    listener);
             SerializationProperties props = new SerializationProperties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), props);
             ParseOptions options = new ParseOptions()
+                    .withSchema(schema)
                     .withSchemaValidationMode(Validation.STRICT)
                     .withErrorReporter(listener);
-            Receiver val = config.getDocumentValidator(out, "", options, null);
+            Receiver val = schema.getDocumentValidator(out, "", options, null);
             val.setPipelineConfiguration(out.getPipelineConfiguration());
             Sender.send(new StreamSource(new StringReader(badBooks)), val, null);
             assertEquals(0, listener.warnings, "warnings");
@@ -114,14 +123,18 @@ public class ValidationTest {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
             config.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, true);
             config.setConfigurationProperty(FeatureKeys.VALIDATION_COMMENTS, true);
-            config.addSchemaSource(new StreamSource(new File(configTest.getDataDir() + "books.xsd")), listener);
+            PreparedSchema schema = new PreparedSchema(
+                    config,
+                    new StreamSource(new File(configTest.getDataDir() + "books.xsd")),
+                    listener);
             Properties props = new Properties();
             props.setProperty("omit-xml-declaration", "yes");
             Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw), new SerializationProperties(props));
             ParseOptions options = new ParseOptions()
+                    .withSchema(schema)
                     .withErrorReporter(listener)
                     .withSchemaValidationMode(Validation.STRICT);
-            Receiver val = config.getDocumentValidator(out, "", options, null);
+            Receiver val = schema.getDocumentValidator(out, "", options, null);
             val.setPipelineConfiguration(out.getPipelineConfiguration());
             Sender.send(new StreamSource(new StringReader(badBooks)), val, null);
             assertEquals(0, listener.warnings, "warnings");

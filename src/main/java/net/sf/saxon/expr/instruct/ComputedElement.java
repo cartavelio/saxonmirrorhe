@@ -617,7 +617,7 @@ public class ComputedElement extends ElementCreator {
             SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
                     ? AnyType.getInstance()
                     : Untyped.getInstance();
-
+            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
             return (out, context) -> {
                 try {
 
@@ -628,7 +628,7 @@ public class ComputedElement extends ElementCreator {
                         ParseOptions options = expr.getValidationOptions()
                                 .withTopLevelElement(elemName.getStructuredQName());
                         context.getConfiguration().prepareValidationReporting(context, options);
-                        Receiver validator = context.getConfiguration().getElementValidator(
+                        Receiver validator = schema.getElementValidator(
                                 elemOut, options, expr.getLocation());
 
                         if (validator != elemOut) {

@@ -599,6 +599,8 @@ public class FixedElement extends ElementCreator {
                     ? AnyType.getInstance()
                     : Untyped.getInstance();
 
+            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
+
             int properties = ReceiverOption.NONE;
             if (!expr.bequeathNamespacesToChildren) {
                 properties |= ReceiverOption.DISINHERIT_NAMESPACES;
@@ -619,7 +621,7 @@ public class FixedElement extends ElementCreator {
                         ParseOptions options = expr.getValidationOptions()
                                 .withTopLevelElement(elemName.getStructuredQName());
                         context.getConfiguration().prepareValidationReporting(context, options);
-                        Receiver validator = context.getConfiguration().getElementValidator(
+                        Receiver validator = schema.getElementValidator(
                                 elemOut, options, expr.getLocation());
 
                         if (validator != elemOut) {

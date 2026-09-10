@@ -122,7 +122,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 //                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
 //                + "    }"
 //})
-public class Configuration implements SourceResolver, NotationSet {
+public class Configuration implements SourceResolver {
 
     protected static IntSet booleanFeatures = new IntHashSet(40);
     protected static IntSet stringFeatures = new IntHashSet(40);
@@ -1084,7 +1084,7 @@ public class Configuration implements SourceResolver, NotationSet {
             synchronized(this) {
                 ConversionRules cv = new ConversionRules();
                 cv.setTypeHierarchy(getTypeHierarchy());
-                cv.setNotationSet(this);
+                cv.setNotationSet(null);
                 if (xsdVersion == XSD10) {
                     cv.setStringToDoubleConverter(StringToDouble.getInstance());
                     cv.setURIChecker(StandardURIChecker.getInstance());
@@ -3028,7 +3028,8 @@ public class Configuration implements SourceResolver, NotationSet {
     //#endif
 
     public Schema getSchema() {
-        return new MinimalSchema();
+        needEnterpriseEdition();
+        return null;
     }
 
     public Schema getSchemaForNamespace(NamespaceUri uri) {
@@ -3039,11 +3040,23 @@ public class Configuration implements SourceResolver, NotationSet {
      * Simple interface to load a schema document
      *
      * @param absoluteURI the absolute URI of the location of the schema document
+     * @return the compiled schema
      * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be read or is invalid
      */
 
-    public void loadSchema(String absoluteURI) throws SchemaException {
-        readSchema(makePipelineConfiguration(), "", absoluteURI, null);
+    public Schema loadSchema(String absoluteURI) throws SchemaException {
+        needEnterpriseEdition();
+        return null;
+    }
+
+    /**
+     * Load an empty schema. This may be useful as a basis for validating a document using a schema loaded
+     * using xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes.
+     * @return an empty schema containing only the built-in components.
+     */
+    public Schema emptySchema() {
+        needEnterpriseEdition();
+        return null;
     }
 
     /**
@@ -3110,7 +3123,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     protected void needEnterpriseEdition() {
         throw new UnsupportedOperationException(
-                "You need the Enterprise Edition of Saxon (with an EnterpriseConfiguration) for this operation");
+                "This operation requires the Enterprise Edition of Saxon (with an EnterpriseConfiguration)");
     }
 
     /**
@@ -3263,20 +3276,6 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Ask whether a given notation has been declared in the schema
-     *
-     * @param uri   the targetNamespace of the notation
-     * @param local the local part of the notation name
-     * @return true if the notation has been declared, false if not
-     * @since 9.3
-     */
-
-    @Override
-    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
-        return false;
-    }
-
-    /**
      * Check that a type is validly derived from another type, following the rules for the Schema Component
      * Constraint "Is Type Derivation OK (Simple)" (3.14.6) or "Is Type Derivation OK (Complex)" (3.4.6) as
      * appropriate.
@@ -3302,46 +3301,6 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public void prepareValidationReporting(XPathContext context, ParseOptions options) {
-    }
-
-    /**
-     * Get a document-level validator to add to a Receiver pipeline.
-     * <p>This method is intended for internal use.</p>
-     *
-     * @param receiver           The receiver to which events should be sent after validation
-     * @param systemId           the base URI of the document being validated
-     * @param validationOptions  Supplies options relevant to XSD validation
-     * @param initiatingLocation The location of the expression that requested validation
-     * @return A Receiver to which events can be sent for validation
-     */
-
-    public Receiver getDocumentValidator(Receiver receiver,
-                                         String systemId,
-                                         ParseOptions validationOptions,
-                                         Location initiatingLocation) {
-        // non-schema-aware version
-        return receiver;
-    }
-
-    /**
-     * Get a Receiver that can be used to validate an element, and that passes the validated
-     * element on to a target receiver. If validation is not supported, the returned receiver
-     * will be the target receiver.
-     * <p>This method is intended for internal use.</p>
-     *
-     * @param receiver          the target receiver tp receive the validated element
-     * @param validationOptions options affecting the way XSD validation is done
-     * @param locationId        current location in the stylesheet or query
-     * @return The target receiver, indicating that with this configuration, no validation
-     * is performed.
-     * @throws net.sf.saxon.trans.XPathException if a validator for the element cannot be created
-     */
-
-    public Receiver getElementValidator(Receiver receiver,
-                                        ParseOptions validationOptions,
-                                        Location locationId)
-            throws XPathException {
-        return receiver;
     }
 
     /**

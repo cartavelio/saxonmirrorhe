@@ -7,15 +7,15 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NameOfNode;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -235,8 +235,8 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
         } else if (validationAction == Validation.STRICT ||
                 validationAction == Validation.LAX) {
             try {
-                Configuration config = context.getConfiguration();
-                ann = config.validateAttribute(attName.getStructuredQName(), value, validationAction);
+                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                ann = schema.validateAttribute(attName.getStructuredQName(), value, validationAction);
             } catch (ValidationException e) {
                 throw XPathException.makeXPathException(e)
                         .maybeWithErrorCode(validationAction == Validation.STRICT ? "XTTE1510" : "XTTE1515")
@@ -281,9 +281,8 @@ public abstract class AttributeCreator extends SimpleNodeConstructor implements 
             }
         } else if (validationAction == Validation.STRICT || validationAction == Validation.LAX) {
             try {
-                final Controller controller = context.getController();
-                assert controller != null;
-                SimpleType ann = controller.getConfiguration().validateAttribute(
+                Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
+                SimpleType ann = schema.validateAttribute(
                         NameOfNode.makeName(orphan).getStructuredQName(), orphan.getUnicodeStringValue(), validationAction);
                 orphan.setTypeAnnotation(ann);
             } catch (ValidationException e) {

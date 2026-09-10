@@ -517,6 +517,7 @@ public class Copy extends ElementCreator {
         @Override
         public PushEvaluator elaborateForPush() {
             Copy expr = (Copy)getExpression();
+            Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
             PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
 
             SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
@@ -560,7 +561,7 @@ public class Copy extends ElementCreator {
                                 ParseOptions options = expr.getValidationOptions()
                                         .withTopLevelElement(elemName.getStructuredQName());
                                 context.getConfiguration().prepareValidationReporting(context, options);
-                                Receiver validator = context.getConfiguration().getElementValidator(
+                                Receiver validator = schema.getElementValidator(
                                         elemOut, options, expr.getLocation());
 
                                 if (validator != elemOut) {
@@ -635,8 +636,7 @@ public class Copy extends ElementCreator {
                             ParseOptions options = expr.getValidationOptions()
                                     .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                             controller.getConfiguration().prepareValidationReporting(context, options);
-                            Receiver val = controller.getConfiguration().
-                                    getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
+                            Receiver val = schema.getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
                             output = new ComplexContentOutputter(val);
                         }
                         if (output.getSystemId() == null) {

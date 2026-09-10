@@ -9,14 +9,15 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
 
 import javax.xml.transform.Source;
@@ -203,8 +204,9 @@ public abstract class Sender {
             }
 //#if EE==true
             // Add a document validator to the pipeline
-            if (!(receiver instanceof DocumentValidator)) {
-                receiver = config.getDocumentValidator(receiver, systemId, options, null);
+            Schema schema = options.getSchema();
+            if (schema != null && !(receiver instanceof DocumentValidator)) {
+                receiver = schema.getDocumentValidator(receiver, systemId, options, null);
             }
 //#endif
         }
