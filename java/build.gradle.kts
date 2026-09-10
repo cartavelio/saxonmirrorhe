@@ -156,7 +156,7 @@ val (downloadSqlJar, mavenSqlJar) = jarTaskBuilder("sql") {
   jarClassifier = "sql"
   common {
     from(editionCompileJava)
-    include("net/sf/saxon/option/sql/*.class")
+    include("com/saxonica/option/sql/*.class")
     include("com/saxonica/functions/sql/*.class")
   }
 }
@@ -167,7 +167,7 @@ val (_, mavenSqlSourceJar) = jarTaskBuilder("sqlSource") {
   jarClassifier = "sql-sources"
   common {
     from(tasks.preprocessJava) {
-      include("net/sf/saxon/option/sql/*.java")
+      include("com/saxonica/option/sql/*.java")
       include("com/saxonica/functions/sql/*.java")
     }
   }
