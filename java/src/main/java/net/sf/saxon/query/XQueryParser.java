@@ -1689,10 +1689,10 @@ public class XQueryParser extends XPathParser {
         if (var.getBody() != null) {
             ExpressionTool.setDeepRetainedStaticContext(var.getBody(), rsc);
         }
-        if (qenv.getModuleNamespace() != null &&
-                !uri.equals(qenv.getModuleNamespace())) {
-            grumble("Variable " + Err.wrap(varQName.getDisplayName(), Err.VARIABLE) + " is not defined in the module namespace");
-        }
+//        if (qenv.getModuleNamespace() != null &&
+//                !uri.equals(qenv.getModuleNamespace())) {
+//            grumble("Variable " + Err.wrap(varQName.getDisplayName(), Err.VARIABLE) + " is not defined in the module namespace");
+//        }
         try {
             qenv.declareVariable(var);
         } catch (XPathException e) {
