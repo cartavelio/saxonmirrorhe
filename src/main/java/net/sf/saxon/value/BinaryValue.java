@@ -8,6 +8,7 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.expr.sort.BinaryMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.type.AtomicType;
@@ -60,6 +61,11 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
     @Override
     public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
         return this;
+    }
+
+    @Override
+    public AtomicMatchKey asMapKey() {
+        return new BinaryMatchKey(this);
     }
 
     /**
