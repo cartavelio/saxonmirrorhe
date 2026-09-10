@@ -93,7 +93,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 SequenceType.ANY_SEQUENCE);
 
         SpecificFunctionType foldFunctionType40 = new SpecificFunctionType(
-                SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
+                SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
         SpecificFunctionType foldFunctionType = version >= 40 ? foldFunctionType40 : foldFunctionType31;
@@ -453,9 +453,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     args[0] = zero;
                     if (arity > 1) {
                         args[1] = array.get(i);
-                        if (arity > 2) {
-                            args[2] = new Int64Value(i + 1);
-                        }
                     }
                 }
                 zero = dynamicCall(fn, context, args);
@@ -475,7 +472,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
             Sequence zero = arguments[1];
-            int arraySize = array.arrayLength();
             FunctionItem fn = (FunctionItem) arguments[2].head();
 
 
@@ -486,9 +482,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     args[0] = array.get(i);
                     if (arity > 1) {
                         args[1] = zero;
-                        if (arity > 2) {
-                            args[2] = new Int64Value(i + 1);
-                        }
                     }
                 }
                 zero = dynamicCall(fn, context, args);
