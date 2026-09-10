@@ -146,15 +146,19 @@ TODO: rethink redefines and override
             retain all the functionality of previous releases. In particular, any schema created using the
             <code>SchemaManager</code> is not implicitly available to any <code>XsltCompiler</code>,
             <code>XQueryCompiler</code>, or <code>DocumentBuilder</code> created by the same <code>Processor</code>:
-            the schema needs to be explicitly imported.</p></li>
+            instead, the schema needs to be explicitly imported.</p></li>
             <li><p>An <code>XsdSchema</code> object, whether created using the old <code>SchemaManager</code>
             or the new <code>XsdCompiler</code>, needs to be explicitly made available to any <code>XsltCompiler</code>
-            or <code>XQueryCompiler</code> that uses it, using the new <code>useSchema()</code> method.</p></li>
+            <code>XQueryCompiler</code>, or <code>XPathCompiler</code> that uses it, using the new <code>useSchema()</code> method.</p></li>
             <li><p>Although Saxon now allows multiple schemas to be held in a <code>Processor</code> (and indeed,
             XSLT 4.0 allows multiple schemas to be used within a single transformation – for example one schema for
             the source document and another for the result document), the schemas must be consistent with each other.
             This primarily means that two schemas within a <code>Processor</code> must not hold conflicting definitions
             of the same component (for example, different definitions of the same complex type).</p></li>
+            <li><p>There are some minor changes in the behavior of the <code>SchemaManager</code>. For example,
+            <code>SchemaValidator.newSchemaValidator()</code> now creates a validator that uses the schema as currently
+            defined in the <code>SchemaManager</code>, ignoring any changes to the schema that might be made by the time the
+            validator is actually run.</p></li>
         </ul>
         
         <p>If a schema-aware stylesheet is exported to a SEF file, the SCM representation of any schema imported by
@@ -199,6 +203,7 @@ TODO: rethink redefines and override
         
         <p>The callback for <code>xsl:message</code> processing can now request (by calling a method on the supplied
         <code>Message</code> object) that the message is to be treated as a dynamic error.</p>
+
         
   
     </category>
@@ -214,7 +219,7 @@ TODO: rethink redefines and override
 
     <category name="JAXP" class="javaonly">
         
-        <p>The classes ProfessionalXPathFactory and EnterpriseXPathFactory are dropped. It seems there
+        <p>The classes <code>ProfessionalXPathFactory</code> and <code>EnterpriseXPathFactory</code> are dropped. It seems there
         were no tests referencing these classes, and JAXP XPath has gradually been deprecated. <b>TODO: Need to
         drop the mention in the XPath documentation.</b></p>
         

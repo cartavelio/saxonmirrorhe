@@ -279,7 +279,8 @@
          </li>
          <li>
             <p>Because the <code>XPathSelector</code> is an <code>Iterable</code>, it is possible to
-               iterate over the results directly using the Java 5 "for-each" construct.</p>
+               iterate over the results directly using the Java "for-each" construct 
+               (<code>for (XdmItem item : selector) { ... }</code>).</p>
          </li>
          <li>
             <p>The result of an XPath expression is in general an <a class="javalink"
@@ -384,13 +385,10 @@ XPath xpath = xpathFactory.newXPath();
          <p>If you want to use Saxon as your XPath implementation, you must instantiate the class <a
                class="javalink" href="net.sf.saxon.xpath.XPathFactoryImpl"
                >net.sf.saxon.xpath.XPathFactoryImpl</a> directly, rather than using the method 
-            <code>XPathFactory.newInstance()</code> which relies on a classpath search. 
-            If you want to take advantage of
-            features in Saxon-PE (Professional Edition), use <a class="javalink"
-               href="com.saxonica.config.ProfessionalXPathFactory"
-               >com.saxonica.config.ProfessionalXPathFactory</a>, or for Saxon-EE (Enterprise
-            Edition) use <a class="javalink" href="com.saxonica.config.EnterpriseXPathFactory"
-               >com.saxonica.config.EnterpriseXPathFactory</a>.</p>
+            <code>XPathFactory.newInstance()</code> which relies on a classpath search. This will
+             create an <code>EnterpriseConfiguration</code> if the Saxon-EE is in use and a suitable
+         license is found; otherwise it will fall back to a <code>ProfessionalConfiguration</code>
+         and then to a Saxon-HE <code>Configuration</code>.</p>
 
          <p>It is important to note that a compiled XPath expression can only be used with a source
             document that was built using the same Saxon <a class="javalink"
