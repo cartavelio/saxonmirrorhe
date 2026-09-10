@@ -2250,7 +2250,7 @@ public class XPathParser {
                 checkLanguageVersion30();
                 return parseFunctionItemType(AnnotationList.EMPTY);
             case "record":
-                return parseRecordTyoe(this);
+                return parseRecordType(this);
             case "enum":
                 return parseEnumType();
             default:
@@ -2267,7 +2267,7 @@ public class XPathParser {
      * Syntax: "record" "(" (name (":" sequenceType)?) ("," (name (":" sequenceType)?))* ")"
      */
 
-    private ItemType parseRecordTyoe(XPathParser p) throws XPathException {
+    private ItemType parseRecordType(XPathParser p) throws XPathException {
         // The initial "record" has been read
         checkLanguageVersion40("a record type");
         Tokenizer t = p.getTokenizer();
@@ -4127,7 +4127,7 @@ public class XPathParser {
 
             case "record": {
                 checkLanguageVersion40("nodeTest record(...)");
-                ItemType type = parseRecordTyoe(this);
+                ItemType type = parseRecordType(this);
                 return SpecificJNodeType.jTreeRoot(SequenceType.one(type));
             }
 
