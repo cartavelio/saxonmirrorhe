@@ -20,12 +20,17 @@ public class CheckCopyright {
     private final int totalNonCommentLines = 0;
     private int totalFiles = 0;
     private static String suffix = ".java";
+    private static String dir = "/Users/mike/GitHub/saxon2020/src/main/java";
+    private static String currentYear = "2022";
 
     public static void main(String[] args) throws Exception {
-        if (args.length == 2) {
+        if (args.length >= 1) {
+            dir = args[0];
+        }
+        if (args.length >= 2) {
             suffix = args[1];
         }
-        new CheckCopyright().processDir(new File(args[0]), true);
+        new CheckCopyright().processDir(new File(dir), true);
 
     }
 
@@ -43,6 +48,12 @@ public class CheckCopyright {
 //        }
     }
 
+    public String fileName(File file) {
+        String path = file.getAbsolutePath();
+        int i = path.indexOf("src/main/java");
+        return path.substring(i+13);
+    }
+
     public void processFile(File directory, String filename) throws Exception {
         int lines = 0;
         int nonCommentLines = 0;
@@ -57,6 +68,7 @@ public class CheckCopyright {
             boolean isSaxonicaPackage = false;
             boolean containsSaxonicaCopyright = false;
             boolean containsMozillaLicense = false;
+            boolean containsCurrentYear = false;
             String line = r.readLine();
             while (line!=null) {
                 if (line.contains("package com.saxonica") &&
@@ -66,6 +78,7 @@ public class CheckCopyright {
                 }
                 if (line.contains("Copyright") && line.contains("Saxonica")) {
                     containsSaxonicaCopyright = true;
+                    containsCurrentYear = line.contains(currentYear);
                 }
                 if (line.contains("This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.")) {
                     containsMozillaLicense = true;
@@ -79,14 +92,16 @@ public class CheckCopyright {
             }
             if (isSaxonicaPackage) {
                 if (containsMozillaLicense) {
-                    System.err.println("File " + file.getName() + " contains Mozilla license");
+                    System.err.println("File " + fileName(file) + " contains Mozilla license");
                 }
                 if (!containsSaxonicaCopyright) {
-                    System.err.println("File " + file.getName() + " contains no Saxonica copyright");
+                    System.err.println("File " + fileName(file) + " contains no Saxonica copyright");
+                } else if (!containsCurrentYear) {
+                    System.err.println("File " + fileName(file) + " contains Saxonica copyright without current year");
                 }
             } else {
                 if (!containsMozillaLicense) {
-                    System.err.println("File " + file.getName() + " contains no Mozilla license");
+                    System.err.println("File " + fileName(file) + " contains no Mozilla license");
                 }
             }
 //            System.out.println("<file name='" + file.getName() + "' lines='" + lines + "' non-comment-lines='" + nonCommentLines + "'/>");
