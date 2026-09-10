@@ -1083,7 +1083,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                                                List<AccessibleObject> candidateMethods, Expression[] staticArgs,
                                                Configuration config, boolean debug) {
             details.name = functionName;
-            details.arity = staticArgs.length;
+            details.maxArity = staticArgs.length;
             //details.implementationClass = theClass;
 
             details.paramTypes = new SequenceType[staticArgs.length];

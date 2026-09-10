@@ -10,6 +10,7 @@ import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.sxpath.IndependentContext;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -213,7 +214,7 @@ public abstract class IdentityConstraint extends SchemaStructure
     public void typeCheck(final SchemaCompiler compiler, SchemaType contextType) throws XPathException {
         final EnterpriseConfiguration config = compiler.getConfiguration();
         IndependentContext env = new IndependentContext(config);
-        env.setWarningHandler((message, loc) -> compiler.warning(message, this));
+        env.setWarningHandler((message, code, loc) -> compiler.warning(message, code, this));
         env.setSchemaAware(true);
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
         ItemType contextItemType = new ContentTypeTest(Type.ELEMENT, contextType, config, false);
@@ -226,19 +227,19 @@ public abstract class IdentityConstraint extends SchemaStructure
                 field.setSelectExpression(field.getSelectExpression().typeCheck(visitor, sit));
                 int card = field.getCardinality(visitor, sit);
                 if (Cardinality.allowsMany(card)) {
-                    compiler.warning("The field expression (" + field.getXPath() + ") may select multiple nodes, which would make the instance document invalid", field);
+                    compiler.warning("The field expression (" + field.getXPath() + ") may select multiple nodes, which would make the instance document invalid", SaxonErrorCode.SXSD1004, field);
                 } else if (this instanceof Key && Cardinality.allowsZero(card)) {
-                    compiler.warning("The field expression (" + field.getXPath() + ") may select no nodes, which would make the instance document invalid", field);
+                    compiler.warning("The field expression (" + field.getXPath() + ") may select no nodes, which would make the instance document invalid", SaxonErrorCode.SXSD1004, field);
                 }
                 NodeTest fieldType = (NodeTest) field.getSelectExpression().getItemType();
                 AtomicType atomizedType = fieldType.getAtomizedItemType();
                 if (atomizedType == null) {
-                    compiler.warning("The node selected by the field expression cannot be atomized", field);
+                    compiler.warning("The node selected by the field expression cannot be atomized", SaxonErrorCode.SXSD1005, field);
                 }
                 SchemaType contentType = fieldType.getContentType();
                 if (!(contentType == AnyType.getInstance() || contentType.isSimpleType() || contentType.isComplexType() && ((ComplexType) contentType).isSimpleContent())) {
                     // we allow AnyType because although it has mixed content, it has subtypes that are simple types, which would be OK.
-                    compiler.warning("The node selected by the field expression must have a simple type, or a complex type with simple content", field);
+                    compiler.warning("The node selected by the field expression must have a simple type, or a complex type with simple content", SaxonErrorCode.SXSD1005, field);
                 }
                 @SuppressWarnings("ConstantConditions")
                 boolean listValued = contentType.isSimpleType() && ((SimpleType)contentType).isListType();

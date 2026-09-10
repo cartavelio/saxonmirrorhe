@@ -598,7 +598,7 @@ public class OptimizerEE extends Optimizer {
 
     private void streamingNotPossible(String reason, Expression select, ExpressionVisitor visitor) {
         trace(reason, select);
-        visitor.issueWarning(reason, select.getLocation());
+        visitor.issueWarning(reason, SaxonErrorCode.SXWN9024, select.getLocation());
     }
 
     /**
@@ -688,7 +688,7 @@ public class OptimizerEE extends Optimizer {
                 err.setLocator(sourceTemplate);
                 if (fallback) {
                     message.append("\n  * Falling back to non-streaming implementation");
-                    sourceTemplate.getStaticContext().issueWarning(message.toString(), sourceTemplate);
+                    sourceTemplate.getStaticContext().issueWarning(message.toString(), SaxonErrorCode.SXWN9024, sourceTemplate);
                     compiledTemplate.setDeclaredStreamable(false);
                 } else {
                     throw err;
@@ -2231,7 +2231,7 @@ public class OptimizerEE extends Optimizer {
     private void unstreamableFunction(XSLFunction fn, UserFunction compiledFunction, String message) {
         if (config.getBooleanProperty(Feature.STREAMING_FALLBACK)) {
             message += ". Falling back to unstreamed implementation";
-            fn.compileWarning(message, "XTSE3430");
+            fn.issueWarning(message, "XTSE3430");
             compiledFunction.setDeclaredStreamability(FunctionStreamability.UNCLASSIFIED);
             fn.getCompilation().setFallbackToNonStreaming(true);
         } else {

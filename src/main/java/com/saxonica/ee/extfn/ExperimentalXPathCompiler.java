@@ -45,10 +45,14 @@ import net.sf.saxon.value.*;
 import java.util.*;
 
 /**
- * This class provides support to the xslt-in-xslt compiler. The XSLT compiler obtains a single
+ * This class provides support to the XX (xslt-in-xslt) compiler. The XSLT compiler obtains a single
  * instance of the ExperimentalXPathCompiler for a compilation episode, initializes it with global
  * context information that applies to the package-being-compiled as a whole, and then invokes its
  * compileXPath() method to compile each XPath expression encountered.
+ *
+ * Note that this code is essentially dormant, because we currently use the XX compiler only with
+ * a Javascript XPath compiler; but we don't want to drop the capability to potentially use it
+ * in the Java world.
  */
 
 public class ExperimentalXPathCompiler {
@@ -349,7 +353,7 @@ public class ExperimentalXPathCompiler {
         }
 
         @Override
-        public void issueWarning(String message, Location locator) {
+        public void issueWarning(String message, String errorCode, Location locator) {
             System.err.println("WARNING: " + message);
         }
 
@@ -404,7 +408,7 @@ public class ExperimentalXPathCompiler {
             if (att == null) {
                 return NamespaceConstant.CODEPOINT_COLLATION_URI;
             } else {
-                return att; // TODO: tokenize on whitespace
+                return Whitespace.trim(att);
             }
         }
 

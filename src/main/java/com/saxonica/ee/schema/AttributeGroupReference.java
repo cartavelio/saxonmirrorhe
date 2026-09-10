@@ -6,6 +6,7 @@ import net.sf.saxon.om.Function;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
@@ -239,7 +240,7 @@ public final class AttributeGroupReference extends SchemaStructure
             if (target == null) {
                 if (compiler.isAllowDanglingReferences()) {
                     compiler.warning("Unknown attribute group " + qName.getEQName()
-                                             + " (substituting an empty attribute group)", this);
+                                             + " (substituting an empty attribute group)", SaxonErrorCode.SXSD1000, this);
                     dangling = true;
                     target = new AttributeGroupDecl(compiler.getConfiguration());
                     target.addAttributeGroupReference(this);

@@ -9,6 +9,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.SchemaType;
@@ -149,7 +150,7 @@ public class VersionControlFilter extends ProxyReceiver {
                                 }
                                 break;
                             default:
-                                compiler.warning("Unrecognized attribute name " + attName, location);
+                                compiler.warning("Unrecognized attribute name " + attName, SaxonErrorCode.SXSD1014, location);
                                 break;
                         }
                         if (doneAttributes) {

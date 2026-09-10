@@ -9,6 +9,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
@@ -105,7 +106,7 @@ public class XSDOverride extends SchemaElement {
                         overridden.processAllAttributes();
                         overridden.validateSubtree(compiler);
                     } catch (SchemaException err) {
-                        compiler.warning("The target of the xs:override is not a valid schema", this);
+                        compiler.warning("The target of the xs:override is not a valid schema", SaxonErrorCode.SXSD1017, this);
                     }
 //                        try {
 //                            System.err.println("After chameleon: ");

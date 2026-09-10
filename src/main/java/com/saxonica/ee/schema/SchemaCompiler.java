@@ -561,16 +561,16 @@ public class SchemaCompiler {
 
     /**
      * Report a warning
-     *
      * @param message the warning message
+     * @param errorCode a code associated with the message
      * @param locator the location of the error
      */
 
-    public void warning(String message, Location locator) {
+    public void warning(String message, String errorCode, Location locator) {
         if (locator.getSystemId() !=null && locator.getSystemId().endsWith("override.xsl")) {
             locator = new Loc("schema_document_resulting_from_override_processing", -1, -1);
         }
-        XmlProcessingIncident exception = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, locator).asWarning();
+        XmlProcessingIncident exception = new XmlProcessingIncident(message, errorCode, locator).asWarning();
         getErrorReporter().report(exception);
     }
 

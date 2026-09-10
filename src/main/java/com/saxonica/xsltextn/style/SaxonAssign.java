@@ -62,7 +62,7 @@ public class SaxonAssign extends XSLGeneralVariable {
                                                 "saxon:assign",
                                                 getPackageData().getLocalLicenseId());
         if (getConfiguration().getBooleanProperty(Feature.ALLOW_MULTITHREADING)) {
-            compileWarning("saxon:assign should not be used in a configuration " +
+            issueWarning("saxon:assign should not be used in a configuration " +
                                    "that allows multi-threading: see FeatureKeys.ALLOW_MULTITHREADING", SaxonErrorCode.SXWN9016);
         }
         StructuredQName name = getSourceBinding().getVariableQName();

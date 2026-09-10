@@ -6,6 +6,7 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.type.Derivation;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
@@ -206,7 +207,7 @@ public class XSDSimpleType extends SchemaElement {
                 // Test added in Saxon 9.3
                 compiler.warning("The redefined simple type was found, but not in the schema document referenced by " +
                         "the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD " +
-                        "specification. However, Saxon does not currently enforce this rule.", this);
+                        "specification. However, Saxon does not currently enforce this rule.", SaxonErrorCode.SXSD1016, this);
             }
             simpleTypeDef.setRedefinitionLevel(oldSType.getRedefinitionLevel() + 1);
             UserSimpleType oldType = (UserSimpleType) oldSType;

@@ -11,6 +11,7 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -513,7 +514,7 @@ public class ElementDecl extends SchemaStructure
                         compiler.error(msg, member);
                         throw new SchemaException("Disallowed substitution group membership");
                     } else {
-                        compiler.warning(msg, member);
+                        compiler.warning(msg, SaxonErrorCode.SXSD1002, member);
                     }
                     return;
                 }
@@ -1151,7 +1152,7 @@ public class ElementDecl extends SchemaStructure
                             " is referenced as head of a substitution group for " +
                             Err.wrap(getDisplayName()) +
                             ", but is not declared in the schema";
-                    compiler.warning(err, this);
+                    compiler.warning(err, SaxonErrorCode.SXSD1003, this);
                 }
             }
             lookForCycles(new Stack<SchemaComponent>(), compiler);

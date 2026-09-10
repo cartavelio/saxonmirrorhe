@@ -6,6 +6,7 @@ import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.*;
@@ -1064,7 +1065,7 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
                 if (fatal || !compiler.isAllowDanglingReferences()) {
                     compiler.error(message, ref);
                 } else {
-                    compiler.warning(message, ref);
+                    compiler.warning(message, SaxonErrorCode.SXSD1007, ref);
                 }
             }
             return null;

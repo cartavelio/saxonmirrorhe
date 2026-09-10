@@ -15,6 +15,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -2777,7 +2778,7 @@ public class UserComplexType extends UserDefinedType
         if (baseUniqueSet.size() + baseKeySet.size() + baseKeyRefSet.size() > 0) {
             compiler.warning("Saxon is not able to verify that the identity constraints in element " +
                     eName(sub) + " are compatible with those in the the base type",
-                    sub);
+                             SaxonErrorCode.SXSD1009, sub);
             // TODO: we could actually compare the constraints, but it's not 100% clear what the rules are
         }
 

@@ -2,31 +2,20 @@ package com.saxonica.expr;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.ForMemberExpression;
-import net.sf.saxon.expr.LocalBinding;
-import net.sf.saxon.expr.LocalVariableReference;
-import net.sf.saxon.expr.instruct.ForEach;
-import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.ParserExtension;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.ItemTypePattern;
-import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.SequenceType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Parser extension for syntax in XPath that is accepted only in Saxon-PE and -EE. This means
@@ -63,7 +52,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
     @Override
     public void handleExternalFunctionDeclaration(XQueryParser p, XQueryFunction func) throws XPathException {
         QueryModule qenv = (QueryModule)p.getStaticContext();
-        SymbolicName.F fName = new SymbolicName.F(func.getFunctionName(), func.getNumberOfArguments());
+        SymbolicName.F fName = new SymbolicName.F(func.getFunctionName(), func.getNumberOfParameters());
         if (!qenv.getFunctionLibrary().isAvailable(fName, qenv.getXPathVersion())) {
             p.grumble("External function " + fName + " is not available", "XPST0017");
         }

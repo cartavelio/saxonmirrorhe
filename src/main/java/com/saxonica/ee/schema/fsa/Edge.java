@@ -3,6 +3,7 @@ package com.saxonica.ee.schema.fsa;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.*;
@@ -270,7 +271,7 @@ public class Edge implements Iterable<Edge> {
             if (baseUniqueCount > 0 || baseKeyCount > 0 || baseKeyRefCount > 0) {
                 compiler.warning("Saxon is not able to verify that the identity constraints defined on " +
                         "element " + base.getDisplayName() + " are compatible between the base type and the derived type",
-                        sub);
+                                 SaxonErrorCode.SXSD1009, sub);
             }
 
             // (f) If (DE) ends in a final state then BE must also do so
@@ -321,7 +322,7 @@ public class Edge implements Iterable<Edge> {
                     compiler.warning("There is no global element declaration named " +
                             Err.wrap(((ElementDecl) de.term).getDisplayName()) +
                             ", so the strict wildcard in the base type can never be satisfied",
-                            (ElementDecl) de.term);
+                                     SaxonErrorCode.SXSD1003, (ElementDecl) de.term);
                     return null;
                 }
                 SchemaType eent = een.getType();
@@ -339,7 +340,7 @@ public class Edge implements Iterable<Edge> {
                         Err.wrap(((ElementDecl) de.term).getDisplayName()) +
                         " is not derived by restriction from that of the global element" +
                         " with the same name, so the strict wildcard in the base type can never be satisfied",
-                        (ElementDecl) de.term);
+                                 SaxonErrorCode.SXSD1011, (ElementDecl) de.term);
                 return null;
 
             } else if (mode.equals("lax")) {
@@ -362,7 +363,7 @@ public class Edge implements Iterable<Edge> {
                         Err.wrap(((ElementDecl) de.term).getDisplayName()) +
                         " is not derived by restriction from that of the global element" +
                         " with the same name, so the lax wildcard in the base type can never be satisfied"
-                        , (ElementDecl) de.term);
+                        , SaxonErrorCode.SXSD1011, (ElementDecl) de.term);
                 return null;
             }
             return null;

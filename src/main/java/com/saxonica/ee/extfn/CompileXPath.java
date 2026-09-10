@@ -254,10 +254,9 @@ public class CompileXPath extends SystemFunction {
         libraryList.addFunctionLibrary(userFunctionLibrary);
         env.setFunctionLibrary(libraryList);
 
-        // TODO - make sure function not found is detected.
         Expression expr;
         try {
-            if (type != null && "pattern".equals(type.getUnicodeStringValue())) {
+            if (type != null && "pattern".equals(type.getStringValue())) {
                 expr = Pattern.make(exprText, env, null);
             } else {
                 expr = make(exprText, env, 0, Token.EOF, null, inCatch);

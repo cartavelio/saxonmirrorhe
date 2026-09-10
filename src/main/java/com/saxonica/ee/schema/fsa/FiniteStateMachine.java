@@ -1,6 +1,7 @@
 package com.saxonica.ee.schema.fsa;
 
 import com.saxonica.ee.schema.*;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
@@ -178,11 +179,11 @@ public class FiniteStateMachine {
             // to stop the algorithms blowing the heap size.
             int[] limits = compiler.getOccurrenceLimits();
             if (max > limits[1]) {
-                compiler.warning("maxOccurs value of " + max + " treated as unbounded", subjectType);
+                compiler.warning("maxOccurs value of " + max + " treated as unbounded", SaxonErrorCode.SXSD1012, subjectType);
                 max = Particle.UNBOUNDED;
             }
             if (min > limits[0]) {
-                compiler.warning("minOccurs value of " + min + " treated as " + limits[0], subjectType);
+                compiler.warning("minOccurs value of " + min + " treated as " + limits[0], SaxonErrorCode.SXSD1012, subjectType);
                 min = limits[0];
             }
         }

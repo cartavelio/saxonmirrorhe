@@ -6,6 +6,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.type.SchemaException;
 
 import java.util.List;
@@ -204,7 +205,7 @@ public class XSDAttributeGroup extends SchemaElement {
                 if (attributeGroupDecl != null && attributeUse != null) {
                     attributeUse.setContainingAttributeGroupDecl(attributeGroupDecl);
                     if (attributeUse.isProhibited()) {
-                        compiler.warning("Specifying use='prohibited' within an attribute group has no effect", this);
+                        compiler.warning("Specifying use='prohibited' within an attribute group has no effect", SaxonErrorCode.SXSD1015, this);
                         // See Microsoft tests, attZ015, and test suite bug 4043
                     } else {
                         attributeGroupDecl.addAttributeUse(attributeUse);
@@ -324,7 +325,7 @@ public class XSDAttributeGroup extends SchemaElement {
             // Test added in Saxon 9.3
             compiler.warning("The redefined attribute group was found, but not in the schema document referenced by " +
                     "the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD " +
-                    "specification. However, Saxon does not currently enforce this rule.", this);
+                    "specification. However, Saxon does not currently enforce this rule.", SaxonErrorCode.SXSD1016, this);
         }
     }
 

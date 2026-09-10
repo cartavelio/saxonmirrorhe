@@ -8,6 +8,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -270,7 +271,7 @@ public abstract class UserSimpleType extends UserDefinedType
                                 if (userMessage != null) {
                                     message += ". " + userMessage;
                                 }
-                                compiler.warning(message, this);
+                                compiler.warning(message, SaxonErrorCode.SXSD1010, this);
                             }
                         }
                     }

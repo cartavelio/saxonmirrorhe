@@ -12,6 +12,7 @@ import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
@@ -88,7 +89,7 @@ public final class AttributeUse extends SimpleComponentReference
         } else {
             String name = getTargetComponentName().getEQName();
             if (compiler.isAllowDanglingReferences() && !fatal) {
-                compiler.warning("Unknown attribute declaration " + name + " (substituting dummy declaration)", this);
+                compiler.warning("Unknown attribute declaration " + name + " (substituting dummy declaration)", SaxonErrorCode.SXSD1001, this);
                 AttributeDecl decl = new AttributeDecl(compiler.getConfiguration(), false);
                 decl.setAttributeName(getTargetComponentName());
                 decl.setSimpleType(BuiltInAtomicType.STRING);

@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaException;
@@ -271,7 +272,7 @@ public class XSDGroup extends SchemaElement {
                 // Test added in Saxon 9.3
                 compiler.warning("The redefined model group was found, but not in the schema document referenced by " +
                         "the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD " +
-                        "specification. However, Saxon does not currently enforce this rule.", this);
+                        "specification. However, Saxon does not currently enforce this rule.", SaxonErrorCode.SXSD1016, this);
             }
             groupDeclaration.setRedefinitionLevel(originalGroup.getRedefinitionLevel() + 1);
             boolean found = patchUpSelfReferences(

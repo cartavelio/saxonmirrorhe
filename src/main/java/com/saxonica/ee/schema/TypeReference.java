@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.type.*;
 
 import javax.xml.transform.SourceLocator;
@@ -142,7 +143,7 @@ public class TypeReference extends SchemaStructure implements ComponentReference
             if (target == null) {
                 if (compiler.isAllowDanglingReferences() && !fatal) {
                     dangling = true;
-                    compiler.warning("Unknown type " + qName.getEQName() + " (substituting xs:error)", this);
+                    compiler.warning("Unknown type " + qName.getEQName() + " (substituting xs:error)", SaxonErrorCode.SXSD1008, this);
                     target = ErrorType.getInstance();
                 } else {
                     dangling = true;

@@ -6,6 +6,7 @@ import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Whitespace;
 
@@ -298,7 +299,7 @@ public class XSDComplexType extends SchemaElement {
                 // Test added in Saxon 9.3
                 compiler.warning("The redefined complex type was found, but not in the schema document referenced by " +
                         "the schemaLocation attribute of the containing <xs:redefine> element. This is not allowed by the XSD " +
-                        "specification. However, Saxon does not currently enforce this rule.", this);
+                        "specification. However, Saxon does not currently enforce this rule.", SaxonErrorCode.SXSD1016, this);
             }
             complexType.setRedefinitionLevel(oldType.getRedefinitionLevel() + 1);
             // rename the type being redefined

@@ -2,6 +2,7 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -153,7 +154,7 @@ public class ModelGroupParticle extends Particle {
         if (target == null) {
             String name = getTargetComponentName().getEQName();
             if (compiler.isAllowDanglingReferences() && !fatal) {
-                compiler.warning("Unknown model group " + name + " (substituting empty group)", this);
+                compiler.warning("Unknown model group " + name + " (substituting empty group)", SaxonErrorCode.SXSD1006, this);
                 ModelGroupDefinition decl = new ModelGroupDefinition(getConfiguration(), this);
                 decl.setModelGroupName(getTargetComponentName());
                 target = decl;
