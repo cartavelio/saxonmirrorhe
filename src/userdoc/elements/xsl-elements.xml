@@ -1135,7 +1135,7 @@
                     always takes precedence.</attribute>
                 <attribute name="type" use="optional">Requests validation of the constructed node
                     against a specified XSD type. The value will typically be a user-defined complex
-                    type defined in  an imported schema.</attribute>
+                    type defined in an imported schema.</attribute>
                 <attribute name="validation" use="optional">Requests strict or lax validation of the
                     contents of the constructed node against the element declaration of its top-level
                     element.</attribute>
@@ -1202,7 +1202,7 @@
                     copies.</attribute>
                 <attribute name="type" use="optional">Requests validation of the copied node
                     against a specified XSD type. The value will typically be a user-defined complex
-                    type defined in  an imported schema.</attribute>
+                    type defined in an imported schema.</attribute>
                 <attribute name="validation" use="optional">Requests strict or lax validation of the
                     contents of the document against the element declaration of its top-level
                     element; or requests that type annotations present on the source node should
@@ -3610,7 +3610,7 @@
                         Collation Algorithm</a>), or collations otherwise recognized by Saxon (see
                     <a class="bodylink"
                         href="/extensibility/collation"
-                        >Collation</a>).</attribute>
+                        >Collations</a>).</attribute>
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
                     instructions in a particular namespace.</attribute>
@@ -3896,7 +3896,7 @@
                 </attribute>
                 <attribute name="type" use="optional">Requests validation of the constructed document
                     against a specified XSD type. The value will typically be a user-defined complex
-                    type defined in  an imported schema.</attribute>
+                    type defined in an imported schema.</attribute>
                 <attribute name="validation" use="optional">Requests strict or lax validation of the
                     contents of the document against the element declaration of its top-level
                     element; this also invokes document-level validation (for example, checking
@@ -4382,8 +4382,7 @@
             <saxon-edition>ALL_SINCE_9.8 EE_9.7</saxon-edition>
             <status>
                 <p>The <code>xsl:source-document</code> instruction (used with the attribute
-                    <code>streamable="yes"</code>) replaces the
-                    <a class="bodylink code" href="../stream">xsl:stream</a> instruction from
+                    <code>streamable="yes"</code>) replaces the <code>xsl:stream</code> instruction from
                     earlier drafts of the XSLT 3.0 specification. It first became available since Saxon
                     9.7.0.8, in Saxon-EE only (with XSLT 3.0 enabled), and becomes fully available
                 in all Saxon editions from 9.8 (but streaming requires Saxon-EE).</p>

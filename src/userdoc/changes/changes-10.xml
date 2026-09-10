@@ -988,8 +988,7 @@
             provides a better way to identify the origins of an error.</p>
 
         <p>For the XPath, XQuery, and XSLT compilers it is now possible to set the error list as an
-            <code>IList</code> of <code
-                cs="Saxon.Api.XmlProcessingError">XmlProcessingError</code> objects. This new
+            <code>IList</code> of <code>XmlProcessingError</code> objects. This new
             error class provides more informative details about the error detected.</p>
 
         <p>The <code cs="Saxon.Api.XsltCompiler">XsltCompiler</code> class now has a

@@ -82,8 +82,8 @@
         <p>Other XSLT 3.0 changes implemented in Saxon 9.7 include:</p>
         
         <ul>
-        <li><p>The <code>use-accumulators</code> attribute of <a class="bodylink code"
-                href="/xsl-elements/stream">xsl:stream</a> is implemented. This means that an
+        <li><p>The <code>use-accumulators</code> attribute of <code>xsl:stream</code> is implemented. 
+            This means that an
             accumulator is not available with a particular streamed input unless it was nominated on
             the <code>xsl:stream</code> instruction.</p></li>
         <li><p>The <a class="bodylink code" href="/xsl-elements/context-item">xsl:context-item</a>
@@ -268,8 +268,8 @@
             say, it is possible to test whether an element has children without consuming the
             content. This is achieved using a tiny amount of look-ahead in the parsing pipeline.</p>
         <p>The ability to initiate streaming using <code>&lt;xsl:apply-templates select="doc(x)"
-                mode="streamable"/></code> has been dropped. Use <a class="bodylink code"
-                href="/xsl-elements/stream">xsl:stream</a> instead. The option has been dropped
+                mode="streamable"/></code> has been dropped. Use <code>xsl:stream</code> instead. 
+            The option has been dropped
             because it is not in the XSLT 3.0 specification, and indeed was non-conformant because
                 <code>doc()</code> is required to return stable results if called twice to process
             the same URI.</p>
@@ -281,8 +281,8 @@
             implemented, alongside Saxon's traditional static type analysis. The <code>UType</code>
             system gives the potential for more precise static typing of constructs such as
             conditional expressions.</p>
-        <p>The <code>use-accumulators</code> attribute of <a class="bodylink code"
-                href="/xsl-elements/stream">xsl:stream</a> is implemented. This means that an
+        <p>The <code>use-accumulators</code> attribute of <code>xsl:stream</code> is implemented. 
+            This means that an
             accumulator is not available with a particular input read using <code>xsl:stream</code>
             unless it was nominated on the <code>xsl:stream</code> instruction.</p>
         <p>The <code>use-accumulators</code> attribute of <a class="bodylink code"
@@ -446,8 +446,8 @@
             by the URI and returns it as a binary value. The result can be used by functions in the
             EXPath binary module.</p>
         <p>The <a class="bodylink code" href="/functions/saxon/stream">saxon:stream()</a> extension
-            function is now converted at compile time into a call on <a class="bodylink code"
-                href="/xsl-elements/stream">xsl:stream</a>. As a result, the streamability rules may
+            function is now converted at compile time into a call on <code>xsl:stream</code>. As a 
+            result, the streamability rules may
             change in minor details. The argument must now use the <code>doc()</code> function, not
             <code>document()</code>.</p>
         <p>The function <code>saxon:analyze-string</code> is dropped; it has been superseded by the
