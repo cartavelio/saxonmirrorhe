@@ -259,7 +259,7 @@ PHP_METHOD(XsdCompiler, combine){
   int argument_length = 0;
   zend_string *key;
 
-  if (ZEND_NUM_ARGS() != 3) {
+  if (ZEND_NUM_ARGS() != 1) {
     WRONG_PARAM_COUNT;
   }
 

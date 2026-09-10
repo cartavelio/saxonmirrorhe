@@ -1225,6 +1225,48 @@ PHP_METHOD(SaxonProcessor, newSchemaValidator) {
   }
 }
 
+PHP_METHOD(SaxonProcessor, newXsdCompiler) {
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+  SaxonProcessor *proc;
+  XsdCompiler *compiler = nullptr;
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  saxonProcessor_object *obj =
+      (saxonProcessor_object *)((char *)pobj -
+                                XtOffsetOf(saxonProcessor_object, std));
+  assert(obj != nullptr);
+  proc = obj->saxonProcessor;
+  assert(proc != nullptr);
+  if (proc != nullptr) {
+    if (object_init_ex(return_value, xsdCompiler_ce) != SUCCESS) {
+      RETURN_NULL();
+    } else {
+      // struct schemaValidator_object* vobj = (struct schemaValidator_object
+      // *)Z_OBJ_P(return_value TSRMLS_CC);
+      zend_object *vvobj = Z_OBJ_P(return_value);
+      xsdCompiler_object *vobj =
+          (xsdCompiler_object *)((char *)vvobj -
+                                     XtOffsetOf(xsdCompiler_object, std));
+      assert(vobj != nullptr);
+      try {
+        compiler = proc->newXsdCompiler();
+        if (compiler == nullptr) {
+            RETURN_NULL();
+        }
+        vobj->xsdCompiler = compiler;
+      } catch (SaxonApiException &e) {
+         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+      }
+    }
+  } else {
+
+    RETURN_NULL();
+  }
+}
+
 PHP_METHOD(SaxonProcessor, getSaxonEdition) {
   SaxonProcessor *saxonProcessor;
 
@@ -4439,6 +4481,7 @@ zend_function_entry SaxonProcessor_methods[] = {
 	PHP_ME(SaxonProcessor,newXslt30Processor,arginfo_saxonc_newXslt30Processor,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, newXQueryProcessor,arginfo_saxonc_newXQueryProcessor,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, newSchemaValidator,arginfo_saxonc_newSchemaValidator,ZEND_ACC_PUBLIC)
+	PHP_ME(SaxonProcessor, newXsdCompiler,arginfo_saxonc_newXsdCompiler,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor,setCatalog,arginfo_saxonc_setCatalog,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, setCatalogFiles,arginfo_saxonc_setCatalogFiles,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor,setConfigurationProperty,arginfo_saxonc_setConfigurationProperty,ZEND_ACC_PUBLIC)

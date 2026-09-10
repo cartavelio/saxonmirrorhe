@@ -22,27 +22,29 @@ function exampleSimple1($proc, $validator)
 
         echo "Doc is valid";
 
+        $validator->clearParameters();
+        $validator->clearProperties();
+
     } catch(Exception $e){
         echo "Doc is not valid!";
         echo 'Caught validation exception: ',  $e->getMessage(), "\n";
     }
 
-    $validator->clearParameters();
-    $validator->clearProperties();
-
 }
             
           
-function exampleSimple2($proc, $validator)
+function exampleSimple2($proc, $compiler)
 {
     echo '<b>exampleSimple2:</b><br/>';
     try {
-        $validator->registerSchemaFromString("<?xml version='1.0' encoding='UTF-8'?><schema targetNamespace='http://myexample/family' xmlns:fam='http://myexample/family' xmlns='http://www.w3.org/2001/XMLSchema'><element name='FamilyMember' type='string' /><element name='Parent' type='string' substitutionGroup='fam:FamilyMember'/><element name='Child' type='string' substitutionGroup='fam:FamilyMember'/><element name='Family'><complexType><sequence><element ref='fam:FamilyMember' maxOccurs='unbounded'/></sequence></complexType></element>  </schema>");
+        $schema = $compiler->compileFromString("<?xml version='1.0' encoding='UTF-8'?><schema targetNamespace='http://myexample/family' xmlns:fam='http://myexample/family' xmlns='http://www.w3.org/2001/XMLSchema'><element name='FamilyMember' type='string' /><element name='Parent' type='string' substitutionGroup='fam:FamilyMember'/><element name='Child' type='string' substitutionGroup='fam:FamilyMember'/><element name='Family'><complexType><sequence><element ref='fam:FamilyMember' maxOccurs='unbounded'/></sequence></complexType></element>  </schema>");
+        $schema2 = $compiler->compileFromFile("php/samples/xsd/family-ext.xsd");
 
-
+        $schema3 = $schema->combine($schema2);
+        $validator = $schema3->newValidator();
         //$proc->setProperty('base', '/');
         $validator->setProperty('report-node', 'true');
-        $validator->registerSchemaFromFile("../data/family-ext.xsd");
+
 
         $validator->validate("xml/family.xml");
         $node = $validator->getValidationReport();
@@ -52,33 +54,29 @@ function exampleSimple2($proc, $validator)
         } else {
             echo "Doc family.xml is valid!";
         }
+        $validator->clearParameters();
+        $validator->clearProperties();
     } catch(Exception $e) {
         echo "Doc is not valid!";
         echo 'Caught validation exception: ',  $e->getMessage(), "\n";
 
     }
-    $validator->clearParameters();
-    $validator->clearProperties();
+
 }
 
- function exampleSimple3($proc, $validator)
+ function exampleSimple3($proc, $compiler)
  {
      echo '<b>exampleSimple3:</b><br/>';
      try {
 
-         $validator->registerSchemaFromFile("../data/family-ext.xsd");
-         $validator->registerSchemaFromFile("../data/family.xsd");
+         $schema = $compiler->combine(["php/samples/xsd/family-ext.xsd", "php/samples/xsd/family.xsd"]);
 
+         $validator = $schema->newValidator();
 
          $validator->setProperty('report-node', 'true');
          $validator->validate("xml/family.xml");
-         if ($validator->exceptionOccurred()) {
-             echo "Error: Doc is not valid!";
-             $node = $validator->getValidationReport();
-             echo 'Validation Report:' . $node->getStringValue() . '<br/>';
-         } else {
-             echo "Doc is valid!";
-         }
+         echo "Doc is valid!";
+
          $validator->clearParameters();
          $validator->clearProperties();
 
@@ -101,6 +99,8 @@ function exampleSimple2($proc, $validator)
             $proc = new Saxon\SaxonProcessor(true);
             $validator = $proc->newSchemaValidator();
 
+            $xsdCompiler = $proc->newXsdCompiler();
+
             $version = $proc->version();
             echo '<b>PHP Schema Validation in SaxonC examples</b><br/>';
             echo 'Saxon Processor version: ' . $version;
@@ -108,9 +108,9 @@ function exampleSimple2($proc, $validator)
             exampleSimple1($proc, $validator);
 
             echo '<br/>';
-            exampleSimple2($proc, $validator);
+            exampleSimple2($proc, $xsdCompiler);
             echo '<br/>';
-            exampleSimple3($proc, $validator);
+            exampleSimple3($proc, $xsdCompiler);
 
             unset($validator);
             unset($proc);
