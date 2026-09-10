@@ -157,7 +157,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // () - empty sequence
         patterns.put(
-                key(Token.LPAR, Token.RPAR),
+                key(Token.LPAREN, Token.RPAREN),
                 (values, env) -> Literal.makeLiteral(EmptySequence.getInstance()));
 
         // [] - empty array
@@ -197,7 +197,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // nodekind() - select children with given node kind.
         patterns.put(
-                key(Token.KEYWORD_LBRA, Token.RPAR),
+                key(Token.KEYWORD_LBRA, Token.RPAREN),
                 (values, env) -> {
                     String kind = values.get(0);
                     NodeTest test = null;
@@ -273,7 +273,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         
         // fn() - function with no arguments
         patterns.put(
-                key(Token.FUNCTION, Token.RPAR),
+                key(Token.FUNCTION_CALL, Token.RPAREN),
                 (values, env) -> {
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();
@@ -283,7 +283,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // fn(.) - function with "." as single argument
         patterns.put(
-                key(Token.FUNCTION, Token.DOT, Token.RPAR),
+                key(Token.FUNCTION_CALL, Token.DOT, Token.RPAREN),
                 (values, env) -> {
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();
@@ -295,7 +295,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // fn(name) - function with child element reference as single argument
         patterns.put(
-                key(Token.FUNCTION, Token.NAME, Token.RPAR),
+                key(Token.FUNCTION_CALL, Token.NAME, Token.RPAREN),
                 (values, env) -> {
                     StructuredQName fnName = verifyFunctionQName(values.get(0), env);
                     StructuredQName elName = verifyElementQName(values.get(1), env);
@@ -310,7 +310,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // fn($var) - function with variable reference as single argument
         patterns.put(
-                key(Token.FUNCTION, Token.DOLLAR, Token.NAME, Token.RPAR),
+                key(Token.FUNCTION_CALL, Token.DOLLAR, Token.NAME, Token.RPAREN),
                 (values, env) -> {
                     StructuredQName varName = verifyQName(values.get(2), env);
                     Expression varRef = env.bindVariable(varName);
@@ -323,7 +323,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // fn(@att) - function with attribute reference as single argument
         patterns.put(
-                key(Token.FUNCTION, Token.AT, Token.NAME, Token.RPAR),
+                key(Token.FUNCTION_CALL, Token.AT, Token.NAME, Token.RPAREN),
                 (values, env) -> {
                     StructuredQName attName = verifyQName(values.get(2), env);
                     AxisExpression arg = new AxisExpression(
@@ -338,7 +338,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
 
         // fn('string') - function with string literal as single argument
         patterns.put(
-                key(Token.FUNCTION, Token.STRING_LITERAL, Token.RPAR),
+                key(Token.FUNCTION_CALL, Token.STRING_LITERAL, Token.RPAREN),
                 (values, env) -> {
                     Expression arg = StringLiteral.makeLiteral(StringValue.makeStringValue(values.get(1)));
                     arg.setLocation(env.getContainingLocation());
