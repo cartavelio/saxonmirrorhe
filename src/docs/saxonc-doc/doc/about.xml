@@ -11,8 +11,8 @@
          href="https://github.com/rimmartin/saxon-node" target="_blank">saxon-node</a> uses SaxonC
       to create an interface with Node.js.) </p>
 
-   <p>SaxonC 11 is built from the SaxonJ 11 Java product using Excelsior JET Enterprise 15.3
-      edition (MP1). The APIs support the current W3C Recommendations: XSLT 3.0, XQuery 3.1, XPath
+   <p>SaxonC 12 is built from the SaxonJ 12 Java product using Graalvm native image (version 22.3.0).
+      The APIs support the current W3C Recommendations: XSLT 3.0, XQuery 3.1, XPath
       3.1 and Schema Validation 1.0/1.1. See the main Saxon 11 documentation <a
          href="https://www.saxonica.com/documentation11/index.html#!conformance">Standards conformance</a>
       section for full details.</p>

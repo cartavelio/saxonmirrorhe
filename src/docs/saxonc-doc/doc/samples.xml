@@ -26,8 +26,7 @@
          directory. This script builds the test harness executables, using a command similar to the
          following:</p>
 
-      <kbd>gcc -m32 -I$jdkdir/include -I$jdkdir/include/linux -I
-         /System/Library/Frameworks/JavaVM.framework/Headers ../SaxonCGlue.c ../SaxonCProcessor.c
+      <kbd>gcc -m32 -I../../Saxon.C.API/graalvm ../SaxonCGlue.c ../SaxonCProcessor.c
          ../SaxonCXPath.c testXSLT.c -o testXSLT -ldl -lc $1</kbd>
 
       <p>To run the executables from the command line, use a command such as:</p>
@@ -53,10 +52,10 @@
             <code>buildCPPSaxon[EDITION].bat</code> file for Windows. These build files build the
          test harness executables, using a command similar to the following:</p>
 
-      <kbd>g++ -m32 bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o
-         bin/XQueryProcessor.o bin/XsltProcessor.o, bin/Xslt30Processor.o
+      <kbd>g++ -m64 -I../../Saxon.C.API/graalvm bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o
+         bin/XQueryProcessor.o bin/XsltExecutable.o bin/SchemaValidator.o  bin/Xslt30Processor.o
          bin/XPathProcessor.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmNode.o bin/XdmFunctionItem.o bin/XdmArray.o bin/XdmMap.o
-         bin/XdmAtomicValue.o bin/SchemaValidator.o testXSLT.cpp -o testXSLT -ldl -lc</kbd>
+         bin/XdmAtomicValue.o bin/SchemaValidator.o testXSLT.cpp -o testXSLT -ldl -lc -lsaxon-eec-12.1</kbd>
 
       <p>The executables created for Linux and Mac OS can be run from the command line using the
          following commands:</p>
@@ -89,7 +88,8 @@ if(result != nullptr) {
    if(trans->exceptionOccurred()) {
       cerr<<"Expected failure = "<<trans->getErrorMessage()<<endl;
    }
-      trans->exceptionClear();  
+      trans->exceptionClear();
+      processor->release();
 }
   ]]></samp>
 

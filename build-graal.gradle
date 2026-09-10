@@ -716,6 +716,19 @@ task graal_eec_jar(
         include "XPathProcessor.h"
         include "SchemaValidator.h"
         include "SaxonApiException.h"
+        include "php8_DocumentBuilder.cpp"
+        include "php8_Xslt30Processor.cpp"
+        include "php8_saxon_arginfo.h"
+        include "php8_SchemaValidator.cpp"
+        include "php8_XsltExecutable.cpp"
+        include "php8_saxon.cpp"
+        include "php8_XPathProcessor.cpp"
+        include "php8_saxon.h"
+        include "php8_XQueryProcessor.cpp"
+        include "config.m4"
+        include "config.w32"
+
+        
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)

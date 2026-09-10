@@ -7,10 +7,31 @@
          href="https://www.saxonica.com/saxon-c/release-notes.xml">Release notes</a>, and for
       details of bug fixes see the <a href="https://saxonica.plan.io/projects/saxon-c">SaxonC
          project</a> at the Saxonica community site.</p>
+
+   <h2 class="subtitle">Changes between releases 11 and 12</h2>
+
+   <h3 class="subtitle">Main new features</h3>
+   <ul>
+      <li>The SaxonC 12 release is built from the SaxonJ (Java) 12 as its baseline.</li>
+      <li>SaxonC is now cross-compiled with Graalvm native-image (version 22.3.0) as a direct replacement to Excelsior Jet JVM.</li>
+      <li>Python wheel package support for SaxonC Python extension. This is available for a number of platforms including MacOS, Linux and Windows.
+         Python supported 3.8+ supported</li>
+      <li>SaxonC now supports PHP 8 and has removed support for PHP 7 since it has reached End of Life and is no longer supported.</li>
+   </ul>
+
+   <h3 class="subtitle">API changes</h3>
+
+   <ul>
+      <li>The ICU localization is currently not support in SaxonC-PE and SaxonC-EE.</li>
+      <li>Host language Extension functions are currently not supported in SaxonC-EE.</li>
+   </ul>
+
    
    <h2 class="subtitle">Changes between releases 1.2 and 11</h2>
    
    <h3 class="subtitle">Main new features</h3>
+
+
    
    <ul>
       <li>Compiling the C++ API now requires at least C++14. This also affects the building of the Python and
