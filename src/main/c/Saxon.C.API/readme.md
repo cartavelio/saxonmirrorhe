@@ -10,6 +10,6 @@ XPathProcessor, and SchemaValidator.
 The following classes provide a subset of the XDM model: XdmValue, XdmItem, XdmAtomicValue, XdmNode,
 XdmFunctionItem, XdmArray, and XdmMap.
 
-For further information about using SaxonC, see the [SaxonC 11
-Documentation](https://www.saxonica.com/saxon-c/documentation11/index.html), or [SaxonC web
+For further information about using SaxonC, see the [SaxonC 12
+Documentation](https://www.saxonica.com/saxon-c/documentation12/index.html), or [SaxonC web
 page](http://www.saxonica.com/saxon-c/index.xml).

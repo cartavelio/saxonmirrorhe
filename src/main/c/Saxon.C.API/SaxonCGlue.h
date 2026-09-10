@@ -74,7 +74,7 @@ extern int jvmCreated; //TODO this might not be required in graalvm - remove
 
 
 //===============================================================================================//
-/*! <code>Environment</code>. This struct captures the Graalvm properties assocated with the cross compiled SaxonC library.
+/*! <code>Environment</code>. This struct captures the Graalvm properties associated with the cross compiled SaxonC library.
  * <p/>
  */
 typedef struct {
@@ -86,7 +86,7 @@ typedef struct {
 
 //===============================================================================================//
 
-/*! <code>sxnc_parameter</code>. This struct captures details of paramaters used for the transformation as (string, value) pairs.
+/*! <code>sxnc_parameter</code>. This struct captures details of parameters used for the transformation as (string, value) pairs.
  * <p/>
  */
 typedef struct {

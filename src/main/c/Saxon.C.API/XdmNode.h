@@ -239,7 +239,7 @@ public:
     XdmNode* getChild(int i, bool cache = true);
 
 
-    //! Get the count of child nodes from thie current node
+    //! Get the count of child nodes from the current node
     /**
      *
      * @return int for the count of child nodes

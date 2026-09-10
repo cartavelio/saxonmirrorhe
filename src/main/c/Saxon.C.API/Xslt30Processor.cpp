@@ -397,7 +397,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
 	}
     proc->attachCurrentThread();
 	if(source == nullptr && stylesheet == nullptr){
-		std::cerr<< "Error: nullptr file name found in transformFiletoString."<<std::endl;
+		std::cerr<< "Error: nullptr file name found in transformFileToString."<<std::endl;
 		return nullptr;
 	}
     allocFn fn = operator new;

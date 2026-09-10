@@ -100,7 +100,7 @@ public:
 
         //!The initial filename to which templates are to be applied (equivalent to the <code>select</code> attribute of <code>xsl:apply-templates</code>).
         /**
-        * The file is parsed internall
+        * The file is parsed internally
         *  @param filename - The file name to which the templates are to be applied
         */
     void setInitialMatchSelectionAsFile(const char * filename);
@@ -163,7 +163,7 @@ public:
      * Remove a property (name, value) pair from the executable
      *
      * @param name  the name of the property to be removed
-     * @return bool - outcome of the romoval
+     * @return bool - outcome of the removal
      */
     bool removeProperty(const char* name);
 
@@ -230,11 +230,11 @@ public:
      */
      std::map<std::string,std::string>& getProperties();
 
-    //!Clear parameter values set
+    //!Clear parameter values set.
     /**
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
+     * Default behaviour (false) is to leave XdmValues in memory.
+     * Individual pointers to XdmValue objects have to be deleted in the calling program.
+     * @param deleteValues - if true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues=false);
 
@@ -362,7 +362,7 @@ public:
     * called, then the parameters supplied are made available to the called template (no error
     * occurs if parameters are supplied that are not used).
     * @param templateName - The name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
-    * @param outfile - The file name where results will be stored,
+    * @param outfile - The file name where results will be stored.
     */
     void callTemplateReturningFile(const char* templateName, const char* outfile);
 
@@ -372,7 +372,6 @@ public:
     * called, then the parameters supplied are made available to the called template (no error
     * occurs if parameters are supplied that are not used).
     * @param templateName - the name of the initial template. This must match the name of a public named template in the stylesheet. If the value is nullptr, the clark name for xsl:initial-template is used.
-    * @param outputfile - The file name where results will be stored,
     */
     const char* callTemplateReturningString(const char* templateName=nullptr);
 
@@ -450,7 +449,9 @@ public:
      */
     void transformToFile(XdmNode * source=nullptr);
 
-
+    /**
+    * Get the messages written using the xsl:message instruction
+    */
     XdmValue * getXslMessages();
 
 

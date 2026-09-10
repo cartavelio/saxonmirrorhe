@@ -73,6 +73,8 @@ public:
    */
    XdmItem * evaluateSingle(const char * xpathStr);
 
+    /** Set the context item
+    */
    void setContextItem(XdmItem * item);
 
     /**
@@ -80,7 +82,8 @@ public:
     */
    void setcwd(const char* cwd);
 
-    //! Set the context item from  file
+    /** Set the context item from file
+    */
     void setContextFile(const char * filename); //TODO: setContextItemFromFile
 
     //! Evaluate the XPath expression, returning the effective boolean value of the result.
@@ -91,7 +94,7 @@ public:
 
     /**
      * Set a parameter value used in the query
-     *s
+     *
      * @param name  of the parameter, as a string. For namespaced parameter use the JAXP solution i.e. "{uri}name"
      * @param value of the query parameter, or nullptr to clear a previously set value
      */
@@ -102,7 +105,7 @@ public:
      * Remove a parameter (name, value) pair
      *
      * @param name  of the parameter
-     * @return bool - outcome of the romoval
+     * @return bool - outcome of the removal
      */
     bool removeParameter(const char * name);
 
@@ -195,10 +198,10 @@ public:
      std::map<std::string,std::string>& getProperties();
 
     /**
-     * Clear parameter values set
-     *  @param deleteValues.  Individual pointers to XdmValue objects have to be deleted in the calling program
-     * Default behaviour (false) is to leave XdmValues in memory
-     *  true then XdmValues are deleted
+     * Clear parameter values set.
+     * Default behaviour (false) is to leave XdmValues in memory.
+     * Individual pointers to XdmValue objects have to be deleted in the calling program.
+     * @param deleteValues - if true then XdmValues are deleted
      */
     void clearParameters(bool deleteValues=false);
 
