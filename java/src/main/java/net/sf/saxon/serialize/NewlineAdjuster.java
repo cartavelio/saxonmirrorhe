@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -41,7 +42,7 @@ public class NewlineAdjuster extends ProxyReceiver {
         try {
             this.regex = new ARegularExpression(StringConstants.NEWLINE, "", "XP20", null, getPipelineConfiguration().getConfiguration());
         } catch (XPathException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedXPathException(e);
         }
     }
 
