@@ -1226,6 +1226,7 @@
       <xsl:sequence select="f:applyFormat(., map{
          'getUnderlyingNode#0':   '((Saxon.Hej.om.NodeInfo)%scope%.Unwrap())',
          'getUnderlyingValue#0':  '((Saxon.Hej.om.NodeInfo)%scope%.Unwrap())',
+         'getStringValue#0':      '%scope%.StringValue',
          '*':                     '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
