@@ -28,6 +28,7 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.QuitParsingException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.AnyItemType;
@@ -130,8 +131,12 @@ public class XQueryExpressionEE extends XQueryExpression {
         if (pusher == null) {
             pusher = expression.makeElaborator().elaborateForPush();
         }
-        TailCall tc = pusher.processLeavingTail(dest, context);
-        Expression.dispatchTailCall(tc);
+        try {
+            TailCall tc = pusher.processLeavingTail(dest, context);
+            Expression.dispatchTailCall(tc);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
     /**
@@ -248,7 +253,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         Controller controller = newController(dynamicEnv);
         XPathContextMajor context = initialContext(dynamicEnv, controller);
         try {
-            PendingUpdateList pul = config.newPendingUpdateList(getPackageData().getImportedSchema());
+            PendingUpdateList pul = config.newPendingUpdateList();
             context.openStackFrame(stackFrameMap);
             expression.makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
             pul.apply(context, mainModule.getRevalidationMode());
@@ -293,7 +298,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         Controller controller = newController(dynamicEnv);
         XPathContextMajor context = initialContext(dynamicEnv, controller);
         try {
-            PendingUpdateList pul = config.newPendingUpdateList(getPackageData().getImportedSchema());
+            PendingUpdateList pul = config.newPendingUpdateList();
             context.openStackFrame(stackFrameMap);
             expression.makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
             pul.apply(context, mainModule.getRevalidationMode());
