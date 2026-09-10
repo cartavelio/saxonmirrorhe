@@ -157,6 +157,10 @@
         (or, of course, in the warning message itself). The <code>StandardErrorReporter</code> now has a method
         <code>suppressWarning</code> that allows a specific warning condition to be suppressed.</p>
         
+        <p>The <code>ParseOptions</code> class is now immutable; any calls such as <code>options.setValidationMode(V)</code>
+        must be replaced with <code>options = options.withValidationMode(V)</code>. This change was made for performance reasons;
+        we found that the code was spending a great deal of time creating and copying new <code>ParseOptions</code> objects.</p>
+        
    
     </category>
 
@@ -191,8 +195,7 @@
         
         <p>The Saxon extension functions <code>saxon:evaluate</code>, <code>saxon:eval</code>, <code>saxon:expression</code>
              have been dropped. (The function <code>saxon:evaluate-node</code> was dropped in Saxon 10). 
-            The same effect (and more) can be achieved
-        using the standard XSLT 3.0 instruction <code>xsl:evaluate</code>.</p>
+            The same effect (and more) can be achieved using the standard XSLT 3.0 instruction <code>xsl:evaluate</code>.</p>
         
         <p>If XSLT 4.0 extensions are enabled, two new (experimental) values are available for <code>xsl:mode/@on-no-match</code>,
         namely <code>shallow-copy-all</code> and <code>shallow-skip-all</code>. These have the same effect as <code>shallow-copy</code>
@@ -233,10 +236,10 @@
         </ul>
         
        <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:contains-sequence(), fn:ends-with-sequence(), 
-           fn:expanded-QName(), fn:intersperse(), fn:replicate(), fn:starts-with-sequence()
+           fn:expanded-QName(), fn:intersperse(), fn:parse-QName(), fn:replicate(), fn:starts-with-sequence()
            and fn:while() are implemented.</p>
         
-        <p>The new single-argument version of fn:QName is implemented.</p>
+   
         
         <p>The proposed 4.0 functions map:build() and map:filter() are implemented</p>
         
