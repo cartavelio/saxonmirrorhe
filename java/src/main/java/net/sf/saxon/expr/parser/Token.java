@@ -160,8 +160,12 @@ public class Token {
                     return OperatorSymbol.TO;
                 case "follows":
                     return OperatorSymbol.FOLLOWS;
+                case "follows-or-is":
+                    return OperatorSymbol.FOLLOWS_OR_IS;
                 case "precedes":
                     return OperatorSymbol.PRECEDES;
+                case "precedes-or-is":
+                    return OperatorSymbol.PRECEDES_OR_IS;
                 case "is-not":
                     return OperatorSymbol.IS_NOT;
                 default:

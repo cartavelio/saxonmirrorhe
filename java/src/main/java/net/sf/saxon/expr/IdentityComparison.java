@@ -168,11 +168,18 @@ public final class IdentityComparison extends BinaryExpression {
     @Override
     protected String tag() {
         switch (operator) {
-            case IS: return "is";
+            case IS:
+                return "is";
             case IS_NOT:
                 return "is-not";
-            case PRECEDES: return "precedes";
-            case FOLLOWS: return "follows";
+            case PRECEDES:
+                return "precedes";
+            case FOLLOWS:
+                return "follows";
+            case PRECEDES_OR_IS:
+                return "precedes-or-is";
+            case FOLLOWS_OR_IS:
+                return "follows-or-is";
             default: return "?";
         }
     }
@@ -455,6 +462,30 @@ public final class IdentityComparison extends BinaryExpression {
                             return null;
                         }
                         return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) > 0);
+                    };
+                case PRECEDES_OR_IS:
+                    return context -> {
+                        GNode v0 = (GNode) p0.eval(context);
+                        if (v0 == null) {
+                            return null;
+                        }
+                        GNode v1 = (GNode) p1.eval(context);
+                        if (v1 == null) {
+                            return null;
+                        }
+                        return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) <= 0);
+                    };
+                case FOLLOWS_OR_IS:
+                    return context -> {
+                        GNode v0 = (GNode) p0.eval(context);
+                        if (v0 == null) {
+                            return null;
+                        }
+                        GNode v1 = (GNode) p1.eval(context);
+                        if (v1 == null) {
+                            return null;
+                        }
+                        return BooleanValue.get(GlobalOrderComparer.getInstance().compare(v0, v1) >= 0);
                     };
                 default:
                     throw new IllegalStateException();

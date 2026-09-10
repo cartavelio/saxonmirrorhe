@@ -143,12 +143,13 @@ public final class ItemChecker extends UnaryExpression {
                                                                     message, SaxonErrorCode.SXWN9026, getLocation());
                 }
             } else {
+                int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, operand, th);
                 throw new XPathException(message)
                         .withErrorCode(role.getErrorCode())
                         .withLocation(this.getLocation())
-                        .asTypeErrorIf(role.isTypeError());
+                        .asTypeErrorIf(version >= 40 || role.isTypeError());
             }
         }
         return this;
@@ -220,13 +221,14 @@ public final class ItemChecker extends UnaryExpression {
         final TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Consumer<Item> checker = item -> {
             if (!requiredItemType.matches(item, th)) {
+                int version = baseExpr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, item, th);
                 String errorCode = role.getErrorCode();
                 XPathException te = new XPathException(message, errorCode)
                         .withFailingExpression(baseExpr)
                         .withLocation(baseExpr.getLocation())
-                        .asTypeErrorIf(!"XPDY0050".equals(errorCode));
+                        .asTypeErrorIf(version >= 40 || !"XPDY0050".equals(errorCode));
                 throw new UncheckedXPathException(te);
             }
         };

@@ -2410,6 +2410,12 @@ public class PackageLoaderHE implements IPackageLoader {
             return new IdentityComparison(lhs, OperatorSymbol.FOLLOWS, rhs);
         });
 
+        eMap.put("followsOrIs", (loader, element) -> {
+            Expression lhs = loader.getFirstChildExpression(element);
+            Expression rhs = loader.getSecondChildExpression(element);
+            return new IdentityComparison(lhs, OperatorSymbol.FOLLOWS_OR_IS, rhs);
+        });
+
         eMap.put("for", (loader, element) -> {
             Expression select = loader.getFirstChildExpression(element);
 
@@ -3068,6 +3074,12 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             return new IdentityComparison(lhs, OperatorSymbol.PRECEDES, rhs);
+        });
+
+        eMap.put("precedesOrIs", (loader, element) -> {
+            Expression lhs = loader.getFirstChildExpression(element);
+            Expression rhs = loader.getSecondChildExpression(element);
+            return new IdentityComparison(lhs, OperatorSymbol.PRECEDES_OR_IS, rhs);
         });
 
         eMap.put("procInst", (loader, element) -> {

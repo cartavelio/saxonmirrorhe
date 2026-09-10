@@ -37,6 +37,8 @@ public class OperatorInfo {
             case IS_NOT: return (6);
             case PRECEDES: return ( 6);
             case FOLLOWS: return ( 6);
+            case PRECEDES_OR_IS: return (6);
+            case FOLLOWS_OR_IS: return (6);
             case OTHERWISE: return ( 7);
             case CONCAT: return ( 8);
             case TO: return ( 9);

@@ -1132,6 +1132,8 @@ public class XPathParser {
             case IS_NOT:
             case PRECEDES:
             case FOLLOWS:
+            case PRECEDES_OR_IS:
+            case FOLLOWS_OR_IS:
             case TO:
                 return false;
             default:
@@ -1162,9 +1164,13 @@ public class XPathParser {
             case GT:
                 return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeGeneralComparison(lhs, operator, rhs);
             case IS:
-            case IS_NOT:
             case PRECEDES:
             case FOLLOWS:
+                return new IdentityComparison(lhs, operator, rhs);
+            case IS_NOT:
+            case PRECEDES_OR_IS:
+            case FOLLOWS_OR_IS:
+                checkLanguageVersion40();
                 return new IdentityComparison(lhs, operator, rhs);
             case TO:
                 return new RangeExpression(lhs, rhs);
