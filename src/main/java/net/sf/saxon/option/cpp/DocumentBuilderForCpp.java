@@ -36,18 +36,19 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
 
 
     @CEntryPoint(name = "j_db_setBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long setBaseURI(IsolateThread thread, ObjectHandle documentBuilderRef, CCharPointer baseUri) throws SaxonApiException {
+    public static long setBaseURI(IsolateThread thread, ObjectHandle documentBuilderRef, CCharPointer c_baseUri) throws SaxonApiException {
 
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
-            if(baseUri != WordFactory.nullPointer()) {
+            if(c_baseUri != WordFactory.nullPointer()) {
                 try {
+                    String baseUri = CTypeConversion.toJavaString(c_baseUri);
                     String userDir = System.getProperty("user.dir");
                     char separatorChar = '/';
                     if (File.separatorChar != '/') {
                         userDir.replace(File.separatorChar, separatorChar);
                     }
                     URI cwdURI = new File(userDir).toURI();
-                    cwdURI = cwdURI.resolve(CTypeConversion.toJavaString(baseUri));
+                    cwdURI = cwdURI.resolve(baseUri);
                     builder.setBaseURI(cwdURI);
                     if(SaxonCAPI.debug) {
                         System.err.println("setBaseURI user.dir="+userDir);
