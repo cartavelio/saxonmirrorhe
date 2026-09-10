@@ -20,7 +20,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.QueryResult;
-import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -48,7 +47,6 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
 
     private final JSONEmitter emitter;
     private Properties outputProperties;
-    private CharacterSet characterSet;
     private boolean isIndenting;
     private boolean isJsonLines;
     private Comparator<AtomicValue> propertySorter;

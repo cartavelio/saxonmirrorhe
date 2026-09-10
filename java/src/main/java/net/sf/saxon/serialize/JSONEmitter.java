@@ -15,6 +15,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
+import net.sf.saxon.serialize.jcs.NumberToJSON;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.text.Normalizer;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.function.Function;
 
 /**
  * This class implements the back-end text generation of the JSON serialization method. It takes
@@ -55,7 +57,7 @@ public class JSONEmitter {
     private final Stack<Boolean> oneLinerStack = new Stack<>();
     private boolean mustClose = true;
     private boolean escapeSolidus = true;
-
+    private boolean canonical = false;
     private boolean unfailing = false;
 
     public JSONEmitter(PipelineConfiguration pipe, UnicodeWriter writer, Properties outputProperties)  {
@@ -78,12 +80,16 @@ public class JSONEmitter {
         if ("yes".equals(details.getProperty(SaxonOutputKeys.JSON_LINES))) {
             isJsonLines = true;
         }
-        if ("yes".equals(details.getProperty(SaxonOutputKeys.UNFAILING))) {
+        if ("yes".equals(details.getProperty(SaxonOutputKeys.CANONICAL))) {
+            canonical = true;
+        }
+        if ("yes".equals(details.getProperty(SaxonOutputKeys.UNFAILING)) && !canonical) {
             unfailing = true;
         }
-        if ("no".equals(details.getProperty(SaxonOutputKeys.ESCAPE_SOLIDUS))) {
+        if ("no".equals(details.getProperty(SaxonOutputKeys.ESCAPE_SOLIDUS)) || canonical) {
             escapeSolidus = false;
         }
+
         String max = details.getProperty(SaxonOutputKeys.LINE_LENGTH);
         if (max != null) {
             try {
@@ -179,9 +185,8 @@ public class JSONEmitter {
         conditionalComma(false);
         if (item == null) {
             emit("null");
-        } else if (item instanceof NumericValue) {
-            NumericValue num = (NumericValue)item;
-            if (item instanceof DecimalValue) {
+        } else if (item instanceof NumericValue num) {
+            if (item instanceof DecimalValue && !canonical) {
                 // Avoid exponential notation
                 emit(num.getUnicodeStringValue());
             } else if (num.isNaN()) {
@@ -197,20 +202,28 @@ public class JSONEmitter {
                     throw new XPathException("JSON has no way of representing Infinity", "SERE0020");
                 }
             } else if (num.isNegativeZero()) {
-                emit("-0");
+                emit(canonical ? "0" : "-0");
             } else {
+
                 double val = num.getDoubleValue();
                 double abs = Math.abs(val);
                 // Avoid exponential notation except in extremis
-                emit(FloatingPointConverter.convertDouble(val, abs >= 1e18 || abs < 1e-18));
-//                if (num.isWholeNumber() && abs < 1e18) {
-//                    emit(num.longValue() + "");
-//                } else if (abs < 1e18 && abs > 1e-18) {
-//                    // Avoid exponential notation except in extremis
-//                    emit(Converter.DoubleToDecimal.INSTANCE.convert(num).asAtomic().getUnicodeStringValue());
+                if (abs == 0.0) {
+                    emit("0");
+                } else /*if (abs >= 1e21 || abs < 1e-21)*/ {
+//                    String s = FloatingPointConverter.convertDouble(val, true).toString();
+//                    s = s.replaceFirst("E", "e").replaceFirst("e(?!-)", "e+");
+//                    emit(s);
+                    try {
+                        String s = NumberToJSON.serializeNumber(val);
+                        emit(s);
+                    } catch (IOException e) {
+                        throw new XPathException(e.getMessage());
+                    }
 //                } else {
-//                    emit(num.getUnicodeStringValue());
-//                }
+//                    emit(new BigDecimalValue(val).toString());
+//                    //emit(FloatingPointConverter.convertDouble(val, false));
+                }
             }
         } else if (item instanceof BooleanValue) {
             emit(item.getUnicodeStringValue());
@@ -344,6 +357,8 @@ public class JSONEmitter {
     }
 
     private UnicodeString escape(UnicodeString cs) throws XPathException {
+        Function<UnicodeString, UnicodeString> escaper =
+                canonical ? this::canonicalEscape : this::simpleEscape;
         if (characterMap != null) {
             UnicodeBuilder out = new UnicodeBuilder();
             UnicodeString s = characterMap.map(cs, true);
@@ -351,27 +366,35 @@ public class JSONEmitter {
             while (true) {
                 long start = s.indexOf((char)0, prev);
                 if (start >= 0) {
-                    out.append(simpleEscape(s.substring(prev, start)));
+                    out.append(escaper.apply(s.substring(prev, start)));
                     long end = s.indexOf((char)0, start + 1);
                     out.append(s.substring(start + 1, end));
                     prev = end + 1;
                 } else {
-                    out.append(simpleEscape(s.substring(prev)));
+                    out.append(escaper.apply(s.substring(prev)));
                     return out.toUnicodeString();
                 }
             }
         } else {
-            return simpleEscape(cs);
+            return escaper.apply(cs);
         }
     }
 
-    private UnicodeString simpleEscape(UnicodeString cs) throws XPathException {
+    private UnicodeString simpleEscape(UnicodeString cs) {
         if (normalize) {
             cs = StringView.of(Normalizer.normalize(cs.toString(), normalizationForm));
         }
         return JsonReceiver.escape(cs, false, !escapeSolidus,
                                    IntPredicateLambda.of(
                                            c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c)));
+    }
+
+    private UnicodeString canonicalEscape(UnicodeString cs)  {
+        if (normalize) {
+            cs = StringView.of(Normalizer.normalize(cs.toString(), normalizationForm));
+        }
+        return JsonReceiver.escape(cs, false, !escapeSolidus,
+                                   IntPredicateLambda.of(c -> c < 31));
     }
 
     private void emit(String s) throws XPathException {

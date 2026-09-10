@@ -423,11 +423,10 @@ public class JsonReceiver implements Receiver {
      * @param retainSlash true if solidus (forwards slash) should not be escaped
      * @param hexEscapes a predicate identifying characters that should be output as hex escapes using \ u XXXX notation.
      * @return the escaped string
-     * @throws XPathException if the input contains invalid escape sequences
      */
 
     public static UnicodeString escape(UnicodeString in, boolean retainQuot,
-                                       boolean retainSlash, IntPredicateProxy hexEscapes) throws XPathException {
+                                       boolean retainSlash, IntPredicateProxy hexEscapes)  {
         TwineBuilder tb = TwineBuilder.make(in.length32());
         IntIterator cp = in.codePoints();
         while (cp.hasNext()) {
@@ -480,9 +479,9 @@ public class JsonReceiver implements Receiver {
         return tb.toUnicodeString();
     }
 
-    @CSharpReplaceBody(code="return c.ToString(\"X4\");")
+    @CSharpReplaceBody(code="return c.ToString(\"x4\");")
     public static String hex4(int c) {
-        return String.format("%04X", c);
+        return String.format("%04x", c);
     }
 
     private final static IntPredicateProxy isControlChar =

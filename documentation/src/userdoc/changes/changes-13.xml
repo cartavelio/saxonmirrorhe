@@ -591,6 +591,7 @@ TODO: rethink redefines and override
             <!--<li><p>JSON-Lines input and output</p></li>-->
             <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
             <li><p>merge-when attribute for xsl:for-each-group</p></li>
+            <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>

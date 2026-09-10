@@ -10,6 +10,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.SequenceWrapper;
@@ -318,9 +319,15 @@ public class SerializerFactory {
                         je.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     JSONSerializer js = new JSONSerializer(pipe, je, props);
-                    String sortOrder = props.getProperty(SaxonOutputKeys.PROPERTY_ORDER);
-                    if (sortOrder != null) {
-                        js.setPropertySorter(getPropertySorter(sortOrder));
+                    String canonical = props.getProperty(SaxonOutputKeys.CANONICAL);
+                    if ("yes".equals(canonical)) {
+                        js.setPropertySorter(
+                                Comparator.comparing(Item::getStringValue));
+                    } else {
+                        String sortOrder = props.getProperty(SaxonOutputKeys.PROPERTY_ORDER);
+                        if (sortOrder != null) {
+                            js.setPropertySorter(getPropertySorter(sortOrder));
+                        }
                     }
                     CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                     ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);

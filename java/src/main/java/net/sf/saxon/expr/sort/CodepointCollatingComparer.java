@@ -101,7 +101,7 @@ public class CodepointCollatingComparer implements AtomicComparer {
 
     @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) {
-        return ((StringValue)a).equals((StringValue)b);
+        return a.equals(b);
     }
 
     /**
