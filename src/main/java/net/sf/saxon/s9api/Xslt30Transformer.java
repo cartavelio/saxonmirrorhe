@@ -690,7 +690,9 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) throws SaxonApiException {
                 Receiver rt = getReceivingTransformer(controller, globalParameterSet, finalDestination);
                 rt = new SequenceNormalizerWithSpaceSeparator(rt);
-                rt.setPipelineConfiguration(pipe);
+                if (rt.getPipelineConfiguration() == null) {
+                    rt.setPipelineConfiguration(pipe);
+                }
                 return receiver = rt;
             }
 

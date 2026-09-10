@@ -571,7 +571,9 @@ public abstract class AbstractXsltTransformer {
             receiver = new RegularSequenceChecker(receiver, true);
         }
         //receiver = new TracingFilter(receiver);
-        receiver.getPipelineConfiguration().setController(controller);
+        if (receiver.getPipelineConfiguration().getController() == null) {  // bug 6626
+            receiver.getPipelineConfiguration().setController(controller);
+        }
 
         if (baseOutputUriWasSet) {
             try {

@@ -36,6 +36,7 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
 
 
     private Sequence getAccumulatorValue(String name, Phase phase, XPathContext context) throws XPathException {
+        //System.err.println("getAccumulatorValue(" + name + ", " + phase);
         AccumulatorRegistry registry = getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
         Accumulator accumulator = getAccumulator(name, registry);
         Item node = context.getContextItem();

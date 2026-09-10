@@ -44,7 +44,7 @@ public abstract class SequenceReceiver implements Receiver {
 
     /*@NotNull*/
     @Override
-    public final PipelineConfiguration getPipelineConfiguration() {
+    public PipelineConfiguration getPipelineConfiguration() {
         return pipelineConfiguration;
     }
 
