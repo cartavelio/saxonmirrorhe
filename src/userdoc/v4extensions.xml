@@ -1130,6 +1130,10 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
 
          <p>Note that the result of the expression is a sequence, not an array.</p>
       </section>
+            <section id="numeric-literals">
+               <h1>Numeric Literals</h1>
+               <p>Numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>),
+                  and underscores can be used as separators (<code>1_000_000</code>).</p>
          </section>
 
    <section id="xslt-syntax-extensions" title="XSLT 4.0 extensions">
