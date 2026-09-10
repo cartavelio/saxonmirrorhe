@@ -138,6 +138,8 @@ configurations.configureEach {
 extension.javaTestPathSuffix = "test/java"
 val javaMainSourceRoot = extension.sourceRoot.map { it.dir("main/java") }
 val javaMainResourcesRoot = extension.sourceRoot.map { it.dir("main/resources") }
+val javaTestSourceRoot = extension.javaTestSourceRoot
+val javaTestResourceRoot = extension.sourceRoot.map { it.dir("test/resources") }
 val libTidyPath = extension.sourceRoot.map { it.file("../lib/Tidy.jar") }
 dependencies {
     javaSourcesBucket(files(javaMainSourceRoot))
@@ -316,6 +318,14 @@ testing {
     register<JvmTestSuite>("editionTest") {
       // Keep a record of the suite around so that we can add test sources at plugin configuration time
       extension.editionTestSuite = this
+      sources {
+        java {
+            srcDir(javaTestSourceRoot)
+        }
+        resources {
+            setSrcDirs(listOf(javaTestResourceRoot))
+        }
+      }
       dependencies {
         implementation(editionSourceSet.output)
         implementation(testImplementationResolvable)
