@@ -475,6 +475,9 @@ public final class DoubleValue extends NumericValue {
      * are considered identical, even though they are not fully interchangeable. "Identical" means the
      * same point in the value space, regardless of type annotation.</p>
      * <p>NaN is identical to itself.</p>
+     * <p>This method treats positive and negative zero as identical, even though they are not defined
+     * as such in XSD 1.1. This is justified on the basis that in all cases where values are required
+     * to be identical (for example, enumeration facets and keyref constraints), being equal is good enough.</p>
      *
      * @param v the other value to be compared with this one
      * @return true if the two values are identical, false otherwise.
