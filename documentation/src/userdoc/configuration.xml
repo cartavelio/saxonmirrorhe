@@ -338,13 +338,12 @@
                href="com.saxonica.config.EnterpriseTransformerFactory">com.saxonica.config.EnterpriseTransformerFactory</a> depending on the Saxon edition in
             use.</p>
 
-         <p>Additional configuration options can be specified using the <code>attribute</code> child of the <code>factory</code> element, for example the
-            following task was used as part of the pipeline for publishing this documentation:</p>
+         <p>Additional configuration options can be specified using the <code>attribute</code> child of the <code>factory</code> element, for example:</p>
 
          <pre><code class="language-xml"><![CDATA[  <xslt in="${userdoc.dir}/src/function-data.xml"
         style="${userdoc.dir}/style/preprocess-functions.xsl"
         out="${userdoc.dir}/src/functions.xml"
-        classpath="e:/saxon/eej/saxon-ee-10.0.jar;e:/saxon/eej/saxon-licenses">
+        classpath="e:/saxon/eej/saxon-ee-13.0.jar;e:/saxon/eej/saxon-licenses">
         <factory name="com.saxonica.config.EnterpriseTransformerFactory">
             <attribute name="http://saxon.sf.net/feature/xsltSchemaAware" value="true"/>
             <attribute name="http://saxon.sf.net/feature/schema-validation-mode" value="strict"/>

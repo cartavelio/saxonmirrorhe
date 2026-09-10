@@ -802,7 +802,7 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolver-5.3.3.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-6.0.23.jar</span></p>
                   </td>
                   <td>
                      <p>168Kb</p>
@@ -817,7 +817,7 @@
                
                <tr>
                   <td>
-                     <p><span class="nowrap">xmlresolver-5.3.3-data.jar</span></p>
+                     <p><span class="nowrap">xmlresolver-6.0.23-data.jar</span></p>
                   </td>
                   <td>
                      <p>1Mb</p>
@@ -910,9 +910,9 @@ with only the Saxon library on the classpath), edit the contents of the
 <code>lib</code> directory where you installed Saxon.</p>
 <p>Delete the library you wish to replace and copy the new version into that
 directory <em>without its version number</em>. For example, to replace the
-<code>xmlresolver-4.2.0.jar</code> APIs with a new version, perhaps
-<code>xmlresolver-4.4.0.jar</code>, delete
-<code>xmlresolver-4.2.0.jar</code> and copy the 4.4.0 jar file into
+<code>xmlresolver-6.0.23.jar</code> APIs with a new version, perhaps
+<code>xmlresolver-6.1.0.jar</code>, delete
+<code>xmlresolver-6.0.23.jar</code> and copy the 6.1.0 jar file into
 the lib directory using the name <code>xmlresolver.jar</code>, without
 any version number.</p>
 </li>
