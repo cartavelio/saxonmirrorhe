@@ -40,6 +40,7 @@ public class SignatureTest {
             "fn:scan-right",
             "fn:matching-segments",
             "fn:system-properties",
+            "fn:regex",
             "map:replace",
             "map:values",
             "array:values"
