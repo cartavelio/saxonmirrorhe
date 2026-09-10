@@ -229,6 +229,38 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor,
   }
 }
 
+void testPackageExport(SaxonProcessor *processor, Xslt30Processor *trans,
+                                                    sResultCount *sresult) {
+        try {
+          cout << "Test: testPackageExport:" << endl;
+          trans->compileFromFileAndSave("../data/override-base-f-001.xsl", "../data/sandpit/test-package-001.pack");
+
+          SaxonProcessor * processor2 = new SaxonProcessor(true);
+          Xslt30Processor * xc2 = processor2->newXslt30Processor();
+          xc2->importPackage("../data/sandpit/test-package-001.pack");
+          XsltExecutable * xe = xc2->compileFromFile("../data/override-f-001.xsl");
+          const char * result = xe->callTemplateReturningString("main");
+          cerr<<"Result = "<<result<<endl;
+          sresult->success++;
+          delete result;
+          delete xe;
+          delete xc2;
+          delete processor2;
+        } catch (SaxonApiException &e) {
+              const char *emessage = e.getMessage();
+              const char *code = e.getErrorCode();
+              if (code != nullptr) {
+                cout << " error code =" << code << endl;
+              }
+              if (emessage != nullptr) {
+                cout << " message = " << emessage << endl;
+              }
+              sresult->failure++;
+              sresult->failureList.push_back("testPackageExport");
+              return;
+            }
+    }
+
 /*
 * Test transform to String. stylesheet supplied as argument. Source supplied as
 XdmNode Should be error. Source file does not exist
@@ -2733,6 +2765,13 @@ int main(int argc, char *argv[]) {
        << endl;
 
   exampleTransformToString(processor, trans, sresult);
+
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
+  testPackageExport(processor, trans, sresult);
 
   cout << endl
        << "============================================================="

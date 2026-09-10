@@ -103,6 +103,12 @@
                   SELF = 12</code>. See the <code>axisNodes()</code> method on the <code>XdmNode</code> class (C++,
                PHP and Python).</li>
          </ul>
+         <p>From SaxonC 12.4:</p>
+         <ul>
+            <li>The <code>importPackage(const char * filename)</code> method is added to the C++, Python and PHP APIs on the
+               <code>Xslt30Processor</code> class. This method supports the <code>xsl:use-package</code> declaration to import a library package before
+               compiling a primary stylesheet or package.</li>
+         </ul>
       </category>
       
       <category name="installation">

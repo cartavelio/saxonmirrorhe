@@ -195,13 +195,16 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
         XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
         String cwd = null;
-
-        compiler.setErrorList(SaxonCException.errorList);
-        if (ccwd != WordFactory.nullPointer()) {
+        if (ccwd.isNonNull()) {
             cwd = CTypeConversion.toJavaString(ccwd);
         }
+
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+
+
+        compiler.setErrorList(SaxonCException.errorList);
+
 
         return compiler.compilePackage(xslSource);
     }
@@ -211,7 +214,7 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Produce a representation of the compiled stylesheet and save to file, in XML form, suitable for
      * distribution and reloading.
-     * @param executable
+     * @param executableRef
      * @param filename
      */
     @CEntryPoint(name = "j_save", exceptionHandler = SaxonCExceptionLongHandler.class)
@@ -266,7 +269,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         }
         XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
         compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = null;
         try {
@@ -287,7 +290,7 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Compile package from Xdm node and save resulting sef to file store.
      *
-     * @param cwd      - current working directory
+     * @param ccwd      - current working directory
      * @param obj      -
      * @param filename - the file to which the compiled package should be saved
      */
@@ -299,8 +302,12 @@ public class Xslt30Processor extends SaxonCAPI {
             //TODO throw exception
             return SaxonCAPI.STATUS_FAIL;
         }
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd =   CTypeConversion.toJavaString(ccwd);
+        }
         XsltCompiler compiler = processor.newXsltCompiler();
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
         XdmNode node = objectHandles.get(xdmNodeRef);
         if (node == null) {
             SaxonApiException ex = new SaxonApiException("Failed to create Stylesheet from XdoNode");
@@ -308,10 +315,7 @@ public class Xslt30Processor extends SaxonCAPI {
         }
         compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = compiler.compilePackage(node.asSource());
-        String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
-        }
+
         String filename = CTypeConversion.toJavaString(cfilename);
 
         if(pack != null) {
@@ -331,15 +335,16 @@ public class Xslt30Processor extends SaxonCAPI {
 
             Processor processor = xslt30Processor.getProcessor();
             XsltCompiler compiler = processor.newXsltCompiler();
-            setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
-            boolean jit = CTypeConversion.toBoolean(cjit);
-            if (jit) {
-                compiler.setJustInTimeCompilation(jit);
-            }
             String cwd = null;
             if(ccwd != WordFactory.nullPointer()) {
                 cwd =   CTypeConversion.toJavaString(ccwd);
             }
+            setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
+            boolean jit = CTypeConversion.toBoolean(cjit);
+            if (jit) {
+                compiler.setJustInTimeCompilation(jit);
+            }
+
             if(filename == WordFactory.nullPointer()) {
                 throw new SaxonApiException("XSL filename is NULL");
             }
@@ -377,17 +382,18 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
         XsltCompiler compiler = processor.newXsltCompiler();
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd =   CTypeConversion.toJavaString(ccwd);
+        }
 
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
         boolean jit = CTypeConversion.toBoolean(cjit);
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
         }
         XsltExecutable executable = null;
-        String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
-        }
+
         if(cfilename == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
@@ -421,17 +427,18 @@ public class Xslt30Processor extends SaxonCAPI {
     public static long compileFromString(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer stylesheet, int cjit , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd =   CTypeConversion.toJavaString(ccwd);
+        }
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
 
         boolean jit = CTypeConversion.toBoolean(cjit);
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
         }
         Source source;
-        String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   CTypeConversion.toJavaString(ccwd);
-        }
+
         if(stylesheet == WordFactory.nullPointer()) {
             throw new SaxonApiException("XSL filename is NULL");
         }
@@ -468,7 +475,12 @@ public class Xslt30Processor extends SaxonCAPI {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         XsltCompiler compiler = xslt30Processor.getProcessor().newXsltCompiler();
 
-        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd =   CTypeConversion.toJavaString(ccwd);
+        }
+
+        setStaticParametersFromArray(compiler, cwd, processorDataAccumulatorRef);
         boolean jit = CTypeConversion.toBoolean(cjit);
         if (jit) {
             compiler.setJustInTimeCompilation(jit);
@@ -491,8 +503,9 @@ public class Xslt30Processor extends SaxonCAPI {
 
     }
 
-    private static void setStaticParametersFromArray(XsltCompiler compiler, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    private static void setStaticParametersFromArray(XsltCompiler compiler, String cwd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         ProcessorDataAccumulator processorDataAccumulator = null;
+        Processor processor = compiler.getProcessor();
         if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
             processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
         }  else {
@@ -541,6 +554,19 @@ public class Xslt30Processor extends SaxonCAPI {
                     if(value.equals("1")) {
                         compiler.setFastCompilation(true);
                     }
+                } else if(sparams[i].equals("importPack:")) {
+                    ProcessorDataAccumulator packageValue = (ProcessorDataAccumulator) values[i];
+
+                    String [] packageFileNames = packageValue.getParameterNames();
+
+                    for(int z = 0 ; z < packageFileNames.length; z++) {
+                        Source source = resolveFileToSource(processor, cwd, packageFileNames[z], ResourceRequest.XSLT_NATURE);
+                        XsltPackage pack = compiler.loadLibraryPackage(source);
+                        compiler.importPackage(pack);
+                    }
+
+
+
                 }
             }
 

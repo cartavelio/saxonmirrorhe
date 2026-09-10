@@ -249,6 +249,17 @@ public:
   XdmValue *transformFileToValue(const char *sourcefile,
                                  const char *stylesheetfile);
 
+
+  //! Import a library package.
+  /**
+  * Calling this method makes the supplied package available for reference
+  * in the <code>xsl:use-package</code> declarations of subsequent compilations performed using this
+  * <code>Xslt30Processor</code>.
+  * @param packageFile - the sef file name of the package to be imported. File name resolved against the cwd
+  * which is set using the <code>setcwd</code>
+  */
+  void importPackage(const char *packageFile);
+
   //! compile a stylesheet file.
   /**
    * Note: the term "compile" here indicates that the stylesheet is converted
@@ -393,6 +404,7 @@ private:
 
   SaxonProcessor *proc; /*!< Pointer to SaxonProcessor object*/
   int64_t cppXT;
+  int64_t importPackageValue;
   std::string cwdXT;   /*!< current working directory */
   bool jitCompilation; /*!< Just-In=Time compilation flag*/
   std::map<std::string, XdmValue *>

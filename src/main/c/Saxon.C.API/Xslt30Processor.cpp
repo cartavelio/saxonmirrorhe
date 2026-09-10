@@ -32,6 +32,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *p, std::string curr) {
     return;
   }
   jitCompilation = false;
+  importPackageValue = -1;
   exception = nullptr;
   cppXT = createXslt30WithProcessor(SaxonProcessor::sxn_environ->thread,
                                     (void *)proc->procRef);
@@ -69,6 +70,7 @@ Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
 
   cppXT = other.cppXT;
   cwdXT = other.cwdXT;
+  importPackageValue = other.importPackageValue;
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
   while (paramIter != other.parameters.end()) {
@@ -239,6 +241,23 @@ void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
   }
 }
 
+
+void Xslt30Processor::importPackage(const char *packageFile){
+
+    if(packageFile == nullptr) {
+        throw SaxonApiException("ImportPackage file name is NULL");
+    }
+
+    if(importPackageValue == -1) {
+        importPackageValue = createProcessorData(SaxonProcessor::sxn_environ->thread);
+    }
+    
+    addProcessorProperty(SaxonProcessor::sxn_environ->thread, (void *)importPackageValue, (char *) packageFile);
+
+
+
+}
+
 void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
                                              const char *filename) {
   proc->attachCurrentThread();
@@ -265,8 +284,23 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr) {
   if (stylesheetStr == nullptr) {
     throw SaxonApiException("XSL string is null");
   }
+  
+  int addition = 0;  
+  if(importPackageValue > -1) {
+        addition += 1;
+  }
+
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      
+  if(importPackageValue > -1) {
+  
+      std::string packageOptionStr = "importPack:";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (void *)processorDataRef, (char *)packageOptionStr.c_str(),
+                           (void *)importPackageValue);
+    
+  }      
 
   int64_t objRef = j_compileFromString(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(),
@@ -291,8 +325,23 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
   if (node == nullptr) {
     throw SaxonApiException("XSL node is null");
   }
+  
+  int addition = 0;  
+  if(importPackageValue > -1) {
+        addition += 1;
+  }
+    
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      
+  if(importPackageValue > -1) {
+  
+      std::string packageOptionStr = "importPack:";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (void *)processorDataRef, (char *)packageOptionStr.c_str(),
+                           (void *)importPackageValue);    
+  }  
+        
   int64_t objRef = j_compileFromXdmNode(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (void *)node->getUnderlyingValue(), (int)jitCompilation,
@@ -316,8 +365,23 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
   if (source == nullptr) {
     throw SaxonApiException("XSL filename is null");
   }
+  
+  int addition = 0;  
+  if(importPackageValue > -1) {
+        addition += 1;
+  }
+    
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      
+  if(importPackageValue > -1) {
+  
+      std::string packageOptionStr = "importPack:";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (void *)processorDataRef, (char *)packageOptionStr.c_str(),
+                           (void *)importPackageValue);    
+  }     
+            
   int64_t objRef = j_compileFromAssociatedFile(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)source, (int)jitCompilation,
@@ -336,8 +400,23 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
   if (stylesheet == nullptr) {
     throw SaxonApiException("XSL filename is null");
   }
+  
+  int addition = 0;  
+  if(importPackageValue > -1) {
+        addition += 1;
+  }
+    
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      
+  if(importPackageValue > -1) {
+  
+      std::string packageOptionStr = "importPack:";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (void *)processorDataRef, (char *)packageOptionStr.c_str(),
+                           (void *)importPackageValue);    
+  } 
+        
   int64_t objRef = j_compileFromFile(
       SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheet, (int)jitCompilation,
@@ -362,10 +441,23 @@ XdmValue *Xslt30Processor::transformFileToValue(const char *sourcefile,
   proc->attachCurrentThread();
 
   if (sourcefile == nullptr && stylesheetfile == nullptr) {
-    throw SaxonApiException("Found null file name");
+    throw SaxonApiException("Found null file name");          
   }
+  int addition = 0;  
+  if(importPackageValue > -1) {
+        addition += 1;
+  }  
+  
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      
+  if(importPackageValue > -1) {
+  
+      std::string packageOptionStr = "importPack:";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (void *)processorDataRef, (char *)packageOptionStr.c_str(),
+                           (void *)importPackageValue);    
+  }       
 
   int64_t result = j_transformToValue(
       SaxonProcessor::sxn_environ->thread, (char *)cwdXT.c_str(), (void *)cppXT,
@@ -398,8 +490,23 @@ void Xslt30Processor::transformFileToFile(const char *source,
   if (stylesheet == nullptr) {
     throw SaxonApiException("Error: stylesheet has not been set.");
   }
+  
+  int addition = 0;  
+  if(importPackageValue > -1) {
+        addition += 1;
+  }
+      
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      
+  if(importPackageValue > -1) {
+  
+      std::string packageOptionStr = "importPack:";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (void *)processorDataRef, (char *)packageOptionStr.c_str(),
+                           (void *)importPackageValue);    
+  } 
+        
   long status = j_transformToFile(
       SaxonProcessor::sxn_environ->thread, (char *)cwdXT.c_str(), (void *)cppXT,
       (void *)nullptr, (char *)source, (char *)stylesheet, (char *)outputfile,
@@ -429,8 +536,23 @@ const char *Xslt30Processor::transformFileToString(const char *source,
         "Error: nullptr file name found in transformFileToString.");
   }
   allocFn fn = operator new;
+  
+  int addition = 0;  
+  if(importPackageValue > -1) {
+        addition += 1;
+  }
+    
   int64_t processorDataRef =
-      SaxonProcessor::createParameterJArray(parameters, properties);
+      SaxonProcessor::createParameterJArray(parameters, properties, addition);
+      
+  if(importPackageValue > -1) {
+  
+      std::string packageOptionStr = "importPack:";
+      addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
+                           (void *)processorDataRef, (char *)packageOptionStr.c_str(),
+                           (void *)importPackageValue);    
+  } 
+        
   char *result = j_transformToString(
       SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXT.c_str(),
       (void *)cppXT, (void *)nullptr, (char *)source, (char *)stylesheet,
