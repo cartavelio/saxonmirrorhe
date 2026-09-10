@@ -353,9 +353,16 @@ public class MessageInstr extends Instruction {
                 NodeInfo content = builder.getCurrentRoot();
                 Message message = expr.makeMessage(abort, errorCode, content);
                 controller.getMessageHandler().accept(message);
+                // Allow the message handler to indicate that the message is to be treated as fatal
+                String reason = "";
+                if (!abort && message.isTerminate()) {
+                    abort = true;
+                    reason = "user-written message handler for ";
+                }
+                abort |= message.isTerminate();
                 if (abort) {
                     TerminationException te = new TerminationException(
-                            "Processing terminated by " + StandardDiagnostics.getInstructionNameDefault(expr) +
+                            "Processing terminated by " + reason + StandardDiagnostics.getInstructionNameDefault(expr) +
                                     " at line " + expr.getLocation().getLineNumber() +
                                     " in " + StandardDiagnostics.abbreviateLocationURIDefault(expr.getLocation().getSystemId()));
                     te.setLocation(expr.getLocation());

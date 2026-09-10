@@ -21,7 +21,7 @@ public class Message {
 
     private final XdmNode _content;
     private final QName _errorCode;
-    private final boolean _terminate;
+    private boolean _terminate;
     private final Location _location;
 
     /**
@@ -81,6 +81,18 @@ public class Message {
 
     public QName getErrorCode() {
         return _errorCode;
+    }
+
+    /**
+     * Indicate that the message is to be treated as terminal (causing the transformation to fail).
+     * A user-written message handler can call this method to indicate that Saxon should treat
+     * the message as if {@code terminate=yes} had been specified in the {@code xsl:message}
+     * instruction. The effect is that the {@code xsl:message} instruction fails with a dynamic
+     * error; note that the stylesheet can catch this error using {@code xsl:catch}.
+     */
+
+    public void raiseDynamicError() {
+        _terminate = true;
     }
 
     /**
