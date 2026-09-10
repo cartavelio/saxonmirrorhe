@@ -1710,6 +1710,19 @@ def testMapOperations2(saxonproc):
         assert map.map_size == 3
 
 
+def testMapOperationsWithStrings(saxonproc):
+
+    mymap = {'a':"2", "b": saxonproc.make_integer_value(2)}
+
+    xdmdict = create_xdm_dict(saxonproc, mymap)
+    map =saxonproc.make_map(xdmdict)
+    assert map is not None
+    print(map.values())
+    assert map.map_size == 2
+
+    assert map.get('a').head.get_string_value() is "2"
+
+
 def testMapOperations3(saxonproc):
 
         thisdict = {"a":1, "b":2,"c":5}
