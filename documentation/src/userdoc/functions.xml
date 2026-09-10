@@ -3252,34 +3252,33 @@
         <ul>
           <li class="javaonly">
             <p>For Java: </p>
+            <ul>
+              <li>
+                <code>'d': Pattern.UNIX_LINES</code>
+              </li>
+              <li>
+                <code>'m': Pattern.MULTILINE</code>
+              </li>
+              <li>
+                <code>'i': Pattern.CASE_INSENSITIVE</code>
+              </li>
+              <li>
+                <code>'s': Pattern.DOTALL</code>
+              </li>
+              <li>
+                <code>'x': Pattern.COMMENTS</code>
+              </li>
+              <li>
+                <code>'u': Pattern.UNICODE_CASE</code>
+              </li>
+              <li>
+                <code>'q': Pattern.LITERAL</code>
+              </li>
+              <li>
+                <code>'c': Pattern.CANON_EQ</code>
+              </li>
+            </ul>
           </li>
-          <ul>
-            <li>
-              <code>'d': Pattern.UNIX_LINES</code>
-            </li>
-            <li>
-              <code>'m': Pattern.MULTILINE</code>
-            </li>
-            <li>
-              <code>'i': Pattern.CASE_INSENSITIVE</code>
-            </li>
-            <li>
-              <code>'s': Pattern.DOTALL</code>
-            </li>
-            <li>
-              <code>'x': Pattern.COMMENTS</code>
-            </li>
-            <li>
-              <code>'u': Pattern.UNICODE_CASE</code>
-            </li>
-            <li>
-              <code>'q': Pattern.LITERAL</code>
-            </li>
-            <li>
-              <code>'c': Pattern.CANON_EQ</code>
-            </li>
-          </ul>
-
           <li class="csonly">
             <p>For .NET: </p>
             <ul>
@@ -4383,7 +4382,7 @@
           example <code>round(-0.125e0, 2)</code> returned <code>-0.13</code> rather than
             <code>-0.12</code>.</p>
         <p>XPath 4.0 introduces a 3-argument form of this function in which the rounding mode can be
-          specified explicitly. This is implemented in Saxon 12.6 and Saxon 13.0; for details see
+          specified explicitly. This is implemented since Saxon 12.6; for details see
           the XPath 4.0 specification.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
