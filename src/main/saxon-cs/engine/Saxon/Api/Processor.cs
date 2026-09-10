@@ -182,6 +182,22 @@ namespace Saxon.Api {
 
             }
         }
+        
+        /// <summary>
+        /// Creates a new <c>XsdCompiler</c> for this <c>Processor</c>. 
+        /// </summary>
+
+        public XsdCompiler NewXsdCompiler()
+        {
+            {
+#if EE
+                return new Saxon.Api.Support.XsdCompilerEE(this, JProcessor.newXsdCompiler());
+#else
+                return null;
+#endif
+
+            }
+        }
 
         // /// <summary>
         // /// An <c>XmlResolver</c>, which will be used while compiling and running queries, 

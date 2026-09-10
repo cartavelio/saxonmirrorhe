@@ -114,9 +114,9 @@ namespace Saxon.Api {
             set {
                 validation = value;
                 if (value is SchemaValidationMode.Strict or SchemaValidationMode.Lax) {
-                    schemaValidator = processor.SchemaManager.NewSchemaValidator();
+                    //schemaValidator = processor.SchemaManager.NewSchemaValidator();
                     schemaValidator.Lax = value == SchemaValidationMode.Lax;
-                    s9Builder.setSchemaValidator(schemaValidator.UnderlyingSchemaValidator);
+                    //s9Builder.setSchemaValidator(schemaValidator.UnderlyingSchemaValidator);
                 }
             }
         }

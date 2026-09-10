@@ -241,7 +241,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public SchemaValidator NewSchemaValidator() {
-            return new (s9schemaManager.newSchemaValidator(), processor);
+            return null; // TODO: for now
+            //return new (s9schemaManager.newSchemaValidator(), processor);
         }
 
         /// <summary>

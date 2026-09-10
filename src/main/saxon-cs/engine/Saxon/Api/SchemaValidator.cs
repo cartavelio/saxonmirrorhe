@@ -16,8 +16,8 @@ using Saxon.Api.Support;
 namespace Saxon.Api {
     /// <summary>
     /// A <c>SchemaValidator</c> is an object that is used for validating instance documents
-    /// against a schema. The schema consists of the collection of schema components that are
-    /// available within the schema cache maintained by the <c>SchemaManager</c>, together with
+    /// against a schema. The schema is an <c>XsdSchema</c> object, typically obtained using
+    /// an <c>XsdCompiler</c>, together with
     /// any additional schema components located during the course of validation by means of an
     /// <c>xsl:schemaLocation</c> or <c>xsi:noNamespaceSchemaLocation</c> attribute within the
     /// instance document.
@@ -44,16 +44,7 @@ namespace Saxon.Api {
     /// well-formed XML, or not existing.</para>
     /// </remarks>    
     [Serializable]
-    public class SchemaValidator : IDestination {
-        private Configuration config;
-        private List<Source> sources = new();
-
-        // internal constructor
-
-        internal SchemaValidator(Saxon.Hej.s9api.SchemaValidator validator, Processor processor) {
-            this.UnderlyingSchemaValidator = validator;
-            this.config = processor.Implementation;
-        }
+    public abstract class SchemaValidator : IDestination {
 
         /// <summary>
         /// The validation mode may be either strict or lax. The default is strict;
@@ -62,9 +53,9 @@ namespace Saxon.Api {
         /// validation, the absence of an element declaration results in the content being considered valid.
         /// </summary>
 
-        public bool Lax {
-            get => UnderlyingSchemaValidator.isLax();
-            set => UnderlyingSchemaValidator.setLax(value);
+        public abstract bool Lax {
+            get;
+            set;
         }
 
         /// <summary>
@@ -73,33 +64,31 @@ namespace Saxon.Api {
         /// attributes encountered in the instance document. The default value is true.
         /// </summary>
 
-        public bool UseXsiSchemaLocation {
-            get => UnderlyingSchemaValidator.isUseXsiSchemaLocation();
-            set => UnderlyingSchemaValidator.setUseXsiSchemaLocation(value);
+        public abstract bool UseXsiSchemaLocation {
+            get;
+            set;
         }
 
 
         /// <summary>Set the validation reporting feature, which saves the validation errors in an XML file</summary>
         /// <param name="destination"> destination where XML will be sent</param>
-        public void SetValidityReporting(IDestination destination) {
-            UnderlyingSchemaValidator.setValidityReporting(destination.UnderlyingDestination);
-        }
+        public abstract void SetValidityReporting(IDestination destination);
         
         /// <summary>Set the <c>InvalidityHandler</c> to be used when validating instance documents;
         /// the invalidity handler is called once at the start of validation, once for each
         /// validation failure, and once at the end.</summary>
-        public IInvalidityHandler InvalidityHandler {
-            set => UnderlyingSchemaValidator.setInvalidityHandler(new InvalidityHandlerWrapper(value));
+        public abstract IInvalidityHandler InvalidityHandler {
+            set;
         }
-        
+
         /// <summary>Set the <c>InvalidityListener</c> to be used when validating instance documents;
         /// this is a simple delegate callback which is called once for each validation failure.</summary>
         /// <remarks>Previous versions of this API allowed validation failures to be gathered
         /// in a user-supplied list. This effect can be achieved by declaring <c>List&lt;ValidationFailure> ErrorList</c>
         /// and setting the <c>InvalidityListener</c> property to <c>ErrorList.Add</c>.</remarks> 
-        
-        public Action<ValidationFailure> InvalidityListener {
-            set => InvalidityHandler = new InvalidityDelegate(value);
+
+        public abstract Action<ValidationFailure> InvalidityListener {
+            set;
         }
 
         /// <summary>
@@ -108,41 +97,33 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="source">Source document supplied as a <c>Stream</c></param>
         /// <param name="baseUri">Base URI of the source document</param>
-        public void AddSource(Stream source, Uri baseUri) {
-            sources.Add(new StreamSource(source, baseUri.ToString()));
-        }
-        
+        public abstract void AddSource(Stream source, Uri baseUri);
+
         /// <summary>
         /// Add an instance document to the list of documents to be validated by a subsequent call
         /// on <c>ValidateMultipleDocuments</c>. The base URI is taken as the current working
         /// directory.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>Stream</c></param>
-        
-        public void AddSource(Stream source) {
-            AddSource(source, new Uri(Environment.CurrentDirectory));
-        }
-        
+
+        public abstract void AddSource(Stream source);
+
         /// <summary>
         /// Add an instance document to the list of documents to be validated by a subsequent call
         /// on <c>ValidateMultipleDocuments</c>.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>TextReader</c></param>
         /// <param name="baseUri">Base URI of the source document</param>
-        public void AddSource(TextReader source, Uri baseUri) {
-            sources.Add(new StreamSource(source, baseUri.ToString()));
-        }
-        
+        public abstract void AddSource(TextReader source, Uri baseUri);
+
         /// <summary>
         /// Add an instance document to the list of documents to be validated by a subsequent call
         /// on <c>ValidateMultipleDocuments</c>. The base URI is taken as the current working
         /// directory.
         /// </summary>
         /// <param name="source">Source document supplied as a <c>TextReader</c></param>
-        
-        public void AddSource(TextReader source) {
-            AddSource(source, new Uri(Environment.CurrentDirectory));
-        }
+
+        public abstract void AddSource(TextReader source);
 
         /// <summary>
         /// Add an instance document to the list of documents to be validated by a subsequent call
@@ -150,12 +131,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="uri">URI of the source document</param>
         /// 
-        public void AddSource(Uri uri) {
-            StreamSource ss = new StreamSource(uri.ToString());
-            AugmentedSource aug = AugmentedSource.makeAugmentedSource(ss);
-            aug.setPleaseCloseAfterUse(true);
-            sources.Add(aug);
-        }
+        public abstract void AddSource(Uri uri);
 
         /// <summary>
         /// Add an instance document to the list of documents to be validated by a subsequent call
@@ -163,25 +139,14 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="reader">Source document supplied as an <c>XmlReader</c></param>
         /// 
-        public void AddSource(XmlReader reader) {
-            PullProvider pp = new DotNetPullProvider(reader);
-            PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setUseXsiSchemaLocation(UnderlyingSchemaValidator.isUseXsiSchemaLocation());
-            pp.setPipelineConfiguration(pipe);
-            // pp = new PullTracer(pp);  /* diagnostics */
-            PullSource pSource = new PullSource(pp);
-            pSource.setSystemId(reader.BaseURI);
-            sources.Add(pSource);
-        }
+        public abstract void AddSource(XmlReader reader);
 
         /// <summary>
         /// Add an instance document to the list of documents to be validated  by a subsequent call
         /// on <c>ValidateMultipleDocuments</c>.
         /// </summary>
         /// <param name="source">Source document supplied as an <c>XdmNode</c> value</param>
-        public void AddSource(XdmNode source) {
-            sources.Add(((NodeInfo) source.value).asActiveSource());
-        }
+        public abstract void AddSource(XdmNode source);
 
         /// <summary>
         /// Validate an instance document supplied in the form of a <c>Stream</c>
@@ -192,10 +157,8 @@ namespace Saxon.Api {
         /// caller.</param>
         /// <param name="baseUri">The base URI to be used for resolving any relative
         /// references, for example a reference to an <c>xsi:schemaLocation</c></param>                  
-        public void Validate(Stream source, Uri baseUri) {
-            UnderlyingSchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
-        }
-        
+        public abstract void Validate(Stream source, Uri baseUri);
+
         /// <summary>
         /// Validate an instance document supplied in the form of a <c>Stream</c>.
         /// The base Uri of the document is taken as the current working directory.
@@ -205,10 +168,8 @@ namespace Saxon.Api {
         /// but it will not be closed after use: that is the responsibility of the
         /// caller.</param>
         /// 
-        public void Validate(Stream source) {
-            Validate(source, new Uri(Environment.CurrentDirectory));
-        }
-        
+        public abstract void Validate(Stream source);
+
         /// <summary>
         /// Validate an instance document supplied in the form of a <c>TextReader</c>
         /// </summary>
@@ -218,10 +179,8 @@ namespace Saxon.Api {
         /// caller.</param>
         /// <param name="baseUri">The base URI to be used for resolving any relative
         /// references, for example a reference to an <c>xsi:schemaLocation</c></param>                  
-        public void Validate(TextReader source, Uri baseUri) {
-            UnderlyingSchemaValidator.validate(new StreamSource(source, baseUri.ToString()));
-        }
-        
+        public abstract void Validate(TextReader source, Uri baseUri);
+
         /// <summary>
         /// Validate an instance document supplied in the form of a <c>TextReader</c>.
         /// The base Uri of the document is taken as the current working directory.
@@ -230,21 +189,14 @@ namespace Saxon.Api {
         /// and validated. This reader will be consumed by the validation process,
         /// but it will not be closed after use: that is the responsibility of the
         /// caller.</param>
-                 
-        public void Validate(TextReader source) {
-            Validate(source, new Uri(Environment.CurrentDirectory));
-        }
+
+        public abstract void Validate(TextReader source);
 
         /// <summary>
         /// Validate an instance document, supplied in the form of a <c>Uri</c> reference
         /// </summary>
         /// <param name="uri">URI of the document to be validated</param>                  
-        public void Validate(Uri uri) {
-            StreamSource ss = new StreamSource(uri.ToString());
-            AugmentedSource aug = AugmentedSource.makeAugmentedSource(ss);
-            aug.setPleaseCloseAfterUse(true);
-            UnderlyingSchemaValidator.validate(aug);
-        }
+        public abstract void Validate(Uri uri);
 
         /// <summary>
         /// Validate an instance document, supplied in the form of an <c>XmlReader</c>.
@@ -259,16 +211,8 @@ namespace Saxon.Api {
         /// </param>
         /// <exception cref="SaxonApiException">Throws an exception if the document is found to be
         /// invalid (and also on other conditions like a failure to read the source document)</exception>
-        public void Validate(XmlReader reader) {
-            PullProvider pp = new DotNetPullProvider(reader);
-            PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setUseXsiSchemaLocation(UnderlyingSchemaValidator.isUseXsiSchemaLocation());
-            pp.setPipelineConfiguration(pipe);
-            // pp = new PullTracer(pp);  /* diagnostics */
-            PullSource psource = new PullSource(pp);
-            psource.setSystemId(reader.BaseURI);
-            UnderlyingSchemaValidator.validate(psource);
-        }
+        
+        public abstract void Validate(XmlReader reader);
 
         /// <summary>
         /// Validate an instance document, supplied in the form of an <c>XdmNode</c>.
@@ -285,9 +229,8 @@ namespace Saxon.Api {
         /// to be validated</param>
         /// <exception cref="SaxonApiException">Throws an exception if the document is found to be
         /// invalid (and also on other conditions like a failure to read the source document)</exception> 
-        public void Validate(XdmNode source) {
-            UnderlyingSchemaValidator.validate(((NodeInfo) source.value).asActiveSource());
-        }
+
+        public abstract void Validate(XdmNode source);
 
         /// <summary>
         /// Supply the destination to hold the validated document. If no destination
@@ -303,42 +246,39 @@ namespace Saxon.Api {
         /// <param name="destination">
         /// The destination to hold the validated document.
         /// </param>
-        public void SetDestination(IDestination destination) {
-            UnderlyingSchemaValidator.setDestination(destination.UnderlyingDestination);
-        }
+        public abstract void SetDestination(IDestination destination);
 
         /// <summary>
         /// Close the destination, allowing resources to be released. Saxon calls this method
         /// when it has finished writing to the destination
         /// </summary>
-        public void Close() {
-            UnderlyingSchemaValidator.close();
-        }
-
+        /// 
+        public abstract void Close();
 
         /// <summary>
         /// The name of the required top-level element of the document to be validated (that is, the
         /// name of the outermost element of the document).
         /// If no value is supplied, there is no constraint on the required element name.
         /// </summary>
-        public QName DocumentElementName {
-            get => UnderlyingSchemaValidator.getDocumentElementName();
-            set => UnderlyingSchemaValidator.setDocumentElementName(value);
+        /// 
+        public abstract QName DocumentElementName {
+            get;
+            set;
         }
-
 
         /// <summary>
         /// The name of the required type of the top-level element of the document to be validated.
         /// QName of the name of the required type of the document element, or null if no value has been set.
         /// If no value is supplied, there is no constraint on the required type
         /// </summary>
-        public QName DocumentElementTypeName {
-            get => UnderlyingSchemaValidator.getDocumentElementTypeName();
-            set => UnderlyingSchemaValidator.setDocumentElementTypeName(value);
+       
+        public abstract QName DocumentElementTypeName {
+            get;
+            set;
         }
         
 
-        internal Saxon.Hej.s9api.SchemaValidator UnderlyingSchemaValidator { get; }
+        internal abstract Saxon.Hej.s9api.SchemaValidator UnderlyingSchemaValidator { get; }
 
 
         /// <summary>
@@ -346,9 +286,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="name">the name of the schema parameter, as a QName</param>
         /// <param name="value">the value of the schema  parameter, or null to clear a previously set value</param>
-        public void SetParameter(QName name, XdmValue value) {
-            UnderlyingSchemaValidator.setParameter(name, value);
-        }
+        
+        public abstract void SetParameter(QName name, XdmValue value);
 
 
         /// <summary>
@@ -357,9 +296,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="name">the parameter whose name is required</param>
         /// <returns>the value that has been set for the parameter, or the EmptySequence if no value has been set</returns>
-        public XdmValue GetParameter(QName name) {
-            return UnderlyingSchemaValidator.getParameter(name);
-        }
+        
+        public abstract XdmValue GetParameter(QName name);
 
 
         /// <summary>
@@ -367,9 +305,10 @@ namespace Saxon.Api {
         /// (by default, fixed and default attribute values are expanded, that is, they are inserted) into
         /// the document during validation as if they were present in the instance being validated)
         /// </summary>
-        public bool ExpendAttributeDefaults {
-            get => UnderlyingSchemaValidator.isExpandAttributeDefaults();
-            set => UnderlyingSchemaValidator.setExpandAttributeDefaults(value);
+        /// 
+        public abstract bool ExpandAttributeDefaults {
+            get;
+            set;
         }
 
         /// <summary>
@@ -390,10 +329,9 @@ namespace Saxon.Api {
         /// can therefore be useful even when there is only one document to be validated,
         /// to avoid the exception condition.)</para>
         /// </remarks>
-        public void ValidateMultipleDocuments() {
-            UnderlyingSchemaValidator.validateMultiple(sources);
-        }
-        
+        /// 
+        public abstract void ValidateMultipleDocuments();
+
         /// <summary>
         /// The underlying <c>Saxon.Hej.s9api.Destination</c> object in the Saxon implementation.
         /// Note that this property represents the schema validator itself as the destination of
@@ -412,17 +350,17 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <value>The underlying Destination object</value>
-        public Saxon.Hej.s9api.Destination UnderlyingDestination => UnderlyingSchemaValidator;
-        
+        public abstract Saxon.Hej.s9api.Destination UnderlyingDestination {
+            get;
+        }
+
         /// <summary>
         /// Define an action to be performed when writing to the Destination is complete.
         /// </summary>
         /// <param name="action">The action to be performed.</param>
-        public void OnClose(System.Action action) {
-            UnderlyingSchemaValidator.onClose(action.Invoke);
-        }
+        public abstract void OnClose(System.Action action);
 
     }
 }
 
-// Copyright (c) 2021 - 2023 Saxonica Limited
+// Copyright (c) 2021 - 2024 Saxonica Limited
