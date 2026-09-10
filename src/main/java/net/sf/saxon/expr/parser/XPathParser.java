@@ -914,20 +914,15 @@ public class XPathParser {
                 case Token.CAST_AS:
                 case Token.CASTABLE_AS:
                     nextToken();
+                    boolean leftParenFollows = t.peekAhead() == Token.LPAREN;
                     CastingTarget at;
-                    if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("union")) {
-                        // Saxon 9.8 / XPath 4.0 proposed extension
-                        // TODO: this syntax is obsolete; drop it
-                        at = (CastingTarget) parseItemType();
-                    } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
-                        //XPath 4.0 extension
-                        at = (CastingTarget) parseItemType();
-                    } else if (allowXPath40Syntax && t.currentToken == Token.LPAREN) {
-                        ItemType target = parseItemType();
-                        if (target instanceof CastingTarget) {
-                            at = (CastingTarget)target;
+                    if (allowXPath40Syntax &&
+                            (t.currentToken == Token.LPAREN || (leftParenFollows && t.currentToken == Token.NAME))) {
+                        ItemType type = parseItemType();
+                        if (type instanceof CastingTarget) {
+                            at = (CastingTarget)type;
                         } else {
-                            grumble("Item type " + target + " cannot be used as the target of a cast/castable expression", "XPST0080");
+                            grumble("Item type " + type + " cannot be used as the target of a cast/castable expression", "XPST0080");
                             return null;
                         }
                     } else {
