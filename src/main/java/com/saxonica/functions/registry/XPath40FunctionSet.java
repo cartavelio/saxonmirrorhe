@@ -211,6 +211,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
+        register("element-number", 0, 3, e -> e.populate(ElementNumber::new, BuiltInAtomicType.INTEGER, ONE, BASE)
+                .arg(0, NodeKindTest.ELEMENT, OPT, null)
+                .arg(1, ChoiceItemType.of(NodeKindTest.DOCUMENT, NodeKindTest.ELEMENT), OPT, null)
+                .arg(2, predicate2, OPT, null));
+
         register("ends-with", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, BooleanValue.TRUE)
