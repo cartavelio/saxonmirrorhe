@@ -372,7 +372,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
     }
 
     /**
-     * Insert _children before or after a given existing child
+     * Insert children before or after a given existing child
      *
      * @param source  the _children to be inserted. We allow any kind of text, comment, or processing instruction
      *                node, but element nodes must be instances of this NodeInfo implementation.

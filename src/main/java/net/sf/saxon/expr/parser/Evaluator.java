@@ -331,25 +331,29 @@ public abstract class Evaluator {
         public final static SHARED_APPEND INSTANCE = new SHARED_APPEND();
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
-            if (expr instanceof Block) {
-                Block block = (Block) expr;
-                Operand[] children = block.getOperanda();
-                ZenoSequence chain = new ZenoSequence();
-                for (Operand o : children) {
-                    Expression child = o.getChildExpression();
-                    if (Cardinality.allowsMany(child.getCardinality())) {
-                        chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
-                    } else {
-                        Item j = child.evaluateItem(context);
-                        if (j != null) {
-                            chain.append(j);
+            try {
+                if (expr instanceof Block) {
+                    Block block = (Block) expr;
+                    Operand[] children = block.getOperanda();
+                    ZenoSequence chain = new ZenoSequence();
+                    for (Operand o : children) {
+                        Expression child = o.getChildExpression();
+                        if (Cardinality.allowsMany(child.getCardinality())) {
+                            chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
+                        } else {
+                            Item j = child.evaluateItem(context);
+                            if (j != null) {
+                                chain.append(j);
+                            }
                         }
                     }
+                    return chain;
+                } else {
+                    // it's not a Block: it must have been rewritten after deciding to use this evaluation mode
+                    return SequenceTool.toGroundedValue(expr.iterate(context));
                 }
-                return chain;
-            } else {
-                // it's not a Block: it must have been rewritten after deciding to use this evaluation mode
-                return SequenceTool.toGroundedValue(expr.iterate(context));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
             }
         }
 

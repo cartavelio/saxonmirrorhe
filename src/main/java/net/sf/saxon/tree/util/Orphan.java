@@ -713,10 +713,11 @@ public final class Orphan implements MutableNodeInfo {
      * @param attType    the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
+     * @param inheritNamespaces
      */
 
     @Override
-    public void addAttribute(NodeName nameCode, SimpleType attType, String value, int properties) {
+    public void addAttribute(NodeName nameCode, SimpleType attType, String value, int properties, boolean inheritNamespaces) {
         // no action: node is not an element
     }
 
@@ -785,6 +786,7 @@ public final class Orphan implements MutableNodeInfo {
      * parent of the target attribute</p>
      *
      * @param newNameCode the namecode of the new name in the name pool
+     * @param inherit
      * @throws IllegalArgumentException if the new name code is not present in the name pool, or if
      *                                  it has a (prefix, uri) pair in which the
      *                                  prefix is the same as that of an existing in-scope namespace binding and the uri is different from that
@@ -792,7 +794,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     @Override
-    public void rename(NodeName newNameCode) {
+    public void rename(NodeName newNameCode, boolean inherit) {
         if (kind == Type.ATTRIBUTE || kind == Type.PROCESSING_INSTRUCTION) {
             nodeName = newNameCode;
         }
@@ -806,12 +808,13 @@ public final class Orphan implements MutableNodeInfo {
      *                added. If the target element already has a namespace binding with this (prefix, uri) pair, the call has
      *                no effect. If the target element currently has a namespace binding with this prefix and a different URI, an
      *                exception is raised.
+     * @param inherit
      * @throws IllegalArgumentException if the namespace code is not present in the namepool, or if the target
      *                                  element already has a namespace binding for this prefix
      */
 
     @Override
-    public void addNamespace(NamespaceBinding nscode) {
+    public void addNamespace(NamespaceBinding nscode, boolean inherit) {
         // no action: node is not an element
     }
 
