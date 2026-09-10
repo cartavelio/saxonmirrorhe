@@ -76,18 +76,17 @@ public class BuildURI extends URIFunctions {
         if (parts.get(PATH_SEGMENTS) != null) {
             GroundedValue value = parts.get(PATH_SEGMENTS);
             int pos = 0;
-            try (SequenceIterator iter = value.iterate()) {
-                GroundedValue svalue = iter.next();
-                while (svalue != null) {
-                    if (pos == 0) {
-                        uri.append(hierarchical ? encodePathSegment(svalue) : svalue.getStringValue());
-                    } else {
-                        uri.append(pathSeparator);
-                        uri.append(encodePathSegment(svalue));
-                    }
-                    pos = pos + 1;
-                    svalue = iter.next();
+            SequenceIterator iter = value.iterate();
+            GroundedValue svalue = iter.next();
+            while (svalue != null) {
+                if (pos == 0) {
+                    uri.append(hierarchical ? encodePathSegment(svalue) : svalue.getStringValue());
+                } else {
+                    uri.append(pathSeparator);
+                    uri.append(encodePathSegment(svalue));
                 }
+                pos = pos + 1;
+                svalue = iter.next();
             }
        } else if (parts.get(PATH) != null) {
             uri.append(parts.get(PATH).getStringValue());
@@ -96,28 +95,26 @@ public class BuildURI extends URIFunctions {
         if (parts.get(QUERY_PARAMETERS) != null) {
             String sep = "?";
             MapItem qmap = (MapItem) parts.get(QUERY_PARAMETERS).head();
-            try (SequenceIterator kiter = qmap.keys()) {
-                GroundedValue kvalue = kiter.next();
-                while (kvalue != null) {
-                    String key = kvalue.getStringValue();
-                    GroundedValue vvalue = qmap.get((AtomicValue) kvalue);
-                    try (SequenceIterator viter = vvalue.iterate()) {
-                        GroundedValue value = viter.next();
-                        while (value != null) {
-                            uri.append(sep);
-                            sep = querySeparator;
-                            if (key.isEmpty()) {
-                                uri.append(encodeOtherSegment(value));
-                            } else {
-                                uri.append(encodeOtherSegment(kvalue));
-                                uri.append("=");
-                                uri.append(encodeOtherSegment(value));
-                            }
-                            value = viter.next();
-                        }
+            SequenceIterator kiter = qmap.keys();
+            GroundedValue kvalue = kiter.next();
+            while (kvalue != null) {
+                String key = kvalue.getStringValue();
+                GroundedValue vvalue = qmap.get((AtomicValue) kvalue);
+                SequenceIterator viter = vvalue.iterate();
+                GroundedValue value = viter.next();
+                while (value != null) {
+                    uri.append(sep);
+                    sep = querySeparator;
+                    if (key.isEmpty()) {
+                        uri.append(encodeOtherSegment(value));
+                    } else {
+                        uri.append(encodeOtherSegment(kvalue));
+                        uri.append("=");
+                        uri.append(encodeOtherSegment(value));
                     }
-                    kvalue = kiter.next();
+                    value = viter.next();
                 }
+                kvalue = kiter.next();
             }
         } else if (parts.get(QUERY) != null) {
             uri.append("?").append(parts.get(QUERY).getStringValue());
