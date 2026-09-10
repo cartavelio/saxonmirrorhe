@@ -783,6 +783,10 @@ public class QT3TestDriverHE extends TestDriver {
                                 outcome.setException(new QName("XPST0075"));
                                 errorCollector.error(new XmlProcessingIncident(err.getMessage(), "XPST0075"));
                                 outcome.setErrorsReported(errorCollector.getErrorCodes());
+                            } catch (Exception err) {
+                                writeTestcaseElement(testCaseName, "fail", "Crashed");
+                                noteFailure(testSetName, testCaseName);
+                                throw err;
                             }
                             break;
                         }
