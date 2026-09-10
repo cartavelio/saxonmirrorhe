@@ -20,9 +20,19 @@
       <reason>Dynamic evaluation of fn:current#0 is not implemented.</reason>
    </exception>
    
-   <exception test-case="record-024 record-025" run="false" report="Not implemented">
-      <created by="Michael Kay" on="2023-11-02"/>
-      <reason>Coercion of record arguments is not implemented.</reason>
+   <exception test-case="sort-081b" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>xsl:sort does not yet allow composite sort keys (PR1674).</reason>
+   </exception>
+   
+   <exception test-case="error-1020b" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>xsl:sort does not yet allow composite sort keys (PR1674).</reason>
+   </exception>
+ 
+   <exception test-case="record-023" run="false" report="Not implemented">
+      <created by="Michael Kay" on="2026-01-30"/>
+      <reason>xsl:record-type is not implemented.</reason>
    </exception>
    
    <exception test-set="package-location" run="false" report="Not implemented">
