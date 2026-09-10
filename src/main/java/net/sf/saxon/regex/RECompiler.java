@@ -1273,35 +1273,6 @@ public class RECompiler {
 
         } else {
 
-            if (reFlags.isAllowWhitespace()) {
-                // 'x' flag is set. Preprocess the expression to strip whitespace, other than between
-                // square brackets
-                UnicodeBuilder sb = new UnicodeBuilder();
-                int nesting = 0;
-                boolean escaped = false;
-                IntIterator iter = pattern.codePoints();
-                while (iter.hasNext()) {
-                    int ch = iter.next();
-                    if (ch == '\\' && !escaped) {
-                        escaped = true;
-                        sb.append(ch);
-                    } else if (ch == '[' && !escaped) {
-                        nesting++;
-                        sb.append(ch);
-                    } else if (ch == ']' && !escaped) {
-                        nesting--;
-                        sb.append(ch);
-                    } else if (nesting == 0 && Whitespace.isWhite(ch)) {
-                        // no action
-                    } else {
-                        escaped = false;
-                        sb.append(ch);
-                    }
-                }
-                this.pattern = sb.toUnicodeString();
-                this.len = this.pattern.length32();
-            }
-
             if (reFlags.isAllowComments()) {
                 // 'c' flag is set (XPath 4.0). Preprocess the expression to strip comments
                 UnicodeBuilder sb = new UnicodeBuilder();
@@ -1331,9 +1302,40 @@ public class RECompiler {
                         sb.append(ch);
                     }
                 }
-                this.pattern = sb.toUnicodeString();
+                this.pattern = pattern = sb.toUnicodeString();
                 this.len = this.pattern.length32();
             }
+
+
+            if (reFlags.isAllowWhitespace()) {
+                // 'x' flag is set. Preprocess the expression to strip whitespace, other than between
+                // square brackets
+                UnicodeBuilder sb = new UnicodeBuilder();
+                int nesting = 0;
+                boolean escaped = false;
+                IntIterator iter = pattern.codePoints();
+                while (iter.hasNext()) {
+                    int ch = iter.next();
+                    if (ch == '\\' && !escaped) {
+                        escaped = true;
+                        sb.append(ch);
+                    } else if (ch == '[' && !escaped) {
+                        nesting++;
+                        sb.append(ch);
+                    } else if (ch == ']' && !escaped) {
+                        nesting--;
+                        sb.append(ch);
+                    } else if (nesting == 0 && Whitespace.isWhite(ch)) {
+                        // no action
+                    } else {
+                        escaped = false;
+                        sb.append(ch);
+                    }
+                }
+                this.pattern = pattern = sb.toUnicodeString();
+                this.len = this.pattern.length32();
+            }
+
 
             // Initialize pass by reference flags value
             int[] compilerFlags = {NODE_TOPLEVEL};

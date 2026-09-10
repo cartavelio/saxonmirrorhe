@@ -87,6 +87,13 @@ public class REFlags {
                     throw new RESyntaxException("Unrecognized flag '" + c + "'");
             }
         }
+        if (literal) {
+            // 'q' flag means that 'i', 'm', 'x', and 'c' are ignored
+            allowWhitespace = false;
+            allowComments = false;
+            multiLine = false;
+            singleLine = false;
+        }
         for (int i = semi + 1; i < flags.length(); i++) {
             char c = flags.charAt(i);
             switch (c) {
