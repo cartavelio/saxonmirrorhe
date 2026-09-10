@@ -634,16 +634,16 @@ public class QT3TestDriverHE extends TestDriver {
                         case "XQ": {
                             XQueryCompiler testXqc = env.xqueryCompiler;
                             testXqc.setLanguageVersion(langVersion);
-                            testXqc.declareNamespace("fn", NamespaceConstant.FN);
-                            testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
+                            //testXqc.declareNamespace("fn", NamespaceConstant.FN);
+                            //testXqc.declareNamespace("xs", NamespaceConstant.SCHEMA);
                             //testXqc.declareNamespace("math", NamespaceConstant.MATH);
-                            testXqc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
-                            testXqc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
+                            //testXqc.declareNamespace("map", NamespaceConstant.MAP_FUNCTIONS);
+                            //testXqc.declareNamespace("array", NamespaceConstant.ARRAY_FUNCTIONS);
                             ErrorCollector errorCollector = new ErrorCollector();
                             testXqc.setErrorReporter(errorCollector);
                             String decVars = env.paramDecimalDeclarations.toString();
                             if (!decVars.isEmpty()) {
-                                int x = exp.indexOf("(:%DECL%:)");
+                                int x = exp.indexOf("(:%DECL%:)");  // TODO: Mechanism no longer used?
                                 if (x < 0) {
                                     exp = decVars + exp;
                                 } else {
