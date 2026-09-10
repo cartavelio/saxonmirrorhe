@@ -37,15 +37,12 @@
    </ul>
    </div>
    
-   <div class="csonly">
-   <ul>
-      <li>
-         <p>On .NET, XPath processing is available via classes in the Saxon.Api namespace,
-            as described at <a
-               class="bodylink" href="dotnet-xpath">Evaluating XPath expressions from C#</a>.</p>
-      </li>
-   </ul>
-   </div>
+   <p class="csonly">On .NET, XPath processing is available via classes in the Saxon.Api namespace, as described at <a
+      class="bodylink" href="dotnet-xpath">Evaluating XPath expressions from C#</a>.</p>
+   
+   <p class="conly">For details about XPath processing from SaxonC, see <a class="bodylink"
+      href="https://www.saxonica.com/saxon-c/documentation12/#!using-xpath">Using XPath</a> in the SaxonC
+      documentation.</p>
    
    <p>Saxon allows XPath expressions to be evaluated either against its own native tree models of
       XML (the tiny tree and linked tree), or against trees built using external third-party libraries:</p>
@@ -163,13 +160,18 @@
       XPath expression returns an <code>xs:dateTime</code> value or a map or array derived from a JSON query. For these reasons, use of
       the JAXP API is discouraged.</p>
       
-      <p>The native Saxon APIs for Java, C++ and C# both have classes that represent the XDM data model more accurately. The
-      Java and C# implementations are essentially identical in structure so a single description will suffice for both.</p>
+      <p>The native Saxon APIs for Java, C# and C++ all have classes that represent the XDM data model more accurately. The
+         Java and C# implementations are essentially identical in structure so a single description will
+         suffice. The C++ implementation is different.</p>
       
-      <p>Values returned by XPath expressions are represented as instances of the
-         class <code java="net.sf.saxon.s9api.XdmValue">XdmValue</code> (<code
-                 cs="Saxon.Api.XdmValue">XdmValue</code> in C# and in SaxonC see: <a href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html"><code>XdmValue</code></a> for C++,
-         <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue"><code>PyXdmValue</code></a>).
+      <p>Values returned by XPath expressions are represented as instances of the <code>XdmValue</code>
+         class: <code java="net.sf.saxon.s9api.XdmValue">XdmValue</code> in Java, <code
+            cs="Saxon.Api.XdmValue">XdmValue</code> in C#, <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html">XdmValue</a> in C++,
+         <a href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmvalue"
+            class="bodylink code">XdmValue</a> in PHP,
+         <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue" class="bodylink
+            code">PyXdmValue</a> in Python.
          The <code>XdmValue</code> class is also used to supply parameters to stylesheets and transformations,
          and to return the results of XSLT or XQuery evaluation.</p>
       
@@ -185,23 +187,14 @@
       XdmExternalObject (an item that encapsulates a Java or .NET object)   
    XdmEmptySequence (a sequence containing no items)      
 ]]></samp>
-
-      <div class="conly"><p>For SaxonC the subclasses of <code>XdmValue</code> directly reflect the XDM model:</p><samp><![CDATA[XdmValue (any sequence)
-         XdmItem (any single item, that is, a sequence of length one)
-            XdmNode (any node)
-            XdmAtomicValue (any atomic value)
-            XdmFunctionItem (a function item)
-               XdmMap (a map)
-               XdmArray (an array)
-      ]]></samp>
-         <!-- TODO add XdmEmptySequence (a sequence containing no items) to SaxonC -->
-      </div>
+      
+      <p class="conly"><code>XdmExternalObject</code> and <code>XdmEmptySequence</code> are not available in SaxonC.</p>
       
       <p>These objects are generally immutable: at any rate, the API offers no methods to modify them. (It is possible
          to subvert this, for example by having an <code>XdmNode</code> that wraps a DOM node, and then modifying the DOM node: this
          is strongly discouraged.)</p>
       
-      <p>A variety of methods are provided to convert between these classes and "ordinary" Java or C# equivalents. For example:</p>
+      <p>A variety of methods are provided to convert between these classes and "ordinary" Java, C#, or C++ equivalents. For example:</p>
       <ul>
          <li class="javaonly"><p>In Java, an <code>XdmAtomicValue</code> can be constructed directly from a Java <code>boolean</code>, <code>String</code>, <code>long</code>, 
             <code>BigDecimal</code>, or <code>Instant</code> (inter alia), and methods such as <code>getBooleanValue()</code>
@@ -209,18 +202,16 @@
          <li class="csonly"><p>In C#, an <code>XdmAtomicValue</code> can be constructed directly from a C# <code>bool</code>, <code>string</code>, <code>long</code>, 
             <code>decimal</code>, or <code>DateTime</code> (inter alia), and methods such as <code>AsBoolean()</code>
             and <code>AsDouble()</code> are available to convert in the other direction.</p></li>
-
-                  <li class="conly"><p>In C++, an <code>XdmAtomicValue</code> can be constructed directly from a C++ <code>bool</code>, <code>std::string</code>, char pointer array, <code>long</code>,
-                     <code>double</code>, float or <code>int</code>, and methods such as <code>getBooleanValue()</code>
-                     and <code>getStringValue()</code> are available to convert in the other direction. Similar for PHP.</p></li>
-                  <li class="conly"><p>In Python, an <code>PyXdmAtomicValue</code> can be constructed directly from a Python <code>bool</code>, <code>str</code>, <code>long</code>,
-                     <code>float</code>, and methods such as <code>double_value</code>
-                     and <code>integer_value</code> are available to convert in the other direction.</p></li>
-
+         <li class="conly"><p>In C++, an <code>XdmAtomicValue</code> can be constructed directly from a C++ <code>bool</code>, <code>std::string</code>, char pointer array, <code>long</code>,
+            <code>double</code>, <code>float</code> or <code>int</code>, and methods such as <code>getBooleanValue()</code>
+             and <code>getStringValue()</code> are available to convert in the other direction. Similarly for PHP.</p></li>
+         <li class="conly"><p>In Python, an <code>PyXdmAtomicValue</code> can be constructed directly from a Python <code>bool</code>, <code>str</code>, <code>long</code>,
+            or <code>float</code>, and methods such as <code>double_value</code>
+            and <code>integer_value</code> are available to convert in the other direction.</p></li>
       </ul>
          
       
-      <p>As an alternative to use of XPath, the <code>select()</code> (or <code>Select()</code>) 
+      <p>In Java and C#, as an alternative to use of XPath, the <code>select()</code> (or <code>Select()</code>) 
          method on <code>XdmValue</code> provides powerful
          navigation capability around XDM trees. This method takes as argument a
          <code java="net.sf.saxon.s9api.streams.Step">Step</code> (<code cs="Saxon.Api.Step">Step</code> in C#) (which is

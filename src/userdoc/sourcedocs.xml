@@ -100,7 +100,13 @@
     
     <ul>
       <li><p>The supplied URI reference is first made absolute by resolving against a 
-        suitable base URI.</p></li>
+        suitable base URI.</p>
+        <p class="conly">SaxonC provides a number of methods for setting the base URI:
+          <code>SaxonProcessor.setcwd()</code>; <code>Xslt30Processor.setcwd()</code> or
+          <code>XsltExecutable.setBaseOutputURI()</code> for XSLT;
+          <code>XQueryProcessor.setQueryBaseURI()</code> for XQuery; or
+          <code>DocumentBuilder.setBaseUri()</code> for building documents.</p>
+      </li>
       <li><p>The resulting absolute URI is dereferenced by a 3-step process:</p>
         <ol>
           <li><p>It is first passed to a local user-supplied <code>ResourceResolver</code>, 
@@ -114,10 +120,7 @@
           there are also specialized methods for particular kinds of resources: for example
           <code>setURIResolver()</code>, <code>setSchemaURIResolver()</code>, 
           <code>setUnparsedTextResolver()</code>, <code>setModuleURIResolver()</code>.</p>
-          <p class="conly"><p>For SaoxnC we have a different setup. Firstly, the user can use the<code>SaxonProcessor.setcwd()</code> which acts as the base URI.
-            Alternatively the user can set on the <code>Xslt30Processor.setcwd()</code>, <code>XsltExecutable.setBaseOutputURI()</code> for XSLT or the
-                    <code>XQueryProcessor.setQueryBaseURI()</code> for XQuery or for building documents <code>DocumentBuilder.setBaseUri()</code>.</p></p>
-
+            <p class="conly">Note that for SaxonC there is no way to supply such a resolver.</p>
           </li>
           <li><p>If the local resolver fails to resolve the URI, it is passed to a resolver registered centrally
           with the Saxon <code java="net.sf.saxon.Configuration">Configuration</code>. The default resolver at this level is designed
@@ -126,15 +129,14 @@
           containing local copies of popular W3C-defined resources such as the DTDs for XHTML and
           SVG. Additional catalog files can be registered using an API (<code
             java="net.sf.saxon.s9api.Processor#setCatalogFiles">Processor.setCatalogFiles()</code>
-            in Java, <code cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> in C#, for SaxonC see below),
+            in Java, <code cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> in C#,
+            <code>SaxonProcessor.setCatalog()</code> in C++ and PHP,
+            <code>PySaxonProcessor.set_catalog()</code> in Python),
             or from the command line, or from the Saxon configuration file. </p>
           <p class="javaonly">The catalog resolver for SaxonJ and SaxonC also has built-in support for
           URIs using the <code>classpath</code> and <code>data</code> schemes.</p>
           <p class="csonly">The catalog resolver for SaxonCS also has built-in support for
               URIs using the <code>data</code> scheme.</p>
-          <p class="conly">In SaxonC, additional catalog files can be registered using an API (<code>SaxonProcessor.setCatalog()</code>
-                      in C++ and PHP, <code>PySaxonProcessor.set_catalog()</code> in Python),
-                      or from the command line, or from the Saxon configuration file.</p>
           </li>
           <li>If the URI has still not been resolved, it is then dereferenced using standard
           mechanisms provided by the platform: for example, <code>http</code> URIs are dereferenced
@@ -172,8 +174,7 @@
         resource using a conventional system identifier (URI) or public identifier, and a local
         catalog is used to map the system and public identifiers to an actual location.</p>
       
-        <p>When
-using Saxon from the command line, it is possible to specify a catalog to be used using
+        <p>When using Saxon from the command line, it is possible to specify a catalog to be used using
           the option <code>-&#xfeff;catalog:<i>files</i></code>. Here <code><i>files</i></code> is the catalog
           file to be searched, or a list of filenames separated by semicolons. This catalog will be used
           to locate DTDs and external entities required by the XML parser, XSLT stylesheet modules
@@ -190,7 +191,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
           <li class="csonly">From C#, use the method <code
             cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> with a list of filenames.</li>
           <li class="conly">From C++ and PHP, use the method <code>SaxonProcessor.setCatalog()</code> with the
-                      filename. From Python , use the method <code>PySaxonProcessor.set_catalog()</code> with the filename.</li>
+            filename. From Python, use the method <code>PySaxonProcessor.set_catalog()</code> with the filename.</li>
         </ul>
         
         <p>
@@ -1909,12 +1910,14 @@ documentBuilder.build(as);]]></samp>
         interface on .NET, validation may be controlled by setting the appropriate options on the
         <code>DocumentBuilder</code>.</p>
 
-      <p class="conly"> On SaxonC, ehen documents are built using the <a
-              href="https://www.saxonica.com/saxon-c/doc/html/classDocumentBuilder.html">DocumentBuilder</a> in the C++ interface, or the
-              <a href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a> in the PHP
-              interface, or the <a href="https://www.saxonica.com/saxon-c/doc/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a> in the Python interface,
-              validation may be controlled by setting the appropriate options on the
-              <code>DocumentBuilder</code>.</p>
+      <p class="conly">Similarly on SaxonC, validation may be controlled by setting the appropriate options on
+        the <a class="bodylink code"
+          href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html">DocumentBuilder</a> in
+        the C++ interface, the <a class="bodylink code"
+          href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a>
+        in the PHP interface, or the <a class="bodylink code"
+          href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a>
+        in the Python interface.</p>
       
       <p class="javaonly">On Java interfaces that expect a JAXP <code>Source</code> object it is possible to request
         validation by supplying an <a class="javalink" href="net.sf.saxon.lib.AugmentedSource"

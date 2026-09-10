@@ -57,8 +57,7 @@
 
       <p>A command is available to run a query contained in a file.</p> 
       <div class="javaonly">
-      <p>The form of command on the Java
-         platform is:</p>
+      <p>The form of command on the Java platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
       </div>
       <div class="csonly">
@@ -66,12 +65,12 @@
       <kbd>dotnet SaxonCS query   [options]  [ <i>params...</i>] </kbd>
       </div>
       <div class="conly">
-       <p>The form of command on the SaxonC platform is:</p>
-       <kbd>./query [options] [ <i>params...</i>] </kbd>
-         <p class="conly">We must first compile the <code>Query.c</code> C
-                    program which builds the command line program by running the batch script <code>./build-saxonc-commands.sh</code>
-                     on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
-                 <p>A command is available to run a query contained in a file.</p>
+         <p>For SaxonC, the <code>query</code> executable file must first be built. To do this, compile
+            the <code>Query.c</code> C command line program by running the batch script
+            <code>./build-saxonc-commands.sh</code> on Linux or MacOS, or
+            <code>build-saxonc-commands.bat</code> on Windows.</p>
+         <p>Then the command takes the form:</p>
+         <kbd>./query   [options]  [ <i>params...</i>] </kbd>
        </div>
 
       <p>The options will generally include either <code>-q:queryFile</code> which takes the query from a file,
