@@ -8175,10 +8175,10 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
             document. It returns the document node (root node) that results from parsing this text
             using the TagSoup parser. </p>
 
-          <p class="javaonly">On the Java platform, the validator.nu jar file must be on the classpath. It may be
+          <p class="javaonly">On the Java platform, the <code>validator.nu</code> jar file must be on the classpath. It may be
             downloaded from Maven.</p>
 
-          <p class="csonly">On SaxonCS platform, the HTML is parsed using HtmlAgilityPack, which
+          <p class="csonly">On SaxonCS platform, the HTML is parsed using <code>AngleSharp</code>, which
           is registered as a dependency and will normally be installed automatically by <b>nuget</b>.</p>
 
           <p>This function is useful where an HTML document is embedded inside another using CDATA.
@@ -8186,20 +8186,9 @@ StreamSource:new() => saxon:object-map() => map:keys() => sort()]]></samp>
               href="/functions/fn/unparsed-text">unparsed-text()</a> function to read HTML from
             filestore. Note that the base URI of the document is not retained in this case.</p>
           
-          <p>Because different parsers are used, and there is no standard mapping from HTML
-          to the XDM model, there are some differences depending on the platform:</p>
-          
-          <ul>
-            <li>On both platforms, HTML elements will have lower-case local names, and will be in
-              the XHTML namespace (<code> "http://www.w3.org/1999/xhtml"</code>)</li>
-            <li class="javaonly"><p>On Java, there will be an additional namespace declaration
-            binding the prefix <code>html</code> to the XHTML namespace.</p></li>
-            <li class="javaonly"><p>On Java, default attributes are expanded, for example
-              an element written as <code>&lt;br/></code> will appear in the XDM model
-              with the additional attribute <code>clear="none"</code>.</p></li>
-            <li class="csonly"><p>On SaxonCS, defaulted attribute values are not included
-            in the XDM model.</p></li>
-          </ul>
+          <p>Because different parsers are used, there are minor differences depending on the platform,
+            but these generally occur only in edge cases, such as use of element or attribute names containing characters 
+            disallowed in XML.</p>
         </div>
       </details>
     </function>

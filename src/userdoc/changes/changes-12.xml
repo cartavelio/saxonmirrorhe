@@ -312,9 +312,11 @@
         
         <p>The extension function <code>saxon:parse-html()</code> (which is now also available as
         <code>fn:parse-html()</code> if 4.0 is enabled) has been reimplemented on SaxonJ to use
-        the <code>validator.nu</code> library in place of <code>TagSoup</code>. As a result, it conforms
-        much more closely to the HTML5 parsing algorithm; it has also been much more thoroughly tested.
-        However, around 30 of the 1300 new tests are currently giving unexplained results
+        the <code>validator.nu</code> library in place of <code>TagSoup</code>. In SaxonCS, it
+            has been reimplemented to use <code>AngleSharp</code> in place of <code>HtmlAgilityPack</code>.
+            In both cases this gives much closer conformance to the HTML5 parsing algorithm; 
+            the function has also been much more thoroughly tested.
+        However, a handful of the 1300 new tests are currently giving unexplained results
         (some of these may turn out to be correct), so it remains work in progress.
         </p>
         
