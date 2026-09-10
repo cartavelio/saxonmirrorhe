@@ -15,11 +15,10 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Whitespace;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.net.URL;
+import java.util.function.IntPredicate;
 
 /**
  * This class contains static methods used to read a query as a byte stream, infer the encoding if
@@ -49,7 +48,7 @@ public class QueryReader {
      * @throws XPathException if the input cannot be read
      */
 
-    public static String readSourceQuery(Configuration config, /*@NotNull*/ StreamSource ss, IntPredicateProxy charChecker) throws XPathException {
+    public static String readSourceQuery(Configuration config, /*@NotNull*/ StreamSource ss, IntPredicate charChecker) throws XPathException {
         CharSequence queryText;
         if (ss.getInputStream() != null) {
             InputStream is = ss.getInputStream();
@@ -112,7 +111,7 @@ public class QueryReader {
      * @throws XPathException if the stream cannot be read, for example if there is a problem with the encoding
      */
 
-    public static String readInputStream(InputStream is, String encoding, IntPredicateProxy nameChecker) throws XPathException {
+    public static String readInputStream(InputStream is, String encoding, IntPredicate nameChecker) throws XPathException {
         if (encoding == null) {
             is = InputStreamMarker.ensureMarkSupported(is);
             encoding = readEncoding(is);
@@ -137,7 +136,7 @@ public class QueryReader {
      * @throws XPathException if the file cannot be read or contains illegal characters
      */
 
-    private static String readQueryFromReader(Reader reader, IntPredicateProxy charChecker) throws XPathException {
+    private static String readQueryFromReader(Reader reader, IntPredicate charChecker) throws XPathException {
         try {
             UnicodeString content = UnparsedTextFunction.readFile(charChecker, reader);
             return content.toString();

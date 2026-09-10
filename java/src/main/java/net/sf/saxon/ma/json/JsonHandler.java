@@ -16,9 +16,9 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Map;
+import java.util.function.IntPredicate;
 
 /**
  * Default handler class for accepting the result from parsing JSON strings
@@ -26,7 +26,7 @@ import java.util.Map;
 public class JsonHandler {
 
     public boolean escape;
-    protected IntPredicateProxy charChecker;
+    protected IntPredicate charChecker;
     private XPathContext context;
 
     private FunctionItem fallbackFunction = null;

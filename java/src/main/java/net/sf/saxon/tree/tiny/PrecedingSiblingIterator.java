@@ -11,7 +11,8 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.z.IntPredicateProxy;
+
+import java.util.function.IntPredicate;
 
 import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
@@ -28,7 +29,7 @@ final class PrecedingSiblingIterator implements SequenceIterator {
     private int nextNodeNr;
     private final NodeTest test;
     private final TinyNodeImpl parentNode;
-    private final IntPredicateProxy matcher;
+    private final IntPredicate matcher;
 
     PrecedingSiblingIterator(TinyTree doc, /*@NotNull*/ TinyNodeImpl node, NodePredicate predicate) {
         document = doc;

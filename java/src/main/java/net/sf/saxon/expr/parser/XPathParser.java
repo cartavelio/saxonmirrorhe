@@ -62,9 +62,9 @@ import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.*;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 
@@ -90,7 +90,7 @@ public class XPathParser {
     protected QNameParser qNameParser;
     protected ParserExtension parserExtension = new ParserExtension();
 
-    protected IntPredicateProxy charChecker;
+    protected IntPredicate charChecker;
 
     protected boolean allowXPath30Syntax = false;
     protected boolean allowXPath30XSLTExtensions = false;

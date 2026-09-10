@@ -39,6 +39,7 @@ import net.sf.saxon.z.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 /**
  * A regular expression compiler.  This class compiles a pattern string into a
@@ -957,7 +958,7 @@ public class RECompiler {
 
             case '.':
                 idx++;
-                IntPredicateProxy predicate;
+                IntPredicate predicate;
                 if (reFlags.isSingleLine()) {
                     // in XPath with the 's' flag, '.' matches everything
                     predicate = IntSetPredicate.ALWAYS_TRUE;

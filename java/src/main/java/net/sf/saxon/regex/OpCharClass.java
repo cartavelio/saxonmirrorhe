@@ -12,18 +12,20 @@ import net.sf.saxon.regex.charclass.CharacterClass;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.z.*;
 
+import java.util.function.IntPredicate;
+
 /**
  * A match of a single character in the input against a set of permitted characters
  */
 
 public class OpCharClass extends Operation {
-    private final IntPredicateProxy predicate;
+    private final IntPredicate predicate;
 
-    OpCharClass(IntPredicateProxy predicate) {
+    OpCharClass(IntPredicate predicate) {
         this.predicate = predicate;
     }
 
-    public IntPredicateProxy getPredicate() {
+    public IntPredicate getPredicate() {
         return predicate;
     }
 

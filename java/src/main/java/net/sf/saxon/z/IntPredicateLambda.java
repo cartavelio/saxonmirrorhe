@@ -16,7 +16,7 @@ import java.util.function.IntPredicate;
  * the case in C#.
  */
 
-public class IntPredicateLambda implements IntPredicateProxy {
+public class IntPredicateLambda implements IntPredicate {
 
     IntPredicate lambda;
     private IntPredicateLambda(IntPredicate lambda) {
@@ -30,7 +30,7 @@ public class IntPredicateLambda implements IntPredicateProxy {
      *               that matches all positive integers).
      * @return the integer predicate
      */
-    public static IntPredicateProxy of(IntPredicate lambda) {
+    public static IntPredicate of(IntPredicate lambda) {
         return new IntPredicateLambda(lambda);
     }
 

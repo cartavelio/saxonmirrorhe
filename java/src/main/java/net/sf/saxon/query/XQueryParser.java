@@ -39,7 +39,6 @@ import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -48,6 +47,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -5100,9 +5100,9 @@ public class XQueryParser extends XPathParser {
 
     public static class Unescaper {
 
-        private final IntPredicateProxy characterChecker;
+        private final IntPredicate characterChecker;
 
-        public Unescaper(IntPredicateProxy characterChecker) {
+        public Unescaper(IntPredicate characterChecker) {
             this.characterChecker = characterChecker;
         }
 

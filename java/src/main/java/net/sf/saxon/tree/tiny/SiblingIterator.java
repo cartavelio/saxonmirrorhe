@@ -17,8 +17,9 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
+
+import java.util.function.IntPredicate;
 
 import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
@@ -41,7 +42,7 @@ final class SiblingIterator implements SequenceIterator, LookaheadIterator, Atom
     private final NodeTest test;
     private final TinyNodeImpl parentNode;
     private boolean needToAdvance = false;
-    private final IntPredicateProxy matcher;
+    private final IntPredicate matcher;
 
     /**
      * Return an enumeration over children or siblings of the context node

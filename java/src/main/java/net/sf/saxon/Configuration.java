@@ -83,6 +83,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.IntPredicate;
 
 
 /**
@@ -1113,7 +1114,7 @@ public class Configuration implements SourceResolver {
      * the version of XML (1.0 or 1.1) selected by this configuration
      */
 
-    public IntPredicateProxy getValidCharacterChecker() {
+    public IntPredicate getValidCharacterChecker() {
         if (xmlVersion == XML10) {
             return IntPredicateLambda.of(CSharp.staticRef(XMLCharacterData::isValid10));
         } else {

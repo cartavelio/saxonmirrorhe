@@ -33,10 +33,10 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.str.*;
 import net.sf.saxon.z.IntIterator;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.IntPredicate;
 
 
 /**
@@ -284,7 +284,7 @@ public class REMatcher {
         if (program.prefix == null) {
             if (program.initialCharClass != null) {
                 // no prefix known; but the first character must match a predicate
-                IntPredicateProxy pred = program.initialCharClass;
+                IntPredicate pred = program.initialCharClass;
                 for (; !(i >= search.length32()); i++) {
                     if (pred.test(search.codePointAt(i))) {
                         if (matchAt(i, false)) {

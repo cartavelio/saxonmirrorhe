@@ -14,11 +14,11 @@ import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntUniversalSet;
 
 import java.util.Optional;
+import java.util.function.IntPredicate;
 
 /**
  * A NodeTest is a simple kind of pattern that enables a context-free test of whether
@@ -113,7 +113,7 @@ public abstract class NodeTest implements NodePredicate {
      * matches the node test.
      */
 
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
+    public IntPredicate getMatcher(final NodeVectorTree tree) {
         // Default implementation materialises the node
         return IntPredicateLambda.of(nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER
                                                && test(tree.getNode(nodeNr)));

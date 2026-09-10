@@ -25,7 +25,6 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.z.IntIterator;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -35,6 +34,7 @@ import java.net.URI;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.UnmappableCharacterException;
+import java.util.function.IntPredicate;
 
 
 /**
@@ -70,7 +70,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
             throws XPathException {
 
         final Configuration config = context.getConfiguration();
-        IntPredicateProxy checker = config.getValidCharacterChecker();
+        IntPredicate checker = config.getValidCharacterChecker();
 
         // Use the URI machinery to validate and resolve the URIs
 
@@ -175,7 +175,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      */
 
     @CSharpInnerClass(outer=false, extra="Saxon.Hej.str.UnicodeBuilder buffer")
-    public static UnicodeString readFile(IntPredicateProxy checker, Reader reader) throws IOException, XPathException {
+    public static UnicodeString readFile(IntPredicate checker, Reader reader) throws IOException, XPathException {
         UnicodeBuilder buffer = new UnicodeBuilder();
         readFile(checker, reader, new AbstractUniStringConsumer() {
             @Override
@@ -198,7 +198,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      */
 
     @CSharpReplaceException(from="java.lang.IllegalStateException", to="System.Text.DecoderFallbackException")
-    public static void readFile(IntPredicateProxy checker, Reader reader, UniStringConsumer output) throws IOException, XPathException {
+    public static void readFile(IntPredicate checker, Reader reader, UniStringConsumer output) throws IOException, XPathException {
         char[] buffer = new char[2048];
         boolean first = true;
         int actual;
@@ -264,19 +264,19 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         reader.close();
     }
 
-    public static IntIterator codepoints(IntPredicateProxy checker, Reader reader) {
+    public static IntIterator codepoints(IntPredicate checker, Reader reader) {
         return new CodepointIterator(checker, reader);
     }
 
     private static class CodepointIterator implements IntIterator {
 
-        private final IntPredicateProxy checker;
+        private final IntPredicate checker;
         private final Reader reader;
         private char[] buffer;
         private int used;
         private int pos;
 
-        public CodepointIterator(IntPredicateProxy checker, Reader reader) {
+        public CodepointIterator(IntPredicate checker, Reader reader) {
             this.checker = checker;
             this.reader = reader;
             this.buffer = new char[2048];

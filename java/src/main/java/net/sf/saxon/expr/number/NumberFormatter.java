@@ -10,12 +10,12 @@ package net.sf.saxon.expr.number;
 import net.sf.saxon.lib.Numberer;
 import net.sf.saxon.regex.charclass.Categories;
 import net.sf.saxon.str.*;
-import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntUnionPredicate;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 /**
  * Class NumberFormatter defines a method to format a ArrayList of integers as a character
@@ -118,7 +118,7 @@ public class NumberFormatter {
         }
     }
 
-    private static final IntPredicateProxy alphanumeric =
+    private static final IntPredicate alphanumeric =
             IntUnionPredicate.makeUnion(Categories.getCategory("N"), (Categories.getCategory("L")));
 
     /**

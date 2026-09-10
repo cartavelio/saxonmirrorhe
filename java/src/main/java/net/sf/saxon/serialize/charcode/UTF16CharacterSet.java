@@ -8,7 +8,8 @@
 package net.sf.saxon.serialize.charcode;
 
 import net.sf.saxon.z.IntIterator;
-import net.sf.saxon.z.IntPredicateProxy;
+
+import java.util.function.IntPredicate;
 
 /**
  * A class to hold some static constants and methods associated with processing UTF16 and surrogate pairs
@@ -129,7 +130,7 @@ public class UTF16CharacterSet implements CharacterSet {
      *         or -1 if all characters in the character sequence are valid
      */
 
-    public static int firstInvalidChar(IntIterator iter, IntPredicateProxy predicate) {
+    public static int firstInvalidChar(IntIterator iter, IntPredicate predicate) {
         while (iter.hasNext()) {
             int ch32 = iter.next();
             if (!predicate.test(ch32)) {

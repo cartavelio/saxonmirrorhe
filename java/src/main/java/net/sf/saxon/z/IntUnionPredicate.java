@@ -7,22 +7,24 @@
 
 package net.sf.saxon.z;
 
+import java.util.function.IntPredicate;
+
 /**
  * An IntPredicate formed as the union of two other predicates: it matches
  * an integer if either of the operands matches the integer
  */
 
-public class IntUnionPredicate implements IntPredicateProxy {
+public class IntUnionPredicate implements IntPredicate {
 
-    private final IntPredicateProxy p1;
-    private final IntPredicateProxy p2;
+    private final IntPredicate p1;
+    private final IntPredicate p2;
 
-    private IntUnionPredicate(IntPredicateProxy p1, IntPredicateProxy p2) {
+    private IntUnionPredicate(IntPredicate p1, IntPredicate p2) {
         this.p1 = p1;
         this.p2 = p2;
     }
 
-    public static IntPredicateProxy makeUnion(IntPredicateProxy p1, IntPredicateProxy p2) {
+    public static IntPredicate makeUnion(IntPredicate p1, IntPredicate p2) {
         return new IntUnionPredicate(p1, p2);
     }
 
@@ -43,8 +45,8 @@ public class IntUnionPredicate implements IntPredicateProxy {
      * @return an array containing the two operands
      */
 
-    public IntPredicateProxy[] getOperands() {
-        return new IntPredicateProxy[]{p1, p2};
+    public IntPredicate[] getOperands() {
+        return new IntPredicate[]{p1, p2};
     }
 
     @Override

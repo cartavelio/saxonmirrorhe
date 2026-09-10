@@ -10,7 +10,8 @@ import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
+
+import java.util.function.IntPredicate;
 
 /**
  * A NodeTypeTest is a NodeTest that simply tests whether a node matches
@@ -72,7 +73,7 @@ public class NodeTypeTest extends NodeTest {
      * matches the node test.
      */
 
-    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
+    public IntPredicate getMatcher(final NodeVectorTree tree) {
 
         byte[] nodeKindArray = tree.getNodeKindArray();
         
