@@ -3972,6 +3972,7 @@ public class XPathParser {
 
         StructuredQName functionName = resolveFunctionName(fname);
         IntSet placeMarkers = null;
+        Set<StructuredQName> keywordPlaceMarkers = null;
 
         // the "(" has already been read by the Tokenizer: now parse the arguments
 
@@ -3986,7 +3987,18 @@ public class XPathParser {
                     StructuredQName paramName = qNameParser.parse(t.currentTokenValue, NamespaceUri.NULL);
                     nextToken(); // read the operator
                     nextToken(); // position on the expression giving the value
-                    arg = parseExprSingle();
+                    peek = t.peekAhead();
+                    if (t.currentToken == Token.QMARK && (peek == Token.COMMA || peek == Token.RPAR)) {
+                        // keyword := ?
+                        nextToken();
+                        if (keywordPlaceMarkers == null) {
+                            keywordPlaceMarkers = new HashSet<>();
+                        }
+                        keywordPlaceMarkers.add(paramName);
+                        arg = Literal.makeEmptySequence(); // a convenient fiction
+                    } else {
+                        arg = parseExprSingle();
+                    }
                     if (keywordArgs == null) {
                         keywordArgs = new HashMap<>();
                     } else if (keywordArgs.containsKey(paramName)) {
@@ -4028,8 +4040,8 @@ public class XPathParser {
         Expression[] arguments = new Expression[args.size()];
         arguments = args.toArray(arguments);
 
-        if (placeMarkers != null) {
-            return makeCurriedFunction(this, offset, functionName, arguments, placeMarkers);
+        if (placeMarkers != null || keywordPlaceMarkers != null) {
+            return makeCurriedFunction(this, offset, functionName, arguments, placeMarkers, keywordPlaceMarkers);
         }
 
         Expression fcall;
@@ -4101,7 +4113,8 @@ public class XPathParser {
 
     public Expression makeCurriedFunction(
             XPathParser parser, int offset,
-            StructuredQName name, Expression[] args, IntSet placeMarkers) throws XPathException {
+            StructuredQName name, Expression[] args,
+            IntSet placeMarkers, Set<StructuredQName> keywordPlaceMarkers) throws XPathException {
         StaticContext env = parser.getStaticContext();
         FunctionLibrary lib = env.getFunctionLibrary();
         SymbolicName.F sn = new SymbolicName.F(name, args.length);
@@ -4114,7 +4127,7 @@ public class XPathParser {
         }
         Expression targetExp = makeNamedFunctionReference(name, target);
         parser.setLocation(targetExp, offset);
-        return curryFunction(targetExp, args, placeMarkers);
+        return curryFunction(targetExp, args, placeMarkers, keywordPlaceMarkers);
     }
 
     /**
@@ -4127,20 +4140,56 @@ public class XPathParser {
      * @return the curried function
      */
 
-    public static Expression curryFunction(Expression functionExp, Expression[] args, IntSet placeMarkers) {
-        IntIterator ii = placeMarkers.iterator();
-        while (ii.hasNext()) {
-            args[ii.next()] = null;
+    public static Expression curryFunction(
+            Expression functionExp, Expression[] args,
+            IntSet placeMarkers, Set<StructuredQName> keywordPlaceMarkers) throws XPathException {
+        int maxPlaceMarker = 0;
+        if (placeMarkers != null) {
+            IntIterator ii = placeMarkers.iterator();
+            while (ii.hasNext()) {
+                maxPlaceMarker = ii.next();
+                args[maxPlaceMarker] = null;
+            }
+        }
+        if (keywordPlaceMarkers != null) {
+            // It must be a static function call so the function expression must be a function literal
+            if (functionExp instanceof UserFunctionReference) {
+                UserFunction ufn = ((UserFunctionReference)functionExp).getNominalTarget();
+                UserFunctionParameter[] params = ufn.getParameterDefinitions();
+                for (int i=0; i<params.length; i++) {
+                    StructuredQName paramName = params[i].getVariableQName();
+                    if (keywordPlaceMarkers.contains(paramName)) {
+                        if (i < maxPlaceMarker) {
+                            throw new XPathException("Saxon restriction: Placemarkers must currently be in the correct order");
+                        }
+                        maxPlaceMarker = i;
+                        args[i] = null;
+                    }
+                }
+            } else {
+                FunctionItem fit = ((FunctionLiteral) functionExp).getGroundedValue();
+                if (fit instanceof SystemFunction) {
+                    BuiltInFunctionSet.Entry details = ((SystemFunction)fit).getDetails();
+                    String[] params = details.paramNames;
+                    for (int i = 0; i < params.length; i++) {
+                        if (keywordPlaceMarkers.contains(new StructuredQName("", "", params[i]))) {
+                            args[i] = null;
+                        }
+                    }
+                } else {
+                    throw new XPathException("Keyword placemarkers not supported on " + fit.getClass());
+                }
+            }
         }
         return new PartialApply(functionExp, args);
     }
 
 
     public Expression createDynamicCurriedFunction(
-            XPathParser p, Expression functionItem, ArrayList<Expression> args, IntSet placeMarkers) {
+            XPathParser p, Expression functionItem, ArrayList<Expression> args, IntSet placeMarkers) throws XPathException {
         Expression[] arguments = new Expression[args.size()];
         arguments = args.toArray(arguments);
-        Expression result = curryFunction(functionItem, arguments, placeMarkers);
+        Expression result = curryFunction(functionItem, arguments, placeMarkers, null);
         p.setLocation(result, p.getTokenizer().currentTokenStartOffset);
         return result;
     }
@@ -4377,24 +4426,6 @@ public class XPathParser {
             return null;
         }
 
-//        // Special treatment of functions in the system function library that depend on dynamic context; turn these
-//        // into calls on function-lookup()
-//
-//        if (functionName.hasURI(NamespaceUri.FN) && fcf instanceof SystemFunction) {
-//            final BuiltInFunctionSet.Entry details = ((SystemFunction) fcf).getDetails();
-//            if (fcf instanceof ContextAccessorFunction || (details != null &&
-//                    (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) != 0)) {
-//                // For a context-dependent function, return a call on function-lookup(), which saves the context
-//                SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
-//                lookup.setRetainedStaticContext(env.makeRetainedStaticContext());
-//                return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(functionName, BuiltInAtomicType.QNAME)),
-//                                               Literal.makeLiteral(Int64Value.makeIntegerValue(arity)));
-//            }
-//        }
-//
-//        Expression ref = makeNamedFunctionReference(functionName, fcf);
-//        setLocation(ref, offset);
-//        return ref;
     }
 
     private static Expression makeNamedFunctionReference(StructuredQName functionName, FunctionItem fcf) {

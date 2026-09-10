@@ -342,7 +342,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
 
     /**
      * Mapping function wrapped around a converter
-     */
+     */                                                                                                       
 
     public static class AtomicSequenceMappingFunction implements ItemMappingFunction {
         private Converter converter;
