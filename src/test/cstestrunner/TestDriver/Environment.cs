@@ -769,7 +769,7 @@ namespace TestDriver {
         
         public override object GetEntity(Uri href, string role, Type ofObjectToReturn) {
             XdmNode node = null;
-            String hrefStr = href.ToString();
+            string hrefStr = href.ToString();
             bool foundDoc = sourceDocs.TryGetValue(hrefStr, out node);
 
             if (!foundDoc) {
@@ -790,7 +790,7 @@ namespace TestDriver {
 
                 if (foundSecDoc) {
                     //string hrefStr = href.ToString ();
-                    String hrefStri = (hrefStr.StartsWith("file:///") ? hrefStr.Substring(7) : hrefStr);
+                    string hrefStri = (href.IsFile ? href.LocalPath : hrefStr);
                     Stream stream = new FileStream(hrefStri, FileMode.Open);
                     
                     Saxon.Ejavax.xml.transform.Source sourcei = new Saxon.Ejavax.xml.transform.stream.StreamSource(stream);
