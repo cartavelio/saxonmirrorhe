@@ -17,12 +17,6 @@ import net.sf.saxon.lib.FeatureKeys;
 public class SaxonErrorCode {
 
     /**
-     * SXLM0001: stylesheet or query appears to be looping/recursing indefinitely
-     */
-
-    public static final String SXLM0001 = "SXLM0001";
-
-    /**
      * SXCH0002: cannot supply output to ContentHandler because it is not well-formed
      */
 
@@ -172,6 +166,19 @@ public class SaxonErrorCode {
      */
 
     public static final String SXJE0053 = "SXJE0053";
+
+    /**
+     * SXLM0001: stylesheet or query appears to be looping/recursing indefinitely
+     */
+
+    public static final String SXLM0001 = "SXLM0001";
+
+    /**
+     * SXLM0002: Max length of sequence exceeded
+     */
+
+    public static final String SXLM0002 = "SXLM0002";
+
 
     /**
      * SXJM0001: Error in arguments to saxon:send-mail

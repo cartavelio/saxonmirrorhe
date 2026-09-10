@@ -14,6 +14,8 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
@@ -45,8 +47,8 @@ public class IntegerRange implements AtomicSequence {
         if (end != start && (end > start != step > 0)) {
             throw new IllegalArgumentException("end before start in IntegerRange");
         }
-        if (Math.abs((end - start)/step) > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE);
+        if (Math.abs((end - start)/step) >= Integer.MAX_VALUE) {
+            throw new UncheckedXPathException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE, SaxonErrorCode.SXLM0002);
         }
         this.start = start;
         this.step = step;
