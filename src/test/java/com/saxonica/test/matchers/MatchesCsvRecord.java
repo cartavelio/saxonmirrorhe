@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.saxonica.test.matchers.MatchesCsvRowRecord.*;
-import static net.sf.saxon.test.matchers.IsDeepEqualTo.deepEquals;
+import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
 public class MatchesCsvRecord extends TypeSafeDiagnosingMatcher<MapItem> {

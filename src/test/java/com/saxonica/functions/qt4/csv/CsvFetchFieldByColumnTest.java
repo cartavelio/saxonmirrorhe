@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
-import static net.sf.saxon.test.matchers.IsDeepEqualTo.deepEquals;
+import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
 
 class CsvFetchFieldByColumnTest {
     MapItem columns = MapBuilder.empty();

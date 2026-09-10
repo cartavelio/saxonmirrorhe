@@ -3,7 +3,7 @@ package com.saxonica.functions.qt4.csv;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.test.TestXdmHelpers;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
@@ -23,7 +23,7 @@ import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
 import static com.saxonica.test.matchers.MatchesCsvRowRecord.callFieldFunction;
 import static com.saxonica.test.matchers.MatchesCsvRowRecord.getRowFieldFunctionItem;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
-import static net.sf.saxon.test.matchers.IsDeepEqualTo.deepEquals;
+import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
 import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
 import static net.sf.saxon.test.xdmfixtures.AtomicValueBuilder.string;
 import static org.hamcrest.core.Is.is;
@@ -54,7 +54,7 @@ class CsvXdmGeneratorTest {
     void emptyCsv() throws XPathException {
         expected = CsvRecordGenerator.EMPTY_CSV;
 
-        actual = subject().fromRowSequence(EmptySequence.getInstance());
+        actual = subject().fromRowSequence(EmptySequence.getInstance().iterate());
 
         assertThat(actual, deepEquals(expected));
     }
@@ -71,7 +71,7 @@ class CsvXdmGeneratorTest {
 
     @Nested
     class ExtractingColumns {
-        Sequence input = makeRows(r -> r.row("name", "city").row("Alice", "Aachen"));
+        SequenceIterator input = makeRowsIterator(r -> r.row("name", "city").row("Alice", "Aachen"));
 
         @Test
         @DisplayName("generates an Empty columns record by default")
@@ -129,7 +129,7 @@ class CsvXdmGeneratorTest {
 
     @Nested
     class FetchingNonExistentFields {
-        Sequence input = makeRows(r -> r.row("name", "city").row("Alice", "Aachen"));
+        SequenceIterator input = makeRowsIterator(r -> r.row("name", "city").row("Alice", "Aachen"));
 
         @Test
         @DisplayName("Attempting to fetch an unknown name raises the appropriate error")
@@ -154,7 +154,7 @@ class CsvXdmGeneratorTest {
 
     @Nested
     class FilteringColumns {
-        Sequence input = makeRows(r -> r.row("a", "b", "c", "d", "e").row("1", "2", "3", "4", "5"));
+        SequenceIterator input = makeRowsIterator(r -> r.row("a", "b", "c", "d", "e").row("1", "2", "3", "4", "5"));
 
         @Test
         @DisplayName("columns can be filtered in natural order (truncated)")
@@ -222,7 +222,7 @@ class CsvXdmGeneratorTest {
 
     @Nested
     class NumberOfColumns {
-        Sequence input = makeRows(r -> r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4"));
+        SequenceIterator input = makeRowsIterator(r -> r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4"));
 
         @Nested
         class ExplictlySpecified {

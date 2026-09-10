@@ -2,6 +2,8 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.test.TestXdmHelpers;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,16 +15,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.saxonica.functions.qt4.csv.TestHelpers.*;
+import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.Assertions.*;
 import static net.sf.saxon.test.OptionsParameterHelper.defaultOptionParameters;
 import static net.sf.saxon.test.OptionsParameterHelper.parsedOptionParameters;
+import static net.sf.saxon.test.matchers.SequenceIteratorIsDeepEqualTo.deepEquals;
+import static net.sf.saxon.test.matchers.SequenceIteratorIsEmptySequence.isEmptySequence;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class CsvParserTest {
     CsvParser subject;
     Map<String,GroundedValue> options;
     CsvContentHandler handler;
-    Sequence result;
+    SequenceIterator result;
+    GroundedValue expectedRows;
 
     @BeforeEach
     void defaultOptions() throws XPathException {
@@ -36,7 +42,7 @@ public class CsvParserTest {
 
         result = subject.parseInput();
 
-        assertEmptySequence(result, "expected an empty CSV");
+        assertThat(result, isEmptySequence());
     }
 
     @Nested
@@ -48,12 +54,7 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            GroundedValue first_row = result.head();
-
-            assertAll(
-                    () -> { assertSequenceLength(1, result, "expected 1 Record"); },
-                    () -> { assertXPathDeepEqual(makeRow("abc", "def", "ghi"), first_row, "expected (abc,def,ghi)"); }
-            );
+            assertThat(result, deepEquals(makeRow("abc", "def", "ghi")));
         }
         @Test
         @DisplayName("rows are passed correctly to the CsvContentHandler")
@@ -62,11 +63,11 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(rows -> {
+            expectedRows = makeRows(rows -> {
                 rows.row("abc", "def", "ghi").row("123", "456", "789");
             });
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc,def,ghi], [123,456,789])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
         @Test
@@ -74,11 +75,11 @@ public class CsvParserTest {
         void singleColumnCSV() throws XPathException {
             subject = new CsvParser(TestXdmHelpers.stringValue("abc\r\n123"), options, handler);
 
-            result = subject.parseInput();
+            SequenceIterator result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(rows -> rows.row("abc").row("123"));
+            expectedRows = makeRows(rows -> rows.row("abc").row("123"));
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc], [123])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
         @Test
@@ -87,9 +88,9 @@ public class CsvParserTest {
             subject = new CsvParser(TestXdmHelpers.stringValue("abc\r\n123\r\n"), options, handler);
 
             result = subject.parseInput();
-            Sequence expectedRows = makeRows(rows -> rows.row("abc").row("123"));
+            expectedRows = makeRows(rows -> rows.row("abc").row("123"));
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc], [123])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
         @Test
@@ -99,9 +100,9 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(rows -> rows.row("abc").row("123"));
+            expectedRows = makeRows(rows -> rows.row("abc").row("123"));
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc], [123])");
+            assertThat(result, deepEquals(expectedRows));
         }
     }
 
@@ -114,11 +115,11 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(rows -> {
+            expectedRows = makeRows(rows -> {
                 rows.row("abc", "def", "ghi").row("123", "456", "789");
             });
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc, def, ghi], [123, 456, 789])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
         @Test
@@ -128,9 +129,9 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRow("abc \"quote\" def", "ghi");
+            expectedRows = makeRow("abc \"quote\" def", "ghi");
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc 'quote' def, ghi])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
         @Test
@@ -142,9 +143,9 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRow("abc |quote| def", "ghi");
+            expectedRows = makeRow("abc |quote| def", "ghi");
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc |quote| def, ghi])");
+            assertThat(result, deepEquals(expectedRows));
         }
     }
 
@@ -161,11 +162,11 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(rows -> {
+            expectedRows = makeRows(rows -> {
                 rows.row("abc", "def").row("123", "456");
             });
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
         @Test
@@ -178,11 +179,11 @@ public class CsvParserTest {
             subject = new CsvParser(TestXdmHelpers.stringValue("abc,def$123,456£ghi,789"), options, handler);
 
             result = subject.parseInput();
-            Sequence expectedRows = makeRows(rows -> {
+            expectedRows = makeRows(rows -> {
                 rows.row("abc", "def").row("123", "456").row("ghi", "789");
             });
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456], [ghi, 789])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
         @Test
@@ -196,11 +197,11 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(rows -> {
+            expectedRows = makeRows(rows -> {
                 rows.row("abc", "def").row("123", "456").row("ghi", "789");
             });
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456], [ghi, 789])");
+            assertThat(result, deepEquals(expectedRows));
         }
 
 
@@ -213,11 +214,11 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(rows -> {
+            expectedRows = makeRows(rows -> {
                 rows.row("abc", "def").row("123", "456").row("ghi", "789");
             });
 
-            assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456], [ghi, 789])");
+            assertThat(result, deepEquals(expectedRows));
         }
     }
 }

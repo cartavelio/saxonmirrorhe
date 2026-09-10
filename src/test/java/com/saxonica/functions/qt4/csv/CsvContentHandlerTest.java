@@ -2,6 +2,9 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import org.junit.jupiter.api.DisplayName;
@@ -15,14 +18,21 @@ import static com.saxonica.functions.qt4.csv.TestHelpers.makeRows;
 import static net.sf.saxon.test.Assertions.*;
 import static net.sf.saxon.test.OptionsParameterHelper.defaultOptionParameters;
 import static net.sf.saxon.test.OptionsParameterHelper.parsedOptionParameters;
+import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
+import static net.sf.saxon.test.matchers.SequenceIteratorIsDeepEqualTo.deepEquals;
+import static net.sf.saxon.test.matchers.SequenceIteratorIsEmptySequence.isEmptySequence;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class CsvContentHandlerTest {
     CsvContentHandler subject;
     Map<String, GroundedValue> options = defaultOptionParameters(CsvToArrays.OPTION_DETAILS);
-    Sequence result;
+    SequenceIterator result;
 
     CsvContentHandlerTest() throws XPathException {
+    }
+
+    static UnicodeString u(String str) {
+        return BMPString.of(str);
     }
 
     @Test
@@ -32,7 +42,7 @@ class CsvContentHandlerTest {
 
         result = subject.getSequenceOfRows();
 
-        assertEmptySequence(result, "an empty ParsedCSV");
+        assertThat(result, isEmptySequence());
     }
 
     @Test
@@ -40,14 +50,11 @@ class CsvContentHandlerTest {
     void oneField() {
         subject = new CsvContentHandler(options);
 
-        subject.appendField("abc");
+        subject.appendField(u("abc"));
 
         result = subject.getSequenceOfRows();
 
-        assertAll(
-                () -> { assertSequenceLength(1, result, "expected one row"); },
-                () -> { assertXPathDeepEqual(makeRow("abc"), result, "field 1 value is abc"); }
-        );
+        assertThat(result, deepEquals(makeRow("abc")));
     }
 
     @Test
@@ -55,16 +62,13 @@ class CsvContentHandlerTest {
     void twoRecords() {
         subject = new CsvContentHandler(options);
 
-        subject.appendField("abc");
-        subject.startNewRow();
-        subject.appendField("123");
+        subject.appendField(u("abc"));
+        subject.finishRow(0);
+        subject.appendField(u("123"));
 
         result = subject.getSequenceOfRows();
 
-        assertAll(
-                () -> { assertSequenceLength(2, result, "expected two rows"); },
-                () -> { assertXPathDeepEqual(makeRows(rows -> rows.row("abc").row("123")), result); }
-        );
+        assertThat(result, deepEquals(makeRows(rows -> rows.row("abc").row("123"))));
     }
 
     @Test
@@ -75,21 +79,18 @@ class CsvContentHandlerTest {
         options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts);
         subject = new CsvContentHandler(options);
 
-        subject.appendField("   abc");
-        subject.appendField("def   ");
-        subject.appendField("   ghi   ");
-        subject.appendField("\tjkl");
-        subject.appendField("mno\t");
-        subject.appendField("\tpqr\t");
-        subject.appendField("\t  123");
-        subject.appendField("456\t  ");
-        subject.appendField("  \t789   \t");
+        subject.appendField(u("   abc"));
+        subject.appendField(u("def   "));
+        subject.appendField(u("   ghi   "));
+        subject.appendField(u("\tjkl"));
+        subject.appendField(u("mno\t"));
+        subject.appendField(u("\tpqr\t"));
+        subject.appendField(u("\t  123"));
+        subject.appendField(u("456\t  "));
+        subject.appendField(u("  \t789   \t"));
 
         result = subject.getSequenceOfRows();
 
-        assertAll(
-                () -> { assertXPathDeepEqual(makeRow("abc", "def", "ghi", "jkl", "mno", "pqr", "123", "456", "789"), result); }
-        );
-
+        assertThat(result, deepEquals(makeRow("abc", "def", "ghi", "jkl", "mno", "pqr", "123", "456", "789")));
     }
 }

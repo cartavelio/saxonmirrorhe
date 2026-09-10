@@ -3,7 +3,6 @@ package com.saxonica.functions.qt4.csv;
 import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
@@ -21,15 +20,11 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.saxonica.functions.qt4.csv.TestHelpers.expectedRows;
-import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
-import static net.sf.saxon.test.matchers.IsDeepEqualTo.deepEquals;
+import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
 import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CsvToXmlTest {
     Configuration configuration = new Configuration();

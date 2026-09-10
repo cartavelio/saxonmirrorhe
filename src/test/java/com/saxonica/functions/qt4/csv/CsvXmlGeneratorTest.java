@@ -3,19 +3,13 @@ package com.saxonica.functions.qt4.csv;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
-import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
 import net.sf.saxon.test.xmlfixtures.DslLambda;
 import net.sf.saxon.test.xmlfixtures.XmlFixtureBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,15 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.saxonica.functions.qt4.csv.TestHelpers.*;
-import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
 import static com.saxonica.test.matchers.MatchesCsvRowRecord.callFieldFunction;
-import static com.saxonica.test.matchers.MatchesCsvRowRecord.getRowFieldFunctionItem;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
-import static net.sf.saxon.test.matchers.IsDeepEqualTo.deepEquals;
-import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
-import static net.sf.saxon.test.xdmfixtures.AtomicValueBuilder.string;
+import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 class CsvXmlGeneratorTest {
     CsvXmlGenerator subject;
@@ -63,14 +52,14 @@ class CsvXmlGeneratorTest {
             csv.element("rows");
         });
 
-        actual = subject().fromRowSequence(EmptySequence.getInstance());
+        actual = subject().fromRowSequence(EmptySequence.getInstance().iterate());
 
         assertThat(actual, deepEquals(expected));
     }
 
     @Nested
     class ExtractingColumns {
-        Sequence input = makeRows(r -> r.row("name", "city").row("Alice", "Aachen"));
+        SequenceIterator input = makeRowsIterator(r -> r.row("name", "city").row("Alice", "Aachen"));
 
         @Test
         @DisplayName("generates an Empty columns record by default")
@@ -105,7 +94,7 @@ class CsvXmlGeneratorTest {
                     csv.element("rows");
                 });
 
-                actual = subject().fromRowSequence(EmptySequence.getInstance());
+                actual = subject().fromRowSequence(EmptySequence.getInstance().iterate());
 
                 assertThat(actual, deepEquals(expected));
             }

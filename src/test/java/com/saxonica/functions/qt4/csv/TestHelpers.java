@@ -1,6 +1,7 @@
 package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
 
@@ -69,4 +70,7 @@ public class TestHelpers {
         return RowMaker.build(definition).getValue();
     }
 
+    public static SequenceIterator makeRowsIterator(Consumer<RowMaker> definition) {
+        return makeRows(definition).iterate();
+    }
 }
