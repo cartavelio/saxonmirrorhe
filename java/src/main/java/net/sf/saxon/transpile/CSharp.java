@@ -44,6 +44,10 @@ public final class CSharp {
      * CSharp.staticRef is an identity function that signals to the
      * CSharp transpiler that the argument expression is a static method reference.
      *
+     * <p>Typically used in a construct such as {@code CSharp.staticRef(Literal::makeEmptySequence)}.
+     * This is needed to enable the transpiler to decide what C# code to generate. It is assumed
+     * that in Java, the indirection will be optimised away.</p>
+     *
      * @param methodReference must be supplied in the form of a method reference ClassName::method
      * @param <T>             the class of the argument
      * @return the argument, unchanged.
