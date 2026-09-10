@@ -27,7 +27,7 @@ public:
 
   //static string nativeExtensionMethod(char *param1, int number);
 
-    int c_nativeCall(void *thread){return 0;}
+    int c_nativeCall(void *thread);
 
 
 private:
