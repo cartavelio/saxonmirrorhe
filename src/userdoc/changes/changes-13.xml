@@ -89,6 +89,8 @@
         output, they are used to ensure that the trace output remains well-formed when errors are
         caught and recovered.</p>
         
+        <p>Add information regarding schema processing....</p>
+        
   
     </category>
     
@@ -97,6 +99,10 @@
     </category>
 
     <category name="JAXP" class="javaonly">
+        
+        <p>The classes ProfessionalXPathFactory and EnterpriseXPathFactory are dropped. It seems there
+        were no tests referencing these classes, and JAXP XPath has gradually been deprecated. <b>Need to
+        drop the mention in the XPath documentation.</b></p>
         
    
     </category>

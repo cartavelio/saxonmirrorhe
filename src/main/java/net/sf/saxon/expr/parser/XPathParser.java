@@ -3783,7 +3783,6 @@ public class XPathParser {
                 } else {
                     String name = readName();
                     fp = makeFingerprint(name, false);
-                    nextToken();
                     expect(Token.RPAREN);
                     nextToken();
                     SchemaDeclaration decl = env.getPackageData().getImportedSchema().getAttributeDecl(fp);
@@ -3801,7 +3800,6 @@ public class XPathParser {
                 } else {
                     String name = readName();
                     fp = makeFingerprint(name, true);
-                    nextToken();
                     expect(Token.RPAREN);
                     nextToken();
                     SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(fp);

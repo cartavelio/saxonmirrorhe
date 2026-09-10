@@ -502,6 +502,8 @@
          <p>The s9api interface allows schemas to be loaded into a <a class="javalink"
                href="net.sf.saxon.s9api.Processor">Processor</a>, and then to be used for validating
             instances, or for schema-aware XSLT and XQuery processing.</p>
+         
+         <p><b>TODO: changes for Saxon13</b></p>
 
          <p>The main steps are:</p>
          <ol>
