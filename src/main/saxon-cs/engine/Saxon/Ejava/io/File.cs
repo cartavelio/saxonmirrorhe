@@ -248,12 +248,12 @@ namespace Saxon.Ejava.io {
         public File[] listFiles(FilenameFilter filter) {
             SysCollGen.IList<string> files = new SysCollGen.List<string>();
             foreach (string dir in SysIODirectory.EnumerateDirectories(fullPath)) {
-                if (filter.accept(this, SysIOPath.GetFileName(dir))) {
+                if (filter == null || filter.accept(this, SysIOPath.GetFileName(dir))) {
                     files.Add(dir);
                 }
             }
             foreach (string file in SysIODirectory.EnumerateFiles(fullPath)) {
-                if (filter.accept(this, SysIOPath.GetFileName(file))) {
+                if (filter == null || filter.accept(this, SysIOPath.GetFileName(file))) {
                     files.Add(file);
                 }
             }
