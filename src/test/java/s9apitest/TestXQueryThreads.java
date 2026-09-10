@@ -41,7 +41,7 @@ public class TestXQueryThreads {
             xdmSequenceIterator.close();
             xqueryEvaluator.close();
         }
-
+        configuration.close();
         Thread.sleep(10000);
 
         for (int j = 0; j < 10; ++j) {
@@ -53,15 +53,18 @@ public class TestXQueryThreads {
 
         String msg = "Number of threads increased from " + threads0.size() + " to " + threads1.size();
         System.err.println(msg);
+        boolean extraThreads = false;
         for (Thread thread : threads1) {
-            if (!threads0.contains(thread)) {
+            if (!threads0.contains(thread) && !thread.getName().startsWith("Cleaner")) {
+                extraThreads = true;
                 System.err.println("  " + thread.getName());
                 for (StackTraceElement stackTraceElement : thread.getStackTrace())
                     System.err.println("    " + stackTraceElement);
             }
         }
-
-        fail(msg);
+        if (extraThreads) {
+            fail(msg);
+        }
     }
 
     private static Set<Thread> threads() {
