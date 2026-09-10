@@ -780,17 +780,7 @@ public class Transform {
                         if (!sheetFile.exists()) {
                             quit("Stylesheet file " + sheetFile + " does not exist", 2);
                         }
-                        //#if CSHARP==false
-                        if (false && styleParserName != null && Version.platform.isJava()) {
-                            InputSource eis = new InputSource(sheetFile.toURI().toString());
-                            XMLReader styleParser = config.getStyleParser();
-                            styleSource = new SAXSource(styleParser, eis);
-                        } else {
-                            //#endif
-                            styleSource = new StreamSource(sheetFile.toURI().toString());
-                            //#if CSHARP==false
-                        }
-                        //#endif
+                        styleSource = new StreamSource(sheetFile.toURI().toString());
                     }
                 }
 
@@ -1386,20 +1376,6 @@ public class Transform {
                 }
                 if (buildSourceTree) {
                     DocumentBuilder builder = processor.newDocumentBuilder();
-                    // Following code believed redundant - bug 5201 - MHK 2022-01-12
-//                    //#if CSHARP==false
-//                    StylesheetPackage top = pss.getTopLevelPackage();
-//                    if (!top.isStripsTypeAnnotations()) {
-//                        int validationMode = getConfiguration().getSchemaValidationMode();
-//                        if (validationMode == Validation.STRICT) {
-//                            builder.setSchemaValidator(processor.getSchemaManager().newSchemaValidator());
-//                        } else if (validationMode == Validation.LAX) {
-//                            SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
-//                            validator.setLax(true);
-//                            builder.setSchemaValidator(validator);
-//                        }
-//                    }
-//                    //#endif
                     builder.setDTDValidation(getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION));
                     builder.setWhitespaceStrippingPolicy(sheet.getWhitespaceStrippingPolicy());
                     if (getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE)) {
@@ -1407,9 +1383,11 @@ public class Transform {
                     }
                     StylesheetPackage top = pss.getTopLevelPackage();
                     if (top.isStripsTypeAnnotations()) {
-                        ParseOptions opt = ((AugmentedSource)source).getParseOptions().withFilter(
+                        ParseOptions opt = source instanceof AugmentedSource ? ((AugmentedSource)source).getParseOptions() : new ParseOptions();
+                        opt = opt.withFilter(
                                 receiver -> getConfiguration().getAnnotationStripper(receiver));
-                        source = new AugmentedSource(source, opt);
+                        source = AugmentedSource.makeAugmentedSource(source);
+                        ((AugmentedSource)source).setParseOptions(opt);
                     }
                     XdmNode node = builder.build(source);
                     transformer.setGlobalContextItem(node, true);
