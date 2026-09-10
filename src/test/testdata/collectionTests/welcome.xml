@@ -41,7 +41,7 @@
                         </a>
                     </td>
                     <td>
-                        <a class="bodylink" href="http://www.saxonica.com/shop/index.html">
+                        <a class="bodylink" href="https://www.saxonica.com/shop/index.html">
                             <div class="MainPageButton green">PURCHASE</div>
                         </a>
                     </td>
@@ -84,7 +84,7 @@
                 </tr>
                 <tr>
                     <td><a class="block-link" target="_blank"
-                            href="http://www.saxonica.com/papers/xmllondon-2015jl.pdf">
+                            href="https://www.saxonica.com/papers/xmllondon-2015jl.pdf">
                             <p><b>6 June 2015</b><br /> John Lumley presented a paper on
                                     <i>Improving Pattern Matching Performance in XSLT</i> at XML
                                 London 2015.</p></a></td>
@@ -99,7 +99,7 @@
                 </tr>
                 <tr>
                     <td><a class="block-link" target="_blank"
-                            href="http://www.saxonica.com/papers/xmlprague-2015mhk.pdf">
+                            href="https://www.saxonica.com/papers/xmlprague-2015mhk.pdf">
                             <p><b>14 February 2015</b><br /> Michael Kay presented a paper on
                                     <i>Parallel Processing in the Saxon XSLT Processor</i> at XML
                                 Prague 2015.</p></a></td>
@@ -123,7 +123,7 @@
                 </tr>
                 <!--<tr>
                     <td><a target="_blank" class="block-link"
-                            href="http://www.saxonica.com/papers/xmllondon-2014mhk.pdf"><p><b>07
+                            href="https://www.saxonica.com/papers/xmllondon-2014mhk.pdf"><p><b>07
                                     June 2014</b><br /> Michael Kay and Debbie Lockett presented a
                                 paper on <i>Benchmarking XSLT Performance</i> at XML London
                                 2014.</p></a></td>
