@@ -36,6 +36,7 @@ public class ResourceRequest {
 
     public static final String SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema";
     public static final String VALIDATION_PURPOSE = "http://www.rddl.org/purposes#validation";
+    
     public static final String ANY_NATURE = null;
 
     /**

@@ -731,7 +731,9 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         if (test instanceof SelectorTest) {
             test = ((SelectorTest)test).asXNodeTest(config);
         }
-        if (test == NodeTypeTest.GNODE && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
+        if (test instanceof NodeTypeTest
+                && ((NodeTypeTest)test).getItemType() == AnyXNodeType.getInstance()
+                && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
             test = MultipleNodeKindTest.CHILD_NODE;
         }
         int kind = test.getItemType().getPrimitiveType();

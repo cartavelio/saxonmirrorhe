@@ -4805,6 +4805,9 @@ public class XPathParser {
             if (functionExp instanceof FunctionLiteral && ((FunctionLiteral)functionExp).getGroundedValue() instanceof IFunctionWithRetainedParameterNames) {
                 IFunctionWithRetainedParameterNames fn = (IFunctionWithRetainedParameterNames) ((FunctionLiteral) functionExp).getGroundedValue();
                 paramNames = fn.getParameterNames();
+            } else if (functionExp instanceof UserFunctionReference) {
+                UserFunction fn = ((UserFunctionReference)functionExp).getNominalTarget();
+                paramNames = fn.getParameterNames();
             }
             if (paramNames != null) {
                 Map<StructuredQName, Integer> paramNameMap = new HashMap<>();

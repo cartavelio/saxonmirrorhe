@@ -431,6 +431,14 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
         return parameterDefinitions;
     }
 
+    public StructuredQName[] getParameterNames() {
+        StructuredQName[] names = new StructuredQName[parameterDefinitions.length];
+        for (int i=0; i<names.length; i++) {
+            names[i] = getParameterName(i);
+        }
+        return names;
+    }
+
     /**
      * Get the minumum arity of this function, that is, the number of mandatory parameters
      *

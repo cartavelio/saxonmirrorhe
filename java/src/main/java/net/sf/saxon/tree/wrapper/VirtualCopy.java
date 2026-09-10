@@ -484,7 +484,7 @@ public class VirtualCopy implements NodeInfo {
      */
     @Override
     public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
-        return makeCopier(original.iterateFollowingAxis(predicate), null, false);
+        return makeCopier(original.iterateFollowingAxis(predicate), null, true);
     }
 
     /**

@@ -13,7 +13,6 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
@@ -26,7 +25,6 @@ import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
@@ -55,7 +53,7 @@ import java.util.function.Supplier;
 
 public class DeepEqual extends CollatingFunctionFixed {
 
-    private int version;
+    private final int version;
 
     public static Supplier<SystemFunction> makeDeepEqual(int version) {
         return () -> new DeepEqual(version);
@@ -192,8 +190,8 @@ public class DeepEqual extends CollatingFunctionFixed {
             if (stringCollator == null) {
                 throw new XPathException("Unknown collation " + collationName, "FOCH0002");
             }
-            comparer = (a, b) -> a.getXPathMatchKey(stringCollator, context.getImplicitTimezone())
-                        .equals(b.getXPathMatchKey(stringCollator, context.getImplicitTimezone()));
+            comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
+                        .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
 
             if (normalizeSpace || normalizationForm != null) {
                 final BiFunction<AtomicValue, AtomicValue, Boolean> baseComparer = comparer;
@@ -1013,17 +1011,17 @@ public class DeepEqual extends CollatingFunctionFixed {
         }
     }
 
-    private static String showNamespaces(HashSet<NamespaceBinding> bindings) {
-        StringBuilder sb = new StringBuilder(256);
-        for (NamespaceBinding binding : bindings) {
-            sb.append(binding.getPrefix());
-            sb.append("=");
-            sb.append(binding.getNamespaceUri());
-            sb.append(" ");
-        }
-        sb.setLength(sb.length() - 1);
-        return sb.toString();
-    }
+//    private static String showNamespaces(HashSet<NamespaceBinding> bindings) {
+//        StringBuilder sb = new StringBuilder(256);
+//        for (NamespaceBinding binding : bindings) {
+//            sb.append(binding.getPrefix());
+//            sb.append("=");
+//            sb.append(binding.getNamespaceUri());
+//            sb.append(" ");
+//        }
+//        sb.setLength(sb.length() - 1);
+//        return sb.toString();
+//    }
 
     private static SequenceIterator mergeAdjacentTextNodes(SequenceIterator in) {
         List<Item> items = new ArrayList<>(20);
@@ -1096,64 +1094,64 @@ public class DeepEqual extends CollatingFunctionFixed {
         return "DeepEqual";
     }
 
-    private static class NormalizingComparer implements AtomicComparer {
-
-        private AtomicComparer baseComparer;
-        private DeepEqualOptions options;
-
-        public NormalizingComparer(AtomicComparer baseComparer, DeepEqualOptions options) {
-            this.baseComparer = baseComparer;
-            this.options = options;
-        }
-
-        @Override
-        public StringCollator getCollator() {
-            return baseComparer.getCollator();
-        }
-
-        @Override
-        public AtomicComparer provideContext(XPathContext context) {
-            baseComparer = baseComparer.provideContext(context);
-            return this; // TODO: thread safety?
-        }
-
-        @Override
-        public int compareAtomicValues(AtomicValue v0, AtomicValue v1) throws NoDynamicContextException {
-            return baseComparer.compareAtomicValues(v0, v1);
-        }
-
-        @Override
-        public boolean comparesEqual(AtomicValue v0, AtomicValue v1) throws NoDynamicContextException {
-            if (v0 instanceof StringValue && v1 instanceof StringValue) {
-                UnicodeString u0 = v0.getUnicodeStringValue();
-                UnicodeString u1 = v1.getUnicodeStringValue();
-                if (options.normalizeSpace) {
-                    u0 = Whitespace.collapseWhitespace(u0);
-                    u1 = Whitespace.collapseWhitespace(u1);
-                }
-                if (options.normalizationForm != null) {
-                    try {
-                        u0 = StringView.of(NormalizeUnicode.normalize(u0.toString(), options.normalizationForm));
-                    } catch (XPathException e) {
-                        throw new IllegalArgumentException(e);
-                    }
-                    try {
-                        u1 = StringView.of(NormalizeUnicode.normalize(u1.toString(), options.normalizationForm));
-                    } catch (XPathException e) {
-                        throw new IllegalArgumentException();
-                    }
-                }
-                return getCollator().comparesEqual(u0, u1);
-            } else {
-                return baseComparer.comparesEqual(v0, v1);
-            }
-        }
-
-        @Override
-        public String save() {
-            return null;
-        }
-    }
+//    private static class NormalizingComparer implements AtomicComparer {
+//
+//        private AtomicComparer baseComparer;
+//        private DeepEqualOptions options;
+//
+//        public NormalizingComparer(AtomicComparer baseComparer, DeepEqualOptions options) {
+//            this.baseComparer = baseComparer;
+//            this.options = options;
+//        }
+//
+//        @Override
+//        public StringCollator getCollator() {
+//            return baseComparer.getCollator();
+//        }
+//
+//        @Override
+//        public AtomicComparer provideContext(XPathContext context) {
+//            baseComparer = baseComparer.provideContext(context);
+//            return this; // TODO: thread safety?
+//        }
+//
+//        @Override
+//        public int compareAtomicValues(AtomicValue v0, AtomicValue v1) throws NoDynamicContextException {
+//            return baseComparer.compareAtomicValues(v0, v1);
+//        }
+//
+//        @Override
+//        public boolean comparesEqual(AtomicValue v0, AtomicValue v1) throws NoDynamicContextException {
+//            if (v0 instanceof StringValue && v1 instanceof StringValue) {
+//                UnicodeString u0 = v0.getUnicodeStringValue();
+//                UnicodeString u1 = v1.getUnicodeStringValue();
+//                if (options.normalizeSpace) {
+//                    u0 = Whitespace.collapseWhitespace(u0);
+//                    u1 = Whitespace.collapseWhitespace(u1);
+//                }
+//                if (options.normalizationForm != null) {
+//                    try {
+//                        u0 = StringView.of(NormalizeUnicode.normalize(u0.toString(), options.normalizationForm));
+//                    } catch (XPathException e) {
+//                        throw new IllegalArgumentException(e);
+//                    }
+//                    try {
+//                        u1 = StringView.of(NormalizeUnicode.normalize(u1.toString(), options.normalizationForm));
+//                    } catch (XPathException e) {
+//                        throw new IllegalArgumentException();
+//                    }
+//                }
+//                return getCollator().comparesEqual(u0, u1);
+//            } else {
+//                return baseComparer.comparesEqual(v0, v1);
+//            }
+//        }
+//
+//        @Override
+//        public String save() {
+//            return null;
+//        }
+//    }
 
 }
 

@@ -20,7 +20,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
@@ -251,7 +250,7 @@ public class ContextValueSetter extends BinaryExpression
     }
 
     /**
-     * Elaborator for a filterAM expression.
+     * Elaborator for a context value setter expression.
      */
 
     public static class ContextValueSetterElaborator extends PullElaborator {
@@ -270,11 +269,6 @@ public class ContextValueSetter extends BinaryExpression
                     return action.iterate(c2);
                 } else {
                     GroundedValue val = lhs.materialize();
-                    if (val.getLength() == 0) {
-                        // context value is an empty sequence. Return an empty iterator. This works
-                        // in most cases but is not quite right
-                        return EmptyIterator.getInstance();
-                    }
                     ManualIterator iter = new ManualIterator(new Parcel(val));
                     c2.setCurrentIterator(iter);
                     return action.iterate(c2);

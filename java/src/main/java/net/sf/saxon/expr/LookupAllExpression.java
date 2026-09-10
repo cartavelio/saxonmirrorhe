@@ -28,7 +28,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
@@ -293,7 +292,8 @@ public class LookupAllExpression extends UnaryExpression {
                     } else if (item instanceof MapItem) {
                         return new MapEntriesIterator((MapItem)item);
                     } else {
-                        return EmptyIterator.getInstance();
+                        XPathException err = new XPathException("Left-hand operand of lookup operator `?` must be a map or array", "XPTY0004").asTypeError();
+                        throw new UncheckedXPathException(err);
                     }
                 });
 

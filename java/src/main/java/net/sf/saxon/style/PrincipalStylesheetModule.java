@@ -512,7 +512,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 declarations.add((XSLUsePackage) use);
             } else if (use instanceof XSLInclude) {
                 String href = Whitespace.trim(use.getAttributeValue(NamespaceUri.NULL, "href"));
-                ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                ParseOptions options = new ParseOptions(); //.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                 DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), options);
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
                 if (includedTree == null) {

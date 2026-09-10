@@ -148,7 +148,7 @@ public final class Atomizer extends UnaryExpression {
             }
             // if all items in the sequence are atomic (they generally will be, since this is
             // done at compile time), then return the sequence
-            return operand;
+            return operand.copy(new RebindingMap());
         } else if (operand instanceof ValueOf &&
                 !ReceiverOption.contains(((ValueOf) operand).getOptions(), ReceiverOption.DISABLE_ESCAPING)) {
             // XSLT users tend to use ValueOf unnecessarily

@@ -144,9 +144,11 @@ public class DocumentFn extends SystemFunction implements Callable {
         public Location locator;
         public PackageData packageData;
         public XPathContext context;
+        public ParseOptions parseOptions;
 
         public DocumentMappingFunction(XPathContext context) {
             this.context = context;
+            this.parseOptions = context.getConfiguration().getParseOptions();
         }
 
         @Override
@@ -159,7 +161,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                     b = stylesheetURI;
                 }
             }
-            return makeDoc(item.getStringValue(), b, packageData, null, context, locator, false);
+            return makeDoc(item.getStringValue(), b, packageData, parseOptions, context, locator, false);
         }
     }
 
