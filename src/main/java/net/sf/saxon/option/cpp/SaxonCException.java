@@ -29,15 +29,7 @@ public class SaxonCException  {
         throwable = e;
 
     }
-
-
-    public String getMessage(){
-        return throwable.getMessage();
-    }
-
-    public Throwable getThrowable(){
-        return throwable;
-    }
+    
 
 
 

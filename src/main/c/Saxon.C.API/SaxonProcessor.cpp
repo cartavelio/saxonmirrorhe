@@ -284,7 +284,12 @@ void SaxonProcessor::initialize(bool l) {
 
     }
     procRef = createSaxonProcessor2((SaxonProcessor::sxn_environ->thread), (int)l);
+if(procRef<0) {
+    std::cerr<<"Processor is in unclean state"<<std::endl;
+} else {
 
+    std::cerr<<"Processor ="<<procRef<<std::endl;
+}
 
 #ifdef DEBUG
     setDebugMode(1);

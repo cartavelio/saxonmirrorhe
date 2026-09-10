@@ -27,13 +27,14 @@ Xslt30Processor::Xslt30Processor() {
 
 Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 
-    std::cerr<<"xslt30 constructor cp0: "<<proc->procRef<<std::endl;
+    if(proc == nullptr) {
+        return;
+    }
 	proc = p;
     jitCompilation = false;
     exception = nullptr;
     cppXT = createXslt30WithProcessor(SaxonProcessor::sxn_environ->thread, (void *)proc->procRef);
 
-    std::cerr<<"xslt30 constructor cp1"<<std::endl;
 
 #ifdef DEBUG
 	//jmethodID debugMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass, "setDebugMode", "(Z)V");
