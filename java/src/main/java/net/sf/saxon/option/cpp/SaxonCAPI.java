@@ -1825,6 +1825,7 @@ public class SaxonCAPI {
                 }
             }
 
+            builder.setErrorReporter(reporter);
             XdmNode doc = builder.build(source);
 
 
@@ -2004,6 +2005,7 @@ public class SaxonCAPI {
         Processor proci = null;
         String cwd = null;
         String filename = null;
+        SaxonCErrorReporter reporter = null;
 
         try {
 
@@ -2039,16 +2041,19 @@ public class SaxonCAPI {
                 if (SaxonCAPI.debug) {
                     System.err.println("DEBUG Validator object set on the builder (from: " + validatorRef.rawValue() + ") = " + filename);
                 }
+                reporter = new SaxonCErrorReporter();
+                validator.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));
                 builder.setSchemaValidator(validator);
             } else  if (SaxonCAPI.debug) {
                 System.err.println("DEBUG No validator found");
             }
+            builder.setErrorReporter(reporter);
             XdmNode node = builder.build(source);
 
             ObjectHandle handle = createHandle(node);
             return handle.rawValue();
         } catch (Exception ex) {
-            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, reporter);
             return SaxonCAPI.STATUS_EXCEPTION;
         }
     }
