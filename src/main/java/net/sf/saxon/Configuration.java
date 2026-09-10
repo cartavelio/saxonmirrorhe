@@ -2213,7 +2213,8 @@ public class Configuration implements SourceResolver, NotationSet {
      * JAXP SAXSource object initialized with an appropriate implementation of org.xml.sax.XMLReader.</p>
      *
      * @param sourceParserClass the fully qualified name of the XML parser class. This must implement
-     *                          the SAX2 XMLReader interface.
+     *                          the SAX2 XMLReader interface. The value "#DEFAULT" requests the internal
+     *                          JDK default parser.
      */
 
     public void setSourceParserClass(String sourceParserClass) {
@@ -2241,7 +2242,8 @@ public class Configuration implements SourceResolver, NotationSet {
      * of choosing an XML parser is to use JAXP interfaces, for example by supplying a
      * JAXP Source object initialized with an appropriate implementation of org.xml.sax.XMLReader.</p>
      *
-     * @param parser the fully qualified name of the XML parser class
+     * @param parser the fully qualified name of the XML parser class. The value "#DEFAULT" requests the internal
+     *      *                          JDK default parser.
      */
 
     public void setStyleParserClass(String parser) {
@@ -3412,7 +3414,8 @@ public class Configuration implements SourceResolver, NotationSet {
      * <p>This method is intended for internal use.</p>
      *
      * @param className A string containing the name of the
-     *                  SAX parser class, for example "com.microstar.sax.LarkDriver"
+     *                  SAX parser class, for example "com.microstar.sax.LarkDriver"; alternatively,
+     *                  the value "#DEFAULT" to get the internal default JDK parser
      * @return an instance of the Parser class named, or null if it is not
      * loadable or is not a Parser.
      * @throws javax.xml.transform.TransformerFactoryConfigurationError if a failure
@@ -3421,6 +3424,9 @@ public class Configuration implements SourceResolver, NotationSet {
     public XMLReader makeParser(String className)
             throws TransformerFactoryConfigurationError {
         try {
+            if (className.equals("#DEFAULT")) {
+                return Version.platform.loadParserForXmlFragments();
+            }
             Object obj = dynamicLoader.getInstance(className, null);
             if (obj instanceof XMLReader) {
                 return (XMLReader) obj;
