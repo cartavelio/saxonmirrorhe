@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ValidateTests {
     private final ConfigTest configTest = new ConfigTest();
 
-    private String TEMPDIR = configTest.getDataDir() + "temp/";
+    private final String TEMPDIR = configTest.getDataDir() + "temp/";
 
     public void setUp() {
         System.err.println("TEMP:" + TEMPDIR);
@@ -34,7 +34,7 @@ public class ValidateTests {
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
+            assertEquals(0, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -50,7 +50,7 @@ public class ValidateTests {
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
+            assertEquals(0, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -65,7 +65,7 @@ public class ValidateTests {
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
+            assertEquals(0, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -81,7 +81,7 @@ public class ValidateTests {
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
+            assertEquals(0, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -105,7 +105,7 @@ public class ValidateTests {
                 "dayOfWeek=Monday"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
+            assertEquals(0, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -123,7 +123,7 @@ public class ValidateTests {
                 "baseLine=1980-01-01"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==1);
+            assertEquals(1, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -140,7 +140,7 @@ public class ValidateTests {
                 "dayOfWeek=Sunday"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
+            assertEquals(0, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -157,7 +157,7 @@ public class ValidateTests {
                 "dayOfWeek=Monday"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==0);
+            assertEquals(0, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -174,7 +174,7 @@ public class ValidateTests {
                 "dayOfWeek=Sunday"};
         try {
             int rc = new Validate().doValidate(args);
-            assertTrue(rc==1);
+            assertEquals(1, rc);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -184,6 +184,7 @@ public class ValidateTests {
     @Test
     public void testStatsReporting() {
 
+        //noinspection ResultOfMethodCallIgnored
         new File(TEMPDIR + "validation-report.xml").delete();
 
         String[] args = {

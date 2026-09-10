@@ -2,12 +2,9 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.lib.StandardErrorReporter;
-import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,12 +29,7 @@ public class TestXQueryThreads {
         for (int i = 0; i < testCount; ++i) {
             XQueryExecutable xqueryExecutable = xqueryCompiler.compile("saxon:stream(doc('uriresolver:resolve')/*/*)");
             XQueryEvaluator xqueryEvaluator = xqueryExecutable.load();
-            xqueryEvaluator.setURIResolver(new StandardURIResolver() {
-                @Override
-                public Source resolve(String href, String base) throws XPathException {
-                    return new StreamSource(strawberryFieldsForever());
-                }
-            });
+            xqueryEvaluator.setResourceResolver(request -> new StreamSource(strawberryFieldsForever()));
             StandardErrorReporter reporter = new StandardErrorReporter();
             reporter.suppressWarning("SXQP0001");
             xqueryEvaluator.setErrorReporter(reporter);
