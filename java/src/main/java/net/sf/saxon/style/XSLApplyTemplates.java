@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.sort.SortExpression;
 import net.sf.saxon.expr.sort.SortKeyDefinitionList;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -157,7 +158,7 @@ public class XSLApplyTemplates extends StyleElement {
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "", 0, "XTTE0510");
             here = new ItemChecker(here, AnyXNodeType.getInstance(), role);
-            select = new SimpleStepExpression(here, new AxisExpression(AxisInfo.CHILD, null));
+            select = new SimpleStepExpression(here, new AxisExpression(AxisInfo.CHILD, MultipleNodeKindTest.CHILD_NODE));
             select.setLocation(allocateLocation());
             select.setRetainedStaticContext(makeRetainedStaticContext());
         }
