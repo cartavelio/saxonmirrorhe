@@ -22,6 +22,7 @@ java_*.hprof
 /src/main/java/net/sf/saxon/lib/Feature.java
 /src/main/java/net/sf/saxon/lib/FeatureCode.java
 /src/main/java/net/sf/saxon/lib/FeatureKeys.java
+/src/main/java/net/sf/saxon/lib/FeatureData.java
 /src/main/csharp/api/Saxon.Api/Feature.cs
 /src/main/csharp/api/Saxon.Api/FeatureKeys.cs
 /src/main/saxon-cs/engine/Saxon/Api/Feature.cs
