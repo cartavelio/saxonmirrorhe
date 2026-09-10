@@ -70,7 +70,7 @@ def create_xdm_dict(proc, mmap):
     Returns:
         dict: Dictionary of (PyXdmAtomicValue, PyXdmValue) pairs
     Example:
-        from saxonc@@edition@@ import *
+        from saxonc@edition@ import *
         with PySaxonProcessor(license=False) as saxonproc:
             mymap = {"a":saxonproc.make_integer_value(1), "b":saxonproc.make_integer_value(2),
                     "c":saxonproc.make_integer_value(3)}
@@ -181,7 +181,7 @@ cdef class PySaxonProcessor:
     """A PySaxonProcessor acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
     This class is itself the context that needs to be managed (i.e. allocation & release)
     Example:
-        from saxonc@@edition@@ import *
+        from saxonc@edition@ import *
         with PySaxonProcessor(license=False) as proc:
             print("Test SaxonC on Python")
             print(proc.version)

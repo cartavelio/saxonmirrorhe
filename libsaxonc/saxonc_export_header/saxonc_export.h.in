@@ -1,0 +1,14 @@
+#ifndef SAXONC_EXPORT_H
+#define SAXONC_EXPORT_H
+
+#if _MSC_VER && !__INTEL_COMPILER
+
+@MSVC_HEADER@
+
+#else
+
+@CLANG_HEADER@
+
+#endif
+
+#endif /* SAXONC_EXPORT_H */

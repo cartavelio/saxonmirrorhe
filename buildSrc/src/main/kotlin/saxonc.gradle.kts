@@ -32,8 +32,6 @@ extension.graal {
 val javaDependencies by configurations.dependencyScope("javaDependencies")
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val javaRuntime by configurations.dependencyScope("javaRuntime")
-val cMakePackageDir by configurations.consumable("cMakePackageDir")
-val debugCMakePackageDir by configurations.consumable("debugCMakePackageDir")
 
 val filteredSourcesBucket by configurations.dependencyScope("filteredSourcesBucket")
 
@@ -295,6 +293,13 @@ fun setupConfigTasks(config: String, imageTask: TaskProvider<GraalNativeImageTas
     return mainTask
 }
 
+val stopgapCOnlyJavaSrc = tasks.register<Sync>("stopgap_c_only_java_src") {
+    into(layout.buildDirectory.dir("c-only-java-src"))
+    from(preprocessJava.map { it.output }) {
+        include("net/sf/saxon/option/cpp/**/*")
+    }
+}
+
 val releaseCMakePackage = setupConfigTasks("Release", graalImage, false) {
     description = "Build and package up the native-image and CMake package config files"
 }
@@ -306,5 +311,10 @@ tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
     dependsOn(releaseCMakePackage)
 }
 
+val cMakePackageDir by configurations.consumable("cMakePackageDir")
+val debugCMakePackageDir by configurations.consumable("debugCMakePackageDir")
+val javaSrcDir by configurations.consumable("javaSrcDir")
+
 cMakePackageDir.outgoing.artifact(releaseCMakePackage.map { it.packageDir.asFile }) { builtBy(releaseCMakePackage) }
 debugCMakePackageDir.outgoing.artifact(debugCMakePackage.map { it.packageDir.asFile }) { builtBy(debugCMakePackage) }
+javaSrcDir.outgoing.artifact(stopgapCOnlyJavaSrc.map { it.destinationDir }) { builtBy(stopgapCOnlyJavaSrc) }

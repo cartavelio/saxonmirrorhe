@@ -294,5 +294,16 @@ val packageSamples = tasks.register<Copy>("package_samples_for_release") {
     }
 }
 
+val releasableSrcDir = layout.buildDirectory.dir("releasable-src")
+val sourceFilesForRelease = tasks.register<Sync>("source_files_for_release") {
+    into(releasableSrcDir)
+    from(layout.projectDirectory.dir("../saxonc/src")) {
+        exclude("saxonc/readme.txt")
+        filter<ReplaceTokens>("tokens" to mapOf("edition" to extension.edition.get(), "VERSION" to saxonBuild.version.get()))
+    }
+}
+
 val packagedSamples by configurations.consumable("packagedSamples")
 packagedSamples.outgoing.artifact(packagedSamplesDir) { builtBy(packageSamples) }
+val sourceFiles by configurations.consumable("sourceFiles")
+sourceFiles.outgoing.artifact(releasableSrcDir) { builtBy(sourceFilesForRelease) }
