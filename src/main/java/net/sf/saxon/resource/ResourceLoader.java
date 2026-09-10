@@ -157,6 +157,9 @@ public class ResourceLoader {
         InputStream inputStream = null;
         if (config != null && url.startsWith("classpath:")) {
             inputStream = ResourceLoader.urlStream(config, url);
+            if (inputStream == null) {
+                throw new FileNotFoundException(url);
+            }
         } else {
             conn = ResourceLoader.urlConnection(new URL(url));
             inputStream = conn.getInputStream();
