@@ -88,7 +88,8 @@ public interface Numberer {
      *                        of xsl:number, e.g. "1", "01", "i", or "a"
      * @param numGrpFormatter an object that handles insertion of grouping separators into the formatted number
      * @param letterValue     The letter-value specified to xsl:number: "alphabetic" or
-     *                        "traditional". Can also be an empty string or null.
+     *                        "traditional". The value "Xnn" or "xnn" signifies use of a radix other than 10,
+     *                        in the range 2 to 36. Can also be an empty string or null.
      * @param cardinal       When called from xsl:number, the value is set to an empty string.
      *                       When called from format-integer, the value is the value within
      *                       parentheses after "c", for example "c(%spellout-masculine)"  supplies
