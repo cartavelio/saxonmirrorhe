@@ -131,9 +131,9 @@ public class TestXsltCompiler {
 
     @Test
     public void testXPathVersion305() {
-//        xpathVersionTest("A", "'b'||'c'", 305, true);
-//        xpathVersionTest("B", "(1 to 3)!(.*.)", 305, true);
-//        xpathVersionTest("C", "exists(map{})", 305, true);
+        xpathVersionTest("A", "'b'||'c'", 305, true);
+        xpathVersionTest("B", "(1 to 3)!(.*.)", 305, true);
+        xpathVersionTest("C", "exists(map{})", 305, true);
         xpathVersionTest("D", "[1,2]", 305, false);
         xpathVersionTest("E", "(1 to 5)=>count()", 305, false);
         xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 305, true);
@@ -163,17 +163,17 @@ public class TestXsltCompiler {
 
     @Test
     public void testXPathVersion40() {
-//        xpathVersionTest("A", "'b'||'c'", 40, true);
-//        xpathVersionTest("B", "(1 to 3)!(.*.)", 40, true);
-//        xpathVersionTest("C", "exists(map{})", 40, true);
-//        xpathVersionTest("D", "[1,2]", 40, true);
-//        xpathVersionTest("E", "(1 to 5)=>count()", 40, true);
-//        xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 40, true);
-//        xpathVersionTest("G", "if (current-date() lt xs:date('2010-01-01')) then 0 else 1", 40, true);
-//        xpathVersionTest("H", "let $x := 3 return $x+1", 40, true);
-//        xpathVersionTest("I", "42[starts-with(string(current-date()), '1999')] otherwise 43", 40, true);
-//        xpathVersionTest("J", "format-integer(42, '001')", 40, true);
-//        xpathVersionTest("K", "parse-json('[]')", 40, true);
+        xpathVersionTest("A", "'b'||'c'", 40, true);
+        xpathVersionTest("B", "(1 to 3)!(.*.)", 40, true);
+        xpathVersionTest("C", "exists(map{})", 40, true);
+        xpathVersionTest("D", "[1,2]", 40, true);
+        xpathVersionTest("E", "(1 to 5)=>count()", 40, true);
+        xpathVersionTest("F", "for $x in 1 to 3 return $x+1", 40, true);
+        xpathVersionTest("G", "if (current-date() lt xs:date('2010-01-01')) then 0 else 1", 40, true);
+        xpathVersionTest("H", "let $x := 3 return $x+1", 40, true);
+        xpathVersionTest("I", "42[starts-with(string(current-date()), '1999')] otherwise 43", 40, true);
+        xpathVersionTest("J", "format-integer(42, '001')", 40, true);
+        xpathVersionTest("K", "parse-json('[]')", 40, true);
         xpathVersionTest("L", "all-different((3,2,1))", 40, true);
     }
 
