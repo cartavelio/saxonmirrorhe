@@ -38,7 +38,7 @@ namespace TestRunner {
 
 
         //file:////C:/work/repositories/hg/xslt30-test/ C:/work/repositories/hg/xslt30-test/results/saxon/ -lang:XT30 -xt30:on
-        public static void Mainxxxxx(string[] args) {
+        public static void MainXSLT(string[] args) {
             if (args.Length == 0 || args[0].Equals("-?")) {
                 System.Console.WriteLine("testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
                                          " [-t:testNamePattern] [-bytecode:on|off|debug] [-tree] [-lang] [-save][-export][-strict]");
@@ -256,7 +256,8 @@ namespace TestRunner {
 
         private bool isSlow(string testName) {
             return testName.StartsWith("regex-classes") ||
-                   testName.Equals("normalize-unicode-008");
+                   testName == "normalize-unicode-008";
+                   ;
         }
 
         internal void CopySchemaNamespace(Environment env, XPathCompiler testXpc) {
@@ -286,7 +287,6 @@ namespace TestRunner {
                 return;
             }
 
-
             Environment env = getEnvironment(testCase, xpath);
             if (env == null) {
                 resultsDoc.writeTestcaseElement(testName, "notRun", "test catalog error");
@@ -297,10 +297,6 @@ namespace TestRunner {
                 env.processor.Implementation.setConfigurationProperty(JFeatureKeys.ENVIRONMENT_VARIABLE_RESOLVER,
                     new EnvironmentVariableResolver());
             }
-
-            // XdmNode testInput = (XdmNode) xpath.EvaluateSingle("test", testCase);
-            //XdmNode stylesheet = (XdmNode) xpath.EvaluateSingle("stylesheet", testInput);
-            //XdmNode pack = (XdmNode) xpath.EvaluateSingle("package", testInput);
 
             Step<XdmNode, XdmNode> testSetDependencies =
                 Steps.Root().Then(Steps.Child("test-set").Then(Steps.Child("dependencies")));
@@ -352,23 +348,6 @@ namespace TestRunner {
                 ModuleResolver mr = new ModuleResolver(null, this);
                 mr.setTestCase(testCase);
                 env.processor.QueryResolver = mr;
-                /*env.processor.getUnderlyingConfiguration().setModuleURIResolver(
-                        (moduleURI, baseURI, locations)-> {
-                    File file = queryModules.get(moduleURI);
-                    if (file == null)
-                    {
-                        return null;
-                    }
-                    try
-                    {
-                        StreamSource ss = new StreamSource(new FileInputStream(file), baseURI);
-                        return new StreamSource[] { ss };
-                    }
-                    catch (FileNotFoundException e)
-                    {
-                        throw new XPathException(e);
-                    }
-                }); */
             }
 
             XdmNode testInput = testCase.Select(Steps.Child("test")).FirstOrDefault();
@@ -383,16 +362,13 @@ namespace TestRunner {
 
 
             XsltExecutable sheet = env.xsltExecutable;
-            //ErrorCollector collector = new ErrorCollector();
 
-            ErrorCollector collector = new ErrorCollector(outcome);
-            SysCollGen.IList<XmlProcessingError> errorList = new SysCollGen.List<XmlProcessingError>();
             XmlUrlResolver res = new XmlUrlResolver();
             string xsltLanguageVersion = specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0";
             if (stylesheet != null) {
                 env.processor.SetProperty(FeatureKeys.ALLOW_MULTITHREADING, "false");
                 XsltCompiler compiler = env.xsltCompiler;
-                compiler.SetErrorList(errorList);
+                compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 Uri hrefFile = res.ResolveUri(stylesheet.BaseUri, stylesheet.GetAttributeValue(new QName("file")));
                 Stream styleSource = new FileStream(hrefFile.AbsolutePath, FileMode.Open, FileAccess.Read);
                 compiler.BaseUri = hrefFile;
@@ -422,7 +398,7 @@ namespace TestRunner {
                     Stream styleSource2 = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
 
                     XsltPackage xpack = compiler.CompilePackage(styleSource2);
-                    xpack = exportImportPackage(testName, testSetName, outcome, compiler, xpack, collector);
+                    xpack = exportImportPackage(testName, testSetName, outcome, compiler, xpack);
                     compiler.ImportPackage(xpack);
                     // Following needed for dynamic loading of packages using fn:transform()
                     // env.processor.getUnderlyingConfiguration().getDefaultXsltCompilerInfo().getPackageLibrary().addPackage(xpack.getUnderlyingPreparedPackage()); //TODO - check this on .net
@@ -430,28 +406,15 @@ namespace TestRunner {
 
 
                 try {
-                    sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector,
-                        styleSource); //compiler.Compile(stream);
+                    sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource); 
                 }
                 catch (Exception err) {
                     Console.WriteLine(err.Message);
-                    //Console.WriteLine(err.StackTrace);
-                    IEnumerator enumerator = errorList.GetEnumerator();
-                    bool checkCur = enumerator.MoveNext();
-                    /*if (checkCur && enumerator.Current != null) {
-                        outcome.SetException ((Exception)(enumerator.Current));
-                    } else {
-                        Console.WriteLine ("Error: Unknown exception thrown");
-                    }*/
-                    outcome.SetErrorsReported(errorList);
                     outcome.SetException(err);
-
-                    //outcome.SetErrorsReported(collector.GetErrorCodes);
                 }
 
 
-                string optimizationAssertion;
-                optimizationAssertions.TryGetValue(testName, out optimizationAssertion);
+                optimizationAssertions.TryGetValue(testName, out var optimizationAssertion);
                 if (optimizationAssertion != null && sheet != null) {
                     try {
                         bool ok = AssertOptimization(sheet, optimizationAssertion);
@@ -477,30 +440,8 @@ namespace TestRunner {
                 //  compiler.setErrorListener(collector);
             }
             else if (principalPackage != null) {
-                /*	Uri hrefFile = res.ResolveUri(pack.BaseUri, pack.GetAttributeValue(new QName("file")));
-                    Stream stream = new FileStream(hrefFile.AbsolutePath, FileMode.Open, FileAccess.Read);
-
-                    XsltCompiler compiler = env.xsltCompiler;
-                    compiler.ErrorList = errorList;
-                    compiler.XsltLanguageVersion =  (spec.Contains("XSLT30") || spec.Contains("XSLT20+") ? "3.0" : "2.0");
-                    //compiler.setErrorListener(collector);
-
-                    try {
-                        XsltPackage xpack = compiler.CompilePackage(stream);
-                        sheet = xpack.Link();
-                    } catch (Exception err) {
-                        Console.WriteLine (err.Message);
-                        IEnumerator enumerator = errorList.GetEnumerator ();
-                        if (enumerator.MoveNext())
-                        {
-                            outcome.SetException((Exception)(enumerator.Current));
-                            outcome.SetErrorsReported(errorList);
-                        }
-                    } */
-
                 XsltCompiler compiler = env.xsltCompiler;
-                //compiler.setXsltLanguageVersion(xsltLanguageVersion);
-                //compiler.ErrorReporter = collector;
+                compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 compiler.ClearParameters();
                 SysCollGen.IEnumerable<XdmNode> paramEnumerable = testInput.Select(Steps.Child("param").Where(IsTrue("static")));
 
@@ -518,8 +459,6 @@ namespace TestRunner {
 
                     compiler.SetParameter(new QName(name), value);
                 }
-
-                ;
 
                 foreach (XdmNode pack in usedPackages) {
                     String pfileName = pack.GetAttributeValue("file");
@@ -542,11 +481,10 @@ namespace TestRunner {
                 catch (Exception err) {
                     println(err.Message);
                     outcome.SetException(err);
-                    //outcome.SetErrorsReported(collector.);
                 }
 
 
-                sheet = exportImport(testName, testSetName, outcome, compiler, sheet, collector, styleSource);
+                sheet = exportImport(testName, testSetName, outcome, compiler, sheet, styleSource);
             }
 
             if (sheet != null) {
@@ -559,7 +497,7 @@ namespace TestRunner {
                 QName initialModeName = initialMode == null ? null : GetQNameAttribute(xpath, initialMode, "@name");
                 QName initialTemplateName =
                     initialTemplate == null ? null : GetQNameAttribute(xpath, initialTemplate, "@name");
-                string baseOutputURI = "file:////" + resultsDir + "/results/output.xml";
+                string baseOutputURI = new System.Uri(resultsDir + "/results/output.xml").AbsoluteUri;
                 XdmNode outputNode = testInput.Select(Steps.Path("output", "@file")).FirstOrDefault();
                 string outputUri = (outputNode != null ? outputNode.GetStringValue() : null);
 
@@ -626,13 +564,7 @@ namespace TestRunner {
                         foreach (SysCollGen.KeyValuePair<QName, XdmValue> entry in caseGlobalParams) {
                             globalParams.Add(entry.Key, entry.Value);
                         }
-
-                        /*foreach(KeyValuePair<QName, XdmValue> entry in caseStaticParams) {
-							globalParams.Add(entry.Key, entry.Value);
-
-						}*/
-
-
+                        
                         transformer.SetStylesheetParameters(globalParams);
 
                         if (contextItem != null) {
@@ -648,21 +580,13 @@ namespace TestRunner {
                         TextWriter sw = new StringWriter();
 
                         Serializer serializer = env.processor.NewSerializer();
-
                         serializer.SetOutputWriter(sw);
-                        //serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-
-                        OutputResolver serializingOutput = new OutputResolver(env.processor, outcome, true);
-                        net.sf.saxon.Controller controller = transformer.GetUnderlyingController;
-
-
+                        
                         XmlDestination dest = null;
                         if (resultAsTree && !resultSerialized) {
                             // If we want non-serialized, we need to accumulate any result documents as trees too
                             transformer.ResultDocumentHandler =
                                 new ResultDocumentHandler(env.processor, outcome, baseOutputURI, false);
-
-
                             dest = new XdmDestination();
                         }
                         else if (resultSerialized) {
@@ -733,7 +657,6 @@ namespace TestRunner {
                             }
                         }
 
-
                         if (initialTemplateName != null) {
                             transformer.GlobalContextItem = contextItem;
                             if (dest == null) {
@@ -780,7 +703,6 @@ namespace TestRunner {
                             }
                         }
 
-                        //outcome.SetWarningsReported(collector.getFoundWarnings());
                         if (resultAsTree && !resultSerialized) {
                             result = ((XdmDestination) (dest)).XdmNode;
                         }
@@ -817,34 +739,12 @@ namespace TestRunner {
                         }
                     }
                     catch (Exception err) {
-                        //if (err.getCause() is XPathException &&
-                        //!((XPathException) err.getCause()).hasBeenReported()) {
-                        //System.err.println("Unreported ERROR: " + err.getCause());
-                        //}
                         outcome.SetException(err);
-                        if (collector.getErrorCodes().Count > 0) {
-                            outcome.SetErrorQNameReported(collector.getErrorCodes());
-                        }
-
-                        //Console.WriteLine(err.StackTrace);
-                        /*if(err.getErrorCode() == null) {
-                        int b = 3 + 4;  }
-                    if(err.getErrorCode() != null)
-                        outcome.AddReportedError(err.getErrorCode().getLocalName());
-                    } else {
-                        outcome.SetErrorsReported(collector.getErrorCodes());
-                    }*/
-                    } /*catch (Exception err) {
-						err.printStackTrace();
-						failures++;
-						resultsDoc.writeTestcaseElement(testName, "fail", "*** crashed " + err.getClass() + ": " + err.getMessage());
-						return;
-					}*/
+                    } 
                 }
                 else {
                     try {
                         XsltTransformer transformer = sheet.Load();
-
 
                         //transformer.SetURIResolver(env); //TODO
                         if (env.unparsedTextResolver != null) {
@@ -879,14 +779,7 @@ namespace TestRunner {
                             transformer.SetParameter(varName, env.params1[varName]);
                         }
 
-                        //transformer.setErrorListener(collector);
                         transformer.BaseOutputUri = new Uri(resultsDir + "/results/output.xml");
-                        /*transformer.MessageListener = (new MessageListener() {
-                            public void message(XdmNode content, bool terminate, SourceLocator locator) {
-                                outcome.addXslMessage(content);
-                            }
-                        });*/
-
 
                         // Run the transformation twice, once for serialized results, once for a tree.
                         // TODO: we could be smarter about this and capture both
@@ -908,7 +801,8 @@ namespace TestRunner {
                             SysCollGen.Dictionary<Uri, TestOutcome.SingleResultDoc> xslResultDocument =
                                 outcome.GetSecondaryResultDocuments();
 
-                            foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in xslResultDocument) {
+                            foreach (SysCollGen.KeyValuePair<Uri, TestOutcome.SingleResultDoc> entry in
+                                xslResultDocument) {
                                 Uri key = entry.Key;
                                 if (key != null) {
                                     String path = entry.Key.AbsolutePath;
@@ -930,25 +824,20 @@ namespace TestRunner {
                         transformer.ResultDocumentHandler = new ResultDocumentHandler(env.processor, outcome,
                             testCase.BaseUri.AbsolutePath, false);
                         transformer.Run(destination);
-
-                        //transformer. .transform();
                         outcome.SetPrincipalResult(destination.XdmNode);
-                        //}
+                    }
+                    catch (DynamicError err) {
+                        outcome.SetException(err);
                     }
                     catch (Exception err) {
                         outcome.SetException(err);
-                        //outcome.SetErrorsReported(collector.getErrorCodes());
-                        // err.printStackTrace();
-                        // failures++;
-                        //resultsDoc.writeTestcaseElement(testName, "fail", "*** crashed " + err.Message);
-                        //return;
+                        Console.Error.WriteLine(err);
                     }
                 }
             }
 
-            XdmNode
-                assertion = (XdmNode) xpath.EvaluateSingle("result/*",
-                    testCase); //testCase.Select(PathFromList(new List<>Child("result"), Child().Where(IsElement())));
+            XdmNode assertion = (XdmNode) xpath.EvaluateSingle("result/*", testCase); 
+            //testCase.Select(PathFromList(new List<>Child("result"), Child().Where(IsElement())));
             if (assertion == null) {
                 recordFailure(testSetName, testName);
                 resultsDoc.writeTestcaseElement(testName, "fail", "No test assertions found");
@@ -995,7 +884,7 @@ namespace TestRunner {
         }
 
         protected XsltExecutable exportImport(string testName, string testSetName, TestOutcome outcome,
-            XsltCompiler compiler, XsltExecutable sheet, ErrorCollector collector, Stream styleSource) {
+            XsltCompiler compiler, XsltExecutable sheet, Stream styleSource) {
             try {
                 if (export && IsExportable(testName)) {
                     sheet = ExportStylesheet(testName, testSetName, compiler, sheet, styleSource);
@@ -1045,7 +934,7 @@ namespace TestRunner {
         }
 
         private XsltPackage exportImportPackage(string testName, string testSetName, TestOutcome outcome,
-            XsltCompiler compiler, XsltPackage pack, ErrorCollector collector) {
+            XsltCompiler compiler, XsltPackage pack) {
             try {
                 if (export) {
                     try {

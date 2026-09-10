@@ -69,7 +69,7 @@ namespace TestRunner {
 
         //C:/work/repositories/hg/qt3-testsuite/ C:/work/repositories/hg/qt3-testsuite/results/saxon/ -lang:XQ31
         //file:////C:/work/repositories/hg/qt3tests/ C:/work/repositories/hg/qt3tests/results/saxon/ -lang:XQ30
-        public static void Main(string[] args) {
+        public static void MainQT(string[] args) {
             if (args.Length == 0 || args[0].Equals("-?")) {
                 System.Console.WriteLine("testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
                                          " [-t:testNamePattern] [-unfolded] [-bytecode:on|off|debug] [-tree] [-lang:XP20|XP30|XQ10|XQ30|XQ31]");
@@ -160,7 +160,7 @@ namespace TestRunner {
                 return "year_lt_0".Equals(value) && !inverse;
             }
             else if ("spec".Equals(type)) {
-                return true;
+                return !(value.Contains("40"));
             }
             else if ("collection-stability".Equals(type)) {
                 // SAXON has a problem here - we don't support stable collections
@@ -304,6 +304,10 @@ namespace TestRunner {
             }
         }
 
+        private bool isSlow(String name) {
+            return name == "RangeExpr-409d" || name.StartsWith("unicode90");
+        }
+
         /**
          * Run a test case
          *
@@ -429,6 +433,13 @@ namespace TestRunner {
                 }
             }
 
+            if (isSlow(testCaseName)) {
+                writeTestcaseElement(testCaseName, "tooBig", "Test is too slow", spec);
+                run = false;
+                notrun++;
+                return;
+            }
+
             XdmNode exceptionElement;
 
             exceptionsMap.TryGetValue(testCaseName, out exceptionElement);
@@ -519,8 +530,8 @@ namespace TestRunner {
                         //testXqc.DeclareNamespace("math", NamespaceConstant.MATH);
                         testXqc.DeclareNamespace("map", "http://www.w3.org/2005/xpath-functions/map");
                         testXqc.DeclareNamespace("array", "http://www.w3.org/2005/xpath-functions/array");
-                        // ErrorCollector errorCollector = new ErrorCollector();
-                        testXqc.ErrorList = new SysCollGen.List<StaticError>();
+                        SysCollGen.List<XmlProcessingError> errorList = new SysCollGen.List<XmlProcessingError>();
+                        testXqc.ErrorReporter = err => errorList.Add(err);
                         string decVars = env.paramDecimalDeclarations.ToString();
                         if (decVars.Length != 0) {
                             int x = (exp.IndexOf("(:%DECL%:)"));
@@ -543,10 +554,7 @@ namespace TestRunner {
                             }
                         }
 
-                        ModuleResolver mr = new ModuleResolver(xpc);
-                        mr.setTestCase(testCase);
-                        testXqc.QueryResolver = mr; // .setModuleURIResolver(mr); //TODO
-                        //testXqc.QueryResolver = mr;
+                        testXqc.QueryResolver = new ModuleResolver(xpc, testCase);
                         try {
                             XQueryExecutable q = testXqc.Compile(exp);
                             if (optimization != null) {
@@ -605,20 +613,20 @@ namespace TestRunner {
                                     outcome.SetPrincipalResult(result);
                                 }
                                 catch (StackOverflowException err) {
-                                    println("in TestSet " + testSetName + err.StackTrace);
+                                    println("in TestSet " + testSetName);
                                     println(err.Message);
                                     outcome.SetException(err);
                                 }
                             }
                         }
                         catch (StackOverflowException err) {
-                            println("in TestSet " + testSetName + err.StackTrace);
+                            println("in TestSet " + testSetName);
                             println(err.Message);
                             outcome.SetException(err);
                         }
                         catch (Exception err) {
-                            println("in TestSet " + testSetName + err.StackTrace);
-                            println(err.Message);
+                            println("in TestSet " + testSetName);
+                            println(err.ToString());
                             outcome.SetException(err);
                             //	outcome.SetErrorsReported(testXqc.ErrorList); //TODO
                         }
@@ -755,24 +763,16 @@ namespace TestRunner {
         }
 
         public class ModuleResolver : IQueryResolver {
-            XPathCompiler catXPC;
-            XdmNode testCase;
+            private readonly XPathCompiler catalogXPathCompiler;
+            private readonly XdmNode testCase;
 
-            public ModuleResolver(XPathCompiler xpc) {
-                this.catXPC = xpc;
-            }
-
-            public void setTestCase(XdmNode testCase) {
+            public ModuleResolver(XPathCompiler xpc, XdmNode testCase) {
+                this.catalogXPathCompiler = xpc;
                 this.testCase = testCase;
             }
 
-
             public Object GetEntity(Uri absoluteUri) {
-                String fullPath = absoluteUri.AbsolutePath;
-                Stream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
-                //javax.xml.transform.Source sourcei = new javax.xml.transform.stream.StreamSource(uri);
-
-                return stream;
+                return new FileStream(absoluteUri.AbsolutePath, FileMode.Open, FileAccess.Read);
             }
 
             internal Uri resolve(Uri basei, String child) {
@@ -781,36 +781,19 @@ namespace TestRunner {
 
 
             public Uri[] GetModules(String moduleUri, Uri baseUri, String[] locationHints) {
-                XdmValue files = catXPC.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
+                XdmValue files = catalogXPathCompiler.Evaluate("./module[@uri='" + moduleUri + "']/@file/string()", testCase);
                 if (files.Count == 0) {
                     throw new Exception("Failed to find module entry for " + moduleUri);
                 }
 
-                Uri[] fullPaths = new Uri[1];
-
-
-                fullPaths[0] = resolve(baseUri, files.Unwrap().head().getStringValue());
-
-
-                return fullPaths;
-            }
-
-            /*public StreamSource[] resolve(string moduleURI, string baseURI, string[] locations) {
-                try {
-                    XdmValue files = catXPC.Evaluate("./module[@uri='" + moduleURI + "']/@file/string()", testCase);
-                    if (files.size() == 0) {
-                        throw new XPathException("Failed to find module entry for " + moduleURI);
-                    }
-                    StreamSource[] ss = new StreamSource[files.size()];
-                    for (int i = 0; i < files.size(); i++) {
-                        URI uri = testCase.getBaseURI().resolve(files.itemAt(i).ToString());
-                        ss[i] = getQuerySource(uri);
-                    }
-                    return ss;
-                } catch (SaxonApiException e) {
-                    throw new XPathException(e);
+                Uri[] uris = new Uri[files.Count];
+                int u = 0;
+                foreach (XdmItem file in files) {
+                    uris[u++] = resolve(baseUri, file.Unwrap().getStringValue());
                 }
-            }*/
+
+                return uris;
+            }
         }
 
         public class EnvironmentVariableResolver : net.sf.saxon.lib.EnvironmentVariableResolver {

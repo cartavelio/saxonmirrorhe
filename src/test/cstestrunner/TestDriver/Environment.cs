@@ -82,9 +82,9 @@ namespace TestRunner {
 
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
-            environment.xpathCompiler.BaseUri = baseURI.ToString(); //TODO: Check that this is OK
+            environment.xpathCompiler.BaseUri = baseURI.ToString(); 
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
-            environment.xqueryCompiler.BaseUri = "file:////" + baseURI.AbsolutePath;
+            environment.xqueryCompiler.BaseUri = baseURI.ToString();
             environment.xsltCompiler = environment.processor.NewXsltCompiler();
             environment.xsltCompiler.BaseUri = new Uri(baseURI.ToString());
             environment.xsltCompiler.XsltLanguageVersion = spec.Equals(Spec.XT30) ? "3.0" : "2.0";
@@ -882,6 +882,7 @@ namespace TestRunner {
                         environment.sourceDocs.Add(uri, doc);
                     }
                     catch (Exception e) {
+                        Console.Error.WriteLine(e);
                         driver.println("*** failed to build source document " + href + ", Exception:" + e.Message);
                     }
 
