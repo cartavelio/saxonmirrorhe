@@ -240,7 +240,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("replace", 3, e -> e.populate(ArrayReplace::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                    .arg(2, forEachFunctionType, ONE, null));
+                    .arg(2, forEachFunctionType31, ONE, null));
 
             register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));

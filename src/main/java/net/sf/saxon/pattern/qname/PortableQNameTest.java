@@ -2,33 +2,21 @@ package net.sf.saxon.pattern.qname;
 
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
-public class SpecificQNameTest implements QNameTest {
+/**
+ * An alternative to {@link SpecificQNameTest} that is not bound to a specific name pool.
+ */
 
-    private final int fingerprint;
+public class PortableQNameTest implements QNameTest {
+
     private final StructuredQName qName;
 
-    private final NamePool namePool;
 
-    public SpecificQNameTest(StructuredQName qName, NamePool pool) {
-        this.namePool = pool;
-        this.qName = qName;
-        this.fingerprint = pool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart());
-    }
-
-    public SpecificQNameTest(NamePool pool, int fingerprint) {
-        this.namePool = pool;
-        this.fingerprint = fingerprint;
-        this.qName = namePool.getStructuredQName(fingerprint);
-    }
-
-    public SpecificQNameTest(StructuredQName qName, NamePool pool, int fingerprint) {
-        this.namePool = pool;
-        this.fingerprint = fingerprint;
+    public PortableQNameTest(StructuredQName qName) {
         this.qName = qName;
     }
 
@@ -43,7 +31,7 @@ public class SpecificQNameTest implements QNameTest {
 
     @Override
     public boolean matchesFingerprint(NamePool namePool, int fp) {
-        return fp == fingerprint;
+        return namePool.allocateFingerprint(qName.getNamespaceUri(), qName.getLocalPart()) == fp;
     }
 
     @Override
@@ -56,7 +44,9 @@ public class SpecificQNameTest implements QNameTest {
         if (other instanceof AnyQNameTest) {
             return Affinity.SUBSUMED_BY;
         } else if (other instanceof SpecificQNameTest) {
-            return this.fingerprint == ((SpecificQNameTest)other).fingerprint ? Affinity.SAME_TYPE : Affinity.DISJOINT;
+            return this.qName.equals(((SpecificQNameTest) other).getStructuredQName()) ? Affinity.SAME_TYPE : Affinity.DISJOINT;
+        } else if (other instanceof PortableQNameTest) {
+            return this.qName.equals(((PortableQNameTest)other).qName) ? Affinity.SAME_TYPE : Affinity.DISJOINT;
         } else if (other instanceof NamespaceQNameTest) {
             return qName.hasURI(((NamespaceQNameTest)other).getNamespace()) ? Affinity.SUBSUMED_BY : Affinity.DISJOINT;
         } else if (other instanceof LocalQNameTest) {
@@ -72,7 +62,7 @@ public class SpecificQNameTest implements QNameTest {
 
     @Override
     public NodeTest makeNodeTest(int nodeKind) {
-        return new NameTest(nodeKind, qName.getNamespaceUri(), qName.getLocalPart(), namePool);
+        return new PortableNameTest(nodeKind, qName.getNamespaceUri(), qName.getLocalPart());
     }
 
     @Override
@@ -83,12 +73,12 @@ public class SpecificQNameTest implements QNameTest {
 
     @Override
     public int hashCode() {
-        return fingerprint;
+        return qName.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof SpecificQNameTest && ((SpecificQNameTest)obj).fingerprint == fingerprint;
+        return obj instanceof PortableQNameTest && ((PortableQNameTest)obj).qName.equals(qName);
     }
 }
 

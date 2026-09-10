@@ -10,9 +10,11 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -44,11 +46,13 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("analyze-string", 3, e -> e.populate( AnalyzeStringFn::new, NodeKindTest.ELEMENT,
+        ItemType analyzeStringReturnType = new PortableNameTest(
+                Type.ELEMENT, NamespaceUri.FN, "analyze-string-result");
+        register("analyze-string", 3, e -> e.populate( AnalyzeStringFn::new, analyzeStringReturnType,
                  ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+                .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
         register("apply", 2, e -> e.populate( ApplyFn::new, AnyItemType.getInstance(),
                  STAR, LATE)

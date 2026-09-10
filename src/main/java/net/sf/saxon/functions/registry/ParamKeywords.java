@@ -49,7 +49,7 @@ public class ParamKeywords {
         arrayParamNames.put("insert-before", "array|position|member");
         arrayParamNames.put("join", "arrays");
         arrayParamNames.put("members", "array");
-        arrayParamNames.put("of", "input");
+        arrayParamNames.put("of-members", "input");
         arrayParamNames.put("partition", "input|break-when");
         arrayParamNames.put("put", "array|position|member");
         arrayParamNames.put("remove", "array|positions");
@@ -94,6 +94,7 @@ public class ParamKeywords {
         fnParamNames.put("contains-token", "value|token|collation");
         fnParamNames.put("count", "input");
         fnParamNames.put("csv-to-arrays", "value|options");
+        fnParamNames.put("csv-to-xml", "value|options");
         fnParamNames.put("current-date", "");
         fnParamNames.put("current-dateTime", "");
         fnParamNames.put("current-time", "");
@@ -204,6 +205,7 @@ public class ParamKeywords {
         fnParamNames.put("op", "operator");
         fnParamNames.put("outermost", "nodes");
         fnParamNames.put("parcel", "input");
+        fnParamNames.put("parse-csv", "value|options");
         fnParamNames.put("parse-ietf-date", "value");
         fnParamNames.put("parse-integer", "value|radix");
         fnParamNames.put("parse-json", "value|options");
@@ -289,7 +291,7 @@ public class ParamKeywords {
         mapParamNames.put("keys", "map");
         mapParamNames.put("keys-where", "map|predicate");
         mapParamNames.put("merge", "maps|options");
-        mapParamNames.put("of", "pairs|combine");
+        mapParamNames.put("of-pairs", "input|combine");
         mapParamNames.put("pair", "key|value");
         mapParamNames.put("pairs", "map");
         mapParamNames.put("put", "map|key|value");

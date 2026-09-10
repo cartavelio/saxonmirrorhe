@@ -4,6 +4,7 @@ import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
@@ -57,6 +58,8 @@ public class SpecificQNameTest implements QNameTest {
             return Affinity.SUBSUMED_BY;
         } else if (other instanceof SpecificQNameTest) {
             return this.fingerprint == ((SpecificQNameTest)other).fingerprint ? Affinity.SAME_TYPE : Affinity.DISJOINT;
+        } else if (other instanceof PortableQNameTest) {
+            return this.getStructuredQName().equals(((PortableQNameTest)other).getStructuredQName()) ? Affinity.SAME_TYPE : Affinity.DISJOINT;
         } else if (other instanceof NamespaceQNameTest) {
             return qName.hasURI(((NamespaceQNameTest)other).getNamespace()) ? Affinity.SUBSUMED_BY : Affinity.DISJOINT;
         } else if (other instanceof LocalQNameTest) {

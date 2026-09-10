@@ -4,6 +4,7 @@ import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.LocalNameTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.PortableNameTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.type.Affinity;
 
@@ -34,6 +35,8 @@ public class LocalQNameTest implements QNameTest {
             return Affinity.SUBSUMED_BY;
         } else if (other instanceof SpecificQNameTest) {
             return ((SpecificQNameTest) other).getStructuredQName().getLocalPart().equals(localName) ? Affinity.SUBSUMES : Affinity.DISJOINT;
+        } else if (other instanceof PortableQNameTest) {
+            return ((PortableQNameTest) other).getStructuredQName().getLocalPart().equals(localName) ? Affinity.SUBSUMES : Affinity.DISJOINT;
         } else if (other instanceof NamespaceQNameTest) {
             return Affinity.OVERLAPS;
         } else if (other instanceof LocalQNameTest) {

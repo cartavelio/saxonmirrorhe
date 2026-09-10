@@ -13,14 +13,9 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Affinity;
 
 /**
- * Interface for tests against a QName. This is implemented by a subset of NodeTests, specifically
- * those that are only concerned with testing a name. It is used for matching error
- * codes against the codes specified in a try/catch clause, and also to match component names
- * in xsl:accept and xsl:expose.
- *
- * The various implementations of QNameTest typically match a node kind as well as node name. This
- * interface, however, is concerned only with matching of QNames, and the ability of an implementation
- * to match a node kind as well is redundant.
+ * Interface for tests against a QName. It is only concerned with testing a name.
+ * It is used for matching error codes against the codes specified in a try/catch clause,
+ * and also to match component names in xsl:accept and xsl:expose.
  */
 
 public interface QNameTest {

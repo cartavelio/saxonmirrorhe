@@ -40,6 +40,8 @@ public class NamespaceQNameTest implements QNameTest {
             return Affinity.SUBSUMED_BY;
         } else if (other instanceof SpecificQNameTest) {
             return ((SpecificQNameTest) other).getStructuredQName().hasURI(namespace) ? Affinity.SUBSUMES : Affinity.DISJOINT;
+        } else if (other instanceof PortableQNameTest) {
+            return ((PortableQNameTest) other).getStructuredQName().hasURI(namespace) ? Affinity.SUBSUMES : Affinity.DISJOINT;
         } else if (other instanceof NamespaceQNameTest) {
             return ((NamespaceQNameTest) other).namespace == namespace ? Affinity.SAME_TYPE : Affinity.DISJOINT;
         } else if (other instanceof LocalQNameTest) {
