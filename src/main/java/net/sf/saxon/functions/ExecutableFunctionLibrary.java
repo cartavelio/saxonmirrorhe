@@ -16,7 +16,6 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.Schema;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +26,8 @@ import java.util.Map;
  * run-time. Normally functions are bound at compile-time; however there are various situations in which
  * the information is needed dynamically, for example (a) to support the XSLT function-available() call
  * (in the pathological case where the argument is not known statically), (b) to allow functions to be
- * called from saxon:evaluate(), (c) to allow functions to be called from a debugging breakpoint.
+ * called from saxon:evaluate(), (c) to allow function-lookup(), (d) to allow functions to be called
+ * from a debugging breakpoint.
  */
 
 public class ExecutableFunctionLibrary implements FunctionLibrary {
@@ -116,14 +116,13 @@ public class ExecutableFunctionLibrary implements FunctionLibrary {
      * Test whether a function with a given name and arity is available
      * <p>This supports the function-available() function in XSLT.</p>
      *
-     * @param functionName  the qualified name of the function being called
-     * @param schema
+     * @param functionName the qualified name of the function being called
      * @param languageLevel the XPath language level, times 10 (31 = XPath 3.1)
      * @return true if a function of this name and arity is available for calling
      */
 
     @Override
-    public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+    public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
         return functions.get(functionName) != null;
     }
 

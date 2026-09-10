@@ -133,7 +133,6 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         staticQueryContext.setModuleURIResolver(moduleURIResolver);
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
         staticQueryContext.setBaseURI(baseURI);
-        staticQueryContext.preLoadSchema(getRetainedStaticContext().getPackageData().getImportedSchema());
         StreamSource[] streamSources;
         try {
             String[] hints = locationHints.toArray(new String[0]);
@@ -168,6 +167,8 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         lib.link(main);
         XQueryExpression xqe = new XQueryExpression(new ContextItemExpression(), main, false);
         DynamicQueryContext dqc = new DynamicQueryContext(context.getConfiguration());
+
+        XQueryParser.createRunTimeFunctionLibrary(main, config, main.getExecutable());
 
         // Get the external variables and set parameters on DynamicQueryContext dqc
         if (variablesOption != null) {
