@@ -106,7 +106,7 @@ public class OrderedStringMap extends StringMapItem {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        if (key.getItemType() == BuiltInAtomicType.STRING) {
+        if (key.getUType().overlaps(UType.STRING_LIKE)) {
             return removeU(key.getUnicodeStringValue());
         } else {
             return this;
