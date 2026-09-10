@@ -124,6 +124,9 @@ namespace Saxon.Callbacks {
                 catch (System.IO.FileNotFoundException) {
                     // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
                 }
+                catch (System.IO.DirectoryNotFoundException) {
+                    // The resolver code is throwing this for a non-existent directory
+                }
             }
 
             return null;
