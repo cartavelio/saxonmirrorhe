@@ -1120,8 +1120,7 @@ public class SaxonCAPI {
         String ccwd = null;
         String ffilename = filename;
 
-
-        if(cwd != null) {
+        if(File.separatorChar != '/' && cwd != null) {
             ccwd = new File(cwd).toURI().toString();
         }
 
