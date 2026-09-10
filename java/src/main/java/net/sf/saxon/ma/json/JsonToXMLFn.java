@@ -7,6 +7,7 @@
 
 package net.sf.saxon.ma.json;
 
+import com.saxonica.functions.qt4.csv.CsvDoc;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
@@ -20,10 +21,12 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.DocumentNodeType;
+import net.sf.saxon.value.BinaryValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -66,6 +69,16 @@ public class JsonToXMLFn extends SystemFunction {
         if (arg0 == null) {
             return EmptySequence.getInstance();
         }
+
+        // Following needed for parse-json but not for json-to-xml, see PR 2205
+        if (arg0 instanceof BinaryValue) {
+            try {
+                arg0 = CsvDoc.decodeBinary(context, ((BinaryValue) arg0).getBinaryValue());
+            } catch (IOException e) {
+                throw new XPathException("Failed to decode binary JSON input", "FOUT1200");
+            }
+        }
+
         UnicodeString input = arg0.getUnicodeStringValue();
         MapItem options = null;
         if (getArity() == 2) {
