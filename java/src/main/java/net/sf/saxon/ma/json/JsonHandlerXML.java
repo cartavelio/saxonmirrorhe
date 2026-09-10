@@ -7,7 +7,9 @@
 
 package net.sf.saxon.ma.json;
 
+//#if EE==true
 import com.saxonica.config.EnterpriseConfiguration;
+//#endif
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ComplexContentOutputter;
