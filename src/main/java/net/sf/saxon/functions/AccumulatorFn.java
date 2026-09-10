@@ -68,7 +68,7 @@ public abstract class AccumulatorFn extends SystemFunction {
      * @param name     the name (as written - a lexical EQName)
      * @param registry the accumulator registry, or null if there are no accumulators registered
      * @return the accumulator
-     * @throws XPathException the the accumulator is not recognised or if the name is invalid
+     * @throws XPathException if the accumulator is not recognised or if the name is invalid
      */
 
     private Accumulator getAccumulator(String name, AccumulatorRegistry registry) throws XPathException {

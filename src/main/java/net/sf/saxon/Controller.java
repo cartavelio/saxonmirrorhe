@@ -1328,7 +1328,7 @@ public class Controller implements ContextOriginator {
      *
      * @param source the input tree. Must be either a DOMSource or a NodeSource
      * @return the NodeInfo representing the input node, suitably wrapped. Exceptionally,
-     * the the source is a whitespace text node that is itself stripped, return null.
+     * if the source is a whitespace text node that is itself stripped, return null.
      */
 
     public NodeInfo prepareInputTree(Source source) {

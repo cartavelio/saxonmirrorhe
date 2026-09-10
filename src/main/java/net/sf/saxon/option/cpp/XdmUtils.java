@@ -22,7 +22,6 @@ import org.graalvm.word.WordFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -162,7 +161,7 @@ public class XdmUtils {
          * convert EQName to ClarkName
          * @param thread - Graalvm runtime data structure for the thread
          * @param alloc - Allocator function to create C memory space passed from the C++ application
-         * @param c_eqname - the the eqname string to convert to Clarkname
+         * @param c_eqname - the eqname string to convert to Clarkname
          * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
          */
         @CEntryPoint(name = "j_EQNameToClarkName", exceptionHandler = SaxonCExceptionCCharHandler.class)
@@ -181,7 +180,7 @@ public class XdmUtils {
          * convert ClarkName to EQName
          * @param thread - Graalvm runtime data structure for the thread
          * @param alloc - Allocator function to create C memory space passed from the C++ application
-         * @param c_clarkname - the the clarkname string to convert to EQName
+         * @param c_clarkname - the clarkname string to convert to EQName
          * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
          */
         @CEntryPoint(name = "j_clarkNameToEQName", exceptionHandler = SaxonCExceptionCCharHandler.class)
@@ -599,7 +598,7 @@ public class XdmUtils {
      * @param thread - Graalvm runtime data structure for the thread
      * @param arrayRef - the XdmArray object given as a reference into the ObjectHandles pool
      * @param alloc - Allocator function to create C memory space passed from the C++ application
-     * @return C Pointer to the the array of long references to array of XdmValue objects in the C memory space.
+     * @return C Pointer to the array of long references to array of XdmValue objects in the C memory space.
      * Exceptions are handled and returned to the C program as null pointer.
      * Exceptions are handled and returned to the C program as null pointer
      * @throws SaxonApiException

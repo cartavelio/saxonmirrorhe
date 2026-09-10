@@ -648,7 +648,7 @@ public class XsltCompiler {
      * by importing them using {@link #importPackage}.</p>
      *
      *
-     * @param source identifies an XML document holding the the XSLT package to be compiled
+     * @param source identifies an XML document holding the XSLT package to be compiled
      * @return the XsltPackage that results from the compilation. Note that this package
      * is not automatically imported to this <code>XsltCompiler</code>; if the package is required
      * for use in subsequent compilations then it must be explicitly imported.
@@ -691,7 +691,7 @@ public class XsltCompiler {
      * Compile a library package.
      * <p>This is a convenience method that simple calls <code>compilePackage(new StreamSource(file))</code>.</p>
      *
-     * @param file identifies an XML document holding the the XSLT package to be compiled
+     * @param file identifies an XML document holding the XSLT package to be compiled
      * @return the XsltPackage that results from the compilation. Note that this package
      * is not automatically imported to this <code>XsltCompiler</code>; if the package is required
      * for use in subsequent compilations then it must be explicitly imported.
