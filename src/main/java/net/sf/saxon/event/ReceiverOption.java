@@ -171,6 +171,11 @@ public class ReceiverOption {
      */
     public static final int TOP_IN_ENTITY = 0x200000;
 
+    /**
+     * Flag set on startElement() to indicate that it's in a validation=skip wildcard
+     */
+    public static final int SKIP_VALIDATION = 0x400000;
+
 
     public static boolean contains(int options, int option) {
         return (options & option) != 0;
