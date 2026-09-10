@@ -219,11 +219,11 @@ Keywords-fn-some-1
       <reason>Third argument as xs:QName not yet implemented</reason>
    </exception>
    
-   <exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
+   <!--<exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Bug 6104</reason>
    </exception>
-   
+   -->
    <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
       try-catch-map2
       try-catch-map3
@@ -287,12 +287,36 @@ Keywords-fn-some-1
    </exception>
    
    <exception test-set="app-spec-examples" 
-      test-case="fo-test-array-values-001
-      fo-test-array-values-002
-      " 
+      test-case=" fo-test-array-values-001
+                  fo-test-array-values-002
+                  " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-map-substitute-001
+                 fo-test-map-substitute-002" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case=" fo-test-map-replace-001
+                  fo-test-map-replace-002
+                  fo-test-map-replace-003" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-map-of-002" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Problem with test: variable $week is referenced in expected result, but not declared there.</reason>
    </exception>
    
  
