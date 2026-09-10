@@ -1,3 +1,4 @@
+using AngleSharp.Dom;
 using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
@@ -5,7 +6,7 @@ using Saxon.Hej.tree.wrapper;
 
 namespace Saxon.Impl.Dom {
     /**
-     * Wraps an HTML DOM tree produced by HTMLAgilityPack. This object represents the document node.
+     * Wraps an HTML DOM tree produced by AngleSharp. This object represents the document node.
      */
     public class HtmlDocumentWrapper : AbstractNodeWrapper, HtmlContainerNodeWrapper, SteppingNode, SiblingCountingNode {
         
@@ -104,7 +105,22 @@ namespace Saxon.Impl.Dom {
         }
 
         protected internal override AxisIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
-            return SingleNodeIterator.makeIterator(outermostElement);
+            //return SingleNodeIterator.makeIterator(outermostElement);
+            if (!htmlDocument.HasChildNodes) {
+                return EmptyIterator.ofNodes();
+            }
+            System.Collections.Generic.List<NodeInfo> childList = new ();
+            int indexPosition = 0;
+            foreach (AngleSharp.Dom.INode child in htmlDocument.ChildNodes) {
+                if (child.NodeType != NodeType.DocumentType) {
+                    HtmlNodeWrapper wrapper = HtmlNodeWrapper.makeWrapper(child, this, this, indexPosition++);
+                    if (nodeTest.test(wrapper)) {
+                        childList.Add(wrapper);
+                    }
+                }
+            }
+
+            return new NodeListIterator(childList);
         }
 
         protected internal override AxisIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {

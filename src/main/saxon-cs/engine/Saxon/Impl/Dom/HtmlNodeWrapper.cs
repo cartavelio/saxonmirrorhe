@@ -180,9 +180,11 @@ namespace Saxon.Impl.Dom {
             List<NodeInfo> attList = new List<NodeInfo>();
             int indexPosition = 0;
             foreach (AngleSharp.Dom.IAttr att in ((AngleSharp.Dom.IElement)node).Attributes) {
-                HtmlAttributeWrapper wrapper = HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++);
-                if (nodeTest.test(wrapper)) {
-                    attList.Add(HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++));
+                if (att.Name != "xmlns" && !att.Name.StartsWith("xmlns:")) {
+                    HtmlAttributeWrapper wrapper = HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++);
+                    if (nodeTest.test(wrapper)) {
+                        attList.Add(HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++));
+                    }
                 }
             }
             return new NodeListIterator(attList);

@@ -91,7 +91,7 @@ namespace Saxon.Impl.Dom {
         }
 
         public override string getDisplayName() {
-            return htmlAttribute.Name;
+            return getLocalPart();
         }
 
         public override NodeInfo getParent() {
