@@ -2537,9 +2537,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 ic.setDefaultFunctionNamespace(rsc.getDefaultFunctionNamespace());
                 ic.setDecimalFormatManager(rsc.getDecimalFormatManager());
                 List<String> reasons = new ArrayList<>();
-                exp = loader.config.getIntegratedFunctionLibrary().bind(sName, args, ic, reasons);
+                exp = loader.config.getIntegratedFunctionLibrary().bind(sName, args, null, ic, reasons);
                 if (exp == null) {
-                    exp = loader.config.getBuiltInExtensionLibraryList().bind(sName, args, ic, reasons);
+                    exp = loader.config.getBuiltInExtensionLibraryList().bind(sName, args, null, ic, reasons);
                 }
                 if (exp instanceof SystemFunctionCall) {
                     SystemFunction fn = ((SystemFunctionCall) exp).getTargetFunction();

@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.query.UnboundFunctionLibrary;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
@@ -41,6 +42,11 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     private int bindingSlot = -1;
     private int tailCall = NOT_TAIL_CALL;
     private StructuredQName name;
+    private boolean beingInlined = false;
+    private SequenceEvaluator[] argumentEvaluators = null;
+    private UnboundFunctionLibrary.UnboundFunctionCallDetails unboundCallDetails;
+
+
 
     public boolean isBeingInlined() {
         return beingInlined;
@@ -49,10 +55,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     public void setBeingInlined(boolean beingInlined) {
         this.beingInlined = beingInlined;
     }
-
-    private boolean beingInlined = false;
-
-    private SequenceEvaluator[] argumentEvaluators = null;
 
     public static final int NOT_TAIL_CALL = 0;
     public static final int FOREIGN_TAIL_CALL = 1;
@@ -63,6 +65,29 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
      */
 
     public UserFunctionCall() {
+    }
+
+    /**
+     * Create an unbound function call (typically, a forwards reference in XQuery)
+     */
+
+    public UserFunctionCall(UnboundFunctionLibrary.UnboundFunctionCallDetails details) {
+        this.unboundCallDetails = details;
+    }
+
+    /**
+     * Copy details from another user function call
+     */
+
+    public void copyFrom(UserFunctionCall ufc2) {
+        staticType = ufc2.staticType;
+        function = ufc2.function;
+        bindingSlot = ufc2.bindingSlot;
+        tailCall = ufc2.tailCall;
+        name = ufc2.name;
+        beingInlined = false;
+        argumentEvaluators = ufc2.argumentEvaluators;
+        unboundCallDetails = null;
     }
 
 
@@ -146,6 +171,10 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         } else {
             return null;
         }
+    }
+
+    public UnboundFunctionLibrary.UnboundFunctionCallDetails getUnboundCallDetails() {
+        return unboundCallDetails;
     }
 
     /**
