@@ -305,20 +305,8 @@ public class PatternParser extends XPathParser {
                 }
             }
             if (tok instanceof Token.NameToken) {
-                if (t.peekAhead() == Token.LPAREN) {
-                    switch (t.currentName()) {
-                        case "type":
-                        case "tuple":
-                        case "union":
-                        case "map":
-                        case "array":
-                        case "atomic":
-                            return parserExtension.parseTypePattern(this);
-                        default:
-                            return super.parseBasicStep(firstInPattern);
-                    }
-                } else if (t.peekAhead() == Token.LCURLY || t.peekAhead() == Token.HASH) {
-                    grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
+                if (t.peekAhead() == Token.LCURLY || t.peekAhead() == Token.HASH) {
+                    grumble("Token " + t.peekAhead() + " not allowed here in an XSLT pattern");
                     return null;
                 } else {
                     return super.parseBasicStep(firstInPattern);
