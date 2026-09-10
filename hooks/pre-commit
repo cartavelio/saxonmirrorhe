@@ -14,7 +14,7 @@ exec 1>&2
 # Files and directories that begin with these prefixes are considered
 # commercial and must be in separate commits from files that are
 # non-commercial
-COMMERCIAL=(src/main/java/com src/main/java/javax)
+COMMERCIAL=(src/main/java/com src/main/java/javax src/test/java/com)
 
 # Files and directories that begin with these prefixes will be
 # excluded from mirroring. (Update the mirror script as well if you
