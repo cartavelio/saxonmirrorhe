@@ -93,7 +93,7 @@ namespace Saxon.Callbacks {
                 }
             }
             catch (net.sf.saxon.trans.XPathException e) {
-                throw e;
+                throw;
             }
             catch (System.Exception e) {
                 throw new net.sf.saxon.trans.XPathException(e.Message, e);
