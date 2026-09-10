@@ -140,8 +140,7 @@ public class EnumerationUnionType extends LocalUnionType {
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
         if (item instanceof StringValue) {
-            SingletonEnumType type = dictionary.get(item.getUnicodeStringValue());
-            return type != null && type.equals(((StringValue)item).getItemType());
+            return dictionary.containsKey(item.getUnicodeStringValue());
         } else {
             return false;
         }
