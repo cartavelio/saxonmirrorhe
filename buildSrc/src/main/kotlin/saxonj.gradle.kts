@@ -588,5 +588,17 @@ val gizmo = tasks.register<JavaExec>("gizmo") {
   standardInput = System.`in`
 }
 
+val transform = tasks.register<JavaExec>("transform") {
+  classpath = editionSourceSet.runtimeClasspath + files(saxonBuild.saxonLicenseDir.get())
+
+  mainClass = "net.sf.saxon.Transform"
+}
+
+val query = tasks.register<JavaExec>("query") {
+  classpath = editionSourceSet.runtimeClasspath + files(saxonBuild.saxonLicenseDir.get())
+
+  mainClass = "net.sf.saxon.Query"
+}
+
 releaseZips.outgoing.artifact(downloadRelease) { builtBy(downloadRelease) }
 releaseMaven.outgoing.artifact(stageMaven) { builtBy(stageMaven)}

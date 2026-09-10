@@ -1,5 +1,6 @@
 import com.saxonica.build.java.PomGenerator
 import com.saxonica.build.GatherReleaseArtifacts
+import java.util.Locale
 
 plugins {
   id("saxon-build")
@@ -434,6 +435,26 @@ publishing {
       url = uri(layout.buildDirectory.dir("maven-o-matic").get())
     }
   }
+}
+
+// add license dir to classpath for transform/query/gizmo executable tasks
+arrayOf("transform", "query", "gizmo").forEach {taskName ->
+  tasks.named<JavaExec>(taskName) {
+    classpath += files(saxonBuild.saxonLicenseDir.get())
+  }
+}
+
+// use the com.saxonica command classes
+arrayOf("transform", "query").forEach { taskName ->
+  tasks.named<JavaExec>(taskName) {
+    mainClass = "com.saxonica.${ taskName.replaceFirstChar(Char::uppercase) }"
+  }
+}
+
+val validate = tasks.register<JavaExec>("validate") {
+  classpath = sourceSets["edition"].runtimeClasspath + files(saxonBuild.saxonLicenseDir.get())
+
+  mainClass = "com.saxonica.Validate"
 }
 
 signing {

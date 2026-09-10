@@ -468,6 +468,13 @@ publishing {
   }
 }
 
+// add license dir to classpath for transform/query/gizmo executable tasks
+arrayOf("transform", "query", "gizmo").forEach {taskName ->
+  tasks.named<JavaExec>(taskName) {
+    classpath += files(saxonBuild.saxonLicenseDir.get())
+  }
+}
+
 signing {
   sign(publishing.publications)
 }
