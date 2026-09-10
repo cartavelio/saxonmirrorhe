@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.map.CompiledAxisMappingFunction;
 import com.saxonica.ee.bytecode.map.CompiledContextMappingFunction;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.FocusTrackingIterator;
 import net.sf.saxon.om.SequenceIterator;
@@ -32,7 +33,9 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
     @Override
     public void compileToIterator(CompilerService compiler,
                                   Expression expression) throws CannotCompileException {
-
+        if (expression instanceof ForEach && ((ForEach)expression).getSeparatorExpression() != null) {
+            throw new CannotCompileException("Separator attribute", true);
+        }
         Expression start = ((ContextSwitchingExpression) expression).getSelectExpression();
         Expression step = ((ContextSwitchingExpression) expression).getActionExpression();
         Generator ga = compiler.getCurrentGenerator();
@@ -198,6 +201,9 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
 
     @Override
     public void compileToPush(CompilerService compiler, Expression expression) throws CannotCompileException {
+        if (expression instanceof ForEach && ((ForEach) expression).getSeparatorExpression() != null) {
+            throw new CannotCompileException("Separator attribute", true);
+        }
         Expression select = ((ContextSwitchingExpression) expression).getSelectExpression();
         Expression action = ((ContextSwitchingExpression) expression).getActionExpression();
         Generator ga = compiler.getCurrentGenerator();

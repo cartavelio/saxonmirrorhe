@@ -9,6 +9,7 @@ import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.FocusTrackingIterator;
+import net.sf.saxon.om.Function;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.rules.Rule;
@@ -159,6 +160,18 @@ public class ForEachGroupCompiler extends ToPushCompiler {
                 allocateStatic(compiler, instr.getGroupingKey());
                 compiler.generateGetContext();
                 ga.invokeConstructor(GroupEndingIterator.class, Expression.class, Pattern.class, XPathContext.class);
+                break;
+
+            case ForEachGroup.GROUP_BREAKING_WHEN:
+//                Function breakWhen = (Function) getGroupingKey().evaluateItem(context);
+//                groupIterator = new GroupBreakingIterator(select, breakWhen, context);
+                ga.newInstance(GroupBreakingIterator.class);
+                ga.dup();
+                allocateStatic(compiler, instr.getSelectExpression());
+                compiler.compileToItem(instr.getGroupingKey());
+                ga.checkClass(Function.class);
+                compiler.generateGetContext();
+                ga.invokeConstructor(GroupBreakingIterator.class, Expression.class, Function.class, XPathContext.class);
                 break;
 
             default:

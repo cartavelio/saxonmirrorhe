@@ -1,15 +1,11 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.ApplyTemplates;
-import net.sf.saxon.expr.instruct.ParameterSet;
-import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.expr.instruct.WithParam;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Mode;
 import org.objectweb.asm.Type;
 
@@ -20,7 +16,9 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
 
     @Override
     public void compileToPush(CompilerService compiler, Expression expression) throws CannotCompileException {
-        Configuration config = compiler.getConfiguration();
+        if (((ApplyTemplates) expression).getSeparatorExpression() != null) {
+            throw new CannotCompileException("Separator attribute", true);
+        }
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "ApplyTemplates-push");

@@ -25,14 +25,14 @@ public class StringToUntypedAtomicCompiler extends ConverterCompiler {
         if (allowsEmpty) {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             Stack<Class<?>> classStack = new Stack<>();
-            classStack.push(StringValue.class);
-            classStack.push(StringValue.class);
+            //classStack.push(StringValue.class);
+            //classStack.push(StringValue.class);
             OnEmpty.UnwindAndJump unwindAndJump = new OnEmpty.UnwindAndJump(classStack, empty);
             LabelInfo end = methodInfo.newLabel("end");
             compileToPrimitive(compiler, expression, UnicodeString.class, unwindAndJump);
             ga.invokeStaticMethod(StringValue.class, "makeUntypedAtomic", UnicodeString.class);
-            unwindAndJump.getUnwindStack().pop();
-            unwindAndJump.getUnwindStack().pop();
+            //unwindAndJump.getUnwindStack().pop();
+            //unwindAndJump.getUnwindStack().pop();
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();

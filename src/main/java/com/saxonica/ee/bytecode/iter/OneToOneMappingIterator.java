@@ -27,6 +27,11 @@ public abstract class OneToOneMappingIterator implements SequenceIterator, Looka
     }
 
     @Override
+    public boolean supportsHasNext() {
+        return (base instanceof LookaheadIterator) && ((LookaheadIterator)base).supportsHasNext();
+    }
+
+    @Override
     public boolean hasNext() {
         // Must only be called if this is a lookahead iterator, which will only be true if the base iterator
         // is a lookahead iterator and one-to-one is true
