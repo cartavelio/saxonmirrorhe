@@ -1,0 +1,2 @@
+/java/src/test/bugs/4507-Carter/2000-04-03/data/data.xml filter=lfs diff=lfs merge=lfs -text
+/java/src/test/bugs/4507-Carter/test.xml filter=lfs diff=lfs merge=lfs -text
