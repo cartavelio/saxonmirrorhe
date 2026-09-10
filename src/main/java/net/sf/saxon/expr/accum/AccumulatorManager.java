@@ -95,9 +95,9 @@ public class AccumulatorManager {
             }
         } else {
             map = new HashMap<Accumulator, IAccumulatorData>();
-            map.put(acc, MARKER);
             accumulatorDataIndex.put(doc, map);
         }
+        map.put(acc, MARKER);
         if (doc instanceof VirtualTreeInfo && ((VirtualTreeInfo)doc).isCopyAccumulators()) {
             NodeInfo original = ((VirtualCopy) doc.getRootNode()).getOriginalNode();
             IAccumulatorData originalData = getAccumulatorData(original.getTreeInfo(), acc, context);
