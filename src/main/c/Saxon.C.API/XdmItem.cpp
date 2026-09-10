@@ -94,9 +94,7 @@ const char *XdmItem::toString() {
   return itemToStringi;
 }
 
-/**
- * Get the type of the object
- */
+
 XDM_TYPE XdmItem::getType() { return XDM_ITEM; }
 
 XdmItem::~XdmItem() {

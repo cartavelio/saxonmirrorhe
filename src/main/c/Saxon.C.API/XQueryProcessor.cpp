@@ -92,9 +92,7 @@ std::map<std::string, std::string> &XQueryProcessor::getProperties() {
   return ptr;
 }
 
-/**
- * Set the source document for the query
- */
+// Set the source document for the query
 void XQueryProcessor::setContextItem(XdmItem *value) {
     if (value == nullptr) {
         std::map<std::string, XdmValue *>::iterator it;
@@ -131,16 +129,12 @@ void XQueryProcessor::declareNamespace(const char *prefix, const char *uri) {
   }
 }
 
-/**
- * Set the source document for the query
- */
+// Set the source document for the query
 void XQueryProcessor::setContextItemFromFile(const char *ifile) {
   setProperty("s", ifile);
 }
 
-/**
- * Set the output file where the result is sent
- */
+// Set the output file where the result is sent
 void XQueryProcessor::setOutputFile(const char *ofile) {
   setProperty("o", ofile);
 }
@@ -154,9 +148,7 @@ XdmValue *XQueryProcessor::getParameter(const char *name, bool withParam) {
   return nullptr;
 }
 
-/**
- * Set a parameter value used in the query
- */
+// Set a parameter value used in the query
 void XQueryProcessor::setParameter(const char *name, XdmValue *value, bool withParam) {
   if (value != nullptr && name != nullptr) {
     std::string skey = (withParam ? "param:" : "") + std::string(name);
@@ -171,15 +163,12 @@ void XQueryProcessor::setParameter(const char *name, XdmValue *value, bool withP
   }
 }
 
-/**
- * Remove a parameter (name, value) pair
- */
+// Remove a parameter (name, value) pair
 bool XQueryProcessor::removeParameter(const char *name) {
   return (bool)(parameters.erase("param:" + std::string(name)));
 }
-/**
- * Set a property.
- */
+
+// Set a property.
 void XQueryProcessor::setProperty(const char *name, const char *value) {
 #ifdef DEBUG
   if (value == nullptr) {

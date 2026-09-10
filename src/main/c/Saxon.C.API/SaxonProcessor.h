@@ -128,7 +128,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
 
 //! The <code>SaxonProcessor</code> class acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
 /*! The <code>SaxonProcessor</code> class not only generates XQuery, XPath,
- * Schema and XSLT Processors, but is used to create XDM values from primitive
+ * Schema and XSLT Processors, but is also used to create XDM values from primitive
  * types.
  */
 class SaxonProcessor {
@@ -203,7 +203,7 @@ public:
 
   //! Get any error message thrown by the processor
   /*!
-   * @return string value of the error message. JNI exceptions thrown by this
+   * @return String value of the error message. JNI exceptions thrown by this
    * processor are handled internally and can be retrieved by this method.
    */
   const char *getErrorMessage();
@@ -396,7 +396,7 @@ public:
 
   static void * makeInternalArray(void **inputs, int length);
 
-  //! Make an XdmMap whose argument is a map from the standard template library.
+  //! Make an XdmMap by supplying a map from the standard template library, with keys in XDM form.
   /**
    *
    * @param dataMap - the input map as an std::map, which consists of keys as XdmAtomicValue and
@@ -406,7 +406,7 @@ public:
    */
   XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
 
-  //! Make an XdmMap whose argument is a map from the standard template library.
+  //! Make an XdmMap by supplying a map from the standard template library, with keys in primitive form.
   /**
    *
    * @param dataMap - the input map as an std::map, which consists of keys as std::string and
@@ -416,7 +416,7 @@ public:
    */
   static XdmMap *makeMap2(std::map<std::string, XdmValue *> dataMap);
 
-  //! Make an XdmMap from arrays of keys and values.
+  //! Make an XdmMap from arrays of keys and values in XDM form.
   /**
    *
    * @param keys - the keys are given as a pointer array of XdmAtomicValue
@@ -435,7 +435,7 @@ public:
    * local part of the name.
    * @param name - the QName in Clark notation: <code>{uri}local</code> if the
    *                name is in a namespace, or simply <code>local</code> if not.
-   * @return the expanded name, as a string in EQName notation.
+   * @return The expanded name, as a string in EQName notation.
    * The caller is responsible for memory deallocation using `operator delete`.
    */
   const char *clarkNameToEQName(const char *name);
@@ -446,14 +446,14 @@ public:
    * @param name - the QName in EQName notation: <code>Q{uri}local</code> if the
    *               name is in a namespace. For a name in no namespace, either of
    * the forms <code>Q{}local</code> or simply <code>local</code> are accepted.
-   * @return the QName in clark notation. The caller is responsible for deallocation of memory using `operator delete`.
+   * @return The QName in clark notation. The caller is responsible for deallocation of memory using `operator delete`.
    */
   const char *EQNameToClarkName(const char *name);
 
   //! Get the string representation of an XdmItem.
   /**
    * @param item - the XdmItem
-   * @return string value as char pointer array. The caller is responsible for deallocation of memory using `operator delete`.
+   * @return String value as char pointer array. The caller is responsible for deallocation of memory using `operator delete`.
    */
   const char *getStringValue(XdmItem *item);
 
@@ -462,9 +462,9 @@ public:
    *
    * @param source - the source document as a lexical string
    * @param encoding - the encoding used to decode the source string. If not
-   * specified then platform default encoding is used
+   * specified then platform default encoding is used.
    * @param validator - can be used to supply a SchemaValidator to validate the
-   * document. Default is null
+   * document. Default is null.
    * @return Pointer to an XdmNode. The caller is responsible for deallocation of memory using `delete`.
    * @throws SaxonApiException if there is a failure in the parsing of the XML
    * document
@@ -478,7 +478,7 @@ public:
    *
    * @param source - the filename of the source document
    * @param validator - can be used to supply a SchemaValidator to validate the
-   * document. Default is null
+   * document. Default is null.
    * @return Pointer to an XdmNode. The caller is responsible for deallocation of memory using `delete`.
    * @throws SaxonApiException  if there ia a failure in the parsing of the XML
    * file
@@ -491,7 +491,7 @@ public:
    *
    * @param source - the URI of the source document
    * @param validator - can be used to supply a SchemaValidator to validate the
-   * document. Default is null
+   * document. Default is null.
    * @return Pointer to an XdmNode. The caller is responsible for deallocation of memory using `delete`.
    * @throws SaxonApiException if there ia failure in the parsing of the XML
    * file
@@ -504,7 +504,7 @@ public:
    *
    * @param source - the JSON document as a lexical string
    * @param encoding - the encoding of the source argument. Argument can be
-   * omitted and NULL accepted to use the default platform encoding
+   * omitted and NULL accepted to use the default platform encoding.
    * @return Pointer to an XdmValue. The caller is responsible for deallocation of memory using `delete`.
    * @throws SaxonApiException if there is a failure in the parsing of the JSON
    */
@@ -522,18 +522,18 @@ public:
    */
   XdmValue *parseJsonFromFile(const char *source);
 
-  //! Internal method to get the kind of node.
+  //! Get the kind of node - internal use only
   /**
    *
-   * @param obj - The Java object representation of the XdmNode
-   * @return the kind of node, for example ELEMENT or ATTRIBUTE as an integer
+   * @param obj - the Java object representation of the XdmNode
+   * @return The kind of node, for example ELEMENT or ATTRIBUTE as an integer
    */
   int getNodeKind(int64_t obj);
 
   //! Test whether this processor is schema-aware
   /**
    *
-   * @return true if this processor is licensed for schema processing,
+   * @return True if this processor is licensed for schema processing,
    * false otherwise
    */
   bool isSchemaAwareProcessor();
@@ -541,8 +541,7 @@ public:
   //! Deprecated. Checks for thrown exceptions
   /**
    * @deprecated - This method is no longer used. We now throw exceptions
-   * @return bool - true when there is a pending exception; otherwise return
-   * false
+   * @return True when there is a pending exception; false otherwise
    */
   bool exceptionOccurred();
 
@@ -554,7 +553,7 @@ public:
   */
   void exceptionClear();
 
-  //! Utility method for working with SaxonC on Python
+  //! Utility method for working with SaxonC on Python - internal use only
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
   //! Utility method for Python API - internal use only
@@ -565,7 +564,7 @@ public:
    */
   void deleteXdmValueArray(XdmValue **arr, int len);
 
-  //! Utility method for working with SaxonC on Python
+  //! Utility method for working with SaxonC on Python - internal use only
   XdmAtomicValue **createXdmAtomicValueArray(int len) {
     return (new XdmAtomicValue *[len]);
   }
@@ -600,22 +599,23 @@ public:
   //! Get the current working directory
   /**
    *
-   * @return string value of the cwd
+   * @return Current working directory
    */
   const char *getcwd();
 
-  //! Get saxon resources directory
+  //! Get the saxon resources directory
   /**
    *
-   * @return string value of the resource directory. The caller is responsible for deallocation of memory using `delete`.
+   * @return String value of the resource directory. The caller is responsible for deallocation of memory using `delete`.
    */
   const char *getResourcesDirectory();
 
-  //! Set saxon resources directory
+  //! Set the saxon resources directory
   void setResourcesDirectory(const char *dir);
 
+  //! Deprecated. Set a catalog file to be used in Saxon
   /**
-   * Deprecated. Set catalog to be used in Saxon
+   *
    * @param catalogFile - file name to the catalog
    * @throws SaxonApiException if there is a failure to set the catalog file
    * @deprecated
@@ -644,10 +644,10 @@ public:
   //! Clear configuration properties specific to the processor in use.
   void clearConfigurationProperties();
 
- //!
- /**
- *
-*/
+ //! Flag to determine if this configuration is licensed.
+  /**
+  * @return True if this configuration is licensed, false otherwise
+ */
  bool isLicensed();
 
  //!Get the short name of the Saxon product edition.
@@ -656,14 +656,14 @@ public:
  * For example "EE". This represents the kind of configuration
  * that has been created, rather than the software that has been installed; for example it is possible to
  * instantiate an "HE" configuration even when using the "PE" or "EE" software.
- * @return the Saxon edition code: "EE", "PE", or "HE". Memory deallocation is handled internally.
+ * @return The Saxon edition code: "EE", "PE", or "HE". Memory deallocation is handled internally.
 */
  const char * getSaxonEdition();
 
   //! Get the Saxon version
   /**
    *
-   * @return char array. Memory deallocation is handled internally.
+   * @return The Saxon version. Memory deallocation is handled internally.
    */
   const char *version();
 
@@ -745,14 +745,14 @@ public:
       return true;
   } **/
 
-  static int jvmCreatedCPP; /*!< Flag to indicate jvm created - used in memory
+  static int jvmCreatedCPP; /*!< Flag to indicate JVM created - used in memory
                                management */
   static sxnc_environment
-      *sxn_environ; /*!< Environment to captures the jni, JVM and handler to the
+      *sxn_environ; /*!< Environment to capture the JNI, JVM and handler to the
                        cross compiled SaxonC library. */
-  std::string cwd;  /*!< current working directory */
+  std::string cwd;  /*!< Current working directory */
 
-  //! Utility method required for the python and PHP extensions to delete string created in the C++ code-base
+  //! Utility method required for the python and PHP extensions to delete a string created in the C++ code-base
   /**
   * @param data - the string data to be deleted using the operator delete
   */
@@ -781,16 +781,16 @@ protected:
   // jclass versionClass; /*!< The Version instance */
   // jclass procClass; /*!< The Saxon Processor instance */
   // jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
-  std::string cwdV; /*!< current working directory */
-  // std::string resources_dir; /*!< current Saxon resources directory */
+  std::string cwdV; /*!< Current working directory */
+  // std::string resources_dir; /*!< Saxon resources directory */
   std::string versionStr; /*!< The Saxon version string */
   std::map<std::string, XdmValue *>
-      parameters; /*!< map of parameters used for the transformation as (string,
+      parameters; /*!< Map of parameters used for the transformation as (string,
                      value) pairs */
   //std::map<std::string, std::string>
-    /*  configProperties;*/ /*!< map of properties used for the transformation as
-                           (string, string) pairs */
-  bool licensei; /*!< if true, this indicates that the Processor created
+  // configProperties; /*!< Map of properties used for the transformation as
+  //                         (string, string) pairs */
+  bool licensei; /*!< If true, this indicates that the Processor created
                     needs a license file (i.e. Saxon-EE), otherwise a Saxon-HE
                     Processor is created  */
   int64_t procRef; /*!< ObjectHandle reference to the underlying processor */

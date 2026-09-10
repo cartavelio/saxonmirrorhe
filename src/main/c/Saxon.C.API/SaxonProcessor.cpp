@@ -1002,9 +1002,8 @@ XdmNode *SaxonProcessor::parseXmlFromUri(const char *uri,
   return nullptr;
 }
 
-/**
- * Set a configuration property.
- */
+
+// Set a configuration property.
 void SaxonProcessor::setConfigurationProperty(const char *name,
                                               const char *value) {
   if (name != nullptr && value != nullptr) {

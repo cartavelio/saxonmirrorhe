@@ -107,10 +107,6 @@ SaxonApiException::~SaxonApiException() throw() {
   }
 }
 
-/**
- * Get the error code associated with the current exception
- * @return the associated error code, or nullptr if no error code is available
- */
 const char *SaxonApiException::getErrorCode() {
   if (errorCode.empty() && !cppException) {
     allocFn fn = operator new;

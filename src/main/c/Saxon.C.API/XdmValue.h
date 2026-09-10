@@ -42,21 +42,20 @@ typedef enum saxonTypeEnum {
 class XdmValue {
 
 public:
-  //! A default Constructor.
   /**
-   * Create an empty value
+   * Default constructor.
+   * Creates an empty XdmValue
    */
   XdmValue() { initialize(); }
 
-  //! A copy constructor.
   /**
-   *
+   * XdmValue copy constructor.
    * @param other - XdmValue
    */
   XdmValue(const XdmValue &other);
 
-  //! Add an XdmItem  to the sequence
   /**
+   * Add an XdmItem to the sequence
    * This method is designed for the primitive types.
    * @param tStr - specify target type of the value
    * @param val - Value to convert
@@ -72,7 +71,7 @@ public:
   void addXdmItem(XdmItem *val);
 
   /**
-   * Add an XdmItem to the sequence, when the sequence was returned from SaxonC: Internal use only.
+   * Add an XdmItem to the sequence, when the sequence was returned from SaxonC - internal use only.
    * @param val - XdmItem object
    */
   void addXdmItemFromUnderlyingValue(XdmItem *val);
@@ -84,8 +83,8 @@ public:
    */
   void addUnderlyingValue(int64_t val);
 
-  //! A Constructor for handling XdmArray - Internal user only
   /**
+   * A Constructor for handling XdmArray - internal use only.
    * Handles a sequence of XdmValues given as a  wrapped an Java XdmValue
    * object.
    * @param val - Java XdmValue object
@@ -94,66 +93,61 @@ public:
    */
   XdmValue(int64_t val, bool arrFlag);
 
-  //! A Constructor
   /**
-   * Wrap a Java XdmValue object.
-   * @param val - Java XdmValue object
+   * XdmValue constructor to create an object which is a wrapper for a Java XdmValue object - internal use only
+   * @param val - internal Java XdmValue object to be wrapped
    */
   XdmValue(int64_t val);
 
-  //! Destructor.
   /**
-   * Destructor for this XdmValue
+   * Destructor method for XdmValue
    */
   virtual ~XdmValue();
 
-  //! This is deprecated and a no-op, C++ destructor handles this case.
   /**
+   * Deprecated: this is deprecated and a no-op, the C++ destructor handles this case.
    * Delete the XdmValue object and clean up all items in the sequence. Release the underlying JNI object.
-   *! @deprecated
+   * @deprecated
    */
   void releaseXdmValue();
 
-  //! Get the first item in the sequence
   /**
-   *
-   * @return XdmItem or nullptr if sequence is empty
-   * Pointer to XdmItem objects have to be deleted in the calling program.
+   * Get the first item in the sequence represented by this XdmValue
+   * @return The first XdmItem in the sequence, or nullptr if the sequence is empty.
+   * Pointers to XdmItem objects have to be deleted in the calling program.
    * The caller is responsible for memory deallocation.
    */
   virtual XdmItem *getHead();
 
-  //! Get the n'th item in the value, counting from zero.
   /**
+   * Get the n'th item in the sequence, counting from zero.
    *
-   *
-   * @param n the item that is required, counting the first item in the sequence
+   * @param n - the item that is required, counting the first item in the sequence
    * as item zero
-   * @return the n'th item in the sequence making up the value, counting from
-   * zero return nullptr  if n is less than zero or greater than or equal to the
+   * @return The n'th item in the sequence making up the XdmValue, counting from
+   * zero. Returns nullptr if n is less than zero or greater than or equal to the
    * number of items in the value.
-   * Pointer to XdmItem objects have to be deleted in the calling program.
+   * Pointers to XdmItem objects have to be deleted in the calling program.
    * The caller is responsible for memory deallocation.
    */
   virtual XdmItem *itemAt(int n);
 
   /**
    * Get the number of items in the sequence
-   *
+   * @return The number of items in the XdmValue.
    */
   virtual int size();
 
-  //! Create a string representation of the value.
   /**
-   * The result of serializing
-   * the value using the adaptive serialization method.
-   * @return a string representation of the value.
+   * Create a string representation of the sequence. This is the result of serializing
+   * the sequence using the adaptive serialization method.
+   * @return A string representation of the XdmValue.
    * The caller is responsible for memory deallocation using `operator delete`.
    */
   virtual const char *toString();
 
-  //! Get the number of references on this XdmValue
   /**
+   * Get the number of references on this XdmValue - internal use only
    * This method is used for internal memory management.
    */
   int getRefCount() {
@@ -164,36 +158,37 @@ public:
     return refCount;
   }
 
-  //! Increment reference count of this XdmValue - Memory management - Internal use only
   /**
-   * this method is used for internal memory management.
+   * Increment reference count of this XdmValue - internal use only
+   * This method is used for internal memory management.
    */
   virtual void incrementRefCount();
 
-  //! Decrement reference count of this XdmValue - Memory management - Internal use only
   /**
-   * this method is used for internal memory management.
+   * Decrement reference count of this XdmValue - internal use only
+   * This method is used for internal memory management.
    */
   virtual void decrementRefCount();
 
   /**
-   * Internal method. Get Java XdmValue object.
-   * @return int64_t - Graalvm reference to the Java object of the XdmValue.
+   * Get the underlying Java XdmValue object - internal use only
+   * @return The Graalvm reference to the Java object of the XdmValue.
    */
   virtual int64_t getUnderlyingValue();
 
   /**
-   * Get the type of the object
+   * Get the type of this XDM value
+   * @return The type of the XdmValue as an XDM_TYPE
    */
   virtual XDM_TYPE getType();
 
   /**
-    * Internal method used to reset associated reference counts on xdmItems that have been relinquished
+    * Reset associated reference counts on XdmItems that have been relinquished - internal use only
     */
   virtual void resetRelinquishedItems();
 
   /**
-    * Internal method used to increment the ref count for an relinquished item only once
+    * Increment the ref count for a relinquished item only once - internal use only
     */
   void incrementRefCountForRelinquishedValue(int i);
 
@@ -203,7 +198,9 @@ public:
  virtual void resetValue(int64_t newValue);
 
 protected:
-  //! initialize this XdmValue with default values
+  /**
+    * Initialize this XdmValue with default values
+    */
   inline void initialize() {
     jValues = SXN_UNSET;
     refCount = 0;
@@ -223,8 +220,8 @@ protected:
 
   XdmItem **values; /*!< Cached. XdmItems in the XdmValue */
   char *relinquished_values; /*!< Pointer to the array of items which have been relinquished */
-  int values_cap; /*!< The count of items in the value */
-  int xdmSize;  /*!< Cached. The count of items in the XdmValue */
+  int values_cap; /*!< The number of items in the value */
+  int xdmSize;  /*!< Cached. The number of items in the XdmValue */
   int refCount; /*!< The reference count of this XdmValue. If >1 this object
                    should not be deleted */
   int64_t value;            /*!< The Java XdmItem reference in Graalvm  */
@@ -232,7 +229,7 @@ protected:
 private:
   char *toStringValue; /*!< Cached. String representation of the XdmValue, if
                           available */
-  int64_t jValues;     /*!< If this XdmValue is a sequence we store values as an
+  int64_t jValues;     /*!< If this XdmValue is a sequence we store values as a
                           ProcessorDataAccumulator object  */
 
   int addXdmItemToValue(XdmItem *val);

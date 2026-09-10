@@ -19,38 +19,35 @@ class SaxonProcessor;
  * data model. An item is either an atomic value, a node, or a function item.
  * <p>An item is a member of a sequence, but it can also be considered as a
  * sequence (of length one) in its own right. <tt>XdmItem</tt> is a subtype of
- * <tt>XdmValue</tt> because every Item in the XDM data model is also a
+ * <tt>XdmValue</tt> because every item in the XDM data model is also a
  * value.</p> <p>It cannot be assumed that every sequence of length one will be
  * represented by an <tt>XdmItem</tt>. It is quite possible for an
  * <tt>XdmValue</tt> that is not an <tt>XdmItem</tt> to hold a singleton
- * sequence.</p> <p>Saxon provides two concrete subclasses of
- * <code>XdmItem</code>, namely XdmNode and XdmAtomicValue. Users must not
+ * sequence.</p> <p>Saxon provides a number of concrete subclasses of
+ * <code>XdmItem</code>, namely XdmNode, XdmAtomicValue and XdmFunctionItem. Users must not
  * attempt to create additional subclasses.</p>
  */
 class XdmItem : public XdmValue {
 
 public:
-  //! XdmItem default constructor.
   /**
-   * Create an empty XdmItem
+   * Default constructor.
+   * Creates an empty XdmItem.
    */
   XdmItem();
 
-  //! XdmItem constructor created as a wrapper around an existing Saxon Java
-  //! object
   /**
-   * XdmItem constructor created from a JNI Java object. This is for internal
-   * use only
-   * @param objRef - The internal Java object for the XdmItem is wrapped here in
-   * the C++ XdmItem class
+   * XdmItem constructor to create an object which is a wrapper for a Java XdmItem object - internal use only
+   * @param objRef - internal Java XdmItem object to be wrapped
    */
   explicit XdmItem(int64_t);
 
-  //! Copy constructor.
   /**
-   * Copy constructor for XdmItem
+   * XdmItem copy constructor.
+   * @param item - XdmItem
    */
   XdmItem(const XdmItem &item);
+
 
  XdmItem& operator=(const XdmItem &d) {
   std::cerr << "XdmItem::operator=(" << std::endl;
@@ -60,28 +57,27 @@ public:
   return *this;
  }
 
-  //! Destructor.
   /**
-   * Destructor for XdmItem
+   * Destructor method for XdmItem
    */
   virtual ~XdmItem();
 
-  //! Increment reference count of this XdmItem - Memory management - Internal use only
   /**
-   * this method is used for internal memory management.
+   * Increment reference count of this XdmItem - internal use only.
+   * This method is used for internal memory management.
    */
   virtual void incrementRefCount();
 
-  //! Decrement reference count of this XdmItem - Memory management - Internal use only
   /**
-   * this method is used for internal memory management.
+   * Decrement reference count of this XdmItem - internal use only.
+   * This method is used for internal memory management.
    */
   virtual void decrementRefCount();
 
   /**
    * Determine whether the item is an atomic value or some other type of item
    *
-   * @return true if the item is an atomic value, false if it is a node or a
+   * @return True if the item is an atomic value, false if it is a node or a
    * function (including maps and arrays)
    */
   virtual bool isAtomic();
@@ -89,79 +85,77 @@ public:
   /**
    * Determine whether the item is a node or some other type of item
    *
-   * @return true if the item is a node, false if it is an atomic value or a
+   * @return True if the item is a node, false if it is an atomic value or a
    * function (including maps and arrays)
    */
   virtual bool isNode();
 
   /**
-   * Determine whether the item is a function or some other type of item
+   * Determine whether the item is an XDM function or some other type of item
    *
-   * @return true if the item is a Xdm function item, false if it is an atomic
-   * value or a function (including maps and arrays)
+   * @return True if the item is an XDM function item (including maps and
+   * arrays), false if it is an atomic value or a node
    */
   virtual bool isFunction();
 
   /**
-   * Determine whether the item is a map or some other type of item
+   * Determine whether the item is an XDM map or some other type of item
    *
-   * @return true if the item is a Xdm map item, false if it is some other value
+   * @return True if the item is an XDM map item, false if it is some other item
    */
   virtual bool isMap();
 
   /**
-   * Determine whether the item is an Array or some other type of item
+   * Determine whether the item is an XDM array or some other type of item
    *
-   * @return true if the item is a Xdm Array item, false if it is some other
-   * value
+   * @return True if the item is an XDM Array item, false if it is some other item
    */
   virtual bool isArray();
 
   /**
-   * Get Java XdmValue object.
-   * @return jobject - The Java object of the XdmValue in its JNI representation
+   * Get the underlying Java XdmValue object - internal use only
+   * @return The Java object of the XdmValue in its JNI representation
    */
   virtual int64_t getUnderlyingValue();
 
-  //! Get the string value of the item.
   /**
+   * Get the string value of the item.
    * For a node, this gets the string value of the node.
    * For an atomic value, it has the same effect as casting the
-   * value to a string. In all cases the result is the same as applying the
+   * value to a string.
+   * For a function item, there is no string value, so an exception is thrown.
+   * In all cases the result is the same as applying the
    * XPath string() function. <p>For atomic values, the result is the same as
    * the result of calling <code>toString</code>. This is not the case for
    * nodes, where <code>toString</code> returns an XML serialization of the
    * node. The caller is responsible for memory deallocation using `operator delete`.</p>
    *
-   * @return the result of converting the item to a string.
+   * @return The result of converting the item to a string.
+   * @throws SaxonApiException if the item is a function
    */
   virtual const char *getStringValue();
 
-  //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
- /**
- * Get the string value of the item. For a node, this gets the string value
- * of the node. For an atomic value, it has the same effect as casting the value
- * to a string. In all cases the result is the same as applying the XPath string()
- * function.
- * The caller is responsible for memory deallocation using `operator delete`.
- * @returns const char * - The string representation of the XdmItem.
-  */
+  /**
+   * Create a string representation of the item. This is the result of serializing
+   * the item using the adaptive serialization method.
+   * @return A string representation of the XdmItem.
+   * The caller is responsible for memory deallocation using `operator delete`.
+   */
   const char *toString();
 
   /**
-   * Get the first item in the sequence
-   * @return XdmItem or nullptr if sequence is empty
+   * Get the first item in the sequence consisting of just this item
+   * @return This XdmItem
    */
   virtual XdmItem *getHead();
 
   /**
-   * Get the n'th item in the value, counting from zero. This is the XmdItem value itself.
+   * Get the n'th item in the sequence consisting of just this item, counting from zero.
    *
-   * @param n the item that is required, counting the first item in the sequence
+   * @param n - the item that is required, counting the first item in the sequence
    * as item zero
-   * @return the n'th item in the sequence making up the value, counting from
-   * zero return nullptr  if n is less than zero or greater than or equal to the
-   * number of items in the value return nullptr if the value is lazily
+   * @return If n is zero, then return this XdmItem. Otherwise return nullptr
+   * if n is not zero, or if the value is lazily
    * evaluated and the delayed evaluation fails with a dynamic error.
    * The caller is responsible for memory deallocation.
    */
@@ -169,13 +163,13 @@ public:
 
   /**
    * Get the number of items in the sequence
-   * @return the number of items in the value. For an item (including a map or
-   * array) this is always 1 (one).
+   * @return The number of items in the XdmValue. For an XdmItem this is always 1 (one).
    */
   int size();
 
   /**
-   * Get the type of the object
+   * Get the type of this XDM value
+   * @return The type of the XdmValue as an XDM_TYPE
    */
   virtual XDM_TYPE getType();
 

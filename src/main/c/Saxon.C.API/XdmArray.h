@@ -26,43 +26,39 @@
 class XdmArray : public XdmFunctionItem {
 
 public:
-  //! XdmArray default constructor.
   /**
-   * Create an empty XdmArray
+   * Default constructor.
+   * Creates an empty XdmArray
    */
   XdmArray();
 
-  //! Copy constructor.
   /**
-   * Copy constructor for XdmArray
+   * XdmArray copy constructor.
+   * @param d - XdmArray
    */
   XdmArray(const XdmArray &d);
 
-  //! Destructor.
   /**
-   * Destructor for XdmArray
+   * Destructor method for XdmArray
    */
   virtual ~XdmArray() {}
 
-  //! XdmArray constructor which is used a wrapper class for the Java XdmArray object - internal use
   /**
-   * @param obj - The internal Java object for the XdmArray is wrapped here in
-   * the C++ XdmArray
+   * XdmArray constructor to create an object which is a wrapper for a Java XdmArray object - internal use only
+   * @param obj - internal Java XdmArray object to be wrapped
    */
   XdmArray(int64_t obj);
 
-  //! XdmArray constructor which is used a wrapper class for the Java XdmArray object - internal use
   /**
-   * @param obj - The internal Java object for the XdmArray is wrapped here in
-   * the C++ XdmArray
+   * XdmArray constructor to create an object which is a wrapper for a Java XdmArray object - internal use only
+   * @param obj - internal Java XdmArray object to be wrapped
    * @param len - The length of the array if known
    */
   XdmArray(int64_t obj, int len);
 
-  //! Get the number of members in the array
   /**
-   *
-   * @return the number of members in the array. (Note that the
+   * Get the number of members in the array
+   * @return The number of members in the array. (Note that the
    * <code>size()</code> method returns 1 (one), because an XDM array is an
    * item.)
    */
@@ -71,24 +67,23 @@ public:
   /**
    * Get the n'th member in the array, counting from zero.
    *
-   * @param n the member that is required, counting the first member in the
+   * @param n - the member that is required, counting the first member in the
    * array as member zero
-   * @return the n'th member in the sequence making up the array, counting from
+   * @return The n'th member in the sequence making up the array, counting from
    * zero. The caller is responsible for memory deallocation.
-   * @remark  if n is less than zero or greater than or equal to the number
+   * @remark If n is less than zero or greater than or equal to the number
    *                                    of members in the array we return null.
-   * User should clear any exception thrown
    */
   XdmValue *get(int n);
 
   /**
    * Create a new array in which one member is replaced with a new value.
    *
-   * @param n the position of the member that is to be replaced, counting the
+   * @param n - the position of the member that is to be replaced, counting the
    * first member in the array as member zero
-   * @param value - is the new member for the new array.
+   * @param value - the new member for the new array.
    * The value itself is not stored internally therefore safe for memory deallocation by the caller.
-   * @return a new array, the same length as the original, with one member
+   * @return A new XdmArray, the same length as the original, with one member
    * replaced by a new value. The caller is responsible for memory deallocation.
    * @remark if n is less than zero or greater than or equal to the number
    *                                   of members in the array then return null
@@ -99,8 +94,8 @@ public:
    * Append a new member to an array
    * @param value - the new member.
    * The value itself is not stored internally therefore safe for memory deallocation by the caller.
-   * @return a new array, one item longer than the original
-   * @remark if the value is lazily evaluated, and evaluation fails then return
+   * @return A new XdmArray, one item longer than the original
+   * @remark If the value is lazily evaluated, and evaluation fails then return
    * null
    */
   XdmArray *addMember(XdmValue *value);
@@ -110,14 +105,14 @@ public:
    *
    * @param value - the other array
    * The value itself is not stored internally therefore safe for memory deallocation by the caller.
-   * @return a new array, containing the members of this array followed by the
+   * @return A new XdmArray, containing the members of this array followed by the
    * members of the other array
    */
   XdmArray *concat(XdmArray *value);
 
   /**
    * Get the members of the array in the form of a list.
-   * @return a std::list of the members of this array.
+   * @return A std::list of the members of this array.
    */
   std::list<XdmValue *> asList();
 
@@ -125,78 +120,58 @@ public:
    * Utility method for working with SaxonC on Python
    * Create an array of XdmValue objects
    * @param len - the length of the array to create
-   * @return an empty array of XdmValue of length len. The caller is responsible for memory deallocation.
+   * @return An empty XdmArray of length len. The caller is responsible for memory deallocation.
    */
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
   /**
-   * Get the members of the array in the form of an array
-   * @return an array of the members of this XdmArray. The caller is responsible for memory deallocation.
+   * Get the members of the XDM array in the form of a C++ array.
+   * @return An array of the members of this XdmArray. The caller is responsible for memory deallocation.
    */
   XdmValue **values();
 
   /**
    * Get the arity of the function
    *
-   * @return the arity of the function, that is, the number of arguments in the
-   * function's signature
+   * @return The arity of the function, that is, the number of arguments in the
+   * function's signature (in this case, 1 (one))
    */
   int getArity() { return 1; }
 
-  //! Get the string value of the XdmArray item.
   /**
-   * Get the value of the item as a string. For arrays, there is no string
-   * value, so an exception is thrown.
+   * Get the string value of the XdmArray item. There is no string value for
+   * function items, so an exception is always thrown.
    *
-   * @return the string value of the item
+   * @return Nothing is returned; this method always throws an exception because the XdmArray
+   * has no associated string value.
    * @throws SaxonApiException
    */
   const char *getStringValue();
 
   /**
-   * Determine whether the item is a function or some other type of item
+   * Determine whether the item is an XDM function or some other type of item
    *
-   * @return true if the item is a Xdm function item, false if it is an atomic
-   * value or a function (including maps and arrays)
+   * @return True; an XDM array is a function item
    */
   bool isFunction() { return true; }
 
   /**
-   * Get the type of the object
+   * Get the type of this XDM value
+   * @return The type of the XdmValue as an XDM_TYPE
    */
   XDM_TYPE getType() { return XDM_ARRAY; }
 
-  //! Determine whether the item is an array or some other type of item
   /**
+   * Determine whether the item is an XDM array or some other type of item
    *
-   * @return true if the item is a Xdm array item, false if it is some other
-   * type
+   * @return True
    */
   bool isArray() { return true; }
 
-  //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
   /**
-   *
-   * <p>In the case of an element node, the result will be a well-formed
-   * XML document serialized as defined in the W3C XSLT/XQuery serialization
-   * specification, using options method="xml", indent="yes",
-   * omit-xml-declaration="yes".</p> <p>In the case of a document node, the
-   * result will be a well-formed XML document provided that the document node
-   * contains exactly one element child, and no text node children. In other
-   * cases it will be a well-formed external general parsed entity.</p> <p>In
-   * the case of an attribute node, the output is a string in the form
-   * <code>name="value"</code>. The name will use the original namespace
-   * prefix.</p> <p>In the case of a namespace node, the output is a string in
-   * the form of a namespace declaration, that is <code>xmlns="uri"</code> or
-   * <code>xmlns:pre="uri"</code>.</p> <p>Other nodes, such as text nodes,
-   * comments, and processing instructions, are represented as they would appear
-   * in lexical XML. Note: this means that in the case of text nodes, special
-   * characters such as <code>&amp;</code> and <code>&lt;</code> are output in
-   * escaped form. To get the unescaped string value of a text node, use
-   * <code>getStringValue()</code> instead.</p>
-   *
-   * @return a simple XML serialization of the node. Under error conditions the
-   * method may return an error message which will always begin with the label "Error: ".
+   * Create a string representation of the XDM array. This is the result of serializing
+   * the array using the adaptive serialization method.
+   * @return A string representation of the XdmArray.
    * The caller is responsible for memory deallocation using `operator delete`.
    */
   const char *toString();

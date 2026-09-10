@@ -72,8 +72,8 @@ public:
 
   //! Constructor with the SaxonProcessor supplied.
   /*!
-    @param proc - Pointer to the SaxonProcessor object
-    @param cwd - The current working directory
+    @param proc - pointer to the SaxonProcessor object
+    @param cwd - the current working directory
     @throws SaxonApiException
   */
   XPathProcessor(SaxonProcessor *proc, std::string cwd = "");
@@ -90,14 +90,14 @@ public:
    * relative URIs appearing within an XPath expression, for example a relative
    * URI passed as an argument to the doc() function. If no static base URI is
    * supplied, then the current working directory is used.
-   * @param uriStr
+   * @param uriStr - the static base URI
    */
   void setBaseURI(const char *uriStr);
 
   //! Get the static base URI for XPath expressions compiled using this XPathProcessor.
   /**
    * Note that memory deallocation is handled internally.
-   * @return the static base URI as a string
+   * @return The static base URI as a string
    */
   const char *getBaseURI();
 
@@ -106,19 +106,19 @@ public:
    * @param xpathStr - the XPath expression supplied as a character string
    * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
-   *  @return an XdmValue representing the result of evaluating the expression or nullptr if
-   *  the expression returns an empty sequence.
-   *  The caller is responsible for memory deallocation using `delete`.
+   * @return An XdmValue representing the result of evaluating the expression or nullptr if
+   * the expression returns an empty sequence.
+   * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException
    */
   XdmValue *evaluate(const char *xpathStr, const char *encoding = nullptr);
 
-  //! Compile and evaluate an XPath expression. The result is expected to be a single XdmItem or nullptr
+  //! Compile and evaluate an XPath expression. The result is expected to be a single XdmItem or nullptr.
   /**
    * @param xpathStr - the XPath expression supplied as a character string
    * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
-   * @return an XdmItem representing the result of evaluating the expression
+   * @return An XdmItem representing the result of evaluating the expression
    * or nullptr if the expression returns an empty sequence.
    * If the expression returns a sequence of more than one item, any items after
    * the first are ignored.
@@ -127,19 +127,21 @@ public:
    */
   XdmItem *evaluateSingle(const char *xpathStr, const char *encoding = nullptr);
 
-  /** Set the context item
+  /** Set the context item for the expression
+   * @param item - the initial context item
    */
   void setContextItem(XdmItem *item);
 
   /**
    * Set the current working directory
+   * @param cwd - current working directory
    */
   void setcwd(const char *cwd);
 
  /**
-  * Get the current working directory.
+  * Get the current working directory set on this XPathProcessor.
   * Memory deallocation is handled internally.
-  * @returns const char* - cwd of the XPath Processor
+  * @return Current working directory
   */
  const char * getcwd();
 
@@ -152,20 +154,20 @@ public:
    * @param xpathStr - the XPath expression supplied as a character string
    * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
-   *  @return bool
+   * @return The effective boolean value of the result
    * @throws SaxonApiException
    */
   bool effectiveBooleanValue(const char *xpathStr,
                              const char *encoding = nullptr);
 
   /**
-   * Set a parameter value used in the XPath expression
+   * Set the value of a parameter used in the XPath expression
    *
    * @param name - the name of the parameter, as a string. For a namespaced name use
-   * clark notation i.e. "{uri}name"
+   * clark notation i.e. "{uri}local"
    * @param value - the value of the parameter, or nullptr to clear a previously set
    * value
-   * @param withParam Internal use only
+   * @param withParam - internal use only
    */
 
   void setParameter(const char *name, XdmValue *value, bool withParam=true);
@@ -174,38 +176,38 @@ public:
    * Remove a parameter (name, value) pair
    *
    * @param name - the name of the parameter
-   * @return bool - outcome of the removal
+   * @return Outcome of the removal
    */
   bool removeParameter(const char *name);
 
-  //! Set a property specific to the XPath processor in use.
+  //! Set a configuration property specific to the XPath processor in use.
   /**
    * XPathProcessor: set serialization properties (names start with '!' i.e.
    * name "!method" -> "xml"), 'o':outfile name, 's': context item supplied as
    * file name
-   * @param name of the property
-   * @param value of the property
+   * @param name - the name of the property
+   * @param value - the value of the property
    */
   void setProperty(const char *name, const char *value);
 
- //! Get a property specified on the XPath processor in use. Memory deallocation is handled internally.
+ //! Get the value of a configuration property specified on the XPath processor in use. Memory deallocation is handled internally.
  /**
-  * @param name - the name of the property.
-  * @returns const char * - value of the property or nullptr if the property is not found. Memory deallocation is handled internally.
+  * @param name - the name of the property
+  * @return Value of the property or nullptr if the property is not found. Memory deallocation is handled internally.
   */
  const char * getProperty(const char *name);
 
   //! Declare a namespace binding as part of the static context for XPath expressions compiled using this XPathProcessor
   /**
    *
-   * @param prefix The namespace prefix. If the value is a zero-length string,
+   * @param prefix - the namespace prefix. If the value is a zero-length string,
    * this method sets the default namespace for elements and types.
-   * @param uri    The namespace URI. It is possible to specify a zero-length
+   * @param uri - the namespace URI. It is possible to specify a zero-length
    * string to "undeclare" a namespace; in this case the prefix will not be
    * available for use, except in the case where the prefix is also a zero
    * length string, in which case the absence of a prefix implies that the name
-   *               is in no namespace.
-   * Assume the prefix or uri is nullptr.
+   * is in no namespace.
+   * @throws SaxonApiException if either the prefix or uri is nullptr
    */
   void declareNamespace(const char *prefix, const char *uri);
 
@@ -217,7 +219,8 @@ public:
    * XPath expression is evaluated. The variable is allowed to have any type
    * (that is, the required type is <code>item()*</code>).
    *
-   * @param name The name of the variable, expressions as a clark name string
+   * @param name - the name of the parameter, as a string. For a namespaced name use
+   * clark notation i.e. "{uri}local"
    */
   void declareVariable(const char *name);
 
@@ -241,14 +244,14 @@ public:
    * example it is possible to compare a number with a string. The default is
    * false (backwards compatibility mode is off).
    *
-   * @param option true if XPath 1.0 backwards compatibility is to be enabled,
+   * @param option - true if XPath 1.0 backwards compatibility is to be enabled,
    * false if it is to be disabled.
    */
   void setBackwardsCompatible(bool option);
 
   //! Say whether the compiler should maintain a cache of compiled expressions.
   /**
-   * @param caching if set to true, caching of compiled expressions is enabled.
+   * @param caching - if set to true, caching of compiled expressions is enabled.
    *                If set to false, any existing cache is cleared, and future
    * compiled expressions will not be cached until caching is re-enabled. The
    * cache is also cleared (but without disabling future caching) if any method
@@ -260,7 +263,8 @@ public:
 
   //! Set the policy for matching unprefixed element names in XPath expressions
   /**
-   * @param policy the policy to be used, possible values: DEFAULT_NAMESPACE =
+   * Use the convertEnumPolicy method to create an UnprefixedElementMatchingPolicy value.
+   * @param policy - the policy to be used, possible values: DEFAULT_NAMESPACE =
    * 0, ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 2
    *
    */
@@ -268,7 +272,8 @@ public:
   setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
 
   /**
-   * Convert an int into an UnprefixedElementMatchingPolicy
+   * Convert an int into an UnprefixedElementMatchingPolicy.
+   * To be used with the setUnprefixedElementMatchingPolicy method.
    *
    * @param n - the int representing the policy
    */
@@ -278,13 +283,13 @@ public:
 
   //! Get the policy for matching unprefixed element names in XPath expressions
   /**
-   * @return the policy being used
+   * @return The policy being used
    */
   UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
 
   //! Import a schema namespace
   /**
-   * Here we add the element and attribute declarations and type definitions
+   * That is, add the element and attribute declarations and type definitions
    * contained in a given namespace to the static context for the XPath
    * expression. <p>This method will not cause the schema to be loaded. This
    * method will not fail if the schema has not been loaded (but in that case
@@ -294,16 +299,16 @@ public:
    * not bind a prefix to the namespace. That must be done separately, using the
    * declareNamespace(String, String) method.</p>
    *
-   * @param uri The schema namespace to be imported. To import declarations in a
+   * @param uri - the schema namespace to be imported. To import declarations in a
    * no-namespace schema, supply a zero-length string.
    */
   void importSchemaNamespace(const char *uri);
 
   /**
-   * Get a parameter value by name
-   * @param name - Specified parameter name to get
-   * @param withParam Internal use only
-   * @return XdmValue
+   * Get the value of a parameter
+   * @param name - the name of the parameter
+   * @param withParam - internal use only
+   * @return The value of the parameter as an XdmValue
    */
   XdmValue *getParameter(const char *name, bool withParam=true);
 
@@ -313,7 +318,7 @@ public:
   std::map<std::string, XdmValue *> &getParameters();
 
   /**
-   * Get all properties as a std::map
+   * Get all configuration properties specified on the processor as a std::map
    */
   std::map<std::string, std::string> &getProperties();
 
@@ -335,7 +340,7 @@ public:
   /**
    * Checks for pending exceptions without creating a local reference to the
    * exception object
-   * @return bool - true when there is a pending exception; otherwise return
+   * @return True when there is a pending exception; otherwise return
    * false
    */
 
@@ -344,34 +349,33 @@ public:
   /**
    * Checks for pending exceptions without creating a local reference to the
    * exception object
-   * @return bool - true when there is a pending exception; otherwise return
-   * false
+   * @return True when there is a pending exception; otherwise false
    */
   bool exceptionOccurred();
 
-  //! Clear any exception thrown
+  //! Clear any thrown exceptions
   void exceptionClear();
 
   //! Get the first error message if there are any errors
   /**
    * An XPath expression may have a number of errors reported against it.
-   * @return char* - The message of the exception
+   * @return The message of the exception
    */
   const char *getErrorMessage();
 
   //! Get the first error code if there are any errors
   /**
-   * After the execution of the XPath expression there may be  a number of
+   * After the execution of the XPath expression there may be a number of
    * errors reported against it.
-   * @return char* - The error code of the exception.
+   * @return The error code of the exception
    */
   const char *getErrorCode();
 
   //! Get the SaxonApiException object created when we have an error
   /**
-   * After the execution of the processor if there is an error, then a
-   * SaxonApiException is created. NULL returned if there is no error.
-   * @return SaxonApiException object of the exception thrown.
+   * After the execution of the processor if there is an error then a
+   * SaxonApiException is created.
+   * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
   SaxonApiException *getException();
 
@@ -379,21 +383,20 @@ private:
   void createException(const char *message = nullptr);
 
 
-  SaxonProcessor *proc; /*!< SaxonProcessor pointer to object. This is the
-                           object that created the XPathProcessor */
-  std::string cwdXP;    /*!< current working directory */
+  SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this XPathProcessor */
+  std::string cwdXP;    /*!< Current working directory */
   char *xp_baseURI;
   // jclass  cppClass; /*!< Reference to the XPathProcessor Java class under JNI
   // */
-  int64_t cppXP; /*!< The XPathProcessor underlying Java object  */
+  int64_t cppXP; /*!< The underlying XPathProcessor Java object  */
   std::map<std::string, XdmValue *>
-      parameters; /*!< map of parameters used for the transformation as (string,
+      parameters; /*!< Map of parameters used for the transformation as (string,
                      value) pairs */
   std::map<std::string, std::string>
-      properties; /*!< map of properties used for the transformation as (string,
+      properties; /*!< Map of properties used for the transformation as (string,
                      string) pairs */
   SaxonApiException
-      *exception; /*!< exception object created when there is an error */
+      *exception; /*!< Exception object created when there is an error */
   UnprefixedElementMatchingPolicy unprefixedElementPolicy;
 };
 

@@ -633,9 +633,9 @@ cdef class PySaxonProcessor:
     def make_string_value(self, value, encoding = None):
         """
         make_string_value(self, value, encoding = None)
-        Factory method to create a String value as a new XdmAtomicValue.
+        Factory method to create an xs:string atomic value as a new PyXdmAtomicValue.
         Args:
-            value (str): The String value. NULL is taken as equivalent to "".
+            value (str): The string value. NULL is taken as equivalent to "".
             encoding (str): The encoding of the string. If not specified then the platform default encoding is used.
         Returns:
             PyXdmAtomicValue: The corresponding XDM string value
