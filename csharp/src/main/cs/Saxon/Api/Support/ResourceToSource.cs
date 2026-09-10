@@ -1,7 +1,9 @@
+using System.IO;
 using Saxon.Callbacks;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.om;
+using Saxon.Hej.resource;
 using Saxon.Hej.trans;
 
 namespace Saxon.Api.Support {
@@ -16,6 +18,7 @@ namespace Saxon.Api.Support {
                 TextResource text => new StreamSource(text.TextReader, text.ResourceUri.ToString()),
                 NodeResource node => new NodeSource((NodeInfo)((XdmNode)node.GetXdmItem()).Unwrap()),
                 XmlReaderResource xml => new NodeSource((NodeInfo)((XdmNode)xml.GetXdmItem()).Unwrap()),
+                BinaryResource bin => new StreamSource(bin.InputStream),
                 _ => throw new XPathException("Unknown resource type " + resource.GetType())
             };
         } 

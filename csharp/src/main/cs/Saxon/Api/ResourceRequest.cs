@@ -11,6 +11,11 @@ namespace Saxon.Api {
         /// </summary>
         public const string TEXT_NATURE = "https://www.iana.org/assignments/media-types/text/plain";
         /// <summary>
+        /// <c>BINARY_NATURE</c> represents binary resources (media type = "application/octet-stream"), for example
+        /// unparsed text files
+        /// </summary>
+        public const string BINARY_NATURE = "https://www.iana.org/assignments/media-types/application/binary";
+        /// <summary>
         /// <c>XQUERY_NATURE</c> represents XQuery modules (main modules or library modules)
         /// </summary>
         public const string XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";

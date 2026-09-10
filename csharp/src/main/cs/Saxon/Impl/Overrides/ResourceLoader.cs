@@ -142,7 +142,8 @@ namespace Saxon.Impl.Overrides {
             return new StreamReader(input,
                 System.Text.Encoding.GetEncoding(encoding,
                     new EncoderExceptionFallback(),
-                    new DecoderExceptionFallback()));
+                    new DecoderExceptionFallback()),
+                detectEncodingFromByteOrderMarks: false );
         }
     }
 }

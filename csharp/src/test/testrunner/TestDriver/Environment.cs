@@ -6,6 +6,7 @@ using System.Xml;
 using System.IO;
 using System.Globalization;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using JConfiguration = Saxon.Hej.Configuration;
 using JPreparedStylesheet = Saxon.Hej.PreparedStylesheet;
@@ -27,6 +28,8 @@ using Saxon.Hej;
 using Saxon.Hej.lib;
 using Saxon.Callbacks;
 using Saxon.Ejava.net;
+using Saxon.Hej.resource;
+using Saxon.Hej.value;
 #if EE
 using Saxon.Eej.ee.stream;
 #endif
@@ -51,6 +54,7 @@ namespace TestDriver {
         public Processor processor;
         public SysCollGen.Dictionary<string, XdmNode> sourceDocs = new();
         private readonly SysCollGen.Dictionary<string, string> streamedSecondaryDocs = new();
+        private readonly SysCollGen.Dictionary<string, string> binaryResources = new();
         private readonly SysCollGen.Dictionary<Uri, SysCollGen.List<IResource>> collections = new(); 
 
         public string streamedPath;
@@ -222,7 +226,7 @@ namespace TestDriver {
 
             // create an unparsed text resolver to handle any unparsed text resources
 
-            CreateUnparsedTextResolver(driver, xpc, env, environment);
+            CreateLocalResourceResolver(driver, xpc, env, environment);
 
             // register any required decimal formats
 
@@ -552,7 +556,7 @@ namespace TestDriver {
             }
         }
 
-        private static void CreateUnparsedTextResolver(Driver driver, XPathCompiler xpc, XdmItem env,
+        private static void CreateLocalResourceResolver(Driver driver, XPathCompiler xpc, XdmNode env,
                 Environment environment) {
             SysCollGen.Dictionary<Uri, Func<TextResource>> resources = new SysCollGen.Dictionary<Uri, Func<TextResource>>();
             SysCollGen.Dictionary<Uri, Encoding> encodings = new SysCollGen.Dictionary<Uri, Encoding>();
@@ -561,83 +565,93 @@ namespace TestDriver {
             // For each resource in the environment, create a dictionary entry that maps
             // the URI of the resource to a factory function that delivers a TextReader
             // for that resource
-            
+
             foreach (XdmItem resource in xpc.Evaluate("resource", env)) {
-                string nominalUriStr = ((XdmNode) resource).GetAttributeValue(new QName("uri"));
+                string nominalUriStr = ((XdmNode)resource).GetAttributeValue(new QName("uri"));
                 Uri nominalUri = new Uri(nominalUriStr, UriKind.RelativeOrAbsolute);
                 if (!nominalUri.IsAbsoluteUri) {
-                    nominalUri = new Uri(((XdmNode) env).BaseUri, nominalUri);
+                    nominalUri = new Uri(env.BaseUri, nominalUri);
                 }
-                string href = ((XdmNode) resource).GetAttributeValue(new QName("file"));
-                string encoding = ((XdmNode) resource).GetAttributeValue(new QName("encoding"));
-                if (encoding == null) {
-                    encoding = "utf-8"; // TODO: should infer from content etc?
+
+                string href = ((XdmNode)resource).GetAttributeValue(new QName("file"));
+                string encoding = ((XdmNode)resource).GetAttributeValue(new QName("encoding"));
+                string mediaType = ((XdmNode)resource).GetAttributeValue(new QName("media-type"));
+                if (mediaType == "application/octet-stream" || mediaType == "application/binary") {
+                    environment.binaryResources[nominalUriStr] = res.ResolveUri(env.BaseUri, href).AbsolutePath;
                 }
-                
-                Encoding enc1 = Encoding.GetEncoding(encoding, 
-                    EncoderFallback.ExceptionFallback, 
-                    new DecoderExceptionFallback());
-                string mediaType = ((XdmNode) resource).GetAttributeValue(new QName("media-type"));
-                if (href != null) {
-                    if (href.StartsWith("http")) {
-                        resources.Add(nominalUri, () => {
-                            Stream stream = new URL(nominalUri).openStream();
-                            StreamReader reader = new (stream, enc1);
-                            string str = reader.ReadToEnd();
-                            return new TextResource(str, nominalUri);
-                        });
+                else {
+                    if (encoding == null) {
+                        encoding = "utf-8"; // TODO: should infer from content etc?
                     }
-                    else {
-                        Uri resourceUri = new Uri(((XdmNode) env).BaseUri, href);
-                        
-                        resources.Add(nominalUri, () => {
-                            try {
-                                // TODO: this logic should surely be in the standard UnparsedTextResolver?
-                                Stream stream = new URL(resourceUri).openStream();
-                                byte[] content = ToByteArray(stream);
-                                Encoding enc2 = enc1;
-                                if (encoding == "utf-16" && content.Length >= 2) {
-                                    // Seems we need to resolve endianness ourselves
-                                    if (content[0] == 0xfe && content[1] == 0xff) {
-                                        enc2 = Encoding.BigEndianUnicode;
-                                    } else if (content[0] == 0xff && content[1] == 0xfe) {
-                                        enc2 = Encoding.Unicode;
-                                    }
-                                }
-                                string str = enc2.GetString(content);
-                                if (str.Length > 0 && str[0] == 0xfffe) {
-                                    str = str.Substring(1);
-                                }
+
+                    Encoding enc1 = Encoding.GetEncoding(encoding,
+                        EncoderFallback.ExceptionFallback,
+                        new DecoderExceptionFallback());
+                    if (href != null) {
+                        if (href.StartsWith("http")) {
+                            resources.Add(nominalUri, () => {
+                                Stream stream = new URL(nominalUri).openStream();
+                                StreamReader reader = new(stream, enc1);
+                                string str = reader.ReadToEnd();
                                 return new TextResource(str, nominalUri);
-                            }
-                            catch (System.Text.DecoderFallbackException e) {
-                                throw new JXpathException(e.Message, "FOUT1190");
-                            }
-                        });
-                        
-                    }
-                    
+                            });
+                        }
+                        else {
+                            Uri resourceUri = new Uri(((XdmNode)env).BaseUri, href);
 
-                    try {
-                        //encodings.Add(nominalUri, encoding);
-                        
+                            resources.Add(nominalUri, () => {
+                                try {
+                                    // TODO: this logic should surely be in the standard UnparsedTextResolver?
+                                    Stream stream = new URL(resourceUri).openStream();
+                                    byte[] content = ToByteArray(stream);
+                                    Encoding enc2 = enc1;
+                                    if (encoding == "utf-16" && content.Length >= 2) {
+                                        // Seems we need to resolve endianness ourselves
+                                        if (content[0] == 0xfe && content[1] == 0xff) {
+                                            enc2 = Encoding.BigEndianUnicode;
+                                        }
+                                        else if (content[0] == 0xff && content[1] == 0xfe) {
+                                            enc2 = Encoding.Unicode;
+                                        }
+                                    }
 
-                        // environment.catalogResources.Add();
-                    }
-                    catch (Exception e) {
-                        driver.println("** Invalid URI in environment: " + e.Message);
-                    }
+                                    string str = enc2.GetString(content);
+                                    if (str.Length > 0 && str[0] == 0xfffe) {
+                                        str = str.Substring(1);
+                                    }
 
-                    if (mediaType != null && mediaType.EndsWith("xquery")) {
-                        driver.RegisterXQueryModule(nominalUri,
-                            res.ResolveUri(((XdmNode) env).BaseUri, href).AbsolutePath);
+                                    return new TextResource(str, nominalUri);
+                                }
+                                catch (System.Text.DecoderFallbackException e) {
+                                    throw new JXpathException(e.Message, "FOUT1190");
+                                }
+                            });
+
+                        }
+
+
+                        try {
+                            //encodings.Add(nominalUri, encoding);
+
+
+                            // environment.catalogResources.Add();
+                        }
+                        catch (Exception e) {
+                            driver.println("** Invalid URI in environment: " + e.Message);
+                        }
+
+                        if (mediaType != null && mediaType.EndsWith("xquery")) {
+                            driver.RegisterXQueryModule(nominalUri,
+                                res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath);
+                        }
                     }
                 }
-            }
 
-            if (resources.Count != 0) {
-                environment.unparsedTextResolver =
-                    new TestUnparsedTextURIResolver(encodings, resources, environment.processor.Implementation).Resolve;
+                if (resources.Count != 0) {
+                    environment.unparsedTextResolver =
+                        new TestUnparsedTextURIResolver(encodings, resources, environment.processor.Implementation)
+                            .Resolve;
+                }
             }
         }
 
@@ -797,6 +811,36 @@ namespace TestDriver {
 
 
         }
+        
+        
+        private IResource GetBinaryResource(Uri uri) {
+            string file;
+            if (binaryResources.ContainsKey(uri.ToString())) {
+                file = binaryResources[uri.ToString()];
+            }
+            else {
+                file = uri.OriginalString;
+                if (file.StartsWith("file://")) {
+                    file = file[7..];
+                }
+                else {
+                    throw new Saxon.Hej.trans.XPathException("No binary resource at URI " + uri, "FOUT1170");
+                }
+            }
+
+            System.IO.Stream inputStream = new FileStream(file, FileMode.Open);
+            if ((inputStream == null)) {
+                throw new Saxon.Hej.trans.XPathException("Resolver for unparsed-binary() returned StreamSource with no InputStream", "FOUT1170");
+            }
+            try {
+                byte[] content = Saxon.Impl.Helpers.IOUtils.readAllBytes(inputStream);
+                inputStream.Close();
+                return new Saxon.Api.BinaryResource(content, new Uri(file));
+            } catch (System.IO.IOException e) {
+                throw new Saxon.Hej.trans.XPathException(e).withErrorCode("FOUT1170");
+            }
+            
+        }
 
 
         // Support URI resolution for XML documents
@@ -848,7 +892,14 @@ namespace TestDriver {
         }
         
         public Saxon.Api.ResourceResolver GetXmlDocumentResolver() {
-            return (request) => GetDocument(request.Uri);
+            return (request) => {
+                if (request.Nature == ResourceRequest.BINARY_NATURE) {
+                    return GetBinaryResource(request.Uri);
+                }
+                else {
+                    return GetDocument(request.Uri);
+                }
+            };
         }
 
         // public override Uri ResolveUri(Uri basei, string href) {
