@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.json;
 
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.MapItem;
@@ -39,9 +38,9 @@ public class ParseJsonFn extends JsonToXMLFn {
         parseJsonOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
         parseJsonOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "use-last");
         parseJsonOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        parseJsonOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
+        parseJsonOptions.addAllowedOption("fallback", SequenceType.one(fallbackType), null);
         parseJsonOptions.addAllowedOption("null", SequenceType.ANY_SEQUENCE, EmptySequence.getInstance());
-        parseJsonOptions.addAllowedOption("number-parser", SequenceType.makeSequenceType(parserType, StaticProperty.EXACTLY_ONE), null);
+        parseJsonOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
         return parseJsonOptions;
     }
 

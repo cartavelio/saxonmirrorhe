@@ -353,7 +353,7 @@ public class Copy extends ElementCreator {
                     Expression[] conditions = new Expression[]{
                             new InstanceOfExpression(
                                     new ContextItemExpression(),
-                                    SequenceType.makeSequenceType(leafTest, StaticProperty.EXACTLY_ONE)),
+                                    SequenceType.one(leafTest)),
                             Literal.makeLiteral(BooleanValue.TRUE, this)};
                     Expression[] actions = new Expression[]{copyOf, this};
                     Choose choose = new Choose(conditions, actions);

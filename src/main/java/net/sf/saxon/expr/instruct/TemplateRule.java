@@ -433,9 +433,9 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         return false;
     }
 
-    public void explainProperties(ExpressionPresenter presenter) throws XPathException {
+    public void explainProperties(ExpressionPresenter presenter) {
         if (getRequiredContextItemType() != AnyItemType.getInstance()) {
-            SequenceType st = SequenceType.makeSequenceType(getRequiredContextItemType(), StaticProperty.EXACTLY_ONE);
+            SequenceType st = SequenceType.one(getRequiredContextItemType());
             presenter.emitAttribute("cxt", st.toAlphaCode());
         }
 

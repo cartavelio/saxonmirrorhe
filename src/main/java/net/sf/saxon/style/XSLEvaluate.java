@@ -225,11 +225,11 @@ public class XSLEvaluate extends StyleElement {
 
             role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/with-params", 0, "XTTE3170");
             withParams = tc.staticTypeCheck(withParams,
-                                            SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE), role, visitor);
+                                            SequenceType.one(MapType.ANY_MAP_TYPE), role, visitor);
 
             role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:evaluate/saxon:options", 0);
             options = tc.staticTypeCheck(options,
-                                         SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE), role, visitor);
+                                         SequenceType.one(MapType.ANY_MAP_TYPE), role, visitor);
 
         } catch (XPathException err) {
             compileError(err);

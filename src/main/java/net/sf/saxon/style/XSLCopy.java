@@ -163,7 +163,7 @@ public class XSLCopy extends StyleElement {
             // wrap the UseAttributeSet instructions in a conditional to perform a run-time test
             Expression condition = new InstanceOfExpression(
                     new ContextItemExpression(),
-                    SequenceType.makeSequenceType(NodeKindTest.ELEMENT, StaticProperty.EXACTLY_ONE));
+                    SequenceType.one(NodeKindTest.ELEMENT));
             Expression choice = Choose.makeConditional(condition, use);
             if (content == null) {
                 content = choice;

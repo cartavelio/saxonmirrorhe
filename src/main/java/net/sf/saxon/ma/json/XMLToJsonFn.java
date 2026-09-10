@@ -11,7 +11,6 @@ import net.sf.saxon.event.DocumentValidator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.OptionsParameter;
@@ -49,7 +48,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
         OptionsParameter xmlToJsonOptions = new OptionsParameter(version);
         xmlToJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         xmlToJsonOptions.addAllowedOption("number-formatter",
-                                          SequenceType.makeSequenceType(formatterFunctionType, StaticProperty.ALLOWS_ZERO_OR_ONE),
+                                          SequenceType.optional(formatterFunctionType),
                                           EmptySequence.getInstance());
         return xmlToJsonOptions;
     }

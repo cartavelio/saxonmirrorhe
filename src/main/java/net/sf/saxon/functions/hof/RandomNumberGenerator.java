@@ -8,7 +8,6 @@
 package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -40,7 +39,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
 
     private final static FunctionItemType NEXT_FN_TYPE = new SpecificFunctionType(
             new SequenceType[]{}, // zero arguments
-            SequenceType.makeSequenceType(RETURN_TYPE, StaticProperty.ALLOWS_ONE));
+            SequenceType.one(RETURN_TYPE));
 
     private final static FunctionItemType PERMUTE_FN_TYPE = new SpecificFunctionType(
         new SequenceType[]{SequenceType.ANY_SEQUENCE},

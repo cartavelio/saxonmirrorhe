@@ -858,8 +858,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     // rewrite SEQ[position() lt V] as
                     // let $N := V return subsequence(SEQ, 1, if (is-whole-number($N)) then $N-1 else floor($N)))
                     LetExpression let = new LetExpression();
-                    let.setRequiredType(SequenceType.makeSequenceType(
-                            comparand.getItemType(), StaticProperty.ALLOWS_ONE));
+                    let.setRequiredType(SequenceType.one(comparand.getItemType()));
                     let.setVariableQName(new StructuredQName("pp", NamespaceUri.SAXON, "pp" + let.hashCode()));
                     let.setSequence(comparand);
                     LocalVariableReference isWholeArg = new LocalVariableReference(let);
@@ -886,8 +885,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     // let $N := V return remove(SEQ, if (is-whole-number($N)) then xs:integer($N) else 0)
                     LetExpression let = new LetExpression();
                     ExpressionTool.copyLocationInfo(start, let);
-                    let.setRequiredType(SequenceType.makeSequenceType(
-                            comparand.getItemType(), StaticProperty.ALLOWS_ONE));
+                    let.setRequiredType(SequenceType.one(comparand.getItemType()));
                     let.setVariableQName(new StructuredQName("pp", NamespaceUri.SAXON, "pp" + let.hashCode()));
                     let.setSequence(comparand);
                     LocalVariableReference isWholeArg = new LocalVariableReference(let);
@@ -906,8 +904,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     // rewrite SEQ[position() gt V] as
                     // let $N := V return subsequence(SEQ, if (is-whole-number($N)) then $N+1 else ceiling($N)))
                     LetExpression let = new LetExpression();
-                    let.setRequiredType(SequenceType.makeSequenceType(
-                            comparand.getItemType(), StaticProperty.ALLOWS_ONE));
+                    let.setRequiredType(SequenceType.one(comparand.getItemType()));
                     let.setVariableQName(new StructuredQName("pp", NamespaceUri.SAXON, "pp" + let.hashCode()));
                     let.setSequence(comparand);
                     LocalVariableReference isWholeArg = new LocalVariableReference(let);

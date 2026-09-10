@@ -8,7 +8,6 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
@@ -32,7 +31,7 @@ public class ArrayItemType extends AnyFunctionType {
     public final static ArrayItemType ANY_ARRAY_TYPE = new ArrayItemType(SequenceType.ANY_SEQUENCE);
 
     public final static SequenceType SINGLE_ARRAY =
-            SequenceType.makeSequenceType(ArrayItemType.ANY_ARRAY_TYPE, StaticProperty.EXACTLY_ONE);
+            SequenceType.one(ArrayItemType.ANY_ARRAY_TYPE);
 
     private final SequenceType memberType;
 

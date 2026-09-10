@@ -275,7 +275,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
         //try {
             if (memberType == null) {
                 if (isEmpty()) {
-                    memberType = SequenceType.makeSequenceType(ErrorType.getInstance(), StaticProperty.EXACTLY_ONE);
+                    memberType = SequenceType.one(ErrorType.getInstance());
                 } else {
                     ItemType contentType = null;
                     int contentCard = StaticProperty.EXACTLY_ONE;

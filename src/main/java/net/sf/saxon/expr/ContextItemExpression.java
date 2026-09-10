@@ -356,7 +356,7 @@ public class ContextItemExpression extends Expression {
         destination.startElement("dot", this);
         ItemType type = getItemType();
         if (!(type == AnyItemType.getInstance())) {
-            SequenceType st = SequenceType.makeSequenceType(type,StaticProperty.EXACTLY_ONE);
+            SequenceType st = SequenceType.one(type);
             destination.emitAttribute("type", st.toAlphaCode());
         }
         if (staticInfo.isPossiblyAbsent()) {

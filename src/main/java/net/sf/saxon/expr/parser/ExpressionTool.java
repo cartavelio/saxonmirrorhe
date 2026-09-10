@@ -1383,7 +1383,7 @@ public class ExpressionTool {
             LetExpression let = new LetExpression();
             let.setVariableQName(
                     new StructuredQName("saxon", NamespaceUri.SAXON, "dot" + exp.hashCode()));
-            let.setRequiredType(SequenceType.makeSequenceType(contextItemType, StaticProperty.EXACTLY_ONE));
+            let.setRequiredType(SequenceType.one(contextItemType));
             let.setSequence(new ContextItemExpression());
             Expression actionCopy = exp.copy(new RebindingMap());
             let.setAction(actionCopy);

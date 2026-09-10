@@ -10,7 +10,6 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
@@ -267,9 +266,9 @@ public class NamedTemplate extends Actor implements TraceableComponent {
         presenter.endElement();
     }
 
-    public void explainProperties(ExpressionPresenter presenter) throws XPathException {
+    public void explainProperties(ExpressionPresenter presenter) {
         if (getRequiredContextItemType() != AnyItemType.getInstance()) {
-            SequenceType st = SequenceType.makeSequenceType(getRequiredContextItemType(), StaticProperty.EXACTLY_ONE);
+            SequenceType st = SequenceType.one(getRequiredContextItemType());
             presenter.emitAttribute("cxt", st.toAlphaCode());
         }
 

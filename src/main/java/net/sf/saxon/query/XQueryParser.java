@@ -2376,14 +2376,14 @@ public class XQueryParser extends XPathParser {
                     && (iterand == ForQualifier.FOR_ITEM || iterand == ForQualifier.FOR_KEY)
                     && iterandType.getCardinality() != StaticProperty.EXACTLY_ONE) {
                 warning("Occurrence indicator on singleton range variable has no effect", SaxonErrorCode.SXWN9039);
-                iterandType = SequenceType.makeSequenceType(iterandType.getPrimaryType(), StaticProperty.EXACTLY_ONE);
+                iterandType = SequenceType.one(iterandType.getPrimaryType());
             }
 
             SequenceType memberType = iterandType;
             if (iterand == ForQualifier.FOR_MEMBER) {
                 memberType = SequenceType.ANY_SEQUENCE;
             } else if (iterand == ForQualifier.FOR_KEY || iterand == ForQualifier.FOR_VALUE) {
-                memberType = SequenceType.makeSequenceType(MapFunctionSet.KVP_TYPE_INEXTENSIBLE, StaticProperty.EXACTLY_ONE);
+                memberType = SequenceType.one(MapFunctionSet.KVP_TYPE_INEXTENSIBLE);
             }
             LocalVariableBinding binding =
                     new LocalVariableBinding(iterationQName, memberType);

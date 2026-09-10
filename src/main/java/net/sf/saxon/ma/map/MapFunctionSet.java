@@ -79,8 +79,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 SequenceType.ANY_SEQUENCE
         );
 
-        SequenceType oneOnDuplicatesFunction = SequenceType.makeSequenceType(
-                ON_DUPLICATES_CALLBACK_TYPE, StaticProperty.EXACTLY_ONE);
+        SequenceType oneOnDuplicatesFunction = SequenceType.one(ON_DUPLICATES_CALLBACK_TYPE);
 
 
 

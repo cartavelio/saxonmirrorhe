@@ -158,7 +158,7 @@ public class FilterExpressionAM extends BinaryExpression
         Supplier<RoleDiagnostic> roleSupplier =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?[]", 0, "XPTY0004");
         ItemType mapOrArray = ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.ANY_ARRAY_TYPE);
-        SequenceType optionalMapOrArray = SequenceType.makeSequenceType(mapOrArray, StaticProperty.ALLOWS_ZERO_OR_ONE);
+        SequenceType optionalMapOrArray = SequenceType.optional(mapOrArray);
         setStart(tc.staticTypeCheck(getStart(), optionalMapOrArray, roleSupplier, visitor));
 
 

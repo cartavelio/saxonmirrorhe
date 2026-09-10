@@ -258,9 +258,7 @@ public class ForExpression extends Assignation {
         if (getSequence().getCardinality() == StaticProperty.EXACTLY_ONE) {
             LetExpression let = new LetExpression();
             let.setVariableQName(variableName);
-            let.setRequiredType(SequenceType.makeSequenceType(
-                    getSequence().getItemType(),
-                    StaticProperty.EXACTLY_ONE));
+            let.setRequiredType(SequenceType.one(getSequence().getItemType()));
             let.setSequence(getSequence());
             let.setAction(getAction());
             let.setSlotNumber(slotNumber);

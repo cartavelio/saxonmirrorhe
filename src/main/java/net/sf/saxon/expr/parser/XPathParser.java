@@ -1663,7 +1663,7 @@ public class XPathParser {
                 SequenceType type = parseSequenceType();
                 if (type.getCardinality() != StaticProperty.EXACTLY_ONE) {
                     warning("Occurrence indicator on singleton range variable has no effect", SaxonErrorCode.SXWN9039);
-                    type = SequenceType.makeSequenceType(type.getPrimaryType(), StaticProperty.EXACTLY_ONE);
+                    type = SequenceType.one(type.getPrimaryType());
                 }
                 v.setRequiredType(type);
             }

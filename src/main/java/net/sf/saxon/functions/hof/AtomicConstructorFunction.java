@@ -8,7 +8,6 @@
 package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AbstractFunction;
 import net.sf.saxon.om.NamespaceResolver;
@@ -56,7 +55,7 @@ public class AtomicConstructorFunction extends AbstractFunction {
     public FunctionItemType getFunctionItemType() {
         return new SpecificFunctionType(
                 new SequenceType[]{SequenceType.OPTIONAL_ATOMIC},
-                SequenceType.makeSequenceType(targetType, StaticProperty.ALLOWS_ZERO_OR_ONE));
+                SequenceType.optional(targetType));
     }
 
     /**

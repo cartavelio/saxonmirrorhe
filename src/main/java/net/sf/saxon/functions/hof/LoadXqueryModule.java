@@ -48,8 +48,8 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         op.addAllowedOption("location-hints", SequenceType.STRING_SEQUENCE);
         op.addAllowedOption("context-item", SequenceType.OPTIONAL_ITEM);
         op.addAllowedOption("content", SequenceType.OPTIONAL_STRING);
-        op.addAllowedOption("variables", SequenceType.makeSequenceType(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE), StaticProperty.EXACTLY_ONE)); // standard type?
-        op.addAllowedOption("vendor-options", SequenceType.makeSequenceType(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE), StaticProperty.EXACTLY_ONE));
+        op.addAllowedOption("variables", SequenceType.one(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE))); // standard type?
+        op.addAllowedOption("vendor-options", SequenceType.one(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE)));
         return op;
     }
 

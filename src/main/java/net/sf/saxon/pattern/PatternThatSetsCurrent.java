@@ -38,7 +38,7 @@ public class PatternThatSetsCurrent extends Pattern {
     public PatternThatSetsCurrent(Pattern wrappedPattern, LocalVariableBinding binding) {
         this.wrappedPattern = wrappedPattern;
         this.binding = binding;
-        binding.setRequiredType(SequenceType.makeSequenceType(wrappedPattern.getItemType(), StaticProperty.EXACTLY_ONE));
+        binding.setRequiredType(SequenceType.one(wrappedPattern.getItemType()));
         adoptChildExpression(wrappedPattern);
         setPriority(wrappedPattern.getDefaultPriority());
     }

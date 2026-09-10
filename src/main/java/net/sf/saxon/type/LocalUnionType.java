@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
@@ -100,7 +99,7 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
 
     @Override
     public SequenceType getResultTypeOfCast() {
-        return SequenceType.makeSequenceType(this, StaticProperty.ALLOWS_ZERO_OR_ONE);
+        return SequenceType.optional(this);
     }
 
 

@@ -616,7 +616,7 @@ public class SourceBinding {
         if (useContentRules) {
             if (sourceElement.hasChildNodes()) {
                 if (declaredType == null) {
-                    return SequenceType.makeSequenceType(NodeKindTest.DOCUMENT, StaticProperty.EXACTLY_ONE);
+                    return SequenceType.one(NodeKindTest.DOCUMENT);
                 } else {
                     return declaredType;
                 }

@@ -9,7 +9,6 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ForEachGroup;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -241,7 +240,7 @@ public final class XSLForEachGroup extends StyleElement {
                 Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0, "XTTE1100");
                 splitWhen = tc.staticTypeCheck(splitWhen,
-                                               SequenceType.makeSequenceType(breakWhenType, StaticProperty.EXACTLY_ONE),
+                                               SequenceType.one(breakWhenType),
                                                role, visitor);
             } catch (XPathException err) {
                 compileError(err);

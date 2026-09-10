@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.json;
 
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
@@ -41,8 +40,8 @@ public class JsonToXMLFn extends SystemFunction {
         jsonToXmlOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "retain");
         jsonToXmlOptions.addAllowedOption("validate", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        jsonToXmlOptions.addAllowedOption("fallback", SequenceType.makeSequenceType(fallbackType, StaticProperty.EXACTLY_ONE), null);
-        jsonToXmlOptions.addAllowedOption("number-parser", SequenceType.makeSequenceType(parserType, StaticProperty.EXACTLY_ONE), null);
+        jsonToXmlOptions.addAllowedOption("fallback", SequenceType.one(fallbackType), null);
+        jsonToXmlOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
         return jsonToXmlOptions;
     }
 

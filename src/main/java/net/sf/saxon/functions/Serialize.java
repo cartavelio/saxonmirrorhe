@@ -12,7 +12,6 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.SequenceCopier;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.PackageData;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
@@ -72,7 +71,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("suppress-indentation", listOfQNames);
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
         op.addAllowedOption("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        op.addAllowedOption("use-character-maps", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
+        op.addAllowedOption("use-character-maps", SequenceType.one(MapType.ANY_MAP_TYPE));
         //use-character-maps-param-type
         op.addAllowedOption("version", SequenceType.SINGLE_STRING);
 
@@ -157,7 +156,7 @@ public class Serialize extends SystemFunction implements Callable {
         requiredTypes.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
         requiredTypes.put("undeclare-prefixes", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
-        requiredTypes.put("use-character-maps", SequenceType.makeSequenceType(MapType.ANY_MAP_TYPE, StaticProperty.EXACTLY_ONE));
+        requiredTypes.put("use-character-maps", SequenceType.one(MapType.ANY_MAP_TYPE));
         //use-character-maps-param-type
         requiredTypes.put("version", SequenceType.SINGLE_STRING); //string-param-type
     }

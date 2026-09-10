@@ -228,7 +228,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("fnCoercer", this);
-        SequenceType st = SequenceType.makeSequenceType(requiredItemType, StaticProperty.EXACTLY_ONE);
+        SequenceType st = SequenceType.one(requiredItemType);
         destination.emitAttribute("to", st.toAlphaCode());
         destination.emitAttribute("diag", roleSupplier.get().save());
         String flags = "" + (allow40 ? "4" : "") + (acceptReducedArity ? "r" : "");

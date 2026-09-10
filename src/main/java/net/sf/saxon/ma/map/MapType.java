@@ -37,10 +37,8 @@ public class MapType extends AnyFunctionType {
     /**
      * A type that allows a sequence of zero or one map items
      */
-    public static final SequenceType OPTIONAL_MAP_ITEM =
-            SequenceType.makeSequenceType(ANY_MAP_TYPE, StaticProperty.ALLOWS_ZERO_OR_ONE);
-    public static final SequenceType SINGLE_MAP_ITEM =
-            SequenceType.makeSequenceType(ANY_MAP_TYPE, StaticProperty.ALLOWS_ONE);
+    public static final SequenceType OPTIONAL_MAP_ITEM = SequenceType.optional(ANY_MAP_TYPE);
+    public static final SequenceType SINGLE_MAP_ITEM = SequenceType.one(ANY_MAP_TYPE);
     public static final SequenceType SEQUENCE_OF_MAPS =
             SequenceType.makeSequenceType(ANY_MAP_TYPE, StaticProperty.ALLOWS_ZERO_OR_MORE);
 
@@ -186,7 +184,7 @@ public class MapType extends AnyFunctionType {
     @Override
     public SequenceType[] getArgumentTypes() {
         // regardless of the key type, a function call on this map can supply any atomic value
-        return new SequenceType[]{SequenceType.makeSequenceType(BuiltInAtomicType.ANY_ATOMIC, StaticProperty.EXACTLY_ONE)};
+        return new SequenceType[]{SequenceType.one(BuiltInAtomicType.ANY_ATOMIC)};
     }
 
     /**
