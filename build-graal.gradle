@@ -805,16 +805,6 @@ task all_saxonc_releases() {
         include "LICENSE.txt"
       }
     }
-
-    if (edition == "pe" || edition == "ee") {
-      doLast {
-        copy {
-          into "${saxoncReleaseDir}/notices"
-          from "${projectDir}/src/docs/notices"
-          include "ICU-J.txt"
-        }
-      }
-    }
   }
 
   Task t = task "zip_${edition}c_release"(
