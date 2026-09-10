@@ -1642,8 +1642,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             throw new IllegalArgumentException("XQuery Update requires a Saxon-EE license");
         }
         if ("XQ".equals(language)) {
-            if (languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
-                XQueryParser parser = new XQueryParser();
+            if (languageVersion == 40 || languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
+                XQueryParser parser = new XQueryParser(Math.max(languageVersion, 31));
                 if (isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
                     parser.setParserExtension(new XQueryParserExtensionEE(updating));
                 } else if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {

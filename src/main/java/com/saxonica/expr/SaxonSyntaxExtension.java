@@ -10,19 +10,17 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.ma.map.TupleItemType;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -63,12 +61,6 @@ public class SaxonSyntaxExtension extends ParserExtension {
             p.expect(Token.RPAR);
             p.nextToken();
             return realType;
-        } else if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("tuple")) {
-            // Saxon 9.8 extension: tuple types
-            return parseTupleType(p);
-        } else if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("union")) {
-            // Saxon 9.8 extension: union types
-            return parseUnionType(p);
         } else {
             return null;
         }
@@ -92,110 +84,7 @@ public class SaxonSyntaxExtension extends ParserExtension {
         //return expr;
     }
 
-    /**
-     * Parse a tuple type (Saxon 9.8 extension).
-     * Syntax: "tuple" "(" (name (":" sequenceType)?) ("," (name (":" sequenceType)?))* ")"
-     */
 
-    private ItemType parseTupleType(XPathParser p) throws XPathException {
-        // The initial "tuple(" has been read
-        Tokenizer t = p.getTokenizer();
-        p.nextToken();
-        List<String> fieldNames = new ArrayList<>(6);
-        List<SequenceType> fieldTypes = new ArrayList<>(6);
-        boolean extensible = false;
-        while (true) {
-            String name;
-            if (t.currentToken == Token.NAME) {
-                name = t.currentTokenValue;
-                if (!NameChecker.isValidNCName(name)) {
-                    p.grumble(Err.wrap(name) + " is not a valid NCName");
-                }
-            } else if (t.currentToken == Token.STRING_LITERAL) {
-                name = t.currentTokenValue;
-            } else {
-                p.grumble("Name of field in tuple must be either an NCName or a quoted string literal");
-                name = "dummy";
-            }
-            if (fieldNames.contains(name)) {
-                p.grumble("Duplicate field name (" + name + ")");
-                name = "dummy";
-            }
-            fieldNames.add(name);
-            p.nextToken();
-            SequenceType arg = SequenceType.NON_EMPTY_SEQUENCE;
-            if (t.currentToken == Token.AS) {
-                p.nextToken();
-                arg = p.parseSequenceType();
-            }
-            fieldTypes.add(arg);
-            if (t.currentToken == Token.RPAR) {
-                break;
-            } else if (t.currentToken == Token.COMMA) {
-                p.nextToken();
-                if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
-                    extensible = true;
-                    p.nextToken();
-                    p.expect(Token.RPAR);
-                    break;
-                }
-            } else {
-                p.grumble("Expected ',' or ')' after field in tuple type, found '" +
-                                  Token.tokens[t.currentToken] + '\'');
-            }
-        }
-        p.nextToken();
-        if (fieldNames.isEmpty()) {
-            p.grumble("Tuple type must contain at least one field");
-            return null;
-        }
-        return new TupleItemType(fieldNames, fieldTypes, extensible);
-
-    }
-
-    /**
-     * Parse a union type (Saxon 9.8 extension).
-     * Syntax: "union" "(" qname ("," qname)* ")"
-     */
-
-    public ItemType parseUnionType(XPathParser p) throws XPathException {
-        // The initial "union(" has been read
-        Tokenizer t = p.getTokenizer();
-        p.nextToken();
-        List<AtomicType> memberTypes = new ArrayList<>(6);
-
-        while (true) {
-            p.expect(Token.NAME);
-            StructuredQName member = p.getQNameParser().parse(
-                    t.currentTokenValue, p.getStaticContext().getDefaultElementNamespace());
-            ItemType type = p.getPlainType(member);
-            if (type instanceof AtomicType) {
-                memberTypes.add((AtomicType) type);
-            } else if (type instanceof PlainType) {
-                for (PlainType pt : ((UnionType)type).getPlainMemberTypes()) {
-                     if (pt instanceof AtomicType) {
-                         memberTypes.add((AtomicType)pt);
-                     } else {
-                         p.grumble("Union type " + type + " has a non-atomic member type " + pt);
-                     }
-                }
-            } else {
-                p.grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
-            }
-            p.nextToken();
-            if (t.currentToken == Token.RPAR) {
-                break;
-            } else if (t.currentToken == Token.COMMA) {
-                p.nextToken();
-            } else {
-                p.grumble("Expected ',' or ')' after member name in union type, found '" +
-                                  Token.tokens[t.currentToken] + '\'');
-            }
-        }
-        p.nextToken();
-        return new LocalUnionType(memberTypes);
-
-    }
 
     public static class UnderscoreFunctionDetails extends InlineFunctionDetails {
         List<UserFunctionParameter> numberedParams = new ArrayList<>();

@@ -612,9 +612,9 @@ public class ProfessionalConfiguration extends Configuration {
             throw new IllegalArgumentException("XQuery Update requires Saxon-EE");
         }
         if ("XQ".equals(language)) {
-            if (languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
-                XQueryParser parser = new XQueryParser();
-                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, 31);
+            if (languageVersion == 40 || languageVersion == 31 || languageVersion == 30 || languageVersion == 10) {
+                XQueryParser parser = new XQueryParser(Math.max(languageVersion, 31));
+                parser.setLanguage(XPathParser.ParsedLanguage.XQUERY, Math.max(languageVersion, 31));
                 if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                     parser.setParserExtension(new XQueryParserExtensionPE());
                 }

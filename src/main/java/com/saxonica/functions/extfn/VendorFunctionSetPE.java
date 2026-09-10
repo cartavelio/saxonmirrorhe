@@ -9,7 +9,7 @@ import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.TupleItemType;
+import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.XQueryExpression;
@@ -18,6 +18,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,8 +68,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                           SequenceType.OPTIONAL_STRING
             );
 
-    private final static TupleItemType analyzeUriResult = new TupleItemType(
-            analyzeUriKeys, analyzeUriValues, false);
+    private final static RecordTest analyzeUriResult = new RecordTest(
+            analyzeUriKeys, analyzeUriValues, new ArrayList<>(), false);
 
     private final static SpecificFunctionType predicate = new SpecificFunctionType(
             new SequenceType[]{SequenceType.SINGLE_ITEM},

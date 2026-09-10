@@ -4,7 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.TupleItemType;
+import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
@@ -38,7 +38,7 @@ public class FunctionAnnotations extends SystemFunction {
         returnTypeTypes.add(SequenceType.ATOMIC_SEQUENCE);
     }
 
-    public final static TupleItemType RETURN_TYPE = new TupleItemType(returnTypeNames, returnTypeTypes, false);
+    public final static RecordTest RETURN_TYPE = new RecordTest(returnTypeNames, returnTypeTypes, new ArrayList<>(), false);
 
 
     @Override
