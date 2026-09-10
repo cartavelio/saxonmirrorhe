@@ -953,6 +953,125 @@ public class TestXsltTransformer {
 
     }
 
+    // Following tests commented out because not fully productized (depend on MHK filestore)
+//    @Test
+//    public void testBug7156() {
+//        // Use xsl:result-document with no href attribute. The bug is that an unclosed output stream is left behind.
+//        // Failure occurs on windows, which is fussy about unclosed output streams.
+//        try {
+//            StreamSource xsltFile = new StreamSource(
+//                    new StringReader("<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+//                                      + "    <xsl:output method=\"xml\" encoding=\"UTF-8\" indent=\"yes\"/>\n"
+//                                      + "    <xsl:template match=\"/\">\n"
+//                                      + "        <xsl:result-document>\n"
+//                                      + "            <result>\n"
+//                                      + "                <xsl:copy-of select=\".\"/>\n"
+//                                      + "            </result>\n"
+//                                      + "        </xsl:result-document>\n"
+//                                      + "    </xsl:template>\n"
+//                                      + "</xsl:stylesheet>\n"));
+//            StreamSource inputFile = new StreamSource(new StringReader("<root><item>Hello</item></root>"));
+//            File outputFile = new File("/Users/mike/Desktop/temp/Bug7156Output.xml");
+//
+//            outputFile.delete();
+//
+//            Processor processor = new Processor(false);
+//            XsltCompiler compiler = processor.newXsltCompiler();
+//            XsltExecutable executable = compiler.compile(xsltFile);
+//            XsltTransformer transformer = executable.load();
+//            transformer.setSource(inputFile);
+//            Serializer serializer = processor.newSerializer(outputFile);
+//            transformer.setDestination(serializer);
+//            transformer.transform();
+//
+//            System.out.println("transform() returned. JVM still running.");
+//            boolean deleted = outputFile.delete();
+//
+//            if (deleted) {
+//                System.out.println("PASS: output.xml deleted successfully (no lock).");
+//            } else {
+//                System.out.println("FAIL: output.xml could NOT be deleted -- file is still locked.");
+//            }
+//        } catch (SaxonApiException e) {
+//            fail(e.getMessage());
+//        }
+//    }
+//
+//    @Test
+//    public void testEmptyOutput() {
+//        // Stylesheet that produces no output. Check that if an output stream is created, then it is closed.
+//        try {
+//            StreamSource xsltFile = new StreamSource(
+//                    new StringReader("<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+//                                             + "    <xsl:output method=\"xml\" encoding=\"UTF-8\" indent=\"yes\"/>\n"
+//                                             + "    <xsl:template match=\"/\">\n"
+//                                             + "    </xsl:template>\n"
+//                                             + "</xsl:stylesheet>\n"));
+//            StreamSource inputFile = new StreamSource(new StringReader("<root><item>Hello</item></root>"));
+//            File outputFile = new File("/Users/mike/Desktop/temp/Bug7156Output2.xml");
+//
+//            outputFile.delete();
+//
+//            Processor processor = new Processor(false);
+//            XsltCompiler compiler = processor.newXsltCompiler();
+//            XsltExecutable executable = compiler.compile(xsltFile);
+//            XsltTransformer transformer = executable.load();
+//            transformer.setSource(inputFile);
+//            Serializer serializer = processor.newSerializer(outputFile);
+//            transformer.setDestination(serializer);
+//            transformer.transform();
+//
+//            System.out.println("transform() returned. JVM still running.");
+//            boolean deleted = outputFile.delete();
+//
+//            if (deleted) {
+//                System.out.println("PASS: output.xml deleted successfully (no lock).");
+//            } else {
+//                System.out.println("FAIL: output.xml could NOT be deleted -- file is still locked.");
+//            }
+//        } catch (SaxonApiException e) {
+//            fail(e.getMessage());
+//        }
+//    }
+//
+//    @Test
+//    public void testEmptySecondaryOutput() {
+//        // Stylesheet that produces no output. Check that if an output stream is created, then it is closed.
+//        try {
+//            StreamSource xsltFile = new StreamSource(
+//                    new StringReader("<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+//                                             + "    <xsl:output method=\"xml\" encoding=\"UTF-8\" indent=\"yes\"/>\n"
+//                                             + "    <xsl:template match='/'>\n"
+//                                             + "       <xsl:result-document/>\n"
+//                                             + "    </xsl:template>\n"
+//                                             + "</xsl:stylesheet>\n"));
+//            StreamSource inputFile = new StreamSource(new StringReader("<root><item>Hello</item></root>"));
+//            File outputFile = new File("/Users/mike/Desktop/temp/Bug7156Output2.xml");
+//
+//            outputFile.delete();
+//
+//            Processor processor = new Processor(false);
+//            XsltCompiler compiler = processor.newXsltCompiler();
+//            XsltExecutable executable = compiler.compile(xsltFile);
+//            XsltTransformer transformer = executable.load();
+//            transformer.setSource(inputFile);
+//            Serializer serializer = processor.newSerializer(outputFile);
+//            transformer.setDestination(serializer);
+//            transformer.transform();
+//
+//            System.out.println("transform() returned. JVM still running.");
+//            boolean deleted = outputFile.delete();
+//
+//            if (deleted) {
+//                System.out.println("PASS: output.xml deleted successfully (no lock).");
+//            } else {
+//                System.out.println("FAIL: output.xml could NOT be deleted -- file is still locked.");
+//            }
+//        } catch (SaxonApiException e) {
+//            fail(e.getMessage());
+//        }
+//    }
+
 
 }
 
