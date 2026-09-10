@@ -53,7 +53,7 @@ public class RegexGroup extends ContextAccessorFunction {
         SymbolicName.F symbolicName = new SymbolicName.F(mapGetName, 3);
         FunctionItem mapGet3 = lib.getFunctionItem(symbolicName, getRetainedStaticContext().reinstate());
         int[] argMap = new int[]{1};
-        return new CurriedFunction(mapGet3, new Sequence[]{map, null, alwaysEmptyFunction}, argMap);
+        return new CurriedFunction(mapGet3, new Sequence[]{map, null, StringValue.EMPTY_STRING}, argMap);
     }
 
     /**

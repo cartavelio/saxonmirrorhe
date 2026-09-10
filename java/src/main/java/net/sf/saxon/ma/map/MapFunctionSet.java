@@ -320,6 +320,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapGet extends SystemFunction {
 
+        public MapGet(){};
+
         String pendingWarning = null;
 
         /**
