@@ -3,7 +3,6 @@ package com.saxonica.config;
 import com.saxonica.ee.bytecode.ByteCodeMonitor;
 import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.config.*;
-import com.saxonica.ee.elab.gen.ElaborationService;
 import com.saxonica.ee.extfn.VendorFunctionSetEE;
 import com.saxonica.ee.extfn.js.IXSLElementFactory;
 import com.saxonica.ee.optim.*;
@@ -2188,10 +2187,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public CompilerService makeCompilerService(HostLanguage hostLanguage) {
         return new CompilerService(this, hostLanguage);
-    }
-
-    public IElaborationService makeElaborationService() {
-        return new ElaborationService();
     }
 
     /**

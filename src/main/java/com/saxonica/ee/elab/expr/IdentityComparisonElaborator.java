@@ -3,19 +3,22 @@ package com.saxonica.ee.elab.expr;
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.BooleanElaborator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.IdentityComparison;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.value.Cardinality;
 
+/**
+ * Elaborator for an identity comparison (operators {@code is}, {@code <<}, and {@code >>} )
+ */
+
 public class IdentityComparisonElaborator extends BooleanElaborator {
 
-    public BooleanEvaluator getBooleanEvaluator() {
+    public BooleanEvaluator elaborateForBoolean() {
         final IdentityComparison exp = (IdentityComparison)getExpression();
-        final ItemEvaluator p0 = Elaborator.make(exp.getLhsExpression()).getItemEvaluator();
-        final ItemEvaluator p1 = Elaborator.make(exp.getRhsExpression()).getItemEvaluator();
+        final ItemEvaluator p0 = makeElaborator(exp.getLhsExpression()).elaborateForItem();
+        final ItemEvaluator p1 = makeElaborator(exp.getRhsExpression()).elaborateForItem();
         final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
         final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
         final int operator = exp.getOperator();

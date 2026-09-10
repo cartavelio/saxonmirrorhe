@@ -1,7 +1,6 @@
 package com.saxonica.ee.elab.fn;
 
 import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.Substring;
@@ -10,10 +9,10 @@ import net.sf.saxon.value.StringValue;
 
 public class SubstringFnElaborator extends ItemElaborator {
 
-    public ItemEvaluator getItemEvaluator() {
+    public ItemEvaluator elaborateForItem() {
         final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-        final ItemEvaluator arg0Eval = Elaborator.make(fnc.getArg(0)).getItemEvaluator();
-        final ItemEvaluator arg1Eval = Elaborator.make(fnc.getArg(1)).getItemEvaluator();
+        final ItemEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+        final ItemEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
 
         if (fnc.getArity() == 2) {
             return context -> {
@@ -22,7 +21,7 @@ public class SubstringFnElaborator extends ItemElaborator {
                 return Substring.substring(sv, start);
             };
         } else {
-            final ItemEvaluator arg2Eval = Elaborator.make(fnc.getArg(1)).getItemEvaluator();
+            final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
             return context -> {
                 StringValue sv = (StringValue) arg0Eval.eval(context);
                 NumericValue start = (NumericValue) arg1Eval.eval(context);

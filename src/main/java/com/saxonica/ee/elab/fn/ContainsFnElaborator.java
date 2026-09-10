@@ -3,19 +3,17 @@ package com.saxonica.ee.elab.fn;
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.StringEvaluator;
 import com.saxonica.ee.elab.gen.BooleanElaborator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.CollatingFunctionFixed;
 import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 
 public class ContainsFnElaborator extends BooleanElaborator {
 
-    public BooleanEvaluator getBooleanEvaluator() {
+    public BooleanEvaluator elaborateForBoolean() {
         final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-        final StringEvaluator arg0Eval = Elaborator.make(fnc.getArg(0)).getStringEvaluator(EmptyUnicodeString.getInstance());
-        final StringEvaluator arg1Eval = Elaborator.make(fnc.getArg(1)).getStringEvaluator(EmptyUnicodeString.getInstance());
+        final StringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForString(true);
+        final StringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForString(true);
         final CollatingFunctionFixed fn = (CollatingFunctionFixed)fnc.getTargetFunction();
         final SubstringMatcher collation = (SubstringMatcher)fn.getStringCollator();
         assert collation != null;

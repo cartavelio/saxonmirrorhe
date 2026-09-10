@@ -2,7 +2,6 @@ package com.saxonica.ee.elab.insn;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.CallTemplate;
@@ -17,11 +16,11 @@ public class CallTemplateElaborator extends PullElaborator {
     // TODO: tail recursion
 
     @Override
-    public PullEvaluator getPullEvaluator() {
+    public PullEvaluator elaborateForPull() {
         ForEach forEach = (ForEach) getExpression();
-        PullEvaluator select = Elaborator.make(forEach.getSelectExpression()).getPullEvaluator();
-        PullEvaluator action = Elaborator.make(forEach.getActionExpression()).getPullEvaluator();
-        ContextMappingFunction mapper = action::eval;
+        PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
+        PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
+        ContextMappingFunction mapper = context -> action.eval(context);
         return context -> {
             XPathContextMinor c2 = context.newMinorContext();
             c2.trackFocus(select.eval(context));
@@ -30,7 +29,7 @@ public class CallTemplateElaborator extends PullElaborator {
     }
 
     @Override
-    public PushEvaluator getPushEvaluator() {
+    public PushEvaluator elaborateForPush() {
         CallTemplate insn = (CallTemplate)getExpression();
         Component fixedTarget = insn.getFixedTarget();
         int bindingSlot = insn.getBindingSlot();

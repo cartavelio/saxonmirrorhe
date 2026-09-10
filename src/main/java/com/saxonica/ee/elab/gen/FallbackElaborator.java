@@ -2,9 +2,15 @@ package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.str.UnicodeString;
+
+/**
+ * The FallbackElaborator performs elaboration of expressions for which no more specific
+ * elaborator is available. It produces evaluation functions that simply call the
+ * direct evaluation interfaces. Note that when a FallbackElaborator is used, the
+ * entire contained subtree will be interpreted in the traditional way, with no benefit
+ * from elaboration.
+ */
 
 public class FallbackElaborator extends Elaborator {
 
@@ -18,30 +24,31 @@ public class FallbackElaborator extends Elaborator {
     }
 
 
-    public PullEvaluator getPullEvaluator() {
-        return getExpression()::iterate;
+    public PullEvaluator elaborateForPull() {
+        return context -> getExpression().iterate(context);
     }
 
-    public PushEvaluator getPushEvaluator() {
+    public PushEvaluator elaborateForPush() {
         return (out, context) -> getExpression().process(out, context);
     }
 
-    public ItemEvaluator getItemEvaluator() {
-        PullEvaluator puller = getPullEvaluator();
-        return context -> puller.eval(context).next();
+    public ItemEvaluator elaborateForItem() {
+        return context -> getExpression().evaluateItem(context);
     }
 
-    public BooleanEvaluator getBooleanEvaluator() {
-        PullEvaluator puller = getPullEvaluator();
-        return context -> ExpressionTool.effectiveBooleanValue(puller.eval(context));
+    public BooleanEvaluator elaborateForBoolean() {
+        return context -> getExpression().effectiveBooleanValue(context);
     }
 
-    public StringEvaluator getStringEvaluator(UnicodeString resultOnEmpty) {
-        ItemEvaluator itemEval = getItemEvaluator();
-        return context -> {
-            Item item = itemEval.eval(context);
-            return item == null ? resultOnEmpty : item.getUnicodeStringValue();
-        };
+    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+        if (zeroLengthWhenAbsent) {
+            return context -> getExpression().evaluateAsString(context);
+        } else {
+            return context -> {
+                Item item = getExpression().evaluateItem(context);
+                return item == null ? null : item.getUnicodeStringValue();
+            };
+        }
     }
 
 

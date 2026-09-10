@@ -1,5 +1,7 @@
 package com.saxonica.ee.optim;
 
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.parser.*;
@@ -312,6 +314,9 @@ public final class IndexedFilterExpression extends Expression {
                 getSearchExpression().hashCode();
     }
 
+    private PullEvaluator basePullEvaluator = null;
+    private PullEvaluator searchPullEvaluator = null;
+
     /**
      * Iterate over the results, returning them in the correct order
      *
@@ -343,7 +348,10 @@ public final class IndexedFilterExpression extends Expression {
                 }
             }
         } else {
-            indexedValue = SearchableValue.makeSearchableValue(baseExp.iterate(context));
+            if (basePullEvaluator == null) {
+                basePullEvaluator = Elaborator.makeElaborator(baseExp).elaborateForPull();
+            }
+            indexedValue = SearchableValue.makeSearchableValue(basePullEvaluator.eval(context));
         }
         // In all other cases there must have been some kind of rewrite; evaluate as a regular
         // filter expression
@@ -352,7 +360,10 @@ public final class IndexedFilterExpression extends Expression {
             return EmptyIterator.emptyIterator();
         }
         AtomicComparer comparer = this.comparer.provideContext(context);
-        SequenceIterator values = getSearchExpression().iterate(context);
+        if (searchPullEvaluator == null) {
+            searchPullEvaluator = Elaborator.makeElaborator(getSearchExpression()).elaborateForPull();
+        }
+        SequenceIterator values = searchPullEvaluator.eval(context);
         return indexedValue.findItems(getUseExpression(), values, convertUntypedToOther,
                                       false, comparer, context);
 

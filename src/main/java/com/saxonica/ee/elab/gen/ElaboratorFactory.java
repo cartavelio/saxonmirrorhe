@@ -7,7 +7,7 @@ import com.saxonica.ee.elab.insn.*;
 
 import java.util.HashMap;
 
-public class ElaboratorMap {
+public class ElaboratorFactory {
 
     private static final HashMap<String, Elaborator> map = new HashMap<>();
 
@@ -19,14 +19,15 @@ public class ElaboratorMap {
         //map.put("xsl:apply-templates", new ApplyTemplatesCompiler());
         map.put("arithmetic", new ArithmeticElaborator());
         map.put("attGetter", new AttributeGetterElaborator());
-        //map.put("convert", new AtomicSequenceConverterCompiler());
+        map.put("bytecode", new ByteCodeCandidateElaborator());
+        map.put("convert", new AtomicSequenceConverterElaborator());
         map.put("data", new AtomizerElaborator());
         map.put("axisStep", new AxisExpressionElaborator());
-        //map.put("sequence", new BlockCompiler());
+        map.put("sequence", new BlockElaborator());
         //map.put("xsl:break", new BreakInstrCompiler());
         //map.put("xsl:call-template", new CallTemplateCompiler());
-        //map.put("CheckCardinality", new CardinalityCheckerCompiler());
-        //map.put("cast", new CastExpressionCompiler());
+        map.put("CheckCardinality", new CardinalityCheckerElaborator());
+        map.put("cast", new CastExprElaborator());
         //map.put("castable", new CastableExpressionCompiler());
         map.put("choose", new ChooseExprElaborator());
         map.put("xsl:comment", new CommentElaborator());
@@ -34,8 +35,8 @@ public class ElaboratorMap {
         map.put("compareToString", new CompareToStringConstantElaborator());
         //map.put("xsl:attribute", new ComputedAttributeCompiler());
         //map.put("xsl:element", new ComputedElementCompiler());
-        //map.put("conditionalSort", new ConditionalSorterCompiler());
-        //map.put("convertUntyped", new AtomicSequenceConverterCompiler());
+        map.put("conditionalSort", new ConditionalSorterElaborator());
+        map.put("convertUntyped", new AtomicSequenceConverterElaborator());
         map.put("dot", new ContextItemElaborator());
         //map.put("xsl:copy", new CopyCompiler());
         map.put("xsl:document", new DocumentInstrElaborator());
@@ -46,21 +47,22 @@ public class ElaboratorMap {
         //map.put("FLWOR", new FLWORExpressionCompiler());
         map.put("filter", new FilterExprElaborator());
         map.put("first", new FirstItemExprElaborator());
-        //map.put("att", new FixedAttributeCompiler());
+        map.put("att", new FixedAttributeElaborator());
         map.put("element", new FixedElementElaborator());
         map.put("forEach", new ForEachElaborator());
         //map.put("xsl:for-each-group", new ForEachGroupCompiler());
         map.put("for", new ForExprElaborator());
         //map.put("namedFunctionRef", new FunctionLiteralCompiler());
         //map.put("fnCoercer", new FunctionSequenceCoercerCompiler());
-        //map.put("GeneralComparison", new GeneralComparisonCompiler());
+        map.put("GeneralComparison", new GeneralComparisonElaborator());
+        map.put("gVarRef", new GlobalVariableReferenceElaborator());
         //map.put("homCheck", new HomogeneityCheckerCompiler());
         map.put("nodeComparison", new IdentityComparisonElaborator());
         //map.put("indexedFilter", new IndexedFilterExpressionCompiler());
         map.put("instance", new InstanceOfElaborator());
         //map.put("intRangeTest", new IntegerRangeTestCompiler());
         map.put("isLast", new IsLastElaborator());
-        //map.put("treatAs", new ItemCheckerCompiler());
+
         //map.put("xsl:iterate", new IterateInstrCompiler());
         //map.put("javaCall", new JavaExtensionFunctionCallCompiler());
         map.put("lastOf", new LastItemExprElaborator());
@@ -90,11 +92,12 @@ public class ElaboratorMap {
         //map.put("staticFunctionCall", new StaticFunctionCallCompiler());
         //map.put("subscript", new SubscriptExpressionCompiler());
         //map.put("supplied", new SuppliedParameterReferenceCompiler());
-        //map.put("switch", new SwitchExpressionCompiler());
+        map.put("switch", new SwitchExprElaborator());
         map.put("sysFuncCall", null); // Handle this one specially
         //map.put("tailCallLoop", new TailCallLoopCompiler());
-        //map.put("tail", new TailExpressionCompiler());
+        map.put("tail", new TailExprElaborator());
         //map.put("trace", new TraceExpressionCompiler());
+        map.put("treatAs", new ItemCheckerElaborator());
         //map.put("useAS", new UseAttributeSetCompiler());
         //map.put("userFunctionCall", new UserFunctionCallCompiler());
         map.put("ValueComparison", new ValueComparisonElaborator());
@@ -108,7 +111,7 @@ public class ElaboratorMap {
         map.put("except", new VennElaborator());
 
         map.put("AccessorFnCompiler", new AccessorFnElaborator());
-        map.put("BaseURICompiler", new NodePropertyElaborator());
+        map.put("BaseURICompiler", new BaseUriFnElaborator());
         map.put("BooleanFnCompiler", new BooleanFnElaborator());
         //map.put("ConcatCompiler", new ConcatCompiler());
         map.put("ContainsCompiler", new ContainsFnElaborator());
@@ -124,7 +127,7 @@ public class ElaboratorMap {
         map.put("NameCompiler", new NodePropertyElaborator());
         map.put("NamespaceUriFnCompiler", new NodePropertyElaborator());
         map.put("NormalizeSpaceCompiler", new NormalizeSpaceFnElaborator());
-        map.put("NodeNameFnCompiler", new NodePropertyElaborator());
+        map.put("NodeNameFnCompiler", new NodeNameFnElaborator());
         map.put("NotFnCompiler", new NotFnElaborator());
         map.put("NumberFnCompiler", new NumberFnElaborator());
         map.put("PositionCompiler", new PositionFnElaborator());

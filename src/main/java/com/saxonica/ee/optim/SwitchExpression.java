@@ -331,7 +331,7 @@ public class SwitchExpression extends Expression implements TailCallReturner, Co
         }
     }
 
-    private int getIndex(AtomicMatchKey key) {
+    public int getIndex(AtomicMatchKey key) {
         return map.getOrDefault(key, -1);
     }
 

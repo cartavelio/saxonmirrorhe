@@ -2,7 +2,6 @@ package com.saxonica.ee.elab.fn;
 
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.StringEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.StringElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
@@ -11,24 +10,36 @@ import net.sf.saxon.value.Whitespace;
 
 public class NormalizeSpaceFnElaborator extends StringElaborator {
 
-    public StringEvaluator getStringEvaluator(UnicodeString resultIfEmpty) {
+    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
         Expression arg = fnc.getArg(0);
-        StringEvaluator argEval = Elaborator.make(arg).getStringEvaluator(null);
+        StringEvaluator argEval = makeElaborator(arg).elaborateForString(zeroLengthWhenAbsent);
         return context -> {
             UnicodeString in = argEval.eval(context);
             if (in == null || in.isEmpty()) {
-                return resultIfEmpty;
+                return handleNullString(zeroLengthWhenAbsent);
             }
             return Whitespace.collapseWhitespace(in);
         };
     }
 
+    /**
+     * Get a function that evaluates the underlying expression in the form of
+     * a boolean, this being the effective boolean value of the expression.
+     *
+     * <p>This method is implemented for normalize-space() because it is a common
+     * idiom to use normalize-space() in a boolean context to test whether a value
+     * contains non-whitespace characters, and this can be done without actually
+     * constructing the normalized string.</p>
+     *
+     * @return an evaluator for the expression that returns a boolean.
+     */
+
     @Override
-    public BooleanEvaluator getBooleanEvaluator() {
+    public BooleanEvaluator elaborateForBoolean() {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
         Expression arg = fnc.getArg(0);
-        StringEvaluator argEval = Elaborator.make(arg).getStringEvaluator(null);
+        StringEvaluator argEval = makeElaborator(arg).elaborateForString(false);
         return context -> {
             UnicodeString in = argEval.eval(context);
             if (in == null || in.isEmpty()) {

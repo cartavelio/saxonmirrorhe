@@ -11,11 +11,14 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
+
+/**
+ * Elaborator for an AxisExpression
+ */
 
 public class AxisExpressionElaborator extends PullElaborator {
 
-    public void reportDoesNotExist(Expression expression, XPathContext context) throws XPathException {
+    private void reportDoesNotExist(Expression expression, XPathContext context) throws XPathException {
         XPathException err = new XPathException("The context item for axis step " +
                                                         expression + " is absent");
         err.setErrorCode("XPDY0002");
@@ -25,7 +28,7 @@ public class AxisExpressionElaborator extends PullElaborator {
         throw err;
     }
 
-    public void reportIsNotNode(Expression expression, XPathContext context) throws XPathException {
+    private void reportIsNotNode(Expression expression, XPathContext context) throws XPathException {
         XPathException err = new XPathException("The context item for axis step " +
                                                         expression + " is not a node");
         err.setErrorCode("XPTY0020");
@@ -35,14 +38,16 @@ public class AxisExpressionElaborator extends PullElaborator {
         throw err;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
-    public PullEvaluator getPullEvaluator() {
+    public PullEvaluator elaborateForPull() {
         AxisExpression axisExpression = (AxisExpression) getExpression();
         NodeTest test = axisExpression.getNodeTest();
         int axis = axisExpression.getAxis();
+        // These variables are computed in the hope that the optimizer will remove runtime error tests
+        // that aren't needed because the condition cannot occur
         boolean checkContextItemExists = axisExpression.isContextPossiblyUndefined();
-        ItemType contextItemType = axisExpression.getContextItemType();
-        boolean checkContextItemIsNode = contextItemType.getGenre() != Genre.NODE;
+        boolean checkContextItemIsNode = axisExpression.getContextItemType().getGenre() != Genre.NODE;
         if (test instanceof AnyNodeTest) {
             return context -> {
                 Item item = context.getContextItem();

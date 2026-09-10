@@ -9,8 +9,8 @@ import net.sf.saxon.value.StringValue;
 public abstract class StringElaborator extends Elaborator {
 
     @Override
-    public PullEvaluator getPullEvaluator() {
-        StringEvaluator strEval = getStringEvaluator(null);
+    public PullEvaluator elaborateForPull() {
+        StringEvaluator strEval = elaborateForString(false);
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
@@ -22,14 +22,14 @@ public abstract class StringElaborator extends Elaborator {
     }
 
     @Override
-    public PushEvaluator getPushEvaluator() {
-        ItemEvaluator ie = getItemEvaluator();
+    public PushEvaluator elaborateForPush() {
+        ItemEvaluator ie = elaborateForItem();
         return (out, context) -> out.append(ie.eval(context));
     }
 
     @Override
-    public ItemEvaluator getItemEvaluator() {
-        StringEvaluator strEval = getStringEvaluator(null);
+    public ItemEvaluator elaborateForItem() {
+        StringEvaluator strEval = elaborateForString(false);
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
@@ -40,8 +40,8 @@ public abstract class StringElaborator extends Elaborator {
         };
     }
 
-    public BooleanEvaluator getBooleanEvaluator() {
-        StringEvaluator strEval = getStringEvaluator(null);
+    public BooleanEvaluator elaborateForBoolean() {
+        StringEvaluator strEval = elaborateForString(false);
         return context -> {
             UnicodeString value = strEval.eval(context);
             return value != null && !value.isEmpty();
@@ -49,7 +49,7 @@ public abstract class StringElaborator extends Elaborator {
     }
 
     @Override
-    public abstract StringEvaluator getStringEvaluator(UnicodeString resultOnEmpty);
+    public abstract StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent);
 
 
 }

@@ -13,21 +13,21 @@ import net.sf.saxon.tree.util.Orphan;
 public abstract class SimpleNodePushElaborator extends Elaborator {
 
     @Override
-    public PullEvaluator getPullEvaluator() {
-        ItemEvaluator itemEval = getItemEvaluator();
+    public PullEvaluator elaborateForPull() {
+        ItemEvaluator itemEval = elaborateForItem();
         return context -> new SingletonIterator(itemEval.eval(context));
     }
 
     @Override
-    public PushEvaluator getPushEvaluator() {
+    public PushEvaluator elaborateForPush() {
         // Must be implemented in a subclass
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public ItemEvaluator getItemEvaluator() {
+    public ItemEvaluator elaborateForItem() {
         final SimpleNodeConstructor instr = (SimpleNodeConstructor) getExpression();
-        final ItemEvaluator select = Elaborator.make(instr.getSelect()).getItemEvaluator();
+        final ItemEvaluator select = makeElaborator(instr.getSelect()).elaborateForItem();
         final short kind = (short)instr.getItemType().getPrimitiveType();
         final Configuration config = getConfiguration();
         return context -> {
@@ -47,17 +47,17 @@ public abstract class SimpleNodePushElaborator extends Elaborator {
         };
     }
 
-    public BooleanEvaluator getBooleanEvaluator() {
-        ItemEvaluator ie = getItemEvaluator();
+    public BooleanEvaluator elaborateForBoolean() {
+        ItemEvaluator ie = elaborateForItem();
         return context -> ExpressionTool.effectiveBooleanValue(ie.eval(context));
     }
 
     @Override
-    public StringEvaluator getStringEvaluator(UnicodeString resultOnEmpty) {
-        ItemEvaluator ie = getItemEvaluator();
+    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+        ItemEvaluator ie = elaborateForItem();
         return context -> {
             Item item = ie.eval(context);
-            return item == null ? resultOnEmpty : item.getUnicodeStringValue();
+            return item == null ? handleNullString(zeroLengthWhenAbsent) : item.getUnicodeStringValue();
         };
     }
 

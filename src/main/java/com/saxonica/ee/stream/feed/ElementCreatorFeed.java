@@ -39,8 +39,9 @@ public class ElementCreatorFeed extends ComplexNodeEventFeed {
     @Override
     protected void processLeft(XPathContext context) throws XPathException {
         ElementCreator instr = (ElementCreator) getExpression();
+        ElementCreator.ElementCreationDetails details = instr.makeElementCreationDetails();
         try {
-            NodeName elemName = instr.getElementName(context, null);
+            NodeName elemName = details.getNodeName(context);
             SchemaType typeCode = instr.getValidationAction() == Validation.PRESERVE ? AnyType.getInstance() : Untyped.getInstance();
 
             if (!instr.isPreservingTypes()) {
@@ -54,7 +55,7 @@ public class ElementCreatorFeed extends ComplexNodeEventFeed {
             }
 
             if (next.getSystemId() == null) {
-                next.setSystemId(instr.getNewBaseURI(context, null));
+                next.setSystemId(details.getSystemId(context));
             }
             boolean condition = !instr.isBequeathNamespacesToChildren();
             int properties =

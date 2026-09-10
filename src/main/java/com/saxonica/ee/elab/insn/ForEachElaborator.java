@@ -2,7 +2,6 @@ package com.saxonica.ee.elab.insn;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.ContextMappingFunction;
 import net.sf.saxon.expr.ContextMappingIterator;
@@ -13,11 +12,11 @@ import net.sf.saxon.om.FocusIterator;
 public class ForEachElaborator extends PullElaborator {
 
     @Override
-    public PullEvaluator getPullEvaluator() {
+    public PullEvaluator elaborateForPull() {
         ForEach forEach = (ForEach) getExpression();
-        PullEvaluator select = Elaborator.make(forEach.getSelectExpression()).getPullEvaluator();
-        PullEvaluator action = Elaborator.make(forEach.getActionExpression()).getPullEvaluator();
-        ContextMappingFunction mapper = action::eval;
+        PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
+        PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
+        ContextMappingFunction mapper = context -> action.eval(context);
         return context -> {
             XPathContextMinor c2 = context.newMinorContext();
             c2.trackFocus(select.eval(context));
@@ -26,10 +25,10 @@ public class ForEachElaborator extends PullElaborator {
     }
 
     @Override
-    public PushEvaluator getPushEvaluator() {
+    public PushEvaluator elaborateForPush() {
         ForEach forEach = (ForEach)getExpression();
-        PullEvaluator select = Elaborator.make(forEach.getSelectExpression()).getPullEvaluator();
-        PushEvaluator action = Elaborator.make(forEach.getActionExpression()).getPushEvaluator();
+        PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
+        PushEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPush();
         return (out, context) -> {
             XPathContextMinor c2 = context.newMinorContext();
             FocusIterator iter = c2.trackFocus(select.eval(context));

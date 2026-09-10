@@ -10,7 +10,7 @@ import net.sf.saxon.value.Int64Value;
 
 public class LastFnElaborator extends ItemElaborator {
 
-    public ItemEvaluator getItemEvaluator() {
+    public ItemEvaluator elaborateForItem() {
         SystemFunctionCall sfc = (SystemFunctionCall) getExpression();
         PositionAndLast.Last fn = (PositionAndLast.Last) sfc.getTargetFunction();
         if (fn.isContextPossiblyUndefined()) {

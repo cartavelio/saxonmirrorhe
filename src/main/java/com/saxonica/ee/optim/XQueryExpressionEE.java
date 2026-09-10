@@ -2,6 +2,9 @@
 package com.saxonica.ee.optim;
 
 import com.saxonica.ee.bytecode.util.CompilerService;
+import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.watch.StreamWatch;
 import com.saxonica.ee.stream.watch.Watch;
@@ -9,10 +12,7 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.ComplexContentOutputter;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sender;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
@@ -24,6 +24,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.om.MutableNodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryModule;
@@ -54,6 +55,8 @@ public class XQueryExpressionEE extends XQueryExpression {
     private final boolean isUpdating;
     private PathMap pathMap;
     private Inversion inversion;
+
+    private static boolean useElaboration = true;
 
     public XQueryExpressionEE(Expression exp, QueryModule mainModule, boolean streaming)
             throws XPathException {
@@ -149,10 +152,32 @@ public class XQueryExpressionEE extends XQueryExpression {
         isUpdating = isUpdatingExpression;
     }
 
-//    protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
-//        PushEvaluator pusher = Elaborator.make(expression).getPushEvaluator();
-//        pusher.process(dest, context);
-//    }
+    PullEvaluator puller = null;
+
+    @Override
+    protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
+        if (useElaboration) {
+            if (puller == null) {
+                puller = Elaborator.makeElaborator(expression).elaborateForPull();
+            }
+            return puller.eval(context);
+        }
+        return super.getExpressionIterator(context);
+    }
+
+    PushEvaluator pusher = null;
+    
+    @Override
+    protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
+        if (useElaboration) {
+            if (pusher == null) {
+                pusher = Elaborator.makeElaborator(expression).elaborateForPush();
+            }
+            pusher.process(dest, context);
+        } else {
+            super.processQuery(dest, context);
+        }
+    }
 
     /**
      * Ask whether this is an update query

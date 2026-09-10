@@ -12,7 +12,6 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Copy;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.Item;
@@ -90,28 +89,29 @@ public class CopyAdjunct extends StreamingAdjunct implements FeedMaker {
                             }
                         }
                         if (next.getSystemId() == null) {
-                            next.setSystemId(expression.getNewBaseURI(context, node));
+                            next.setSystemId(node.getBaseURI());
                         }
 
                         next.startElement(elemName, typeCode,
                                               expression.getLocation(), properties);
 
                         // output the required namespace nodes via a callback
-                        expression.outputNamespaceNodes(next, elemName, node);
+                        expression.outputNamespaceNodes(next, elemName, expression.makeElementCreationDetails(node));
 
                         break;
                     }
                     default:
-                        try {
-                            TailCall tc = expression.processLeavingTail(next, context, node);
-                            while (tc != null) {
-                                tc = tc.processLeavingTail();
-                            }
-                        } catch (XPathException err) {
-                            err.maybeSetLocation(expression.getLocation());
-                            throw err;
-                        }
-                        break;
+                        throw new UnsupportedOperationException();
+//                        try {
+//                            TailCall tc = expression.specificProcess(next, context, node);
+//                            while (tc != null) {
+//                                tc = tc.processLeavingTail();
+//                            }
+//                        } catch (XPathException err) {
+//                            err.maybeSetLocation(expression.getLocation());
+//                            throw err;
+//                        }
+//                        break;
                 }
             }
         }

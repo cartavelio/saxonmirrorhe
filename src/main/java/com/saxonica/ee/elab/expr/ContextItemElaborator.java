@@ -6,9 +6,13 @@ import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 
+/**
+ * Elaborator for the context item expression, "dot".
+ */
+
 public class ContextItemElaborator extends ItemElaborator {
 
-    public ItemEvaluator getItemEvaluator() {
+    public ItemEvaluator elaborateForItem() {
         ContextItemExpression cie = (ContextItemExpression) getExpression();
         if (cie.isContextPossiblyUndefined()) {
             return context -> {

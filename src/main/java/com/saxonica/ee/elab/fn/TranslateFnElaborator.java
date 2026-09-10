@@ -1,7 +1,6 @@
 package com.saxonica.ee.elab.fn;
 
 import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.Translate;
@@ -10,12 +9,12 @@ import net.sf.saxon.z.IntToIntMap;
 
 public class TranslateFnElaborator extends ItemElaborator {
 
-    public ItemEvaluator getItemEvaluator() {
+    public ItemEvaluator elaborateForItem() {
         final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
         final Translate fn = (Translate) fnc.getTargetFunction();
-        final ItemEvaluator arg0Eval = Elaborator.make(fnc.getArg(0)).getItemEvaluator();
-        final ItemEvaluator arg1Eval = Elaborator.make(fnc.getArg(1)).getItemEvaluator();
-        final ItemEvaluator arg2Eval = Elaborator.make(fnc.getArg(2)).getItemEvaluator();
+        final ItemEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForItem();
+        final ItemEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForItem();
+        final ItemEvaluator arg2Eval = makeElaborator(fnc.getArg(2)).elaborateForItem();
         final IntToIntMap staticMap = fn.getStaticMap();
 
         if (staticMap != null) {

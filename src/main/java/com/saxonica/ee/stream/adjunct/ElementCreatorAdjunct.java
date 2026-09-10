@@ -11,7 +11,8 @@ import net.sf.saxon.trans.XPathException;
 
 
 /**
- * Generate streaming code for an xsl:element instruction
+ * Generate streaming code for an xsl:element instruction. Used for xsl:element and for literal result
+ * elements, but not for xsl:copy
  */
 public class ElementCreatorAdjunct extends ParentConstructorAdjunct implements FeedMaker {
 

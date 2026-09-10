@@ -3,7 +3,6 @@ package com.saxonica.ee.elab.expr;
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.BooleanElaborator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.expr.CompareToConstant;
 import net.sf.saxon.expr.CompareToIntegerConstant;
 import net.sf.saxon.expr.Expression;
@@ -16,12 +15,16 @@ import net.sf.saxon.value.NumericValue;
 
 import java.math.BigDecimal;
 
+/**
+ * Elaborator for a "compare to integer constant" expression
+ */
+
 public class CompareToIntegerConstantElaborator extends BooleanElaborator {
 
-    public BooleanEvaluator getBooleanEvaluator() {
+    public BooleanEvaluator elaborateForBoolean() {
         CompareToIntegerConstant expression = (CompareToIntegerConstant) getExpression();
         Expression arg = expression.getBaseExpression();
-        ItemEvaluator argEval = Elaborator.make(arg).getItemEvaluator();
+        ItemEvaluator argEval = makeElaborator(arg).elaborateForItem();
         int operator = expression.getComparisonOperator();
         long comparand = expression.getComparand();
 
@@ -55,7 +58,7 @@ public class CompareToIntegerConstantElaborator extends BooleanElaborator {
 
         if (isDecimal) {
             // convert constant to BigDecimal in advance
-            final BigDecimal deci = new BigDecimal(comparand);
+            final BigDecimal deci = BigDecimal.valueOf(comparand);
             return context -> {
                 BigDecimal val = ((NumericValue) argEval.eval(context)).getDecimalValue();
                 return CompareToConstant.interpretComparisonResult(operator, val.compareTo(deci));

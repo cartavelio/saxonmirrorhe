@@ -13,8 +13,8 @@ import net.sf.saxon.trans.NoDynamicContextException;
 public abstract class ComplexNodePushElaborator extends FallbackElaborator {
 
     @Override
-    public PullEvaluator getPullEvaluator() {
-        PushEvaluator pushEval = getPushEvaluator();
+    public PullEvaluator elaborateForPull() {
+        PushEvaluator pushEval = this.elaborateForPush();
         return context -> {
             Controller controller = context.getController();
             if (controller == null) {
@@ -30,8 +30,8 @@ public abstract class ComplexNodePushElaborator extends FallbackElaborator {
     }
 
     @Override
-    public ItemEvaluator getItemEvaluator() {
-        PushEvaluator pushEval = getPushEvaluator();
+    public ItemEvaluator elaborateForItem() {
+        PushEvaluator pushEval = this.elaborateForPush();
         return context -> {
             Controller controller = context.getController();
             if (controller == null) {
@@ -47,7 +47,7 @@ public abstract class ComplexNodePushElaborator extends FallbackElaborator {
     }
 
     @Override
-    public PushEvaluator getPushEvaluator() {
+    public PushEvaluator elaborateForPush() {
         // Must be implemented in a subclass
         throw new UnsupportedOperationException();
     }

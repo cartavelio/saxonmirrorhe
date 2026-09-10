@@ -1,9 +1,6 @@
 package com.saxonica.ee.elab.expr;
 
-import com.saxonica.ee.elab.eval.BooleanEvaluator;
-import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.eval.*;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.om.GroundedValue;
@@ -11,16 +8,23 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
+/**
+ * Elaborator for a literal.
+ *
+ * <p>Evaluators are supplied for evaluation in pull, push, and singleton mode, as well as boolean
+ * evaluation</p>
+ */
+
 public class LiteralElaborator extends PullElaborator {
 
     @Override
-    public PullEvaluator getPullEvaluator() {
+    public PullEvaluator elaborateForPull() {
         GroundedValue value = ((Literal)getExpression()).getGroundedValue();
         return context -> value.iterate();
     }
 
     @Override
-    public PushEvaluator getPushEvaluator() {
+    public PushEvaluator elaborateForPush() {
         GroundedValue value = ((Literal) getExpression()).getGroundedValue();
         if (value instanceof Item) {
             return (out, context) -> out.append((Item)value);
@@ -34,7 +38,7 @@ public class LiteralElaborator extends PullElaborator {
     }
 
     @Override
-    public ItemEvaluator getItemEvaluator() {
+    public ItemEvaluator elaborateForItem() {
         GroundedValue value = ((Literal) getExpression()).getGroundedValue();
         assert value.getLength() < 2;
         Item item = value.head();
@@ -42,7 +46,7 @@ public class LiteralElaborator extends PullElaborator {
     }
 
     @Override
-    public BooleanEvaluator getBooleanEvaluator() {
+    public BooleanEvaluator elaborateForBoolean() {
         GroundedValue value = ((Literal) getExpression()).getGroundedValue();
         try {
             boolean ebv = value.effectiveBooleanValue();

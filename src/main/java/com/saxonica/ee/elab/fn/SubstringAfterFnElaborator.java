@@ -1,7 +1,6 @@
 package com.saxonica.ee.elab.fn;
 
 import com.saxonica.ee.elab.eval.StringEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.StringElaborator;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.sort.CodepointCollator;
@@ -12,14 +11,14 @@ import net.sf.saxon.str.UnicodeString;
 
 public class SubstringAfterFnElaborator extends StringElaborator {
 
-    public StringEvaluator getStringEvaluator(UnicodeString resultIfEmpty) {
+    public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
         final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
         final SubstringAfter fn = (SubstringAfter) fnc.getTargetFunction();
         final SubstringMatcher stringCollator = (SubstringMatcher) fn.getStringCollator();
         assert stringCollator != null; // We don't go down this path until the collation is known
 
-        final StringEvaluator arg0Eval = Elaborator.make(fnc.getArg(0)).getStringEvaluator(EmptyUnicodeString.getInstance());
-        final StringEvaluator arg1Eval = Elaborator.make(fnc.getArg(1)).getStringEvaluator(EmptyUnicodeString.getInstance());
+        final StringEvaluator arg0Eval = makeElaborator(fnc.getArg(0)).elaborateForString(true);
+        final StringEvaluator arg1Eval = makeElaborator(fnc.getArg(1)).elaborateForString(true);
 
         if (stringCollator instanceof CodepointCollator) {
             return context -> {

@@ -2,7 +2,6 @@ package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.ContextMappingFunction;
 import net.sf.saxon.expr.ContextMappingIterator;
@@ -10,16 +9,20 @@ import net.sf.saxon.expr.SlashExpression;
 import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.om.FocusIterator;
 
+/**
+ * Elaborator for a slash expression. (This actually corresponds to the "!" operator, not to "/")
+ */
+
 public class SlashExprElaborator extends PullElaborator {
 
     // TODO: combine ForEach and SlashExpression
 
     @Override
-    public PullEvaluator getPullEvaluator() {
+    public PullEvaluator elaborateForPull() {
         SlashExpression forEach = (SlashExpression) getExpression();
-        PullEvaluator select = Elaborator.make(forEach.getSelectExpression()).getPullEvaluator();
-        PullEvaluator action = Elaborator.make(forEach.getActionExpression()).getPullEvaluator();
-        ContextMappingFunction mapper = action::eval;
+        PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
+        PullEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPull();
+        ContextMappingFunction mapper = context -> action.eval(context);
         return context -> {
             XPathContextMinor c2 = context.newMinorContext();
             c2.trackFocus(select.eval(context));
@@ -28,10 +31,10 @@ public class SlashExprElaborator extends PullElaborator {
     }
 
     @Override
-    public PushEvaluator getPushEvaluator() {
+    public PushEvaluator elaborateForPush() {
         SlashExpression forEach = (SlashExpression)getExpression();
-        PullEvaluator select = Elaborator.make(forEach.getSelectExpression()).getPullEvaluator();
-        PushEvaluator action = Elaborator.make(forEach.getActionExpression()).getPushEvaluator();
+        PullEvaluator select = makeElaborator(forEach.getSelectExpression()).elaborateForPull();
+        PushEvaluator action = makeElaborator(forEach.getActionExpression()).elaborateForPush();
         return (out, context) -> {
             XPathContextMinor c2 = context.newMinorContext();
             FocusIterator iter = c2.trackFocus(select.eval(context));
