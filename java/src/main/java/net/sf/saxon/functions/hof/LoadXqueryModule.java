@@ -24,7 +24,9 @@ import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.DecimalValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.QNameValue;
@@ -53,6 +55,23 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         op.addAllowedOption("vendor-options", SequenceType.one(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE)));
         return op;
     }
+
+
+    public static ItemType RESULT_TYPE = RecordTest.nonExtensible(
+            new RecordTest.Field("variables",
+                                 SequenceType.one(
+                                         //map(xs:QName, item()*)
+                                         new MapType(BuiltInAtomicType.QNAME,
+                                                     SequenceType.ANY_SEQUENCE)), false),
+            new RecordTest.Field("functions",
+                                 SequenceType.one(
+                                         //map(xs:QName, map(xs:integer, function(*)))
+                                         new MapType(BuiltInAtomicType.QNAME,
+                                                     SequenceType.one(
+                                                             new MapType(BuiltInAtomicType.INTEGER,
+                                                                         SequenceType.one(AnyFunctionType.INSTANCE))))), false)
+    );
+
 
     /**
      * Prepare an XPathContext object for evaluating the function

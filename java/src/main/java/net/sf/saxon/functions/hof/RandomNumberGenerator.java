@@ -12,13 +12,17 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.functions.SimpleUnaryFunction;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.SequenceExtent;
@@ -33,7 +37,17 @@ import java.util.Random;
  */
 public class RandomNumberGenerator extends SystemFunction implements Callable {
 
-    public static final MapType RETURN_TYPE = new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_ITEM);
+    public static ItemType RETURN_TYPE = RecordTest.nonExtensible(
+            new RecordTest.Field("number", SequenceType.SINGLE_DOUBLE, false),
+            new RecordTest.Field("next",
+                                 SequenceType.one(
+                                         // TODO: the precise type is recursive
+                                         new SpecificFunctionType(SequenceType.one(MapType.ANY_MAP_TYPE))),
+                                 false),
+            new RecordTest.Field("permute",
+                                 SequenceType.one(
+                                         new SpecificFunctionType(SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE)),
+                                 false));
 
     private static final Shape SHAPE = new Shape(new Twine8("number"),
                                                  new Twine8("next"),
