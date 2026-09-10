@@ -202,6 +202,12 @@ public final class SequenceType {
             BuiltInAtomicType.DECIMAL.zeroOrOne();
 
     /**
+     * A type that allows a single anyURI
+     */
+    public static final SequenceType SINGLE_ANY_URI =
+            BuiltInAtomicType.ANY_URI.one();
+
+    /**
      * A type that allows a single optional anyURI
      */
 

@@ -17,28 +17,39 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.Validation;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.ValidationException;
+import net.sf.saxon.value.*;
 import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ParseXml extends SystemFunction implements Callable {
+
+    public static OptionsParameter makeOptionsParameter(int version) {
+        OptionsParameter parseOptions = new OptionsParameter(version);
+        parseOptions.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
+        parseOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        parseOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        parseOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
+        return parseOptions;
+    }
+
 
     /**
      * Evaluate the expression
@@ -52,14 +63,85 @@ public class ParseXml extends SystemFunction implements Callable {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue input = (StringValue) arguments[0].head();
+        Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
+        if (getArity() >= 2) {
+            MapItem options = (MapItem) arguments[1].head();
+            if (options != null) {
+                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+            }
+        }
         if (input == null) {
             return EmptySequence.getInstance();
-            //#if CSHARP==false
-        } else if (usePushParser()) {
-            return parseXmlPush(input, context);
-            //#endif
+        }
+
+        ParseOptions parseOptions = context.getConfiguration().getParseOptions();
+
+        PackageData pd = getRetainedStaticContext().getPackageData();
+        if (pd instanceof StylesheetPackage) {
+            parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
         } else {
-            return parseXmlPull(input, context);
+            parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+        }
+
+        GroundedValue val = checkedOptions.get("dtd-validation");
+        if (val != null && val.effectiveBooleanValue()) {
+            parseOptions = parseOptions.withDTDValidationMode(Validation.STRICT);
+        }
+        val = checkedOptions.get("xsd-validation");
+        boolean validating = false;
+        if (val != null) {
+            String validationValue = val.getStringValue();
+            validating = !"skip".equals(validationValue);
+            if (validationValue.equals("strict")) {
+                parseOptions = parseOptions.withSchemaValidationMode(Validation.STRICT);
+            } else if (validationValue.equals("lax")) {
+                parseOptions = parseOptions.withSchemaValidationMode(Validation.LAX);
+            } else if (validationValue.equals("skip")) {
+                parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
+            } else if (validationValue.startsWith("type ")) {
+                String eqName = validationValue.substring(5).trim();
+                if (!eqName.startsWith("Q{")) {
+                    throw new XPathException("Type name in xsd-validation option of fn:parse-xml must start with 'Q{'", "FODC0008");
+                }
+                StructuredQName typeName;
+                try {
+                    typeName = StructuredQName.fromLexicalQName(eqName, false, true, null);
+                } catch (XPathException e) {
+                    throw e.withErrorCode("FODC0008");
+                }
+                SchemaType type = context.getConfiguration().getSchemaType(typeName);
+                if (type == null) {
+                    throw new XPathException("Unknown type " + eqName, "FODC0008");
+                }
+                parseOptions = parseOptions
+                        .withSchemaValidationMode(Validation.BY_TYPE)
+                        .withTopLevelType(type);
+            } else {
+                throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "FODC0008");
+            }
+            val = checkedOptions.get("strip-space");
+            if (val != null) {
+                parseOptions = parseOptions.withSpaceStrippingRule(
+                        val.effectiveBooleanValue()
+                                ? validating
+                                    ? IgnorableSpaceStrippingRule.getInstance()
+                                    : AllElementsSpaceStrippingRule.getInstance()
+                                : NoElementsSpaceStrippingRule.getInstance());
+            }
+        }
+
+        String baseUri;
+        if (checkedOptions.containsKey("base-uri")) {
+            baseUri = checkedOptions.get("base-uri").getStringValue();
+        } else {
+            baseUri = getStaticBaseUriString();
+        }
+
+
+        if (usePushParser()) {
+            return parseXmlPush(input, parseOptions, baseUri, context);
+        } else {
+            return parseXmlPull(input, parseOptions, baseUri, context);
         }
     }
 
@@ -76,8 +158,12 @@ public class ParseXml extends SystemFunction implements Callable {
      * @return the parsed document, as a tree
      * @throws XPathException if parsing fails
      */
-    private NodeInfo parseXmlPush(StringValue inputArg, XPathContext context) throws XPathException {
-        String baseURI = getRetainedStaticContext().getStaticBaseUriString();
+    private NodeInfo parseXmlPush(
+            StringValue inputArg,
+            ParseOptions options,
+            String baseUri,
+            XPathContext context) throws XPathException {
+
 
         RetentiveErrorHandler errorHandler = new RetentiveErrorHandler();
         try {
@@ -85,39 +171,41 @@ public class ParseXml extends SystemFunction implements Callable {
             if (controller == null) {
                 throw new XPathException("parse-xml() function is not available in this environment");
             }
-            Configuration config = controller.getConfiguration();
-
+            
             StringReader sr = new StringReader(inputArg.getStringValue());
-            InputSource is = new InputSource(sr);
-            is.setSystemId(baseURI);
-            Source source = new SAXSource(is);
-            source.setSystemId(baseURI);
+//            InputSource is = new InputSource(sr);
+//            is.setSystemId(baseUri);
+            Source source = new StreamSource(sr);
+            source.setSystemId(baseUri);
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
-            ParseOptions options = config.getParseOptions();
-            PackageData pd = getRetainedStaticContext().getPackageData();
-            if (pd instanceof StylesheetPackage) {
-                options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
-                if (((StylesheetPackage)pd).isStripsTypeAnnotations()) {
-                    s = config.getAnnotationStripper(s);
-                }
-            } else {
-                options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
-            }
+
             options = options.withErrorHandler(errorHandler);
 
             s.setPipelineConfiguration(b.getPipelineConfiguration());
 
             Sender.send(source, s, options);
 
+            if (errorHandler.failed || !errorHandler.errors.isEmpty()) {
+                // Typically, a DTD validation failure
+                StringBuilder message = new StringBuilder();
+                for (SAXParseException err : errorHandler.errors) {
+                    message.append(err.getMessage()).append(" ");
+                }
+                throw new XPathException(message.toString(), "FODC0007");
+            }
             TinyDocumentImpl node = (TinyDocumentImpl) b.getCurrentRoot();
-            node.setBaseURI(baseURI);
+            node.setBaseURI(baseUri);
             b.reset();
             return node;
         } catch (XPathException err) {
             String msg = makeParsingErrorMessage(err);
-            XPathException xe = new XPathException(msg, "FODC0006");
+            String code = "FODC0006";
+            if (err instanceof ValidationException || err.hasErrorCode("FODC0007")) {
+                code = "FODC0007";
+            }
+            XPathException xe = new XPathException(msg, code);
             errorHandler.captureRetainedErrors(xe);
             xe.maybeSetContext(context);
             throw xe;
@@ -166,8 +254,11 @@ public class ParseXml extends SystemFunction implements Callable {
      * @return the parsed document, as a tree
      * @throws XPathException if parsing fails
      */
-    private NodeInfo parseXmlPull(StringValue inputArg, XPathContext context) throws XPathException {
-        String baseURI = getRetainedStaticContext().getStaticBaseUriString();
+    private NodeInfo parseXmlPull(
+            StringValue inputArg,
+            ParseOptions options,
+            String baseUri,
+            XPathContext context) throws XPathException {
         try {
             Controller controller = context.getController();
             if (controller == null) {
@@ -176,34 +267,30 @@ public class ParseXml extends SystemFunction implements Callable {
             Configuration config = context.getConfiguration();
 
             StringReader sr = new StringReader(inputArg.getStringValue());
-            StreamSource ss = new StreamSource(sr, baseURI);
+            StreamSource ss = new StreamSource(sr, baseUri);
             Source pullSource = Version.platform.resolveSource(ss, config);
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
-            ParseOptions options = config.getParseOptions();
             PackageData pd = getRetainedStaticContext().getPackageData();
             if (pd instanceof StylesheetPackage) {
-                options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
                 if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
                     s = config.getAnnotationStripper(s);
                 }
-            } else {
-                options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
             }
 
-            s.setPipelineConfiguration(b.getPipelineConfiguration());
 
+            s.setPipelineConfiguration(b.getPipelineConfiguration());
             Sender.send(pullSource, s, options);
 
             NodeInfo root = b.getCurrentRoot();
             if (root instanceof TinyDocumentImpl) {
                 TinyDocumentImpl node = (TinyDocumentImpl) root;
-                node.setBaseURI(baseURI);
+                node.setBaseURI(baseUri);
                 node.getTreeInfo().setUserData("saxon:document-uri", "");
             } else if (root instanceof DocumentImpl) {
                 DocumentImpl node = (DocumentImpl) root;
-                node.setBaseURI(baseURI);
+                node.setBaseURI(baseUri);
                 node.getTreeInfo().setUserData("saxon:document-uri", "");
             }
             b.reset();
@@ -217,7 +304,7 @@ public class ParseXml extends SystemFunction implements Callable {
     }
 
     private String makeParsingErrorMessage(XPathException err) {
-        String msg = "First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. ";
+        String msg = "First argument to parse-xml() is not a well-formed and valid XML document. ";
         msg += err.getMessage();
         Throwable cause = err.getCause();
         if (cause != null) {

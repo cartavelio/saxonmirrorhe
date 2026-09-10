@@ -601,11 +601,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
          */
 
         public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(int a, ItemType type, int options, Sequence resultIfEmpty) {
-//            return arg(a, type, options, resultIfEmpty, null);
-//        }
-//
-//        public net.sf.saxon.functions.registry.BuiltInFunctionSet.Entry arg(
-//                int a, ItemType type, int options, Sequence resultIfEmpty, Expression defaultValue) {
+            assert paramTypes != null;
             int cardinality = options & StaticProperty.CARDINALITY_MASK;
             OperandUsage usage = OperandUsage.NAVIGATION;
             if ((options & ABS) != 0) {

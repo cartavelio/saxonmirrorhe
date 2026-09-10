@@ -19,6 +19,7 @@ import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.resource.ActiveSAXSource;
 import net.sf.saxon.s9api.Location;
@@ -28,7 +29,9 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -36,9 +39,18 @@ import org.xml.sax.XMLReader;
 import javax.xml.transform.sax.SAXSource;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ParseXmlFragment extends SystemFunction implements Callable {
+
+    public static OptionsParameter makeOptionsParameter(int version) {
+        OptionsParameter parseOptions = new OptionsParameter(version);
+        parseOptions.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
+        parseOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        return parseOptions;
+    }
 
     /**
      * Evaluate the expression
@@ -56,14 +68,30 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         if (input == null) {
             return EmptySequence.getInstance();
         } else {
-            return evalParseXml(input, context);
+            Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
+            if (getArity() >= 2) {
+                MapItem options = (MapItem) arguments[1].head();
+                if (options != null) {
+                    checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+                }
+            }
+            String baseUri = getStaticBaseUriString();
+            if (checkedOptions.containsKey("base-uri")) {
+                baseUri = checkedOptions.get("base-uri").getStringValue();
+            }
+            boolean stripSpace = false;
+            if (checkedOptions.containsKey("strip-space")) {
+                stripSpace = checkedOptions.get("strip-space").effectiveBooleanValue();
+            }
+            return evalParseXmlFragment(input, baseUri, stripSpace, context);
         }
     }
 
     //#if CSHARP==false
-    private NodeInfo evalParseXml(StringValue inputArg, XPathContext context) throws XPathException {
+    private NodeInfo evalParseXmlFragment(
+            StringValue inputArg, String baseUri, boolean stripSpace, XPathContext context)
+            throws XPathException {
         NodeInfo node = null;
-        final String baseURI = getStaticBaseUriString();
         ParseXml.RetentiveErrorHandler errorHandler = new ParseXml.RetentiveErrorHandler();
 
         int attempt = 0;
@@ -80,7 +108,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                 StringReader skeletonReader = new StringReader(skeleton);
 
                 InputSource is = new InputSource(skeletonReader);
-                is.setSystemId(baseURI);
+                is.setSystemId(baseUri);
                 SAXSource source = new SAXSource(is);
                 XMLReader reader;
                 if (attempt == 1) {
@@ -96,7 +124,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
 
                 ActiveSAXSource.configureParser(reader);
                 source.setXMLReader(reader);
-                source.setSystemId(baseURI);
+                source.setSystemId(baseUri);
 
                 Builder b = controller.makeBuilder();
                 b.setDurability(Durability.TEMPORARY);
@@ -112,20 +140,24 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                     if ("http://www.saxonica.com/parse-xml-fragment/actual.xml".equals(systemId)) {
                         safetyCheck.add(true);
                         InputSource is1 = new InputSource(fragmentReader);
-                        is1.setSystemId(baseURI);
+                        is1.setSystemId(baseUri);
                         return is1;
                     } else {
                         return null;
                     }
                 });
-                PackageData pd = getRetainedStaticContext().getPackageData();
-                if (pd instanceof StylesheetPackage) {
-                    options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
-                    if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
-                        s = configuration.getAnnotationStripper(s);
-                    }
+                if (stripSpace) {
+                    options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                 } else {
-                    options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                    PackageData pd = getRetainedStaticContext().getPackageData();
+                    if (pd instanceof StylesheetPackage) {
+                        options = options.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                        if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
+                            s = configuration.getAnnotationStripper(s);
+                        }
+                    } else {
+                        options = options.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                    }
                 }
                 options = options.withErrorHandler(errorHandler);
 
@@ -178,7 +210,6 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         }
 
         private int level = 0;
-        private final boolean suppressStartContent = false;
 
         /**
          * Notify the start of an element
