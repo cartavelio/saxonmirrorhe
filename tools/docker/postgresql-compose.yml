@@ -2,13 +2,16 @@ version: '3.8'
 
 services:
     sqlserver:
-      image: postgres:13.2-alpine
-      container_name: sqlserver
+      image: saxonica/sqltests-postgres
+      build:
+        context: .
+        additional_contexts:
+          bootstrap: ../sql
+        dockerfile: ./postgresql.Dockerfile
       ports:
         - 5432:5432
       volumes:
         - postgresql-data:/var/lib/postgresql/data
-        - ../sql/postgresql:/app/sql
       environment:
         POSTGRES_PASSWORD: admin
       networks:
@@ -19,4 +22,3 @@ networks:
 
 volumes:
   postgresql-data:
-    external: true

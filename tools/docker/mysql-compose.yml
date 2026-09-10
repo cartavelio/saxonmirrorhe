@@ -2,13 +2,16 @@ version: '3.8'
 
 services:
     sqlserver:
-      image: mysql:latest
-      container_name: sqlserver
+      image: saxonica/sqltests-mysql
+      build:
+        context: .
+        additional_contexts:
+          bootstrap: ../sql
+        dockerfile: ./mysql.Dockerfile
       ports:
         - 3306:3306
       volumes:
-        - mysql-data:/var/lib/postgresql/data
-        - ../sql/mysql:/app/sql
+        - mysql-data:/var/lib/mysql
       environment:
         MYSQL_ROOT_PASSWORD: admin
       networks:
@@ -19,4 +22,3 @@ networks:
 
 volumes:
   mysql-data:
-    external: true
