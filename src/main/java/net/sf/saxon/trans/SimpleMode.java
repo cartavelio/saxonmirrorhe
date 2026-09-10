@@ -360,14 +360,7 @@ public class SimpleMode extends Mode {
         // This logic is designed to ensure that when a UnionPattern contains multiple branches
         // with the same priority, next-match doesn't select the same template twice (next-match-024)
         int moduleHash = module.hashCode();
-//        int sequence;
-//        if (mostRecentRule == null) {
-//            sequence = 0;
-//        } else if (action == mostRecentRule.getAction() && moduleHash == mostRecentModuleHash) {
-//            sequence = mostRecentRule.getSequence();
-//        } else {
-//            sequence = mostRecentRule.getSequence() + 1;
-//        }
+
         //int precedence = module.getPrecedence();
         int minImportPrecedence = module.getMinImportPrecedence();
 
@@ -394,7 +387,7 @@ public class SimpleMode extends Mode {
     }
 
     /**
-     * Generate a new rule - so it can be overridden to make more specialist rules
+     * Generate a new rule (overridden in EE to make more specialist rules)
      *
      * @param pattern             the pattern that this rule matches
      * @param action              the object invoked by this rule (usually a Template)
