@@ -20,7 +20,6 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationException;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * A numeric (double precision floating point) value
@@ -298,34 +297,8 @@ public final class DoubleValue extends NumericValue {
             return new DoubleValue(Math.round(value));
         }
 
-        // Convert to a scaled integer, by multiplying by 10^scale
+        return roundViaDecimal(scale, Round.RoundingRule.HALF_TO_CEILING);
 
-        double factor = Math.pow(10, scale + 1);
-        double d = Math.abs(value * factor);
-
-        if (Double.isInfinite(d)) {
-            // double arithmetic has overflowed - do it in decimal
-            BigDecimal dec = BigDecimal.valueOf(value);
-            dec = dec.setScale(scale, RoundingMode.HALF_UP);
-            return new DoubleValue(dec.doubleValue());
-        }
-
-        // Now apply any rounding needed
-
-        double rem = d % 10;
-        if (rem > 5 || (rem == 5 && value > 0)) {
-            d += 10 - rem;
-        } else {
-            d -= rem;
-        }
-
-        // Now convert back to the original magnitude
-
-        d /= factor;
-        if (value < 0) {
-            d = -d;
-        }
-        return new DoubleValue(d);
     }
 
     /**
@@ -346,11 +319,22 @@ public final class DoubleValue extends NumericValue {
             } else if (roundingRule == Round.RoundingRule.FLOOR) {
                 return floor();
             } else if (roundingRule == Round.RoundingRule.HALF_TO_CEILING) {
-                return new DoubleValue(Math.round(value));
+                if (value > Long.MIN_VALUE && value < Long.MAX_VALUE) {
+                    if (value >= -0.5 && value < 0.0) {
+                        return new DoubleValue(-0.0);
+                    }
+                    return new DoubleValue(Math.round(value));
+                }
             }
         }
 
-        // In the general case, go via xs:decimal
+        return roundViaDecimal(scale, roundingRule);
+    }
+
+    private DoubleValue roundViaDecimal(int scale, Round.RoundingRule roundingRule) {
+        if (value == 0.0 || Double.isNaN(value) || Double.isInfinite(value)) {
+            return this;
+        }
 
         BigDecimalValue decimalValue = new BigDecimalValue(new BigDecimal(value));
         NumericValue rounded = decimalValue.round(scale, roundingRule);
