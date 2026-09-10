@@ -5,6 +5,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.QName;
@@ -271,16 +272,15 @@ public class Archive {
     }
 
     private static ArrayList<Entry> toInsertionEntries(MapItem entries, Entry defaultEntry) throws XPathException {
-        AtomicIterator ui = entries.keys();
         ArrayList<Entry> result = new ArrayList<>();
         Entry first = null;
         Sequence s;
-        AtomicValue av;
         StringValue content = StringValue.bmp("content");
         StringValue compressionKey = StringValue.bmp("compression");
         StringValue positionKey = StringValue.bmp("position");
-        while ((av = ui.next()) != null) {
-            MapItem entry = (MapItem) entries.get(av).iterate().next();
+        for (KeyValuePair kvp : entries.keyValuePairs()) {
+            AtomicValue av = kvp.key;
+            MapItem entry = (MapItem) kvp.value.iterate().next();
             Entry e = new Entry(av.getStringValue(),
                                 (Base64BinaryValue) entry.get(content).iterate().next());
             e.setCompression(defaultEntry.compression);

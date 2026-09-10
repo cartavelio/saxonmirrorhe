@@ -20,10 +20,7 @@ import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapBuilder;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.Pattern;
@@ -37,7 +34,6 @@ import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.VisibilityProvenance;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -116,11 +112,9 @@ public class CompileXPath extends SystemFunction {
 
         MapItem namespaces = (MapItem) options.get(StringValue.bmp("namespaces"));
         if (namespaces != null) {
-            AtomicIterator keys = namespaces.keys();
-            AtomicValue key;
-            while ((key = keys.next()) != null) {
-                String prefix = key.getStringValue();
-                String uri = namespaces.get(key).getUnicodeStringValue().toString();
+            for (KeyValuePair kvp : namespaces.keyValuePairs()) {
+                String prefix = kvp.key.getStringValue();
+                String uri = kvp.value.getUnicodeStringValue().toString();
                 if (uri.equals("~")) {
                     uri = NamespaceConstant.getUriForConventionalPrefix(prefix);
                 }
@@ -142,13 +136,11 @@ public class CompileXPath extends SystemFunction {
         MapItem globals = (MapItem) options.get(StringValue.bmp("globals"));
         ArrayList<String> knownGlobals = new ArrayList<>();
         if (globals != null) {
-            AtomicIterator keys = globals.keys();
-            AtomicValue key;
-            while ((key = keys.next()) != null) {
-                knownGlobals.add(key.getStringValue());
-                NodeInfo n = (NodeInfo) globals.get(key);
+            for (KeyValuePair kvp : globals.keyValuePairs()) {
+                knownGlobals.add(kvp.key.getStringValue());
+                NodeInfo n = (NodeInfo) kvp.value;
                 String t = n.getAttributeValue(NamespaceUri.NULL, "sType");
-                XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(key.getStringValue()));
+                XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(kvp.key.getStringValue()));
                 v.setRequiredType(makeType(t));
             }
         }
@@ -157,16 +149,14 @@ public class CompileXPath extends SystemFunction {
         }
         int maxSlot = 0;
         if (locals != null) {
-            AtomicIterator keys = locals.keys();
-            AtomicValue key;
-            while ((key = keys.next()) != null) {
-                SequenceExtent s = (SequenceExtent) locals.get(key);
+            for (KeyValuePair kvp : locals.keyValuePairs()) {
+                GroundedValue s = kvp.value;
                 String staticType = s.itemAt(2).getStringValue();
                 int slot = (int) ((Int64Value) s.itemAt(1)).longValue();
                 if (slot > maxSlot) {
                     maxSlot = slot;
                 }
-                XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(key.getStringValue()));
+                XPathVariable v = env.declareVariable(StructuredQName.fromClarkName(kvp.key.getStringValue()));
                 v.setSlotNumber(slot);
                 v.setRequiredType(makeType(staticType));
             }
@@ -200,11 +190,10 @@ public class CompileXPath extends SystemFunction {
             /* TODO - this is being set up for every call of saxon:compile-XPath() - should be 'static' */
             NameTest argTest = new NameTest(Type.ELEMENT, exportURI, "arg", configuration.getNamePool());
             StylesheetPackage sheet = new StylesheetPackage(configuration);
-            AtomicIterator keys = globalFunctions.keys();
-            AtomicValue key;
-            while ((key = keys.next()) != null) {
+            for (KeyValuePair kvp : globalFunctions.keyValuePairs()) {
+                AtomicValue key = kvp.key;
                 String nameArity = key.getStringValue();
-                NodeInfo decl = (NodeInfo) globalFunctions.get(key);
+                NodeInfo decl = (NodeInfo) kvp.value;
                 decl = decl.getParent(); // TODO - work out whether we need the body or can use the whole definition
                 SequenceType reqType = SequenceType.ANY_SEQUENCE;
                 String rType = decl.getAttributeValue(NamespaceUri.NULL, "as");

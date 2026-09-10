@@ -1512,6 +1512,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
     }
 
+
+
     /**
      * Factory method to create a Template Rule
      *

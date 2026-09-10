@@ -11,6 +11,8 @@ import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.functions.extfn.ObjectMap;
 import com.saxonica.functions.extfn.VendorFunctionSetPE;
+import com.saxonica.functions.qt4.ma.OrderedDictionaryMap;
+import com.saxonica.functions.qt4.ma.OrderedMap;
 import com.saxonica.functions.registry.UseWhen40FunctionSet;
 import com.saxonica.functions.registry.XPath40FunctionSet;
 import com.saxonica.functions.registry.XQUpdate10FunctionSet;
@@ -36,8 +38,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.*;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
-import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
@@ -988,6 +989,17 @@ public class ProfessionalConfiguration extends Configuration {
     public boolean isExtensionElementAvailable(StructuredQName qName) {
         ExtensionElementCreator eef = getExtensionElementCreator(qName.getNamespaceUri());
         return eef != null && eef.createExtensionElement(qName.getLocalPart()) != null;
+    }
+
+    public MapBuilder makeMapBuilder(boolean ordered, boolean stringOnly) {
+        if (ordered) {
+            checkLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION, "ordered maps", -1);
+        }
+        if (stringOnly) {
+            return ordered ? OrderedDictionaryMap.getBuilder() : DictionaryMap.getBuilder();
+        } else {
+            return ordered ? OrderedMap.getBuilder() : HashTrieMap.getBuilder();
+        }
     }
 
     //#if CSHARP==false

@@ -5,11 +5,13 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -75,8 +77,13 @@ public class TypeOf_1 extends SystemFunction {
             case FUNCTION:
                 return "function(*)";
             default:
-                return it.getClass().getCanonicalName();
+                return getClassName(it.getClass());
         }
+    }
+
+    @CSharpReplaceBody(code="return theClass.ToString();")
+    private static String getClassName(Class<?> theClass) {
+        return theClass.getCanonicalName();
     }
 
     public static String nodeKind(NodeInfo node) {
