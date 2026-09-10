@@ -515,6 +515,13 @@ public class Transform {
 
                 if ("".equals(value)) {
                     traceListener = new XSLTTraceListener();
+                    if (out != null) {
+                        try {
+                            traceListener.setOutputDestination(new StandardLogger(new PrintStream(out)));
+                        } catch (FileNotFoundException e) {
+                            throw new XPathException(e);
+                        }
+                    }
                 } else {
                     traceListener = config.makeTraceListener(value);
                 }
