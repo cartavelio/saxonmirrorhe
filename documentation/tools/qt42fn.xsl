@@ -11,10 +11,10 @@
 <xsl:preserve-space elements="*"/>
 
 <xsl:variable name="qt4cg-fn-uri"
-  select="resolve-uri('../../../qt4cg/qtspecs/specifications/xpath-functions-40/src/function-catalog.xml',
+  select="resolve-uri('../../../../qt4cg/qtspecs/specifications/xpath-functions-40/src/function-catalog.xml',
                       static-base-uri())"/>
 <xsl:variable name="qt4cg-xslt-uri"
-  select="resolve-uri('../../../qt4cg/qtspecs/specifications/xslt-40/src/function-catalog.xml',
+  select="resolve-uri('../../../../qt4cg/qtspecs/specifications/xslt-40/src/function-catalog.xml',
                       static-base-uri())"/>
 
 <xsl:variable name="qt4cg-functions">

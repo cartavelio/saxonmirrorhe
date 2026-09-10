@@ -13,26 +13,26 @@
       <e:attribute name="name" required="no">
          <e:data-type name="uri"/>
       </e:attribute>
-      <e:attribute name="package-version" required="no">
+      <e:attribute name="package-version" required="no" default="'1'">
          <e:data-type name="string"/>
       </e:attribute>
       <e:attribute name="version" required="yes">
          <e:data-type name="decimal"/>
       </e:attribute>
 
-      <e:attribute name="input-type-annotations">
+      <e:attribute name="input-type-annotations" default="'unspecified'">
          <e:constant value="preserve"/>
          <e:constant value="strip"/>
          <e:constant value="unspecified"/>
       </e:attribute>
-      <e:attribute name="declared-modes" required="no">
+      <e:attribute name="declared-modes" required="no" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="default-mode">
+      <e:attribute name="default-mode" default="'#unnamed'">
          <e:data-type name="eqname"/>
          <e:constant value="#unnamed"/>
       </e:attribute>
-      <e:attribute name="default-validation">
+      <e:attribute name="default-validation" default="'strip'">
          <e:constant value="preserve"/>
          <e:constant value="strip"/>
       </e:attribute>
@@ -46,10 +46,16 @@
       <e:attribute name="exclude-result-prefixes" required="no">
          <e:data-type name="prefixes"/>
       </e:attribute>
-      <e:attribute name="expand-text" required="no">
+      <e:attribute name="expand-text" required="no" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-when" required="no">
+      <e:attribute name="fixed-namespaces" required="no">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="schema-role" required="no">
+         <e:data-type name="ncname"/>
+      </e:attribute>
+      <e:attribute name="use-when" required="no" default="true()">
          <e:data-type name="expression"/>
       </e:attribute>
       <e:attribute name="xpath-default-namespace" required="no">
@@ -70,10 +76,11 @@
       <e:attribute name="name" required="yes">
          <e:data-type name="uri"/>
       </e:attribute>
-      <e:attribute name="package-version" required="no">
+      <e:attribute name="package-version" required="no" default="'*'">
          <e:data-type name="string"/>
       </e:attribute>
       <e:choice repeat="zero-or-more">
+         <e:element name="package-location"/>
          <e:element name="accept"/>
          <e:element name="override"/>
       </e:choice>
@@ -91,6 +98,8 @@
          <e:constant value="attribute-set"/>
          <e:constant value="variable"/>
          <e:constant value="mode"/>
+         <e:constant value="item-type"/>
+         <e:constant value="record-type"/>
          <e:constant value="*"/>
       </e:attribute>
       <e:attribute name="names" required="yes">
@@ -116,6 +125,8 @@
          <e:constant value="attribute-set"/>
          <e:constant value="variable"/>
          <e:constant value="mode"/>
+         <e:constant value="item-type"/>
+         <e:constant value="record-type"/>
          <e:constant value="*"/>
       </e:attribute>
       <e:attribute name="names" required="yes">
@@ -148,6 +159,30 @@
       </e:allowed-parents>
    </e:element-syntax>
 
+    <e:element-syntax name="package-location">
+        <e:attribute name="href" required="yes">
+            <e:data-type name="uri"/>
+        </e:attribute>
+        <e:attribute name="path-in-archive" required="no">
+            <e:data-type name="string"/>
+        </e:attribute>
+        <e:attribute name="archive-type" required="no">
+            <e:data-type name="string"/>
+        </e:attribute>
+        <e:attribute name="is-priority" required="no" default="true()">
+            <e:data-type name="boolean"/>
+        </e:attribute>
+        <e:attribute name="format" required="no">
+            <e:data-type name="string"/>
+        </e:attribute>
+        <e:empty/>
+        <e:allowed-parents>
+            <e:parent name="use-package"/>
+        </e:allowed-parents>
+    </e:element-syntax>
+    
+    
+
    <!-- Stylesheets -->
 
    <e:element-syntax name="stylesheet">
@@ -157,15 +192,15 @@
       <e:attribute name="version" required="yes">
          <e:data-type name="decimal"/>
       </e:attribute>
-      <e:attribute name="default-mode">
+      <e:attribute name="default-mode" default="'#unnamed'">
          <e:data-type name="eqname"/>
          <e:constant value="#unnamed"/>
       </e:attribute>
-      <e:attribute name="default-validation">
+      <e:attribute name="default-validation" default="'strip'">
          <e:constant value="preserve"/>
          <e:constant value="strip"/>
       </e:attribute>
-      <e:attribute name="input-type-annotations">
+      <e:attribute name="input-type-annotations" default="'unspecified'">
          <e:constant value="preserve"/>
          <e:constant value="strip"/>
          <e:constant value="unspecified"/>
@@ -182,7 +217,16 @@
       <e:attribute name="expand-text">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-when">
+      <e:attribute name="fixed-namespaces" required="no">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="main-module" required="no">
+         <e:data-type name="uri"/>
+      </e:attribute>
+      <e:attribute name="schema-role" required="no">
+         <e:data-type name="ncname"/>
+      </e:attribute>
+      <e:attribute name="use-when" default="true()">
          <e:data-type name="expression"/>
       </e:attribute>
       <e:attribute name="xpath-default-namespace">
@@ -200,15 +244,15 @@
       <e:attribute name="version" required="yes">
          <e:data-type name="decimal"/>
       </e:attribute>
-      <e:attribute name="default-mode">
+      <e:attribute name="default-mode" default="'#unnamed'">
          <e:data-type name="eqname"/>
          <e:constant value="#unnamed"/>
       </e:attribute>
-      <e:attribute name="default-validation">
+      <e:attribute name="default-validation" default="'strip'">
          <e:constant value="preserve"/>
          <e:constant value="strip"/>
       </e:attribute>
-      <e:attribute name="input-type-annotations">
+      <e:attribute name="input-type-annotations" default="'unspecified'">
          <e:constant value="preserve"/>
          <e:constant value="strip"/>
          <e:constant value="unspecified"/>
@@ -222,10 +266,19 @@
       <e:attribute name="exclude-result-prefixes">
          <e:data-type name="prefixes"/>
       </e:attribute>
-      <e:attribute name="expand-text">
+      <e:attribute name="expand-text" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-when">
+      <e:attribute name="fixed-namespaces">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="main-module">
+         <e:data-type name="uri"/>
+      </e:attribute>
+      <e:attribute name="schema-role" required="no">
+         <e:data-type name="ncname"/>
+      </e:attribute>
+      <e:attribute name="use-when" default="true()">
          <e:data-type name="expression"/>
       </e:attribute>
       <e:attribute name="xpath-default-namespace">
@@ -264,6 +317,9 @@
 
    <e:element-syntax name="import-schema">
       <e:in-category name="declaration"/>
+      <e:attribute name="role">
+         <e:data-type name="ncname"/>
+      </e:attribute>
       <e:attribute name="namespace">
          <e:data-type name="uri"/>
       </e:attribute>
@@ -271,26 +327,6 @@
          <e:data-type name="uri"/>
       </e:attribute>
       <e:element repeat="zero-or-one" name="xs:schema"/>
-      <e:allowed-parents>
-         <e:parent name="package"/>
-         <e:parent name="stylesheet"/>
-         <e:parent name="transform"/>
-      </e:allowed-parents>
-   </e:element-syntax>
-   
-   <e:element-syntax name="item-type">
-      <e:in-category name="declaration"/>
-      <e:attribute name="name" required="yes">
-         <e:data-type name="eqname"/>
-      </e:attribute>
-      <e:attribute name="as" required="yes">
-         <e:data-type name="item-type"/>
-      </e:attribute>
-      <e:attribute name="visibility">
-         <e:constant value="private"/>
-         <e:constant value="final"/>
-      </e:attribute>
-      <e:empty/>
       <e:allowed-parents>
          <e:parent name="package"/>
          <e:parent name="stylesheet"/>
@@ -333,37 +369,37 @@
       <e:attribute name="name">
          <e:data-type name="eqname"/>
       </e:attribute>
-      <e:attribute name="decimal-separator">
-         <e:data-type name="char"/>
-      </e:attribute>
-      <e:attribute name="grouping-separator">
-         <e:data-type name="char"/>
-      </e:attribute>
-      <e:attribute name="infinity">
+      <e:attribute name="decimal-separator" default="'.'">
          <e:data-type name="string"/>
       </e:attribute>
-      <e:attribute name="minus-sign">
-         <e:data-type name="char"/>
-      </e:attribute>
-      <e:attribute name="exponent-separator">
-         <e:data-type name="char"/>
-      </e:attribute>
-      <e:attribute name="NaN">
+      <e:attribute name="grouping-separator" default="','">
          <e:data-type name="string"/>
       </e:attribute>
-      <e:attribute name="percent">
+      <e:attribute name="infinity" default="'Infinity'">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="minus-sign" default="'-'">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="exponent-separator" default="'e'">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="NaN" default="'NaN'">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="percent" default="'%'">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="per-mille" default="'&#x2030;'">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="zero-digit" default="'0'">
          <e:data-type name="char"/>
       </e:attribute>
-      <e:attribute name="per-mille">
+      <e:attribute name="digit" default="'#'">
          <e:data-type name="char"/>
       </e:attribute>
-      <e:attribute name="zero-digit">
-         <e:data-type name="char"/>
-      </e:attribute>
-      <e:attribute name="digit">
-         <e:data-type name="char"/>
-      </e:attribute>
-      <e:attribute name="pattern-separator">
+      <e:attribute name="pattern-separator" default="';'">
          <e:data-type name="char"/>
       </e:attribute>
       <e:empty/>
@@ -390,7 +426,7 @@
       <e:attribute name="mode">
          <e:data-type name="tokens"/>
       </e:attribute>
-      <e:attribute name="as">
+      <e:attribute name="as" default="'item()*'">
          <e:data-type name="sequence-type"/>
       </e:attribute>
       <e:attribute name="visibility">
@@ -417,13 +453,13 @@
       <e:attribute name="select">
          <e:data-type name="expression"/>
       </e:attribute>
+      <e:attribute name="mode">
+         <e:data-type name="token"/>
+      </e:attribute>
       <e:attribute name="separator">
          <e:attribute-value-template>
             <e:data-type name="string"/>
          </e:attribute-value-template>
-      </e:attribute>
-      <e:attribute name="mode">
-         <e:data-type name="token"/>
       </e:attribute>
       <e:choice repeat="zero-or-more">
          <e:element name="sort"/>
@@ -439,21 +475,25 @@
       <e:attribute name="name">
          <e:data-type name="eqname"/>
       </e:attribute>
-      <e:attribute name="streamable">
+      <e:attribute name="as" required="no" default="'item()*'">
+         <e:data-type name="sequence-type"/>
+      </e:attribute>
+      <e:attribute name="streamable" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-accumulators">
+      <e:attribute name="use-accumulators" default="''">
          <e:data-type name="tokens"/>
       </e:attribute>
-      <e:attribute name="on-no-match">
+      <e:attribute name="on-no-match" default="'text-only-copy'">
          <e:constant value="deep-copy"/>
          <e:constant value="shallow-copy"/>
+         <e:constant value="shallow-copy-all"/>
          <e:constant value="deep-skip"/>
          <e:constant value="shallow-skip"/>
          <e:constant value="text-only-copy"/>
          <e:constant value="fail"/>
       </e:attribute>
-      <e:attribute name="on-multiple-match">
+      <e:attribute name="on-multiple-match" default="'use-last'">
          <e:constant value="use-last"/>
          <e:constant value="fail"/>
       </e:attribute>
@@ -463,18 +503,23 @@
       <e:attribute name="warning-on-multiple-match">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="typed">
+      <e:attribute name="typed" default="'unspecified'">
          <e:data-type name="boolean"/>
          <e:constant value="strict"/>
          <e:constant value="lax"/>
          <e:constant value="unspecified"/>
       </e:attribute>
-      <e:attribute name="visibility">
+      <e:attribute name="copy-namespaces" default="'yes'">
+         <e:data-type name="boolean"/>
+      </e:attribute>
+      <e:attribute name="visibility" default="'private'">
          <e:constant value="public"/>
          <e:constant value="private"/>
          <e:constant value="final"/>
       </e:attribute>
-      <e:empty/>
+      <e:sequence>
+         <e:element repeat="zero-or-more" name="template"/>
+      </e:sequence>
       <e:allowed-parents>
          <e:parent name="package"/>
          <e:parent name="stylesheet"/>
@@ -484,9 +529,9 @@
 
    <e:element-syntax name="context-item">
       <e:attribute name="as">
-         <e:data-type name="item-type"/>
+         <e:data-type name="item-type" default="'item()'"/>
       </e:attribute>
-      <e:attribute name="use">
+      <e:attribute name="use" default="'optional'">
          <e:constant value="required"/>
          <e:constant value="optional"/>
          <e:constant value="absent"/>
@@ -500,9 +545,9 @@
    <e:element-syntax name="global-context-item">
       <e:in-category name="declaration"/>
       <e:attribute name="as">
-         <e:data-type name="item-type"/>
+         <e:data-type name="item-type" default="'item()'"/>
       </e:attribute>
-      <e:attribute name="use">
+      <e:attribute name="use" default="'optional'">
          <e:constant value="required"/>
          <e:constant value="optional"/>
          <e:constant value="absent"/>
@@ -541,12 +586,6 @@
       <e:attribute name="select" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
-      <!--<e:attribute name="array">
-         <e:data-type name="expression"/>
-      </e:attribute>-->
-      <!--<e:attribute name="map">
-         <e:data-type name="expression"/>
-      </e:attribute>-->
       <e:attribute name="separator">
          <e:attribute-value-template>
             <e:data-type name="string"/>
@@ -566,12 +605,6 @@
       <e:attribute name="select" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
-      <!--<e:attribute name="array">
-         <e:data-type name="expression"/>
-      </e:attribute>-->
-      <!--<e:attribute name="map">
-         <e:data-type name="expression"/>
-      </e:attribute>-->
       <e:sequence>
          <e:element repeat="zero-or-more" name="param"/>
          <e:element repeat="zero-or-one" name="on-completion"/>
@@ -623,7 +656,7 @@
       <e:attribute name="then" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="else" required="no">
+      <e:attribute name="else" required="no" default="()">
          <e:data-type name="expression"/>
       </e:attribute>
       <e:model name="sequence-constructor"/>
@@ -686,7 +719,7 @@
       <e:attribute name="select" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="rollback-output">
+      <e:attribute name="rollback-output" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:sequence>
@@ -703,7 +736,7 @@
    </e:element-syntax>
 
    <e:element-syntax name="catch">
-      <e:attribute name="errors" required="no">
+      <e:attribute name="errors" required="no" default="'*'">
          <e:data-type name="tokens"/>
       </e:attribute>
       <e:attribute name="select" required="no">
@@ -729,7 +762,7 @@
       <e:attribute name="as">
          <e:data-type name="sequence-type"/>
       </e:attribute>
-      <e:attribute name="static">
+      <e:attribute name="static" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:attribute name="visibility">
@@ -763,10 +796,10 @@
       <e:attribute name="required">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="tunnel">
+      <e:attribute name="tunnel" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="static">
+      <e:attribute name="static" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:model name="sequence-constructor"/>
@@ -791,7 +824,7 @@
       <e:attribute name="as">
          <e:data-type name="sequence-type"/>
       </e:attribute>
-      <e:attribute name="tunnel">
+      <e:attribute name="tunnel" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:model name="sequence-constructor"/>
@@ -823,16 +856,16 @@
       <e:attribute name="name" required="yes">
          <e:data-type name="eqname"/>
       </e:attribute>
-      <e:attribute name="use-attribute-sets">
+      <e:attribute name="use-attribute-sets" default="''">
          <e:data-type name="eqnames"/>
       </e:attribute>
-      <e:attribute name="visibility">
+      <e:attribute name="visibility" default="'private'">
          <e:constant value="public"/>
          <e:constant value="private"/>
          <e:constant value="final"/>
          <e:constant value="abstract"/>
       </e:attribute>
-      <e:attribute name="streamable">
+      <e:attribute name="streamable" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:element repeat="zero-or-more" name="attribute"/>
@@ -843,22 +876,86 @@
          <e:parent name="override"/>
       </e:allowed-parents>
    </e:element-syntax>
+   
+   <e:element-syntax name="item-type">
+      <e:in-category name="declaration"/>
+      <e:attribute name="name" required="yes">
+         <e:data-type name="eqname"/>
+      </e:attribute>
+      <e:attribute name="as" default="'item()*'">
+         <e:data-type name="item-type"/>
+      </e:attribute>
+      <e:attribute name="visibility" default="'private'">
+         <e:constant value="private"/>
+         <e:constant value="public"/>
+      </e:attribute>
+      <e:empty/>
+      <e:allowed-parents>
+         <e:parent name="package"/>
+         <e:parent name="stylesheet"/>
+         <e:parent name="transform"/>
+      </e:allowed-parents>
+   </e:element-syntax>
+   
+   <e:element-syntax name="record-type">
+      <e:in-category name="declaration"/>
+      <e:attribute name="name" required="yes">
+         <e:data-type name="eqname"/>
+      </e:attribute>
+      <e:attribute name="constructor" default="'no'">
+         <e:data-type name="boolean"/>
+      </e:attribute>
+      <e:attribute name="extensible" default="'no'">
+         <e:data-type name="boolean"/>
+      </e:attribute>
+      <e:attribute name="visibility" default="'private'">
+         <e:constant value="private"/>
+         <e:constant value="public"/>
+      </e:attribute>
+      <e:sequence>
+         <e:element repeat="zero-or-more" name="field"/>
+      </e:sequence>
+      <e:allowed-parents>
+         <e:parent name="package"/>
+         <e:parent name="stylesheet"/>
+         <e:parent name="transform"/>
+      </e:allowed-parents>
+   </e:element-syntax>
+   
+   <e:element-syntax name="field">
+      <e:attribute name="name" required="yes">
+         <e:data-type name="ncname"/>
+      </e:attribute>
+      <e:attribute name="as" default="'item()*'">
+         <e:data-type name="sequence-type"/>
+      </e:attribute>
+      <e:attribute name="required" default="'yes'">
+         <e:data-type name="boolean"/>
+      </e:attribute>
+      <e:attribute name="default">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:empty/>
+      <e:allowed-parents>
+         <e:parent name="record-type"/>
+      </e:allowed-parents>
+   </e:element-syntax>
 
    <e:element-syntax name="function">
       <e:in-category name="declaration"/>
       <e:attribute name="name" required="yes">
          <e:data-type name="eqname"/>
       </e:attribute>
-      <e:attribute name="as" required="no">
+      <e:attribute name="as" required="no" default="'item()*'">
          <e:data-type name="sequence-type"/>
       </e:attribute>
-      <e:attribute name="visibility" required="no">
+      <e:attribute name="visibility" required="no" default="'private'">
          <e:constant value="public"/>
          <e:constant value="private"/>
          <e:constant value="final"/>
          <e:constant value="abstract"/>
       </e:attribute>
-      <e:attribute name="streamability" required="no">
+      <e:attribute name="streamability" required="no" default="'unclassified'">
          <e:constant value="unclassified"/>
          <e:constant value="absorbing"/>
          <e:constant value="inspection"/>
@@ -868,10 +965,10 @@
          <e:constant value="ascent"/>
          <e:data-type name="eqname"/>
       </e:attribute>
-      <e:attribute name="override-extension-function" required="no">
+      <e:attribute name="override-extension-function" required="no" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="override" required="no" deprecated="yes">
+      <e:attribute name="override" required="no" deprecated="yes" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:attribute name="new-each-time" required="no">
@@ -883,7 +980,7 @@
          <e:constant value="0"/>
          <e:constant value="maybe"/>
       </e:attribute>
-      <e:attribute name="cache" required="no">
+      <e:attribute name="cache" required="no" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:sequence>
@@ -903,7 +1000,7 @@
       <e:attribute name="xpath" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="as" required="no">
+      <e:attribute name="as" required="no" default="'item()*'">
          <e:data-type name="sequence-type"/>
       </e:attribute>
       <e:attribute name="base-uri" required="no">
@@ -920,7 +1017,7 @@
       <e:attribute name="namespace-context" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="schema-aware" required="no">
+      <e:attribute name="schema-aware" required="no" default="'no'">
          <e:attribute-value-template>
             <e:data-type name="boolean"/>
          </e:attribute-value-template>
@@ -966,10 +1063,10 @@
             <e:data-type name="uri"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="inherit-namespaces">
+      <e:attribute name="inherit-namespaces" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-attribute-sets">
+      <e:attribute name="use-attribute-sets" default="''">
          <e:data-type name="eqnames"/>
       </e:attribute>
       <e:attribute name="type">
@@ -1025,10 +1122,18 @@
 
    <e:element-syntax name="text">
       <e:in-category name="instruction"/>
-      <e:attribute name="disable-output-escaping" deprecated="yes">
+      <e:attribute name="select">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="separator">
+         <e:attribute-value-template>
+            <e:data-type name="string"/>
+         </e:attribute-value-template>
+      </e:attribute>
+      <e:attribute name="disable-output-escaping" deprecated="yes" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:text/>
+      <e:model name="sequence-constructor"/>
       <e:allowed-parents>
          <e:parent-category name="sequence-constructor"/>
       </e:allowed-parents>
@@ -1044,7 +1149,7 @@
             <e:data-type name="string"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="disable-output-escaping" deprecated="yes">
+      <e:attribute name="disable-output-escaping" deprecated="yes" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:model name="sequence-constructor"/>
@@ -1118,13 +1223,13 @@
       <e:attribute name="select">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="copy-namespaces">
+      <e:attribute name="copy-namespaces" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="inherit-namespaces">
+      <e:attribute name="inherit-namespaces" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-attribute-sets">
+      <e:attribute name="use-attribute-sets" default="''">
          <e:data-type name="eqnames"/>
       </e:attribute>
       <e:attribute name="type">
@@ -1147,10 +1252,10 @@
       <e:attribute name="select" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="copy-accumulators">
+      <e:attribute name="copy-accumulators" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="copy-namespaces">
+      <e:attribute name="copy-namespaces" default="'yes'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:attribute name="type">
@@ -1167,29 +1272,30 @@
          <e:parent-category name="sequence-constructor"/>
       </e:allowed-parents>
    </e:element-syntax>
-   
-   <!--<e:element-syntax name="match">
-      <e:in-category name="instruction"/>
-      <e:attribute name="select" required="no">
-         <e:data-type name="expression"/>
-      </e:attribute>
-      <e:attribute name="pattern" required="yes">
-         <e:data-type name="pattern"/>
-      </e:attribute>
-      <e:sequence>
-         <e:element repeat="zero-or-more" name="fallback"/>
-      </e:sequence>
-      <e:allowed-parents>
-         <e:parent-category name="sequence-constructor"/>
-      </e:allowed-parents>
-   </e:element-syntax>-->
-   
+
    <e:element-syntax name="sequence">
       <e:in-category name="instruction"/>
       <e:attribute name="select" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
+      <e:attribute name="as" required="no" default="'item()*'">
+         <e:data-type name="sequence-type"/>
+      </e:attribute>
       <e:model name="sequence-constructor"/>
+      <e:allowed-parents>
+         <e:parent-category name="sequence-constructor"/>
+      </e:allowed-parents>
+   </e:element-syntax>
+   
+   <e:element-syntax name="select">
+      <e:in-category name="instruction"/>
+      <e:attribute name="as" required="no" default="'item()*'">
+         <e:data-type name="sequence-type"/>
+      </e:attribute>
+      <e:sequence>
+         <e:element name="fallback" repeat="zero-or-more"/>
+         <e:text/>
+      </e:sequence>
       <e:allowed-parents>
          <e:parent-category name="sequence-constructor"/>
       </e:allowed-parents>
@@ -1235,7 +1341,7 @@
       <e:attribute name="select">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="level">
+      <e:attribute name="level" default="'single'">
          <e:constant value="single"/>
          <e:constant value="multiple"/>
          <e:constant value="any"/>
@@ -1246,7 +1352,7 @@
       <e:attribute name="from">
          <e:data-type name="pattern"/>
       </e:attribute>
-      <e:attribute name="format">
+      <e:attribute name="format" default="'1'">
          <e:attribute-value-template>
             <e:data-type name="string"/>
          </e:attribute-value-template>
@@ -1262,14 +1368,14 @@
             <e:constant value="traditional"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="ordinal">
+      <e:attribute name="ordinal" default="'no'">
          <e:attribute-value-template>
             <e:data-type name="string"/>
          </e:attribute-value-template>
       </e:attribute>
       <e:attribute name="start-at">
          <e:attribute-value-template>
-            <e:data-type name="integer"/>
+            <e:data-type name="string"/>
          </e:attribute-value-template>
       </e:attribute>
       <e:attribute name="grouping-separator">
@@ -1299,7 +1405,7 @@
             <e:data-type name="language"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="order">
+      <e:attribute name="order" default="'ascending'">
          <e:attribute-value-template>
             <e:constant value="ascending"/>
             <e:constant value="descending"/>
@@ -1310,7 +1416,7 @@
             <e:data-type name="uri"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="stable">
+      <e:attribute name="stable" default="'yes'">
          <e:attribute-value-template>
             <e:data-type name="boolean"/>
          </e:attribute-value-template>
@@ -1358,12 +1464,6 @@
       <e:attribute name="select" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
-      <!--<e:attribute name="array">
-         <e:data-type name="expression"/>
-      </e:attribute>-->
-      <!--<e:attribute name="map">
-         <e:data-type name="expression"/>
-      </e:attribute>-->
       <e:attribute name="group-by" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
@@ -1376,10 +1476,13 @@
       <e:attribute name="group-ending-with" required="no">
          <e:data-type name="pattern"/>
       </e:attribute>
-      <e:attribute name="break-when" required="no">
+      <e:attribute name="split-when" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="composite">
+      <e:attribute name="merge-when" required="no">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="composite" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:attribute name="collation">
@@ -1426,10 +1529,10 @@
       <e:attribute name="streamable" required="no">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-accumulators">
+      <e:attribute name="use-accumulators" default="''">
          <e:data-type name="tokens"/>
       </e:attribute>
-      <e:attribute name="sort-before-merge" required="no">
+      <e:attribute name="sort-before-merge" required="no" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:attribute name="validation">
@@ -1456,7 +1559,7 @@
             <e:data-type name="language"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="order">
+      <e:attribute name="order" default="'ascending'">
          <e:attribute-value-template>
             <e:constant value="ascending"/>
             <e:constant value="descending"/>
@@ -1528,7 +1631,7 @@
             <e:data-type name="string"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="flags" required="no">
+      <e:attribute name="flags" required="no" default="''">
          <e:attribute-value-template>
             <e:data-type name="string"/>
          </e:attribute-value-template>
@@ -1544,6 +1647,9 @@
    </e:element-syntax>
 
    <e:element-syntax name="matching-substring">
+      <e:attribute name="select" required="no">
+         <e:data-type name="expression"/>
+      </e:attribute>
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
          <e:parent name="analyze-string"/>
@@ -1551,6 +1657,9 @@
    </e:element-syntax>
 
    <e:element-syntax name="non-matching-substring">
+      <e:attribute name="select" required="no">
+         <e:data-type name="expression"/>
+      </e:attribute>
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
          <e:parent name="analyze-string"/>
@@ -1566,10 +1675,10 @@
             <e:data-type name="uri"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="streamable">
+      <e:attribute name="streamable" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
-      <e:attribute name="use-accumulators">
+      <e:attribute name="use-accumulators" default="''">
          <e:data-type name="tokens"/>
       </e:attribute>
       <e:attribute name="validation">
@@ -1595,10 +1704,10 @@
       <e:attribute name="initial-value" required="yes">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="as">
+      <e:attribute name="as" default="'item()*'">
          <e:data-type name="sequence-type"/>
       </e:attribute>
-      <e:attribute name="streamable">
+      <e:attribute name="streamable" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:element name="accumulator-rule" repeat="one-or-more"/>
@@ -1613,12 +1722,15 @@
       <e:attribute name="match" required="yes">
          <e:data-type name="pattern"/>
       </e:attribute>
-      <e:attribute name="phase" required="no">
+      <e:attribute name="phase" required="no" default="'start'">
          <e:constant value="start"/>
          <e:constant value="end"/>
       </e:attribute>
       <e:attribute name="select" required="no">
          <e:data-type name="expression"/>
+      </e:attribute>
+      <e:attribute name="capture" required="no" default="'no'">
+         <e:data-type name="boolean" default="'no'"/>
       </e:attribute>
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
@@ -1639,7 +1751,7 @@
       <e:attribute name="use">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="composite">
+      <e:attribute name="composite" default="'no'">
          <e:data-type name="boolean"/>
       </e:attribute>
       <e:attribute name="collation" required="no">
@@ -1653,13 +1765,19 @@
       </e:allowed-parents>
    </e:element-syntax>
 
-   <!-- XPath Extensions -->
-
    <e:element-syntax name="map">
       <e:in-category name="instruction"/>
-      <e:attribute name="on-duplicates" required="no">
+      <e:attribute name="select">
          <e:data-type name="expression"/>
       </e:attribute>
+      <e:attribute name="duplicates" required="no" default="fn($a, $b) { error(xs:QName(err:XTDE3365)) }">
+         <e:data-type name="expression"/>
+      </e:attribute>
+      <!--<e:attribute name="ordered" default="no">
+         <e:attribute-value-template>
+            <e:data-type name="boolean"/>
+         </e:attribute-value-template>
+      </e:attribute>-->
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
          <e:parent-category name="sequence-constructor"/>
@@ -1679,14 +1797,31 @@
          <e:parent-category name="sequence-constructor"/>
       </e:allowed-parents>
    </e:element-syntax>
+    
+    <e:element-syntax name="record">
+        <e:in-category name="instruction"/>
+        <e:attribute name="xsl:as" default="'map(*)'">
+            <e:data-type name="item-type"/>
+        </e:attribute>
+        <e:attribute name="xsl:duplicates" required="no" default="fn($a, $b) { error(xs:QName(err:XTDE3365)) }">
+            <e:data-type name="expression"/>
+        </e:attribute>
+        <e:attribute name="*" required="yes">
+           <e:data-type name="expression"/>
+        </e:attribute>
+        <e:model name="sequence-constructor"/>
+        <e:allowed-parents>
+            <e:parent-category name="sequence-constructor"/>
+        </e:allowed-parents>
+    </e:element-syntax>
    
    <e:element-syntax name="array">
       <e:in-category name="instruction"/>
-      <e:attribute name="select" required="no">
+      <e:attribute name="for-each" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="composite" required="no">
-         <e:data-type name="boolean"/>
+      <e:attribute name="select" required="no">
+         <e:data-type name="expression"/>
       </e:attribute>
       <e:model name="sequence-constructor"/>
       <e:allowed-parents>
@@ -1696,7 +1831,7 @@
    
    <e:element-syntax name="array-member">
       <e:in-category name="instruction"/>
-      <e:attribute name="select">
+      <e:attribute name="select" required="no">
          <e:data-type name="expression"/>
       </e:attribute>
       <e:model name="sequence-constructor"/>
@@ -1704,7 +1839,7 @@
          <e:parent-category name="sequence-constructor"/>
       </e:allowed-parents>
    </e:element-syntax>
-
+   
    <!-- Diagnostics -->
 
    <e:element-syntax name="message">
@@ -1712,12 +1847,12 @@
       <e:attribute name="select">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="terminate">
+      <e:attribute name="terminate" default="'no'">
          <e:attribute-value-template>
             <e:data-type name="boolean"/>
          </e:attribute-value-template>
       </e:attribute>
-      <e:attribute name="error-code">
+      <e:attribute name="error-code" default="'Q{http://www.w3.org/2005/xqt-errors}XTMM9000'">
          <e:attribute-value-template>
             <e:data-type name="eqname"/>
          </e:attribute-value-template>
@@ -1736,7 +1871,7 @@
       <e:attribute name="select">
          <e:data-type name="expression"/>
       </e:attribute>
-      <e:attribute name="error-code">
+      <e:attribute name="error-code" default="'Q{http://www.w3.org/2005/xqt-errors}XTMM9001'">
          <e:attribute-value-template>
             <e:data-type name="eqname"/>
          </e:attribute-value-template>
@@ -1778,6 +1913,9 @@
          <e:attribute-value-template>
             <e:data-type name="uri"/>
          </e:attribute-value-template>
+      </e:attribute>
+      <e:attribute name="select">
+         <e:data-type name="expression"/>
       </e:attribute>
       <e:attribute name="validation">
          <e:constant value="strict"/>
@@ -1834,6 +1972,11 @@
             <e:data-type name="string"/>
          </e:attribute-value-template>
       </e:attribute>
+      <e:attribute name="escape-solidus">
+         <e:attribute-value-template>
+            <e:data-type name="boolean"/>
+         </e:attribute-value-template>
+      </e:attribute>
       <e:attribute name="escape-uri-attributes">
          <e:attribute-value-template>
             <e:data-type name="boolean"/>
@@ -1857,6 +2000,11 @@
       <e:attribute name="item-separator">
          <e:attribute-value-template>
             <e:data-type name="string"/>
+         </e:attribute-value-template>
+      </e:attribute>
+      <e:attribute name="json-lines">
+         <e:attribute-value-template>
+            <e:data-type name="boolean"/>
          </e:attribute-value-template>
       </e:attribute>
       <e:attribute name="json-node-output-method">
@@ -1961,6 +2109,9 @@
       <e:attribute name="encoding">
          <e:data-type name="string"/>
       </e:attribute>
+      <e:attribute name="escape-solidus">
+         <e:data-type name="boolean"/>
+      </e:attribute>
       <e:attribute name="escape-uri-attributes">
          <e:data-type name="boolean"/>
       </e:attribute>
@@ -1975,6 +2126,9 @@
       </e:attribute>
       <e:attribute name="item-separator">
          <e:data-type name="string"/>
+      </e:attribute>
+      <e:attribute name="json-lines">
+         <e:data-type name="boolean"/>
       </e:attribute>
       <e:attribute name="json-node-output-method">
          <e:constant value="xml"/>
@@ -2055,6 +2209,13 @@
       <e:allowed-parents>
          <e:parent name="character-map"/>
       </e:allowed-parents>
+   </e:element-syntax>
+   
+   <e:element-syntax name="note">
+      <e:attribute name="#any#" required="no">
+         <e:data-type name="string"/>
+      </e:attribute>
+      <e:model name="any"/>
    </e:element-syntax>
 
 </e:instructions>
