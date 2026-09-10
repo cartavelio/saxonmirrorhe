@@ -187,6 +187,8 @@
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
         is dropped.</p>
         
+        <p>In a try/catch expression, the variable <code>err:map</code> is available within the catch clause.</p>
+        
         <p>Variadic functions (syntax <code>declare %variadic function</code>) are implemented in XQuery.</p>
         
         <p>The second <code>$position</code> argument is available on function callbacks made by the functions
