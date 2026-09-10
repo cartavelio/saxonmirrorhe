@@ -3,6 +3,9 @@ import com.saxonica.build.csharp.*
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.java.JarFinder
 import com.saxonica.build.java.PreprocessSourcesTask
+import com.saxonica.build.AwsSigningResources
+import com.saxonica.build.UnsignedArtifactUploadTask
+import com.saxonica.build.SignedArtifactDownloadTask
 import org.gradle.api.attributes.Usage
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
@@ -483,6 +486,36 @@ tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
 }
 
 releaseArtifacts.outgoing.artifacts(artifacts.map { it.outputs.files })
+
+// ============================================================
+
+val signingResources = tasks.register<AwsSigningResources>("signingResources") {
+  region = "eu-west-2"
+  stackName = "SaxonicaCiCdStack"
+}
+
+val unsignedNugetPkgs = tasks.register<Sync>("unsignedNugetPkgs") {
+  inputs.files(nupkgBuildTask)
+  into(layout.buildDirectory.dir("unsignedNugetPkgs"))
+  from(nupkgBuildTask.map { it.nupkgFile.get() })
+}
+
+val uploadUnsignedNugetPkg = tasks.register<UnsignedArtifactUploadTask>("uploadUnsignedNugetPkg") {
+  inputDir = layout.projectDirectory.dir(unsignedNugetPkgs.map { it.destinationDir.toString() })
+  bucket = signingResources.map { it.codeSigningInputsBucket.get() }
+  queueUrl = signingResources.map { it.windowsCodeSigningInputsQueueUrl.get() }
+  region = signingResources.map { it.region.get() }
+  baseKeyPrefix = "inputs"
+  jobFileDir = layout.buildDirectory.dir("uploadNugetPkg")
+}
+
+val downloadSignedNugetPkg = tasks.register<SignedArtifactDownloadTask>("downloadSignedNugetPkg") {
+  outputDir = layout.buildDirectory.dir("signed-nuget")
+  bucket = signingResources.map { it.codeSigningOutputsBucket.get() }
+  queueUrl = signingResources.map { it.windowsCodeSigningOutputsQueueUrl.get() }
+  region = signingResources.map { it.region.get() }
+  jobFile = uploadUnsignedNugetPkg.map { it.jobFile.get() }
+}
 
 // ============================================================
 // Documentation tasks

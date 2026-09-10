@@ -314,7 +314,7 @@ abstract class DotNetCreateNupkg : DotNetImplementation() {
   val nupkgOutputDir: Provider<Directory> = dotnetversion.map { v -> projectLayout.buildDirectory.dir("net${v}/${configuration.get()}/nupkg").get() }
 
   @get:OutputFile
-  val nupkgFile: Provider<RegularFile> = nupkgOutputDir.map { it.file("${target.get()}.${version.get()}.nupkg") }
+  val nupkgFile: Provider<RegularFile> = nupkgOutputDir.map { it.file("${target.get()}-${edition.get().uppercase()}.${version.get()}.nupkg") }
 
   @TaskAction
   fun build() {
