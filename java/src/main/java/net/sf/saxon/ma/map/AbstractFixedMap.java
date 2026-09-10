@@ -60,7 +60,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
                     throw new XPathException("Duplicate key " + Err.depict(keyArray[i]) + " in map", "FOJS0003");
                 }
             }
-            return new FixedMap(keyArray, valueArray, index);
+            return new FixedMap(keyArray, valueArray, index, specVersion);
         }
 
         /**
@@ -120,7 +120,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
                 AtomicValue[] keyArray = keyList.toArray(new AtomicValue[0]);
                 GroundedValue[] valueArray = valueList.toArray(new GroundedValue[0]);
 
-                return new FixedMap(keyArray, valueArray, index);
+                return new FixedMap(keyArray, valueArray, index, specVersion);
 
             } else {
                 return getCompletedMapConfidently();
@@ -142,7 +142,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
             for (int i = 0; i < keyArray.length; i++) {
                 index.put(keyArray[i].asMapKey(specVersion), i);
             }
-            return new FixedMap(keyArray, valueArray, index);
+            return new FixedMap(keyArray, valueArray, index, specVersion);
         }
     }
 

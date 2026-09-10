@@ -4472,7 +4472,7 @@ public class XPathParser {
                         optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
                         optionsMap = optionsBuilder.getCompletedMap();
                     }
-                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
+                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
                         .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
                     result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }

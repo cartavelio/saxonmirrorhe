@@ -47,11 +47,12 @@ public class FixedMap extends AbstractFixedMap {
      * @param index  a hash map indexing the values
      */
 
-    protected FixedMap(AtomicValue[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
+    protected FixedMap(AtomicValue[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index, int specVersion) {
         assert keys.length == values.length;
         this.keyArray = keys;
         this.values = values;
         this.index = index;
+        setSpecVersion(specVersion);
     }
 
 

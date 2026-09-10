@@ -245,7 +245,7 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      * @return the hash code
      */
     public int hashCode() {
-        return value ? 0 : 1;
+        return value ? 0x1f2f3f4f : 0x1e2e3e4e;
     }
 
     /**
