@@ -40,11 +40,11 @@ public class Shape {
      * @param recordTypeDefinition - an instance of RecordTest, populated with a list of field names
      */
     public Shape(RecordTest recordTypeDefinition) {
-        this(unicodeStringArrayFromStringList((ArrayList) recordTypeDefinition.getFieldNames()));
+        this(unicodeStringArrayFromStringList((ArrayList<String>) recordTypeDefinition.getFieldNames()));
     }
 
     private static Twine8[] unicodeStringArrayFromStringList(ArrayList<String> stringList) {
-        List<Twine8> unicodeStringList = new ArrayList<Twine8>();
+        ArrayList<Twine8> unicodeStringList = new ArrayList<Twine8>();
         stringList.forEach((fieldName) -> {
             unicodeStringList.add(new Twine8(fieldName));
         });
