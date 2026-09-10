@@ -47,9 +47,6 @@ as their Java counterparts, with some exceptions. They are described in the foll
 
       <p>An introduction to the API for Saxon on .NET is provided at <a class="bodylink" href="dotnetapi">Saxon API for .NET</a>;
 full specifications are available in the <a href="/dotnetdoc" class="apilink">.NET API</a>.</p>
-
-      <p>For information about writing extension functions using .NET languages, see
-<a class="bodylink" href="/extensibility/dotnetextensions">Writing extension functions for .NET</a>.</p>
          
    <section id="dotnetapi" title="Saxon API for .NET">
       <h1>Saxon API for .NET</h1>
@@ -144,7 +141,7 @@ of document sources. It also contains a factory method <code>NewSchemaValidator(
          <a class="cslink" href="Saxon.Api.SchemaValidator">SchemaValidator</a>. The <code>SchemaValidator</code>, in turn, is used to validate a source document
 against the set of schema definitions held in the <code>SchemaManager</code>'s cache.</p>
 
-      <p>Finally, the API offers a class <a class="cslink" href="Saxon.Api.XmlDestination">XmlDestination</a> to define the possible ways of handling a document
+      <p>Finally, the API offers a class <a class="cslink" href="Saxon.Api.XdmDestination">XdmDestination</a> to define the possible ways of handling a document
 constructed as the output of a transformation, query, or validation episode. Various subtypes of <code>XdmDestination</code>
  allow such results to be serialized as XML (using either the Saxon serializer or an <code>XmlTextWriter</code>),
  or to be materialized as a Saxon <code>XdmNode</code> or as a DOM <code>XmlNode</code>.</p>
@@ -299,11 +296,11 @@ supplied with the .NET platform.</p>
       <p>Normal HTML elements (such as <code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, etc) are delivered
       as element nodes whose local name is in lower-case, with the XHTML namespace URI.</p>
    </section>
-   <section id="saxon-cs-extension-functions">
+   <section id="saxon-cs-extension-functions" title="Writing Extension Functions">
       <h1>Writing Extension Functions</h1>
       <p>Reflexive extension functions are not available in Saxon-CS.</p>
    </section>
-   <section id="saxon-extensions">
+   <section id="saxon-extensions" title="Built-in Extensions">
       <h1>Built-in Extensions</h1>
       <p>All the extension functions in the <code>saxon</code> namespace are available with the
       exception of <code>saxon:send-mail()</code>, <code>saxon:parse-dateTime()</code>, saxon:object-map...</p>
@@ -325,7 +322,7 @@ supplied with the .NET platform.</p>
       
       <p>The SQL extension is NOT available in Saxon-CS.</p>
    </section>
-   <section id="localization">
+   <section id="localization" title="Localization">
       <h1>Localization</h1>
       <p>Collation URIs for the Unicode Collation Algorithm are implemented using the ICU4N library, which is not as complete
       as its Java counterpart, ICU4J.</p>
@@ -334,7 +331,7 @@ supplied with the .NET platform.</p>
       
       <p>Localization of numbers and dates is not currently available for languages other than English.</p>
    </section>
-   <section id="restrictions">
+   <section id="restrictions" title="Restrictions">
       <h1>Restrictions</h1>
       
       <p>Absolute URIs with single-character scheme names (for example, <code>a:/x/y/z</code>) are not handled correctly. 
@@ -347,7 +344,7 @@ supplied with the .NET platform.</p>
       <h2>Restrictions and Changes Relative to Saxon-EE 10 on .NET</h2>
       
       <p>The only supported parser is the Microsoft System.Xml parser. (Saxon 10 on .NET also worked with
-      a port of Apache Xerces.) See <a href="xmlparsing"/>.</p>
+         a port of Apache Xerces.) See <a href="../xmlparsing" class="bodylink">XML Parsing in Saxon-CS</a>.</p>
       
       
       
