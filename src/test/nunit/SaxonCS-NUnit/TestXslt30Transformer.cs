@@ -2326,10 +2326,12 @@ namespace SaxonCS_NUnit {
             var rdr = new StringReader(xslt);
             XsltExecutable exec = xsltCompiler.Compile(rdr);
             Xslt30Transformer transf = exec.Load30();
-            XdmDestination dest = new XdmDestination();
+            StringWriter sw = new();
+            Serializer ser = processor.NewSerializer(sw);
             var stream = File.OpenRead(ConfigTest.DATA_DIR + "cirkev.xml");
 
-            transf.ApplyTemplates(stream, dest);
+            transf.ApplyTemplates(stream, ser);
+            Assert.AreEqual("<?xml version=\"1.0\" encoding=\"UTF-8\"?>10:00", sw.ToString());
         }
         
     }
