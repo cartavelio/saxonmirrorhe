@@ -26,7 +26,7 @@ import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
  */
 
 public final class AttributeDecl extends SchemaStructure
-        implements ComponentWithValueConstraint, UserSchemaComponent, SerializableSchemaComponent, SchemaDeclaration {
+        implements ComponentWithValueConstraint, UserSchemaComponent, SerializableSchemaComponent, IAttributeDecl {
 
     /**
      * In the case of a locally defined attribute declaration that is not part of a named attribute group,
@@ -343,16 +343,6 @@ public final class AttributeDecl extends SchemaStructure
     }
 
     /**
-     * Determine, in the case of an Element Declaration, whether there are type alternatives defined
-     *
-     * @return false for an attribute declaration
-     */
-    @Override
-    public boolean hasTypeAlternatives() {
-        return false;
-    }
-
-    /**
      * Check references from this component to other components
      *
      * @param compiler used for error reporting
@@ -465,27 +455,7 @@ public final class AttributeDecl extends SchemaStructure
                         getTargetNamespace().equals(NamespaceUri.SCHEMA) ||
                         getTargetNamespace().equals(NamespaceUri.SCHEMA_INSTANCE)));
     }
-
-    /**
-     * Determine, in the case of an Element Declaration, whether it is nillable. For an Attribute declaration,
-     * always return false;
-     */
-
-    @Override
-    public boolean isNillable() {
-        return false;
-    }
-
-    /**
-     * Determine, in the case of an Element Declaration, whether it is nillable. For an Attribute declaration,
-     * always return false;
-     */
-
-    @Override
-    public boolean isAbstract() {
-        return false;
-    }
-
+    
     /**
      * Serialize the schema component
      */

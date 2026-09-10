@@ -918,7 +918,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
         StructuredQName nn = new StructuredQName(name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
         Schema schema = loadSchema(schemaURI);
-        SchemaDeclaration attributeDecl = schema.getAttributeDecl(nn);
+        IAttributeDecl attributeDecl = schema.getAttributeDecl(nn);
 
         if (attributeDecl == null) {
             throw new XQException("Attribute declaration " + nn.getDisplayName() + " not found in schema");
@@ -938,7 +938,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         Configuration config = getConfiguration();
         int fp = getFingerprint(nodename);
         Schema schema = loadSchema(schemaURI);
-        SchemaDeclaration elementDecl = schema.getElementDecl(fp);
+        IElementDecl elementDecl = schema.getElementDecl(fp);
         if (elementDecl == null) {
             throw new XQException("Element declaration " + nodename + " not found in schema");
         }

@@ -201,15 +201,8 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 return false;
             }
         }
-        if (disallowsDefinedNames) {
-            if (fingerprint == -1) {
-                fingerprint = name.obtainFingerprint(namePool);
-            }
-            if ((isElement ?
-                         schema.getElementDecl(fingerprint) :
-                         schema.getAttributeDecl(fingerprint)) != null) {
-                return false;
-            }
+        if (disallowsDefinedNames && isDefined(schema, isElement, name)) {
+            return false;
         }
         if (parentType != null && disallowsDefinedSiblings) {
             IntHashSet siblings = new IntHashSet();
@@ -226,6 +219,14 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
             return allowedNamespaces.contains(name.getNamespaceUri());
         } else {
             return disallowedNamespaces == null || !disallowedNamespaces.contains(name.getNamespaceUri());
+        }
+    }
+
+    private boolean isDefined(Schema schema, boolean isElement, NodeName name) {
+        if (isElement) {
+            return schema.getElementDecl(name.getStructuredQName()) != null;
+        } else {
+            return schema.getAttributeDecl(name.getStructuredQName()) != null;
         }
     }
 
@@ -247,10 +248,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (disallowedQNames != null && disallowedQNames.contains(fingerprint)) {
             return "The name is in the list of disallowed QNames for the wildcard. ";
         }
-        if (disallowsDefinedNames &&
-                (isElement ?
-                         schema.getElementDecl(fingerprint) :
-                         schema.getAttributeDecl(fingerprint)) != null) {
+        if (disallowsDefinedNames && isDefined(schema, isElement, nn)) {
             return "There is a global " + (isElement ? "element" : "attribute") +
                     " declaration for the name, and the wildcard specifies notQName='##defined'. ";
         }

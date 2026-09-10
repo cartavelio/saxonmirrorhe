@@ -27,7 +27,7 @@ import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
  * declaration, or a local element declaration.
  */
 public class ElementDecl extends SchemaStructure
-        implements UserSchemaComponent, SerializableSchemaComponent, ComponentWithValueConstraint, SchemaDeclaration, Term {
+        implements UserSchemaComponent, SerializableSchemaComponent, ComponentWithValueConstraint, IElementDecl, Term {
 
     /**
      * The block attribute for this element definition.

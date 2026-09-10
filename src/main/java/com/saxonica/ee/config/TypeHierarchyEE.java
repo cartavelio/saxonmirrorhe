@@ -60,7 +60,7 @@ public class TypeHierarchyEE extends TypeHierarchy {
             if (t1 instanceof SchemaElementTest && on2.isPresent() && on2.get().size() == 1) {
                 IntIterator ii2 = on2.get().iterator();
                 int name2 = ii2.hasNext() ? ii2.next() : -1;
-                SchemaDeclaration decl2 = ((SchemaElementTest) t1).getSchema().getElementDecl(name2);
+                IElementDecl decl2 = ((SchemaElementTest) t1).getSchema().getElementDecl(name2);
                 if (decl2 != null) {
                     s1 = decl2.getType();
                 }
@@ -72,7 +72,7 @@ public class TypeHierarchyEE extends TypeHierarchy {
             if (t2 instanceof SchemaElementTest && on1.isPresent() && on1.get().size() == 1) {
                 IntIterator ii1 = on1.get().iterator();
                 int name1 = ii1.hasNext() ? ii1.next() : -1;
-                SchemaDeclaration decl1 = ((SchemaElementTest) t2).getSchema().getElementDecl(name1);
+                IElementDecl decl1 = ((SchemaElementTest) t2).getSchema().getElementDecl(name1);
                 if (decl1 != null) {
                     s2 = decl1.getType();
                 }
