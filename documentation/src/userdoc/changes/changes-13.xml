@@ -813,12 +813,12 @@ TODO: rethink redefines and override
             <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
             <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
-            <li><p>PR1068 - The SaxonCS implementation of fn:graphemes does not handle all strings correctly. This
+            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This
             is due to limitations in the ICU4N library.</p></li>
             <li><p>PR2372 - Serializing processing instructions with the HTML serialization method.</p></li>
             <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
             <li><p>PR2387 - Handling of NaN and Infinity by the JSON serialization method.</p></li>
-            <li><p>The new EXPath file:list-roots function is not yet implemented.</p></li>
+            <li><p>The new EXPath <code>file:list-roots</code> function is not yet implemented.</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
@@ -828,6 +828,13 @@ TODO: rethink redefines and override
         <p>TODO: Note in documentation that we have included the Blake3 hashing algorithm 
             Adapted from the ISC-licensed O(1) Cryptography library by Matt Sicker and ported from the reference public domain
             implementation by Jack O'Connor. (See Blake3 java module for details)</p>
+        
+        <p>At the time of first release of Saxon 13, there is an inconsistency in the draft 4.0 specifications regarding
+        the processing of arrays using template rules. The <code>array:members</code> function represents each array member
+        as a "value record" (a map with a single entry having the key "value"), while the <code>xsl:array-member</code> instruction
+        represents an array member as a zero-arity function item. The code in Saxon attempts to resolve this by accepting
+        both representations and converting where appropriate; however, this situation is unstable and the specification
+        can be expected to change in this area.</p>
     
     </category>
     
