@@ -1430,7 +1430,7 @@ function run_test_case($testcase, $env, $path)
                                 return "PASS";
 
 
-                           /* $xsltproc->exceptionClear();
+                           /*
                             $init_template = $testcase->{'test'}->{'initial-template'};
                             echo "Test data=" . $test;
                             $executable = $xsltproc->compileFromFile($test);

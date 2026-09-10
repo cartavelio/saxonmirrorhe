@@ -260,8 +260,6 @@ function exampleXMLFilterChain2($saxonProc, $proc, $xmlFile, $xsl1File, $xsl2Fil
             //$errCode = $proc->getErrorCode();
             $errMessage = $executable2->getErrorMessage();
             echo 'Expected error:  Message=' . $errMessage;
-
-            $executable2->exceptionClear();
         }
         $executable2->clearParameters();
 

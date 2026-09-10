@@ -20,7 +20,6 @@ function exampleSimple1($xpathEngine, $xmlfile)
     } else {
         echo "Result is null";
     }
-    $xpathEngine->exceptionClear();
     $xpathEngine->clearParameters();
     $xpathEngine->clearProperties();    
 }
