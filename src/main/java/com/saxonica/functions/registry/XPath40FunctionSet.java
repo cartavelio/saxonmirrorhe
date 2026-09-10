@@ -2,6 +2,7 @@ package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
 import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
@@ -12,6 +13,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 4.0
@@ -49,6 +51,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_NODE},
                 SequenceType.NODE_SEQUENCE);
 
+        // TODO: superseded by "every"
+        register("all", 1, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
+
+        // TODO: superseded by "every"
+        register("all", 2, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
+                .arg(1, predicate, ONE, null));
 
         register("all-equal", 1, e -> e.populate(AllEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
@@ -85,7 +95,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
         register("collation-key", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BASE64_BINARY,
-                                                     OPT, DCOLL)
+                                                     ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
@@ -141,6 +151,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
+
+        register("error", 2, e -> e.populate(Error::new, Type.ITEM_TYPE, OPT, LATE)
+                .arg(0, BuiltInAtomicType.QNAME, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("error", 3, e -> e.populate(Error::new, Type.ITEM_TYPE, OPT, LATE)
+                .arg(0, BuiltInAtomicType.QNAME, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                .arg(2, Type.ITEM_TYPE, STAR, null));
 
         register("every", 1, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
@@ -233,6 +252,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
 
+        register("matches", 3, e -> e.populate(Matches::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, BuiltInAtomicType.STRING, OPT, null));
+
         register("max", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, OPT, BASE | UO | CARD0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
@@ -246,7 +270,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 SequenceType.ANY_SEQUENCE);
 
         register("op", 1, e -> e.populate(OpFn::new, operatorType, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, STAR, null));
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
 
         register("parcel", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
@@ -274,7 +298,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_BOOLEAN);
 
-        register("partition", 2, e -> e.populate(Partition::new, ArrayItemType.ANY_ARRAY_TYPE, STAR, 0)
+        register("partition", 2, e -> e.populate(Partition::new, new ArrayItemType(SequenceType.SINGLE_ITEM), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | INS, null)
                 .arg(1, partitionFunctionType, ONE | INS, null));
 
@@ -289,9 +313,19 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY)
                 .arg(1, BuiltInAtomicType.INTEGER, STAR, null));
 
+        register("replace", 4, e -> e.populate(Replace::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, BuiltInAtomicType.STRING, ONE, null)
+                .arg(3, BuiltInAtomicType.STRING, OPT, null));
+
         register("replicate", 2, e -> e.populate(Replicate::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
+                .arg(1, BuiltInAtomicType.NON_NEGATIVE_INTEGER, ONE, null));
+
+        register("resolve-uri", 2, e -> e.populate(ResolveURI::new, BuiltInAtomicType.ANY_URI, OPT, CARD0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
         register("slice", 1, 4, e -> e.populate(Slice::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
@@ -320,6 +354,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
 
+        register("subsequence", 3, e -> e.populate(Subsequence_3::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
+                .arg(0, Type.ITEM_TYPE, STAR | TRA, EMPTY)
+                .arg(1, NumericType.getInstance(), ONE, null)
+                .arg(2, NumericType.getInstance(), OPT, null));
+
         register("substring-after", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.STRING, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
@@ -330,7 +369,20 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
-        register("transitive-closure", 1, 3, e -> e.populate(TransitiveClosure::new, TransitiveClosure.resultType, STAR, 0)
+        register("tokenize", 2, e -> e.populate(RegexFunctionSansFlags::new, BuiltInAtomicType.STRING, STAR, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("tokenize", 3, e -> e.populate(Tokenize_3::new, BuiltInAtomicType.STRING, STAR, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                .arg(2, BuiltInAtomicType.STRING, OPT, null));
+
+        register("trace", 2, e -> e.populate(Trace::new, Type.ITEM_TYPE, STAR, AS_ARG0 | LATE)
+                .arg(0, Type.ITEM_TYPE, STAR | TRA, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("transitive-closure", 1, 3, e -> e.populate(TransitiveClosure::new, TransitiveClosure.resultType, ONE, 0)
                 .arg(0, navigator, ONE, null)
                 .arg(1, BuiltInAtomicType.NON_NEGATIVE_INTEGER, OPT, null)
                 .arg(2, BuiltInAtomicType.POSITIVE_INTEGER, OPT, null));
@@ -340,6 +392,20 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("unparcel", 1, e -> e.populate(UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));
+
+        register("unparsed-text", 2, e -> e.populate(UnparsedText::new, BuiltInAtomicType.STRING, OPT, BASE | LATE)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("unparsed-text-available", 2, e -> e.populate(UnparsedTextAvailable::new,
+                                                               BuiltInAtomicType.BOOLEAN, ONE, BASE | LATE)
+                .arg(0, BuiltInAtomicType.STRING, OPT, BooleanValue.FALSE)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("unparsed-text-lines", 2, e -> e.populate(UnparsedTextLines::new, BuiltInAtomicType.STRING, STAR, BASE | LATE)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
 
         register("xdm-to-json", 1, e -> e.populate(XdmToJsonFn::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));

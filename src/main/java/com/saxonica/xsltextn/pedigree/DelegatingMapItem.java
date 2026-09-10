@@ -5,7 +5,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
@@ -71,7 +71,7 @@ public abstract class DelegatingMapItem extends MapItem {
     }
 
     @Override
-    public boolean conforms(AtomicType keyType, SequenceType valueType, TypeHierarchy th) {
+    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
         return base.conforms(keyType, valueType, th);
     }
 

@@ -759,7 +759,7 @@ public class ExperimentalXPathCompiler {
                     result.initialPut("v", contentMap);
                 }
             } else if (primary instanceof MapType) {
-                AtomicType keyType = ((MapType) primary).getKeyType();
+                PlainType keyType = ((MapType) primary).getKeyType();
                 if (keyType != BuiltInAtomicType.ANY_ATOMIC) {
                     MapItem keyMap = makeMap(new SequenceType(keyType, StaticProperty.EXACTLY_ONE));
                     result.initialPut("k", keyMap);
