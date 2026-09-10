@@ -86,15 +86,15 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         alwaysOff.add("feature/simple-uca-fallback"); // off for JS1, on for JS2
         alwaysOff.add("feature/advanced-uca-fallback");
 
-        needsEE.add("languages_for_numbering");
+        //needsEE.add("languages_for_numbering");
         alwaysOff.add("feature/streaming");
         alwaysOff.add("feature/schema_aware");
-        //needsEE.add("feature/Saxon-PE");
-        //needsEE.add("feature/Saxon-EE");
+        alwaysOn.add("feature/Saxon-PE");
+        alwaysOn.add("feature/Saxon-EE");
         //needsEE.add("feature/XSD_1.1");
         alwaysOn.add("feature/XPath_3.1");
         alwaysOn.add("feature/dynamic_evaluation");
-        needsEE.add("feature/xquery_invocation");
+        alwaysOff.add("feature/xquery_invocation");
 
         alwaysOff.add("detect_accumulator_cycles");
     }
