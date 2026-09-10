@@ -112,6 +112,11 @@ public class Serializer extends AbstractDestination {
         BYTE_ORDER_MARK(SaxonOutputKeys.BYTE_ORDER_MARK),
 
         /**
+         * Set to "yes" or "no" to indicate whether a byte order mark is to be written
+         */
+        CANONICAL(SaxonOutputKeys.CANONICAL),
+
+        /**
          * Space-separated list of QNames (in Clark form or EQName form) of elements
          * whose content is to be wrapped in CDATA sections
          */
@@ -396,11 +401,15 @@ public class Serializer extends AbstractDestination {
         //#if CSHARP == true
         propName = switch(prop) {
             case ALLOW_DUPLICATE_NAMES -> SaxonOutputKeys.ALLOW_DUPLICATE_NAMES;
+            case BUILD_TREE -> SaxonOutputKeys.BUILD_TREE;
+            case BYTE_ORDER_MARK -> SaxonOutputKeys.BYTE_ORDER_MARK;
+            case CANONICAL -> SaxonOutputKeys.BYTE_ORDER_MARK;
             case CDATA_SECTION_ELEMENTS -> OutputKeys.CDATA_SECTION_ELEMENTS;
             case DOCTYPE_PUBLIC -> OutputKeys.DOCTYPE_PUBLIC;
             case DOCTYPE_SYSTEM -> OutputKeys.DOCTYPE_SYSTEM;
             case ENCODING -> OutputKeys.ENCODING;
             case ESCAPE_SOLIDUS -> SaxonOutputKeys.ESCAPE_SOLIDUS;
+            case ESCAPE_URI_ATTRIBUTES -> SaxonOutputKeys.ESCAPE_URI_ATTRIBUTES;
             case HTML_VERSION -> SaxonOutputKeys.HTML_VERSION;
             case INCLUDE_CONTENT_TYPE -> SaxonOutputKeys.INCLUDE_CONTENT_TYPE;
             case INDENT -> OutputKeys.INDENT;
@@ -422,12 +431,17 @@ public class Serializer extends AbstractDestination {
             case SAXON_CHARACTER_REPRESENTATION -> SaxonOutputKeys.CHARACTER_REPRESENTATION;
             case SAXON_CONDITIONAL_CDATA -> SaxonOutputKeys.CONDITIONAL_CDATA;
             case SAXON_DOUBLE_SPACE -> SaxonOutputKeys.DOUBLE_SPACE;
+            case SAXON_INDENT_SPACES -> SaxonOutputKeys.INDENT_SPACES;
             case SAXON_INTERNAL_DTD_SUBSET -> SaxonOutputKeys.INTERNAL_DTD_SUBSET;
             case SAXON_LINE_LENGTH -> SaxonOutputKeys.LINE_LENGTH;
             case SAXON_NEWLINE -> SaxonOutputKeys.NEWLINE;
             case SAXON_PROPERTY_ORDER -> SaxonOutputKeys.PROPERTY_ORDER;
+            case SAXON_RECOGNIZE_BINARY -> SaxonOutputKeys.RECOGNIZE_BINARY;
+            case SAXON_REQUIRE_WELL_FORMED -> SaxonOutputKeys.REQUIRE_WELL_FORMED;
             case SAXON_SINGLE_QUOTES -> SaxonOutputKeys.SINGLE_QUOTES;
-            default -> "*unknown serialization property";
+            case SAXON_SPEC_VERSION -> SaxonOutputKeys.SPEC_VERSION;
+            case SAXON_WRAP -> SaxonOutputKeys.WRAP;
+            default -> "*unknown serialization property " + prop;
         };
         //#endif
         //#if CSHARP == false

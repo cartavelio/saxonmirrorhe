@@ -31,6 +31,12 @@ namespace Saxon.Api {
         public static readonly QName METHOD =
             new QName("", "method");
 
+        /// <summary>QName identifying the serialization parameter "allow-duplicate-names".
+        /// The value is the string "yes" or "no".</summary>
+
+        public static readonly QName ALLOW_DUPLICATE_NAMES =
+            new QName("", "allow-duplicate-names");
+        
         /// <summary>QName identifying the serialization parameter "byte-order-mark".
         /// The value is the string "yes" or "no".</summary>
 
@@ -161,7 +167,7 @@ namespace Saxon.Api {
         /// instructions hex and b64 to be recognized containing hexBinary or base64 data respectively.
         /// </summary>
         public static readonly QName SAXON_RECOGNIZE_BINARY =
-            new QName("", "saxon:recognize-binary");
+            new QName(SAXON, "saxon:recognize-binary");
 
         /// <summary>QName identifying the serialization parameter "saxon:indent-spaces". The value
         /// is an integer (represented as a string) indicating the amount of indentation required.
@@ -176,7 +182,7 @@ namespace Saxon.Api {
         /// length of lines when indenting.Default is 80.
         /// </summary>
         public static readonly QName SAXON_LINE_LENGTH =
-            new QName("", "saxon:line-length");
+            new QName(SAXON, "saxon:line-length");
 
 
         /// <summary>
@@ -186,13 +192,13 @@ namespace Saxon.Api {
         /// by namespace, then by local name).
         /// </summary>
         public static readonly QName SAXON_ATTRIBUTE_ORDER =
-            new QName("", "saxon:attribute-order");
+            new QName(SAXON, "saxon:attribute-order");
 
         /// <summary>
         ///  Saxon extension: request canonical XML output.
         /// </summary>
         public static readonly QName SAXON_CANONICAL =
-            new QName("", "saxon:canonical");
+            new QName(SAXON, "saxon:canonical");
 
         /// <summary>
         /// Saxon extension: set to any string. Indicates the sequence of characters used to represent
@@ -200,15 +206,19 @@ namespace Saxon.Api {
         /// methods that use indentation.
         /// </summary>
         public static readonly QName SAXON_NEWLINE =
-            new QName("", "saxon:newline");
+            new QName(SAXON, "saxon:newline");
 
 
         /// <summary>
         /// Saxon extension for internal use: used in XSLT to tell the serializer whether the
         /// stylesheet used version="1.0" or version = "2.0"
         /// </summary>
-        public static readonly QName SAXON_STYLESHEET_VERSION =
-            new QName("", "saxon:stylesheet-version");
+        /// <remarks>
+        /// Replaces SAXON_STYLESHEET_VERSION in earlier releases
+        /// </remarks>
+        /// 
+        public static readonly QName SAXON_SPEC_VERSION =
+            new QName(SAXON, "saxon:spec-version");
 
         /// <summary>QName identifying the serialization parameter "saxon:double-space". The value of this 
         /// parameter is given as a space-separated list of expanded QNames in Clark notation, that is 
@@ -245,7 +255,7 @@ namespace Saxon.Api {
         /// available for events in this output stream
         /// </summary>
         public static readonly QName SUPPLY_SOURCE_LOCATOR =
-            new QName("", "supply-source-locator");
+            new QName(SAXON, "supply-source-locator");
 
 
         /// <summary>
@@ -253,7 +263,7 @@ namespace Saxon.Api {
         /// such that each item in the result sequence is enclosed in an element indicating its type
         /// </summary>
         public static readonly QName SAXON_WRAP =
-            new QName("", "", "wrap-result-sequence");
+            new QName(SAXON, "wrap-result-sequence");
 
         /// <summary>Create a Serializer</summary>
 

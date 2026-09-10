@@ -950,6 +950,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 int part = 0;
 
                 for (Pattern subPattern : subPatterns) {
+                    Pattern subPattern2 = subPattern;
                     int seq = mgr.allocateSequenceNumber();
 
                     TemplateRule rule = getConfiguration().makeTemplateRule();
@@ -958,17 +959,14 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     // Adapt the pattern if the mode has @typed=strict|lax
                     String typed = (String)mode.getActivePart().getPropertyValue("typed");
                     if ("strict".equals(typed) || "lax".equals(typed)) {
-                        Pattern localPattern2;
                         try {
-                            localPattern2 = subPattern.convertToTypedPattern(typed);
+                            subPattern2 = subPattern.convertToTypedPattern(typed);
                         } catch (XPathException e) {
                             throw e.maybeWithLocation(this);
                         }
-                        if (localPattern2 != subPattern) {
-                            ExpressionTool.copyLocationInfo(match, localPattern2);
-                            localPattern2.setOriginalText(match.toString());
-                            //localPattern2 = localPattern2.typeCheck(visitor, info);
-                            subPattern = localPattern2;
+                        if (subPattern2 != subPattern) {
+                            ExpressionTool.copyLocationInfo(match, subPattern2);
+                            subPattern2.setOriginalText(match.toString());
                         }
                     }
 
@@ -976,13 +974,13 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     // Copy the match pattern: in the case where a template rule belongs to multiple modes,
                     // the binding vector for any references to external functions or variables belongs
                     // to the mode, and the slot numbers for these references will vary from one mode to another.
-                    Pattern subPatternCopy = subPattern.copy(new RebindingMap());
-                    rule.setMatchPattern(subPatternCopy);
+                    subPattern2 = subPattern2.copy(new RebindingMap());
+                    rule.setMatchPattern(subPattern2);
                     compiledTemplateRules.add(rule);
 
                     if (mode.isDeclaredStreamable()) {
                         rule.setDeclaredStreamable(true);
-                        if (!subPatternCopy.isMotionless()) {
+                        if (!subPattern2.isMotionless()) {
                             boolean fallback = getConfiguration().getBooleanProperty(Feature.STREAMING_FALLBACK);
                             String message = "Template rule is declared streamable but the match pattern is not motionless";
                             if (fallback) {
@@ -1053,7 +1051,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 //                            }
 
                             double prio = prioritySpecified ? priority : Double.NaN;
-                            mgr.registerRule(subPatternCopy, rule, mode, module, prio, seq, part++);
+                            mgr.registerRule(subPattern2, rule, mode, module, prio, seq, part++);
 
 //                        }
 //                    }
