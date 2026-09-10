@@ -73,7 +73,6 @@ public class ImmutableArrayItem extends AbstractArrayItem {
 
     /**
      * Get the number of members in the array
-     * <p>
      * <p>Note: the {@link #getLength() method always returns 1, because an array is an item}</p>
      *
      * @return the number of members in this array.

@@ -26,7 +26,6 @@ import java.net.URISyntaxException;
 /**
  * Default implementation of the CollectionFinder interface. The standard CollectionFinder recognizes four
  * types of collection:
- * <p>
  * <ol>
  *     <li>Any URI may be explicitly registered and associated with an instance of {@link ResourceCollection}</li>
  *     <li>If the file: URI scheme is used, and the relevant file identifies a directory, the directory

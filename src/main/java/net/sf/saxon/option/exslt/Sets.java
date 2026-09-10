@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
 
 /**
  * This class implements extension functions in the
- * http://exslt.org/sets namespace. <p>
+ * http://exslt.org/sets namespace.
  */
 
 public abstract class Sets {

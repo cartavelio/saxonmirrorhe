@@ -31,7 +31,6 @@ public class RawResult implements Result {
 
     /**
      * Set the system identifier for this Result.
-     * <p>
      * <p>If the Result is not to be written to a file, the system identifier is optional.
      * The application may still want to provide one, however, for use in error messages
      * and warnings, or to resolve relative output identifiers.</p>
