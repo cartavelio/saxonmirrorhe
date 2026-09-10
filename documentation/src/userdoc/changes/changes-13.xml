@@ -122,6 +122,17 @@ TODO: rethink redefines and override
  
     </category>-->
     
+    <category name="xpath40">
+        <p>Support for new XPath 4.0 types by default.  See:</p>
+        <ul>
+            <li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
+            <li><p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a></p></li>
+            <li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
+            <li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
+            <li><p><a class="bodylink" href="/expressions/type-system/type-aliases">Type aliases</a></p></li>
+        </ul>             
+    </category>
+    
     <!--<category name="functions31">
 
  
