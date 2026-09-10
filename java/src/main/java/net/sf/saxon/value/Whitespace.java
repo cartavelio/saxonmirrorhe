@@ -393,7 +393,7 @@ public class Whitespace {
                 break;
             }
         }
-        if (firstNonWhite == 0 && lastNonWhite == in.length()) {
+        if (firstNonWhite == 0 && lastNonWhite + 1 == in.length()) {
             // No leading or trailing whitespace
             return in;
         }
