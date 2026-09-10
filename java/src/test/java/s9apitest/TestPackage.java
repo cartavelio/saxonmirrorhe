@@ -290,6 +290,7 @@ public class TestPackage {
         try {
             Processor processor1 = new Processor(true);
             XsltCompiler compiler = processor1.newXsltCompiler();
+            compiler.setJustInTimeCompilation(false);
             compiler.setTargetEdition("HE");
             // Choose a stylesheet that Saxon-EE will optimize
             XsltExecutable top = compiler.compile(
