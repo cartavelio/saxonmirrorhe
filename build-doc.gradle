@@ -526,13 +526,14 @@ task doc_ConfigFileDoc(
 
 task gen_doc_icu_uca(
   type: JavaExec,
-  dependsOn: ["copy_userdoc_sources"],
+  dependsOn: ["copy_userdoc_sources", "eejJar"],
   description: "Generate the ICU/UCA documentation"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/userdoc")
   inputs.files fileTree(dir: "${projectDir}/tools/docs/userdoc")
   outputs.files fileTree(dir: "${buildDir}/userdoc/src/extensibility")
-  classpath = configurations.documentation
+  classpath = configurations.samples \
+        + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
   mainClass = "com.saxonica.Transform"
   args "-it:go",
     "-s:${projectDir}/src/userdoc/catalog.xml",

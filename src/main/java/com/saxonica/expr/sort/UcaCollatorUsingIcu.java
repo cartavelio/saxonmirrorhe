@@ -6,6 +6,7 @@ import com.ibm.icu.text.Collator;
 import com.ibm.icu.text.RuleBasedCollator;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.VersionInfo;
+import com.saxonica.config.ICULibrary;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.CollationMatchKey;
 import net.sf.saxon.lib.SubstringMatcher;
@@ -80,22 +81,24 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
         return uca;
     }
 
-//    /**
-//     * Return the locales supported in this version of ICU
-//     * Note that with Java 6 this method has been known to throw an array index exception from RuleBasedCollator,
-//     * With Java 7 this performs correctly and getAvailableLocales() does not appear to be
-//     * invoked from any of the UCA or numbering support.
-//     *
-//     * @return The language tags and display names separated by semicolon
-//     */
-//    public static String[] getLocales() {
-//        ArrayList<String> locales = new ArrayList<>();
-//        Locale[] availableLocales = RuleBasedCollator.getAvailableLocales();
-//        for (Locale l : availableLocales) {
-//            locales.add(ICULibrary.getLanguageTag(l) + ";" + l.getDisplayName());
-//        }
-//        return locales.toArray(new String[0]);
-//    }
+    //#if CSHARP==false
+    /**
+     * Return the locales supported in this version of ICU
+     * Note that with Java 6 this method has been known to throw an array index exception from RuleBasedCollator,
+     * With Java 7 this performs correctly and getAvailableLocales() does not appear to be
+     * invoked from any of the UCA or numbering support.
+     *
+     * @return The language tags and display names separated by semicolon
+     */
+    public static String[] getLocales() {
+        ArrayList<String> locales = new ArrayList<>();
+        Locale[] availableLocales = RuleBasedCollator.getAvailableLocales();
+        for (Locale l : availableLocales) {
+            locales.add(ICULibrary.getLanguageTag(l) + ";" + l.getDisplayName());
+        }
+        return locales.toArray(new String[0]);
+    }
+    //#endif
 
     private void error(String field, String allowed) throws XPathException {
         error("value of " + field + " must be " + allowed);
