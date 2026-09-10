@@ -5,7 +5,7 @@ using Saxon.Impl.XDoc;
 
 namespace Saxon.Api {
     /// <summary>
-    /// A <c>LinqDestination</c> represents an <c>XDocument</c> that is constructed to hold the
+    /// A <c>LinqDestination</c> represents an <c>System.Xml.Linq.XDocument</c> that is constructed to hold the
     /// output of a query or transformation.
     /// </summary>
     /// <remarks>
@@ -56,7 +56,7 @@ namespace Saxon.Api {
         /// node or an element node, this method returns the <c>OwnerDocument</c> property of 
         /// that node.</remarks>
 
-        public XDocument XDocument => builder.getDocumentNode();
+        public System.Xml.Linq.XDocument XDocument => builder.getDocumentNode();
 
 
         /// <summary>
