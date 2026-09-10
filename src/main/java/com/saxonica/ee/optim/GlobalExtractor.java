@@ -53,7 +53,7 @@ public class GlobalExtractor {
      * the cost of evaluating the expression. The method has the side-effect of updating the
      * contents of the variable "ineligibles".
      * @param expr the expression to be assessed
-     * @param forStreaming
+     * @param forStreaming true if we are optimizing for streamed execution
      * @return an estimate of the cost.
      */
 
@@ -71,14 +71,7 @@ public class GlobalExtractor {
             markSubtreeIneligible(expr);
             return 100;
         }
-//        if (expr.getParentExpression() instanceof Choose) {
-//            Operand o = ExpressionTool.findOperand(expr.getParentExpression(), expr);
-//            assert (o != null);
-//            if (o.isInChoiceGroup()) {
-//                markSubtreeIneligible(expr);
-//                return 100;
-//            }
-//        }
+
         double cost = expr.getCost();
         for (Operand o : expr.operands()) {
             double subcost = markIneligibleExpressions(o.getChildExpression(), forStreaming);
@@ -95,8 +88,9 @@ public class GlobalExtractor {
     private void markAncestorsIneligible(Expression expr) {
         Expression parent = expr;
         while (parent != null) {
-            if (ineligibles.get(parent) == null) {
-                ineligibles.put(parent, "this");
+            String prev = ineligibles.putIfAbsent(parent, "this");
+            if (prev != null) {
+                return;
             }
             parent = parent.getParentExpression();
         }
