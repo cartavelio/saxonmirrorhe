@@ -16,7 +16,10 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerRange;
+import net.sf.saxon.value.MemoClosure;
 
 /**
  * An Evaluator evaluates an expression to return a sequence
@@ -331,12 +334,14 @@ public abstract class Evaluator {
                     ZenoSequence chain = new ZenoSequence();
                     for (Operand o : children) {
                         Expression child = o.getChildExpression();
-                        if (Cardinality.allowsMany(child.getCardinality())) {
-                            chain.appendSequence(SequenceTool.toGroundedValue(child.iterate(context)));
+                        if (child instanceof VariableReference) {
+                            GroundedValue seq = ((VariableReference)child).evaluateVariable(context).materialize();
+                            chain = chain.appendSequence(seq);
                         } else {
-                            Item j = child.evaluateItem(context);
-                            if (j != null) {
-                                chain.append(j);
+                            SequenceIterator iter = child.iterate(context);
+                            Item item;
+                            while ((item = iter.next()) != null) {
+                                chain = chain.append(item);
                             }
                         }
                     }

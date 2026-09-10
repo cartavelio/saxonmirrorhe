@@ -9,6 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.SingletonIntersectExpression;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -184,12 +185,12 @@ public interface GroundedValue extends Sequence {
      */
 
     default GroundedValue concatenate(GroundedValue... others) {
-        ZenoSequence chain = new ZenoSequence();
-        chain.appendSequence(this);
-        for (GroundedValue seq : others) {
-            chain.appendSequence(seq);
+        ZenoChain<Item> chain = new ZenoChain<>();
+        chain = chain.addAll(asIterable());
+        for (GroundedValue val : others) {
+            chain = chain.addAll(val.asIterable());
         }
-        return chain;
+        return new ZenoSequence(chain);
     }
 }
 

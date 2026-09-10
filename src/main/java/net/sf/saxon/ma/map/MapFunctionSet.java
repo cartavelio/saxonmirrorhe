@@ -376,7 +376,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 Sequence seq = dynamicCall(fn, context, new Sequence[]{pair.key, pair.value});
                 GroundedValue val = seq.materialize();
                 if (val.getLength() > 0) {
-                    results.appendSequence(val);
+                    results = results.appendSequence(val);
                 }
             }
             return results;
@@ -396,7 +396,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 DictionaryMap kvp = new DictionaryMap(2);
                 kvp.initialPut("key", pair.key);
                 kvp.initialPut("value", pair.value);
-                results.appendSequence(kvp);
+                results = results.appendSequence(kvp);
             }
             return results;
         }
