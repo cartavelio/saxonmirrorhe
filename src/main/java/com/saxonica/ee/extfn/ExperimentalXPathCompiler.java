@@ -220,7 +220,7 @@ public class ExperimentalXPathCompiler {
                 } else {
                     boolean inCatch = sefElement.iterateAxis(
                             AxisInfo.ANCESTOR,
-                            new LocalNameTest(config.getNamePool(), Type.ELEMENT, "catch")).next() != null;
+                            new LocalNameTest(Type.ELEMENT, "catch")).next() != null;
                     boolean allowEmpty = "true".equals(sefElement.getAttributeValue(NamespaceUri.NULL, "allowEmpty"));
                     expr = make(exprText, env, inCatch, allowEmpty);
                 }

@@ -9,12 +9,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntHashMap;
 
@@ -45,15 +43,12 @@ public class PendingUpdateListImpl implements PendingUpdateList {
 
     private final Set<PackageData> packages = new HashSet<>();
 
-    private final Schema schema;
-
     /**
      * Create a Pending Update List
-     * @param schema the schema to be used for revalidation
      */
 
-    public PendingUpdateListImpl(Schema schema) {
-        this.schema = schema;
+    public PendingUpdateListImpl() {
+
     }
 
     /**
@@ -104,10 +99,10 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                 throw conflict("replace", "XUDY0016", oldAtt);
             }
             addAttributeAction(element, action);
-            SameNameTest test = new SameNameTest(oldAtt);
+            NodeName oldAttName = NameOfNode.makeName(oldAtt);
             AttributeMap newAtts = ((ReplaceAttributeAction) action).getNewAttributes();
             for (AttributeInfo att : newAtts) {
-                if (!test.matches(att.getNodeName().getStructuredQName())) {
+                if (!att.getNodeName().equals(oldAttName)) {
                     NamespaceBinding nsBinding = new NamespaceBinding(att.getNodeName().getPrefix(), att.getNodeName().getNamespaceUri());
                     checkForNamespaceConflict(element, Type.ATTRIBUTE, nsBinding, action);
                 }
@@ -312,7 +307,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
         // perform revalidation
         if (validationMode == Validation.STRICT || validationMode == Validation.LAX) {
             for (MutableNodeInfo root : affectedTrees) {
-                InSituValidator validator = new InSituValidator(root, schema, validationMode);
+                InSituValidator validator = new InSituValidator(root, validationMode);
                 validator.validate();
             }
         }

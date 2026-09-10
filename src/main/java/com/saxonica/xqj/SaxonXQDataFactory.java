@@ -17,6 +17,9 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -220,7 +223,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
                 throw new XQException(e.getMessage());
             }
         }
-        StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
+        StructuredQName sqName = structuredQName(typename);
         SchemaType st = getConfiguration().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
@@ -263,7 +266,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         }
         Configuration config = getConfiguration();
 
-        StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
+        StructuredQName sqName = structuredQName(typename);
         SchemaType st = getConfiguration().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
@@ -278,11 +281,9 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     }
 
     private static XQItemType makeAttributeTest(QName nodename, SchemaType schemaType, Configuration config) {
-        QNameTest nameTest = AnyNodeTest.getInstance();
+        QNameTest nameTest = AnyQNameTest.getInstance();
         if (nodename != null) {
-            nameTest = new NameTest(
-                    Type.ATTRIBUTE, NamespaceUri.of(nodename.getNamespaceURI()),
-                    nodename.getLocalPart(), config.getNamePool());
+            nameTest = new SpecificQNameTest(structuredQName(nodename), config.getNamePool());
         }
         ContentTypeTest combined = new ContentTypeTest(Type.ATTRIBUTE, nameTest, schemaType, false, config);
         return new SaxonXQItemType(combined, config);
@@ -349,18 +350,14 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             throw new XQException("Unknown base type " + basetype);
         }
         SchemaType st = BuiltInType.getSchemaType(saxonType);
-        ContentTypeTest contentTest = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), st, false, config);
         return makeElementTest(nodename, st, false, config);
 
     }
 
     private static XQItemType makeElementTest(QName nodename, SchemaType schemaType, boolean nillable, Configuration config) {
-        QNameTest nameTest;
-        if (nodename == null) {
-            nameTest = AnyNodeTest.getInstance();
-        } else {
-            nameTest = new NameTest(
-                    Type.ELEMENT, NamespaceUri.of(nodename.getNamespaceURI()), nodename.getLocalPart(), config.getNamePool());
+        QNameTest nameTest = AnyQNameTest.getInstance();
+        if (nodename != null) {
+            nameTest = new SpecificQNameTest(structuredQName(nodename), config.getNamePool());
         }
         ContentTypeTest combined = new ContentTypeTest(Type.ELEMENT, nameTest, schemaType, nillable, config);
         return new SaxonXQItemType(combined, config);
@@ -376,7 +373,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         }
         Configuration config = getConfiguration();
 
-        StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
+        StructuredQName sqName = structuredQName(typename);
         SchemaType st = getConfiguration().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
@@ -923,10 +920,10 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
     /*@NotNull*/
     @Override
-    public XQItemType createSchemaAttributeType(/*@NotNull*/ QName name, int basetype, /*@Nullable*/ URI schemaURI) throws XQException {
+    public XQItemType createSchemaAttributeType(QName name, int basetype, URI schemaURI) throws XQException {
         checkNotClosed();
         Configuration config = getConfiguration();
-        StructuredQName nn = new StructuredQName(name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
+        StructuredQName nn = structuredQName(name);
         SchemaDeclaration attributeDecl = config.getAttributeDeclaration(nn);
         if (attributeDecl == null && schemaURI != null) {
             loadSchema(schemaURI);
@@ -1092,6 +1089,10 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         } catch (SchemaException err) {
             throw newXQException(err);
         }
+    }
+
+    private static StructuredQName structuredQName(QName q) {
+        return new StructuredQName(q.getPrefix(),NamespaceUri.of(q.getNamespaceURI()), q.getLocalPart());
     }
 
 }

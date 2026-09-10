@@ -1,7 +1,6 @@
 package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.AttributeDecl;
-import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
@@ -9,6 +8,8 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SchemaNodeTest;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -26,6 +27,10 @@ import java.util.Optional;
 
 public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
 
+    // Prior to 9.3 a schema-attribute() test was represented by a CombinedNodeTest combining a NameTest and
+    // a ContentTypeTest. This was changed as a consequence of the change to the specification introduced
+    // by the resolution of specification bug 10065
+
     private final Configuration config;
     private final AttributeDecl declaration;
     private final SimpleType requiredType;
@@ -33,12 +38,11 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
     /**
      * Constructor
      *
-     * @param schema the relevant schema
      * @param attributeDecl The attribute declaration of the named attribute
      * @throws MissingComponentException if the type of the attribute is missing from the schema
      */
 
-    public SchemaAttributeTest(PreparedSchema schema, AttributeDecl attributeDecl) throws MissingComponentException {
+    public SchemaAttributeTest(/*@NotNull*/ AttributeDecl attributeDecl) throws MissingComponentException {
         config = attributeDecl.getConfiguration();
         declaration = attributeDecl;
         requiredType = attributeDecl.getType();
@@ -47,6 +51,12 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
     @Override
     public StructuredQName getNodeName() {
         return declaration.getComponentName();
+    }
+
+    @Override
+    public QNameTest getQNameTest() {
+        return new SpecificQNameTest(
+                declaration.getComponentName(), config.getNamePool(), declaration.getFingerprint());
     }
 
     /**

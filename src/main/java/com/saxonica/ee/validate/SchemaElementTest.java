@@ -1,18 +1,18 @@
 package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.ElementDecl;
-import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SchemaNodeTest;
+import net.sf.saxon.pattern.UnionQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -27,11 +27,11 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
     // a ContentTypeTest. This was changed as a consequence of the change to the specification introduced
     // by the resolution of specification bug 10065
 
-    private final PreparedSchema schema;
     private final ElementDecl head;
     private final IntHashMap<ElementDecl> groupByFingerprint;
     private final HashMap<NodeName, ElementDecl> groupByName;
     private final SchemaType requiredType;
+    private final QNameTest qNameTest;
 
     /**
      * Constructor
@@ -39,10 +39,9 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
      * @param element The element declaration of the named element
      */
 
-    public SchemaElementTest(PreparedSchema schema, ElementDecl element) throws MissingComponentException {
+    public SchemaElementTest(ElementDecl element) throws MissingComponentException {
         head = element;
-        this.schema = schema;
-        Collection<ElementDecl> subsGroup = schema.getSubstitutionGroupMembers(element);
+        Collection<ElementDecl> subsGroup = element.getSubstitutionGroupMembers();
         groupByFingerprint = new IntHashMap<>(subsGroup.size());
         groupByName = new HashMap<>(subsGroup.size());
         for (ElementDecl decl : subsGroup) {
@@ -52,6 +51,21 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
             }
         }
         requiredType = element.getType();
+        qNameTest = makeQNameTest();
+    }
+
+    private QNameTest makeQNameTest() {
+        List<QNameTest> names = new ArrayList<>();
+        NamePool pool = head.getConfiguration().getNamePool();
+        for (NodeName nn : groupByName.keySet()) {
+            names.add(new SpecificQNameTest(nn.getStructuredQName(), pool, nn.getFingerprint()));
+        }
+        return new UnionQNameTest(names);
+    }
+
+    @Override
+    public QNameTest getQNameTest() {
+        return qNameTest;
     }
 
     /**
@@ -62,15 +76,6 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
 
     public ElementDecl getElementDeclaration() {
         return head;
-    }
-
-    /**
-     * Get the schema from the static context of this type designation
-     * @return the in-scope schema
-     */
-
-    public Schema getSchema() {
-        return schema;
     }
 
     @Override
@@ -137,10 +142,8 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
             }
             ElementDecl decl = groupByFingerprint.get(nameCodeArray[nodeNr] & 0xfffff);
             try {
-                boolean ok = decl != null && !(((TinyTree) tree).isNilled(nodeNr) && !decl.isNillable()) /*&& !decl.isAbstract()*/ &&
+                return decl != null && !(((TinyTree) tree).isNilled(nodeNr) && !decl.isNillable()) /*&& !decl.isAbstract()*/ &&
                         matchesAnnotation(decl.getType(), ((TinyTree) tree).getSchemaType(nodeNr), decl.getConfiguration().getTypeHierarchy());
-                //System.err.println(((TinyTree)tree).getConfiguration().getNamePool().getDisplayName(nameCodeArray[nodeNr] & 0xfffff) + " = " + ok);
-                return ok;
             } catch (MissingComponentException e) {
                 return false;
             }
