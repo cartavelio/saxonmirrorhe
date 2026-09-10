@@ -1731,6 +1731,7 @@ cdef class PyXsltExecutable:
             if isinstance(kwds["xdm_item"], PyXdmItem):
                 xdm_item = kwds["xdm_item"]
                 self.thisxptr.setGlobalContextItem(xdm_item.derivedptr)
+                xdm_item.derivedptr.incrementRefCount()
             else:
                 raise Exception("xdm_item value must be of type PyXdmItem")
         else:
