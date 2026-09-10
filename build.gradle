@@ -89,6 +89,8 @@ ext {
   mailJar = null
   resolverJar = null
   resolverDataJar = null
+  httpclient5Jar = null
+  httpcore5Jar = null
   jlineJar = null
   htmlparserJar = null
   version_h = saxonVersion.replace(".", "-")
@@ -213,6 +215,9 @@ dependencies {
     [group: 'jline', name: 'jline', version: jlineVersion ],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion],
     [group: 'org.xmlresolver', name: 'xmlresolver', version: xmlresolverVersion, classifier: 'data'],
+     // Apache HTTP components required by XML Resolver 6.x
+    [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.1.3'],
+    [group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: '5.1.3'],
     [group: 'com.github.javaparser', name: 'javaparser-symbol-solver-core', version: '3.25.9'],
     [group: 'com.github.javaparser', name: 'javaparser-core', version: '3.25.9'],
     // PE and EE
@@ -525,6 +530,8 @@ mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
 jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
 resolverJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}.jar"
 resolverDataJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}-data.jar"
+httpclient5Jar = "${fileSeparator}httpclient5-5.1.3.jar"
+httpcore5Jar = "${fileSeparator}httpcore5-5.1.3.jar"
 htmlparserJar = "${fileSeparator}htmlparser-${htmlparserVersion}.jar"
 configurations.compileClasspath.each { cp ->
   if (cp.toString().endsWith(icu4jJar)) {
@@ -547,6 +554,12 @@ configurations.compileClasspath.each { cp ->
   }
   if (cp.toString().endsWith(htmlparserJar)) {
     htmlparserJar = cp.toString()
+  }
+  if (cp.toString().endsWith(httpclient5Jar)) {
+    httpclient5Jar = cp.toString()
+  }
+  if (cp.toString().endsWith(httpcore5Jar)) {
+    httpcore5Jar = cp.toString()
   }
 }
 
@@ -579,6 +592,8 @@ apply from: "dev-setup.gradle"
     inputs.file jlineJar
     inputs.file resolverJar
     inputs.file resolverDataJar
+    inputs.file httpclient5Jar
+    inputs.file httpcore5Jar
     inputs.files fileTree(dir: "${projectDir}/src/docs/doc")
     inputs.files fileTree(dir: "${projectDir}/src/docs/notices")
     if (release == "pe" || release == "ee") {
@@ -601,6 +616,18 @@ apply from: "dev-setup.gradle"
       copy {
         into "${buildDir}/releases/${release}j/lib"
         from resolverDataJar
+      }
+    }
+    doLast {
+      copy {
+        into "${buildDir}/releases/${release}j/lib"
+        from httpclient5Jar
+      }
+    }
+    doLast {
+      copy {
+        into "${buildDir}/releases/${release}j/lib"
+        from httpcore5Jar
       }
     }
     doLast {
@@ -1157,6 +1184,8 @@ task eej_MetaInf(
 // locally. These are for the libraries we ship with the product.
 def heJarClassPath = "lib/xmlresolver-${xmlresolverVersion}.jar lib/xmlresolver.jar "
 heJarClassPath += "lib/xmlresolver-${xmlresolverVersion}-data.jar lib/xmlresolverdata-data.jar "
+heJarClassPath += "lib/httpclient5-5.1.3.jar lib/httpclient5.jar "
+heJarClassPath += "lib/httpcore5-5.1.3.jar lib/httpcore5.jar "
 heJarClassPath += "lib/jline-${jlineVersion}.jar lib/jline.jar "
 def peeeJarClassPath = heJarClassPath + "lib/icu4j-${icu4jVersion}.jar lib/icu4j.jar lib"
 heJarClassPath += "lib"
