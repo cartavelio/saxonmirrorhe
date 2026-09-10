@@ -26,36 +26,17 @@
                 <p>This chart describes the features present in each edition of Saxon 11.</p>
                 <p><b>At the time of publication, not all editions of Saxon 11 are available. The information
                 for editions that are not yet available is provisional and subject to change.</b></p>
-                <xsl:if test="number($version) ge 11">
-                    <p>
-                        <i>For features in version 10 products, see the <a class="bodylink"
-                            href="feature-matrix-10.xml">Saxon 10 Feature Matrix</a>.</i>
-                    </p>
-                </xsl:if>
-                <xsl:if test="number($version) ge 10">
-                    <p>
-                        <i>For features in version 9.9 products, see the <a class="bodylink"
-                            href="feature-matrix-9-9.xml">Saxon 9.9 Feature Matrix</a>.</i>
-                    </p>
-                </xsl:if>
-                <xsl:if test="number($version) ge 9.9">
-                    <p>
-                        <i>For features in version 9.8 products, see the <a class="bodylink"
-                            href="feature-matrix-9-8.xml">Saxon 9.8 Feature Matrix</a>.</i>
-                    </p>
-                </xsl:if>
-                <xsl:if test="number($version) ge 9.8">
-                    <p>
-                        <i>For features in version 9.7 products, see the <a class="bodylink"
-                            href="feature-matrix-9-7.xml">Saxon 9.7 Feature Matrix</a>.</i>
-                    </p>
-                </xsl:if>
-                <xsl:if test="number($version) ge 9.7">
-                    <p>
-                        <i>For features in version 9.6 products, see the <a class="bodylink"
-                            href="feature-matrix-9-6.xml">Saxon 9.6 Feature Matrix</a>.</i>
-                    </p>
-                </xsl:if>
+                <p>
+                    <i>For features in older versions of the products, see the relevant Feature Matrix:
+                        <xsl:for-each select="(10, 9.9, 9.8, 9.7, 9.6)[number($version) ge .]">
+                            <a class="bodylink" href="feature-matrix-{string(.)}.xml">Saxon <xsl:value-of select="string(.)"/></a>
+                            <xsl:if test="not(position()=last())">
+                                <xsl:text>, </xsl:text>
+                            </xsl:if>
+                        </xsl:for-each>
+                        <xsl:text>.</xsl:text>
+                    </i>
+                </p>
                     <p>The table below lists product features and indicates which features are
                         present in which product package.</p>
                     <table class="feature-matrix" id="overview">
