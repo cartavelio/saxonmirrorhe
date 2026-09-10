@@ -350,6 +350,8 @@ val sphinxDocSources = tasks.register<Sync>("sphinx-doc-sources") {
 
 val sphinxDocTask = tasks.register<SphinxDoc>("sphinx-doc") {
     venv = venvTask
+    overrides.put("version", saxonBuild.version)
+    overrides.put("release", saxonBuild.version)
     docSrcDir = sphinxDocSources.map { it.destinationDir }
     docBuildDir = layout.buildDirectory.dir("doc/build")
     wheelInstaller(installDevWheel)
