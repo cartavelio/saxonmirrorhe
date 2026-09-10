@@ -1079,7 +1079,9 @@
         		</ul>
         	</li>
         	-->
-				<li><p>The rules have been relaxed regarding the use of non-XML characters in instances of <code>xs:string</code> and the function <code>fn:decode-from-uri</code> is introduced.</p></li>
+				<li>
+					<p>The rules have been relaxed regarding the use of <a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xml-and-xsd-versions">non-XML characters</a> in instances of <code>xs:string</code>.  This has an impact on <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-parse-json"><code>fn:parse-json</code></a>, <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-json-to-xml"><code>fn:json-to-xml</code></a> and the new function <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-decode-from-uri"><code>fn:decode-from-uri</code></a>.</p>
+				</li>
 				<li><p>The term <i>atomic item</i> replaces <i>atomic value</i></p></li>
 				<li>
 					<p>It's now possible to compare and sort all types of atomic item:</p>
@@ -1095,7 +1097,16 @@
 						<li><p>JSON nodes (JNode)</p></li>
 						<li><p>A new name for XML nodes: XNode</p></li>
 						<li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
-						<li><p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a></p></li>
+						<li>
+							<p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a>, including 5 built-in named record types:</p>
+							<ul>
+								<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#load-xquery-module-record"><code>fn:load-xquery-module-record</code></a> - <i>holds the result of <code>fn:load-xquery-module</code></i></li>
+								<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#parsed-csv-structure-record"><code>fn:parsed-csv-structure-record</code></a> - <i>holds the result of <code>fn:parse-csv</code></i></li>
+								<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#random-number-generator-record"><code>fn:random-number-generator-record</code></a> - <i>holds the result of <code>fn:random-number-generator</code></i></li>
+								<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#schema-type-record"><code>fn:schema-type-record</code></a> - <i>represents the properties of a simple or complex type in a schema</i></li>
+								<li><a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#uri-structure-record"><code>fn:uri-structure-record</code></a> - <i>represents the components of a URI</i></li>
+							</ul>
+						</li>
 						<li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
 						<li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
 						<li><p><a class="bodylink" href="/expressions/types/named-item-types">Named item types</a></p></li>
@@ -1117,7 +1128,16 @@
 						<li><p>the single accessor function is now an iterator over members of the array.</p></li>
 					</ul>
 				</li>
-				<li><p>A URIQualifiedName may now supply a prefix as well as a URI and local name.</p></li>
+				<li><p>The default namespace for elements and types can be set to the value <a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#static_context"><code>##any</code></a>, allowing unprefixed names in axis steps to match elements with a given local name in any namespace.</p></li>
+				<li><p>A URIQualifiedName <a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-namespaces-and-qnames">may now supply a prefix</a> as well as a URI and local name.</p></li>
+				<li>
+					<p>Changes to <code>fn:format-number</code>:</p>
+					<ul>
+						<li><p>The decimal format name can now be supplied as a value of type <code>xs:QName</code>, as an alternative to supplying a lexical QName as an instance of <code>xs:string</code></p></li>
+						<li><p>Decimal format parameters can now be supplied directly as a map in the third argument, rather than referencing a format defined in the static context.</p></li>
+						<li><p>For selected properties including minus sign, exponent-separator, percent and per-mille, it is now possible to specify a single-character marker to be used in the picture string, together with a multi-character rendition to be used in the formatted output.</p></li>
+					</ul>
+				</li>
 			</ul>
 		</section>
 
