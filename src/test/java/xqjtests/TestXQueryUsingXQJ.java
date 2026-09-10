@@ -128,7 +128,7 @@ public class TestXQueryUsingXQJ {
 			Configuration config = new Configuration();
 			config.setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);
 			config.setValidation(false);
-			config.getParseOptions().setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+			config.setParseOptions(config.getParseOptions().withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance()));
 			XQDataSource dataSource   = new SaxonXQDataSource(config);
 			XQConnection xqconnection = dataSource.getConnection();
 			XQStaticContext context = xqconnection.getStaticContext();

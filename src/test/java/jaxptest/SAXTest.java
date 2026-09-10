@@ -190,8 +190,7 @@ public class SAXTest {
 
             SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
             XMLReader xmlReader = parser.getXMLReader();
-            ParseOptions parseOptions = new ParseOptions();
-            parseOptions.setXMLReader(xmlReader);
+            ParseOptions parseOptions = new ParseOptions().withXMLReader(xmlReader);
 
             NodeInfo node = configuration
                     .buildDocumentTree(new StreamSource(new StringReader("<b xmlns='a'/>")), parseOptions)
