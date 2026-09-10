@@ -15,8 +15,6 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * This class implements the function fn:sort-with#2, introduced in XPath 4.0
@@ -41,37 +39,23 @@ public class SortWith extends SystemFunction {
             inputList.add(it);
         }
         GroundedValue comparatorFunctions = arguments[1].materialize();
-        List<Comparator<Item>> javaComparators = new ArrayList<>(comparatorFunctions.getLength());
-        for (Item item : comparatorFunctions.asIterable()) {
-            javaComparators.add((a, b) -> {
+        inputList.sort((a,b) -> {
+            for (Item item : comparatorFunctions.asIterable()) {
                 try {
-                    Sequence result = ((FunctionItem)item).call(context, new Sequence[]{a, b});
-                    return Long.signum(((IntegerValue)result.head()).longValue());
+                    Sequence result = ((FunctionItem) item).call(context, new Sequence[]{a, b});
+                    int c = Long.signum(((IntegerValue) result.head()).longValue());
+                    if (c != 0) {
+                        return c;
+                    }
                 } catch (XPathException e) {
                     throw new UncheckedXPathException(e);
                 }
-            });
-        }
-        sort(inputList, javaComparators);
+            }
+            return 0;
+        });
         return SequenceExtent.makeSequenceExtent(inputList);
     }
 
-
-    private static void sort(List<Item> input, List<Comparator<Item>> comparators) {
-        input.sort(multiComparator(comparators));
-    }
-
-    private static Comparator<Item> multiComparator(List<Comparator<Item>> comparators) {
-        return (a,b) -> {
-            for (Comparator<? super Item> comparator : comparators) {
-                int c = comparator.compare(a, b);
-                if (c != 0) {
-                    return c;
-                }
-            }
-            return 0;
-        };
-    }
 
 
 }
