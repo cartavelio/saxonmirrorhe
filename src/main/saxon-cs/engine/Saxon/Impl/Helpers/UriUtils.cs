@@ -90,11 +90,11 @@ namespace Saxon.Impl.Helpers {
             }
 
             try {
-                if (new Uri(ub.ToString(), UriKind.RelativeOrAbsolute).IsWellFormedOriginalString()) {
+                if (new Sys.Uri(ub.ToString(), Sys.UriKind.RelativeOrAbsolute).IsWellFormedOriginalString()) {
                     return true;
                 }
             }
-            catch (Exception e) {
+            catch (Sys.Exception e) {
                 // ignore invalid URI failure
             }
 
