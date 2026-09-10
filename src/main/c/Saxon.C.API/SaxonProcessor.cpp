@@ -286,7 +286,7 @@ void SaxonProcessor::detachCurrentThread() {
 #ifdef DEBUG
   std::cerr << "detachCurrentThread called" << std::endl;
 #endif
-  int result = detach_graalvm_thread(SaxonProcessor::sxn_environ);
+  detach_graalvm_thread(SaxonProcessor::sxn_environ);
 #ifdef DEBUG
   if (result != 0) {
     std::cerr << "detachCurrentThread failed" << std::endl;
@@ -927,6 +927,24 @@ void SaxonProcessor::release() {
     std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
 #endif
   }
+}
+
+void SaxonProcessor::deleteXdmValueArray(XdmValue **arr, int len) {
+    if(arr != nullptr && len > 0) {
+        for (int i = 0; i < len; i++) {
+            delete arr[i];
+        }
+        delete[] arr;
+    }
+}
+
+void SaxonProcessor::deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len) {
+    if(arr != nullptr && len > 0) {
+        for (int i = 0; i < len; i++) {
+            delete arr[i];
+        }
+        delete[] arr;
+    }
 }
 
 /* ========= Factory method for Xdm ======== */

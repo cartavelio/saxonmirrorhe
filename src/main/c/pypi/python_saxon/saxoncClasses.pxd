@@ -33,6 +33,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         XdmValue ** createXdmValueArray(int len)
 
+        void deleteXdmValueArray(XdmValue ** arr, int len)
+
+        void deleteXdmAtomicValueArray(XdmAtomicValue ** arr, int len)
 
         XdmAtomicValue ** createXdmAtomicValueArray(int len)
 

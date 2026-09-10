@@ -612,6 +612,8 @@ cdef class PySaxonProcessor:
 
         newArray_ = PyXdmArray()
         newArray_.derivedaaptr = newArray_.derivedfptr = newArray_.derivedptr = newArray_.thisvptr =  self.thisptr.makeArray(argumentV, len_)
+        if len_ > 0:
+            self.thisptr.deleteXdmValueArray(argumentV, len_)
         if newArray_.derivedaaptr == NULL:
             del newArray_
             return None
@@ -673,6 +675,9 @@ cdef class PySaxonProcessor:
 
         newMap_ = PyXdmMap()
         newMap_.derivedmmptr = newMap_.derivedfptr = newMap_.derivedptr = newMap_.thisvptr =  self.thisptr.makeMap3(c_keys, c_values, len_)
+        if len_ > 0:
+            self.thisptr.deleteXdmAtomicValueArray(c_keys, len_)
+            self.thisptr.deleteXdmValueArray(c_values, len_)
         if newMap_.derivedmmptr == NULL:
             return None
         return newMap_
@@ -2758,6 +2763,8 @@ cdef class PyXsltExecutable:
         cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
         xdmValue = self.thisxptr.callFunctionReturningValue(c_functionName, argumentV, len(args))
+        if len_ > 0:
+            self.thisxptr.deleteXdmValueArray(argumentV, len_)
         if xdmValue is NULL:
           return None
         cdef type_ = xdmValue.getType()
@@ -2834,7 +2841,9 @@ cdef class PyXsltExecutable:
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
-        cdef const char* c_string = self.thisxptr.callFunctionReturningString(c_functionName, argumentV, len(args))
+        cdef const char* c_string = self.thisxptr.callFunctionReturningString(c_functionName, argumentV, _len)
+        if _len > 0:
+            self.thisxptr.deleteXdmValueArray(argumentV, _len)
         encoding = sys.getdefaultencoding()
         if "encoding" in kwds:
             encoding = kwds["encoding"]
@@ -2893,7 +2902,9 @@ cdef class PyXsltExecutable:
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
-        self.thisxptr.callFunctionReturningFile(c_functionName, argumentV, len(args), c_outputfile)
+        self.thisxptr.callFunctionReturningFile(c_functionName, argumentV, _len, c_outputfile)
+        if _len > 0:
+            self.thisxptr.deleteXdmValueArray(argumentV, _len)
 
 
      @property
@@ -5101,6 +5112,8 @@ cdef class PyXdmFunctionItem(PyXdmItem):
          cdef PyXdmMap mval = None
          cdef PyXdmArray aaval = None
          c_xdmValue = self.derivedfptr.call(proc.thisptr, argumentV, _len)
+         if _len > 0:
+             proc.thisptr.deleteXdmValueArray(argumentV, _len)
          if c_xdmValue == NULL:
              return None
          type_ = c_xdmValue.getType()

@@ -534,10 +534,26 @@ public:
   //! Utility method for working with SaxonC on Python
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
+  //! Utility method for Python API - internal use only
+  /**
+   * This method deletes a XdmValue pointer array
+   * @param arr - XdmValue pointer array
+   * @param len - length of the array
+   */
+  void deleteXdmValueArray(XdmValue **arr, int len);
+
   //! Utility method for working with SaxonC on Python
   XdmAtomicValue **createXdmAtomicValueArray(int len) {
     return (new XdmAtomicValue *[len]);
   }
+
+  //! Utility method for Python API - internal use only
+  /**
+   * This method deletes a XdmAtomicValue pointer array
+   * @param arr - XdmAtomicValue pointer array
+   * @param len - length of the array
+   */
+  void deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len);
 
   //! Checks for pending exceptions and creates a SaxonApiException object,
   //! which handles one or more local exceptions objects

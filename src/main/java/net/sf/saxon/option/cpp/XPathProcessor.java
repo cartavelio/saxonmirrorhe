@@ -316,6 +316,9 @@ public class XPathProcessor extends SaxonCAPI {
      **/
     @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+        if(xpathProcessorRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XPathProcessor is null");
+        }
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {

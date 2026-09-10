@@ -21,7 +21,6 @@ SchemaValidator::SchemaValidator(SaxonProcessor *p, std::string curr) {
   exception = nullptr;
 
   if (cppV < 0) {
-
     throw SaxonApiException();
   }
 
