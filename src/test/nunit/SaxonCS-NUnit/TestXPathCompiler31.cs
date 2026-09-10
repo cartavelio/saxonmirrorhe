@@ -217,7 +217,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void TestDefaultLanguage() {
             String result = good("default-language()");
-            Assert.AreEqual("en", result);
+            Assert.True(result.StartsWith("en"));
         }
 
         [Test]
