@@ -2283,20 +2283,6 @@ local:format("2016-10-07", $fmt)]]></code></pre>
 				The entry is allowed to be absent only if the type definition indicates that an empty
 				sequence would be acceptable.</p>
 
-			<p>Using record types makes stronger type checking possible. With a general-purpose map, any
-				atomic item can be supplied as a key, and the <code>map:get()</code> function (or a
-				dynamic call on the map as a function) returns an empty sequence if the entry is not
-				present. With records, however, supplying a key value that is not a string, or that is
-				not one of the known field names, results in a static type error if it can be detected
-				at compile time. Furthermore, if <code>$T</code> is known to be a record type, then the
-				type of an expression such as <code>$T?field</code> can be statically inferred, which
-				again enables better error detection and better optimization.</p>
-
-			<aside>Although <code>$T?N</code> results in a static type error if <code>T</code> is a
-				record type that doesn't define field <code>N</code>, a run-time
-				reference <code>$T("N")</code> works the same way as any other dynamic map lookup,
-				returning an empty sequence.</aside>
-
 			<p>Record types are useful where maps are used to hold information with a regular
 				structure; for example when a function accepts maps as input or returns maps as output.
 				Declaring the argument or result type of a function as a record type often gives better
