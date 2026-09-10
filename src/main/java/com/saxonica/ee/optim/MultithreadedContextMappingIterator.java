@@ -63,12 +63,17 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         // prime the queue
         int n = 0;
         int max  = threads * 3; // bug 3958
-        while (++n <= max ) {
-            Item item = base.next();
-            if (item == null) {
-                return;
+        try {
+            while (++n <= max) {   // see bug 3958
+                Item item = base.next();
+                if (item == null) {
+                    return;
+                }
+                mapOneItem(context);
             }
-            mapOneItem(context);
+        } catch (UncheckedXPathException e) {
+            close();
+            throw e.getXPathException();
         }
     }
 
@@ -96,10 +101,14 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
                 } catch (InterruptedException e) {
                     throw new UncheckedXPathException(e);
                 } catch (ExecutionException e) {
+                    close();
                     if (e.getCause() instanceof XPathException) {
                         throw new UncheckedXPathException((XPathException) e.getCause());
+                    } else if (e.getCause() instanceof UncheckedXPathException) {
+                        throw (UncheckedXPathException)e.getCause();
+                    } else {
+                        throw new UncheckedXPathException(e);
                     }
-                    throw new UncheckedXPathException(e);
                 }
                 if (stepIterator == null) {
                     return null;
@@ -153,20 +162,25 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
                             } catch (XPathException err) {
                                 close();
                                 throw err;
+                            } catch (UncheckedXPathException err) {
+                                close();
+                                throw err.getXPathException();
                             }
                         });
                 break;
             } catch (RejectedExecutionException e) {  // bug 4075
                 if (service.isShutdown()) {
-                    return;
+                    return;  // bug 4788
                 }
                 if (attempts++ < 10) {
                     try {
-                        Thread.sleep(1 << attempts);
+                        Thread.sleep(1L << attempts);
                     } catch (InterruptedException e1) {
+                        close();
                         throw e;
                     }
                 } else {
+                    close();
                     throw e;
                 }
             }
