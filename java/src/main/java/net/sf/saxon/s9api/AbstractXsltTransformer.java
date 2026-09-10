@@ -126,7 +126,8 @@ public abstract class AbstractXsltTransformer {
      * instruction has the attribute <code>streamable="yes"</code>; if it does, the returned
      * <code>Source</code> object must be a <code>StreamSource</code> or <code>SAXSource</code>.</p>
      * <p>The resolver is also used for a number of other cases where URIs are dereferenced during
-     * stylesheet execution, for example in the <code>fn:transform</code> function</p>
+     * stylesheet execution, for example in the <code>fn:transform</code> and
+     * <code>fn:unparsed-binary</code> functions.</p>
      *
      * @param resolver the <code>ResourceResolver</code> to be used during stylesheet execution.
      */

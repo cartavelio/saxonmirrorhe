@@ -11,11 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.lib.EnvironmentVariableResolver;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.StandardModuleURIResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.TreeModel;
@@ -28,8 +24,6 @@ import net.sf.saxon.trans.XmlProcessingIncident;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
@@ -608,7 +602,7 @@ public class QT3TestDriverHE extends TestDriver {
                                 if (env.contextItem != null) {
                                     selector.setContextItem(env.contextItem);
                                 }
-                                selector.setURIResolver(new TestURIResolver(env));
+                                selector.setResourceResolver(new TestResourceResolver(env));
                                 //selector.setURIResolver(new TestURIResolver(env));
                                 if (env.unparsedTextResolver != null) {
                                     selector.getUnderlyingXPathContext().setUnparsedTextURIResolver(env.unparsedTextResolver);
@@ -726,7 +720,7 @@ public class QT3TestDriverHE extends TestDriver {
                                 } else  if (env.contextItem != null) {
                                     selector.setContextItem(env.contextItem);
                                 }
-                                selector.setURIResolver(new TestURIResolver(env));
+                                selector.setResourceResolver(new TestResourceResolver(env));
                                 if (env.unparsedTextResolver != null) {
                                     selector.getUnderlyingQueryContext().setUnparsedTextURIResolver(env.unparsedTextResolver);
                                 }
@@ -1032,29 +1026,61 @@ public class QT3TestDriverHE extends TestDriver {
         }
     }
     
-    public static class TestURIResolver implements URIResolver {
+    public static class TestResourceResolver implements ResourceResolver {
         Environment env;
 
-        public TestURIResolver(Environment env) {
+        public TestResourceResolver(Environment env) {
             this.env = env;
         }
 
+        /**
+         * Process a resource request to deliver a resource
+         *
+         * @param request the resource request
+         * @return the returned Source; or null to delegate resolution to another resolver. The type of Source
+         * must correspond to the type of resource requested: for non-XML resources, it should generally be a
+         * <code>StreamSource</code>.
+         * @throws XPathException if the request is invalid in some way, or if the identified resource is unsuitable,
+         *                        or if resolution is to fail rather than being delegated to another resolver.
+         */
         @Override
-        public Source resolve(String href, String base) throws TransformerException {
-            try {
-                String abs = ResolveURI.makeAbsolute(href, base).toString();
-                XdmNode node = env.sourceDocs.get(abs);
-                if (node == null) {
-                    node = env.sourceDocs.get(href);
-                    if (node == null) {
-                        return null;
+        public Source resolve(ResourceRequest request) throws XPathException {
+            //try {
+                String abs = request.uri;
+                if (ResourceRequest.BINARY_NATURE.equals(request.nature)) {
+                    try {
+                        Environment.CatalogResource resource = env.catalogResources.get(abs);
+                        if (resource != null) {
+                            return new StreamSource(new FileInputStream(resource.file));
+                        }
+                    } catch (FileNotFoundException e) {
+                        throw new XPathException("Failed to find file in test driver resource resolver ", e);
                     }
                 }
-                return node.asSource();
-            } catch (URISyntaxException e) {
-                throw new XPathException("Invalid URI: " + e.getMessage(), "FODC0005");
-            }
+                XdmNode node = env.sourceDocs.get(abs);
+                if (node != null) {
+                    return node.asSource();
+                }
+                return null;
+            //} catch (Exception )
         }
+
+//        @Override
+//        public Source resolve(String href, String base) throws TransformerException {
+//            try {
+//
+//                XdmNode node = env.sourceDocs.get(abs);
+//                if (node == null) {
+//                    node = env.sourceDocs.get(href);
+//                    if (node == null) {
+//                        return null;
+//                    }
+//                }
+//                return node.asSource();
+//            } catch (URISyntaxException e) {
+//                throw new XPathException("Invalid URI: " + e.getMessage(), "FODC0005");
+//            }
+//        }
     }
 
     /**

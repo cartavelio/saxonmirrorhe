@@ -132,6 +132,10 @@ public class ParseXml extends SystemFunction implements Callable {
             } else {
                 throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "FODC0008");
             }
+            val = checkedOptions.get("xsi-schema-location");
+            if (val.effectiveBooleanValue()) {
+                parseOptions = parseOptions.withUseXsiSchemaLocation(true);
+            }
 
             val = checkedOptions.get("allow-external-entities");
             if (val != null && !val.effectiveBooleanValue()) {

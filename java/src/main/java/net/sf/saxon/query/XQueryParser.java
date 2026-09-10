@@ -1628,7 +1628,7 @@ public class XQueryParser extends XPathParser {
 
         NamespaceUri uri = varQName.getNamespaceUri();
         NamespaceUri moduleURI = ((QueryModule) env).getModuleNamespace();
-        if (moduleURI != null && !moduleURI.equals(uri)) {
+        if (moduleURI != null && !moduleURI.equals(uri) && !(var.isPrivate() && isAllowXPath40Syntax())) {
             grumble("A variable declared in a library module must be in the module namespace", "XQST0048", offset);
         }
 
@@ -1840,11 +1840,6 @@ public class XQueryParser extends XPathParser {
             grumble("The function must be in a namespace", "XQST0060");
         }
 
-        NamespaceUri moduleURI = ((QueryModule) env).getModuleNamespace();
-        if (moduleURI != null && !moduleURI.equals(uri)) {
-            grumble("A function in a library module must be in the module namespace", "XQST0048");
-        }
-
         if (isReservedInQuery(uri)) {
             grumble("The function name " + fName + " is in a reserved namespace", "XQST0045");
         }
@@ -1859,6 +1854,11 @@ public class XQueryParser extends XPathParser {
         func.setMemoFunction(memoFunction);
         func.setUpdating(annotations.includes(Annotation.UPDATING));
         func.setAnnotations(annotations);
+
+        NamespaceUri moduleURI = ((QueryModule) env).getModuleNamespace();
+        if (moduleURI != null && !moduleURI.equals(uri) && !(func.isPrivate() && isAllowXPath40Syntax())) {
+            grumble("A function in a library module must be in the module namespace", "XQST0048");
+        }
 
         nextToken();
         HashSet<StructuredQName> paramNames = new HashSet<>(8);

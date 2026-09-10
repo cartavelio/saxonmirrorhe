@@ -264,7 +264,7 @@ public class Environment implements ResourceResolver {
 
         // create an unparsed text resolver to handle any unparsed text resources
 
-        createUnparsedTextResolver(driver, xpc, env, environment);
+        createLocalResourceResolver(driver, xpc, env, environment);
 
         // register any required decimal formats
 
@@ -577,7 +577,7 @@ public class Environment implements ResourceResolver {
         }
     }
 
-    private static void createUnparsedTextResolver(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
+    private static void createLocalResourceResolver(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment) throws SaxonApiException {
         final HashMap<URI, Object> resources = new HashMap<>();
         final HashMap<URI, String> encodings = new HashMap<>();
         for (XdmNode resource : env.children("resource")) {
@@ -597,13 +597,13 @@ public class Environment implements ResourceResolver {
                         e.printStackTrace();
                     }
                 } else {
-                    res.file = new File(((XdmNode) env).getBaseURI().resolve(href));
+                    res.file = new File(env.getBaseURI().resolve(href));
                     obj = res.file;
                 }
                 try {
                     resources.put(new URI(res.uri), obj);
                     encodings.put(new URI(res.uri), res.encoding);
-                    URI abs = ((XdmNode) resource).getBaseURI().resolve(res.uri);
+                    URI abs = resource.getBaseURI().resolve(res.uri);
                     resources.put(abs, obj);
                     encodings.put(abs, res.encoding);
                     environment.catalogResources.put(abs.toString(), res);

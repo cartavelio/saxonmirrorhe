@@ -69,6 +69,9 @@ public class DirectResourceResolver implements ResourceResolver {
             try {
                 return ResourceLoader.typedStreamSource(config, request.uri);
             } catch (IOException e) {
+                if (e.getMessage().contains(request.uri)) {
+                    throw new XPathException("Cannot read binary resource ", e);
+                }
                 throw new XPathException("Cannot read " + request.uri, e);
             }
         }

@@ -219,7 +219,7 @@ public class DynamicQueryContext {
     }
 
     /**
-     * Set an object that will be used to resolve URIs used in
+     * Set a resolver callback that will be used to resolve URIs used in
      * fn:document() and related functions.
      *
      * @param resolver An object that implements the ResourceResolver interface, or
@@ -228,14 +228,13 @@ public class DynamicQueryContext {
      */
 
     public void setResourceResolver(ResourceResolver resolver) {
-        // System.err.println("Setting uriresolver to " + resolver + " on " + this);
         resourceResolver = resolver;
     }
 
     /**
-     * Get the URI resolver.
+     * Get the resource resolver.
      *
-     * @return the user-supplied URI resolver if there is one, or the
+     * @return the user-supplied resource resolver if there is one, or the
      *         system-defined one otherwise
      * @since 11.1; replaces getURIResolver in earlier releases
      */
@@ -245,7 +244,7 @@ public class DynamicQueryContext {
     }
 
     /**
-     * Set an object that will be used to resolve URIs used in
+     * Set a resolver callback that will be used to resolve URIs used in
      * fn:unparsed-text() and related functions.
      *
      * @param resolver An object that implements the UnparsedTextURIResolver interface, or

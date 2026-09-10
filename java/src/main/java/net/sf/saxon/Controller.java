@@ -636,7 +636,7 @@ public class Controller implements ContextOriginator {
     }
 
     /**
-     * Set an object that will be used to resolve URIs used in
+     * Set a resolver callback that will be used to resolve URIs used in
      * document(), etc.
      *
      * @param resolver An object that implements the ResourceResolver interface, or
@@ -648,10 +648,7 @@ public class Controller implements ContextOriginator {
     }
 
     /**
-     * Get the URI resolver.
-     * <p><i>This method changed in Saxon 8.5, to conform to the JAXP specification. If there
-     * is no user-specified URIResolver, it now returns null; previously it returned the system
-     * default URIResolver.</i></p>
+     * Get the resource resolver.
      *
      * @return the user-supplied URI resolver if there is one, or null otherwise.
      */

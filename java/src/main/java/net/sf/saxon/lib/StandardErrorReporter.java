@@ -552,7 +552,7 @@ public class StandardErrorReporter
                     }
                 } 
                 String next = e.getMessage();
-                if (next != null) {
+                if (next != null && ! sb.toString().contains(next)) {
                     sb.append(": ").append(next);
                 }
                 e = e.getCause();
