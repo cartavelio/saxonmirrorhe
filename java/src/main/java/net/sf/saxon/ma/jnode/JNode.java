@@ -48,7 +48,7 @@ public abstract class JNode implements GNode {
 
     /**
      * Get the value of the selector property
-     * @return the selector
+     * @return the selector. Returns null if the property is absent (for a root JNode)
      */
 
     public abstract AtomicValue getSelector();

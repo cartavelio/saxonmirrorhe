@@ -375,11 +375,21 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             indent(indentLevel++);
             afterColon = false;
         }
-        emit("jnode(");
-        outputInternalSequence(jNode.getContent());
-        afterColon = false;
-        indent(--indentLevel);
-        emit(")");
+        if (jNode.getSelector() == null) {
+            emit("jtree(");
+            outputInternalSequence(jNode.getContent());
+            afterColon = false;
+            indent(--indentLevel);
+            emit(")");
+        } else {
+            emit("jnode(");
+            outputInternalSequence(jNode.getSelector());
+            emit(":");
+            outputInternalSequence(jNode.getContent());
+            afterColon = false;
+            indent(--indentLevel);
+            emit(")");
+        }
     }
 
 
