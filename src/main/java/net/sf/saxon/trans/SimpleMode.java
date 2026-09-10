@@ -1002,16 +1002,15 @@ public class SimpleMode extends Mode {
     public static void forceAllocateAllBindingSlots(
             final StylesheetPackage pack, final SimpleMode mode, final List<ComponentBinding> bindings) {
         final Set<TemplateRule> rulesProcessed = new HashSet<>();
-        final IdentityHashMap<Pattern, Boolean> patternsProcessed = new IdentityHashMap<>();
+        //final IdentityHashMap<Pattern, Boolean> patternsProcessed = new IdentityHashMap<>();
         try {
             mode.processRules(r -> {
                 // A rule can appear twice, for example at different import precedences or
-                // because the match pattern is a union pattern; only allocate slots once
+                // because the match pattern is a union pattern, or because it is used in
+                // more than one mode: only allocate slots once
                 Pattern pattern = r.getPattern();
-                if (!patternsProcessed.containsKey(pattern)) {
-                    allocateBindingSlotsRecursive(pack, mode, pattern, bindings);
-                    patternsProcessed.put(pattern, true);
-                }
+                allocateBindingSlotsRecursive(pack, mode, pattern, bindings);
+                
                 TemplateRule tr = (TemplateRule) r.getAction();
                 if (tr.getBody() != null && !rulesProcessed.contains(tr)) {
                     allocateBindingSlotsRecursive(pack, mode, tr.getBody(), bindings);

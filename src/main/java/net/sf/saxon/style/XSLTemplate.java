@@ -596,7 +596,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         // If the pattern is a union pattern and there is no priority specified, split into
         // multiple template rules so each can be given its own priority. This rule changes
         // in 4.0
-        if (match != null) {
+        if (match instanceof UnionPattern) {
             subPatterns = new ArrayList<>(2);
             if (prioritySpecified) {
                 subPatterns.add(match);
@@ -619,6 +619,9 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             } else {
                 gatherSubPatterns(match, subPatterns);
             }
+        } else if (match != null) {
+            subPatterns = new ArrayList<>(1);
+            subPatterns.add(match);
         }
 
     }
@@ -662,8 +665,14 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
     }
 
+    /**
+     * If this is a named template, then add it to the stylesheet-level component index
+     * @param decl the Declaration being indexed. (This corresponds to the StyleElement object
+     *             except in cases where one module is imported several times with different precedence.)
+     * @param top  represents the outermost XSLStylesheet or XSLPackage element
+     */
     @Override
-    public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
+    public void index(ComponentDeclaration decl, PrincipalStylesheetModule top)  {
         if (getTemplateName() != null) {
             if (compiledNamedTemplate == null) {
                 compiledNamedTemplate = new NamedTemplate(getTemplateName(), getConfiguration());
@@ -746,7 +755,12 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     }
 
 
-
+    /**
+     * Perform expression simplification and type-checking on the body of the template
+     * @param body the body of the template rule
+     * @param cisi type information about the static context
+     * @return the body after simplification and type checking
+     */
 
     private Expression refineTemplateBody(Expression body, ContextItemStaticInfo cisi) {
         Expression old = body;
@@ -793,6 +807,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         Configuration config = getConfiguration();
 
         if (getTemplateName() != null) {
+            // If this is both a named template and a template rule, treat both as separate
             body = body.copy(new RebindingMap());
         }
 
@@ -916,63 +931,92 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                                          + "unless it is itself enclosed by that xsl:mode declaration", "XTSE4020");
                 }
                 int part = 0;
+
                 int seq = mgr.allocateSequenceNumber();
-                for (Pattern subPattern : subPatterns) {
-                    Pattern match1 = subPattern.copy(new RebindingMap());
-                    String typed = (String)mode.getActivePart().getPropertyValue("typed");
+
+                TemplateRule rule = getConfiguration().makeTemplateRule();
+                rule.setMode(mode);
+                // Copy the match pattern: in the case where a template rule belongs to multiple modes,
+                // the binding vector for any references to external functions or variables belongs
+                // to the mode, and the slot numbers for these references will vary from one mode to another.
+                rule.setMatchPattern(match.copy(new RebindingMap()));
+                compiledTemplateRules.add(rule);
+
+                if (mode.isDeclaredStreamable()) {
+                    rule.setDeclaredStreamable(true);
+                    if (!match.isMotionless()) {
+                        boolean fallback = getConfiguration().getBooleanProperty(Feature.STREAMING_FALLBACK);
+                        String message = "Template rule is declared streamable but the match pattern is not motionless";
+                        if (fallback) {
+                            message += "\n  * Falling back to non-streaming implementation";
+                            getStaticContext().issueWarning(message, SaxonErrorCode.SXWN9024, this);
+                            rule.setDeclaredStreamable(false);
+                            getCompilation().setFallbackToNonStreaming(true);
+                        } else {
+                            throw new XPathException(message, "XTSE3430", this);
+                        }
+                    }
+                }
+
+                if (mode.getDefaultResultType() != null) {
+                    if (!declaresRequiredType) {
+                        rule.setRequiredType(mode.getDefaultResultType());
+                    } else {
+                        TypeHierarchy th = getConfiguration().getTypeHierarchy();
+                        Affinity aff = th.sequenceTypeRelationship(requiredType, mode.getDefaultResultType());
+                        if (aff != Affinity.SAME_TYPE && aff != Affinity.SUBSUMED_BY) {
+                            compileError("Type declared in xsl:template/@as must be a subtype of the type declared in xsl:mode/@as",
+                                         "XTSE4040");
+                        }
+                    }
+                }
+
+                if (subPatterns.size() == 1) {
+                    String typed = (String) mode.getActivePart().getPropertyValue("typed");
                     if ("strict".equals(typed) || "lax".equals(typed)) {
-                        Pattern match2;
+                        Pattern localPattern2;
                         try {
-                            match2 = match1.convertToTypedPattern(typed);
+                            localPattern2 = match.convertToTypedPattern(typed);
                         } catch (XPathException e) {
                             throw e.maybeWithLocation(this);
                         }
-                        if (match2 != match1) {
+                        if (localPattern2 != match) {
                             ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
-                            ExpressionTool.copyLocationInfo(match, match2);
-                            match2.setOriginalText(match.toString());
-                            match2 = match2.typeCheck(visitor, info);
-                            match1 = match2;
+                            ExpressionTool.copyLocationInfo(match, localPattern2);
+                            localPattern2.setOriginalText(match.toString());
+                            localPattern2 = localPattern2.typeCheck(visitor, info);
+                            rule.setMatchPattern(localPattern2);
                         }
                     }
-                    TemplateRule rule = getConfiguration().makeTemplateRule();
-                    rule.setMode(mode);
-                    rule.setMatchPattern(match1);
-                    compiledTemplateRules.add(rule);
-
 
                     double prio = prioritySpecified ? priority : Double.NaN;
-                    mgr.registerRule(match1, rule, mode, module, prio, seq, part++);
+                    mgr.registerRule(rule.getMatchPattern(), rule, mode, module, prio, seq, part++);
 
-                    if (mode.isDeclaredStreamable()) {
-                        rule.setDeclaredStreamable(true);
-                        if (!match1.isMotionless()) {
-                            boolean fallback = getConfiguration().getBooleanProperty(Feature.STREAMING_FALLBACK);
-                            String message = "Template rule is declared streamable but the match pattern is not motionless";
-                            if (fallback) {
-                                message += "\n  * Falling back to non-streaming implementation";
-                                getStaticContext().issueWarning(message, SaxonErrorCode.SXWN9024, this);
-                                rule.setDeclaredStreamable(false);
-                                getCompilation().setFallbackToNonStreaming(true);
-                            } else {
-                                throw new XPathException(message, "XTSE3430", this);
+                } else {
+
+                    for (Pattern subPattern : subPatterns) {
+                        Pattern localSubPattern1 = subPattern.copy(new RebindingMap());
+                        String typed = (String) mode.getActivePart().getPropertyValue("typed");
+                        if ("strict".equals(typed) || "lax".equals(typed)) {
+                            Pattern localSubPattern2;
+                            try {
+                                localSubPattern2 = localSubPattern1.convertToTypedPattern(typed);
+                            } catch (XPathException e) {
+                                throw e.maybeWithLocation(this);
+                            }
+                            if (localSubPattern2 != localSubPattern1) {
+                                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
+                                ExpressionTool.copyLocationInfo(match, localSubPattern2);
+                                localSubPattern2.setOriginalText(match.toString());
+                                localSubPattern2 = localSubPattern2.typeCheck(visitor, info);
+                                localSubPattern1 = localSubPattern2;
                             }
                         }
-                    }
 
-                    if (mode.getDefaultResultType() != null) {
-                        if (!declaresRequiredType) {
-                            rule.setRequiredType(mode.getDefaultResultType());
-                        } else {
-                            TypeHierarchy th = getConfiguration().getTypeHierarchy();
-                            Affinity aff = th.sequenceTypeRelationship(requiredType, mode.getDefaultResultType());
-                            if (aff != Affinity.SAME_TYPE && aff != Affinity.SUBSUMED_BY) {
-                                compileError("Type declared in xsl:template/@as must be a subtype of the type declared in xsl:mode/@as",
-                                             "XTSE4040");
-                            }
-                        }
-                    }
+                        double prio = prioritySpecified ? priority : Double.NaN;
+                        mgr.registerRule(localSubPattern1, rule, mode, module, prio, seq, part++);
 
+                    }
                 }
             }
         }
@@ -1155,8 +1199,5 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         return match;
     }
 
-//    public Map<StructuredQName, TemplateRule> getTemplateRulesByMode() {
-//        return compiledTemplateRules;
-//    }
 }
 

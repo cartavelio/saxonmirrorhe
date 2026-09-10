@@ -222,7 +222,8 @@ public abstract class Pattern extends PseudoExpression {
      * @return the next slot that is free to be allocated
      */
 
-    public int allocateSlots(SlotManager slotManager, int nextFree) {
+    public int
+    allocateSlots(SlotManager slotManager, int nextFree) {
         return nextFree;
     }
 
