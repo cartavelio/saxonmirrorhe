@@ -499,6 +499,11 @@
 						ordering carries semantic significance, for example a map whose keys are timestamps.</p>
 					</li>
 					<li>
+						<p>In a map constructor, the keyword <code>map</code> can be omitted. So
+						the expression <code>{"x":1, "y":2}</code> has the same effect as <code>map{"x":1, "y":2}</code>.
+						</p>
+					</li>
+					<li>
 						<p>Various functions (<code>map:merge</code>, <code>map:build</code>) and
 						instructions (<code>xsl:map</code>) provide detailed control over how duplicate
 						entries are handled.</p>
@@ -524,6 +529,12 @@
 						using a <emph>record type</emph>: for example <code>record(first, middle, last)</code>
 						describes the type of a map having three entries with keys <code>"first"</code>,
 						<code>"middle"</code>, and <code>"last"</code>.</p>
+					</li>
+					<li>
+						<p>Binary values of types <code>xs:hexBinary</code> and <code>xs:base64Binary</code>
+						are now mutually comparable, which means for example that the keys <code>xs:hexBinary("")</code>
+						and <code>xs:base64Binary("")</code> can no longer co-exist in the same map: they
+						are considered to be duplicates.</p>
 					</li>
 				</ul>
 			</div>
@@ -853,18 +864,102 @@
 		<section id="jnodes" title="JNodes" class="qt4">
 			<h1>JNodes</h1>
 			
-			<aside>Available since Saxon 13 in XPath 4.0.</aside>
+			<p>JNodes (think <emph>JSON Nodes</emph>) encapsulate the values found in a tree of
+			maps and arrays, such as the tree formed by parsing a JSON text. JNodes can be used
+			in path expressions in the same way as XML nodes (now called <emph>XNodes</emph> when
+			a distinction is needed) are used in a tree formed by parsing XML.</p>
 			
-			<p>TODO add info! JNodes are introduced in XPath 4.0.</p>
+			<p>Many operations apply both to JNodes and XNodes, so the term <emph>GNode</emph>
+			is introduced to refer to both kinds generically.</p>
+			
+			<aside>Available since Saxon 13 when XPath 4.0 is enabled.</aside>
+			
+			<p>Consider the tree formed by applying the <code>parse-json</code> function to a 
+				(recursive) JSON text as follows:</p>
+			
+			<pre><code>
+let $tree := parse-json('{
+  "type": "package",
+  "name": "org",
+  "content": [
+      { "type": "package",
+        "name": "xml",
+        "content": [
+            { "type": "package",
+              "name": "sax",
+              "content": [
+                  { "type": "class",
+                    "name": "Attributes"},
+                  { "type": "class",
+                    "name": "ContentHandler"},
+                  { "type": "class",
+                    "name": "XMLReader"}
+               ]
+            }]
+     }]
+}')</code></pre>
+			
+			<p>The value of <code>$tree</code> is a map, and this can be wrapped in a JNode either explicitly
+			by a call on the function <code>jtree($tree)</code>, or implicitly by using <code>$tree</code>
+			as the left hand operand of the <code>/</code> operator.</p>
+			
+			<p>As a simple example, <code>$tree/type</code> (which is short for <code>$tree/child::type</code>)
+			returns a JNode that wraps the top-level map entry <code>"type":"package"</code>. The important
+			properties of this JNode are its key (<code>"type"</code>) and its value (<code>"package"</code>):
+			these properties are accessible using the functions <code>jkey</code> and <code>jvalue</code>.</p>
+			
+			<p>It is also possible to navigate from a JNode to its descendants: the expression <code>$tree//name</code>
+			returns six JNodes, whose <code>value</code> properties are respectively <code>"org"</code>, 
+			<code>"xml"</code>, <code>"sax"</code>, <code>"Attributes"</code>, <code>"ContentHandler"</code>, 
+			and <code>"XMLReader"</code>. The path expression <code>$tree//name[../type="class"]/jvalue()</code>
+			returns the sequence <code>("Attributes", "ContentHandler", "XMLReader")</code>. This illustrates that
+			it is possible to navigate from a JNode to its parent using the parent axis, here abbreviated in the usual
+			way to <code>..</code>. The path expression can be written in full as:</p>
+			
+			<eg><code>jtree($tree)/descendant-or-self::*/child::name[parent::*/child::type="class"]/jvalue()</code></eg>
+			
+			<p>All the axes available for XNodes are also available for JNodes (including four new axes introduced in
+			XPath 4.0: <code>following-or-self</code>, <code>preceding-or-self</code>, <code>following-sibling-or-self</code>,
+			and <code>preceding-sibling-or-self</code>. This works only because maps in 4.0 are ordered: in the above
+			example, the <code>preceding-sibling</code> axis starting at a JNode whose <code>key</code> is <code>"name"</code>
+			is in each case a JNode whose <code>key</code> is <code>"type"</code>.</p>
+			
+			<p>When selecting the children of a JNode that wraps an array, the child JNodes again have a <code>key</code>
+			and a <code>value</code> property: this time, the <code>key</code> property is an integer giving the one-based
+			index of an array member, and the <code>value</code> property is the value of the array member. So the expression
+			<code>$tree//name[.="ContentHandler"]/../jkey()</code> returns 2, because the map whose <code>name</code>
+			entry is <code>"ContentHandler"</code> is the second member of the containing array.</p>
+			
+			<p>The node tests used to select chosen nodes on an axis differ slightly from those used with XNodes.
+			The most common node tests are:</p>
 			
 			<ul>
-				<li><p>Generic node (gnode())</p> - <i/>represents a node in a tree, regardless of
-					whether it's a JSON tree or an XML tree.</li>
-				<li><p>JSON node (jnode())</p> - <i>represents a node in a JSON tree, as opposed to an
-					XML tree</i></li>
+				<li><p><code>*</code> selects all the entries in a map, or all the members of an array</p></li>
+				<li><p><code>name</code> selects the entry in a map whose key is the string <code>name</code>, which
+				must take the form of an NCName.</p></li>
+				<li><p><code>get("key value")</code> selects the entry in a map whose key is <code>"key value"</code>. In this
+				case the key can be any atomic item (including, as in this example, a string containing spaces). When
+				selecting members of an array, <code>get(3)</code> selects the third member.</p></li>
+				<li><p><code>~type</code> selects JNodes whose <code>value</code> is of a given type. For example
+				<code>child::~xs:integer</code> selects child JNodes whose value is an integer, while <code>child::~array()</code>
+				selects child JNodes whose value is an array. Using record types is often convenient: in the above example,
+				<code>$tree//~record(type, name)</code> selects all descendant maps having entries with keys <code>"type"</code>
+				and <code>"name"</code>.</p></li>
 			</ul>
-			<p>To complement the above changes, from 4.0 onwards, a node in an XML tree is known as an
-				XNode (node()) but remains otherwise unchanged.</p>
+			
+			<p>JNodes are intended primarily for use with trees of maps and arrays derived from JSON, in which the
+			values of entries/members are typically single items. They can also be used with maps and arrays whose
+			values are multi-item sequences, but their use in such cases is slightly less convenient. For details
+			consult the XPath 4.0 specification. It's entirely possible that the specification in this area will
+			change over time.</p>
+			
+			<aside>When processing JSON input in which the value <code>null</code> appears, it may be useful
+			to supply the option <code>null=#fn:null</code> to the <code>parse-json</code> or <code>json-doc</code>
+			function. This causes a JSON null to be represented as the QName value <code>#fn:null</code> rather than
+			as an empty sequence, which makes it easier to select using JNode tests. For example,
+			<code>count($tree//*[.=#fn:null])</code> will count the number of null values in the tree.</aside>
+			
+			
 		</section>
 
 		<section id="string-templates" title="String templates" class="qt4">
