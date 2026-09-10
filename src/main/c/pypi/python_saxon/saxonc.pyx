@@ -817,7 +817,7 @@ cdef class PySaxonProcessor:
         Raises:
             Exception: Error if invalid use of keywords
         """
-        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
+        py_error_message = "Error: parse_xml should contain exactly one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
         if kwds.keys() >= {"xml_file_name", "xml_text"}:
             raise Exception(py_error_message)
         if kwds.keys() >= {"xml_file_name", "xml_uri"}:
@@ -895,7 +895,7 @@ cdef class PySaxonProcessor:
         Raises:
             Exception: Error if invalid use of keywords
         """
-        py_error_message = "Error: parse_json should only contain one of the following keyword arguments: (json_file_name|json_text)"
+        py_error_message = "Error: parse_json should contain exactly one of the following keyword arguments: (json_file_name|json_text)"
         if kwds.keys() >= {"json_file_name", "json_text"}:
             raise Exception(py_error_message)
         cdef PyXdmNode val = None
@@ -1095,7 +1095,7 @@ cdef class PyDocumentBuilder:
             Exception: Error if invalid use of keywords.
             PySaxonApiError: Error if failure to parse XML file or XML text
         """
-        py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
+        py_error_message = "Error: parse_xml should contain exactly one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
         if kwds.keys() >= {"xml_file_name", "xml_text"}:
             raise Exception(py_error_message)
         if kwds.keys() >= {"xml_file_name", "xml_uri"}:
@@ -1315,7 +1315,7 @@ cdef class PyXslt30Processor:
             2) executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef", target="HE")
             3) executable = xsltproc.compile_stylesheet(associated_file="foo.xml")
         """
-        py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node)"
+        py_error_message = "Error: compile_stylesheet should contain exactly one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node)"
         cdef char * c_outputfile
         cdef char * c_stylesheet
         cdef char * c_encoding_string = NULL
@@ -1750,7 +1750,7 @@ cdef class PyXsltExecutable:
             Exception: Exception is raised if keyword argument is not one of file_name or xdm_item
                 (providing a PyXdmItem).
         """
-        py_error_message = "Error: set_global_context_item should only contain one of the following keyword arguments: (file_name|xdm_item)"
+        py_error_message = "Error: set_global_context_item should contain exactly one of the following keyword arguments: (file_name|xdm_item)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -1783,7 +1783,7 @@ cdef class PyXsltExecutable:
             Exception: Exception is raised if keyword argument is not one of file_name or xdm_value
                 (providing a PyXdmValue).
         """
-        py_error_message = "Error: set_initial_match_selection should only contain one of the following keyword arguments: (file_name|xdm_value)"
+        py_error_message = "Error: set_initial_match_selection should contain exactly one of the following keyword arguments: (file_name|xdm_value)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -3032,7 +3032,7 @@ cdef class PyXQueryProcessor:
         Args:
             **kwds: Possible keyword arguments: file_name (str) or xdm_item (PyXdmItem)
         """
-        py_error_message = "Error: set_context should only contain one of the following keyword arguments: (file_name|xdm_item)"
+        py_error_message = "Error: set_context should contain exactly one of the following keyword arguments: (file_name|xdm_item)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -3535,7 +3535,7 @@ cdef class PyXPathProcessor:
         Args:
             **kwds: Possible keyword arguments: file_name (str) or xdm_item (PyXdmItem)
         """
-        py_error_message = "Error: set_context should only contain one of the following keyword arguments: (file_name|xdm_item)"
+        py_error_message = "Error: set_context should contain exactly one of the following keyword arguments: (file_name|xdm_item)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -3853,7 +3853,7 @@ cdef class PySchemaValidator:
         Args:
             **kwds: Possible keyword arguments: must be one of the following (xsd_text|xsd_file|xsd_node)
         """
-        py_error_message = "Error: register_schema should only contain one of the following keyword arguments: (xsd_text|xsd_file|xsd_node)"
+        py_error_message = "Error: register_schema should contain exactly one of the following keyword arguments: (xsd_text|xsd_file|xsd_node)"
         if len(kwds) != 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -3917,7 +3917,7 @@ cdef class PySchemaValidator:
             PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
             that prevented validation from taking place (such as failure to read or parse the input document)
         """
-        py_error_message = "Error: validate should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
+        py_error_message = "Error: validate should contain exactly one of the following keyword arguments: (file_name|xdm_node|xml_text)"
         if len(kwds) > 1:
           raise Exception(py_error_message)
         cdef py_value = None
@@ -3951,7 +3951,7 @@ cdef class PySchemaValidator:
             PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
             that prevented validation from taking place (such as failure to read or parse the input document)
         """
-        py_error_message = "Error: validate_to_node should only contain one of the following keyword arguments: (file_name|xdm_node|xml_text)"
+        py_error_message = "Error: validate_to_node should contain exactly one of the following keyword arguments: (file_name|xdm_node|xml_text)"
         if len(kwds) > 1:
           raise Exception(py_error_message)
         cdef py_value = None
