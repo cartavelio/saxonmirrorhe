@@ -58,13 +58,13 @@ public class SaxonPreprocess extends AnnotationParent {
 
         String defaultNamespace = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNamespace == null) {
-            defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
+            defaultNamespace = getXSDSchemaElement().getXPathDefaultNamespace();
         }
         NamespaceUri defaultNamespaceUri;
         if (defaultNamespace.equals("##defaultNamespace")) {
             defaultNamespaceUri = getURIForPrefix("", true);
         } else if (defaultNamespace.equals("##targetNamespace")) {
-            defaultNamespaceUri = getXSDSchema().getTargetNamespace();
+            defaultNamespaceUri = getXSDSchemaElement().getTargetNamespace();
         } else if (defaultNamespace.equals("##local")) {
             defaultNamespaceUri = NamespaceUri.NULL;
         } else {

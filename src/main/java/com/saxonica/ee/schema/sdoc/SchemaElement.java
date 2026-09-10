@@ -239,7 +239,7 @@ public abstract class SchemaElement extends ElementImpl {
      * @throws SchemaException if none is found (which means the schema is invalid)
      */
 
-    public XSDSchemaElement getXSDSchema() throws SchemaException {
+    public XSDSchemaElement getXSDSchemaElement() throws SchemaException {
         NodeInfo n = this;
         while (true) {
             if (n instanceof XSDSchemaElement) {
@@ -261,7 +261,7 @@ public abstract class SchemaElement extends ElementImpl {
      */
 
     public SingleNamespaceSchema getSchema() throws SchemaException {
-        return getXSDSchema().getSchema();
+        return getXSDSchemaElement().getSchema();
     }
 
     /**
@@ -369,7 +369,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected void error(String err) throws SchemaException {
         ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         try {
-            getXSDSchema().incrementErrorCount();
+            getXSDSchemaElement().incrementErrorCount();
         } catch (SchemaException e2) {
             throw new IllegalStateException("Schema document contains no xs:schema element. " +
                                                     "Problem occurred while reporting error: " + e2.getMessage());
@@ -394,7 +394,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected void error(SchemaException exception) throws SchemaException {
         ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         try {
-            getXSDSchema().incrementErrorCount();
+            getXSDSchemaElement().incrementErrorCount();
         } catch (SchemaException e2) {
             throw new IllegalStateException("Schema document contains no xs:schema element. " +
                     "Problem occurred while reporting error: " + exception.getMessage());
@@ -469,7 +469,7 @@ public abstract class SchemaElement extends ElementImpl {
     protected StructuredQName getComponentName(String name, int option)
         throws SchemaException {
         try {
-            XSDSchemaElement root = getXSDSchema();
+            XSDSchemaElement root = getXSDSchemaElement();
             String[] parts = NameChecker.getQNameParts(Whitespace.trim(name));
             NamespaceUri uri = null;
             if (parts[0].isEmpty()) {
@@ -1077,12 +1077,12 @@ public abstract class SchemaElement extends ElementImpl {
                     return;
                 }
                 if (ns.equals(NAMESPACE_TARGET)) {
-                    wildcard.addAllowedNamespace(getXSDSchema().getTargetNamespace());
+                    wildcard.addAllowedNamespace(getXSDSchemaElement().getTargetNamespace());
                 } else if (ns.equals(NAMESPACE_LOCAL)) {
                     wildcard.addAllowedNamespace(NamespaceUri.NULL);
                 } else if (ns.equals(NAMESPACE_OTHER)) {
                     wildcard.addDisallowedNamespace(NamespaceUri.NULL);
-                    wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
+                    wildcard.addDisallowedNamespace(getXSDSchemaElement().getTargetNamespace());
                 } else if (ns.equals(NAMESPACE_ANY)) {
                     // do nothing, this is the default
                 } else if (ns.contains("##")) {
@@ -1112,7 +1112,7 @@ public abstract class SchemaElement extends ElementImpl {
             //need to retrieve all the namespaces
             String ns = tokenizer.nextToken();
             if (ns.equals(XSDAny.NAMESPACE_TARGET)) {
-                wildcard.addDisallowedNamespace(getXSDSchema().getTargetNamespace());
+                wildcard.addDisallowedNamespace(getXSDSchemaElement().getTargetNamespace());
             } else if (ns.equals(XSDAny.NAMESPACE_LOCAL)) {
                 wildcard.addDisallowedNamespace(NamespaceUri.NULL);
             } else if (ns.contains("##")) {
@@ -1231,7 +1231,7 @@ public abstract class SchemaElement extends ElementImpl {
         @Override
         public Executable getExecutable() {
             try {
-                return schemaElement.getXSDSchema().getExecutable();
+                return schemaElement.getXSDSchemaElement().getExecutable();
             } catch (SchemaException e) {
                 return null;
             }

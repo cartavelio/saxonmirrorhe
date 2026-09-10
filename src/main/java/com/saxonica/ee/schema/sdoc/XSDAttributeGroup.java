@@ -287,7 +287,7 @@ public class XSDAttributeGroup extends SchemaElement {
                 // attribute group that it refers to, so that all references
                 // other than this one will identify the redefined group
 
-                NamespaceUri uri = getXSDSchema().getTargetNamespace();
+                NamespaceUri uri = getXSDSchemaElement().getTargetNamespace();
                 String localName = ref.getTargetComponentName().getLocalPart();
                 String newLocalName = localName + '_' + ref.hashCode();
                 StructuredQName newNameCode = new StructuredQName("", uri, newLocalName);

@@ -71,6 +71,12 @@ public class CompiledComplexType {
         machine = new FiniteStateMachine(type, false);
     }
 
+    public CompiledComplexType(PreparedSchema schema, UserComplexType type, FiniteStateMachine fsm) {
+        this.schema = schema;
+        this.type = type;
+        this.machine = fsm;
+    }
+
     public EnterpriseConfiguration getConfiguration() {
         return schema.getConfiguration();
     }

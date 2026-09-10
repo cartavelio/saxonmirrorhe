@@ -37,7 +37,7 @@ public class XSDOverride extends SchemaElement {
     @Override
     protected void prepareAttributes() throws SchemaException {
 
-        if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+        if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:override element requires XSD 1.1 to be enabled");
         }
 
@@ -56,7 +56,7 @@ public class XSDOverride extends SchemaElement {
         }
 
         String documentBase = getBaseURI();
-        SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
+        SchemaCompiler compiler = getXSDSchemaElement().getSchemaCompiler();
 
         Source source = SchemaReader.getSource(documentBase,
                                                schemaLocation,
@@ -79,8 +79,8 @@ public class XSDOverride extends SchemaElement {
             return;
         }
         //System.err.println("Processing override " + key);
-        compiler.setBeingRead(getXSDSchema().getTargetNamespace(), key);
-        if (compiler.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null) {
+        compiler.setBeingRead(getXSDSchemaElement().getTargetNamespace(), key);
+        if (compiler.getExistingSchemaDocument(schemaLocation, getXSDSchemaElement().getTargetNamespace()) != null) {
             error("Saxon can't handle overriding of a schema document that has already been loaded by a different route");
             return;
         }

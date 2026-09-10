@@ -34,7 +34,7 @@ public class XSDDefaultOpenContent extends AnnotationParent {
     @Override
     protected void prepareAttributes() throws SchemaException {
 
-        if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+        if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:defaultOpenContent element requires XSD 1.1 to be enabled");
         }
 
@@ -80,7 +80,7 @@ public class XSDDefaultOpenContent extends AnnotationParent {
             switch (fp) {
                 case StandardNames.XS_ANY: {
                     Wildcard wildcard = ((XSDAny) child).getElementWildcard().getWildcard();
-                    getXSDSchema().setDefaultOpenContent(wildcard, mode, appliesToEmpty);
+                    getXSDSchemaElement().setDefaultOpenContent(wildcard, mode, appliesToEmpty);
                     break;
                 }
             }

@@ -235,7 +235,7 @@ public class XSDSchemaElement extends SchemaElement {
             NamespaceUri nsURI = NamespaceUri.of(nsURIatt);
             // if we are including a schema we must take care that the namespaces are the same
             if (referrer instanceof XSDInclude || referrer instanceof XSDRedefine) {
-                final NamespaceUri includingNamespace = referrer.getXSDSchema().getTargetNamespace();
+                final NamespaceUri includingNamespace = referrer.getXSDSchemaElement().getTargetNamespace();
                 if (!includingNamespace.equals(nsURI)) {
                     error("The target namespace of the included schema must be the same as the target namespace of the including schema");
                     return;
@@ -249,7 +249,7 @@ public class XSDSchemaElement extends SchemaElement {
             if (referrer instanceof XSDInclude || referrer instanceof XSDRedefine || referrer instanceof XSDOverride) {
                 // if no target namespace specified for an included schema document, adopt the target
                 // namespace of the including schema
-                targetNamespace = referrer.getXSDSchema().getTargetNamespace();
+                targetNamespace = referrer.getXSDSchemaElement().getTargetNamespace();
                 chameleon = true;
             } else {
                 targetNamespace = NamespaceUri.NULL;

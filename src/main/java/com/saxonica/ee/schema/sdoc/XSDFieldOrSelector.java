@@ -52,7 +52,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
         NamespaceUri defaultNS;
         String defaultNSstring = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNSstring == null) {
-            defaultNSstring = getXSDSchema().getXPathDefaultNamespace();
+            defaultNSstring = getXSDSchemaElement().getXPathDefaultNamespace();
         }
         if (defaultNSstring != null) {
             switch (defaultNSstring) {
@@ -60,7 +60,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
                     defaultNS = getURIForPrefix("", true);
                     break;
                 case "##targetNamespace":
-                    defaultNS = getXSDSchema().getTargetNamespace();
+                    defaultNS = getXSDSchemaElement().getTargetNamespace();
                     break;
                 case "##local":
                     defaultNS = NamespaceUri.NULL;
@@ -86,7 +86,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
         Expression exp;
         try {
             exp = new XPathParser(env).parse(xpath, 0, Token.EOF, env);
-            boolean allowExtensions = getXSDSchema().getAllowedExtensions().contains("id-xpath-syntax");
+            boolean allowExtensions = getXSDSchemaElement().getAllowedExtensions().contains("id-xpath-syntax");
             if (allowExtensions) {
                 List<String> reasonsForFailure = new ArrayList<>();
                 selector = StreamingPatternMaker.makeStreamingPattern(exp, getConfiguration(), reasonsForFailure);

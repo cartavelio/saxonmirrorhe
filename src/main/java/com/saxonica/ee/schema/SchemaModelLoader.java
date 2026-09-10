@@ -45,6 +45,7 @@ public class SchemaModelLoader extends ProxyReceiver {
     private SchemaCompiler compiler;
     private final HashMap<String, SchemaComponent> components = new HashMap<>(100);
     private final HashSet<SchemaComponent> anonComponents = new HashSet<>(100);
+    private final IdentityHashMap<UserComplexType, FiniteStateMachine> pendingCompilations = new IdentityHashMap<>();
     private final List<Fixup> fixups = new ArrayList<>();
     private final Stack<SCMNodeHandler> handlerStack = new Stack<>();
     private NamespaceResolver namespaceResolver;
@@ -93,6 +94,14 @@ public class SchemaModelLoader extends ProxyReceiver {
                 throw new XPathException("Invalid checksum in compiled schema file");
             }
         }
+
+        for (SchemaType type : schema.getAllTypes()) {
+            if (type instanceof UserComplexType) {
+                FiniteStateMachine fsm = pendingCompilations.get(type);
+                schema.rebuildComplexType((UserComplexType)type, fsm);
+            }
+        }
+
         try {
             for (Fixup fixup : fixups) {
                 fixup.apply(this);
@@ -144,6 +153,12 @@ public class SchemaModelLoader extends ProxyReceiver {
                     ((UserSchemaComponent) o).elaborate(compiler);
                 }
             }
+
+            for (CompiledComplexType cct : schema.getCompiledComplexTypes()) {
+                cct.makeContextDeterminedTypeMapForAttributes(schema);
+                cct.makeContextDeterminedTypeMapForElements(schema);
+            }
+            
         } catch (SchemaException err) {
             throw new XPathException(err);
         }
@@ -705,7 +720,6 @@ public class SchemaModelLoader extends ProxyReceiver {
     private static class ComplexTypeHandler extends SCMNodeHandler {
 
         UserComplexType complexType;
-        CompiledComplexType compiledComplexType;
 
         @Override
         public SCMNodeHandler handleChildElement(String localName) {
@@ -725,7 +739,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 case "modelGroupParticle":
                     return new ParticleHandler(complexType);
                 case "finiteStateMachine":
-                    return new FiniteStateMachineHandler(complexType);
+                    return new FiniteStateMachineHandler(complexType, loader);
                 case "assertion":
                     return new AssertionHandler(complexType);
                 default:
@@ -810,7 +824,6 @@ public class SchemaModelLoader extends ProxyReceiver {
                     Derivation.DERIVATION_EXTENSION |
                                                      Derivation.DERIVATION_RESTRICTION);
             complexType.setFinalProhibitions(finalSet);
-            //compiledComplexType = loader.schema.compileComplexType(loader.compiler,complexType);
         }
 
         @Override
@@ -1655,9 +1668,9 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         private final FiniteStateMachine fsm;
 
-        public FiniteStateMachineHandler(UserComplexType complexType) {
+        public FiniteStateMachineHandler(UserComplexType complexType, SchemaModelLoader loader) {
             fsm = new FiniteStateMachine(complexType, true);
-            //complexType.setFiniteStateMachine(fsm);
+            loader.pendingCompilations.put(complexType, fsm);
         }
 
         @Override

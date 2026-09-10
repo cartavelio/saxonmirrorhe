@@ -95,7 +95,7 @@ public class XSDSimpleType extends SchemaElement {
         //-- @final
         String finalVal = atts.getValue(NamespaceUri.NULL, "final");
         if (finalVal == null) {
-            simpleTypeDef.setFinalProhibitions(getXSDSchema().getFinalDefault());
+            simpleTypeDef.setFinalProhibitions(getXSDSchemaElement().getFinalDefault());
         } else {
             int f = parseFinalOrBlock("final",
                     finalVal,
@@ -212,7 +212,7 @@ public class XSDSimpleType extends SchemaElement {
             simpleTypeDef.setRedefinitionLevel(oldSType.getRedefinitionLevel() + 1);
             UserSimpleType oldType = (UserSimpleType) oldSType;
             // rename the type being redefined
-            NamespaceUri uri = getXSDSchema().getTargetNamespace();
+            NamespaceUri uri = getXSDSchemaElement().getTargetNamespace();
             NamePool pool = getNamePool();
             String localName = simpleTypeDef.getName();
             String prefix = simpleTypeDef.getTypeName().getPrefix();

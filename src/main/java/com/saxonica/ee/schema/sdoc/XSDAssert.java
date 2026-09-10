@@ -61,7 +61,7 @@ public class XSDAssert extends AnnotationParent {
 
     @Override
     protected void prepareAttributes() throws SchemaException {
-        if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+        if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:assert element requires XSD 1.1 to be enabled");
         }
         AttributeMap atts = attributes();
@@ -72,7 +72,7 @@ public class XSDAssert extends AnnotationParent {
 
         String defaultNamespace = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNamespace == null) {
-            defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
+            defaultNamespace = getXSDSchemaElement().getXPathDefaultNamespace();
         }
         NamespaceUri defaultNamespaceUri;
         switch (defaultNamespace) {
@@ -80,7 +80,7 @@ public class XSDAssert extends AnnotationParent {
                 defaultNamespaceUri = getURIForPrefix("", true);
                 break;
             case "##targetNamespace":
-                defaultNamespaceUri = getXSDSchema().getTargetNamespace();
+                defaultNamespaceUri = getXSDSchemaElement().getTargetNamespace();
                 break;
             case "##local":
                 defaultNamespaceUri = NamespaceUri.NULL;
@@ -116,7 +116,7 @@ public class XSDAssert extends AnnotationParent {
         env.setContextItemParentless(true);
         env.setContainingLocation(new AttributeLocation(this, NamespaceUri.NULL.qName("test")));
         int xpathVersion = config.getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD);
-        if (getXSDSchema().getAllowedExtensions().contains("any-xpath-version")) {
+        if (getXSDSchemaElement().getAllowedExtensions().contains("any-xpath-version")) {
             xpathVersion = 31;
         }
         env.setXPathLanguageLevel(xpathVersion);
@@ -126,7 +126,7 @@ public class XSDAssert extends AnnotationParent {
 
         // Declare any variables defined in saxon:param elements
         Map<StructuredQName, XPathVariable> parameters = new HashMap<>();
-        for (GlobalParam param : getXSDSchema().getGlobalParams()) {
+        for (GlobalParam param : getXSDSchemaElement().getGlobalParams()) {
             XPathVariable var = env.declareVariable(param.getVariableQName());
             GroundedValue defaultVal = ((Literal) param.getBody()).getGroundedValue();
             var.setDefaultValue(defaultVal);

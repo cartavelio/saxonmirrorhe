@@ -457,7 +457,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     /**
      * Set a user-defined SchemaURIResolver for resolving URIs used in "import schema"
-     * declarations.
+     * declarations. This acts as a default for any {@link XsdCompiler} created from
+     * this point on.
      *
      * @param resolver the URI resolver used for import schema declarations
      */
@@ -525,6 +526,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     /**
      * Get the user-defined SchemaURIResolver for resolving URIs used in "import schema"
      * declarations; if none has been explicitly set, returns the standard schema URI resolver.
+     * This returns the default setting used when creating a new {@link XsdCompiler}; it is not
+     * affected by subsequent calls to {@link XsdCompiler#setSchemaURIResolver(SchemaURIResolver)}.
      *
      * @return the user-defined SchemaURIResolver if there is one; otherwise the standard
      * schema URI resolver.
@@ -553,7 +556,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Load an empty schema. This may be useful as a basis for validating a document using a schema loaded
+     * Create an empty schema. This may be useful as a basis for validating a document using a schema loaded
      * using xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes.
      *
      * @return an empty schema containing only the built-in components.

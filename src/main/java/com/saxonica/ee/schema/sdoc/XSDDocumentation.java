@@ -63,7 +63,7 @@ public class XSDDocumentation extends SchemaElement {
         allowAttributes(atts, allowed);
 
         String source = atts.getValue(NamespaceUri.NULL, "source");
-        if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+        if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             if (source != null && !StandardURIChecker.getInstance().isValidURI(source)) {
                 error("Value of source attribute must be a valid anyURI value");
             }

@@ -61,7 +61,7 @@ public class XSDIdentityConstraint extends SchemaElement {
         StructuredQName qName;
 
         if (refAtt != null) {
-            if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+            if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The @ref attribute cannot be used on an integrity constraint unless XSD 1.1 is enabled");
             }
             qName = getComponentName(refAtt, USE_DEFAULT_NS);

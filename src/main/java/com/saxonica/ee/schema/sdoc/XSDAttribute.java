@@ -77,7 +77,7 @@ public class XSDAttribute extends SchemaElement {
             form = "qualified";
             //attributeDecl.setForm("qualified");
         } else {
-            form = getXSDSchema().getAttributeFormDefault();
+            form = getXSDSchemaElement().getAttributeFormDefault();
             if (form != null) {
                 //attributeDecl.setForm(form);
             } else {
@@ -89,7 +89,7 @@ public class XSDAttribute extends SchemaElement {
         // @targetNamespace
         String localTargetNamespace = atts.getValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null) {
-            if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+            if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The targetNamespace cannot be defined locally unless XSD 1.1 is enabled");
             }
             if (atts.getValue(NamespaceUri.NULL, "name") == null) {
@@ -115,7 +115,7 @@ public class XSDAttribute extends SchemaElement {
             } else {
                 try {
                     if (localTargetNamespace != null || "qualified".equals(form)) {
-                        if (getXSDSchema().getTargetNamespace().equals(NamespaceUri.SCHEMA_INSTANCE)) {
+                        if (getXSDSchemaElement().getTargetNamespace().equals(NamespaceUri.SCHEMA_INSTANCE)) {
                             error("Attributes cannot be declared in the 'xsi:' namespace");
                         }
                         attName = getComponentName(attValue, REQUIRE_TARGET_NS);
@@ -150,7 +150,7 @@ public class XSDAttribute extends SchemaElement {
                 attName = getComponentName(attValue, USE_DEFAULT_NS);
                 attributeUse.setTargetComponentName(attName);
                 if (attName.hasURI(NamespaceUri.SCHEMA_INSTANCE)) {
-                    SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
+                    SchemaCompiler compiler = getXSDSchemaElement().getSchemaCompiler();
                     PreparedSchema xsi = compiler.getSchemaForBuiltInNamespace(NamespaceUri.SCHEMA_INSTANCE);
                     xsi.copyTo(compiler.getPreparedSchema(), compiler);
                     attributeUse.tryToResolve(compiler, true);
@@ -231,7 +231,7 @@ public class XSDAttribute extends SchemaElement {
             }
             boolean hasFixed = atts.getValue(NamespaceUri.NULL, "fixed") != null;
             if (hasFixed && attValue.equals("prohibited") &&
-                    getXSDSchema().getSchemaCompiler().getLanguageVersion() != Configuration.XSD10) {
+                    getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() != Configuration.XSD10) {
                 // see test attP029 and test bug 14245
                 error("When @fixed is present, the @use attribute must not have the value \"prohibited\"");
                 attValue = "optional";  // error recovery
@@ -261,7 +261,7 @@ public class XSDAttribute extends SchemaElement {
         //-- @inheritable
         String inheritAtt = atts.getValue(NamespaceUri.NULL, "inheritable");
         if (inheritAtt != null) {
-            if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+            if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The inheritable attribute cannot be used unless XSD 1.1 is enabled");
             }
             boolean inherit = parseBooleanAttribute("inheritable", inheritAtt);
@@ -332,7 +332,7 @@ public class XSDAttribute extends SchemaElement {
 
         String localTargetNamespace = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null &&
-                !NamespaceUri.of(localTargetNamespace).equals(getXSDSchema().getTargetNamespace())) {
+                !NamespaceUri.of(localTargetNamespace).equals(getXSDSchemaElement().getTargetNamespace())) {
             checkLocalTargetNamespace("attribute");
         }
 

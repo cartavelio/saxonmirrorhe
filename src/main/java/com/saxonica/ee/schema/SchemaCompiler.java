@@ -754,10 +754,10 @@ public class SchemaCompiler {
         }
         HashMap<StructuredQName, Sequence> params = new HashMap<StructuredQName, Sequence>();
         params.put(NamespaceUri.NULL.qName("newTargetNamespace"),
-                   new AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
+                   new AnyURIValue((referrer.getXSDSchemaElement().getTargetNamespace().toUnicodeString())));
         GlobalParameterSet parameterSet = new GlobalParameterSet();
         parameterSet.put(NamespaceUri.NULL.qName("newTargetNamespace"),
-                         new AnyURIValue((referrer.getXSDSchema().getTargetNamespace().toUnicodeString())));
+                         new AnyURIValue((referrer.getXSDSchemaElement().getTargetNamespace().toUnicodeString())));
         TreeInfo doc = chameleonTransformer.transform(this, pipelineConfiguration, referrer, input, parameterSet);
         return new SchemaDocument(doc);
     }

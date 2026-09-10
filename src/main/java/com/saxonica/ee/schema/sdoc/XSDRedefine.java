@@ -51,7 +51,7 @@ public class XSDRedefine extends SchemaElement {
 
         String documentBase = getBaseURI();
         PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-        SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
+        SchemaCompiler compiler = getXSDSchemaElement().getSchemaCompiler();
         
         Source source = null;
         try {
@@ -72,7 +72,7 @@ public class XSDRedefine extends SchemaElement {
                 error("The schema document " + source.getSystemId() + " includes or redefines itself recursively");
                 return;
             }
-            if (compiler.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null) {
+            if (compiler.getExistingSchemaDocument(schemaLocation, getXSDSchemaElement().getTargetNamespace()) != null) {
                 error("Saxon can't handle redefinition of a schema document that has already been loaded by a different route");
                 return;
             }

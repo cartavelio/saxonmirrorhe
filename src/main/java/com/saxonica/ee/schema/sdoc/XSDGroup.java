@@ -316,7 +316,7 @@ public class XSDGroup extends SchemaElement {
                 // it refers to, so that all references other than this one will identify
                 // the redefined group
 
-                NamespaceUri uri = getXSDSchema().getTargetNamespace();
+                NamespaceUri uri = getXSDSchemaElement().getTargetNamespace();
                 String localName = gref.getTargetComponentName().getLocalPart();
                 String newLocalName = localName + '_' + gref.hashCode();
                 StructuredQName newNameCode = new StructuredQName("", uri, newLocalName);

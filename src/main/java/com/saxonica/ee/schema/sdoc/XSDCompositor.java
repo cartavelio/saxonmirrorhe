@@ -102,7 +102,7 @@ public class XSDCompositor extends SchemaElement {
 
         if (modelGroup instanceof AllModelGroup) {
             int max = particle.getMaxOccurs();
-            if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+            if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 if (max != 1) {
                     invalidAttributeValue("maxOccurs", (max == -1 ? "unbounded" : max + ""), "Must be \"1\"");
                     return;

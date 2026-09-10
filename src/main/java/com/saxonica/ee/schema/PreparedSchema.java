@@ -1,6 +1,7 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.fsa.FiniteStateMachine;
 import com.saxonica.ee.schema.sdoc.SchemaDocument;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
@@ -545,6 +546,10 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public CompiledComplexType getCompiledComplexType(UserComplexType type) {
         return compiledComplexTypes.get(type);
+    }
+
+    public Iterable<CompiledComplexType> getCompiledComplexTypes() {
+        return compiledComplexTypes.values();
     }
 
     /**
@@ -1524,6 +1529,7 @@ public class PreparedSchema implements Schema, NotationSet {
             SchemaModelLoader loader = new SchemaModelLoader(config);
             PreparedSchema schema = loader.load(source);
             addSchema(schema);
+            //schema.recompile();
             //schema.copyTo(this, config.newSchemaCompiler());
             for (NamespaceUri ns : schema.getTargetNamespaces()) {
                 setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
@@ -1556,7 +1562,6 @@ public class PreparedSchema implements Schema, NotationSet {
         }
         pschema.copyTo(this, config.newSchemaCompiler());
         setLocalLicenseId(pschema.getLocalLicenseId());
-
     }
 
 
@@ -1915,7 +1920,15 @@ public class PreparedSchema implements Schema, NotationSet {
         return cct;
     }
 
-
+    public CompiledComplexType rebuildComplexType(UserComplexType type, FiniteStateMachine fsm) throws SchemaException {
+        CompiledComplexType cct = getCompiledComplexType(type);
+        if (cct != null) {
+            return cct;
+        }
+        cct = new CompiledComplexType(this, type, fsm);
+        compiledComplexTypes.put(type, cct);
+        return cct;
+    }
 
 }
 

@@ -51,11 +51,11 @@ public class XSDInclude extends AnnotationParent {
             return;
         }
 
-        SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
+        SchemaCompiler compiler = getXSDSchemaElement().getSchemaCompiler();
         String documentBase = getBaseURI();
         try {
             String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
-            XSDSchemaElement existing = compiler.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
+            XSDSchemaElement existing = compiler.getExistingSchemaDocument(location, getXSDSchemaElement().getTargetNamespace());
             if (existing != null) {
                 includedSchema = existing.getSchema();
                 return;

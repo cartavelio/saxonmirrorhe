@@ -60,7 +60,7 @@ public class XSDImport extends AnnotationParent {
 
         NamespaceUri targetNamespace = NamespaceUri.of(namespace);
 
-        XSDSchemaElement thisSchemaDocument = getXSDSchema();
+        XSDSchemaElement thisSchemaDocument = getXSDSchemaElement();
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
 
         SchemaCompiler compiler = thisSchemaDocument.getSchemaCompiler();

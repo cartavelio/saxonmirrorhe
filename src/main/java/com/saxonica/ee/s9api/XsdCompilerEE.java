@@ -5,13 +5,17 @@ import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SchemaModelLoader;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.lib.StandardErrorReporter;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XsdCompiler;
 import net.sf.saxon.s9api.XsdSchema;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -207,6 +211,19 @@ public class XsdCompilerEE extends XsdCompiler {
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
+    }
+
+    /**
+     * Construct an {@link XsdSchema} by wrapping an internal schema object. This is intended primarily
+     * for internal use
+     * @param internalSchema the internal schema object
+     */
+
+    public XsdSchema wrapInternalSchema(Schema internalSchema) {
+        if (!(internalSchema instanceof PreparedSchema)) {
+            throw new IllegalArgumentException("The internalSchema must be an instance of PreparedSchema");
+        }
+        return new XsdSchemaImpl(processor, (PreparedSchema)internalSchema);
     }
 
 

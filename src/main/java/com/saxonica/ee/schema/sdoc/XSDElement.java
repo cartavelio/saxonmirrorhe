@@ -78,7 +78,7 @@ public class XSDElement extends SchemaElement {
         } else if (isTopLevel()) {
             form = "qualified";
         } else {
-            form = getXSDSchema().getElementFormDefault();
+            form = getXSDSchemaElement().getElementFormDefault();
             if (form == null) {
                 form = "unqualified";
             }
@@ -87,7 +87,7 @@ public class XSDElement extends SchemaElement {
         // @targetNamespace
         String localTargetNamespace = atts.getValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null) {
-            if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
+            if (getXSDSchemaElement().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The targetNamespace cannot be defined locally unless XSD 1.1 is enabled");
             }
             if (atts.getValue(NamespaceUri.NULL, "name") == null) {
@@ -129,7 +129,7 @@ public class XSDElement extends SchemaElement {
                     boolean existsAsTopLevel = schema.getElementDecl(nc) != null;
                     if (!existsAsTopLevel) {
                         String localName = nc.getLocalPart();
-                        XSDSchemaElement s = getXSDSchema();
+                        XSDSchemaElement s = getXSDSchemaElement();
                         for (NodeInfo ignored : s.children(NodeSelector.of(x -> x instanceof XSDElement &&
                                 localName.equals(x.getAttributeValue(NamespaceUri.NULL, "name"))))) {
                             existsAsTopLevel = true;
@@ -216,7 +216,7 @@ public class XSDElement extends SchemaElement {
             attValue = atts.getValue(NamespaceUri.NULL, "block");
             if (attValue == null) {
                 if (element != null) {
-                    element.setBlock(getXSDSchema().getBlockDefault());
+                    element.setBlock(getXSDSchemaElement().getBlockDefault());
                 }
             } else {
                 int f = parseFinalOrBlock("block",
@@ -237,7 +237,7 @@ public class XSDElement extends SchemaElement {
             attValue = atts.getValue(NamespaceUri.NULL, "final");
             if (attValue == null) {
                 if (element != null) {
-                    element.setFinalProhibitions(getXSDSchema().getFinalDefault());
+                    element.setFinalProhibitions(getXSDSchemaElement().getFinalDefault());
                 }
             } else {
                 int f = parseFinalOrBlock("final",
@@ -368,7 +368,7 @@ public class XSDElement extends SchemaElement {
 
         String localTargetNamespace = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
         if (localTargetNamespace != null &&
-                !NamespaceUri.of(localTargetNamespace).equals(getXSDSchema().getTargetNamespace())) {
+                !NamespaceUri.of(localTargetNamespace).equals(getXSDSchemaElement().getTargetNamespace())) {
             checkLocalTargetNamespace("element");
         }
 
