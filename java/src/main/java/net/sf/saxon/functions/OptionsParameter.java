@@ -136,15 +136,15 @@ public class OptionsParameter {
             }
         }
 
-        for (Map.Entry<String, SequenceType> allowed : allowedOptions.entrySet()) {
-            String nominalKey = allowed.getKey();
+        for (Map.Entry<String, SequenceType> allowedoptions : allowedOptions.entrySet()) {
+            String nominalKey = allowedoptions.getKey();
             AtomicValue actualKey;
             if (nominalKey.startsWith("Q{")) {
                 actualKey = new QNameValue(StructuredQName.fromEQName40((nominalKey)), BuiltInAtomicType.QNAME);
             } else {
                 actualKey = new StringValue(nominalKey);
             }
-            SequenceType required = allowed.getValue();
+            SequenceType required = allowedoptions.getValue();
             GroundedValue actual = supplied.get(actualKey);
             if (actual != null) {
                 if (!required.matches(actual)) {

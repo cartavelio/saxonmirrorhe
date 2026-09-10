@@ -182,7 +182,6 @@ public class CoercedFunction extends AbstractFunction {
         int suppliedArity = Math.min(args.length, argTypes.length);
         Configuration config = context.getConfiguration();
         CoercionRules coercionRules = CoercionRules.forVersion(config, allow40 ? 40 : 31);
-        TypeHierarchy th = config.getTypeHierarchy();
         Sequence[] targetArgs = new Sequence[suppliedArity];
         for (int i = 0; i < suppliedArity; i++) {
             GroundedValue gVal = args[i].materialize();

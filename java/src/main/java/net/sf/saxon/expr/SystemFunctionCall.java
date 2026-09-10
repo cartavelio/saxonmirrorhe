@@ -90,14 +90,6 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         return this;
     }
 
-//    public void allocateArgumentEvaluators(Expression[] arguments) {
-//        int lastExplicitArg = Math.min(arguments.length, getTargetFunction().getDetails().argumentTypes.length)-1;
-//        for (int i = 0; i < arguments.length; i++) {
-//            Expression arg = arguments[i];
-//            argumentEvaluators[i] = Elaborator.makeElaborator(arg).lazily(false);
-//        }
-//    }
-
     @Override
     public SystemFunction getTargetFunction() {
         return (SystemFunction) super.getTargetFunction();
