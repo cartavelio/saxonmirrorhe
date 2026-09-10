@@ -220,8 +220,8 @@ public class SaxonCAPI {
      * @param processorDataRef - long value referencing ProcessorDataAccumulator object in the ObjectHandle pool. Used to pass processor data and options
      * @return  success status. 1 for success, -1 for fail and -2 for exception thrown
      */
-    @CEntryPoint(name = "j_run_transform")
-    public static long run_transform(IsolateThread thread, ObjectHandle processorDataRef) {
+    @CEntryPoint(name = "j_run_transform", exceptionHandler =  SaxonCExceptionLongHandler.class)
+    public static long run_transform(IsolateThread thread, ObjectHandle processorDataRef) throws SaxonApiException {
 
         String[] args;
 
@@ -281,8 +281,8 @@ public class SaxonCAPI {
      * @param processorDataRef  - long value referencing Processor object in the ObjectHandle pool
      * @return    success status. 1 for success, -1 for fail and -2 for exception thrown
      */
-    @CEntryPoint(name = "j_run_query")
-    public static long run_query(IsolateThread thread, ObjectHandle processorDataRef) {
+    @CEntryPoint(name = "j_run_query", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long run_query(IsolateThread thread, ObjectHandle processorDataRef) throws SaxonApiException {
 
         String[] args;
 
