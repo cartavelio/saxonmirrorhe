@@ -37,7 +37,6 @@ import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
-import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.SourceLocator;
 import java.io.File;
@@ -1557,7 +1556,6 @@ public class ExpressionTool {
         return changed;
     }
 
-    @NotNull
     private static VariableReference makeReference(Binding variable) {
         if (variable.isGlobal()) {
             return new GlobalVariableReference((GlobalVariable) variable);

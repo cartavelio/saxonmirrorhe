@@ -1,7 +1,6 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
@@ -12,7 +11,7 @@ public class GroundedValueAsIterable<T extends Item> implements Iterable<T> {
         this.value = value;
     }
 
-    public @NotNull Iterator<T> iterator() {
+    public Iterator<T> iterator() {
         return new WrappingJavaIterator<T>(value.iterate());
     }
 

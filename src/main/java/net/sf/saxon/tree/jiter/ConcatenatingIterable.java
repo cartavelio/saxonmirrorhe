@@ -7,8 +7,6 @@
 
 package net.sf.saxon.tree.jiter;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 
 /**
@@ -31,7 +29,6 @@ public class ConcatenatingIterable<E> implements Iterable<E> {
         this.second = second;
     }
 
-    @NotNull
     @Override
     public Iterator<E> iterator() {
         return new ConcatenatingIterator<>(first.iterator(), () -> second.iterator());

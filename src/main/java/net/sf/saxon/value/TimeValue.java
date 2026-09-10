@@ -20,7 +20,6 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -634,7 +633,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         }
 
         @Override
-        public int compareTo(@NotNull TimeComparable o) {
+        public int compareTo(TimeComparable o) {
             DateTimeValue dt0 = asTimeValue().toDateTime();
             DateTimeValue dt1 = o.asTimeValue().toDateTime();
             return dt0.getSchemaComparable().compareTo(dt1.getSchemaComparable());

@@ -17,7 +17,6 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -861,7 +860,6 @@ public abstract class Calculator {
         }
     }
 
-    @NotNull
     @CSharpReplaceBody(code="return A/B;")
     private static BigDecimal internalDecimalDivide(BigDecimal A, BigDecimal B) {
         int scale = Math.max(BigDecimalValue.DIVIDE_PRECISION, A.scale() - B.scale() + BigDecimalValue.DIVIDE_PRECISION);

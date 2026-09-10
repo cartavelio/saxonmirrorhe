@@ -28,7 +28,6 @@ import net.sf.saxon.tree.tiny.TinyTextualElement;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1197,7 +1196,7 @@ public final class Navigator {
             this.parent = parent;
             this.filter = filter;
         }
-        @NotNull
+
         @Override
         public Iterator<NodeInfo> iterator() {
             AxisIterator basis;
