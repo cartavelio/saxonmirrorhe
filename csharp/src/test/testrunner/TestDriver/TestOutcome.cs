@@ -1,10 +1,13 @@
-﻿using SysCollGen = System.Collections.Generic;
+﻿using System;
+using SysCollGen = System.Collections.Generic;
 using System.Text;
 using Saxon.Api;
 using System.Collections;
+using System.IO;
 using System.Xml;
 using Saxon.Hej.@event;
 using Saxon.Hej.om;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.regex;
 using Saxon.Hej.serialize;
 using Saxon.Hej.str;
@@ -820,15 +823,15 @@ namespace TestDriver {
 
                 if (value.Count == 1 && value.Simplify() is XdmNode node &&
                     node.NodeKind == XdmNodeKind.Document) {
-                    iter0 = node.Implementation.iterateAxis(JAxisInfo.CHILD);
+                    iter0 = node.Implementation.iterateChildAxis(AnyGNode.TEST);
                 }
                 else {
                     iter0 = value.Unwrap().iterate();
                 }
 
                 JGroundedValue val0 = SequenceTool.toGroundedValue(iter0);
-                JSequenceIterator iter1 = ((NodeInfo) expected.Implementation.iterateAxis(JAxisInfo.CHILD).next())
-                    .iterateAxis(JAxisInfo.CHILD);
+                JSequenceIterator iter1 = ((NodeInfo) expected.Implementation.iterateChildAxis(AnyGNode.TEST).next())
+                    .iterateChildAxis(AnyGNode.TEST);
                 JGroundedValue val1 = SequenceTool.toGroundedValue(iter1);
                 bool success = JDeepEqual.deepEqual(
                     val0.iterate(), val1.iterate(),

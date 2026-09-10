@@ -367,7 +367,7 @@ namespace TestDriver {
             Configuration config = environment.processor.Implementation;
             XmlUrlResolver res = new TracingXmlResolver(env.BaseUri);
             XsdCompiler compiler = environment.processor.NewXsdCompiler();
-            List<XsdCompiler.SchemaSource> sources = new List<XsdCompiler.SchemaSource>();
+            SysCollGen.List<XsdCompiler.SchemaSource> sources = new SysCollGen.List<XsdCompiler.SchemaSource>();
             foreach (XdmNode schema in env.Children("schema")) {
                 string role = schema.GetAttributeValue(new QName("role"));
                 string xsdVersion = schema.GetAttributeValue(new QName("xsd-version"));
