@@ -212,6 +212,7 @@ public class Configuration implements SourceResolver {
     private Comparator<String> mediaQueryEvaluator;
     private final Map<String, String> fileExtensions = new HashMap<>();
     private final Map<String, ResourceFactory> resourceFactoryMapping = new HashMap<>();
+    private final Set<StructuredQName> disabledFunctionNames = new HashSet<>();
     private final Map<NamespaceUri, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
     private int regexBacktrackingLimit = 10000000;
 
@@ -1465,6 +1466,31 @@ public class Configuration implements SourceResolver {
 
     public void registerExtensionFunction(ExtensionFunctionDefinition function) {
         integratedFunctionLibrary.registerFunction(function);
+    }
+
+    /**
+     * Disable a function. Call this method to ensure that no function with the
+     * given name can be called by any application using this Configuration. The
+     * function may be in any namespace. All functions with the given name are
+     * disabled, regardless of their arity. Disabling a function prevents any
+     * subsequent parsing of a static function call, and any subsequent call
+     * of function-lookup with this name. It does not prevent subsequent
+     * execution of function calls that have already been compiled.
+     * @param functionName the name of the function to be disabled
+     */
+
+    public void disableFunction(StructuredQName functionName) {
+        disabledFunctionNames.add(functionName);
+    }
+
+    /**
+     * Ask whether a given function has been disabled
+     * @param functionName the name of the function in question
+     * @return true if the function has been disabled by calling {@link #disableFunction}
+     */
+
+    public boolean isDisabledFunction(StructuredQName functionName) {
+        return disabledFunctionNames.contains(functionName);
     }
 
     /**

@@ -150,6 +150,25 @@ public class DynamicQueryContext {
     }
 
     /**
+     * Set the context value for evaluating the expression. If this method is not called,
+     * the context value will be undefined. The context item is available as the value of
+     * the expression ".".
+     * To obtain a node by parsing a source document, see the method
+     * {@link net.sf.saxon.Configuration#buildDocumentTree} in the Configuration class.
+     *
+     * @param value The value that is to be the context value for the query. Prior to XQuery 4.0,
+     *              this must be a single item.
+     * @throws IllegalArgumentException if the supplied item is a node that was built under the wrong
+     *                                  Saxon Configuration
+     * @throws NullPointerException     if the supplied item is null
+     * @since 8.4. Superseded by {@link #setContextValue} in 13.0
+     */
+
+    public void setContextItem(Item value) {
+        setContextValue(value);
+    }
+
+    /**
      * Get the context value for the query, as set using {@link #setContextValue}.
      *
      * @return the context item if set, or null otherwise.
@@ -159,6 +178,23 @@ public class DynamicQueryContext {
     /*@Nullable*/
     public GroundedValue getContextValue() {
         return contextValue;
+    }
+
+    /**
+     * Get the context item for the query, as set using {@link #setContextItem}.
+     *
+     * @return the context item if set, or null otherwise.
+     * @throws IllegalStateException if the context value has been set to a value
+     * that is not a single item
+     * @since 8.4.
+     */
+
+    /*@Nullable*/
+    public Item getContextItem() {
+        if (contextValue.getLength() == 1) {
+            return contextValue.head();
+        }
+        throw new IllegalStateException("Context value is not a singleton item");
     }
 
     /**

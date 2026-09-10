@@ -99,7 +99,7 @@ public class ResourceRequest {
 
     /**
      * If the encoding is specified out of band, it can be provided here. Requesting an encoding
-     * doesn't gaurantee that it'll be used. For example, HTTP headers might override it.
+     * doesn't guarantee that it'll be used. For example, HTTP headers might override it.
      */
     public String requestedEncoding;
 

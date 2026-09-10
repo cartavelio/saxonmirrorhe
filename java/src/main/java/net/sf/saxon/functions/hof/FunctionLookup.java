@@ -92,6 +92,10 @@ public class FunctionLookup extends ContextAccessorFunction {
 
     public FunctionItem lookup(StructuredQName name, int arity, XPathContext context) throws XPathException {
 
+        if (context.getConfiguration().isDisabledFunction(name)) {
+            return null;
+        }
+
         Controller controller = context.getController();
         Executable exec = controller.getExecutable();
         RetainedStaticContext rsc = getRetainedStaticContext();
@@ -120,21 +124,6 @@ public class FunctionLookup extends ContextAccessorFunction {
                 }
                 return foundFunction;
             }
-//            FunctionItem fi = lib.getFunctionItem(sn, ic);
-//            if (fi instanceof UserFunction) {
-//                Visibility vis = ((UserFunction) fi).getDeclaredVisibility();
-//                if (vis == Visibility.ABSTRACT) {
-//                    return null;
-//                }
-//            }
-//            if (fi instanceof CallableFunction) {
-//                ((CallableFunction) fi).setCallable(new CallableWithBoundFocus(((CallableFunction) fi).getCallable(), context));
-//            } else if (fi instanceof ContextItemAccessorFunction) {
-//                return ((ContextItemAccessorFunction) fi).bindContext(context);
-//            } else if (fi instanceof SystemFunction && ((SystemFunction) fi).dependsOnContextItem()) {
-//                return new SystemFunctionWithBoundContextItem((SystemFunction) fi, context);
-//            }
-//            return fi;
         } catch (XPathException e) {
             if (e.hasErrorCode("XPST0017")) {
                 return null;

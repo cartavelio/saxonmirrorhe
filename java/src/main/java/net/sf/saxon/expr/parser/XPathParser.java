@@ -4197,6 +4197,9 @@ public class XPathParser {
         }
 
         StructuredQName functionName = resolveFunctionName(fname);
+        if (env.getConfiguration().isDisabledFunction(functionName)) {
+            grumble("Function " + functionName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
+        }
 
         // placeMarkerArgs holds details of the arguments that were set to "?", indicating
         // a partially applied function. The list is in the order that the placeMarkers appear,
@@ -4649,6 +4652,10 @@ public class XPathParser {
         } catch (XPathException e) {
             grumble(e.getMessage(), e.getErrorCodeQName());
             assert functionName != null;
+        }
+
+        if (env.getConfiguration().isDisabledFunction(functionName)) {
+            grumble("Function " + functionName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017", offset);
         }
 
         try {

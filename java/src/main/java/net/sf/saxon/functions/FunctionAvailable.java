@@ -63,6 +63,10 @@ public class FunctionAvailable extends SystemFunction {
 
             StructuredQName functionName = qp.parse(lexicalQName, env.getDefaultFunctionNamespace());
 
+            if (env.getConfiguration().isDisabledFunction(functionName)) {
+                return Literal.makeLiteral(BooleanValue.FALSE);
+            }
+
             int minArity = 0;
             int maxArity = 20;
             if (getArity() == 2) {
@@ -109,6 +113,10 @@ public class FunctionAvailable extends SystemFunction {
             }
         } catch (XPathException e) {
             throw e.withErrorCode("XTDE1400").withXPathContext(context);
+        }
+
+        if (context.getConfiguration().isDisabledFunction(qName)) {
+            return false;
         }
 
         final FunctionLibrary lib = context.getController().getExecutable().getFunctionLibrary();
