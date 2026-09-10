@@ -275,10 +275,10 @@ public class ArrayItemType extends AnyFunctionType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
             throws XPathException {
         return new SpecificFunctionType(
-                getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
+                getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
     }
 
     /**

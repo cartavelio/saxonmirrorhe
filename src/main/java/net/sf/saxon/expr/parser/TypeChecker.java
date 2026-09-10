@@ -88,10 +88,10 @@ public class TypeChecker {
         final Configuration config = env.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
         final ContextItemStaticInfo defaultContextInfo = config.getDefaultContextItemStaticInfo();
+        final boolean allow40 = env.getXPathVersion() >= 40;
 
         final ItemType reqItemType = req.getPrimaryType();
         int reqCard = req.getCardinality();
-        boolean allowsMany = Cardinality.allowsMany(reqCard);
 
         ItemType suppliedItemType = null;
         // item type of the supplied expression: null means not yet calculated
@@ -327,7 +327,7 @@ public class TypeChecker {
                         exp = new ItemChecker(exp, th.getGenericFunctionItemType(), roleSupplier);
                         suppliedItemType = th.getGenericFunctionItemType();
                     }
-                    exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier);
+                    exp = makeFunctionSequenceCoercer(exp, (FunctionItemType) reqItemType, roleSupplier, allow40);
                     itemTypeOK = true;
                 }
 
@@ -462,13 +462,15 @@ public class TypeChecker {
     }
 
     private static Expression makeFunctionSequenceCoercer(
-            Expression exp, FunctionItemType reqItemType, Supplier<RoleDiagnostic> role) throws XPathException {
-        // Apply function coercion as defined in XPath 3.0.
-
-        return reqItemType.makeFunctionSequenceCoercer(exp, role);
+            Expression exp,
+            FunctionItemType reqItemType,
+            Supplier<RoleDiagnostic> role,
+            boolean allow40) throws XPathException {
+        // Apply function coercion as defined in XPath 3.0 or 4.0
+        return reqItemType.makeFunctionSequenceCoercer(exp, role, allow40);
     }
 
-    private Expression makeDownCaster(Expression exp, AtomicType reqItemType, Configuration config) throws XPathException {
+    private Expression makeDownCaster(Expression exp, AtomicType reqItemType, Configuration config) {
         return AtomicSequenceConverter.makeDownCaster(exp, reqItemType, config);
     }
 

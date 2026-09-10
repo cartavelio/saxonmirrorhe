@@ -39,6 +39,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
 
     private final SpecificFunctionType requiredItemType;
     private final Supplier<RoleDiagnostic> roleSupplier;
+    private final boolean allow40;
 
     /**
      * Constructor
@@ -48,10 +49,11 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
      */
 
     public FunctionSequenceCoercer(Expression sequence, SpecificFunctionType requiredItemType,
-                                   Supplier<RoleDiagnostic> role) {
+                                   Supplier<RoleDiagnostic> role, boolean allow40) {
         super(sequence);
         this.requiredItemType = requiredItemType;
         this.roleSupplier = role;
+        this.allow40 = allow40;
         ExpressionTool.copyLocationInfo(sequence, this);
     }
 
@@ -115,7 +117,8 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        FunctionSequenceCoercer fsc2 = new FunctionSequenceCoercer(getBaseExpression().copy(rebindings), requiredItemType, roleSupplier);
+        FunctionSequenceCoercer fsc2 = new FunctionSequenceCoercer(
+                getBaseExpression().copy(rebindings), requiredItemType, roleSupplier, allow40);
         ExpressionTool.copyLocationInfo(this, fsc2);
         return fsc2;
     }
@@ -214,6 +217,9 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         SequenceType st = SequenceType.makeSequenceType(requiredItemType, StaticProperty.EXACTLY_ONE);
         destination.emitAttribute("to", st.toAlphaCode());
         destination.emitAttribute("diag", roleSupplier.get().save());
+        if (allow40) {
+            destination.emitAttribute("flags", "4");
+        }
         getBaseExpression().export(destination);
         destination.endElement();
     }
@@ -243,11 +249,13 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         private final SpecificFunctionType requiredItemType;
         private final Configuration config;
         private final Location locator;
+        private final boolean allow40;
 
-        public Coercer(SpecificFunctionType requiredItemType, Configuration config, Location locator) {
+        public Coercer(SpecificFunctionType requiredItemType, Configuration config, Location locator, boolean allow40) {
             this.requiredItemType = requiredItemType;
             this.config = config;
             this.locator = locator;
+            this.allow40 = allow40;
         }
 
         public FunctionItem mapItem(Item item) throws XPathException {
@@ -257,7 +265,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
             }
             try {
                 checkAnnotations((FunctionItem)item, requiredItemType, config);
-                return new CoercedFunction((FunctionItem)item, requiredItemType);
+                return new CoercedFunction((FunctionItem)item, requiredItemType, allow40);
             } catch (XPathException err) {
                 throw err.maybeWithLocation(locator);
             }
@@ -272,7 +280,8 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             FunctionSequenceCoercer expr = (FunctionSequenceCoercer) getExpression();
             PullEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForPull();
-            Coercer coercer = new Coercer(expr.requiredItemType, expr.getConfiguration(), expr.getLocation());
+            Coercer coercer = new Coercer(
+                    expr.requiredItemType, expr.getConfiguration(), expr.getLocation(), expr.allow40);
             return context -> new ItemMappingIterator(base.iterate(context), coercer, true);
         }
 
@@ -280,7 +289,8 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         public ItemEvaluator elaborateForItem() {
             FunctionSequenceCoercer expr = (FunctionSequenceCoercer) getExpression();
             ItemEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForItem();
-            Coercer coercer = new Coercer(expr.requiredItemType, expr.getConfiguration(), expr.getLocation());
+            Coercer coercer = new Coercer(
+                    expr.requiredItemType, expr.getConfiguration(), expr.getLocation(), expr.allow40);
             return context -> {
                 Item item = base.eval(context);
                 if (item == null) {

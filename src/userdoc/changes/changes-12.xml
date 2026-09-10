@@ -378,6 +378,8 @@
             with capability for numbering from the end, counting backwards, selecting every Nth item, etc.</p></li>
             <li><p>The <code>array:slice</code> function is implemented; it does the same as <code>fn:slice</code>,
                 but for arrays rather than sequences.</p></li>
+            <li><p>The <code>map:keys#2</code> function is implemented; the second argument is a function that
+                tests each value and decides whether the corresponding key should be returned.</p></li>
             
         </ul>
 
@@ -442,6 +444,13 @@
         by the left-hand side individually. For example <code>(-2 to +2) =!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>.
         The effect is similar to writing <code>(-2 to +2) ! abs(.)</code>, but the operator precedences make it
         easier to construct a pipeline of operations without parentheses.</p>
+        
+        <p>From 12.3, the function coercion rules are extended to allow a supplied function item to have lower arity
+        than that implied by the signature of the required type. For example, <code>map:for-each</code> expects a function with
+        two arguments, which are set respectively to the key and the value of an entry in the map. But if you are only interested in the key,
+        you can supply a function of arity 1, and your function will be called omitting the second argument. Similarly,
+        for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code>
+        which has arity zero: this has the effect that the predicate will always be true.</p>
         
         
         <h2>XQuery 4.0 extensions</h2>

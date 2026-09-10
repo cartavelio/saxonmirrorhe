@@ -459,8 +459,8 @@ public class SpecificFunctionType extends AnyFunctionType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role) {
-        return new FunctionSequenceCoercer(exp, this, role);
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40) {
+        return new FunctionSequenceCoercer(exp, this, role, allow40);
     }
 
 }

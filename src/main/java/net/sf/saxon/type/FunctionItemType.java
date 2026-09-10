@@ -72,11 +72,12 @@ public interface FunctionItemType extends ItemType {
      *
      * @param exp     the expression that delivers the supplied sequence of function items (the ones in need of coercion)
      * @param role    information for use in diagnostics
+     * @param allow40 true if 4.0 coercions are allowed, such as reducing the arity of the function
      * @return the coerced function, a function that calls the original function after checking the parameters
      * @throws XPathException if an error is detected
      */
 
-    Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
+    Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
             throws XPathException;
 
     /**

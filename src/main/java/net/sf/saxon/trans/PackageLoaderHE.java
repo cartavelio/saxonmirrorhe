@@ -1854,7 +1854,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 loader.addCompletionAction(() -> coercedFn2.setTargetFunction(loader.getUserFunction((SymbolicName.F)name)));
             } else if (target instanceof Literal) {
                 targetFn = (FunctionItem) ((Literal) target).getGroundedValue();
-                coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type);
+                coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type, true);
             } else {
                 throw new AssertionError();
             }
@@ -2317,7 +2317,9 @@ public class PackageLoaderHE implements IPackageLoader {
             SpecificFunctionType type = (SpecificFunctionType) loader.parseAlphaCode(element, "to").getPrimaryType();
             final String diag = element.getAttributeValue(NamespaceUri.NULL,"diag");
             Expression arg = loader.getFirstChildExpression(element);
-            return new FunctionSequenceCoercer(arg, type, () -> RoleDiagnostic.reconstruct(diag));
+            String flags = element.getAttributeValue("", "flags");
+            boolean allow40 = flags != null && flags.contains("4");
+            return new FunctionSequenceCoercer(arg, type, () -> RoleDiagnostic.reconstruct(diag), allow40);
         });
 
         eMap.put("fnRef", (loader, element) -> {
