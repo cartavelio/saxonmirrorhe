@@ -458,7 +458,7 @@ public class FloatingPointConverter {
      * Append a string representation of a double value to a string buffer
      *
      * @param d                the double to be formatted
-     * @param forceExponential forces exponential notation if set (if not set, exponential notation
+     * @param useExponential   forces exponential notation if set (if not set, exponential notation
      *                         is used only for values outside the range 1e-6 to 1e+6)
      * @return the original string buffer, now containing the string representation of the supplied double
      */
