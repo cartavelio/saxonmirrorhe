@@ -42,6 +42,11 @@
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
   </exception>
   
+  <exception test-set="fn-unordered" test-case="fn-unordered-mix-args-012" run="false" report="notRun">
+    <created by="Michael Kay" on="2026-04-29"/>
+    <reason>Test assumes float(1.01) = decimal(1.01)</reason>
+  </exception>
+  
   <exception test-set="fn-unparsed-text" test-case="fn-unparsed-text-054a" run="false" report="notRun">
     <created by="Michael Kay" on="2025-12-18"/>
     <reason>Getting access problems with https://timeanddate.com</reason>
