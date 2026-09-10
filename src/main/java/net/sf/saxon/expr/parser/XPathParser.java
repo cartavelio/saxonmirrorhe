@@ -3446,28 +3446,28 @@ public class XPathParser {
 
         Expression result;
         LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
-        if (token == Token.NAME && t.peekAhead() == Token.COLONCOLON) {
-            switch (t.currentTokenValue) {
-                case "content":
-                    //modifier = LookupExpression.LookupModifier.CONTENT;
-                    break;
-                case "key":
-                    modifier = LookupExpression.Modifier.KEY;
-                    break;
-                case "value":
-                    modifier = LookupExpression.Modifier.VALUE;
-                    break;
-                case "entry":
-                    modifier = LookupExpression.Modifier.ENTRY;
-                    break;
-                default:
-                    grumble("Unknown modifier after '?' operator: " + t.currentTokenValue);
-            }
-
-            nextToken(); // swallow the '::'
-            nextToken();
-        }
-        token = t.currentToken;
+//        if (token == Token.NAME && t.peekAhead() == Token.COLONCOLON) {
+//            switch (t.currentTokenValue) {
+//                case "content":
+//                    //modifier = LookupExpression.LookupModifier.CONTENT;
+//                    break;
+//                case "key":
+//                    modifier = LookupExpression.Modifier.KEY;
+//                    break;
+//                case "value":
+//                    modifier = LookupExpression.Modifier.VALUE;
+//                    break;
+//                case "entry":
+//                    modifier = LookupExpression.Modifier.ENTRY;
+//                    break;
+//                default:
+//                    grumble("Unknown modifier after '?' operator: " + t.currentTokenValue);
+//            }
+//
+//            nextToken(); // swallow the '::'
+//            nextToken();
+//        }
+        //token = t.currentToken;
         if (token == Token.NAME) {
             String name = t.currentTokenValue;
             if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
