@@ -30,7 +30,7 @@ class CsvContentHandlerTest {
     void defaultReturn() {
         subject = new CsvContentHandler(options);
 
-        result = subject.getSequence();
+        result = subject.getSequenceOfRows();
 
         assertEmptySequence(result, "an empty ParsedCSV");
     }
@@ -42,7 +42,7 @@ class CsvContentHandlerTest {
 
         subject.appendField("abc");
 
-        result = subject.getSequence();
+        result = subject.getSequenceOfRows();
 
         assertAll(
                 () -> { assertSequenceLength(1, result, "expected one row"); },
@@ -59,7 +59,7 @@ class CsvContentHandlerTest {
         subject.startNewRow();
         subject.appendField("123");
 
-        result = subject.getSequence();
+        result = subject.getSequenceOfRows();
 
         assertAll(
                 () -> { assertSequenceLength(2, result, "expected two rows"); },
@@ -85,7 +85,7 @@ class CsvContentHandlerTest {
         subject.appendField("456\t  ");
         subject.appendField("  \t789   \t");
 
-        result = subject.getSequence();
+        result = subject.getSequenceOfRows();
 
         assertAll(
                 () -> { assertXPathDeepEqual(makeRow("abc", "def", "ghi", "jkl", "mno", "pqr", "123", "456", "789"), result); }

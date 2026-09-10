@@ -15,13 +15,11 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.saxonica.functions.qt4.csv.TestHelpers.expectedRows;
 import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
-import static net.sf.saxon.test.matchers.IsDeepEqualTo.deepEquals;
 import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPathException;
 
 class CsvToXdmTest {

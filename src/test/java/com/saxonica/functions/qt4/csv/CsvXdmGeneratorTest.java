@@ -30,14 +30,14 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 class CsvXdmGeneratorTest {
-    CsvXdmGenerator subject;
+    CsvRecordGenerator subject;
     Map<String, GroundedValue> options = new HashMap<>();
     MapItem expected;
     MapItem expectedColumns;
     MapItem actual;
 
-    CsvXdmGenerator subject() throws XPathException {
-        if (subject == null) subject = new CsvXdmGenerator(options);
+    CsvRecordGenerator subject() throws XPathException {
+        if (subject == null) subject = new CsvRecordGenerator(options);
         return subject;
     }
 
@@ -52,7 +52,7 @@ class CsvXdmGeneratorTest {
     @Test
     @DisplayName("Empty sequence produces an appropriate Map")
     void emptyCsv() throws XPathException {
-        expected = CsvXdmGenerator.EMPTY_CSV;
+        expected = CsvRecordGenerator.EMPTY_CSV;
 
         actual = subject().fromRowSequence(EmptySequence.getInstance());
 
@@ -66,7 +66,7 @@ class CsvXdmGeneratorTest {
             m.put("names", m.map()).put("fields", m.sequence());
         });
 
-        assertThat(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, deepEquals(expected));
+        assertThat(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, deepEquals(expected));
     }
 
     @Nested
@@ -78,7 +78,7 @@ class CsvXdmGeneratorTest {
         void defaultsToNoColumnExtraction() throws XPathException {
             actual = subject().fromRowSequence(input);
 
-            assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD,
+            assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD,
                                                 expectedRows(r -> r.row("name", "city").row("Alice", "Aachen"))));
         }
 
@@ -233,7 +233,7 @@ class CsvXdmGeneratorTest {
 
                 actual = subject().fromRowSequence(input);
 
-                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
                     r.row("a", "b", "c").row("1", "2", "3");
                 })));
             }
@@ -246,7 +246,7 @@ class CsvXdmGeneratorTest {
 
                 actual = subject().fromRowSequence(input);
 
-                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
                     r.row("a", "b", "c", "d", "e", "f", "").row("1", "2", "3", "4", "", "", "");
                 })));
             }
@@ -258,7 +258,7 @@ class CsvXdmGeneratorTest {
 
                 actual = subject().fromRowSequence(input);
 
-                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
                     r.row("a", "b", "c", "d", "e").row("1", "2", "3", "4", "");
                 })));
             }
@@ -323,7 +323,7 @@ class CsvXdmGeneratorTest {
 
                 actual = subject().fromRowSequence(input);
 
-                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
                     r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4", "", "");
                 })));
             }
@@ -364,7 +364,7 @@ class CsvXdmGeneratorTest {
 
                 actual = subject().fromRowSequence(input);
 
-                assertThat(actual, matchesCsvRecord(CsvXdmGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
+                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
                     r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4");
                 })));
             }
