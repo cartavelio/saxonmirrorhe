@@ -55,8 +55,7 @@ namespace Saxon.Callbacks {
         /// resource; or null if the request cannot be resolved.</returns>
         public virtual Saxon.Ejavax.xml.transform.Source? resolve(Saxon.Hej.lib.JJ_ResourceRequest request) {
             if (catalogBasedResolver != null) {
-                try
-                {
+                try {
                     IResourceRequest? req = null;
                     if (request.uriIsNamespace) {
                         IResolverConfiguration catConfig = catalogBasedResolver.Configuration;
@@ -64,6 +63,7 @@ namespace Saxon.Callbacks {
                         if (feature == null) {
                             return null;
                         }
+
                         CatalogManager catalog = (CatalogManager)feature;
                         Uri? attempt = catalog.LookupNamespaceUri(request.uri, request.nature, request.purpose);
                         if (attempt == null) {
@@ -72,7 +72,8 @@ namespace Saxon.Callbacks {
 
                         req = catalogBasedResolver.GetRequest(request.uri, null, request.nature, request.purpose);
                     }
-                    else if (request.nature == Saxon.Hej.lib.JJ_ResourceRequest.DTD_NATURE || request.nature == Saxon.Hej.lib.JJ_ResourceRequest.EXTERNAL_ENTITY_NATURE) {
+                    else if (request.nature == Saxon.Hej.lib.JJ_ResourceRequest.DTD_NATURE ||
+                             request.nature == Saxon.Hej.lib.JJ_ResourceRequest.EXTERNAL_ENTITY_NATURE) {
                         string href = request.relativeUri ?? request.uri;
                         string baseUri = request.baseUri ?? request.uri;
 
@@ -95,20 +96,23 @@ namespace Saxon.Callbacks {
                     if (rr.Resolved && rr.ResolvedUri != null) {
                         TypedStreamSource result = new TypedStreamSource();
                         result.setSystemId(rr.ResolvedUri.ToString());
-                        if (rr.Stream != null)
-                        {
+                        if (rr.Stream != null) {
                             result.setInputStream(rr.Stream);
                         }
-                        if (rr.ContentType != null)
-                        {
+
+                        if (rr.ContentType != null) {
                             result.setContentType(rr.ContentType);
                         }
+
                         return result;
                     }
                 }
 
                 catch (WebException) {
                     // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
+                }
+                catch (System.Net.Http.HttpRequestException) {
+                    // Thrown by XmlResolver 6.0.21 for an unknown resource
                 }
                 catch (System.ArgumentException) {
                     // Thrown for an unknown URI scheme
