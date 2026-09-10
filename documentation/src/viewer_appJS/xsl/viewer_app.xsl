@@ -853,7 +853,8 @@
             <xsl:when test="$index eq count($hash-parts) and empty($section)">
                 <!-- $section will be empty for Functions pages (note that Changes handled
                     separately)
-                and javadoc page anchor links - i.e. containing @-->
+                and page anchor links (i.e. containing @) e.g for class members in javadoc, 
+                and other internal page links (expressed using #fragment in the source) -->
                 <xsl:choose>
                     <xsl:when test="$hash-parts[1] eq 'functions'">
                         <xsl:variable name="last" select="$hash-parts[$index]"/>
@@ -872,14 +873,23 @@
                         
                         <xsl:choose>
                             <xsl:when test="$pre eq ''">
-                                <li idt="{$section/@id}" class="trail">
+                                <li idt="{$pre}" class="trail">
                                     <xsl:value-of select="$all"/>
                                 </li>
                             </xsl:when>
                             <xsl:otherwise>
                                 <xsl:variable name="post" select="substring-after($all, '@')"/>
-                                <li idt="{$pre}" class="trail"><xsl:value-of select="$pre"/> &#x25b7;</li>
-                                <li ida="{$post}" class="trail"><xsl:value-of select="$post"/></li>
+                                <xsl:choose>
+                                    <xsl:when test="$hash-parts[1] = ('javadoc', 'dotnetdoc')">
+                                        <li idt="{$pre}" class="trail"><xsl:value-of select="$pre"/> &#x25b7;</li>
+                                        <li ida="{$post}" class="trail"><xsl:value-of select="$post"/></li>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <xsl:variable name="section" select="$parent/*[@id eq $pre]"/> 
+                                        <xsl:variable name="title" select="($section/@title, $section/@id, $pre)[1]"/>
+                                        <li idt="{$pre}" class="trail"><xsl:value-of select="$title"/></li>
+                                    </xsl:otherwise>
+                                </xsl:choose>
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:otherwise>
