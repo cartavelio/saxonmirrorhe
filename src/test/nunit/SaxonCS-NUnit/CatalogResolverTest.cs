@@ -17,7 +17,9 @@ namespace SaxonCS_NUnit {
                 Assert.Fail();
             }
             catch (SaxonApiException ex) {
-                Assert.That(ex.Message.Contains("An error has occurred while opening external DTD"));
+                if (!ex.Message.Contains("Cannot resolve external DTD subset")) {
+                    Assert.Fail(ex.Message);
+                }
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);
