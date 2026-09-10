@@ -1,3 +1,4 @@
+import com.saxonica.build.LazyExec
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.TemplatedDocTask
 import com.saxonica.build.php.PhpFinder
@@ -85,7 +86,7 @@ val createPhpBuildRoot = tasks.register<Copy>("create-build-root") {
   }
 }
 
-val phpizeTask = tasks.register<Exec>("phpize") {
+val phpizeTask = tasks.register<LazyExec>("phpize") {
   inputs.files(createPhpBuildRoot.map { it.outputs.files }) // avoid marking the build root as an input...
   inputs.dir(srcFolder)
 
@@ -93,9 +94,8 @@ val phpizeTask = tasks.register<Exec>("phpize") {
   outputs.dir(phpBuildRoot.map { it.dir("build") })
   outputs.dir(phpBuildRoot.map { it.dir("autom4te.cache") })
 
-  workingDir = phpBuildRoot.get().asFile
-
-  executable(extension.phpizeExe.get())
+  workingDir = phpBuildRoot
+  executable(extension.phpizeExe)
 }
 
 abstract class PhpDefaultWithExec: DefaultTask() {
@@ -126,22 +126,22 @@ val phpConfigureTask = tasks.register<PhpDefaultWithExec>("configure") {
   }
 }
 
-val makeTask = tasks.register<Exec>("make") {
+val makeTask = tasks.register<LazyExec>("make") {
   inputs.files(phpConfigureTask)
   outputs.files(phpBuildRoot.map { it.files("saxon.la", ".dep", ".loT") })
   outputs.dir(phpBuildRoot.map { it.dir(".libs") })
   outputs.dir(phpBuildRoot.map { it.dir("modules") })
 
-  workingDir = phpBuildRoot.get().asFile
+  workingDir = phpBuildRoot
   executable(extension.makeExe)
 }
 
-val makeInstallTask = tasks.register<Exec>("make-install") {
+val makeInstallTask = tasks.register<LazyExec>("make-install") {
   inputs.files(phpConfigureTask)
   outputs.dir(phpExtensionLibDir)
 
-  workingDir = phpBuildRoot.get().asFile
-  executable(extension.makeExe.get())
+  workingDir = phpBuildRoot
+  executable(extension.makeExe)
   args("install")
 }
 
@@ -163,7 +163,6 @@ val makeCleanTask = tasks.register<PhpDefaultWithExec>("make-clean") {
     }
   }
 }
-
 
 val testRunnerDir = layout.buildDirectory.dir("testrunner")
 val vendorDir = testRunnerDir.map { it.dir("vendor") }
