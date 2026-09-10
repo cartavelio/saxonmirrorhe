@@ -22,6 +22,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.*;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyFunctionType;
@@ -97,6 +98,14 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
     @Override
     public MapItem call(XPathContext context, Sequence[] args) throws XPathException {
+
+        // Requires EE
+        try {
+            context.getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY, "fn:load-xquery-module", -1);
+        } catch (LicenseException e) {
+            throw new XPathException(e.getMessage(), "FOQM0006");
+        }
+
         Sequence xqueryVersionOption = null;
         Sequence locationHintsOption = null;
         Sequence variablesOption = null;
