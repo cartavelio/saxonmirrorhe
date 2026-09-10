@@ -605,7 +605,7 @@ public class XQueryParser extends XPathParser {
                         } else if (isKeyword("variable")) {
                             annotationList.check(env.getConfiguration(), "DV");
                             parseVariableDeclaration(annotationList);
-                        } else if (tryKeyword("item-type")) {
+                        } else if (tryKeyword("type")) {
                             annotationList.check(env.getConfiguration(), "DI");
                             parseItemTypeDeclaration(annotationList);
                         } else {
@@ -725,8 +725,8 @@ public class XQueryParser extends XPathParser {
                             allowDeclarations = false;
                         }
                         parseOptionDeclaration();
-                    } else if (tryKeyword("item-type")) {
-                        checkSyntaxExtensions("declare item-type");
+                    } else if (tryKeyword("type")) {
+                        checkSyntaxExtensions("declare type");
                         if (allowDeclarations) {
                             allowDeclarations = false;
                         }

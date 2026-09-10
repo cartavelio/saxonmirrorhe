@@ -182,6 +182,9 @@
         <p>Both XQuery and XPath now allow the syntax <code>for key $k $value $v in $map</code> to iterate
         over the entries in a map.</p>
         
+        <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
+        <code>declare item-type</code>.</p>
+        
         <p>Choice item types are implemented, for example the required type of a parameter in a function
         signature can be <code>(map(*) | array(*))</code>. The local union type syntax 
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
