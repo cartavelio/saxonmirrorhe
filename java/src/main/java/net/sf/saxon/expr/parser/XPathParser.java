@@ -787,6 +787,43 @@ public class XPathParser {
     /*@NotNull*/
     public Expression parseExpression() throws XPathException {
         int offset = t.currentTokenStartOffset;
+        if (allowXPath40Syntax) {
+            Set<String> prefixes = new HashSet<>();
+            if (tryKeywordPair("declare", "default")) {
+                 readKeyword("element");
+                 readKeyword("namespace");
+                 String uri = expectStringLiteral();
+                 nextToken();
+                 if (uri.equals("##any")) {
+                     ((IndependentContext) env).setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+                 } else {
+                     ((IndependentContext) env).declareNamespace("", NamespaceUri.of(uri));
+                 }
+                 readToken(Token.SEMICOLON);
+            }
+            while (tryKeywordPair("declare", "namespace")) {
+                String prefix = readName();
+                if (!NameChecker.isValidNCName(prefix)) {
+                    grumble("Namespace prefix '" + prefix + "' is not a valid NCName", "XPST0003");
+                }
+                if (prefixes.contains(prefix)) {
+                    grumble("Duplicate declaration of prefix '" + prefix + "'", "XQST0033");
+                }
+                if (prefix.equals("xmlns")) {
+                    grumble("Reserved namespace prefix 'xmlns' cannot be declared", "XQST0070");
+                }
+                prefixes.add(prefix);
+                readToken(Token.EQUALS);
+                String uri = expectStringLiteral();
+                nextToken();
+                NamespaceUri nsUri = NamespaceUri.of(uri);
+                if (prefix.equals("xml") != nsUri.equals(NamespaceUri.XML)) {
+                    grumble("Incorrect binding of XML namespace", "XPST0070");
+                }
+                ((IndependentContext)env).declareNamespace(prefix, NamespaceUri.of(uri));
+                readToken(Token.SEMICOLON);
+            }
+        }
         Expression exp = parseExprSingle();
         ArrayList<Expression> list = null;
         while (t.currentToken == Token.COMMA) {
@@ -6044,6 +6081,11 @@ public class XPathParser {
     public boolean isKeywordPair(String s1, String s2) {
         return isKeyword(s1) && isKeyword(t.peekAhead(), s2);
     }
+
+    /**
+     * Ask if the current token and next token constitute a given keyword pair, and if
+     * so, advance to the next token after the keyword pair
+     */
 
     public boolean tryKeywordPair(String s1, String s2) throws XPathException {
         boolean result = isKeyword(s1) && isKeyword(t.peekAhead(), s2);

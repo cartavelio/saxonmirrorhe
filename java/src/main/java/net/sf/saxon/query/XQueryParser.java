@@ -25,6 +25,7 @@ import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
@@ -1539,11 +1540,16 @@ public class XQueryParser extends XPathParser {
         foundDefaultElementNamespace = true;
         nextToken();
         readKeyword("namespace");
-        NamespaceUri uri = NamespaceUri.of(uriLiteral(expectStringLiteral()));
-        if (uri.equals(NamespaceUri.XML) || uri.equals(NamespaceUri.XMLNS)) {
-            grumble("Reserved namespace used as default element/type namespace", "XQST0070");
+        String rawUri = expectStringLiteral();
+        if (rawUri.equals("##any")) {
+            ((QueryModule) env).setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+        } else {
+            NamespaceUri uri = NamespaceUri.of(uriLiteral(rawUri));
+            if (uri.equals(NamespaceUri.XML) || uri.equals(NamespaceUri.XMLNS)) {
+                grumble("Reserved namespace used as default element/type namespace", "XQST0070");
+            }
+            ((QueryModule) env).setDefaultElementNamespace(uri, isFixedDefault);
         }
-        ((QueryModule) env).setDefaultElementNamespace(uri, isFixedDefault);
         nextToken();
     }
 
