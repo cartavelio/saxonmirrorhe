@@ -720,5 +720,5 @@ public class SaxonDeepEqual extends SystemFunction {
 
 }
 
-// Copyright (c) 2009-2023 Saxonica Limited
+// Copyright (c) 2009-2026 Saxonica Limited
 

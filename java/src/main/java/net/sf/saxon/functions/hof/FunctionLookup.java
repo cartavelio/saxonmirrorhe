@@ -188,4 +188,4 @@ public class FunctionLookup extends ContextAccessorFunction {
 }
 
 
-// Copyright (c) 2011-2023 Saxonica Limited
+// Copyright (c) 2011-2026 Saxonica Limited

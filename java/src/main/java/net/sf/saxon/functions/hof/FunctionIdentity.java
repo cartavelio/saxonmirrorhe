@@ -44,4 +44,4 @@ public class FunctionIdentity extends SystemFunction {
     }
 }
 
-// Copyright (c) 2012-2023 Saxonica Limited
+// Copyright (c) 2012-2026 Saxonica Limited

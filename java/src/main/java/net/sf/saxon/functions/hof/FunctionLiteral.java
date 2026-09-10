@@ -204,4 +204,4 @@ public class FunctionLiteral extends Literal {
 
 }
 
-// Copyright (c) 2009-2023 Saxonica Limited
+// Copyright (c) 2009-2026 Saxonica Limited

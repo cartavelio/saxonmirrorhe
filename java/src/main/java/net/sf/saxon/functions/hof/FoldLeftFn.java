@@ -95,4 +95,4 @@ public class FoldLeftFn extends FoldingFunction {
     }
 }
 
-// Copyright (c) 2013-2023 Saxonica Limited
+// Copyright (c) 2013-2026 Saxonica Limited

@@ -306,4 +306,4 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
 }
 
-// Copyright (c) 2018-2023 Saxonica Limited
+// Copyright (c) 2018-2026 Saxonica Limited

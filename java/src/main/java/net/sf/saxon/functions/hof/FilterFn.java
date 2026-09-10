@@ -114,4 +114,4 @@ public class FilterFn extends SystemFunction {
 }
 
 
-// Copyright (c) 2018-2023 Saxonica Limited
+// Copyright (c) 2018-2026 Saxonica Limited

@@ -315,4 +315,4 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
 
 }
 
-// Copyright (c) 2004-2023 Saxonica Limited
+// Copyright (c) 2004-2026 Saxonica Limited

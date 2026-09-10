@@ -320,4 +320,4 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     }
 }
 
-// Copyright (c) 2009-2023 Saxonica Limited
+// Copyright (c) 2009-2026 Saxonica Limited
