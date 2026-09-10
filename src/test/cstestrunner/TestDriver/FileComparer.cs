@@ -161,7 +161,7 @@ namespace TestRunner
                 XsltTransformer t = canonizer.Load();
                 StringWriter sw = new StringWriter();
                 Serializer r = p.NewSerializer();
-                r.SetOutputWriter(sw);
+                r.OutputWriter = sw;
                 t.InitialContextNode = p.NewDocumentBuilder().Build(
                     new FileStream(input, FileMode.Open));
                 t.Run(r);
@@ -330,7 +330,7 @@ namespace TestRunner
                 StringWriter sw = new StringWriter();
                 Processor proc = (Processor)t.Implementation.getConfiguration().getProcessor();
                 Serializer sr = proc.NewSerializer();
-                sr.SetOutputWriter(sw);
+                sr.OutputWriter = sw;
 
                 t.Run(sr);
                 String result = sw.ToString();

@@ -224,7 +224,7 @@ namespace TestDriver {
                 }
 
                 schemaAware = edition == "EE";
-                driverSerializer.SetOutputStream(Console.OpenStandardError());
+                driverSerializer.OutputStream = Console.OpenStandardError();
                 driverSerializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 processCatalog(catalog);
                 printResults(resultsDir + "/results" + driverProc.ProductVersion + ".xml");

@@ -627,7 +627,7 @@ namespace TestDriver {
                         TextWriter sw = new StringWriter();
 
                         Serializer serializer = env.processor.NewSerializer();
-                        serializer.SetOutputWriter(sw);
+                        serializer.OutputWriter = sw;
 
                         IDestination dest = null;
                         if (resultAsTree && !resultSerialized) {
@@ -1090,7 +1090,7 @@ namespace TestDriver {
                     XmlUrlResolver res = new XmlUrlResolver();
                     Uri uri = res.ResolveUri(baseUri, href);
                     dest.BaseUri = uri;
-                    dest.SetOutputWriter(writer);
+                    dest.OutputWriter = writer;
 
                     if (uri.Equals(baseOutputUri)) {
                         dest.OnClose(() => outcome.SetPrincipalSerializedResult(writer.ToString()));

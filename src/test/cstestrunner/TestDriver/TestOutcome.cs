@@ -310,7 +310,7 @@ namespace TestDriver {
                 StringWriter sw = new StringWriter();
 
                 Serializer s = p.NewSerializer(sw);
-                s.SetOutputWriter(sw);
+                s.OutputWriter = sw;
                 s.SetOutputProperty(Serializer.METHOD, "xml");
                 s.SetOutputProperty(Serializer.INDENT, "no");
                 s.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
