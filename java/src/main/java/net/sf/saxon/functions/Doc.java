@@ -154,18 +154,20 @@ public class Doc extends SystemFunction implements Callable {
 
         ParseOptions parseOptions = context.getConfiguration().getParseOptions();
 
+        MapItem options = null;
         if (getArity() >= 2) {
+            options = (MapItem) arguments[1].head();
+        }
+        if (options != null && !((MapItem)options).isEmpty()) {
             // 4.0 spec provides an options parameter. For this case we create a clean
             // XML parser rather than using one from the pool. This is (a) to avoid the problems
             // of resetting it to a virgin state before returning it to the pool, and (b)
             // to ensure we get the default JDK parser implementation, rather than picking a parser
             // off the classpath.
-            MapItem options = (MapItem) arguments[1].head();
-            if (options != null && !options.isEmpty()) {
-                Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
 
-                parseOptions = processOptions(checkedOptions);
-            }
+            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+            parseOptions = processOptions(checkedOptions);
+
         } else {
 
             PackageData pd = getRetainedStaticContext().getPackageData();
