@@ -1759,7 +1759,9 @@ public class SaxonCAPI {
         Processor proci = null;
         String cwd = null;
         String xml = null;
-        SchemaValidatorForCpp validatorForCpp = null;
+        SchemaValidator validator = null;
+
+        SaxonCErrorReporter reporter = null;
         try {
             if (cxml == WordFactory.nullPointer()) {
                 SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XML string is null");
@@ -1799,8 +1801,10 @@ public class SaxonCAPI {
                 }
             }
             if (validatorRef != WordFactory.nullPointer()) {
-                validatorForCpp = objectHandles.get(validatorRef);
-                builder.setSchemaValidator(validatorForCpp.getSchemaManager().newSchemaValidator());
+                validator = objectHandles.get(validatorRef);
+                reporter = new SaxonCErrorReporter();
+                validator.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));
+                builder.setSchemaValidator(validator);
             }
             Source source = new SAXSource(new InputSource(reader));
             if (cwd != null && cwd.length() > 0) {
@@ -1832,7 +1836,8 @@ public class SaxonCAPI {
 
             return handle.rawValue();
         } catch (Exception e) {
-            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, reporter);
+            saxonError.setStatus((int)SaxonCAPI.STATUS_EXCEPTION);
             return SaxonCAPI.STATUS_EXCEPTION;
         }
 
@@ -2022,9 +2027,9 @@ public class SaxonCAPI {
 
             Source source = resolveFileToSource(proci, cwd, filename, ResourceRequest.XML_NATURE);
             if (validatorRef != WordFactory.nullPointer()) {
-                SchemaValidatorForCpp validatorForCpp = objectHandles.get(validatorRef);
+                SchemaValidator validator = objectHandles.get(validatorRef);
 
-                builder.setSchemaValidator(validatorForCpp.getSchemaManager().newSchemaValidator());
+                builder.setSchemaValidator(validator);
             }
             XdmNode node = builder.build(source);
 

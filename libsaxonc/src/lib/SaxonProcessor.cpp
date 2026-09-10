@@ -14,6 +14,7 @@
 #include "saxonc/XdmNode.h"
 #include "saxonc/XdmValue.h"
 #include "saxonc/UserFunctionHandler.h"
+#include "saxonc/XsdCompiler.h"
 
 //#define DEBUG
 
@@ -22,6 +23,7 @@
 #endif
 
 #include <stdio.h>
+
 
 #if defined MEM_DEBUG
 
@@ -191,110 +193,7 @@ void SaxonProcessor::exceptionClear() {
     SaxonProcessor(false);
 }*/
 
-SaxonApiException *SaxonProcessor::checkForExceptionCPP(
-    /*JNIEnv *env, jclass callingClass, jobject callingObject*/) {
-
-  /* if (env->ExceptionCheck()) {
-       std::string result1 = "";
-       std::string errorCode = "";
-       jthrowable exc = env->ExceptionOccurred();
-
-#ifdef DEBUG
-       env->ExceptionDescribe();
-#endif
-       jclass exccls(env->GetObjectClass(exc));
-       jclass clscls(env->FindClass("java/lang/Class"));
-
-       jmethodID getName(env->GetMethodID(clscls, "getName",
-"()Ljava/lang/String;")); jstring
-name(static_cast<jstring>(env->CallObjectMethod(exccls, getName))); char const
-*utfName(env->GetStringUTFChars(name, 0)); result1 = (std::string(utfName));
-       env->ReleaseStringUTFChars(name, utfName);
-
-       jmethodID getMessage(env->GetMethodID(exccls, "getMessage",
-"()Ljava/lang/String;")); if (getMessage) {
-
-           jstring message((jstring) (env->CallObjectMethod(exc, getMessage)));
-           char const *utfMessage = nullptr;
-           if (!message) {
-               utfMessage = "";
-               return nullptr;
-           } else {
-               utfMessage = (env->GetStringUTFChars(message, 0));
-           }
-           if (utfMessage != nullptr) {
-               result1 = (result1 + " : ") + utfMessage;
-           }
-
-           env->ReleaseStringUTFChars(message, utfMessage);
-
-           std::string prefix = "net.sf.saxon.s9api.SaxonApiException";
-
-           if (result1.compare(0, prefix.length(),
-"net.sf.saxon.s9api.SaxonApiException") == 0) {
-
-               jclass
-saxonApiExceptionClass(env->FindClass("net/sf/saxon/s9api/SaxonApiException"));
-               static jmethodID lineNumID = nullptr;
-               lineNumID = env->GetMethodID(saxonApiExceptionClass,
-"getLineNumber", "()I"); static jmethodID ecID = nullptr; ecID =
-env->GetMethodID(saxonApiExceptionClass, "getErrorCode",
-"()Lnet/sf/saxon/s9api/QName;");
-
-               static jmethodID esysID = nullptr;
-               esysID = env->GetMethodID(saxonApiExceptionClass, "getSystemId",
-"()Ljava/lang/String;");
-
-               jobject errCodeQName = (jobject) (env->CallObjectMethod(exc,
-ecID));
-
-               jstring errSystemID = (jstring) (env->CallObjectMethod(exc,
-esysID));
-
-               int linenum = env->CallIntMethod(exc, lineNumID);
-
-               jclass qnameClass(env->FindClass("net/sf/saxon/s9api/QName"));
-               static jmethodID qnameStrID = nullptr;
-               qnameStrID = env->GetMethodID(qnameClass, "toString",
-"()Ljava/lang/String;");
-
-               jstring qnameStr = nullptr;
-
-               if(errCodeQName) {
-                   qnameStr = (jstring) (env->CallObjectMethod(errCodeQName,
-qnameStrID));
-               }
-
-               SaxonApiException *saxonExceptions = new
-SaxonApiException(result1.c_str(), (qnameStr ? env->GetStringUTFChars(qnameStr,
-                                                                                                             0)
-                                                                                    : nullptr),
-                                                                          (errSystemID
-? env->GetStringUTFChars( errSystemID, 0) : nullptr), linenum);
-
-               if (errCodeQName) {
-                   env->DeleteLocalRef(errCodeQName);
-               }
-               if (errSystemID) {
-                   env->DeleteLocalRef(errSystemID);
-               }
-               if (qnameStr) {
-                   env->DeleteLocalRef(qnameStr);
-               }
-
-               if (message) {
-                   env->DeleteLocalRef(message);
-               }
-               env->ExceptionClear();
-               return saxonExceptions;
-           }
-       }
-       SaxonApiException *saxonExceptions = new
-SaxonApiException(result1.c_str());
-
-       env->ExceptionClear();
-       return saxonExceptions;
-   } TODO remove comment*/
+SaxonApiException *SaxonProcessor::checkForExceptionCPP() {
   return nullptr;
 }
 
@@ -838,6 +737,9 @@ SaxonProcessor &SaxonProcessor::operator=(const SaxonProcessor &other) {
 }
 
 SaxonProcessor::SaxonProcessor(const SaxonProcessor &other) {
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "SaxonProc: copy constructor called: " << std::endl;
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef = j_copy_handles(thread, (void *)other.procRef);
   cwd = other.cwd;
@@ -882,6 +784,7 @@ XPathProcessor *SaxonProcessor::newXPathProcessor() {
 
 SchemaValidator *SaxonProcessor::newSchemaValidator() {
   if (licensei) {
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     return (new SchemaValidator(this, cwd));
   } else {
     std::cerr << "\nError: Processor is not licensed for schema processing!!"
@@ -889,6 +792,17 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
     return nullptr;
   }
 }
+
+XsdCompiler * SaxonProcessor::newXsdCompiler() {
+  if (licensei) {
+    return (new XsdCompiler(this, cwd));
+  } else {
+    std::cerr << "\nError: Processor is not licensed for schema processing!!"
+              << std::endl;
+    return nullptr;
+  }
+}
+
 
 const char *SaxonProcessor::version() {
 
@@ -1127,7 +1041,7 @@ void SaxonProcessor::setConfigurationProperty(const char *name,
   if (name != nullptr && value != nullptr) {
     saxon_error_t r = SAXON_ERROR_DEFAULT;
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-    int resultsi = (int) j_applyPropertyToConfiguration(thread, (void *)procRef,
+    j_applyPropertyToConfiguration(thread, (void *)procRef,
                            (char *)name, (char *)value, &r);
 
     if (r.status != SAXON_OK) {

@@ -247,8 +247,6 @@ void XPathProcessor::declareVariable(const char *name) {
     j_xp_declareVariable(thread, (void *) cppXP, (char *) name, &r);
 }
 
-#if CVERSION_API_NO >= 121
-
 void XPathProcessor::setBackwardsCompatible(bool option) {
     if (option) {
         setProperty("backwardsCom:", "true");
@@ -278,8 +276,6 @@ void XPathProcessor::importSchemaNamespace(const char *uri) {
         setProperty("importSN", uri);
     }
 }
-
-#endif
 
 void XPathProcessor::setBaseURI(const char *uriStr) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);

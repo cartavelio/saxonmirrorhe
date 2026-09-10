@@ -1484,7 +1484,6 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param processorDataAccumulatorRef - long value referencing ProcessorDataAccumulator object in the ObjectHandles pool. This is the mapping of supplied parameter and property names to values
      * @return long value referencing the results as an XdmValue object which is held in the ObjectHandles pool to previous GC.
      * Caller must remove object from ObjectHandles pool when no longer required
-     * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
      */
     @CEntryPoint(name = "j_callTemplateReturningValue")
     public static long callTemplateReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {

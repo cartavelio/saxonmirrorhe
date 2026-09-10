@@ -76,6 +76,8 @@ class XPathProcessor;
 
 class SchemaValidator;
 
+class XsdCompiler;
+
 class XdmValue;
 
 class XdmNode;
@@ -95,6 +97,7 @@ class XsltExecutable;
 class DocumentBuilder;
 
 class SaxonApiException;
+
 
 typedef enum eXdmType {
   XDM_VALUE = 0,
@@ -142,6 +145,8 @@ class SAXONC_EXPORT SaxonProcessor {
   friend class XQueryProcessor;
 
   friend class SchemaValidator;
+
+  friend class XsdCompiler;
 
   friend class XPathProcessor;
 
@@ -246,10 +251,26 @@ public:
   /**
    * Create a SchemaValidator.
    * A SchemaValidator can be used to validate instance documents against the schema held by this SchemaValidator.
+   * From Saxon 13, schemas are more modular, which means that
+   * it becomes an application responsibility to ensure that the correct schema is used for each
+   * aspect of processing. To take advantage of this flexibility, use of the method newSchemaValidator
+   * should be replaced with the XsdCompiler.
    *
    * @return Pointer to a new SchemaValidator. The caller is responsible for deallocation of memory using `delete`.
+   * @deprecated since 13.0. Use newXsdCompiler.
    */
   SchemaValidator *newSchemaValidator();
+
+    /**
+     * Create an XsdCompiler. This provides capabilities to load
+     * XML schema definitions.
+     *
+     * @return a new XsdCompiler, provided the Saxon configuration is a licensed SaxonC-EE
+     * configuration. In other cases, the method throws an exception.
+     * @throws SaxonApiException if this is not a licensed SaxonC-EE configuration.
+     * @since 13.0.
+     */
+  XsdCompiler *newXsdCompiler();
 
 
   void setExtensionLibrary(const char * libraryName);

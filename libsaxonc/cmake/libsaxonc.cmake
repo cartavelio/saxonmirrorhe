@@ -26,6 +26,8 @@ add_library(${saxonc} SHARED
     ${SAXONC_SRC_DIR}/lib/XdmValue.cpp
     ${SAXONC_SRC_DIR}/lib/Xslt30Processor.cpp
     ${SAXONC_SRC_DIR}/lib/XsltExecutable.cpp
+    ${SAXONC_SRC_DIR}/lib/XsdCompiler.cpp
+    ${SAXONC_SRC_DIR}/lib/XsdSchema.cpp
 )
 add_library(SaxonC${SAXON_EDITION}::${saxonc} ALIAS ${saxonc})
 set_target_properties(${saxonc} PROPERTIES
@@ -50,6 +52,8 @@ target_sources(${saxonc}
             ${SAXONC_SRC_DIR}/include/saxonc/SaxonCXPath.h
             ${SAXONC_SRC_DIR}/include/saxonc/SaxonProcessor.h
             ${SAXONC_SRC_DIR}/include/saxonc/SchemaValidator.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XsdSchema.h
+            ${SAXONC_SRC_DIR}/include/saxonc/XsdCompiler.h
             ${SAXONC_SRC_DIR}/include/saxonc/UserFunctionHandler.h
             ${SAXONC_SRC_DIR}/include/saxonc/XPathProcessor.h
             ${SAXONC_SRC_DIR}/include/saxonc/XQueryProcessor.h

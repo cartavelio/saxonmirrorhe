@@ -84,6 +84,14 @@ public:
     SaxonApiException(saxon_status_t status, const char *message, const char *errorCode,
                       const char *systemId, int linenumber, int numOfErrors);
 
+
+    /**
+     * A constructor. Create a SaxonApiException
+     * @param  saxon_error_t - The struct with the error information
+     */
+
+    SaxonApiException(saxon_error_t error);
+
   /**
    * A destructor.
    */

@@ -83,6 +83,7 @@ SaxonApiException::SaxonApiException(const char *m, const char *ec,
   isStaticError = false;
 }
 
+
 SaxonApiException::SaxonApiException(saxon_status_t status, const char *m, const char *ec,
                                      const char *sysId, int linenumber, int numErrors): SaxonApiException(m, ec, sysId, linenumber)  {
 
@@ -91,6 +92,9 @@ SaxonApiException::SaxonApiException(saxon_status_t status, const char *m, const
   isStaticError = false;
   numOfErrors = numErrors;
 }
+
+
+SaxonApiException::SaxonApiException(saxon_error_t r): SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors) {}
 
 SaxonApiException::~SaxonApiException() throw() {
   if (!message.empty()) {

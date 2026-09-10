@@ -151,6 +151,9 @@ public class ProcessorDataAccumulator {
     @CEntryPoint(name = "addProcessorValue")
     public static void addProcessorValue(IsolateThread thread, ObjectHandle processorDataRef, ObjectHandle objectRef){
 
+        if(objectRef == WordFactory.nullPointer()){
+            return;
+        }
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
         Object object = SaxonCAPI.objectHandles.get(objectRef);
 

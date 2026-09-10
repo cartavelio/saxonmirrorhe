@@ -19,6 +19,7 @@ class SaxonProcessor;
 class XdmValue;
 class XdmNode;
 class XdmItem;
+class XsdSchema;
 
 /*! A <code>SchemaValidator</code> represents a factory for validating instance
  * documents against a schema.
@@ -33,13 +34,13 @@ public:
   SchemaValidator();
 
   /**
-   * Constructor with the SaxonProcessor supplied.
-   * The supplied processor should have license flag set to true for the Schema
-   * Validator to operate.
-   * @param proc - pointer to the SaxonProcessor object
-   * @param cwd - the current working directory
-   * @throws SaxonApiException
-   */
+ * Constructor with the SaxonProcessor supplied.
+ * The supplied processor should have license flag set to true for the Schema
+ * Validator to operate.
+ * @param proc - pointer to the SaxonProcessor object
+ * @param cwd - the current working directory
+ * @throws SaxonApiException
+ */
   SchemaValidator(SaxonProcessor *proc, std::string cwd = "");
 
   /**
@@ -49,7 +50,7 @@ public:
   SchemaValidator(const SchemaValidator &other);
 
   /**
-   * Destructor method: at the end of the program call the release() method to clear the JVM.
+   * Destructor method to clean up memory held by the SchemaValidator
    */
   ~SchemaValidator();
 
@@ -84,6 +85,7 @@ public:
    * format, or a compiled schema in Saxon-defined SCM format (as produced using
    * the method exportSchema)
    * @throws SaxonApiException
+   * @deprecated since 13.0. Use newXsdCompiler.
    */
   void registerSchemaFromFile(const char *xsd);
 
@@ -92,6 +94,7 @@ public:
    * @param schemaStr - The schema document supplied as a string
    * @param systemID - The system ID of the document supplied as a string
    * @throws SaxonApiException
+   * @deprecated since 13.0. Use newXsdCompiler.
    */
   void registerSchemaFromString(const char *schemaStr,
                                 const char *systemID = nullptr);
@@ -100,6 +103,7 @@ public:
    * Register the schema supplied as an XDM Node Object
    * @param node - The schema document supplied as an XdmNode object
    * @throws SaxonApiException
+   * @deprecated since 13.0. Use newXsdCompiler.
    */
   void registerSchemaFromNode(XdmNode *node);
 
@@ -131,6 +135,14 @@ public:
    * @throws SaxonApiException
    */
   void validate(const char *sourceFile = nullptr);
+
+    /**
+     * Validate an instance document by a registered schema.
+     * @param sourceFile Name of the file to be validated. Allow nullptr when
+     * source document is supplied with other method
+     * @throws SaxonApiException
+     */
+    void validateFromString(const char *content);
 
   /**
    * Validate an instance document supplied as a Source object.
@@ -265,6 +277,32 @@ public:
   void setLax(bool l);
 
   /**
+     * Ask whether validation is to be in lax mode.
+     *
+     * @return true if validation is to be in lax mode, false if it is to be in strict mode.
+   */
+  bool isLax();
+
+    /**
+     * Get the schema used by this schema validator
+     * @return the relevant schema
+     */
+    XsdSchema * getSchema();
+
+    void setUseXsiSchemaLocation(bool recognize);
+
+    bool isUseXsiSchemaLocation();
+
+    void setDocumentElementName(const char * eqname);
+
+    const char * getDocumentElementName();
+
+    void validateMultiple(const char **sourceFile);
+
+    bool isExpandAttributeDefaults();
+
+    void setExpandAttributeDefaults(bool expand);
+  /**
    * Get the underlying Java object of the C++ schema validator.
    */
   int64_t getUnderlyingValidator() { return cppV; }
@@ -275,9 +313,14 @@ public:
   SaxonProcessor* getSaxonProcessor();
 
 private:
+
+  friend class XsdSchema;
+
+
+  SchemaValidator(std::string cwd, int64_t p, int64_t schemaValidatorObject);
+
   bool lax; /*!< Flag to indicate lax mode for the Schema validation */
-  // jclass  cppClass; /*!< JNI object where the SchemaValidator method will be
-  // invoked */
+
   int64_t cppV, procRef;     /*!< The underlying SchemaValidator Java object */
   std::string cwdV; /*!< Current working directory */
   std::string

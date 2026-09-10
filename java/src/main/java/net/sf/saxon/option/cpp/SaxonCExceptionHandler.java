@@ -5,6 +5,9 @@ import net.sf.saxon.s9api.SaxonApiException;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
 public class SaxonCExceptionHandler {
 
 
@@ -30,6 +33,18 @@ public class SaxonCExceptionHandler {
 
             if (SaxonCAPI.debug) {
                 System.err.println("Java DEBUG: j_getErrorMessage = " + throwable.getClass().getName());
+                System.err.println("Java DEBUG: j_getErrorMessage = " + throwable.getMessage());
+                String stackTrace;
+                try (java.io.StringWriter sw = new java.io.StringWriter();
+                     PrintWriter pw = new PrintWriter(sw)) {
+
+                    throwable.printStackTrace(pw);
+                    stackTrace = sw.toString();
+                    System.err.println("Java DEBUG: stackTrace = " + stackTrace);
+                } catch (IOException e) {
+
+                }
+
             }
 
             int lineNumber = -1;
@@ -58,7 +73,7 @@ public class SaxonCExceptionHandler {
 
             if (errorCode != null) {
                 try (final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(errorCode)) {
-                    errorStruct.setMessage(holder.get());
+                    errorStruct.setErrorCode(holder.get());
                 }
             }
 
@@ -84,7 +99,9 @@ public class SaxonCExceptionHandler {
 
 
     public static void setErrorMessage(SaxonError errorStruct, String message, String defaultMessage) {
-
+        if (SaxonCAPI.debug) {
+            System.err.println("Java DEBUG: SaxonCExceptionHandler.setErrorMessage = " +message);
+        }
         try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(message != null ? message : defaultMessage)) {
             errorStruct.setMessage(holder.get());
         }
