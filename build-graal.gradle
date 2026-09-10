@@ -497,8 +497,8 @@ task graal_hec_jar(
 
 task graal_pec_jar(
   type: Jar,
-  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "compile_function_library", "unjar_JLineJar"],
-  description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\","
+  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
   inputs.files fileTree(dir: "${buildDir}/classes/pec")
@@ -568,8 +568,8 @@ task graal_pec_jar(
 
 task graal_eec_jar(
   type: Jar,
-  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "compile_function_library", "unjar_JLineJar"],
-  description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\""
+  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\", \"unjar_JLineJar\""
 ) {
   inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
   inputs.files fileTree(dir: "${buildDir}/classes/eec")
