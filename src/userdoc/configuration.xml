@@ -77,8 +77,10 @@
       generics to ensure that the supplied property value is of the correct type for the selected feature.</p>
       
       <p class="csonly">In the Saxon.Api interface for C#, configuration options can be set using a method call such as
-         <code>processor.SetConfigurationFeature(Feature&lt;bool>.LINE_NUMBERING, true)</code>. It's necessary to specify
-         the type of the value (here <code>bool</code>) to make the method type-safe.</p>
+         <code>processor.SetProperty(Feature&lt;bool>.LINE_NUMBERING, true)</code>. It's necessary to specify
+         the type of the value (here <code>bool</code>) to make the method type-safe. There is also a method that accepts
+         the feature name as a string, for example <code>processor.SetProperty("http://saxon.sf.net/feature/linenumbering", "true")</code>;
+      in this case the value must also be supplied as a string.</p>
       
       <p>It's also possible to set the same properties by using lower-level methods on the <code>Configuration</code>
          object itself. The properties all have names in the form of URIs (for example <code>"http://saxon.sf.net/feature/linenumbering"</code>),
