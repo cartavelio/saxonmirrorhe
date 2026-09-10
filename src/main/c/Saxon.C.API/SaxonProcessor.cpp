@@ -284,7 +284,7 @@ void SaxonProcessor::detachCurrentThread() {
 #ifdef DEBUG
   std::cerr << "detachCurrentThread called" << std::endl;
 #endif
-  detach_graalvm_thread(SaxonProcessor::sxn_environ);
+  int result = detach_graalvm_thread(SaxonProcessor::sxn_environ);
 #ifdef DEBUG
   if (result != 0) {
     std::cerr << "detachCurrentThread failed" << std::endl;
@@ -406,23 +406,23 @@ XdmValue *SaxonProcessor::makeXdmValueFromRef(int64_t results) {
     XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
     if (xdm_type == XDM_ATOMIC_VALUE) {
       value = new XdmValue();
-      value->addXdmItem(new XdmAtomicValue(results));
+      value->addXdmItemFromUnderlyingValue(new XdmAtomicValue(results));
 
     } else if (xdm_type == XDM_NODE) {
       value = new XdmValue();
-      value->addXdmItem(new XdmNode(results));
+      value->addXdmItemFromUnderlyingValue(new XdmNode(results));
 
     } else if (xdm_type == XDM_MAP) {
       value = new XdmValue();
-      value->addXdmItem(new XdmMap(results));
+      value->addXdmItemFromUnderlyingValue(new XdmMap(results));
 
     } else if (xdm_type == XDM_ARRAY) {
       value = new XdmValue();
-      value->addXdmItem(new XdmArray(results));
+      value->addXdmItemFromUnderlyingValue(new XdmArray(results));
 
     } else if (xdm_type == XDM_FUNCTION_ITEM) {
       value = new XdmValue();
-      value->addXdmItem(new XdmFunctionItem(results));
+      value->addXdmItemFromUnderlyingValue(new XdmFunctionItem(results));
     } else if (typeRef == XDM_EMPTY) {
       // Empty Sequence detected.
       // TODO Maybe we should create an EmptySequence object
@@ -910,9 +910,10 @@ void SaxonProcessor::createHeapDump(bool live) {
 void SaxonProcessor::release() {
   if (SaxonProcessor::jvmCreatedCPP != 0) {
     SaxonProcessor::jvmCreatedCPP = 0;
-#ifdef DEBUG
-    std::cerr << "SaxonProc: JVM finalized calling !" << std::endl;
-#endif
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "SaxonProc: JVM finalized calling !" << std::endl;
+    }
+
     // finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
 
     // delete SaxonProcessor::sxn_environ;
@@ -923,34 +924,20 @@ void SaxonProcessor::release() {
     }
 
   } else {
-#ifdef DEBUG
-    std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
-#endif
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      std::cerr << "SaxonProc: JVM finalize not called!" << std::endl;
+    }
   }
 }
 
 void SaxonProcessor::deleteXdmValueArray(XdmValue **arr, int len) {
-  if (arr != nullptr && len > 0) {
-    for (int i = 0; i < len; i++) {
-      if (arr[i]->getRefCount() < 1) {
-        delete arr[i];
-      } else {
-        arr[i]->decrementRefCount();
-      }
-    }
+  if (arr != nullptr) {
     delete[] arr;
   }
 }
 
 void SaxonProcessor::deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len) {
-  if (arr != nullptr && len > 0) {
-    for (int i = 0; i < len; i++) {
-      if (arr[i]->getRefCount() < 1) {
-        delete arr[i];
-      } else {
-        arr[i]->decrementRefCount();
-      }
-    }
+  if (arr != nullptr) {
     delete[] arr;
   }
 }

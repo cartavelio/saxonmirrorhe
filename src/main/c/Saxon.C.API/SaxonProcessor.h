@@ -740,6 +740,7 @@ public:
     }
   }
 
+
   //! Internal method for diagnostics
   void createHeapDump(bool live);
 
@@ -753,7 +754,7 @@ public:
 protected:
   // jclass xdmAtomicClass; /*!< The XdmAtomicValue instance */
   // jclass versionClass; /*!< The Version instance */
-  // jclass procClass; /*!< The SAxon Processor instance */
+  // jclass procClass; /*!< The Saxon Processor instance */
   // jclass saxonCAPIClass; /*!< The SaxonCAPI instance */
   std::string cwdV; /*!< current working directory */
   // std::string resources_dir; /*!< current Saxon resources directory */
@@ -767,7 +768,7 @@ protected:
   bool licensei; /*!< indicates whether the Processor requires a Saxon that
                     needs a license file (i.e. Saxon-EE) other a Saxon-HE
                     Processor is created  */
-  int64_t procRef;
+  int64_t procRef; //!< ObjectHandle reference to the underlying processor
 
   // JNINativeMethod *nativeMethods; /*!< native methods variable used in
   // extension methods */ std::vector<JNINativeMethod> nativeMethodVect; /*!<

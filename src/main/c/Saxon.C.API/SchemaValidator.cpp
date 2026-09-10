@@ -280,9 +280,21 @@ const char *SchemaValidator::checkException() { return proc->checkException(); }
 
 void SchemaValidator::setSourceNode(XdmNode *value) {
   if (value != nullptr) {
-    value->incrementRefCount();
+    XdmValue * value = getParameter("node", false);
+    if(value != nullptr) {
+         parameters.erase(std::string("node"));
+    }
     parameters["node"] = (XdmValue *)value;
   }
+}
+
+XdmValue *SchemaValidator::getParameter(const char *name, bool withParam) {
+  std::map<std::string, XdmValue *>::iterator it;
+  it = parameters.find((withParam ? "param:" : "") + std::string(name));
+  if (it != parameters.end())
+    return it->second;
+
+  return nullptr;
 }
 
 void SchemaValidator::setParameter(const char *name, XdmValue *value) {
@@ -293,8 +305,7 @@ void SchemaValidator::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-        valuei->decrementRefCount();
-        parameters.erase(skey);
+          parameters.erase(skey);
       }
     }
     parameters[skey] = value;
@@ -315,22 +326,22 @@ void SchemaValidator::setProperty(const char *name, const char *value) {
       std::string(name), std::string((value == nullptr ? "" : value))));
 }
 
-void SchemaValidator::clearParameters(bool delVal) {
-  if (delVal) {
-    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
-         itr != parameters.end(); itr++) {
-      XdmValue *value = itr->second;
-      value->decrementRefCount();
+void SchemaValidator::clearParameters(bool delValues) {
+    if (delValues ) {
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+             itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if (value != nullptr) {
 #ifdef DEBUG
-      std::cout << "SchemaValidator.clearParameter() - XdmValue refCount="
-                << value->getRefCount() << std::endl;
+                std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+                  << value->getRefCount() << std::endl;
 #endif
-      if (value != nullptr && value->getRefCount() < 1) {
-        delete value;
-      }
+                delete value;
+                value = nullptr;
+            }
+        }
     }
-  }
-  parameters.clear();
+    parameters.clear();
 }
 
 void SchemaValidator::clearProperties() { properties.clear(); }

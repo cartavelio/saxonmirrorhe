@@ -31,6 +31,9 @@ PHP_METHOD(XQueryProcessor, __destruct) {
                                  XtOffsetOf(xqueryProcessor_object, std));
   XQueryProcessor *xqueryProcessor = obj->xqueryProcessor;
   if (xqueryProcessor != nullptr) {
+    _decrementRefCount(xqueryProcessor->getParameters());
+    xqueryProcessor->clearParameters();
+    xqueryProcessor->clearProperties();
     delete xqueryProcessor;
   }
 }
@@ -62,6 +65,7 @@ PHP_METHOD(XQueryProcessor, runQueryToValue) {
                                   XtOffsetOf(xdmValue_object, std));
           assert(vobj != nullptr);
           vobj->xdmValue = node;
+          node->incrementRefCount();
           return;
         }
       }
@@ -260,7 +264,14 @@ PHP_METHOD(XQueryProcessor, setContextItem) {
         (xqueryProcessor_object *)((char *)pobj -
                                    XtOffsetOf(xqueryProcessor_object, std));
     xqueryProcessor = obj->xqueryProcessor;
+        if (Z_TYPE_P(oth) == IS_NULL) {
+          xqueryProcessor->setContextItem(nullptr);
+          return;
+        }
+
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
+        XdmValue * oldValue = xqueryProcessor->getParameter("node", false);
+        _decrementRefCountForValue(oldValue);
 
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
       zend_object *vvobj = Z_OBJ_P(oth);
@@ -270,6 +281,8 @@ PHP_METHOD(XQueryProcessor, setContextItem) {
       if (ooth != nullptr) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
+
+        value->incrementRefCount();
           xqueryProcessor->setContextItem((XdmItem *)value);
 
           return;
@@ -282,6 +295,7 @@ PHP_METHOD(XQueryProcessor, setContextItem) {
       if (ooth != nullptr) {
         XdmItem *value = ooth->xdmItem;
         if (value != nullptr) {
+        value->incrementRefCount();
           xqueryProcessor->setContextItem(value);
 
           return;
@@ -296,7 +310,7 @@ PHP_METHOD(XQueryProcessor, setContextItem) {
       if (ooth != nullptr) {
         XdmAtomicValue *value = ooth->xdmAtomicValue;
         if (value != nullptr) {
-
+           value->incrementRefCount();
           xqueryProcessor->setContextItem((XdmItem *)value);
 
           return;
@@ -366,6 +380,9 @@ PHP_METHOD(XQueryProcessor, setParameter) {
       php_error(E_WARNING, "Error setting source value - value is nullptr");
       return;
     }
+
+    XdmValue * oldValue = xqueryProcessor->getParameter(name, true);
+    _decrementRefCountForValue(oldValue);
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
     // std::cout<<"test type:"<<(Z_OBJCE_P(oth)->name)<<std::endl;
     // Z_ADDREF_P(oth);
@@ -377,6 +394,7 @@ PHP_METHOD(XQueryProcessor, setParameter) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
           xqueryProcessor->setParameter(name, (XdmValue *)value);
+          value->incrementRefCount();
         }
       }
     } else if (strcmp(objName, "Saxon\\XdmValue") == 0) {
@@ -386,8 +404,8 @@ PHP_METHOD(XQueryProcessor, setParameter) {
       if (ooth != nullptr) {
         XdmValue *value = ooth->xdmValue;
         if (value != nullptr) {
-
           xqueryProcessor->setParameter(name, value);
+          value->incrementRefCount();
         }
       }
 
@@ -399,8 +417,8 @@ PHP_METHOD(XQueryProcessor, setParameter) {
       if (ooth != nullptr) {
         XdmAtomicValue *value = ooth->xdmAtomicValue;
         if (value != nullptr) {
-
           xqueryProcessor->setParameter(name, (XdmValue *)value);
+          value->incrementRefCount();
         }
       }
     }
@@ -441,6 +459,7 @@ PHP_METHOD(XQueryProcessor, clearParameters) {
                                  XtOffsetOf(xqueryProcessor_object, std));
   xqueryProcessor = obj->xqueryProcessor;
   if (xqueryProcessor != nullptr) {
+    _decrementRefCount(xqueryProcessor->getParameters());
     xqueryProcessor->clearParameters();
   }
 }

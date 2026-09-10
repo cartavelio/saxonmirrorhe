@@ -25,13 +25,15 @@ EXTERN_SAXONC
 
 /**
  * Create a boxed Boolean value
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param val - boolean value
  */
 
-int64_t booleanValue(sxnc_environment *environi, bool);
+int64_t booleanValue(sxnc_environment *environi, bool val);
 
 /**
  * Create a boxed Integer value
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param i - int value
  */
 
@@ -39,6 +41,7 @@ int64_t integerValue(sxnc_environment *environi, int i);
 
 /**
  * Create a boxed Double value
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param d - double value
  */
 
@@ -46,6 +49,7 @@ int64_t doubleValue(sxnc_environment *environi, double d);
 
 /**
  * Create a boxed Float value
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param f - float value
  */
 
@@ -53,6 +57,7 @@ int64_t floatValue(sxnc_environment *environi, float f);
 
 /**
  * Create a boxed Long value
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param l - long value
  */
 
@@ -60,6 +65,7 @@ int64_t longValue(sxnc_environment *environi, long l);
 
 /**
  * Create a boxed String value
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param str - char array value
  */
 
@@ -68,6 +74,7 @@ int64_t getJavaStringValue(sxnc_environment *environi, const char *str);
 /**
  * A Constructor for internal use. Create an underlying representation for the
  * XdmValue based on the target type. Conversion is applied if possible.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param type - the target type of the value
  * @param str - value to convert
  */
@@ -78,6 +85,7 @@ int64_t xdmValueAsObj(sxnc_environment *environi, const char *type,
 /**
  * A Constructor. Create an XdmValue based on the target type. Conversion is
  * applied if possible.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param type - the target type of the value
  * @param str - value to convert
  */
@@ -180,6 +188,7 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
 
 /**
  * Determine whether the item is an atomic value or a node
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param value - XDM value
  *
  * @return true if the item is an atomic value, false if it is a node
@@ -189,6 +198,7 @@ bool isAtomicValue(sxnc_environment *environi, sxnc_value value);
 
 /**
  * Get the number of items in the sequence
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param val - XDM value
  *
  * @return the number of items in the value - always one
@@ -222,6 +232,7 @@ int size(sxnc_environment *environi, sxnc_value val);
  * of the node. For an atomic value, it has the same effect as casting the value
  * to a string. In all cases the result is the same as applying the XPath
  * string() function.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param value - Value to convert to string
  **/
 
@@ -229,6 +240,7 @@ const char *getStringValue(sxnc_environment *environi, sxnc_value value);
 
 /**
  * Get the integer value of the item.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param value - Value to convert to integer
  * @param failure_value - If the value is not an integer then we can specify the
  *value to return. Default is zero.
@@ -240,6 +252,7 @@ int getIntegerValue(sxnc_environment *environi, sxnc_value value,
 
 /**
  * Get the boolean value of the item.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param value - Value to convert to boolean
  *
  **/
@@ -247,6 +260,7 @@ bool getBooleanValue(sxnc_environment *environi, sxnc_value value);
 
 /**
  * Get the long value of the item.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param value - Value to convert to long
  * @param failureVal - If the Value is not a long then we can specify the value
  * to return. Default is zero.
@@ -257,6 +271,7 @@ long getLongValue(sxnc_environment *environi, sxnc_value value,
 
 /**
  * Get the float value of the item.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param value - Value to convert to float
  * @param failureVal - If the Value is not a float then we can specify the value
  * to return. Default is zero.
@@ -267,6 +282,7 @@ float getFloatValue(sxnc_environment *environi, sxnc_value value,
 
 /**
  * Get the double value of the item.
+ * @param environi - GraalVM environment held as the struct sxnc_environment.
  * @param value - Value to convert to double
  * @param failureVal - If the Value is not a double then we can specify the
  *value to return. Default is zero.

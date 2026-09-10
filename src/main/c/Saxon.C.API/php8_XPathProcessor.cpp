@@ -25,6 +25,9 @@ PHP_METHOD(XPathProcessor, __destruct) {
 
   XPathProcessor *xpathProc = obj->xpathProcessor;
   if (xpathProc != nullptr) {
+    _decrementRefCount(xpathProc->getParameters());
+    xpathProc->clearParameters();
+    xpathProc->clearProperties();
     delete xpathProc;
   }
 }
@@ -79,7 +82,13 @@ PHP_METHOD(XPathProcessor, setParameter) {
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr) {
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
-    // std::cout<<"test type:"<<(Z_OBJCE_P(oth)->name)<<std::endl;
+    if (Z_TYPE_P(oth) == IS_NULL) {
+      php_error(E_WARNING, "Error setting source value - value is null");
+      return;
+    }
+
+    XdmValue * oldValue = xpathProcessor->getParameter(name, true);
+    _decrementRefCountForValue(oldValue);
 
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
 
@@ -419,6 +428,9 @@ PHP_METHOD(XPathProcessor, setContextItem) {
       xpathProcessor->setContextItem(nullptr);
       return;
     }
+        XdmValue * oldValue = xpathProcessor->getParameter("node", false);
+        _decrementRefCountForValue(oldValue);
+
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
 
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -520,6 +532,7 @@ PHP_METHOD(XPathProcessor, clearParameters) {
                                 XtOffsetOf(xpathProcessor_object, std));
   xpathProcessor = obj->xpathProcessor;
   if (xpathProcessor != nullptr) {
+    _decrementRefCount(xpathProcessor->getParameters());
     xpathProcessor->clearParameters();
   }
 }

@@ -80,8 +80,8 @@ public:
 
   //! Register the schema supplied as a string
   /**
-   *
    * @param schemaStr - The schema document supplied as a string
+   * @param systemID - The system ID of the document supplied as a string
    * @throws SaxonApiException
    */
   void registerSchemaFromString(const char *schemaStr,
@@ -89,8 +89,7 @@ public:
 
   //! Register the schema supplied as an XDM Node Object
   /**
-   *
-   * @param schemaStr - The schema document supplied as an XdmNode object
+   * @param node - The schema document supplied as an XdmNode object
    * @throws SaxonApiException
    */
   void registerSchemaFromNode(XdmNode *node);
@@ -187,6 +186,15 @@ public:
 
   //! Clear property values set
   void clearProperties();
+
+  /**
+   * Get a parameter value by name
+   * @param name - Specified parameter name to get
+   * @param withParam Internal use only
+   * @return XdmValue
+   */
+  XdmValue *getParameter(const char *name, bool withParam);
+
 
   //! Get all parameters as a std::map
   std::map<std::string, XdmValue *> &getParameters();

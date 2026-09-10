@@ -31,6 +31,7 @@ XdmNode::XdmNode(const XdmNode &other) {
   nodeKind = other.nodeKind;
   nodeToString = other.nodeToString;
   axisCount = other.axisCount;
+  children = other.children;
 
 }
 
@@ -63,18 +64,16 @@ XdmNode::~XdmNode() {
     operator delete((char *)localName);
     localName = nullptr;
   }
-    /*
-    //TODO - note that I have commented this out because it crashes in C++.
-    // This should be fine because its the users responsibility to delete children. Python/PHP does the delete.
-    if (children != nullptr) {
+
+    /*if (children != nullptr) {
 
         for (int p = 0; p < childCount; ++p) {
-            if(children[p] != nullptr && children[p]->getRefCount() < 1) {
+            if(children[p]->getRefCount() < 1) {
                 delete children[p];
             }
         }
         delete[] children;
-    } */
+    }*/
 
   /* if (nodeToString != nullptr) {
     delete[] nodeToString;
@@ -235,7 +234,6 @@ XdmNode *XdmNode::getParent() {
         getParentForXdmNode(SaxonProcessor::sxn_environ->thread, (void *)value);
     if (nodeRef > SXN_UNSET) {
       parent = new XdmNode(nullptr, nodeRef, UNKNOWN);
-      // parent->incrementRefCount();
       return parent;
     }
     return nullptr;
@@ -341,62 +339,43 @@ XdmNode **XdmNode::getChildren(bool cached) {
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmNode getChildren called:" << " ob ref=" << (this)  << std::endl;
   }
-  if (cached && children != nullptr) {
-    return children;
-  } else {
-    if (childCount < 0) {
-      getChildCount();
-    }
-
-    if (childCount == 0) {
-      return nullptr;
-    }
-
-    allocFn fn = operator new;
-    long long *childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread,
-                                          (void *)fn, (void *)value);
-    if (childNodes == nullptr) {
-      return nullptr;
-    }
-    children = new XdmNode *[childCount];
-    for (int p = 0; p < childCount; ++p) {
-      children[p] = new XdmNode(this, (int64_t)childNodes[p], UNKNOWN);
-    }
-    operator delete(childNodes);
-    return children;
+  if (childCount < 0) {
+    getChildCount();
   }
+
+  if (childCount == 0) {
+    return nullptr;
+  }
+
+  allocFn fn = operator new;
+  long long *childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread,
+                                        (void *)fn, (void *)value);
+  if (childNodes == nullptr) {
+    return nullptr;
+  }
+  XdmNode **fetchedChildren = new XdmNode *[childCount];
+  for (int p = 0; p < childCount; ++p) {
+    fetchedChildren[p] = new XdmNode(this, (int64_t)childNodes[p], UNKNOWN);
+  }
+  operator delete(childNodes);
+  return fetchedChildren;
 }
 
 XdmNode *XdmNode::getChild(int i, bool cached) {
-
   if (i < 0) {
     return nullptr;
   }
 
-  if (cached) {
+  XdmNode *child = nullptr;
 
-    if (children == nullptr) {
-      getChildren(cached);
-    }
+  int64_t childRef =
+      j_getChild(SaxonProcessor::sxn_environ->thread, (void *)value, i);
 
-    if (i < childCount && children[i] != nullptr) {
-      return children[i];
-
-    } else {
-      return nullptr;
-    }
-  } else {
-    XdmNode *child = nullptr;
-
-    int64_t childRef =
-        j_getChild(SaxonProcessor::sxn_environ->thread, (void *)value, i);
-
-    if (childRef == SXN_UNSET) {
-      return nullptr;
-    }
-
-    child = new XdmNode(this, childRef, UNKNOWN);
-
-    return child;
+  if (childRef == SXN_UNSET) {
+    return nullptr;
   }
+
+  child = new XdmNode(this, childRef, UNKNOWN);
+
+  return child;
 }

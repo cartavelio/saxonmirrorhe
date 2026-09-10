@@ -72,6 +72,12 @@ public:
   void addXdmItem(XdmItem *val);
 
   /**
+   * Add an XdmItem to the sequence, when the sequence was returned from SaxonC: Internal use only.
+   * @param val - XdmItem object
+   */
+  void addXdmItemFromUnderlyingValue(XdmItem *val);
+
+  /**
    * Add an Java XdmValue object to the sequence.
    * See methods the functions in SaxonCXPath of the C library
    * @param val - Java object
@@ -101,10 +107,11 @@ public:
    */
   virtual ~XdmValue();
 
-  //! Delete the XdmValue object and clean up all items in the sequence. Release
-  //! the underlying JNI object
+  //! This is deprecated and a no-op, C++ destructor handles this case. Delete
+  //! the XdmValue object and clean up all items in the sequence. Release
+  //! the underlying JNI object.
   /*
-   *
+   *! @deprecated
    */
   void releaseXdmValue();
 
@@ -207,16 +214,19 @@ protected:
   char *valueType; /*!< Cached. The type of the XdmValue */
 
   XdmItem **values; /*!< Cached. XdmItems in the XdmValue */
-  char *relinquished_values;
-  int values_cap;
+  char *relinquished_values; /*!< Pointer to the array of items which have been relinquished */
+  int values_cap; /*!< The count of items in the value */
   int xdmSize;  /*!< Cached. The count of items in the XdmValue */
   int refCount; /*!< The reference count of this XdmValue. If >1 this object
                    should not be deleted */
+
 private:
   char *toStringValue; /*!< Cached. String representation of the XdmValue, if
                           available */
   int64_t jValues;     /*!< If this XdmValue is a sequence we store values as an
                           ProcessorDataAccumulator object  */
+
+  int addXdmItemToValue(XdmItem *val);
 };
 
 #endif /** SAXON_XDMVALUE_H **/

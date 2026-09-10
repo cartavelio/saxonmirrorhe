@@ -79,6 +79,11 @@ public:
    */
   XdmNode(XdmNode *parent, int64_t, XDM_NODE_KIND kind);
 
+  /**
+   * Copy constructor
+   *
+   * @param other The node being copied
+   */
   XdmNode(const XdmNode &other);
 
   //! Destructor.
@@ -246,7 +251,7 @@ public:
   /**
    *
    *
-   * @param cache - true to cache the attribute nodes for future use. User os
+   * @param cache - deprecated. User is
    * responsible for memory management for the attribute nodes.
    * @return NULL if this node is not an element, or if this element has no
    * attribute with the specified name. Otherwise return the attribute nodes as
@@ -270,6 +275,11 @@ public:
   */
   XdmNode **axisNodes(EnumXdmAxis axis);
 
+  /**
+   * Convert an int into the corresponding EnumXdmAxis Enum object
+   *
+   * @param n - the integer value for the XDM axis
+   */
   EnumXdmAxis convertEnumXdmAxis(int n) { return static_cast<EnumXdmAxis>(n); }
 
   //! Get the count of nodes in the nodeAxis array. Cached from the last call to
@@ -292,21 +302,20 @@ public:
    */
   bool isNode() { return true; }
 
-  //! Get all the child nodes from the current parent node
+  //! Get all the child nodes from the current parent node.
   /**
-   *
+   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
    * @return pointer array of XdmNode objects
    */
-
-  XdmNode **getChildren(bool cache = true);
+  XdmNode **getChildren(bool cache = false);
 
   //! Get the ith child nodes from the current parent node
   /**
-   *
+   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
    * @return a pointer to the ith child node
    */
 
-  XdmNode *getChild(int i, bool cache = true);
+  XdmNode *getChild(int i, bool cache = false);
 
   //! Get the count of child nodes from the current node
   /**
@@ -338,6 +347,18 @@ public:
      */
 
     bool hasRelinquishedChildren();
+
+  //! Utility method required for python and PHP extension to delete string
+  //! created in the C++ code-base
+  /**
+  * @param fetchedChildren - the array of pointers to child nodes to be deleted
+  */
+  static void deleteChildrenArray(XdmNode **fetchedChildren) {
+    if (fetchedChildren != nullptr) {
+      delete[] fetchedChildren;
+      fetchedChildren = nullptr;
+    }
+  }
 
 
 private:

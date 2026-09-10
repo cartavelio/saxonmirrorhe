@@ -55,3 +55,5 @@ g++ -std=c++14 -g   -fPIC -I../../Saxon.C.API/graalvm   bin/SaxonCGlue.o bin/Sax
 g++ -std=c++14 -g  -g -fPIC -I../../Saxon.C.API/graalvm  bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o  bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testXPath.cpp -o testXPath -Wl,-rpath,@executable_path/$library_dir -ldl -lsaxon-@@edition@@c-@@VERSION@@ -L$library_dir $@
 
 g++ -std=c++14 -g -fPIC -I../../Saxon.C.API/graalvm  bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o  bin/XsltExecutable.o bin/Xslt30Processor.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmMap.o bin/XdmFunctionItem.o bin/SchemaValidator.o bin/SaxonApiException.o testValidator.cpp -o testValidator -Wl,-rpath,@executable_path/$library_dir -ldl -lsaxon-@@edition@@c-@@VERSION@@ -L$library_dir $@
+
+

@@ -96,13 +96,6 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
 
 void XsltExecutable::deleteXdmValueArray(XdmValue **arr, int len) {
   if (arr != nullptr && len > 0) {
-    for (int i = 0; i < len; i++) {
-      if (arr[i]->getRefCount() < 1) {
-        delete arr[i];
-      } else {
-        arr[i]->decrementRefCount();
-      }
-    }
     delete[] arr;
   }
 }
@@ -111,7 +104,7 @@ bool XsltExecutable::exceptionOccurred() { return exceptionFound; }
 
 void XsltExecutable::setGlobalContextItem(XdmItem *value) {
   if (value != nullptr) {
-    parameters["node"] = value;
+      setParameter("node", (XdmValue*)value, false);
   }
 }
 
@@ -122,17 +115,22 @@ void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
 }
 
 void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
-  if (_selection == nullptr) {
-    selectionRef = SXN_UNSET;
-  } else {
-    selectionRef = _selection->getUnderlyingValue();
-    selectionStringFlag = false;
-  }
+    if (_selection == nullptr) {
+        selectionRef = SXN_UNSET;
+    } else {
+        setParameter("_i_matchs", _selection, false);
+        selectionStringFlag = false;
+    }
 }
 
 void XsltExecutable::setInitialMatchSelectionAsFile(const char *filename) {
 
-  if (selectionRef != SXN_UNSET && selectionStringFlag) {
+    if (!selectionStringFlag) {
+        XdmValue * valuei = getParameter("_i_matches", false);
+            if(valuei != nullptr) {
+            parameters.erase("_i_matches");
+        }
+    } else if (selectionRef != SXN_UNSET && selectionStringFlag) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread,
                       (void *)selectionRef);
   }
@@ -174,12 +172,26 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
       if (valuei != nullptr) {
-        valuei->decrementRefCount();
-        parameters.erase(skey);
+          parameters.erase(skey);
       }
     }
     parameters[skey] = value;
   }
+}
+
+void XsltExecutable::setParameter(const char *name, XdmValue *value,
+                                  bool withParam) {
+    if (value != nullptr && name != nullptr) {
+        std::string skey = (withParam ? "param:" : "") + std::string(name);
+        std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
+        if (it != parameters.end()) {
+            XdmValue *valuei = it->second;
+            if (valuei != nullptr) {
+                parameters.erase(skey);
+            }
+        }
+        parameters[skey] = value;
+    }
 }
 
 void XsltExecutable::setInitialTemplateParameters(
@@ -187,7 +199,9 @@ void XsltExecutable::setInitialTemplateParameters(
   for (std::map<std::string, XdmValue *>::iterator itr = _itparameters.begin();
        itr != _itparameters.end(); itr++) {
 
-    parameters["itparam:" + std::string(itr->first)] = itr->second;
+    //parameters["itparam:" + std::string(itr->first)] = itr->second;
+    std::string paramStr = "itparam:" + std::string(itr->first);
+    setParameter(paramStr.c_str(), itr->second, false);
   }
   tunnel = _tunnel;
   if (tunnel) {
@@ -266,13 +280,13 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
   return resultDocumentMap;
 }
 
-XdmValue *XsltExecutable::getParameter(const char *name) {
+XdmValue *XsltExecutable::getParameter(const char *name, bool withParam) {
   std::map<std::string, XdmValue *>::iterator it;
-  it = parameters.find("param:" + std::string(name));
+  it = parameters.find((withParam ? "param:" : "") + std::string(name));
   if (it != parameters.end())
     return it->second;
   else {
-    it = parameters.find("sparam:" + std::string(name));
+    it = parameters.find((withParam ? "sparam:" : "")  + std::string(name));
     if (it != parameters.end())
       return it->second;
   }
@@ -323,23 +337,23 @@ const char *XsltExecutable::getProperty(const char *name) {
   return nullptr;
 }
 
-void XsltExecutable::clearParameters(bool delValues) {
-  if (delValues) {
-    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
-         itr != parameters.end(); itr++) {
 
-      XdmValue *value = itr->second;
-      if (value != nullptr) {
-#ifdef DEBUG
-        std::cout << "clearParameter() - XdmValue refCount="
-                  << value->getRefCount() << std::endl;
-#endif
-        delete value;
-        value = nullptr;
-      }
+void XsltExecutable::clearParameters(bool delValues) {
+    if (delValues) {
+        for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+             itr != parameters.end(); itr++) {
+            XdmValue *value = itr->second;
+            if (delValues && value != nullptr) {
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                    std::cerr << "XsltExecutable.clearParameter() - XdmValue refCount="
+                      << value->getRefCount() << std::endl;
+                }
+                delete value;
+                value = nullptr;
+            }
+        }
     }
-  }
-  parameters.clear();
+    parameters.clear();
 }
 
 void XsltExecutable::clearProperties() {
@@ -385,11 +399,11 @@ void XsltExecutable::exportStylesheet(const char *filename) {
 
 void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
   proc->attachCurrentThread();
-  if (selectionRef == SXN_UNSET) {
+  /*if (selectionRef == SXN_UNSET) {
     throw SaxonApiException(
         "Error: The initial match selection has not been set. Please set it "
         "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
-  }
+  }*/
 
   setProperty("resources", resources_dir.c_str());
 
@@ -443,11 +457,11 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
 const char *XsltExecutable::applyTemplatesReturningString() {
   proc->attachCurrentThread();
-  if (selectionRef == SXN_UNSET) {
+  /*if (selectionRef == SXN_UNSET) {
     throw SaxonApiException(
         "Error: The initial match selection has not been set. Please set it "
         "using setInitialMatchSelection or setInitialMatchSelectionAsFile.");
-  }
+  }*/
 
   setProperty("resources", resources_dir.c_str());
 
@@ -883,10 +897,6 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
 XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 
-  if (sourcefile == nullptr) {
-
-    return nullptr;
-  }
 
   setProperty("resources", resources_dir.c_str());
 
@@ -1131,7 +1141,7 @@ const char *XsltExecutable::transformFileToString(const char *source) {
 const char *XsltExecutable::transformToString(XdmNode *source) {
 
   if (source != nullptr) {
-    parameters["node"] = source;
+      setParameter("node", (XdmValue *)source, false);
   }
   return transformFileToString(nullptr);
 }
@@ -1139,7 +1149,7 @@ const char *XsltExecutable::transformToString(XdmNode *source) {
 XdmValue *XsltExecutable::transformToValue(XdmNode *source) {
 
   if (source != nullptr) {
-    parameters["node"] = source;
+    setParameter("node", (XdmValue *)source, false);
   }
   return transformFileToValue(nullptr);
 }
@@ -1147,7 +1157,7 @@ XdmValue *XsltExecutable::transformToValue(XdmNode *source) {
 void XsltExecutable::transformToFile(XdmNode *source) {
 
   if (source != nullptr) {
-    parameters["node"] = source;
+      setParameter("node", (XdmValue *)source, false);
   }
   transformFileToFile(nullptr, nullptr);
 }

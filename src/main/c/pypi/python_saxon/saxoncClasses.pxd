@@ -644,7 +644,7 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         XdmNode* getParent()
 
-        XdmNode *getChild(int i, bool cache);
+        XdmNode *getChild(int i, bool cache=False);
 
         const char* getAttributeValue(const char *str)
 
@@ -661,6 +661,9 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
         XdmNode** getChildren()
 
         int getChildCount()
+
+        @staticmethod
+        void deleteChildrenArray(XdmNode** fetchedChildren)
 
 
 
@@ -687,6 +690,7 @@ cdef extern from "@@location@@Saxon.C.API/XdmFunctionItem.h":
 
         int getArity()
 
+        @staticmethod
         XdmFunctionItem * getSystemFunction(SaxonProcessor * processor, const char * name, int arity)
 
         XdmValue * call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) except +raise_py_error

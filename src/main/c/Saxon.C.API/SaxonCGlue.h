@@ -55,7 +55,7 @@ static const bool true = 1;
 static const int SXN_EXCEPTION = -2;
 static const int SXN_UNSET = -1;
 
-/*!    \file  SaxonCGlue.h
+/*!  \file  SaxonCGlue.h
  *   \brief This C header file contains a number of factory functions for
  * running SaxonC C/C++ APIs, including GraalVM create and destroy functions.
  */
@@ -77,9 +77,9 @@ extern int jvmCreated; // TODO this might not be required in graalvm - remove
  * associated with the compiled SaxonC library. <p/>
  */
 typedef struct {
-  graal_isolate_t *isolate;
-  graal_isolatethread_t *thread;
-  graal_isolatethread_t *mainthread;
+  graal_isolate_t *isolate; //!< Structure representing a GraalVM isolate
+  graal_isolatethread_t *thread; //!< pointer to the current GraalVM isolate thread
+  graal_isolatethread_t *mainthread; //!< pointer to the main GraalVM isolate thread
 } sxnc_environment;
 
 //===============================================================================================//
@@ -89,7 +89,7 @@ typedef struct {
  * pairs. <p/>
  */
 typedef struct {
-  char *name;
+  char *name; //!< The parameter name
   int64_t value; /*!< Internal use only. The value of the parameter points to
                     the Java object. */
 
@@ -102,7 +102,7 @@ typedef struct {
  * pairs. <p/>
  */
 typedef struct {
-  char *name;
+  char *name; //!< The property name
   char *value; /*!< Internal use only. The value of the parameter points to the
                   Java object. */
 } sxnc_property;
@@ -118,7 +118,7 @@ typedef struct {
  * processor objects created in C for XSLT, XQuery and XPath. <p/>
  */
 typedef struct {
-  int64_t value;
+  int64_t value; //!< The ObjectHandle of the processor object
 } sxnc_processor;
 
 extern int64_t cpp;
@@ -139,6 +139,9 @@ char *_getResourceDirectory();
  */
 int create_graalvm_isolate(sxnc_environment *env);
 
+/**
+ * Attach to the current thread in the loaded GraalVM isolate
+ */
 int attach_graalvm_thread(sxnc_environment *env);
 
 /**
@@ -146,6 +149,13 @@ int attach_graalvm_thread(sxnc_environment *env);
  */
 int detach_graalvm_thread(sxnc_environment *env);
 
+/**
+ * Create and return the ObjectHandle for a Saxon Processor. Here we pass in the Graal isolate
+ * pointer which should have been attached to in advance.
+ *
+ * \param *thread [in] The Graal Isolate thread
+ * \param license [in] Whether the processor should be licensed (EE/PE) or not (HE).
+ */
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 
 /**

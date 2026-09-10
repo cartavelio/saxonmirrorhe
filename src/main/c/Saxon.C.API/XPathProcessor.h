@@ -157,8 +157,10 @@ public:
    * the JAXP solution i.e. "{uri}name"
    * @param value of the query parameter, or nullptr to clear a previously set
    * value
+   * @param withParam Internal use only
    */
-  void setParameter(const char *name, XdmValue *value);
+
+  void setParameter(const char *name, XdmValue *value, bool withParam=true);
 
   /**
    * Remove a parameter (name, value) pair
@@ -211,7 +213,7 @@ public:
   /**
    * Set the language version for the XPath compiler.
    *
-   * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
+   * @param version One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
    *              Setting the option to 1.0 requests an XPath 2.0 processor
    * running in 1.0 compatibility mode; this is equivalent to setting the
    * language version to 2.0 and backwards compatibility mode to true.
@@ -253,6 +255,11 @@ public:
   void
   setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
 
+  /**
+   * Convert an int into an UnprefixedElementMatchingPolicy
+   *
+   * @param n - the int representing the policy
+   */
   UnprefixedElementMatchingPolicy convertEnumPolicy(int n) {
     return static_cast<UnprefixedElementMatchingPolicy>(n);
   }
@@ -281,6 +288,14 @@ public:
   void importSchemaNamespace(const char *uri);
 
   /**
+   * Get a parameter value by name
+   * @param name - Specified parameter name to get
+   * @param withParam Internal use only
+   * @return XdmValue
+   */
+  XdmValue *getParameter(const char *name, bool withParam=true);
+
+  /**
    * Get all parameters as a std::map
    */
   std::map<std::string, XdmValue *> &getParameters();
@@ -303,6 +318,7 @@ public:
    * Clear property values set
    */
   void clearProperties();
+
 
   /**
    * Checks for pending exceptions without creating a local reference to the
@@ -350,7 +366,6 @@ public:
 private:
   void createException(const char *message = nullptr);
 
-  void setParameter(const char *name, XdmValue *value, bool withParam);
 
   SaxonProcessor *proc; /*!< SaxonProcessor pointer to object. This is the
                            object that created the XPathProcessor */

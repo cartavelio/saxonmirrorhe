@@ -38,6 +38,8 @@ PHP_METHOD(Xslt30Processor, __destruct) {
                                  XtOffsetOf(xslt30Processor_object, std));
 
   Xslt30Processor *xslt30Processor = obj->xslt30Processor;
+  _decrementRefCount(xslt30Processor->getParameters());
+  xslt30Processor->clearParameters();
   if (xslt30Processor != nullptr) {
     delete xslt30Processor;
   }
@@ -55,6 +57,7 @@ PHP_METHOD(Xslt30Processor, clearParameters) {
                                  XtOffsetOf(xslt30Processor_object, std));
   xslt30Processor = obj->xslt30Processor;
   if (xslt30Processor != NULL) {
+    _decrementRefCount(xslt30Processor->getParameters());
     xslt30Processor->clearParameters();
   }
 }
@@ -151,6 +154,7 @@ PHP_METHOD(Xslt30Processor, transformFileToValue) {
                                   XtOffsetOf(xdmValue_object, std));
           assert(vobj != nullptr);
           vobj->xdmValue = node;
+          node->incrementRefCount();
         }
       }
     } catch (SaxonApiException &e) {
@@ -180,6 +184,15 @@ PHP_METHOD(Xslt30Processor, setParameter) {
     if (Z_TYPE_P(oth) == IS_NULL) {
       php_error(E_WARNING, "Error setting source value - value is null");
       return;
+    }
+
+    XdmValue * oldValue = xslt30Processor->getParameter(name);
+    if(oldValue != nullptr) {
+        oldValue->decrementRefCount();
+        if(oldValue->getRefCount() < 1) {
+            delete oldValue;
+            oldValue = nullptr;
+        }
     }
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {

@@ -7,6 +7,7 @@ from Environment import Environment
 from test_outcome import PyTestOutcome
 from test_report import PyTestReport
 import sys, getopt
+from urllib.parse import urlparse
 from os.path import abspath
 from os.path import isfile
 from datetime import datetime as date
@@ -74,6 +75,11 @@ total_tests = 0
 exceptionList = ['unicode-90', 'validation-1601']
 '''number-5018 number-2806 number-5014 number-5029'''
 
+def cwd_from_base_uri(base_uri: str):
+    cwd = os.path.dirname(urlparse(base_uri).path)
+    if os.path.isdir(cwd):
+        return cwd
+    raise IOError("Specified directory <%s> does not exist!" % cwd)
 
 def process_catalog(path: str, catalogi):
     att_name = None
@@ -281,7 +287,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri)
-    environment.proc.set_cwd(base_uri)
+    environment.proc.set_cwd(cwd_from_base_uri(base_uri))
     builder = environment.proc.new_document_builder()
     base = xpc.evaluate("//static-base-uri")
     if base is not None:
@@ -314,7 +320,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
 
     try:
         schema_validator = environment.proc.new_schema_validator()
-        schema_validator.set_cwd(base_uri)
+        schema_validator.set_cwd(cwd_from_base_uri(base_uri))
     except PySaxonApiError as ex:
         print("*** Failed to create PySchemaValidator :" + str(ex))
 
@@ -368,7 +374,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, enviro
                 sheet = stylesheets.item_at(ii).get_node_value()
                 stylesheet_file = sheet.get_attribute_value("file")
                 print(stylesheet_file)
-                environment.xslt_proc.set_cwd(base_uri)
+                environment.xslt_proc.set_cwd(cwd_from_base_uri(base_uri))
                 environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=stylesheet_file)
         except PySaxonApiError as ex:
             print(ex)
@@ -495,7 +501,7 @@ def get_named_parameters(proc: PySaxonProcessor, xpath_proc: PyXPathProcessor, n
                         print("Error in get_named_parameters - value is None")
                     continue
             except PySaxonApiError as ex:
-                print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
+                print("*** Error evaluating parameter " + name + " in initial-template : " + str(ex))
                 continue
             '''if as_i is not None:
                 valuei = proc.make_atomic_value(str(as_i), str(value))
@@ -608,7 +614,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         if select is not None:
             '''print(select)'''
             environment.xpath_proc.clear_properties()
-            environment.xpath_proc.set_cwd(initial_mode.get_node_value().base_uri)
+            environment.xpath_proc.set_cwd(cwd_from_base_uri(initial_mode.get_node_value().base_uri))
             try:
                 initial_match_selection = environment.xpath_proc.evaluate(select)
             except PySaxonApiError as ex:
@@ -620,7 +626,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                 return
 
     'TODO - the base_uri contains file:/// the resolving of stylesheet does not work with file:'
-    environment.xslt_proc.set_cwd(test_case_node.base_uri)
+    environment.xslt_proc.set_cwd(cwd_from_base_uri(test_case_node.base_uri))
     environment.xslt_proc.set_jit_compilation(False)
     errorResult = None
     result = None

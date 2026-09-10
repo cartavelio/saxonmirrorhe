@@ -1,5 +1,6 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
+import os
 import shutil
 
 # This file is copied to build/pypi before running; internal
@@ -15,6 +16,11 @@ from platform import system
 from distutils.dir_util import copy_tree
 
 extra_link_args = []
+def build_debug():
+    if 'BUILD_DEBUG' in os.environ and os.environ['BUILD_DEBUG'] == "true":
+        return True
+    else:
+        return False
 
 if system() == 'Darwin':
     extra_link_args.append('-L@@location@@libs/darwin')
@@ -67,6 +73,6 @@ setup(
     python_requires='>=3.8',                # Minimum version requirement of the package
     ext_modules=cythonize(ext_modules,
                           compiler_directives={'language_level': 3},
-                          ),
+                          gdb_debug=build_debug()),
 
 )

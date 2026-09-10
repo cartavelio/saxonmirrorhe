@@ -41,6 +41,30 @@ zend_class_entry *xdmArray_ce;
 
 zend_class_entry *xsltExecutable_ce;
 
+void _decrementRefCount(std::map<std::string, XdmValue *> parameters){
+    for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();
+         itr != parameters.end(); itr++) {
+      XdmValue *value = itr->second;
+      if (value != nullptr) {
+        value->decrementRefCount();
+        if (value->getRefCount() < 1) {
+          delete value;
+          value = nullptr;
+        }
+      }
+    }
+}
+
+void _decrementRefCountForValue(XdmValue * value){
+    if(value != nullptr) {
+        value->decrementRefCount();
+        if(value->getRefCount() < 1) {
+            delete value;
+            value = nullptr;
+        }
+    }
+}
+
 #include "php8_SchemaValidator.cpp"
 #include "php8_DocumentBuilder.cpp"
 #include "php8_XPathProcessor.cpp"
@@ -978,7 +1002,6 @@ PHP_METHOD(SaxonProcessor, createAtomicValue) {
                            "unknown type specified in XdmValue", 0);
       RETURN_NULL();
     }
-    // std::cerr<<"createAtomicValue cp0 -========================="<<std::endl;
     if (xdmValue == nullptr) {
       RETURN_NULL();
     }
@@ -1766,6 +1789,7 @@ PHP_METHOD(XdmValue, addXdmItem) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
           xdmValue->addXdmItem((XdmItem *)value);
+          value->incrementRefCount();
           return;
         }
       }
@@ -1777,6 +1801,7 @@ PHP_METHOD(XdmValue, addXdmItem) {
         XdmItem *value = ooth->xdmItem;
         if (value != nullptr) {
           xdmValue->addXdmItem(value);
+          value->incrementRefCount();
           return;
         }
       }
@@ -1790,6 +1815,7 @@ PHP_METHOD(XdmValue, addXdmItem) {
         XdmAtomicValue *value = ooth->xdmAtomicValue;
         if (value != nullptr) {
           xdmValue->addXdmItem((XdmItem *)value);
+          value->incrementRefCount();
           return;
         }
       }
@@ -3641,11 +3667,10 @@ zend_function_entry SaxonProcessor_methods[] = {
                ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromString,
                                        arginfo_saxonc_parseXmlFromString,
                                        ZEND_ACC_PUBLIC)
-            PHP_ME(SaxonProcessor, parseXmlFromFile,
-                   arginfo_saxonc_parseXmlFromFile,
-                   ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromUri,
-                                           arginfo_saxonc_parseXmlFromUri,
-                                           ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, parseXmlFromFile,arginfo_saxonc_parseXmlFromFile,ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, parseXmlFromUri,arginfo_saxonc_parseXmlFromUri,ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, parseJsonFromFile,arginfo_saxonc_parseJsonFromFile,ZEND_ACC_PUBLIC)
+            PHP_ME(SaxonProcessor, parseJsonFromString,arginfo_saxonc_parseJsonFromString,ZEND_ACC_PUBLIC)
                 PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,
                        ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
                                                newXPathProcessor,

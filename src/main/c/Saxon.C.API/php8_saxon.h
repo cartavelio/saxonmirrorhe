@@ -174,7 +174,11 @@ struct xsltExecutable_object {
 };
 
 #define PHP_SAXON_EXTNAME "saxonc"
-#define PHP_SAXON_EXTVER "11.4"
+#define PHP_SAXON_EXTVER "12.5"
+
+void _decrementRefCount(std::map<std::string, XdmValue *>);
+
+void _decrementRefCountForValue(XdmValue *);
 
 /*
  * Class:     com_saxonica_functions_extfn_PhpCall_PhpFunctionCall
@@ -194,17 +198,16 @@ PHP_RINIT_FUNCTION(saxon);
 PHP_METHOD(SaxonProcessor, __construct);
 PHP_METHOD(SaxonProcessor, __destruct);
 
-PHP_METHOD(SaxonProcessor, createAtomicValue);
+PHP_METHOD(SaxonProcessor, createAtomicValue); // increment refCount
+PHP_METHOD(SaxonProcessor, createXdmMapValue);  // increment refCount
+PHP_METHOD(SaxonProcessor, createXdmArrayValue);  // increment refCount
+PHP_METHOD(SaxonProcessor, createQNameValue);    // increment refCount
 
-PHP_METHOD(SaxonProcessor, createXdmMapValue);
-PHP_METHOD(SaxonProcessor, createXdmArrayValue);
-PHP_METHOD(SaxonProcessor, createQNameValue);
-
-PHP_METHOD(SaxonProcessor, parseXmlFromString);
-PHP_METHOD(SaxonProcessor, parseXmlFromFile);
-PHP_METHOD(SaxonProcessor, parseXmlFromUri);
-PHP_METHOD(SaxonProcessor, parseJsonFromString);
-PHP_METHOD(SaxonProcessor, parseJsonFromFile);
+PHP_METHOD(SaxonProcessor, parseXmlFromString);   // increment refCount
+PHP_METHOD(SaxonProcessor, parseXmlFromFile);     // increment refCount
+PHP_METHOD(SaxonProcessor, parseXmlFromUri);    // increment refCount
+PHP_METHOD(SaxonProcessor, parseJsonFromString); // increment refCount
+PHP_METHOD(SaxonProcessor, parseJsonFromFile);   // increment refCount
 PHP_METHOD(SaxonProcessor, setcwd);
 PHP_METHOD(SaxonProcessor, attachCurrentThread);
 PHP_METHOD(SaxonProcessor, detachCurrentThread);
@@ -239,9 +242,9 @@ PHP_METHOD(DocumentBuilder, setDTDValidation);
 PHP_METHOD(DocumentBuilder, isDTDValidation);
 PHP_METHOD(DocumentBuilder, setBaseUri);
 PHP_METHOD(DocumentBuilder, getBaseUri);
-PHP_METHOD(DocumentBuilder, parseXmlFromString);
-PHP_METHOD(DocumentBuilder, parseXmlFromFile);
-PHP_METHOD(DocumentBuilder, parseXmlFromUri);
+PHP_METHOD(DocumentBuilder, parseXmlFromString);    // increment refCount
+PHP_METHOD(DocumentBuilder, parseXmlFromFile);     // increment refCount
+PHP_METHOD(DocumentBuilder, parseXmlFromUri);      // increment refCount
 PHP_METHOD(DocumentBuilder, exceptionOccurred);
 PHP_METHOD(DocumentBuilder, exceptionClear);
 PHP_METHOD(DocumentBuilder, getErrorMessage);
@@ -250,7 +253,7 @@ PHP_METHOD(DocumentBuilder, getErrorCode);
 PHP_METHOD(Xslt30Processor, __destruct);
 PHP_METHOD(Xslt30Processor, transformFileToFile);
 PHP_METHOD(Xslt30Processor, transformFileToString);
-PHP_METHOD(Xslt30Processor, transformFileToValue);
+PHP_METHOD(Xslt30Processor, transformFileToValue); // increment refCount
 PHP_METHOD(Xslt30Processor, compileFromFile);
 PHP_METHOD(Xslt30Processor, compileFromValue);
 PHP_METHOD(Xslt30Processor, compileFromString);
@@ -263,43 +266,43 @@ PHP_METHOD(Xslt30Processor, setTargetEdition);
 PHP_METHOD(Xslt30Processor, setRelocate);
 PHP_METHOD(Xslt30Processor, setFastCompilation);
 PHP_METHOD(Xslt30Processor, setXsltLanguageVersion);
-PHP_METHOD(Xslt30Processor, setParameter);
-PHP_METHOD(Xslt30Processor, clearParameters);
+PHP_METHOD(Xslt30Processor, setParameter); // checks for old values, then add new one, increment refCount
+PHP_METHOD(Xslt30Processor, clearParameters); // do decrementing of values and delete if refCount == 0
 PHP_METHOD(Xslt30Processor, exceptionClear);
 PHP_METHOD(Xslt30Processor, exceptionOccurred);
 PHP_METHOD(Xslt30Processor, getErrorCode);
 PHP_METHOD(Xslt30Processor, setcwd);
 
 PHP_METHOD(XsltExecutable, __destruct);
-PHP_METHOD(XsltExecutable, callFunctionReturningValue);
-PHP_METHOD(XsltExecutable, callFunctionReturningString);
-PHP_METHOD(XsltExecutable, callFunctionReturningFile);
-PHP_METHOD(XsltExecutable, callTemplateReturningValue);
+PHP_METHOD(XsltExecutable, callFunctionReturningValue);  // increment refCount, arguments does not need refcounting
+PHP_METHOD(XsltExecutable, callFunctionReturningString);     //arguments does not need refcounting
+PHP_METHOD(XsltExecutable, callFunctionReturningFile);     // arguments does not need refcounting
+PHP_METHOD(XsltExecutable, callTemplateReturningValue); // increment refCount
 PHP_METHOD(XsltExecutable, callTemplateReturningString);
 PHP_METHOD(XsltExecutable, callTemplateReturningFile);
-PHP_METHOD(XsltExecutable, applyTemplatesReturningValue);
+PHP_METHOD(XsltExecutable, applyTemplatesReturningValue);  // increment refCount
 PHP_METHOD(XsltExecutable, applyTemplatesReturningString);
 PHP_METHOD(XsltExecutable, applyTemplatesReturningFile);
 PHP_METHOD(XsltExecutable, clone);
 PHP_METHOD(XsltExecutable, transformFileToFile);
 PHP_METHOD(XsltExecutable, transformFileToString);
-PHP_METHOD(XsltExecutable, transformFileToValue);
-PHP_METHOD(XsltExecutable, transformToString);
-PHP_METHOD(XsltExecutable, transformToValue);
-PHP_METHOD(XsltExecutable, transformToFile);
+PHP_METHOD(XsltExecutable, transformFileToValue);  // increment refCount
+PHP_METHOD(XsltExecutable, transformToString);  // check for old value
+PHP_METHOD(XsltExecutable, transformToValue);   // check for old value
+PHP_METHOD(XsltExecutable, transformToFile);    // check for old value
 PHP_METHOD(XsltExecutable, setOutputFile);
 PHP_METHOD(XsltExecutable, setResultAsRawValue);
-PHP_METHOD(XsltExecutable, setParameter);
+PHP_METHOD(XsltExecutable, setParameter);   // checks for old values, then add new one, increment refCount
 PHP_METHOD(XsltExecutable, setBaseOutputURI);
 PHP_METHOD(XsltExecutable, setInitialMode);
-PHP_METHOD(XsltExecutable, setInitialTemplateParameters);
-PHP_METHOD(XsltExecutable, setInitialMatchSelection);
-PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile);
-PHP_METHOD(XsltExecutable, setGlobalContextItem);
-PHP_METHOD(XsltExecutable, setGlobalContextFromFile);
+PHP_METHOD(XsltExecutable, setInitialTemplateParameters); // checks for old values, any duplicates: --refCount, then add new one, increment refCount
+PHP_METHOD(XsltExecutable, setInitialMatchSelection);   // checks for old values, then add new one, increment refCount
+PHP_METHOD(XsltExecutable, setInitialMatchSelectionAsFile);  // checks for old values and remove, decrement refCount
+PHP_METHOD(XsltExecutable, setGlobalContextItem);   // checks for old values, then add new one, increment refCount
+PHP_METHOD(XsltExecutable, setGlobalContextFromFile);  // checks for old values and remove, decrement refCount
 PHP_METHOD(XsltExecutable, setcwd);
 PHP_METHOD(XsltExecutable, setProperty);
-PHP_METHOD(XsltExecutable, clearParameters);
+PHP_METHOD(XsltExecutable, clearParameters);   // do decrementing of values and delete if refCount == 0
 PHP_METHOD(XsltExecutable, clearProperties);
 PHP_METHOD(XsltExecutable, exportStylesheet);
 PHP_METHOD(XsltExecutable, exceptionClear);
@@ -308,25 +311,25 @@ PHP_METHOD(XsltExecutable, checkForException);
 PHP_METHOD(XsltExecutable, getErrorCode);
 PHP_METHOD(XsltExecutable, getErrorMessage);
 PHP_METHOD(XsltExecutable, setSaveXslMessage);
-PHP_METHOD(XsltExecutable, getXslMessages);
+PHP_METHOD(XsltExecutable, getXslMessages);  //check increment refCount
 PHP_METHOD(XsltExecutable, clearXslMessages);
 PHP_METHOD(XsltExecutable, setCaptureResultDocuments);
-PHP_METHOD(XsltExecutable, getResultDocuments);
+PHP_METHOD(XsltExecutable, getResultDocuments);     //check increment refCount
 
 // PHP_METHOD(XQueryProcesor,  __construct);
 PHP_METHOD(XQueryProcesor, __destruct);
 PHP_METHOD(XQueryProcessor, setQueryContent);
-PHP_METHOD(XQueryProcessor, setContextItem);
+PHP_METHOD(XQueryProcessor, setContextItem);  // checks for old values, then add new one, increment refCount
 PHP_METHOD(XQueryProcessor, setContextItemFromFile);
-PHP_METHOD(XQueryProcessor, setParameter);
+PHP_METHOD(XQueryProcessor, setParameter);     // checks for old values, then add new one, increment refCount
 PHP_METHOD(XQueryProcessor, setProperty);
 PHP_METHOD(XQueryProcessor, setLanguageVersion);
 PHP_METHOD(XQueryProcessor, setStreaming);
 PHP_METHOD(XQueryProcessor, isStreaming);
-PHP_METHOD(XQueryProcessor, clearParameters);
+PHP_METHOD(XQueryProcessor, clearParameters);    // do decrementing of values and delete if refCount == 0
 PHP_METHOD(XQueryProcessor, clearProperties);
 // PHP_METHOD(XQueryProcessor, setOutputFile);
-PHP_METHOD(XQueryProcessor, runQueryToValue);
+PHP_METHOD(XQueryProcessor, runQueryToValue); //check increment refCount
 PHP_METHOD(XQueryProcessor, runQueryToString);
 PHP_METHOD(XQueryProcessor, runQueryToFile);
 PHP_METHOD(XQueryProcessor, setQueryFile);
@@ -339,12 +342,12 @@ PHP_METHOD(XQueryProcessor, getErrorMessage);
 
 // PHP_METHOD(XPathProcessor,  __construct);
 PHP_METHOD(XPathProcessor, __destruct);
-PHP_METHOD(XPathProcessor, setContextItem);
+PHP_METHOD(XPathProcessor, setContextItem);  // checks for old values, then add new one, increment refCount
 PHP_METHOD(XPathProcessor, setContextFile);
 PHP_METHOD(XPathProcessor, setBaseURI);
 PHP_METHOD(XPathProcessor, effectiveBooleanValue);
-PHP_METHOD(XPathProcessor, evaluate);
-PHP_METHOD(XPathProcessor, evaluateSingle);
+PHP_METHOD(XPathProcessor, evaluate);   //check increment refCount
+PHP_METHOD(XPathProcessor, evaluateSingle);  //check increment refCount
 PHP_METHOD(XPathProcessor, declareNamespace);
 PHP_METHOD(XPathProcessor, setBackwardsCompatible);
 PHP_METHOD(XPathProcessor, convertEnumPolicy);
@@ -352,9 +355,9 @@ PHP_METHOD(XPathProcessor, setUnprefixedElementMatchingPolicy);
 PHP_METHOD(XPathProcessor, setCaching);
 PHP_METHOD(XPathProcessor, setLanguageVersion);
 PHP_METHOD(XPathProcessor, importSchemaNamespace);
-PHP_METHOD(XPathProcessor, setParameter);
+PHP_METHOD(XPathProcessor, setParameter);          // checks for old values, then add new one, increment refCount
 PHP_METHOD(XPathProcessor, setProperty);
-PHP_METHOD(XPathProcessor, clearParameters);
+PHP_METHOD(XPathProcessor, clearParameters);   // do decrementing of values and delete if refCount == 0
 PHP_METHOD(XPathProcessor, clearProperties);
 PHP_METHOD(XPathProcessor, exceptionClear);
 PHP_METHOD(XPathProcessor, exceptionOccurred);
@@ -363,19 +366,19 @@ PHP_METHOD(XPathProcessor, getErrorMessage);
 
 // PHP_METHOD(SchemaValidator,  __construct);
 PHP_METHOD(SchemaValidator, __destruct);
-PHP_METHOD(SchemaValidator, setSourceNode);
+PHP_METHOD(SchemaValidator, setSourceNode);  // checks for old values, then add new one, increment refCount
 PHP_METHOD(SchemaValidator, setOutputFile);
 PHP_METHOD(SchemaValidator, exportSchema);
 PHP_METHOD(SchemaValidator, registerSchemaFromFile);
 PHP_METHOD(SchemaValidator, registerSchemaFromString);
 PHP_METHOD(SchemaValidator, validate);
-PHP_METHOD(SchemaValidator, validateToNode);
-PHP_METHOD(SchemaValidator, getValidationReport);
+PHP_METHOD(SchemaValidator, validateToNode);  //check increment refCount
+PHP_METHOD(SchemaValidator, getValidationReport);  //check increment refCount
 PHP_METHOD(SchemaValidator, setLax);
 PHP_METHOD(SchemaValidator, registerSchemaFromNode);
-PHP_METHOD(SchemaValidator, setParameter);
+PHP_METHOD(SchemaValidator, setParameter);         // checks for old values, then add new one, increment refCount
 PHP_METHOD(SchemaValidator, setProperty);
-PHP_METHOD(SchemaValidator, clearParameters);
+PHP_METHOD(SchemaValidator, clearParameters); // do decrementing of values and delete if refCount == 0
 PHP_METHOD(SchemaValidator, clearProperties);
 PHP_METHOD(SchemaValidator, exceptionClear);
 PHP_METHOD(SchemaValidator, exceptionOccurred);
@@ -387,10 +390,10 @@ PHP_METHOD(SchemaValidator, getErrorMessage);
 PHP_METHOD(XdmValue, __construct);
 PHP_METHOD(XdmValue, __destruct);
 PHP_METHOD(XdmValue, __toString);
-PHP_METHOD(XdmValue, getHead);
-PHP_METHOD(XdmValue, itemAt);
+PHP_METHOD(XdmValue, getHead);   //check increment refCount
+PHP_METHOD(XdmValue, itemAt);   //check increment refCount
 PHP_METHOD(XdmValue, size);
-PHP_METHOD(XdmValue, addXdmItem);
+PHP_METHOD(XdmValue, addXdmItem); //check increment refCount
 
 /*     ============== PHP Interface of   XdmItem =============== */
 
@@ -400,8 +403,8 @@ PHP_METHOD(XdmItem, __toString);
 PHP_METHOD(XdmItem, getStringValue);
 PHP_METHOD(XdmItem, isAtomic);
 PHP_METHOD(XdmItem, isNode);
-PHP_METHOD(XdmItem, getAtomicValue);
-PHP_METHOD(XdmItem, getNodeValue);
+PHP_METHOD(XdmItem, getAtomicValue);  //check increment refCount
+PHP_METHOD(XdmItem, getNodeValue); //check increment refCount
 
 /*     ============== PHP Interface of   XdmNode =============== */
 
@@ -416,14 +419,14 @@ PHP_METHOD(XdmNode, getNodeName);
 PHP_METHOD(XdmNode, isAtomic);
 PHP_METHOD(XdmNode, getChildCount);
 PHP_METHOD(XdmNode, getAttributeCount);
-PHP_METHOD(XdmNode, getChildNode);
-PHP_METHOD(XdmNode, getChildren);
-PHP_METHOD(XdmNode, axisNodes);
-PHP_METHOD(XdmNode, getParent);
-PHP_METHOD(XdmNode, getAttributeNode);
-PHP_METHOD(XdmNode, getAttributeNodes);
+PHP_METHOD(XdmNode, getChildNode);    //check increment refCount
+PHP_METHOD(XdmNode, getChildren);    //check increment refCount
+PHP_METHOD(XdmNode, axisNodes);   //check increment refCount
+PHP_METHOD(XdmNode, getParent);    //check increment refCount
+PHP_METHOD(XdmNode, getAttributeNode);  //check increment refCount
+PHP_METHOD(XdmNode, getAttributeNodes); //check increment refCount
 PHP_METHOD(XdmNode, getAttributeValue);
-PHP_METHOD(XdmNode, getTypedValue);
+PHP_METHOD(XdmNode, getTypedValue);   //check increment refCount
 PHP_METHOD(XdmNode, getLineNumber);
 PHP_METHOD(XdmNode, getColumnNumber);
 
@@ -444,16 +447,16 @@ PHP_METHOD(XdmFunctionItem, __construct);
 PHP_METHOD(XdmFunctionItem, __destruct);
 PHP_METHOD(XdmFunctionItem, getName);
 PHP_METHOD(XdmFunctionItem, getArity);
-PHP_METHOD(XdmFunctionItem, getSystemFunction);
-PHP_METHOD(XdmFunctionItem, call);
+PHP_METHOD(XdmFunctionItem, getSystemFunction);   //check increment refCount
+PHP_METHOD(XdmFunctionItem, call);   //check increment refCount
 
 /*     ============== PHP Interface of   XdmMap =============== */
 
 PHP_METHOD(XdmMap, __construct);
 PHP_METHOD(XdmMap, __destruct);
 PHP_METHOD(XdmMap, mapSize);
-PHP_METHOD(XdmMap, get);
-PHP_METHOD(XdmMap, put);
+PHP_METHOD(XdmMap, get);    //check increment refCount
+PHP_METHOD(XdmMap, put);    //check increment refCount
 PHP_METHOD(XdmMap, remove);
 PHP_METHOD(XdmMap, isEmpty);
 PHP_METHOD(XdmMap, containsKey);
@@ -465,9 +468,9 @@ PHP_METHOD(XdmMap, keys);
 
 PHP_METHOD(XdmArray, __construct);
 PHP_METHOD(XdmArray, __destruct);
-PHP_METHOD(XdmArray, get);
-PHP_METHOD(XdmArray, put);
-PHP_METHOD(XdmArray, addMember);
+PHP_METHOD(XdmArray, get);   //check increment refCount
+PHP_METHOD(XdmArray, put);   //check increment refCount
+PHP_METHOD(XdmArray, addMember);  //check increment refCount
 PHP_METHOD(XdmArray, concat);
 // PHP_METHOD(XdmArray,  values);
 PHP_METHOD(XdmArray, getArity);

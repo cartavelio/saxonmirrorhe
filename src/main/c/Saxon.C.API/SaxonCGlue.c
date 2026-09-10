@@ -40,6 +40,9 @@ int create_graalvm_isolate(sxnc_environment *env) {
   return 0;
 }
 
+/*!
+ *
+ */
 int attach_graalvm_thread(sxnc_environment *env) {
   graal_isolatethread_t *newthread = graal_get_current_thread(((env)->isolate));
   if (newthread) {

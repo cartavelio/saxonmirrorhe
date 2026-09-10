@@ -35,6 +35,9 @@ PHP_METHOD(SchemaValidator, __destruct) {
 
   SchemaValidator *schemaValidator = obj->schemaValidator;
   if (schemaValidator != nullptr) {
+    _decrementRefCount(schemaValidator->getParameters());
+    schemaValidator->clearParameters();
+    schemaValidator->clearProperties();
     delete schemaValidator;
   }
 }
@@ -165,6 +168,7 @@ PHP_METHOD(SchemaValidator, validateToNode) {
               (xdmNode_object *)((char *)vvobj -
                                  XtOffsetOf(xdmNode_object, std));
           assert(vobj != nullptr);
+          node->incrementRefCount();
           vobj->xdmNode = node;
           return;
         }
@@ -226,6 +230,7 @@ PHP_METHOD(SchemaValidator, getValidationReport) {
               (xdmNode_object *)((char *)vvobj -
                                  XtOffsetOf(xdmNode_object, std));
           assert(vobj != nullptr);
+          node->incrementRefCount();
           vobj->xdmNode = node;
           return;
         }
@@ -259,6 +264,9 @@ PHP_METHOD(SchemaValidator, setSourceNode) {
       if (ooth != nullptr) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
+           XdmValue * oldValue = schemaValidator->getParameter("node", true);
+          _decrementRefCountForValue(oldValue);
+          value->incrementRefCount();
           schemaValidator->setSourceNode(value);
         }
       }
@@ -338,8 +346,16 @@ PHP_METHOD(SchemaValidator, setParameter) {
                                  XtOffsetOf(schemaValidator_object, std));
   schemaValidator = obj->schemaValidator;
   if (schemaValidator != nullptr) {
+
+    if (Z_TYPE_P(oth) == IS_NULL) {
+      php_error(E_WARNING, "Error setting source value - value is nullptr");
+      return;
+    }
+
+    XdmValue * oldValue = schemaValidator->getParameter(name, false);
+    _decrementRefCountForValue(oldValue);
+
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
-    // std::cout<<"test type:"<<(Z_OBJCE_P(oth)->name)<<std::endl;
 
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
       zend_object *nobj = Z_OBJ_P(oth);
@@ -349,6 +365,7 @@ PHP_METHOD(SchemaValidator, setParameter) {
       if (ooth != nullptr) {
         XdmNode *value = ooth->xdmNode;
         if (value != nullptr) {
+        value->incrementRefCount();
           schemaValidator->setParameter(name, (XdmValue *)value);
         }
       }
@@ -359,7 +376,7 @@ PHP_METHOD(SchemaValidator, setParameter) {
       if (ooth != nullptr) {
         XdmValue *value = ooth->xdmValue;
         if (value != nullptr) {
-
+          value->incrementRefCount();
           schemaValidator->setParameter(name, value);
         }
       }
@@ -372,7 +389,7 @@ PHP_METHOD(SchemaValidator, setParameter) {
       if (ooth != nullptr) {
         XdmAtomicValue *value = ooth->xdmAtomicValue;
         if (value != nullptr) {
-
+          value->incrementRefCount();
           schemaValidator->setParameter(name, (XdmValue *)value);
         }
       }
@@ -409,8 +426,8 @@ PHP_METHOD(SchemaValidator, clearParameters) {
                                  XtOffsetOf(schemaValidator_object, std));
   schemaValidator = obj->schemaValidator;
   if (schemaValidator != nullptr) {
-
-    schemaValidator->clearParameters(true);
+    _decrementRefCount(schemaValidator->getParameters());
+    schemaValidator->clearParameters();
     schemaValidator->exceptionClear();
   }
 }

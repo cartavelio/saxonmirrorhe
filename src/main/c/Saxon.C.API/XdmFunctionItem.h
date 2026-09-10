@@ -90,6 +90,7 @@ public:
    * This can be any function defined in XPath 3.1 functions and operators,
    * including functions in the math, map, and array namespaces. It can also be
    * a Saxon extension function, provided a licensed Processor is used.
+   *
    * @param processor - The Saxon Processor object required to get the system
    * function
    * @param name - the name of the function
@@ -99,7 +100,7 @@ public:
    * unsuitable for dynamic calling.
    */
   static XdmFunctionItem *getSystemFunction(SaxonProcessor *processor,
-                                            const char *name, int arity);
+                                     const char *name, int arity);
 
   /**
    * Utility method for working with SaxonC on Python
@@ -141,7 +142,7 @@ public:
   bool isFunction() { return true; }
 
 protected:
-  XdmValue *getXdmValueSubClass(int64_t value);
+  XdmValue *getXdmValueSubClass(int64_t value); /*!< Creates the right type of result value */
 
   char *fname; /*!< The name of the function item */
 

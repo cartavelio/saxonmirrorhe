@@ -7,6 +7,7 @@ from Environment import Environment, Spec
 from test_outcome import PyTestOutcome
 from test_report import PyTestReport
 import sys, getopt
+from urllib.parse import urlparse
 from os.path import abspath
 from os.path import isfile
 from datetime import datetime as date
@@ -145,6 +146,7 @@ def process_catalog(path: str, catalogi):
             print("<b>Test sets: " + str(xml.size) + "<b/> See <a href='#results'> Results here </a>")
 
             for i in range(xml.size):
+                value = xml.item_at(i)
                 if value is not None and value.is_node:
                     node = value.get_node_value()
                     if node is not None:
@@ -350,6 +352,11 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
 
     return True
 
+def cwd_from_base_uri(base_uri: str):
+    cwd = os.path.dirname(urlparse(base_uri).path)
+    if os.path.isdir(cwd):
+        return cwd
+    raise IOError("Specified directory <%s> does not exist!" % cwd)
 
 def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, environments_i: dict,
                         environment: Environment):
@@ -367,7 +374,8 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri)
-    environment.proc.set_cwd(base_uri)
+
+    environment.proc.set_cwd(cwd_from_base_uri(base_uri))
     environment.xquery_proc.set_query_base_uri(base_uri)
     '''TODO There is a bug with the DocumentBuilder base_uri and cwd for the processor'''
     builder = environment.proc.new_document_builder()
@@ -479,7 +487,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
 
     try:
         schema_validator = environment.proc.new_schema_validator()
-        schema_validator.set_cwd(base_uri)
+        schema_validator.set_cwd(cwd_from_base_uri(base_uri))
     except PySaxonApiError as ex:
         print("*** Failed to create PySchemaValidator :" + str(ex))
 
@@ -538,7 +546,7 @@ def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: Spec, envir
                 sheet = stylesheets.item_at(ii).get_node_value()
                 stylesheet_file = sheet.get_attribute_value("file")
                 print(stylesheet_file)
-                environment.xslt_proc.set_cwd(base_uri)
+                environment.xslt_proc.set_cwd(cwd_from_base_uri(base_uri))
                 environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=stylesheet_file)
         except PySaxonApiError as ex:
             print(ex)
@@ -666,7 +674,7 @@ def get_named_parameters(proc: PySaxonProcessor, xpath_proc: PyXPathProcessor, n
                             print("Error in get_named_parameters - value is None")
                         continue
                 except PySaxonApiError as ex:
-                    print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
+                    print("*** Error evaluating parameter " + name + " in initial-template : " + str(ex))
                     continue
                 '''if as_i is not None:
                     valuei = proc.make_atomic_value(str(as_i), str(value))
@@ -799,7 +807,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                 if "XP" == spec.short_spec_name or "XT" == spec.short_spec_name:
                     testxpc = environment.xpath_proc
                     if environment.proc.is_schema_aware:
-                        assert_xpc.set_property("sa", "true")
+                        testxpc.set_property("sa", "true")
                     testxpc.set_language_version(spec.version)
                     testxpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
                     testxpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
@@ -923,7 +931,7 @@ def main(argv):
             diri = str(sys.argv[1])
         except TypeError as ex:
             print("Error test suite directory missing")
-            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir>')
+            print('qt3_test_suite_driver.py <testsuitedir> -l <lang> -t <testpattern> -s <testset> -o <resultdir>')
             sys.exit(2)
 
         print("Test suite directory = " + diri)

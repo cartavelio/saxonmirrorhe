@@ -57,7 +57,7 @@ class PyTestOutcome:
             print("Error Found = " + str(result_as_error))
             return False
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
-            print(assert_set)
+            print("test_assertion2 = " + str(assert_set))
         if "assert" == tag:
             return self.assert_xpath(assertion, result, assert_xpc, catalog_xpc)
         elif "assert-xml" == tag:
@@ -152,9 +152,11 @@ class PyTestOutcome:
                 base_urii = self.base_uri
             uri = urllib.parse.urljoin(base_urii, uri)
             if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                print("assert-result-document")
                 print("uri=" + uri)
             if self.result_documents:
                 if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                    print("Result document keys:")
                     print(list(self.result_documents.keys()))
                 try:
                     print("Check assert-result-document")
