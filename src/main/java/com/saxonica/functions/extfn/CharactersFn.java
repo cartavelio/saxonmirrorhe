@@ -9,6 +9,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
 
@@ -33,6 +34,9 @@ public class CharactersFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue s = (StringValue)arguments[0].head();
+        if (s == null) {
+            return EmptySequence.getInstance();
+        }
         SequenceIterator codepoints = s.iterateCharacters();
         ItemMappingIterator mapper = new ItemMappingIterator(codepoints, ItemMapper.of(cp ->
             new StringValue(new UnicodeChar((int) ((IntegerValue) cp).longValue()))
