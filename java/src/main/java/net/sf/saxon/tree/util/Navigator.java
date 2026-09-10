@@ -533,9 +533,17 @@ public final class Navigator {
         int num = 0;
         NodePredicate countTest;
         if (count == null) {
-            countTest = NodePredicateLambda.of(
-                    n -> node.getQName().equals(((NodeInfo) n).getQName()));
-            num = 1;
+            if (node.hasFingerprint()) {
+                int reqFp = node.getFingerprint();
+                countTest = NodePredicateLambda.of(
+                        n -> reqFp == ((NodeInfo)n).getFingerprint());
+                num = 1;
+            }  else {
+                StructuredQName req = node.getQName();
+                countTest = NodePredicateLambda.of(
+                        n -> req.equals(((NodeInfo) n).getQName()));
+                num = 1;
+            }
         } else {
             countTest = NodePredicateLambda.of(n -> {
                 try {
