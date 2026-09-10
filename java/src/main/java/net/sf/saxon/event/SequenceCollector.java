@@ -72,14 +72,11 @@ public final class SequenceCollector extends SequenceWriter {
      */
 
     public GroundedValue getSequence() {
-        switch (list.size()) {
-            case 0:
-                return EmptySequence.INSTANCE;
-            case 1:
-                return list.get(0);
-            default:
-                return new SequenceExtent.Of<>(list);
-        }
+        return switch (list.size()) {
+            case 0 -> EmptySequence.INSTANCE;
+            case 1 -> list.get(0);
+            default -> new SequenceExtent.Of<>(list);
+        };
     }
 
     /**

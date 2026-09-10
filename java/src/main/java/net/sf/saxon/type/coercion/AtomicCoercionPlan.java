@@ -16,6 +16,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * A coercion plan represents a process for implementing the coercion rules for converting
@@ -42,7 +43,9 @@ public class AtomicCoercionPlan extends CoercionPlan {
      */
 
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
-
+        if (item == null) {
+            return EmptySequence.INSTANCE;
+        }
         if (item.getGenre() == Genre.ATOMIC) {
             return coerceAtomicValue((AtomicValue) item, requiredType, request);
         } else {

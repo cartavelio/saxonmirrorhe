@@ -10,6 +10,7 @@ package net.sf.saxon.type.coercion;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
@@ -342,11 +343,24 @@ public class SequenceCoercer extends UnaryExpression {
         public PullEvaluator elaborateForPull() {
             SequenceCoercer expr = (SequenceCoercer) getExpression();
             SequenceType requiredType = expr.requiredType;
-            SequenceType suppliedType = SequenceType.makeSequenceType(expr.getItemType(), expr.getCardinality());
+            ItemType suppliedItemType = expr.getBaseExpression().getItemType();
+            int suppliedCardinality = expr.getBaseExpression().getCardinality();
+            SequenceType knownType = SequenceType.makeSequenceType(expr.getItemType(), expr.getCardinality());
             CoercionPlan plan = expr.getCoercionPlan();
-            PullEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForPull();
             CoercionRequest request = new CoercionRequest(
-                    suppliedType, expr.getConfiguration(), expr.roleSupplier, expr.getLocation());
+                    knownType, expr.getConfiguration(), expr.roleSupplier, expr.getLocation());
+            if (plan instanceof AtomicCoercionPlan aPlan
+                    && suppliedItemType.isAtomicType() &&
+                    !Cardinality.allowsMany(suppliedCardinality)) {
+                ItemEvaluator itemEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+                ItemType requiredItemType = requiredType.getPrimaryType();
+                return context ->
+                        aPlan.coerceItem(itemEval.eval(context), requiredItemType, request).iterate();
+
+            }
+
+            PullEvaluator base = expr.getBaseExpression().makeElaborator().elaborateForPull();
+
             return context -> plan.coerceSequence(base.iterate(context), requiredType, request);
 
             // TODO: isolate the case where the only thing needed is a CardinalityChecker

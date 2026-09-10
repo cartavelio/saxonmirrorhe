@@ -17,6 +17,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,9 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
     @Override
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         UnionType reqType = (UnionType)requiredType;
-        TypeHierarchy th = request.config.getTypeHierarchy();
+        if (item == null) {
+            return EmptySequence.INSTANCE;
+        }
         if (!(item instanceof AtomicValue)) {
             AtomicSequence atomizedValue = item.atomize();
             ZenoSequence result = new ZenoSequence();
