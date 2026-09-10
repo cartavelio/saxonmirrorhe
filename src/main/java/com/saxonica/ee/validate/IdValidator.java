@@ -121,26 +121,6 @@ public class IdValidator extends ValidatingFilter {
         nextReceiver.endElement();
     }
 
-//    /**
-//     * Handle an attribute
-//     * @param nameCode   integer identifying the name of the attribute
-//     * @param type       the type annotation
-//     * @param value      the value of the attribute
-//     * @param locationId the location of the node in the source, or of the instruction that created it
-//     * @param properties additional properties of the attribute  @throws XPathException On any failure to write the attribute
-//     */
-//
-//    public void attribute(NodeName nameCode, SimpleType type, CharSequence value, Location locationId, int properties)
-//            throws XPathException {
-//        IdValueChecker checker = checkerMap.get(type);
-//        if (checker == null) {
-//            checker = allocateChecker(type);
-//            checkerMap.put(type, checker);
-//        }
-//        checker.checkValue(value, locationId);
-//        nextReceiver.attribute(nameCode, type, value, locationId, properties);
-//    }
-
     /**
      * Classify a type as one of ID, IDREF, IDREFS, or other.
      * This is only done the first type a type is encountered, to avoid repeated searching of the

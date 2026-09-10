@@ -245,8 +245,8 @@ public class XQuery10TestSuiteDriver {
                 }
                 String name = testCase.getStringValue();
                 StringTokenizer tok = new StringTokenizer(name);
-                while (tok.hasMoreElements()) {
-                    exceptions.add(tok.nextElement());
+                while (tok.hasMoreTokens()) {
+                    exceptions.add(tok.nextToken());
                 }
                 attSet = true;
             }

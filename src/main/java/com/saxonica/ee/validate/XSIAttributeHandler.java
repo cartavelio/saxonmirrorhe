@@ -293,48 +293,6 @@ public class XSIAttributeHandler extends ValidatingFilter {
         return null;
     }
 
-
-//    /**
-//     * Notify an attribute. Attributes are notified after the startElement event, and before any
-//     * children. Namespaces and attributes may be intermingled.
-//     *
-//     * @param nameCode   The name of the attribute
-//     * @param typeCode   The type of the attribute
-//     * @param locationId the location of the node in the source, or of the instruction that created it
-//     * @param properties Bit significant value. The following bits are defined:
-//     *                   <dl>
-//     *                   <dd>DISABLE_ESCAPING</dd>    <dt>Disable escaping for this attribute</dt>
-//     *                   <dd>NO_SPECIAL_CHARACTERS</dd>      <dt>Attribute value contains no special characters</dt>
-//     *                   </dl>
-//     * @throws IllegalStateException: attempt to output an attribute when there is no open element
-//     *                                start tag
-//     */
-//
-//    public void attribute(NodeName nameCode, SimpleType typeCode, CharSequence value, Location locationId, int properties)
-//            throws XPathException {
-//
-//        // Check for special xsi attributes and annotate them with a type code
-//        String uri = nameCode.getURI();
-//        if (uri.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
-//            int fp = nameCode.obtainFingerprint(getNamePool());
-//            if (fp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
-//                typeCode = BuiltInAtomicType.ANY_URI;
-//            } else if (fp == StandardNames.XSI_SCHEMA_LOCATION) {
-//                typeCode = BuiltInListType.ANY_URIS;
-//            } else if (fp == StandardNames.XSI_TYPE) {
-//                typeCode = BuiltInAtomicType.QNAME;
-//            } else if (fp == StandardNames.XSI_NIL) {
-//                typeCode = BuiltInAtomicType.BOOLEAN;
-//            }
-//        }
-//
-//        namespacesEncountered.add(uri);
-//
-//        // Pass the attribute down the pipeline
-//        nextReceiver.attribute(nameCode, typeCode, value, locationId, properties);
-//    }
-
-
     @Override
     public void endDocument() throws XPathException {
         super.endDocument();

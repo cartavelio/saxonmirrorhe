@@ -219,7 +219,7 @@ public class XSDSchema extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         Configuration config = getConfiguration();
         this.executable = new Executable(config);

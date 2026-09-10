@@ -32,7 +32,7 @@ public class XSDComplexContentRestriction extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         try {
             complexType = getContainingComplexType();

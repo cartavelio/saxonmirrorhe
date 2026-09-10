@@ -39,12 +39,12 @@ public class SaxonWhile extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         test = XSLIf.prepareTestAttribute(this);
         if (test == null) {
             reportAbsence("test");

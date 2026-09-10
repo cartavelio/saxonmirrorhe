@@ -32,7 +32,7 @@ public class XSDRedefine extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         AttributeMap atts = attributes();
         String[] allowed = {"id", "schemaLocation"};

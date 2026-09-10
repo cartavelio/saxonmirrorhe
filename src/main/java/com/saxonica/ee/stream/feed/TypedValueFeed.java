@@ -71,7 +71,7 @@ public class TypedValueFeed extends AbsorptionFeed {
     public void endDocument() throws XPathException {
         depth--;
         if (depth == 0) {
-            append(new StringItem(buffer));
+            append(new StringItem(buffer.toString()));
         }
     }
 
@@ -111,7 +111,7 @@ public class TypedValueFeed extends AbsorptionFeed {
     public void endElement() throws XPathException {
         depth--;
         if (depth == 0) {
-            append(new StringItem(buffer));
+            append(new StringItem(buffer.toString()));
         }
     }
 

@@ -91,7 +91,7 @@ public class CopyModifyExpression extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return getReturnExp().getCardinality();
     }
 

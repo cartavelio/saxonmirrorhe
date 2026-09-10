@@ -43,7 +43,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         PreparedSchema schema = getSchema();
 

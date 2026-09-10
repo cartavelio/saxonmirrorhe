@@ -36,7 +36,7 @@ public class XSDFacet extends AnnotationParent {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         AttributeMap atts = attributes();
         //-- handle attributes

@@ -139,7 +139,7 @@ public abstract class SchemaElement extends ElementImpl {
      * Must be supplied in a subclass
      */
 
-    public abstract void prepareAttributes() throws SchemaException;
+    protected abstract void prepareAttributes() throws SchemaException;
 
     /**
      * Check the attributes of an element against a list of allowed attributes.

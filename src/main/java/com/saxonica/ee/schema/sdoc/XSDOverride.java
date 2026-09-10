@@ -35,7 +35,7 @@ public class XSDOverride extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:override element requires XSD 1.1 to be enabled");

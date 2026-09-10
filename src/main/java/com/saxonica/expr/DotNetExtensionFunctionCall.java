@@ -528,7 +528,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         cli.System.Type resultClass = getReturnType();
         if (resultClass == null) {
             // we don't know yet

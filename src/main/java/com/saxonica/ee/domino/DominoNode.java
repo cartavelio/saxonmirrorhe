@@ -722,14 +722,12 @@ public class DominoNode implements NodeInfo, VirtualNode {
 
 
     /**
-     * Get the string value of the item as a CharSequence. This is in some cases more efficient than
+     * Get the string value of the item as a {@link }UnicodeString}. This is in some cases more efficient than
      * the version of the method that returns a String. The method satisfies the rule that
      * <code>X.getStringValueCS().toString()</code> returns a string that is equal to
      * <code>X.getStringValue()</code>.
-     * <p>Note that two CharSequence values of different types should not be compared using equals(), and
-     * for the same reason they should not be used as a key in a hash table.</p>
-     * <p>If the calling code can handle any CharSequence, this method should
-     * be used. If the caller requires a string, the {@link #getUnicodeStringValue} method is preferred.</p>
+     * <p>If the calling code can handle a UnicodeString, this method should
+     * be used. If the caller requires a string, the {@link #getStringValue} method is preferred.</p>
      *
      * @return the string value of the item
      * @throws UnsupportedOperationException if the item is a function item (an unchecked exception

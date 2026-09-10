@@ -41,12 +41,12 @@ public class SaxonDo extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return false;
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
         String actionAtt = null;
 
         for (AttributeInfo att : attributes()) {

@@ -27,7 +27,7 @@ public class XSDNotation extends AnnotationParent {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         notation = new Notation(getSchema().getConfiguration(), this);
 

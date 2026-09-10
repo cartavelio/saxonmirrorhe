@@ -114,7 +114,7 @@ public class ObjectLookupExpression extends LookupExpression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         if (isSingleContainer && isSingleEntry) {
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         } else {

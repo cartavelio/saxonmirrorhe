@@ -52,7 +52,7 @@ public class XSDComplexType extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         PreparedSchema schema = getSchema();
         complexType = new UserComplexType(schema.getConfiguration(), this);

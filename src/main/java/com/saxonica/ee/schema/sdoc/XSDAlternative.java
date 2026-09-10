@@ -41,7 +41,7 @@ public class XSDAlternative extends AnnotationParent {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
         AttributeMap atts = attributes();
         String[] allowed = {"id", "test", "type", "xpathDefaultNamespace"};
         allowAttributes(atts, allowed);

@@ -175,7 +175,7 @@ public class CompiledExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         int h = 0x833b12a0;
         return h + getInterpretedExpression().hashCode() + byteCode.hashCode();
     }

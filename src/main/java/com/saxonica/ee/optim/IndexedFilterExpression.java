@@ -243,7 +243,7 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
@@ -256,7 +256,7 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     @Override
-    public int computeSpecialProperties() {
+    protected int computeSpecialProperties() {
         return getBaseExpression().getSpecialProperties();
     }
 
@@ -305,7 +305,7 @@ public final class IndexedFilterExpression extends Expression {
      */
 
     @Override
-    public int computeHashCode() {
+    protected int computeHashCode() {
         return "IndexedFilterExpression".hashCode() +
                 getBaseExpression().hashCode() ^
                 getUseExpression().hashCode() ^

@@ -30,7 +30,7 @@ public class XSDExtension extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         try {
             complexType = getContainingComplexType();

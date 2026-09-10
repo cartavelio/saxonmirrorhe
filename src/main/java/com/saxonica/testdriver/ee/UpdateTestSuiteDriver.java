@@ -254,7 +254,7 @@ public class UpdateTestSuiteDriver {
                 }
                 String testCase = exceptionCase.getAttributeValue("", "test-case");
                 StringTokenizer tok = new StringTokenizer(testCase);
-                while (tok.hasMoreElements()) {
+                while (tok.hasMoreTokens()) {
                     exceptions.add(tok.nextToken());
                 }
             }

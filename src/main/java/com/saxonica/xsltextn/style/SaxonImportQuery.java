@@ -31,7 +31,7 @@ public class SaxonImportQuery extends StyleElement {
     private String moduleURI;
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         // Avoid reporting errors twice
         if (href != null || moduleURI != null) {

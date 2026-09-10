@@ -53,7 +53,7 @@ public class XSDAttributeGroup extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         isRedefinition = (getParent() instanceof XSDRedefine);
 

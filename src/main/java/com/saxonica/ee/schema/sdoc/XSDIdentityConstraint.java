@@ -44,7 +44,7 @@ public class XSDIdentityConstraint extends SchemaElement {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         AttributeMap atts = attributes();
         if (getFingerprint() == StandardNames.XS_KEYREF) {

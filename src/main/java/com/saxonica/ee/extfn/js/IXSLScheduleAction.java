@@ -45,12 +45,12 @@ public class IXSLScheduleAction extends StyleElement {
      */
 
     @Override
-    public boolean mayContainSequenceConstructor() {
+    protected boolean mayContainSequenceConstructor() {
         return true;
     }
 
     @Override
-    public void prepareAttributes() {
+    protected void prepareAttributes() {
 
         AttributeMap atts = attributes();
         int c = 0, d = 0;

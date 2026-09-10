@@ -31,7 +31,7 @@ public class XSDDefaultOpenContent extends AnnotationParent {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
             error("The xs:defaultOpenContent element requires XSD 1.1 to be enabled");

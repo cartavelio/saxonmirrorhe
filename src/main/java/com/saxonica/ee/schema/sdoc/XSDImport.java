@@ -38,7 +38,7 @@ public class XSDImport extends AnnotationParent {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         AttributeMap atts = attributes();
         String[] allowed = {"id", "namespace", "schemaLocation"};

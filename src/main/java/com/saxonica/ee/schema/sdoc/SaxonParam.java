@@ -29,7 +29,7 @@ import net.sf.saxon.value.SequenceType;
 public class SaxonParam extends AnnotationParent {
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
 
         Configuration config = getConfiguration();
         NodeInfo parent = getParent();

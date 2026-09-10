@@ -748,7 +748,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     }
 
     @Override
-    public int computeCardinality() {
+    protected int computeCardinality() {
         Class resultClass = getReturnClass();
         if (resultClass.equals(Void.TYPE)) {
             // this always returns an empty sequence, but we'll model it as

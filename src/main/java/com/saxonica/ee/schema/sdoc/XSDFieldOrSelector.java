@@ -43,7 +43,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
      */
 
     @Override
-    public void prepareAttributes() throws SchemaException {
+    protected void prepareAttributes() throws SchemaException {
         boolean isField = (getLocalPart().equals("field"));
         AttributeMap atts = attributes();
         String[] allowed = {"id", "xpath", "xpathDefaultNamespace"};
