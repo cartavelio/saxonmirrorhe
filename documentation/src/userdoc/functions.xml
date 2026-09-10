@@ -220,9 +220,7 @@
           <in-spec>xslt40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Applies template rules to selected items.</p>
@@ -442,9 +440,7 @@
           <in-spec>xslt40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Delivers the content of a character map declared using <a
@@ -1530,7 +1526,7 @@
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
         <p> Returns the sequence of element nodes that have an <code>ID</code> value matching the
-          value of one or more of the <code>IDREF</code> values supplied in <code>$arg</code>.</p>
+          value of one or more of the <code>IDREF</code> values supplied in <code>$values</code>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1713,7 +1709,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Checks whether <code>$arg</code> contains exactly one item; fails if it is empty or
+        <p>Checks whether <code>$input</code> contains exactly one item; fails if it is empty or
           contains multiple items.</p>
       </description>
     </function>
@@ -1781,7 +1777,7 @@
         </proto>
       </signatures>
       <status>
-        <p>Available in Saxon 9.3 - 9.5 with altered argument order (<code>$f,$seq</code>), and
+        <p>Available in Saxon 9.3 - 9.5 with altered argument order (<code>$predicate,$input</code>), and
           provided XPath 3.0 is enabled.</p>
         <p>Saxon 10, unlike the W3C XSLT 3.0 specification, makes <code>fn:filter</code> streamable
           under appropriate circumstances. Calls on <code>fn:filter</code> are streamable provided
@@ -1794,8 +1790,8 @@
       </status>
       <saxon-edition>ALL_SINCE_10 PE/EE_9.6</saxon-edition>
       <description>
-        <p>Returns those items from the sequence <code>$seq</code> for which the supplied function
-            <code>$f</code> returns true.</p>
+        <p>Returns those items from the sequence <code>$input</code> for which the supplied function
+          <code>$predicate</code> returns true.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1898,8 +1894,8 @@
       </status>
       <saxon-edition>ALL_SINCE_10 PE/EE_9.6</saxon-edition>
       <description>
-        <p>Applies the function item <code>$f</code> to every item from the sequence
-            <code>$seq</code> in turn, returning the concatenation of the resulting sequences in
+        <p>Applies the function item <code>$action</code> to every item from the sequence
+          <code>$input</code> in turn, returning the concatenation of the resulting sequences in
           order.</p>
       </description>
     </function>
@@ -1921,8 +1917,8 @@
       </status>
       <saxon-edition>ALL_SINCE_10 PE/EE_9.6</saxon-edition>
       <description>
-        <p>Applies the function item <code>$f</code> to successive pairs of items taken one from
-            <code>$seq1</code> and one from <code>$seq2</code>, returning the concatenation of the
+        <p>Applies the function item <code>$action</code> to successive pairs of items taken one from
+          <code>$input1</code> and one from <code>$input2</code>, returning the concatenation of the
           resulting sequences in order.</p>
       </description>
     </function>
@@ -3558,7 +3554,7 @@
       <status-ok/>
       <saxon-edition>ALL</saxon-edition>
       <description>
-        <p>Tests whether <code>$srcval</code> contains one or more items; fails if it is an empty
+        <p>Tests whether <code>$input</code> contains one or more items; fails if it is an empty
           sequence.</p>
       </description>
     </function>
@@ -4352,7 +4348,7 @@
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
-        <p>This function serializes the supplied input sequence <code>$arg</code>, returning the
+        <p>This function serializes the supplied input sequence <code>$input</code>, returning the
           serialized representation of the sequence as a string.</p>
       </description>
     </function>
@@ -4750,7 +4746,7 @@
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns that part of the given input string that occurs after the first occurrence of the
-          string given in <code>$arg2</code>.</p>
+          string given in <code>$substring</code>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4772,7 +4768,7 @@
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns that part of the given input string that occurs before the first occurrence of
-          the string given in <code>$arg2</code>.</p>
+          the string given in <code>$substring</code>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5745,7 +5741,7 @@
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
-        <p>Returns <code>e</code> to the power of <code>$arg</code>.</p>
+        <p>Returns <code>e</code> to the power of <code>$value</code>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5763,7 +5759,7 @@
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
-        <p>Returns 10 to the power of <code>$arg</code>.</p>
+        <p>Returns 10 to the power of <code>$value</code>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5784,7 +5780,7 @@
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
-        <p>Returns the natural logarithm of <code>$arg</code>. </p>
+        <p>Returns the natural logarithm of <code>$value</code>. </p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5802,7 +5798,7 @@
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
-        <p>Returns the base-10 logarithm of <code>$arg</code>. </p>
+        <p>Returns the base-10 logarithm of <code>$value</code>. </p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5841,7 +5837,7 @@
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
-        <p>Returns <code>$arg1</code> raised to the power of <code>$arg2</code>.</p>
+        <p>Returns <code>$x</code> raised to the power of <code>$y</code>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5949,22 +5945,22 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/map">build</name>
       <signatures>
         <proto return-type="map(*)">
-          <arg name="input" type="item()*" desc="FIXME:"/>
+          <arg name="input" type="item()*" desc="The input map"/>
           <arg name="key"
             type="(fn($item as item(), $position as xs:integer) as xs:anyAtomicType*)?"
-            default="fn:identity#1" desc="FIXME:"/>
+            default="fn:identity#1" desc="Function to compute map keys"/>
           <arg name="value" type="(fn($item as item(), $position as xs:integer) as item()*)?"
-            default="fn:identity#1" desc="FIXME:"/>
-          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
+            default="fn:identity#1" desc="Function to compute map values"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Options map"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>Available since Saxon 13 in XPath 4.0. An earlier version of the function was available
+          since Saxon 12.0 provided that syntax extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 13 12_EXPERIMENTAL</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns a map that typically contains one entry for each item in a supplied input
           sequence.</p>
       </description>
@@ -6053,19 +6049,19 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/map">filter</name>
       <signatures>
         <proto return-type="map(*)">
-          <arg name="map" type="map(*)" desc="FIXME:"/>
+          <arg name="map" type="map(*)" desc="The input map"/>
           <arg name="predicate"
             type="fn($key as xs:anyAtomicType, $value as item()*, $position as xs:integer) as xs:boolean?"
-            desc="FIXME:"/>
+            desc="The function used to filter the input map"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12 provided that syntax
+          extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Selects entries from a map, returning a new map.</p>
       </description>
     </function>
@@ -6178,18 +6174,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/map">keys-where</name>
       <signatures>
         <proto return-type="xs:anyAtomicType*">
-          <arg name="map" type="map(*)" desc="FIXME:"/>
+          <arg name="map" type="map(*)" desc="The input map"/>
           <arg name="predicate"
-            type="fn($key as xs:anyAtomicType, $value as item()*) as xs:boolean?" desc="FIXME:"/>
+            type="fn($key as xs:anyAtomicType, $value as item()*) as xs:boolean?" desc="The
+            predicate function"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns a sequence containing selected keys present in a map.</p>
       </description>
     </function>
@@ -6385,16 +6379,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">empty</name>
       <signatures>
         <proto return-type="xs:boolean">
-          <arg name="array" type="array(*)" desc="FIXME:"/>
+          <arg name="array" type="array(*)" desc="The input array"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 provided that syntax
+          extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns <code>true</code> if the supplied array contains no members.</p>
       </description>
     </function>
@@ -6402,7 +6396,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">filter</name>
       <description>
         <p>Returns an array containing those members of the <code>$array</code> for which
-            <code>$function</code> returns true.</p>
+          <code>$predicate</code> returns true.</p>
       </description>
       <signatures>
         <proto return-type="array(*)">
@@ -6482,16 +6476,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">foot</name>
       <signatures>
         <proto return-type="item()*">
-          <arg name="array" type="array(*)" desc="FIXME:"/>
+          <arg name="array" type="array(*)" desc="The input array"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 provided that syntax
+          extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns the last member of an array.</p>
       </description>
     </function>
@@ -6499,7 +6493,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">for-each</name>
       <description>
         <p>Returns an array whose size is the same as <code>array:size($array)</code>, in which each
-          member is computed by applying <code>$function</code> to the corresponding member of
+          member is computed by applying <code>$action</code> to the corresponding member of
             <code>$array</code>.</p>
       </description>
       <signatures>
@@ -6606,17 +6600,18 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">index-where</name>
       <signatures>
         <proto return-type="xs:integer*">
-          <arg name="array" type="array(*)" desc="FIXME:"/>
-          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" desc="FIXME:"/>
+          <arg name="array" type="array(*)" desc="The input array"/>
+          <arg name="predicate" type="fn(item()*, xs:integer) as xs:boolean?" desc="The predicate
+            function"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 provided that syntax
+          extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns the positions in an input array of members that match a supplied predicate.</p>
       </description>
     </function>
@@ -6793,19 +6788,22 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">slice</name>
       <signatures>
         <proto return-type="array(*)">
-          <arg name="array" type="array(*)" desc="FIXME:"/>
-          <arg name="start" type="xs:integer?" default="()" desc="FIXME:"/>
-          <arg name="end" type="xs:integer?" default="()" desc="FIXME:"/>
-          <arg name="step" type="xs:integer?" default="()" desc="FIXME:"/>
+          <arg name="array" type="array(*)" desc="The input array"/>
+          <arg name="start" type="xs:integer?" default="()" desc="The position of the first item
+            from the input array to be included in the result"/>
+          <arg name="end" type="xs:integer?" default="()" desc="The position of the last item from
+            the input array to be included in the result"/>
+          <arg name="step" type="xs:integer?" default="()" desc="Step between positions to include
+            in the result"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 provided that syntax
+          extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns an array containing selected members of a supplied input array based on their
           position.</p>
       </description>
@@ -6931,16 +6929,16 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/array">trunk</name>
       <signatures>
         <proto return-type="array(*)">
-          <arg name="array" type="array(*)" desc="FIXME:"/>
+          <arg name="array" type="array(*)" desc="The input array"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.0 provided that syntax
+          extensions are enabled.</p>
       </status>
-      <saxon-edition>PE/EE 13</saxon-edition>
+      <saxon-edition>PE/EE 12</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns an array containing all members except the last from a supplied array.</p>
       </description>
     </function>

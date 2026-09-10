@@ -687,12 +687,19 @@ TODO: rethink redefines and override
             <li>The <code>saxon:as</code> extension attribute is deprecated; the standard <code>as</code>
                 attribute can now be used in its place.</li>
             <li><p>The functions <code>fn:items-after</code>, <code>fn:items-before</code>,
-                <code>fn:items-ending-where</code>, <code>fn:items-starting-where</code> are dropped.</p></li>
+                <code>fn:items-ending-where</code>, <code>fn:items-starting-where</code> are
+                dropped. (The alternative original Saxon namespace functions remain available: 
+                <code>saxon:items-after</code>, <code>saxon:items-before</code>,
+                <code>saxon:items-from</code>, <code>saxon:items-until</code>.)</p></li>
             <li><p>The function <code>fn:iterate-while</code> is replaced by
                 <code>fn:while-do</code> and <code>fn:do-until</code>.</p></li>
             <li><p>The function <code>fn:parts</code> is dropped.</p></li>
             <li><p>The function <code>fn:xdm-to-json</code> is dropped.</p></li>
             <li><p>The function <code>array:of</code> is renamed <code>array:of-members</code>.</p></li>
+            <li><p>The function <code>array:exists</code> is dropped.</p></li>
+            <li><p>The second argument for <code>map:keys</code> is dropped, replaced by the new
+                function <code>map:keys-where</code>.</p></li>
+            <li><p>The function <code>map:pairs</code> is dropped.</p></li>
         </ul>
         
         <p>Some Saxon extension functions that were essentially prototypes of 
