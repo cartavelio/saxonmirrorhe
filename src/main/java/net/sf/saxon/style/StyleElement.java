@@ -25,13 +25,14 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.NodeListIterator;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.linked.TextImpl;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BigDecimalValue;
@@ -50,6 +51,12 @@ import java.util.*;
  * <p>Note: this class implements Locator. The element retains information about its own location
  * in the stylesheet, which is useful when an XSLT static error is found.</p>
  */
+
+// Enable the C# code to accept a lambda expression in calls to children()
+@CSharpInjectMembers(code = {""
+        + "    protected System.Collections.Generic.IEnumerable<net.sf.saxon.om.NodeInfo> children(System.Predicate<net.sf.saxon.om.NodeInfo> filter) {"
+        + "        return new net.sf.saxon.tree.util.Navigator.ChildrenAsIterable(this, net.sf.saxon.pattern.NodeSelector.of(filter));"
+        + "    }"})
 
 public abstract class StyleElement extends ElementImpl {
 
@@ -71,6 +78,7 @@ public abstract class StyleElement extends ElementImpl {
 
     // Conditions under which an error is to be reported
 
+    @CSharpSimpleEnum
     public enum OnFailure {
         REPORT_ALWAYS, REPORT_UNLESS_FORWARDS_COMPATIBLE, REPORT_IF_INSTANTIATED,
         REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE, REPORT_DYNAMICALLY_UNLESS_FALLBACK_AVAILABLE,
@@ -255,7 +263,7 @@ public abstract class StyleElement extends ElementImpl {
     public Visibility getDeclaredVisibility() {
         String vis = getAttributeValue("", "visibility");
         if (vis == null) {
-            return null;
+            return Visibility.UNDEFINED;
         } else {
             return interpretVisibilityValue(vis, "");
         }
@@ -591,7 +599,7 @@ public abstract class StyleElement extends ElementImpl {
      * prepareAttributes (provided in the subclass) and traps any exceptions
      */
 
-    final void processAttributes() {
+    protected final void processAttributes() {
         prepareAttributes();
     }
 
@@ -790,7 +798,7 @@ public abstract class StyleElement extends ElementImpl {
         }
     }
 
-    final static String[] YES_NO = new String[]{"0", "1", "false", "no", "true", "yes"};
+    public final static String[] YES_NO = {"0", "1", "false", "no", "true", "yes"};
 
 
     /**
@@ -813,11 +821,23 @@ public abstract class StyleElement extends ElementImpl {
 
     }
 
-    static boolean isYes(String s) {
+    /**
+     * Ask whether an attribute is "yes" or one of its accepted synonyms
+     * @param s the value to be tested. Whitespace should be trimmed by the caller
+     * @return true if the value is "yes", "true", or "1"
+     */
+    public static boolean isYes(String s) {
         return "yes".equals(s) || "true".equals(s) || "1".equals(s);
     }
 
-    static boolean isNo(String s) {
+    /**
+     * Ask whether an attribute is "no" or one of its accepted synonyms
+     *
+     * @param s the value to be tested. Whitespace should be trimmed by the caller
+     * @return true if the value is "no", "false", or "0"
+     */
+
+    public static boolean isNo(String s) {
         return "no".equals(s) || "false".equals(s) || "0".equals(s);
     }
 
@@ -1982,7 +2002,7 @@ public abstract class StyleElement extends ElementImpl {
             }
         }
         if (containsEmptyTest) {
-            List<NodeInfo> vars = new ArrayList<>();
+            List<NodeInfo> vars = new ArrayList<>();  
             List<NodeInfo> onEmpties = new ArrayList<>();
             List<NodeInfo> others = new ArrayList<>();
             for (NodeInfo kid : children()) {
@@ -1997,7 +2017,7 @@ public abstract class StyleElement extends ElementImpl {
             }
             vars.addAll(others);
             vars.addAll(onEmpties);
-            return compileSequenceConstructor(compilation, decl, new ListIterator<>(vars), includeParams);
+            return compileSequenceConstructor(compilation, decl, new NodeListIterator(vars), includeParams);
         } else {
             return compileSequenceConstructor(compilation, decl, iterateAxis(AxisInfo.CHILD), includeParams);
         }
@@ -2162,7 +2182,7 @@ public abstract class StyleElement extends ElementImpl {
      * @return a wrapper instruction that performs the tracing (if activated at run-time)
      */
 
-    static Expression makeTraceInstruction(StyleElement source, Expression child) {
+    protected static Expression makeTraceInstruction(StyleElement source, Expression child) {
         if (child instanceof TraceExpression && !(source instanceof StylesheetComponent)) {
             return child;
             // this can happen, for example, after optimizing a compile-time xsl:if
@@ -2301,7 +2321,7 @@ public abstract class StyleElement extends ElementImpl {
 
     Visibility interpretVisibilityValue(String s, String flags) {
         for (Visibility v : Visibility.values()) {
-            if (v.show().equals(s) &&
+            if (v.toString().toLowerCase().equals(s) &&
                     (flags.contains("h") || !s.equals("hidden")) &&
                     (flags.contains("a") || !s.equals("absent"))) {
                 return v;
@@ -2311,7 +2331,7 @@ public abstract class StyleElement extends ElementImpl {
                 (flags.contains("h") ? "|hidden" : "") +
                 (flags.contains("a") ? "|absent" : "")
         );
-        return null;
+        return Visibility.UNDEFINED;
     }
 
     /**
