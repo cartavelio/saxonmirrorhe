@@ -398,6 +398,12 @@ td .qt4 {
 	background-size: 2em;
 	min-height: 2em;
 }
+code.qt4,
+span.qt4 {
+	background-size: 1.25em;
+	min-height: 1em;
+	background-position-x: right -1.5em;
+}
 .flink-qt4 {
    padding-right: .5em;
    border-right: .5em;
@@ -1124,5 +1130,5 @@ div.warning p{
 /* used in table listing built-in datatypes */
 .notes .sources {
 	font-size: smaller;
-	margin-top: 4px;
+	margin-top: 8px;
 }
