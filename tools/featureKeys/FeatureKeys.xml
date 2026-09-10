@@ -20,9 +20,10 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/allow-external-functions</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@allowExternalFunctions</configfile>
         <configfiledesc>
-            <p>True if calls to external Java or .NET functions are allowed.</p>
+            <p>True if reflexive calls to external Java functions are allowed.</p>
         </configfiledesc>
         <commandline for="TQ">-ext</commandline>
         <desc>
@@ -56,6 +57,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/allow-multithreading</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@allowMultiThreading</configfile>
         <configfiledesc>
             <p>True if <a class="bodylink code" href="/extensions/attributes/threads"
@@ -81,6 +83,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/allow-old-java-uri-format</uri>
         <editions>PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@allowOldJavaUriFormat</configfile>
         <configfiledesc>
             <p>True if reflexive calls to external Java functions are allowed to use the "liberal"
@@ -111,6 +114,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/allowSyntaxExtensions</uri>
         <editions>PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@allowSyntaxExtensions</configfile>
         <configfiledesc>
             <p>Enables use of (experimental and non-conformant) extensions to XPath syntax.</p>
@@ -132,6 +136,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/assertionsCanSeeComments</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xsd/@assertionsCanSeeComments</configfile>
         <configfiledesc>
             <p>Determines whether comment and processing instructions in a document being validated
@@ -154,6 +159,7 @@
         <type>Instance of <link>net.sf.saxon.lib.CollationURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/collation-uri-resolver</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setCollationURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getCollationURIResolver</getter>
         <desc>
@@ -170,6 +176,7 @@
         <type>Name of a class implementing <link>net.sf.saxon.lib.CollationURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/collation-uri-resolver-class</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setCollationURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getCollationURIResolver</getter>
         <configfile>global/@collationUriResolver</configfile>
@@ -187,6 +194,7 @@
         <type>Instance of <link>net.sf.saxon.lib.CollectionFinder</link></type>
         <uri>http://saxon.sf.net/feature/collection-finder</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setCollectionFinder</setter>
         <getter class="net.sf.saxon.Configuration">getCollectionFinder</getter>
         <desc>
@@ -206,6 +214,7 @@
             <link>net.sf.saxon.lib.CollectionFinder</link></type>
         <uri>http://saxon.sf.net/feature/collection-finder-class</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setCollectionFinder</setter>
         <getter class="net.sf.saxon.Configuration">getCollectionFinder</getter>
         <commandline for="TQ">-cf</commandline>
@@ -228,6 +237,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/compile-with-tracing</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setCompileWithTracing</setter>
         <getter class="net.sf.saxon.Configuration">isCompileWithTracing</getter>
         <commandline for="TQ">automatically set when -T is present</commandline>
@@ -251,6 +261,7 @@
         <type>Instance of class <link>net.sf.saxon.Configuration</link></type>
         <uri>http://saxon.sf.net/feature/configuration</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <desc>
             <p>This attribute cannot be set on the <link>net.sf.saxon.Configuration</link> itself,
                 but it can be set on various JAXP factory objects such as a
@@ -267,7 +278,8 @@
         <name>CONFIGURATION_FILE</name>
         <type>string (filename)</type>
         <uri>http://saxon.sf.net/feature/configuration-file</uri>
-        <editions>PE EE</editions>
+        <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <commandline for="TQV">-config:filename</commandline>
         <desc>
             <p>Defines a configuration file to be applied to the configuration.</p>
@@ -288,6 +300,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/debugByteCode</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@debugByteCode</configfile>
         <configfiledesc>
             <p>Causes bytecode generation to be run in debugging mode, for use when diagnosing a
@@ -306,6 +319,7 @@
         <type>string (filename)</type>
         <uri>http://saxon.sf.net/feature/debugByteCodeDir</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@debugByteCodeDirectory</configfile>
         <configfiledesc>
             <p>Identifies the directory for output files produced when <code>displayByteCode</code>
@@ -331,6 +345,7 @@
         <type>Absolute URI (collation URI)</type>
         <uri>http://saxon.sf.net/feature/defaultCollation</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">declareDefaultCollation</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">getDefaultCollationName</getter>
         <configfile>global/@defaultCollation</configfile>
@@ -357,6 +372,7 @@
         <type>Absolute URI (collection URI)</type>
         <uri>http://saxon.sf.net/feature/defaultCollection</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setDefaultCollection</setter>
         <getter class="net.sf.saxon.Configuration">getDefaultCollection</getter>
         <configfile>global/@defaultCollection</configfile>
@@ -377,6 +393,7 @@
         <type>string (ISO 3166 country code)</type>
         <uri>http://saxon.sf.net/feature/defaultCountry</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setDefaultCountry</setter>
         <getter class="net.sf.saxon.Configuration">getDefaultCountry</getter>
         <configfile>localizations/@defaultCountry</configfile>
@@ -393,6 +410,7 @@
         <type>string (ISO language code, following the same rules as for xml:lang)</type>
         <uri>http://saxon.sf.net/feature/defaultLanguage</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setDefaultLanguage</setter>
         <getter class="net.sf.saxon.Configuration">getDefaultLanguage</getter>
         <configfile>localizations/@defaultLanguage</configfile>
@@ -410,6 +428,7 @@
         <type>string ("S" for Saxon, "J" for Java, "N" for .NET)</type>
         <uri>http://saxon.sf.net/feature/defaultRegexEngine</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@defaultRegexEngine</configfile>
         <configfiledesc>
             <p>Determines which regular expression engine should be used for evaluating regular expressions.</p>
@@ -438,6 +457,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/disableXslEvaluate</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xslt/@disableXslEvaluate</configfile>
         <configfiledesc>
             <p>If set, the use of the <code>xsl:evaluate</code> instruction in XSLT 3.0
@@ -456,6 +476,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/displayByteCode</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@displayByteCode</configfile>
         <configfiledesc>
             <p>Causes files containing a human-readable print of the generated bytecode to be
@@ -474,6 +495,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/validation</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setValidation</setter>
         <getter class="net.sf.saxon.Configuration">isValidation</getter>
         <commandline for="TQ">-dtd:(on|off|recover)</commandline>
@@ -496,6 +518,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/dtd-validation-recoverable</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.lib.ParseOptions">setContinueAfterValidationErrors</setter>
         <getter class="net.sf.saxon.lib.ParseOptions">isContinueAfterValidationErrors</getter>
         <commandline for="TQV">-dtd:(on|off|recover)</commandline>
@@ -519,6 +542,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/eagerEvaluation</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@eagerEvaluation</configfile>
         <configfiledesc>
             <p>Forces Saxon to do eager evaluation of expressions in contexts where normally it would do lazy evaluation,
@@ -538,6 +562,7 @@
         <type>Name of a class implementing <code>org.xml.sax.EntityResolver</code></type>
         <uri>http://saxon.sf.net/feature/entityResolverClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.lib.ParseOptions">setEntityResolver</setter>
         <getter class="net.sf.saxon.lib.ParseOptions">getEntityResolver</getter>
         <configfile>global/@entityResolver</configfile>
@@ -565,6 +590,7 @@
                 <link>net.sf.saxon.lib.EnvironmentVariableResolver</link></type>
         <uri>http://saxon.sf.net/feature/environmentVariableResolver</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <desc>
             <p>Setting the <code>ENVIRONMENT_VARIABLE_RESOLVER</code> causes the supplied object to
                 be registered as the environment variable resolver for the
@@ -582,6 +608,7 @@
         <type>Name of a class implementing <link>net.sf.saxon.lib.EnvironmentVariableResolver</link></type>
         <uri>http://saxon.sf.net/feature/environmentVariableResolverClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@environmentVariableResolver</configfile>
         <configfiledesc>
             <p>Defines the environment variable resolver for all queries and transforms using this
@@ -607,6 +634,7 @@
         <type>Name of a class implementing <code>org.xml.sax.ErrorListener</code></type>
         <uri>http://saxon.sf.net/feature/errorListenerClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setErrorListener</setter>
         <getter class="net.sf.saxon.Configuration">getErrorListener</getter>
         <configfile>global/@errorListener</configfile>
@@ -630,6 +658,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/expandAttributeDefaults</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setExpandAttributeDefaults</setter>
         <getter class="net.sf.saxon.Configuration">isExpandAttributeDefaults</getter>
         <commandline for="TQ">-expand:(on|off)</commandline>
@@ -656,6 +685,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/expathFileDeleteTemporaryFiles</uri>
         <editions>PE EE</editions>
+        <platforms>J</platforms>
         <commandline for="TQ">-expathFileDeleteTemporaryFiles:(on|off)</commandline>
         <desc>
             <p><code>EXPATH_FILE_DELETE_TEMPORARY_FILES</code> determines whether temporary files
@@ -672,6 +702,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/generateByteCode</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <commandline for="TQ">--generateByteCode:(on|off)</commandline>
         <configfile>global/@generateByteCode</configfile>
         <configfiledesc>
@@ -694,6 +725,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/ignoreSAXSourceParser</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@ignoreSAXSourceParser</configfile>
         <configfiledesc>
             <p>Set to true to ignore the <code>XMLReader</code> supplied as a <code>SAXSource</code>
@@ -723,6 +755,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/implicitSchemaImports</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xsd/@implicitSchemaImports</configfile>
         <configfiledesc>
             <p>If true, allows a schema document to reference components in a different target namespace without an explicit
@@ -744,6 +777,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/lazyConstructionMode</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@lazyConstructionMode</configfile>
         <configfiledesc>
             <p>If true, causes temporary trees to be constructed lazily.</p>
@@ -764,6 +798,7 @@
         <type>string (filename)</type>
         <uri>http://saxon.sf.net/feature/licenseFileLocation</uri>
         <editions>PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>configuration/@licenseFileLocation</configfile>
         <configfiledesc>
             <p>Defines the location of the Saxon license file, as a URI relative to the base URI of
@@ -785,6 +820,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/linenumbering</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setLineNumbering</setter>
         <getter class="net.sf.saxon.Configuration">isLineNumbering</getter>
         <commandline for="TQV">-l:(on|off)</commandline>
@@ -813,6 +849,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/markDefaultedAttributes</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@markDefaultedAttributes</configfile>
         <configfiledesc>
             <p>Indicates that Saxon should retain the fact that attributes are derived
@@ -834,6 +871,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/maxCompiledClasses</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@maxCompiledClasses</configfile>
         <configfiledesc>
             <p>Places a limit on the number of classes for which Saxon will generate bytecode.</p>
@@ -853,6 +891,7 @@
         <type>Name of a class implementing <link>net.sf.saxon.event.Receiver</link></type>
         <uri>http://saxon.sf.net/feature/messageEmitterClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setMessageEmitterClass</setter>
         <getter class="net.sf.saxon.Configuration">getMessageEmitterClass</getter>
         <commandline for="T">-m:classname</commandline>
@@ -894,6 +933,7 @@
         <type>Instance of <link>net.sf.saxon.lib.ModuleURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/moduleURIResolver</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setModuleURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getModuleURIResolver</getter>
         <commandline for="Q">-mr:classname</commandline>
@@ -909,6 +949,7 @@
         <type>Name of a class implementing <link>net.sf.saxon.lib.ModuleURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/moduleURIResolverClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setModuleURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getModuleURIResolver</getter>
         <commandline for="Q">-mr:classname</commandline>
@@ -928,6 +969,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/monitorHotSpotByteCode</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <commandline>-TB</commandline>
         <configfile>global/@monitorHotSpotByteCode</configfile>
         <configfiledesc>
@@ -964,6 +1006,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/multipleSchemaImports</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xsd/@multipleSchemaImports</configfile>
         <configfiledesc>
             <p>If set to true, the schema processor attempts to fetch a schema document appearing in
@@ -997,6 +1040,7 @@
         <type>Instance of <link>net.sf.saxon.om.NamePool</link></type>
         <uri>http://saxon.sf.net/feature/namePool</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setNamePool</setter>
         <getter class="net.sf.saxon.Configuration">getNamePool</getter>
         <desc>
@@ -1020,6 +1064,7 @@
         <type>A string containing two integers, comma-separated</type>
         <uri>http://saxon.sf.net/feature/occurrenceLimits</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="com.saxonica.config.EnterpriseConfiguration">setOccurrenceLimits</setter>
         <getter class="com.saxonica.config.EnterpriseConfiguration">getOccurrenceLimits</getter>
         <commandline for="V">-limits:min,max</commandline>
@@ -1049,6 +1094,7 @@
         <type>object</type>
         <uri>http://saxon.sf.net/feature/optimizationLevel</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.expr.parser.Optimizer">setOptimizationLevel</setter>
         <getter class="net.sf.saxon.expr.parser.Optimizer">getOptimizationLevel</getter>
         <commandline for="TQ">-opt:[-]flags</commandline>
@@ -1095,6 +1141,7 @@
         <type>Instance of <link>net.sf.saxon.lib.OutputURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/outputURIResolver</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setOutputURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getOutputURIResolver</getter>
         <desc>
@@ -1109,6 +1156,7 @@
         <type>Name of a class implementing <link>net.sf.saxon.lib.OutputURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/outputURIResolverClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <commandline for="T">-or:classname</commandline>
         <configfile>xslt/@outputUriResolver</configfile>
         <configfiledesc>
@@ -1128,6 +1176,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/preEvaluateDocFunction</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@preEvaluateDoc</configfile>
         <configfiledesc>
             <p>If true, allows calls on <a class="bodylink code" href="/functions/fn/doc">doc()</a>
@@ -1146,34 +1195,14 @@
                 compile time is to use the new facility of static global variables.</p>
         </desc>
     </feature>
-    <feature>
-        <featureCode>52</featureCode>
-        <name>PREFER_JAXP_PARSER</name>
-        <type>boolean</type>
-        <uri>http://saxon.sf.net/feature/preferJaxpParser</uri>
-        <editions>HE PE EE</editions>
-        <configfile>global/@preferJaxpParser</configfile>
-        <configfiledesc>
-            <p>Relevant only on .NET, determines whether the Java Classpath parser is used in
-                preference to the Microsoft .NET parser.</p>
-        </configfiledesc>
-        <desc>
-            <p>Relevant only on the IKVM-based .NET product, determines whether the Java Classpath parser is used in
-                preference to the Microsoft .NET parser.</p>
-            <p>This option has no effect on the Java platform, nor with Saxon-CS. The default is <b>true</b>. When
-                running on the .NET platform, if the option is true it causes the Apache Xerces
-                parser (cross-compiled using IKVMC) to be used in preference to the .NET XML parser.
-                If false the .NET XML parser (<code>System.Xml.XmlTextReader</code>) is used. One
-                reason for providing this option is that the .NET XML parser does not report ID
-                attributes, which means that the <code>id()</code> function does not work.</p>
-        </desc>
-    </feature>
+    <!-- 52 was PREFER_JAXP_PARSER -->
     <feature>
         <featureCode>53</featureCode>
         <name>RECOGNIZE_URI_QUERY_PARAMETERS</name>
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/recognize-uri-query-parameters</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@recognizeUriQueryParameters</configfile>
         <configfiledesc>
             <p>If true, and the standard <code>URIResolver</code> is in use, query parameters such
@@ -1208,6 +1237,7 @@
         <type>integer (0..2)</type>
         <uri>http://saxon.sf.net/feature/recoveryPolicy</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setRecoveryPolicy</setter>
         <getter class="net.sf.saxon.Configuration">getRecoveryPolicy</getter>
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
@@ -1229,6 +1259,7 @@
         <type>string ("recoverSilently", "recoverWithWarnings", or "doNotRecover")</type>
         <uri>http://saxon.sf.net/feature/recoveryPolicyName</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setRecoveryPolicy</setter>
         <getter class="net.sf.saxon.Configuration">getRecoveryPolicy</getter>
         <commandline for="T">-warnings:(silent|recover|fatal)</commandline>
@@ -1255,6 +1286,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/resultDocumentThreads</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xslt/@resultDocumentThreads</configfile>
         <configfiledesc>
             <p>Indicates the maximum number of threads to be used for processing
@@ -1285,6 +1317,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/retain-dtd-attribute-types</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <desc>
             <p>If set to true, indicates that when input is obtained from a SAX parser, the
                 DTD-based attribute type notified by the XML parser should be used to set the type
@@ -1300,6 +1333,7 @@
         <type>Instance of the class <link>net.sf.saxon.lib.SchemaURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/schemaURIResolver</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setSchemaURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getSchemaURIResolver</getter>
         <desc>
@@ -1316,6 +1350,7 @@
         <type>Name of a class that implements <link>net.sf.saxon.lib.SchemaURIResolver</link></type>
         <uri>http://saxon.sf.net/feature/schemaURIResolverClass</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setSchemaURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getSchemaURIResolver</getter>
         <configfile>xsd/@schemaUriResolver</configfile>
@@ -1336,6 +1371,7 @@
                 <link>Validation.LAX</link>, or <link> Validation.STRICT</link></type>
         <uri>http://saxon.sf.net/feature/schema-validation</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setSchemaValidationMode</setter>
         <getter class="net.sf.saxon.Configuration">getSchemaValidationMode</getter>
         <commandline for="TQ">-val:(strict|lax|strip|preserve)</commandline>
@@ -1350,6 +1386,7 @@
         <type>string ("strict", "lax", "preserve", or "strip")</type>
         <uri>http://saxon.sf.net/feature/schema-validation-mode</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setSchemaValidationMode</setter>
         <getter class="net.sf.saxon.Configuration">getSchemaValidationMode</getter>
         <configfile>global/@schemaValidation</configfile>
@@ -1369,6 +1406,7 @@
         <type>Name of a class that implements <link>net.sf.saxon.lib.SerializerFactory</link></type>
         <uri>http://saxon.sf.net/feature/serializerFactoryClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setSerializerFactory</setter>
         <getter class="net.sf.saxon.Configuration">getSerializerFactory</getter>
         <configfile>global/@serializerFactory</configfile>
@@ -1391,6 +1429,7 @@
                 <code>javax.xml.parsers. SAXParserFactory</code> interface</type>
         <uri>http://saxon.sf.net/feature/sourceParserClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setSourceParserClass</setter>
         <getter class="net.sf.saxon.Configuration">getSourceParserClass</getter>
         <configfile>global/@parser</configfile>
@@ -1421,6 +1460,7 @@
             interface</type>
         <uri>http://saxon.sf.net/feature/sourceResolverClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setSourceResolver</setter>
         <getter class="net.sf.saxon.Configuration">getSourceResolver</getter>
         <configfile>global/@sourceResolver</configfile>
@@ -1443,6 +1483,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/stableCollectionUri</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@stableCollectionUri</configfile>
         <configfiledesc>
             <p>Indicates that collections read using the <code>fn:collection()</code> function are
@@ -1468,6 +1509,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/stableUnparsedText</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@stableUnparsedText</configfile>
         <configfiledesc>
             <p>Indicates that unparsed text files read using functions such as
@@ -1491,6 +1533,7 @@
         <type>string (filename)</type>
         <uri>http://saxon.sf.net/feature/standardErrorOutputFile</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setStandardErrorOutput</setter>
         <configfile>global/@standardErrorOutputFile</configfile>
         <configfiledesc>
@@ -1517,6 +1560,7 @@
         <type>string ("off", "standard")</type>
         <uri>http://saxon.sf.net/feature/streamability</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@streamability</configfile>
         <configfiledesc>
             <p>Determines the test applied to see if constructs are streamable (if streaming is
@@ -1550,6 +1594,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/strictStreamability</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xslt/@strictStreamability</configfile>
         <configfiledesc>
             <p>Causes the XSLT processor to verify that constructs that are declared streamable are
@@ -1580,6 +1625,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/streamingFallback</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@streamingFallback</configfile>
         <configfiledesc>
             <p>If true, then constructs for which streaming is requested will be exectued in
@@ -1600,6 +1646,7 @@
         <type>string ("all", "none", or "ignorable")</type>
         <uri>http://saxon.sf.net/feature/strip-whitespace</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setStripsWhiteSpace</setter>
         <getter class="net.sf.saxon.Configuration">getStripsWhiteSpace</getter>
         <configfile>global/@stripSpace</configfile>
@@ -1625,6 +1672,7 @@
         <type>Name of a class implementing the <code>org.xml.sax.XMLReader</code> interface</type>
         <uri>http://saxon.sf.net/feature/styleParserClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setStyleParserClass</setter>
         <getter class="net.sf.saxon.Configuration">getStyleParserClass</getter>
         <configfile>global/@styleParser</configfile>
@@ -1649,6 +1697,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/suppressEvaluationExpiryWarning</uri>
         <editions>PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@suppressEvaluationExpiryWarning</configfile>
         <configfiledesc>
             <p>Suppresses the warning issued to indicate that an evaluation license in use is due to
@@ -1666,6 +1715,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/suppressXPathWarnings</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@suppressXPathWarnings</configfile>
         <configfiledesc>
             <p>Suppresses all warnings issued by the XPath and XQuery parsers.</p>
@@ -1682,6 +1732,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/suppressXsltNamespaceCheck</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@suppressXsltNamespaceCheck</configfile>
         <configfiledesc>
             <p>Suppresses the warning when there is no commonality between the namespaces used in
@@ -1699,6 +1750,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/thresholdForCompilingTypes</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>xsd/@thresholdForCompilingTypes</configfile>
         <configfiledesc>
             <p>Indicates how often an XSD simple type definition must be used before Saxon generates
@@ -1720,6 +1772,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/timing</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setTiming</setter>
         <getter class="net.sf.saxon.Configuration">isTiming</getter>
         <configfile>global/@timing</configfile>
@@ -1743,6 +1796,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/trace-external-functions</uri>
         <editions>PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@traceExternalFunctions</configfile>
         <configfiledesc>
             <p>Provides diagnostics when external functions are dynamically loaded.</p>
@@ -1761,6 +1815,7 @@
         <type>Instance of the class <link>net.sf.saxon.lib.TraceListener</link></type>
         <uri>http://saxon.sf.net/feature/traceListener</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setTraceListener</setter>
         <getter class="net.sf.saxon.Configuration">getTraceListener</getter>
         <commandline for="TQ">-TL:classname</commandline>
@@ -1781,6 +1836,7 @@
         <type>Name of a class implementing <link>net.sf.saxon.lib.TraceListener</link></type>
         <uri>http://saxon.sf.net/feature/traceListenerClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setTraceListenerClass</setter>
         <getter class="net.sf.saxon.Configuration">getTraceListenerClass</getter>
         <configfile>global/@traceListener</configfile>
@@ -1803,6 +1859,7 @@
         <type>string (file name)</type>
         <uri>http://saxon.sf.net/feature/traceListenerOutputFile</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@traceListenerOutputFile</configfile>
         <configfiledesc>
             <p>Supplies a file as destination for trace listener output.</p>
@@ -1820,6 +1877,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/trace-optimizer-decisions</uri>
         <editions>PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@traceOptimizerDecisions</configfile>
         <configfiledesc>
             <p>Causes tracing of decisions made by the optimizer.</p>
@@ -1841,6 +1899,7 @@
                 <link>net.sf.saxon.event.Builder#TINY_TREE_CONDENSED</link>)</type>
         <uri>http://saxon.sf.net/feature/treeModel</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setTreeModel</setter>
         <getter class="net.sf.saxon.Configuration">getTreeModel</getter>
         <commandline for="TQ">-tree:(linked|tiny|tinyc)</commandline>
@@ -1857,6 +1916,7 @@
         <type>string ("linkedTree" or "tinyTree" or "tinyTreeCondensed")</type>
         <uri>http://saxon.sf.net/feature/treeModelName</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setTreeModel</setter>
         <getter class="net.sf.saxon.Configuration">getTreeModel</getter>
         <configfile>global/@treeModel</configfile>
@@ -1880,6 +1940,7 @@
             <code>net.sf.saxon.lib.UnparsedTextURIResolver</code></type>
         <uri>http://saxon.sf.net/feature/unparsedTextURIResolver</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <typedesc>Name of a class implementing the
                 <link>net.sf.saxon.lib.UnparsedTextURIResolver</link> interface</typedesc>
         <desc>
@@ -1896,6 +1957,7 @@
             <code>net.sf.saxon.lib.UnparsedTextURIResolver</code></type>
         <uri>http://saxon.sf.net/feature/unparsedTextURIResolverClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@unparsedTextURIResolver</configfile>
         <configfiledesc>
             <p>The class name of the <code>UnparsedTextURIResolver</code> to be used for deferencing
@@ -1916,6 +1978,7 @@
         <type>Name of a class implementing <code>javax.xml.transform.URIResolver</code></type>
         <uri>http://saxon.sf.net/feature/uriResolverClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setURIResolver</setter>
         <getter class="net.sf.saxon.Configuration">getURIResolver</getter>
         <configfile>global/@uriResolver</configfile>
@@ -1943,6 +2006,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/use-pi-disable-output-escaping</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@usePiDisableOutputEscaping</configfile>
         <configfiledesc>
             <p>When sending output to a user-defined content handler, indicates whether JAXP-defined
@@ -1964,6 +2028,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/use-typed-value-cache</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@useTypedValueCache</configfile>
         <configfiledesc>
             <p>If true, typed values of element and attribute nodes are cached in the TinyTree. Uses
@@ -1984,6 +2049,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/useXsiSchemaLocation</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.lib.ParseOptions">setUseXsiSchemaLocation</setter>
         <getter class="net.sf.saxon.lib.ParseOptions">isUseXsiSchemaLocation</getter>
         <configfile>xsd/@useXsiSchemaLocation</configfile>
@@ -2007,6 +2073,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/validation-comments</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.lib.ParseOptions">setAddCommentsAfterValidationErrors</setter>
         <getter class="net.sf.saxon.lib.ParseOptions">isAddCommentsAfterValidationErrors</getter>
         <configfile>global/@validationComments</configfile>
@@ -2029,6 +2096,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/validation-warnings</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@validationWarnings</configfile>
         <configfiledesc>
             <p>For result trees subjected to schema validation, indicates whether validation
@@ -2062,6 +2130,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/version-warning</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xslt/@versionWarning</configfile>
         <configfiledesc>
             <p>False suppresses the warning produced when the XSLT processor version is not the same
@@ -2088,6 +2157,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xinclude-aware</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setXIncludeAware</setter>
         <getter class="net.sf.saxon.Configuration">isXIncludeAware</getter>
         <configfile>global/@xInclude</configfile>
@@ -2110,12 +2180,12 @@
         <type>string ("1.0" or "1.1")</type>
         <uri>http://saxon.sf.net/feature/xml-version</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.Configuration">setXMLVersion</setter>
         <getter class="net.sf.saxon.Configuration">getXMLVersion</getter>
         <configfile>global/@versionOfXml</configfile>
         <configfiledesc>
-            <p>Determines whether XML 1.0 or XML 1.1 rules are used for names. (1.0 means the rules
-                before Edition 5.)</p>
+            <p>Determines whether XML 1.0 or XML 1.1 rules are used.</p>
         </configfiledesc>
         <typedesc>1.0|1.1</typedesc>
         <commandline for="TQV">-xmlversion:(1.0|1.1)</commandline>
@@ -2128,7 +2198,8 @@
                 expressions (etc.), to change the meaning of <code>\i</code> and <code>\c</code> in
                 regular expressions, and to determine whether the serializer allows XML 1.1
                 documents to be constructed. </p>
-            <p>The default is currently 1.0, but may change.</p>
+            <p>The default is 1.0.</p>
+            <p>Saxon-CS uses the <code>System.Xml</code> parser, which does not support XML 1.1.</p>
         </desc>
     </feature>
     <feature>
@@ -2137,6 +2208,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/parserFeature?uri=</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <desc>
             <p>Sets the value of a parser feature flag. The feature name is any fully-qualified
                 URI.</p>
@@ -2153,6 +2225,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/parserProperty?uri=</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <desc>
             <p>Sets the value of a parser property flag. The property name is any fully-qualified
                 URI.</p>
@@ -2169,6 +2242,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xqueryAllowUpdate</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setUpdatingEnabled</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">isUpdatingEnabled</getter>
         <setter class="net.sf.saxon.s9api.XQueryCompiler">setUpdatingEnabled</setter>
@@ -2198,6 +2272,7 @@
         <type>string ("strip" or "preserve")</type>
         <uri>http://saxon.sf.net/feature/xqueryConstructionMode</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setConstructionMode</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">getConstructionMode</getter>
         <configfile>xquery/@constructionMode</configfile>
@@ -2218,6 +2293,7 @@
         <type>Namespace URI</type>
         <uri>http://saxon.sf.net/feature/xqueryDefaultElementNamespace</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setDefaultElementNamespace</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">getDefaultElementNamespace</getter>
         <configfile>xquery/@defaultElementNamespace</configfile>
@@ -2237,6 +2313,7 @@
         <type>Namespace URI</type>
             <uri>http://saxon.sf.net/feature/xqueryDefaultFunctionNamespace</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setDefaultFunctionNamespace</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">getDefaultFunctionNamespace</getter>
         <configfile>xquery/@defaultFunctionNamespace</configfile>
@@ -2256,6 +2333,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xqueryEmptyLeast</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setEmptyLeast</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">isEmptyLeast</getter>
         <configfile>xquery/@emptyLeast</configfile>
@@ -2276,6 +2354,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xqueryInheritNamespaces</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setInheritNamespaces</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">isInheritNamespaces</getter>
         <configfile>xquery/@inheritNamespaces</configfile>
@@ -2295,6 +2374,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xqueryMultipleModuleImports</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xquery/@multipleModuleImports</configfile>
         <configfiledesc>
             <p>If set to true, the XQuery processor attempts to fetch an XQuery module appearing in
@@ -2317,6 +2397,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xqueryPreserveBoundarySpace</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setPreserveBoundarySpace</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">isPreserveBoundarySpace</getter>
         <configfile>xquery/@preserveBoundarySpace</configfile>
@@ -2336,6 +2417,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xqueryPreserveNamespaces</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setPreserveNamespaces</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">isPreserveNamespaces</getter>
         <configfile>xquery/@preserveNamespaces</configfile>
@@ -2355,6 +2437,7 @@
         <type>string containing an ItemType, for example <code>document-node()</code></type>
         <uri>http://saxon.sf.net/feature/xqueryRequiredContextItemType</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setRequiredContextItemType</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">getRequiredContextItemType</getter>
         <setter class="net.sf.saxon.s9api.XQueryCompiler">setRequiredContextItemType</setter>
@@ -2376,6 +2459,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xquerySchemaAware</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setSchemaAware</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">isSchemaAware</getter>
         <setter class="net.sf.saxon.s9api.XQueryCompiler">setSchemaAware</setter>
@@ -2402,6 +2486,7 @@
                 <code>javax.xml.transform.ErrorListener</code></type>
         <uri>http://saxon.sf.net/feature/xqueryStaticErrorListenerClass</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setErrorListener</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">getErrorListener</getter>
         <setter class="net.sf.saxon.s9api.XQueryCompiler">setErrorListener</setter>
@@ -2423,32 +2508,27 @@
     <feature>
         <featureCode>110</featureCode>
         <name>XQUERY_VERSION</name>
-        <type>string ("1.0" or "3.0" or "3.1")</type>
+        <type>string ("3.1" or "4.0")</type>
         <uri>http://saxon.sf.net/feature/xqueryVersion</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.query.StaticQueryContext">setLanguageVersion</setter>
         <getter class="net.sf.saxon.query.StaticQueryContext">getLanguageVersion</getter>
         <setter class="net.sf.saxon.s9api.XQueryCompiler">setLanguageVersion</setter>
         <getter class="net.sf.saxon.s9api.XQueryCompiler">getLanguageVersion</getter>
         <configfile>xquery/@version</configfile>
         <configfiledesc>
-            <p>Indicates whether XQuery 3.0 or 3.1 syntax is accepted. From Saxon 9.8, an XQuery 3.1
-                processor is always used by default. So setting this property has no effect.</p>
+            <p>Indicates the version of XQuery syntax that is accepted.</p>
         </configfiledesc>
-        <typedesc>1.0|3.0|3.1</typedesc>
+        <typedesc>3.1|4.0</typedesc>
         <desc>
             <p>This property determines the version of XQuery used by the
                 <code>Configuration</code>.</p>
-            <p>From Saxon 9.8, an XQuery 3.1 processor is always used by default. So setting this
-                property has no effect.</p>
-            <!--<p>This property determines the version of XQuery used by the
-                <code>Configuration</code>. In order to use XQuery 3.0, it is necessary both to set
-                the XQuery compiler to process XQuery 3.0, and to specify XQuery 3.0 in the query
-                prolog of each module that uses XQuery 3.0 features.</p>
-            <p>This option can be set for a particular XQuery compilation. When the option is set at
-                the <code>Configuration</code> level, it acts as a default.</p>
-            <p>Note that XQuery 3.0 features cannot be used with XQuery Update.</p>
-            <p>XQuery 3.0 is supported only in Saxon-EE.</p>-->
+            <p>Indicates the version of XQuery syntax that is accepted. From Saxon 9.8, an XQuery 3.1
+                processor is always used by default. So setting this property to a value less than 3.1 is no longer
+                allowed. The value "4.0" enables experimental syntax extensions that are under discussion
+                in the XML community, and subject to change.</p>
+            
         </desc>
     </feature>
     <feature>
@@ -2457,6 +2537,7 @@
         <type>string ("1.0" or "1.1")</type>
         <uri>http://saxon.sf.net/feature/xsd-version</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>xsd/@version</configfile>
         <configfiledesc>
             <p>Indicates whether XSD 1.1 syntax is accepted.</p>
@@ -2477,6 +2558,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/enableAssertions</uri>
         <editions>PE EE</editions>
+        <platforms>J CS</platforms>
         <commandline for="T">-ea</commandline>
         <configfile>xslt/@enableAssertions</configfile>
         <configfiledesc>
@@ -2502,6 +2584,7 @@
         <type>string (a QName in Clark notation)</type>
         <uri>http://saxon.sf.net/feature/initialMode</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.s9api.XsltTransformer">setInitialMode</setter>
         <getter class="net.sf.saxon.s9api.XsltTransformer">getInitialMode</getter>
         <commandline for="T">-im:mode-name</commandline>
@@ -2524,6 +2607,7 @@
         <type>string (a QName in Clark notation)</type>
         <uri>http://saxon.sf.net/feature/initialTemplate</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.s9api.XsltTransformer">setInitialTemplate</setter>
         <getter class="net.sf.saxon.s9api.XsltTransformer">getInitialTemplate</getter>
         <commandline for="T">-it:template-name</commandline>
@@ -2546,6 +2630,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/xsltSchemaAware</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.s9api.XsltCompiler">setSchemaAware</setter>
         <getter class="net.sf.saxon.s9api.XsltCompiler">isSchemaAware</getter>
         <configfile>xslt/@schemaAware</configfile>
@@ -2572,6 +2657,7 @@
         <type>Name of a class implementing <code>javax.xml.transform.ErrorListener</code></type>
         <uri>http://saxon.sf.net/feature/stylesheetErrorListener</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.s9api.XsltCompiler">setErrorListener</setter>
         <getter class="net.sf.saxon.s9api.XsltCompiler">getErrorListener</getter>
         <configfile>xslt/@staticErrorListener</configfile>
@@ -2598,6 +2684,7 @@
         <type>Name of a class implementing <code>javax.xml.transform.URIResolver</code></type>
         <uri>http://saxon.sf.net/feature/stylesheetURIResolver</uri>
         <editions>HE PE EE</editions>
+        <platforms>J</platforms>
         <setter class="net.sf.saxon.s9api.XsltCompiler">setURIResolver</setter>
         <getter class="net.sf.saxon.s9api.XsltCompiler">getURIResolver</getter>
         <commandline for="T">-r:classname</commandline>
@@ -2625,24 +2712,26 @@
     <feature>
         <featureCode>118</featureCode>
         <name>XSLT_VERSION</name>
-        <type>string ("2.0" or "3.0")</type>
+        <type>string ("3.0" or "4.0")</type>
         <uri>http://saxon.sf.net/feature/xsltVersion</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <setter class="net.sf.saxon.s9api.XsltCompiler">setXsltLanguageVersion</setter>
         <getter class="net.sf.saxon.s9api.XsltCompiler">getXsltLanguageVersion</getter>
         <!--<commandline for="T">-xsltversion:(2.0|3.0)</commandline>-->
         <configfile>xslt/@version</configfile>
         <configfiledesc>
-            <p>XSLT language version to be supported by the processor. From Saxon 9.8, an XSLT 3.0
-                processor is always used by default. So setting this property has no effect.</p>
+            <p>XSLT language version to be supported by the processor.</p>
             <!--<p>XSLT language version to be supported by the processor. The value 0.0 indicates that
                 the version is taken from the <code>xsl:stylesheet</code> element.</p>-->
         </configfiledesc>
-        <typedesc>0.0, 2.0, or 3.0</typedesc>
+        <typedesc>3.0, 4.0</typedesc>
         <desc>
             <p>This property determines the version of XSLT to be supported by default.</p>
             <p>From Saxon 9.8, an XSLT 3.0 processor is always used by default. So setting this
-                property has no effect.</p>
+                property to a value less than 3.0 has no effect.</p>
+            <p>The value 4.0 enables experimental syntax extensions, under discussion in the XML
+            community, which are subject to change.</p>
             <!--<p>XSLT 3.0 is supported only in Saxon-EE. If no value is specified for the property, an
                 XSLT 2.0 or XSLT 3.0 processor is used depending on the value of the
                     <code>version</code> attribute of the <code>xsl:stylesheet</code> element.</p>-->
@@ -2654,6 +2743,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/regexBacktrackingLimit</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@regexBacktrackingLimit</configfile>
         <configfiledesc>
             <p>Sets a limit on the amount of backtracking performed during regular expression evaluation.</p>
@@ -2678,6 +2768,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/xpathVersionForXsd</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@xpathVersionForXsd</configfile>
         <configfiledesc>
             <p>Defines what version of the XPath language may be used in XML Schema 1.1 assertions and type alternatives.</p>
@@ -2694,6 +2785,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/xpathVersionForXslt</uri>
         <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@xpathVersionForXslt</configfile>
         <configfiledesc>
             <p>Defines what version of the XPath language may be used in XSLT 3.0 stylesheets.</p>
@@ -2712,6 +2804,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/thresholdForFunctionInlining</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@thresholdForFunctionInlining</configfile>
         <configfiledesc>
             <p>Defines a limit on the size of user-defined functions that will be inlined.</p>
@@ -2730,6 +2823,7 @@
         <type>integer</type>
         <uri>http://saxon.sf.net/feature/thresholdForHotspotByteCode</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@thresholdForHotspotByteCode</configfile>
         <configfiledesc>
             <p>Defines how many times a code fragment must be executed before bytecode generation kicks in.</p>
@@ -2752,6 +2846,7 @@
         <type>String</type>
         <uri>http://saxon.sf.net/feature/allowedProtocols</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@allowedProtocols</configfile>
         <configfiledesc>
             <p>Defines the protocols (for example "file" and "http") that may be used in URIs resolved
@@ -2802,6 +2897,7 @@
         <type>boolean</type>
         <uri>http://saxon.sf.net/feature/retainNodeForDiagnostics</uri>
         <editions>EE</editions>
+        <platforms>J CS</platforms>
         <configfile>global/@retainNodeForDiagnostics</configfile>
         <configfiledesc>
             <p>Indicates that the location information held in the run-time expression tree should retain links to nodes in the
@@ -2824,6 +2920,7 @@
     <type>boolean</type>
     <uri>http://saxon.sf.net/feature/allowUnresolvedSchemaComponents</uri>
     <editions>EE</editions>
+    <platforms>J CS</platforms>
     <configfile>xsd/@allowUnresolvedSchemaComponents</configfile>
     <configfiledesc>
       <p>Indicates that the presence of an unresolved component reference in a schema
@@ -2855,6 +2952,7 @@
         <type>string</type>
         <uri>http://saxon.sf.net/feature/zipUriPattern</uri>
         <editions>EE</editions>
+        <platforms>J</platforms>
         <configfile>global/@zipUriPattern</configfile>
         <configfiledesc>
             <p>A regular expression used to decide whether a collection URI is to
