@@ -337,6 +337,10 @@ task eecs_dll(
   dependsOn: ["eecs_project_files"],
   description: "Compile Saxon-CS DLL for EE"
 ) {
+  inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
+  inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
+  outputs.file "${buildDir}/cs/obj/Debug/net5.0/engine.dll"
+
   doLast {
     if (dotnetex == null) {
       throw new GradleException("Cannot build: failed to find dotnet[.exe] on path.")
@@ -353,6 +357,11 @@ task dotnetTestDrivers(
   dependsOn: ['dotnetRelease']
 ) {
   def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
+
+  inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+  inputs.files fileTree(dir: "${projectDir}/src/test/cstestrunner")
+  outputs.file "${buildDir}/testdrivers/bin/Release/TestDrivers.${sver}.nupkg"
+
   doLast {
     copy {
       from "${projectDir}/tools/saxon-cs"
@@ -382,6 +391,10 @@ task dotnetExamples(
 ) {
   def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
 
+  inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+  inputs.files fileTree(dir: "${projectDir}/src/samples/cs/Examples.cs")
+  outputs.file "${buildDir}/examples/bin/Release/Examples.${sver}.nupkg"
+
   doLast {
     copy {
       from "${projectDir}/tools/saxon-cs"
@@ -392,14 +405,14 @@ task dotnetExamples(
 
   doLast {
     exec {
-      workingDir = "${projectDir}/build/examples"
-      commandLine "echo", dotnetex, 'restore', 'Examples.sln', '--verbosity', 'Normal'
+      workingDir = "${buildDir}/examples"
+      commandLine dotnetex, 'restore', 'Examples.sln', '--verbosity', 'Normal'
     }
   }
   doLast {
     exec {
-      workingDir = "${projectDir}/build/examples"
-      commandLine "echo", dotnetex, 'build', 'Examples.sln', '--verbosity', 'Normal',
+      workingDir = "${buildDir}/examples"
+      commandLine dotnetex, 'build', 'Examples.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
         "-p:Version=${sver}", "-p:PackageVersion=${sver}"
     }
@@ -409,6 +422,10 @@ task dotnetExamples(
 task dotnetRelease(
   dependsOn: ['eecs_dll']
 ) {
+  inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
+  inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")
+  outputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+
   def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
   doLast {
     copy {
@@ -465,6 +482,9 @@ task dotnetPublish(
   if (platform == null) {
     throw new GradleException("Unrecognized OS: ${systemOs}")
   }
+
+  inputs.file "${buildDir}/cs/bin/Release/net5.0/SaxonCS.dll"
+  outputs.files fileTree(dir: "${buildDir}/cs/bin/Release/net5.0/${rid}/publish")
 
   doLast {
     exec {
