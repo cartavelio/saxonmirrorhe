@@ -209,7 +209,8 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
     }
 
     /**
-     * Get the code point at a given position in the string
+     * Get the code point at a given position in the string, where positions count codepoints,
+     * not Java 16-bit chars. (Note the distinction from {@link java.lang.String#codePointAt(int)})
      * @param index the given position (0-based)
      * @return the code point at the given position
      * @throws IndexOutOfBoundsException if the index is out of range

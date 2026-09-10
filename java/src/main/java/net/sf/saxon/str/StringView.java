@@ -16,6 +16,8 @@ import java.util.function.IntPredicate;
 
 /**
  * An implementation of the UnicodeString interface that wraps an ordinary Java string.
+ * If direct addressing by codepoint index is attempted, we make a copy of the data
+ * to make direct addressing efficient.
  */
 
 public class StringView extends UnicodeString {
@@ -28,13 +30,24 @@ public class StringView extends UnicodeString {
         this.baseString = baseString;
     }
 
+    /**
+     * Create a {@code StringView} of a supplied Java string
+     * @param base the supplied Java string
+     * @return a {@code StringView} object that wraps the Java string (which is not copied)
+     */
+
     public static UnicodeString of(String base) {
         return new StringView(base);
     }
 
-    public static UnicodeString wrap(String base) {
-        return new StringView(base).tidy();
-    }
+    /**
+     * Create a {@code StringView} of a supplied Java string; this method
+     * also prepares the string for direct codepoint addressing.
+     *
+     * @param base the supplied Java string
+     * @return a {@code StringView} object that wraps the Java string, and also makes
+     * an internal copy that is codepoint-addressible.
+     */
 
     public static UnicodeString tidy(String base) {
         return new StringView(base).tidy();
@@ -71,7 +84,8 @@ public class StringView extends UnicodeString {
     }
 
     /**
-     * Get the number of bits needed to hold all the characters in this string
+     * Get the number of bits needed to hold the characters in this string, that is,
+     * the number of bits needed for the highest codepoint present.
      *
      * @return 7 for ascii characters, 8 for latin-1, 16 for BMP, 24 for general Unicode.
      */

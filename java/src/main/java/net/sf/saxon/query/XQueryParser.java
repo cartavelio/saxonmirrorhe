@@ -2699,9 +2699,8 @@ public class XQueryParser extends XPathParser {
                         break;
                     case "map":
                         for (int c = 0; c < componentNames.size(); c++) {
-                            Expression componentValue = MapFunctionSet.getInstance(40).makeFunction("get", 2).makeFunctionCall(
-                                    new LocalVariableReference(v),
-                                    new StringLiteral(componentNames.get(c).getLocalPart()));
+                            Expression componentValue = new LookupExpression(new LocalVariableReference(v),
+                                                                             new StringLiteral(componentNames.get(c).getLocalPart()));
                             LocalVariableBinding v2 = new LocalVariableBinding(componentNames.get(c), componentTypes.get(c));
                             LetClause subclause = new LetClause();
                             setLocation(subclause, t.currentTokenStartOffset);

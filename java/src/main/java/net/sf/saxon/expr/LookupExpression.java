@@ -17,10 +17,7 @@ import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.RecordType;
-import net.sf.saxon.ma.map.Shape;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -452,7 +449,14 @@ public class LookupExpression extends BinaryExpression {
                     return context -> {
                         MapItem map = (MapItem) lhs.eval(context);
                         AtomicValue key = (AtomicValue) rhs.eval(context);
-                        return optionalGroundedValueIterator(map.get(key));
+                        GroundedValue value;
+                        if (map instanceof RecordItem rec) {
+                            // TODO: check that key is a string
+                            value = rec.safeGet(key.getStringValue());
+                        } else {
+                            value = map.get(key);
+                        }
+                        return optionalGroundedValueIterator(value);
                     };
 
                 } else if (expr.isSingleEntry) {

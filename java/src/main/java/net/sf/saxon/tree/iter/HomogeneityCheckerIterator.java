@@ -9,6 +9,7 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
@@ -62,11 +63,11 @@ public class HomogeneityCheckerIterator implements SequenceIterator {
         }
         //first item in iterator
         if (state == 0) {
-            if (item instanceof NodeInfo) {
+            if (item instanceof GNode) {
                 List<Item> nodes = new ArrayList<>(50);
                 nodes.add(item);
                 while ((item = base.next()) != null) {
-                    if (!(item instanceof NodeInfo)) {
+                    if (!(item instanceof GNode)) {
                         throw reportMixedItems();
                     } else {
                         nodes.add(item);

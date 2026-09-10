@@ -30,8 +30,7 @@ import java.util.function.Supplier;
 
 /**
  * A RangeExpression is an expression that represents an integer sequence as
- * a pair of end-points (for example "x to y"). This implementation also
- * supports the experimental syntax "x by y to z", with y defaulting to 1.
+ * a pair of end-points (for example "x to y").
  */
 
 public class RangeExpression extends Expression {

@@ -9,6 +9,7 @@ package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.RecordItem;
 import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GroundedValue;
@@ -43,16 +44,16 @@ public final class RecordCoercionPlan extends CoercionPlan {
 
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         if (item instanceof MapItem suppliedMap) {
-            RecordType test = (RecordType) requiredType;
+            RecordType recordType = (RecordType) requiredType;
             // We need to reorder the entries; so start with those that are present in the record type
             StringMapBuilder builder = new StringMapBuilder(suppliedMap.size());
-            for (String s : test.getFieldNames()) {
+            for (String s : recordType.getFieldNames()) {
                  StringValue key = new StringValue(s);
                  GroundedValue val = suppliedMap.get(key);
                  if (val == null) {
                      val = EmptySequence.getInstance();
                  }
-                 SequenceType fieldType = test.getFieldType(s);
+                 SequenceType fieldType = recordType.getFieldType(s);
                  if (fieldType != null) {
                      CoercionPlan fieldPlan = fieldType.getPrimaryType().getCoercionPlan(40);
                      if (fieldType.matches(val)) {
@@ -74,7 +75,8 @@ public final class RecordCoercionPlan extends CoercionPlan {
                      }
                  }
             }
-            return builder.getCompletedMapConfidently();
+            MapItem map = builder.getCompletedMapConfidently();
+            return new RecordItem(map, recordType);
 
         } else {
             throw coercionError(item, requiredType, request, null);

@@ -257,30 +257,67 @@ public class RecordType implements FunctionItemType {
      */
     @Override
     public boolean matches(Item item) {
-        if (item instanceof MapItem map) {
-            for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
-                GroundedValue val = map.get(new StringValue(field.getKey()));
-                if (val == null) {
-                    //if (!Cardinality.allowsZero(field.getValue().getCardinality())) {
-                        return false;
-                   // }
-                } else if (!field.getValue().matches(val)) {
-                    return false;
-                }
+        if (item instanceof RecordItem rec) {
+            if (rec.getRecordType() == this) {
+                return true;
             }
-
-            AtomicIterator keyIter = map.keys();
-            AtomicValue key;
-            while ((key = keyIter.next()) != null) {
-                if (!(key instanceof StringValue) || !fieldTypes.containsKey(key.getStringValue())) {
-                    return false;
-                }
+            if (rec.getRecordType().isSubtypeOf(this)) {
+                return true;
             }
-
-            return true;
-        } else {
-            return false;
         }
+        return false;
+//        if (item instanceof MapItem map) {
+//            for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
+//                GroundedValue val = map.get(new StringValue(field.getKey()));
+//                if (val == null) {
+//                    //if (!Cardinality.allowsZero(field.getValue().getCardinality())) {
+//                        return false;
+//                   // }
+//                } else if (!field.getValue().matches(val)) {
+//                    return false;
+//                }
+//            }
+//
+//            AtomicIterator keyIter = map.keys();
+//            AtomicValue key;
+//            while ((key = keyIter.next()) != null) {
+//                if (!(key instanceof StringValue) || !fieldTypes.containsKey(key.getStringValue())) {
+//                    return false;
+//                }
+//            }
+//
+//            return true;
+//        } else {
+//            return false;
+//        }
+    }
+
+    public boolean isSubtypeOf(RecordType other) {
+        // All of the following are true:
+        //A is a record type.
+        //B is a record type.
+        //Every field name in A is also declared in B.
+        //For every field that is declared in both A and B, where the declared type in A is T and the declared type in B is U, T ⊑ U .
+        //For every field that is declared in B but is not declared in A, the empty sequence matches the declared type in B.
+
+        for (String field : fieldNamesInOrder) {
+            SequenceType fieldType = fieldTypes.get(field);
+            SequenceType otherType = other.fieldTypes.get(field);
+            if (otherType == null) {
+                return false;
+            }
+            Affinity aff = Subsumption.sequenceTypeRelationship(fieldType, otherType);
+            if (aff != Affinity.SAME_TYPE && aff != Affinity.SUBSUMED_BY) {
+                return false;
+            }
+        }
+        for (String field : other.fieldNamesInOrder) {
+            if (fieldTypes.get(field) == null
+                    && !Cardinality.allowsZero(other.fieldTypes.get(field).getCardinality())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

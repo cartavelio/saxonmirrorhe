@@ -9,13 +9,12 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.*;
+import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.CopyOf;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
@@ -23,12 +22,16 @@ import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.JNodeSequenceConverter;
@@ -36,6 +39,7 @@ import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -144,7 +148,7 @@ public class SlashExpression extends BinaryExpression
     }
 
     /**
-     * Determine the data type of the items returned by this exprssion
+     * Determine the data type of the items returned by this expression
      *
      * @return the type of the step
      */
@@ -152,7 +156,19 @@ public class SlashExpression extends BinaryExpression
     /*@NotNull*/
     @Override
     public final ItemType getItemType() {
-        return getStep().getItemType();
+        ItemType startType = getStart().getItemType();
+        ItemType stepType = getStep().getItemType();
+        if (UType.GNODE.subsumes(stepType.getUType())) {
+            return stepType;
+        }
+        if (UType.XNODE.subsumes(startType.getUType())) {
+            return stepType;
+        }
+        if (startType instanceof JNodeType || startType instanceof MapType || startType instanceof ArrayItemType) {
+            return AnyJNodeType.getInstance();
+        }
+        // At this point things get complicated, and the 4.0 spec isn't 100% final yet.
+        return ChoiceItemType.of(AnyJNodeType.getInstance(), stepType);
     }
 
 
@@ -197,21 +213,41 @@ public class SlashExpression extends BinaryExpression
         Supplier<RoleDiagnostic> roleSupplier =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, version >= 40 ? "XPTY0004" : "XPTY0019");
 
+
         if (version >= 40) {
             ItemType lhsItemType = getLhsExpression().getItemType();
             if (lhsItemType instanceof MapType || lhsItemType instanceof ArrayItemType) {
                 setStart(new JNodeSequenceConverter(getStart(), roleSupplier));
-            } else {
-                Affinity aff = Subsumption.computeRelationship(lhsItemType, AnyGNodeType.getInstance());
-                switch (aff) {
-                    case OVERLAPS:
-                    case SUBSUMES:
-                        setStart(new JNodeSequenceConverter(getStart(), roleSupplier));
-                        break;
-                    default:
-                        // no action
-                }
+                lhsItemType = AnyJNodeType.getInstance();
+            } else if (lhsItemType.getUType().overlaps(UType.FUNCTION)) {
+                setStart(new JNodeSequenceConverter(getStart(), roleSupplier));
+                lhsItemType = AnyGNodeType.getInstance();
             }
+            Expression step = getStep();
+            if (!ExpressionTool.dependsOnFocus(getStep())) {
+                step = getStep().typeCheck(visitor, ContextItemStaticInfo.ABSENT);
+            }
+            if (isChildSelectorExpression(step)) {
+                if (lhsItemType instanceof JNodeType) {
+                    return new SlashExpression(
+                            getStart(),
+                            new DynamicNodeTestExpr(AxisInfo.CHILD, getStep())); // TODO: what about predicates?
+                }
+                // Otherwise, we don't know statically how to interpret the final step, so we handle it
+                // at run-time
+            }
+
+//            else {
+//                Affinity aff = Subsumption.computeRelationship(lhsItemType, AnyGNodeType.getInstance());
+//                switch (aff) {
+//                    case OVERLAPS:
+//                    case SUBSUMES:
+//                        setStart(new JNodeSequenceConverter(getStart(), roleSupplier));
+//                        break;
+//                    default:
+//                        // no action
+//                }
+//            }
         }
 
         TypeChecker tc = config.getTypeChecker(false);
@@ -263,6 +299,27 @@ public class SlashExpression extends BinaryExpression
         }
 
         return this;
+    }
+
+    // Determine whether the step is a direct selection expression. The 4.0 rules for this
+    // are in flux, at present we only allow literals and variable references, or a sequence thereof
+
+    private static boolean isChildSelectorExpression(Expression expr) {
+        if (expr instanceof Literal || expr instanceof VariableReference) {
+            return true;
+        }
+        if (ExpressionTool.dependsOnFocus(expr)) {
+            return false;
+        }
+        if (expr instanceof Block block) {
+            for (Operand child : block.operands()) {
+                if (!isChildSelectorExpression(child.getChildExpression())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     // Simplify an expression of the form a//b, where b has no positional filters.
@@ -934,18 +991,7 @@ public class SlashExpression extends BinaryExpression
         // This class delivers the result of the path expression in unsorted order,
         // without removal of duplicates. If sorting and deduplication are needed,
         // this is achieved by wrapping the path expression in a DocumentSorter
-
-//        Expression step = getStep();
-//        if (contextFree && step instanceof AxisExpression) {
-//            // See bug 4730: the step might have been changed to something else
-//            return MappingIterator.map(
-//                    getStart().iterate(context),
-//                    item -> ((AxisExpression) step).iterate((NodeInfo)item));
-//        }
-//
-//        XPathContext context2 = context.newMinorContext();
-//        context2.trackFocus(getStart().iterate(context));
-//        return new ContextMappingIterator(c1 -> getStep().iterate(c1), context2);
+        
     }
 
     /**
@@ -1130,12 +1176,49 @@ public class SlashExpression extends BinaryExpression
         @Override
         public PullEvaluator elaborateForPull() {
             SlashExpression expr = (SlashExpression) getExpression();
-            PullEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForPull();
-            PullEvaluator action = expr.getActionExpression().makeElaborator().elaborateForPull();
+            PullEvaluator select = expr.getStart().makeElaborator().elaborateForPull();
             if (expr.contextFree && expr.getStep() instanceof AxisExpression step) {
-                return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((GNode)item));
+                return context -> MappingIterator.map(select.iterate(context), item -> step.iterate((GNode) item));
+            } else if (isChildSelectorExpression(expr.getStep())) {
+                // We don't know whether the LHS will return XNodes or JNodes, which affects
+                // the interpretation of the RHS; but we do know that the RHS doesn't
+                // depend on the focus
+                SequenceEvaluator action = expr.getStep().makeElaborator().eagerly();
+                return context -> {
+                    GroundedValue rhs = action.evaluate(context).materialize();
+                    NodePredicate[] predicate = new NodePredicate[1]; // set on first use
+
+                    MappingFunction mapper = item -> {
+                        if (item instanceof NodeInfo x) {
+                            return rhs.iterate();
+                        } else if (item instanceof JNode j) {
+                            if (predicate[0] == null) { // first time through
+                                if (!SequenceType.ATOMIC_SEQUENCE.matches(rhs)) {
+                                    throw new UncheckedXPathException("RHS of '/' must be all atomic items", "XPTY0018");
+                                }
+                                AtomicSequence rhsData = Atomizer.atomize(rhs);
+                                predicate[0] = node -> {
+                                    // TODO: use direct addressing for a map or array if only one key given
+                                    AtomicMatchKey key = ((JNode) node).getSelector().asMapKey(40);
+                                    for (AtomicValue it : rhsData) {
+                                        if (it.asMapKey(40).equals(key)) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                };
+                            }
+                            return j.iterateChildAxis(predicate[0]);
+                        } else {
+                            throw new UncheckedXPathException("LHS of '/' is not a GNode", "XPTY0004");
+                        }
+                    };
+                    return new MappingIterator(select.iterate(context), mapper);
+                };
+
             } else {
                 @SuppressWarnings("Convert2MethodRef")
+                PullEvaluator action = expr.getStep().makeElaborator().elaborateForPull();
                 ContextMappingFunction mapper = cxt -> action.iterate(cxt);
                 return context -> {
                     XPathContextMinor c2 = context.newMinorContext();

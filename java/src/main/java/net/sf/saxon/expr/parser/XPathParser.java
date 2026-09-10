@@ -1788,9 +1788,8 @@ public class XPathParser {
                         break;
                     case "map":
                         for (int c = 0; c < componentNames.size(); c++) {
-                            Expression componentValue = MapFunctionSet.getInstance(40).makeFunction("get", 2).makeFunctionCall(
-                                    new LocalVariableReference(lastClause),
-                                    new StringLiteral(componentNames.get(c).getLocalPart()));
+                            Expression componentValue = new LookupExpression(new LocalVariableReference(lastClause),
+                                                                             new StringLiteral(componentNames.get(c).getLocalPart()));
                             LetExpression componentBinding = new LetExpression();
                             componentBinding.setVariableQName(componentNames.get(c));
                             componentBinding.setRequiredType(componentTypes.get(c));
@@ -2891,7 +2890,7 @@ public class XPathParser {
 
 
     protected Expression parseMethodCall(Expression step) throws XPathException {
-        checkLanguageVersion40("method calls ( ?> operator )");
+        checkLanguageVersion40("method calls ( =?> operator )");
         nextToken();
         String methodName = expectName();
         if (!NameChecker.isValidNCName(methodName)) {
@@ -2917,7 +2916,7 @@ public class XPathParser {
         }
         nextToken();
 
-        // Given STEP ?> NAME ( ARG1, ARG2, ...), construct the expression
+        // Given STEP =?> NAME ( ARG1, ARG2, ...), construct the expression
         // for $map in STEP as map(*) return ($map ? NAME) treat as function(*) ( $map, ARG1, ARG2, ...)
 
         ForExpression forex = new ForExpression();
@@ -3122,19 +3121,19 @@ public class XPathParser {
                         setLocation(ae);
                         return ae;
                     }
-                    case "get": {
-                        notAllowedInPattern();
-                        if (languageVersion < 40) {
-                            return parseFunctionCall(name, null);
-                        }
-                        nextToken();
-                        readToken(Token.LPAREN);
-                        Expression selector = parseExprSingle();
-                        readToken(Token.RPAREN);
-                        DynamicNodeTestExpr getExpr = new DynamicNodeTestExpr(AxisInfo.CHILD, selector);
-                        setLocation(getExpr);
-                        return getExpr;
-                    }
+//                    case "get": {
+//                        notAllowedInPattern();
+//                        if (languageVersion < 40) {
+//                            return parseFunctionCall(name, null);
+//                        }
+//                        nextToken();
+//                        readToken(Token.LPAREN);
+//                        Expression selector = parseExprSingle();
+//                        readToken(Token.RPAREN);
+//                        DynamicNodeTestExpr getExpr = new DynamicNodeTestExpr(AxisInfo.CHILD, selector);
+//                        setLocation(getExpr);
+//                        return getExpr;
+//                    }
                     case "function":
                         notAllowedInPattern();
                         return parseInlineFunction(AnnotationList.EMPTY);
@@ -3218,6 +3217,7 @@ public class XPathParser {
                     Expression selector;
                     if (t.currentToken == Token.RCURLY) {
                         selector = Literal.makeEmptySequence();
+                        nextToken();
                     } else {
                         selector = parseExpression();
                         readToken(Token.RCURLY);
@@ -6139,7 +6139,7 @@ public class XPathParser {
     };
 
     private final static String[] reservedFunctionNames40 = new String[]{
-            "array", "attribute", "comment", "document-node", "element", "enum", "fn", "function", "get", "if", "item",
+            "array", "attribute", "comment", "document-node", "element", "enum", "fn", "function", "if", "item",
             "jnode", "map", "namespace-node", "node", "processing-instruction", "schema-attribute",
             "schema-element", "switch", "text", "typeswitch"
     };
