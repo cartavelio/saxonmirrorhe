@@ -92,7 +92,7 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public AtomicIterator keys() {
-        return new SingleAtomicIterator(key);
+        return SingleAtomicIterator.makeIterator(key);
     }
 
     /**

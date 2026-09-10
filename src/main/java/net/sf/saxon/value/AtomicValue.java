@@ -496,7 +496,7 @@ public abstract class AtomicValue
      */
     @Override
     public SingleAtomicIterator iterate() {
-        return new SingleAtomicIterator(this);
+        return (SingleAtomicIterator)SingleAtomicIterator.makeIterator(this);
     }
 
 
