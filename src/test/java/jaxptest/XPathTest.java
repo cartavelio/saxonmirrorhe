@@ -1,7 +1,15 @@
 package jaxptest;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.sxpath.IndependentContext;
+import net.sf.saxon.sxpath.XPathEvaluator;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -171,6 +179,42 @@ public class XPathTest {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @Test
+    public void testBug5361() {
+        try {
+            Configuration configuration = Configuration.newConfiguration();
+
+            IndependentContext staticCtx = new IndependentContext(configuration) {
+                {
+                    declareVariable(null, "falseVar");
+                }
+
+                @Override
+                public net.sf.saxon.expr.Expression bindVariable(StructuredQName qName) throws XPathException {
+                    LocalVariableReference local = (LocalVariableReference) super.bindVariable(qName);
+                    if (qName.getLocalPart().equals("falseVar")) {
+                        local.setStaticType(
+                                SequenceType.SINGLE_BOOLEAN,
+                                BooleanValue.FALSE,
+                                0);
+                    }
+                    return local;
+                }
+            };
+
+            final XPathEvaluator xpathEvaluator = new XPathEvaluator(configuration);
+            xpathEvaluator.setStaticContext(staticCtx);
+
+            net.sf.saxon.sxpath.XPathExpression xpathExpression = xpathEvaluator.createExpression(
+                    "//A[$falseVar=true()][child::*[2]]"
+            );
+            assertTrue(Literal.isEmptySequence(xpathExpression.getInternalExpression()));
+        } catch (net.sf.saxon.trans.XPathException e) {
+            fail();
+        }
+
     }
 
 
