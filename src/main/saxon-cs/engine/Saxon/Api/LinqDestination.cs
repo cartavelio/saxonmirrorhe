@@ -18,14 +18,24 @@ namespace Saxon.Api {
         private readonly XDocBuilder builder;
         private readonly LinqDestinationImpl destination;
 
-        /// <summary>Construct a <c>DomDestination</c>.</summary>
-        /// <remarks>With this constructor, the system will create a new DOM Document
+        /// <summary>Construct a <c>LinqDestination</c>.</summary>
+        /// <remarks>With this constructor, the system will create a new LINQ XDocument
         /// to act as the destination of the query or transformation results. The document
         /// node of the new document may be retrieved via the <c>XmlDocument</c> property.</remarks>
 
         public LinqDestination()
         {
             builder = new XDocBuilder();
+            destination = new LinqDestinationImpl(builder);
+        }
+        
+        /// <summary>Construct a <c>LinqDestination</c> using a supplied document.</summary>
+        /// <remarks>With this constructor, the system will add te results of the query
+        /// or transformation to the supplied (skeletal) XDocument.</remarks>
+
+        public LinqDestination(XDocument doc)
+        {
+            builder = new XDocBuilder(doc);
             destination = new LinqDestinationImpl(builder);
         }
         
