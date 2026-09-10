@@ -50,6 +50,9 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     private final StylesheetPackage stylesheetPackage;
     private final boolean declaredModes;
 
+    private record ModuleKeyAndPrecedence(DocumentKey key, int precedence) {};
+    private final HashSet<ModuleKeyAndPrecedence> modulePrecedenceIndex = new HashSet<>();
+
 
     // table of functions imported from XQuery library modules
     //private XQueryFunctionLibrary queryFunctions;
@@ -170,6 +173,14 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     @Override
     public PrincipalStylesheetModule getPrincipalStylesheetModule() {
         return this;
+    }
+
+    public void registerModule(DocumentKey key, int precedence) {
+        modulePrecedenceIndex.add(new ModuleKeyAndPrecedence(key, precedence));
+    }
+
+    public boolean containsModuleWithPrecedence(DocumentKey key, int precedence) {
+        return modulePrecedenceIndex.contains(new ModuleKeyAndPrecedence(key, precedence));
     }
 
     /**

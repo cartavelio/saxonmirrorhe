@@ -95,9 +95,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
             // error already reported
             return null;
         }
-        //checkEmpty();
-        //checkTopLevel((this instanceof XSLInclude ? "XTSE0170" : "XTSE0190"));
-
+        
         try {
             PrincipalStylesheetModule psm = importer.getPrincipalStylesheetModule();
             //PreparedStylesheet pss = psm.getPreparedStylesheet();
@@ -117,8 +115,11 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 incModule = new StylesheetModule(includedSheet, precedence);
                 incModule.setImporter(importer);
 
-                // in 4.0, ignore the xsl:include if the import precedence is the same
-                if (!isImport() && getCompilation().getCompilerInfo().getXsltVersion() == 40 && incModule.getPrecedence() == precedence) {
+                // in 4.0, ignore the xsl:include if the import precedence is the same as
+                // the one that was loaded previously
+                if (!isImport()
+                        && getCompilation().getCompilerInfo().getXsltVersion() == 40
+                        && psm.containsModuleWithPrecedence(key, precedence)) {
                     return null;
                 }
 
@@ -165,6 +166,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 }
             }
 
+            psm.registerModule(key, precedence);
             incModule.spliceIncludes();          // resolve any nested imports and includes;
 
             // Check the consistency of input-type-annotations
