@@ -69,10 +69,10 @@
       <reason>Declare context value not yet implemented</reason>
    </exception>
    
-   <exception test-set="prod-ContextValueDecl"  run="false" report="n/a">
+   <!--<exception test-set="prod-ContextValueDecl"  run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-20"/>
       <reason>Context value declaration not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="prod-DefaultNamespaceDecl" test-case=" 
       default-namespace-40-04" run="false" report="n/a">
@@ -143,7 +143,7 @@
    </exception>
    
  
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-chain-001
       fo-test-fn-chain-002
       fo-test-fn-chain-003
@@ -166,7 +166,7 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
   
    
