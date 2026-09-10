@@ -842,6 +842,15 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- ZenoChain -->
+   <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.ma.zeno.ZenoChain']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'iterator#0':        '%scope%.GetEnumerator()',
+         '*':                 '%scope%.%name%(%args%)'
+         })"/>     
+   </xsl:template>
+   
    
    <!--Handle BitSet -->
    <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.BitSet']" 

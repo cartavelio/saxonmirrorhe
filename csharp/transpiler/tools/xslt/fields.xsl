@@ -261,6 +261,19 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- Fields on net.sf.saxon.ma.trie.TrieKVP -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][starts-with(@RESOLVED_TYPE,'net.sf.saxon.ma.trie.TrieKVP')]" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='key'">
+            <xsl:value-of select="scope/name/@identifier"/>.Key</xsl:when>
+         <xsl:when test="name/@identifier='value'">
+            <xsl:value-of select="scope/name/@identifier"/>.Value</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
    <!-- Fields on com.ibm.icu.text.BreakIterator -->
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'com.ibm.icu.text.BreakIterator']" priority="20">
       <xsl:choose>
