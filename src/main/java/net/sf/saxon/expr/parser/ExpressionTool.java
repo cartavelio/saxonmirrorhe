@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.parser;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.SequenceCollector;
@@ -955,20 +954,7 @@ public class ExpressionTool {
     public static Expression optimizeComponentBody(
             Expression body, final Compilation compilation, ExpressionVisitor visitor, ContextItemStaticInfo cisi, boolean extractGlobals)
             throws XPathException {
-        final Configuration config = visitor.getConfiguration();
         Optimizer opt = visitor.obtainOptimizer();
-        StaticContext env = visitor.getStaticContext();
-//        boolean compileWithTracing = config.isCompileWithTracing();
-//        if (!compileWithTracing) {
-//            // Bug 3472 - desperate attempts to discover whether tracing was enabled for this particular compilation
-//            if (compilation != null) {
-//                compileWithTracing = compilation.getCompilerInfo().isCompileWithTracing();
-//            } else if (env instanceof QueryModule) {
-//                compileWithTracing = ((QueryModule) env).getUserQueryContext().isCompileWithTracing();
-//            } else if (env instanceof ExpressionContext) {
-//                compileWithTracing = ((ExpressionContext) env).getStyleElement().getCompilation().getCompilerInfo().isCompileWithTracing();
-//            }
-//        }
         if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
             ExpressionTool.resetPropertiesWithinSubtree(body);
             if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
