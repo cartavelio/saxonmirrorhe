@@ -120,7 +120,7 @@ public abstract class CoercionPlan {
                 "Failed to convert the " + role.getMessage() + ": " +
                         "Cannot convert " + representation + " to "
                         + requiredType)
-                .withErrorCode("XPTY0004")
+                .withErrorCode(role.getErrorCode())
                 .withLocation(request.locator);
     }
     
