@@ -518,7 +518,7 @@ public class FLWORExpression extends Expression {
         if (clauses.size() == 1) {
             Clause c = clauses.get(0);
             if (c instanceof LetClause ||
-                    (c instanceof ForClause && !(c instanceof ForMemberClause) && ((ForClause)c).getPositionVariable() == null)) {
+                    (c instanceof ForClause && ((ForClause)c).getPositionVariable() == null)) {
                 return rewriteForOrLet(visitor, contextItemType);
             }
         }
@@ -610,7 +610,7 @@ public class FLWORExpression extends Expression {
 
         boolean allForOrLetExpr = true;
         for (Clause c : clauses) {
-            if (c instanceof ForClause  && !(c instanceof ForMemberClause)) {
+            if (c instanceof ForClause) {
                 if (((ForClause)c).getPositionVariable() != null) {
                     allForOrLetExpr = false;
                     break;

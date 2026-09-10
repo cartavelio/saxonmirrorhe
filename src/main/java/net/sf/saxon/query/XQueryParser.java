@@ -18,6 +18,7 @@ import net.sf.saxon.expr.sort.SortKeyDefinition;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.QNameTest;
@@ -2424,11 +2425,14 @@ public class XQueryParser extends XPathParser {
         if (forMember && !allowXPath40Syntax) {
             grumble("The 'for member' syntax requires XQuery 4.0 to be enabled");
         }
+        // "for member $x as T in $array"
+        // compiles to
+        // "for $temp in array:members($array) let $x as T := $temp?value"
         do {
             nextToken();
 
             int offset = t.currentTokenStartOffset;
-            ForClause clause = forMember ? new ForMemberClause() : new ForClause();
+            ForClause clause = new ForClause();
             clause.setRepeated(!first || containsLoopingClause(clauseList));
             if (first) {
                 first = false;
@@ -2439,7 +2443,12 @@ public class XQueryParser extends XPathParser {
             expect(Token.DOLLAR);
             nextToken();
             expect(Token.NAME);
-            StructuredQName varQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
+            StructuredQName explicitQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
+            StructuredQName iterationQName = explicitQName;
+            if (forMember) {
+                iterationQName =
+                        new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "fm" + clause.hashCode());
+            }
             SequenceType type = forMember ? SequenceType.ANY_SEQUENCE : SequenceType.SINGLE_ITEM;
             nextToken();
 
@@ -2472,7 +2481,8 @@ public class XQueryParser extends XPathParser {
                 type = SequenceType.makeSequenceType(type.getPrimaryType(), StaticProperty.EXACTLY_ONE);
             }
 
-            LocalVariableBinding binding = new LocalVariableBinding(varQName, type);
+            LocalVariableBinding binding =
+                    new LocalVariableBinding(iterationQName, forMember ? SequenceType.ANY_SEQUENCE : type);
             clause.setRangeVariable(binding);
 
             if (isKeyword("at")) {
@@ -2481,7 +2491,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 expect(Token.NAME);
                 StructuredQName posQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
-                if (!scanOnly && posQName.equals(varQName)) {
+                if (!scanOnly && posQName.equals(explicitQName)) {
                     grumble("The two variables declared in a single 'for' clause must have different names", "XQST0089");
                 }
                 LocalVariableBinding pos = new LocalVariableBinding(posQName, SequenceType.SINGLE_INTEGER);
@@ -2490,13 +2500,28 @@ public class XQueryParser extends XPathParser {
             }
             expect(Token.IN);
             nextToken();
-            clause.initSequence(flwor, parseExprSingle());
-            declareRangeVariable(clause.getRangeVariable());
+            Expression collection = parseExprSingle();
+            if (forMember) {
+                collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
+            }
+            clause.initSequence(flwor, collection);
+            declareRangeVariable(binding /*clause.getRangeVariable()*/);
             if (clause.getPositionVariable() != null) {
                 declareRangeVariable(clause.getPositionVariable());
             }
             if (allowingEmpty) {
                 checkForClauseAllowingEmpty(flwor, clause);
+            }
+            if (forMember) {
+                // Generate "let $x as T := $temp?value"
+                LetClause letClause = new LetClause();
+                final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, type);
+                letClause.setRangeVariable(letBinding);
+                LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
+                LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("value"));
+                letClause.initSequence(flwor, lookup);
+                declareRangeVariable(letBinding);
+                clauseList.add(letClause);
             }
         } while (t.currentToken == Token.COMMA);
     }
