@@ -88,10 +88,10 @@
     
     <xsl:variable name="property-count" select="count($api-doc//member[starts-with(@name, concat('P:Saxon.Api.', 
       $nestedname, '.')) or starts-with(@name, concat('P:Saxon.Api.', $nestedname, '`'))])"/>
-    <xsl:if test="count(property[@public ne 'false']) - $property-count gt 0">
+    <xsl:if test="count(property[@public ne 'false']) + count(indexer[@public ne 'false']) - $property-count gt 0">
       <xsl:message>Missing <xsl:value-of 
-        select="count(property[@public ne 'false']) - $property-count"/> property comments in <xsl:value-of 
-          select="@name"/></xsl:message>
+        select="count(property[@public ne 'false']) + count(indexer[@public ne 'false']) 
+        - $property-count"/> property comments in <xsl:value-of select="@name"/></xsl:message>
     </xsl:if>
     
     <xsl:variable name="method-count" select="count($api-doc//member[(starts-with(@name, concat('M:Saxon.Api.',
@@ -146,6 +146,9 @@
         <xsl:apply-templates select="*[not(@public='false')] except (type)"/><!-- Go process methods etc. -->
         <xsl:if test="self::enum">
           <xsl:variable name="fields" select="$api-doc//member[starts-with(@name, concat('F:', $fullname, '.'))]"/>
+          <xsl:if test="empty($fields)">
+            <xsl:message>---- <xsl:value-of select="@name"/> enum has no fields, check for missing comments</xsl:message>
+          </xsl:if>
           <xsl:for-each select="$fields">
             <field name="{tokenize(@name, '\.')[last()]}"
               public="true">
@@ -509,6 +512,32 @@
     </xsl:copy>
   </xsl:template>
   
+  <xsl:template match="indexer">
+    <xsl:copy>
+      <xsl:copy-of select="@* except @type"/>
+      <xsl:if test="@type">
+        <xsl:attribute name="type" select="f:getKnownFullType(@type)"/>
+      </xsl:if>
+      <xsl:apply-templates select="type"/><!-- for indexers which are generic types -->
+      <xsl:variable name="apimember" select="$api-doc//member[starts-with(@name,'P:Saxon.Api.') and 
+        (ends-with(functx:substring-before-if-contains(@name, '('), concat(current()/../@name, '.', current()/@name)) or 
+        (contains(functx:substring-before-if-contains(@name, '('), concat(current()/../@name, '`')) and 
+        ends-with(functx:substring-before-if-contains(@name, '('), concat('.', current()/@name))))]"/>
+      <xsl:if test="empty($apimember)">
+        <xsl:message>*** apimember not found for <xsl:value-of select="../@name"/>.<xsl:value-of select="@name"/></xsl:message>
+      </xsl:if>
+      <xsl:variable name="is-generic-method" select="exists(paramtypes)"/>
+      <xsl:variable name="apidoc-params" select="f:extract-params($apimember/@name)"/>
+      <xsl:sequence select="if ($is-generic-method or count($apidoc-params) = 0) 
+        then f:params-from-names-doc(param) else $apidoc-params"/>
+      <comments>
+        <xsl:variable name="obsolete" select="reverse(preceding-sibling::*)[1]/self::obsolete"/>
+        <xsl:apply-templates select="$obsolete" mode="comment"/>
+        <xsl:apply-templates select="$apimember/*" mode="comment"/>
+      </comments>
+    </xsl:copy>
+  </xsl:template>
+  
   <xsl:template match="using"/> 
   
   <xsl:template match="get|set|init"/> 
@@ -621,6 +650,7 @@
     'long':'System.Int64',
     'object':'System.Object',
     'string':'System.String',
+    'Action':'System.Action',
     'ArgumentException':'System.ArgumentException',
     'Boolean':'System.Boolean',
     'Char':'System.Char',

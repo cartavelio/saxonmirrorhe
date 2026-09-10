@@ -129,7 +129,7 @@
             type="{@type}" fulltype="{f:fullName(@fulltype)}">
             <xsl:apply-templates select="type"/>
             <xsl:apply-templates select="comments"/>
-            <xsl:if test="not(comments/returns)">
+            <xsl:if test="not(comments/returns) and not(@type = 'void')">
                 <xsl:message>-- Missing returns comment for delegate <xsl:value-of select="@name"/></xsl:message>
             </xsl:if>
             <xsl:call-template name="gen-params"/>           
@@ -194,6 +194,19 @@
             <xsl:apply-templates select="comments"/>
             <xsl:call-template name="gen-params"/>           
         </method>
+    </xsl:template>
+    
+    <xsl:template match="indexer">
+        <indexer id="{@name}" 
+            visibility="{if (@public='true') then 'public' else 'protected'}"
+            type="{f:shortName(@type)}" fulltype="{f:fullName(@type)}">
+            <xsl:copy-of select="@static[.='true']"/>
+            <xsl:copy-of select="@abstract[.='true']"/>
+            <xsl:apply-templates select="type"/>
+            <xsl:apply-templates select="paramtypes"/>
+            <xsl:apply-templates select="comments"/>
+            <xsl:call-template name="gen-params"/>           
+        </indexer>
     </xsl:template>
     
     <xsl:template name="gen-params">

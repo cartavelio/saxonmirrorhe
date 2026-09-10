@@ -899,12 +899,13 @@
                      'Field Summary',
                      'Constructor Summary',
                      'Property Summary',
+                     'Indexer Summary',
                      'Method Summary')"
             as="xs:string+"/>
 
         <xsl:variable name="this-class" select="."/>
         <xsl:variable name="classid" select="@fulltype"/>
-        <xsl:for-each select="1 to 6">
+        <xsl:for-each select="1 to 7">
             <xsl:variable name="i" select="." as="xs:integer"/>
             <xsl:variable name="members"
                 select="if ($i eq 1) then $this-class/class
@@ -912,6 +913,7 @@
                         else if ($i eq 3) then $this-class/fields/field
                         else if ($i eq 4) then $this-class/methods/constructor
                         else if ($i eq 5) then $this-class/property
+                        else if ($i eq 6) then $this-class/indexer
                         else $this-class/methods/method"
                 as="node()*"/>
             <xsl:if test="exists($members)">
@@ -980,6 +982,26 @@
                                                     comment/sentence)[1]" mode="jdc"/>
                                             </div>
                                         </xsl:when>
+                                        <xsl:when test="$i eq 6">
+                                            <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}" data-href="{$classid}@{@id}">
+                                                <xsl:value-of select="@id"/>
+                                            </span>
+                                            <xsl:text> [</xsl:text>
+                                            <xsl:for-each select="params/param">
+                                                <xsl:sequence select="f:showGenericType(.)"/>
+                                                <xsl:text> </xsl:text>
+                                                <xsl:value-of select="@name"/>
+                                                <xsl:if test="position() ne last()">
+                                                    <xsl:text>, </xsl:text>
+                                                    <br/>
+                                                </xsl:if>
+                                            </xsl:for-each>
+                                            <xsl:text>]</xsl:text>
+                                            <div class="fnormal">
+                                                <xsl:apply-templates select="(comment/attribute[@name='@deprecated'],
+                                                    comment/sentence)[1]" mode="jdc"/>
+                                            </div>
+                                        </xsl:when>
                                         <xsl:otherwise>
                                             <xsl:sequence select="f:sig($classid, ., false())"/>
                                         </xsl:otherwise>
@@ -1030,6 +1052,13 @@
                 <xsl:apply-templates select="$this-class/property" mode="detail"/>
             </div>
         </xsl:if>
+            
+            <xsl:if test="exists($this-class/indexer)"><!-- .NET API only -->
+                <div class="section">
+                    <h2>Indexer Detail</h2>
+                    <xsl:apply-templates select="$this-class/indexer" mode="detail"/>
+                </div>
+            </xsl:if>
 
         <xsl:if test="exists($this-class/methods/method)">
             <div class="section">
@@ -1050,8 +1079,9 @@
         <xsl:sequence select="f:scrollpage($subpage)"/>
     </xsl:template>
     
-    <xsl:template match="enumConstant|field|property" mode="detail">
+    <xsl:template match="enumConstant|field|property|indexer" mode="detail">
         <xsl:variable name="isProp" select="self::property"/><!--[@get or @set or @static]-->
+        <xsl:variable name="isIndexer" select="self::indexer"/>
         <div class="method">
             <h3>
                 <xsl:value-of select="@id"/>
@@ -1060,11 +1090,24 @@
                 <xsl:value-of select="f:class-parts(.),' '"/>
                 <xsl:sequence select="if ($isProp) then f:showPropertyType(.) else f:showGenericType(.)"/>
                 <xsl:text> </xsl:text>
-                <xsl:value-of select="@id"/>
+                <xsl:value-of select="if ($isIndexer) then 'this' else @id"/>
                 <xsl:if test="$isProp">
                     <xsl:value-of select="' {', if (@get eq 'true') then 'get;' else (), 
                         if (@set eq 'true') then 'set;' else (), 
                         if (@init eq 'true') then 'init;' else (), '}'"/>
+                </xsl:if>
+                <xsl:if test="$isIndexer">
+                    <xsl:text>[</xsl:text>
+                    <xsl:for-each select="params/param">
+                        <xsl:sequence select="f:showGenericType(.)"/>
+                        <xsl:text> </xsl:text>
+                        <xsl:value-of select="@name"/>
+                        <xsl:if test="position() ne last()">
+                            <xsl:text>, </xsl:text>
+                            <br/>
+                        </xsl:if>
+                    </xsl:for-each>
+                    <xsl:text>]</xsl:text>
                 </xsl:if>
             </p>
             <xsl:if test="@const or @constexpr">
