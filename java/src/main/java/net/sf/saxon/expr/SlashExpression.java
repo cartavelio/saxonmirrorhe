@@ -31,7 +31,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.coercion.GNodeSequenceConverter;
+import net.sf.saxon.type.coercion.JNodeSequenceConverter;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
@@ -200,13 +200,13 @@ public class SlashExpression extends BinaryExpression
         if (version >= 40) {
             ItemType lhsItemType = getLhsExpression().getItemType();
             if (lhsItemType instanceof MapType || lhsItemType instanceof ArrayItemType) {
-                setStart(new GNodeSequenceConverter(getStart(), roleSupplier));
+                setStart(new JNodeSequenceConverter(getStart(), roleSupplier));
             } else {
                 Affinity aff = Subsumption.computeRelationship(lhsItemType, AnyGNodeType.getInstance());
                 switch (aff) {
                     case OVERLAPS:
                     case SUBSUMES:
-                        setStart(new GNodeSequenceConverter(getStart(), roleSupplier));
+                        setStart(new JNodeSequenceConverter(getStart(), roleSupplier));
                         break;
                     default:
                         // no action

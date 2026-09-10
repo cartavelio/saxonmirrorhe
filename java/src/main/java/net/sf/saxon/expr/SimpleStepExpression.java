@@ -64,7 +64,7 @@ public final class SimpleStepExpression extends SlashExpression {
         getLhs().typeCheck(visitor, contextInfo);
 
         ItemType selectType = getStart().getItemType();
-        if (selectType == ErrorType.getInstance()) {
+        if (selectType == ErrorType.getInstance() && getStart().getCardinality() == StaticProperty.ALLOWS_ZERO) {
             return Literal.makeEmptySequence();
         }
 

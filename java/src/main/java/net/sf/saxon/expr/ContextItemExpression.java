@@ -99,6 +99,12 @@ public class ContextItemExpression extends Expression {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, /*@Nullable*/ ContextItemStaticInfo contextInfo) throws XPathException {
         if (contextInfo.getOptionality() == Optionality.PROHIBITED) {
+            if (visitor.getStaticContext().getXPathVersion() >= 40) {
+                // In 4.0 XPDY0002 becomes a type error, so it can be reported statically
+                throw new XPathException("The expression requires a context item, but there is none")
+                        .withErrorCode("XPDY0002")
+                        .asTypeError();
+            }
             visitor.issueWarning("Evaluation will always fail: there is no context item", SaxonErrorCode.SXWN9027, getLocation());
             ErrorExpression ee = new ErrorExpression(
                     "There is no context item",

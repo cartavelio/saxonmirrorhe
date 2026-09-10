@@ -71,7 +71,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.coercion.GNodeSequenceConverter;
+import net.sf.saxon.type.coercion.JNodeSequenceConverter;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.NamedXNodeType;
@@ -2105,7 +2105,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression body = loader.getFirstChildExpression(element);
             String savedRole = element.getAttributeValue(NamespaceUri.NULL, "diag");
             Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(savedRole);
-            return new GNodeSequenceConverter(body, role);
+            return new JNodeSequenceConverter(body, role);
         });
 
 

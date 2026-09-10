@@ -40,13 +40,13 @@ import java.util.function.Supplier;
 
 
 /**
- * A GNodeSequenceConverter implements the implicit conversion of maps and arrays
+ * A JNodeSequenceConverter implements the implicit conversion of maps and arrays
  * to JNodes required in the 4.0 specification. Note that this is not part of the
  * general coercion rules; it happens only for the context setting expression
  * of an axis expression where the node-test is not confined to selecting XNodes.
  */
 
-public final class GNodeSequenceConverter extends UnaryExpression {
+public final class JNodeSequenceConverter extends UnaryExpression {
 
     private final Supplier<RoleDiagnostic> roleSupplier;
 
@@ -57,7 +57,7 @@ public final class GNodeSequenceConverter extends UnaryExpression {
      * @param roleSupplier information used in constructing an error message
      */
 
-    public GNodeSequenceConverter(Expression sequence, Supplier<RoleDiagnostic> roleSupplier) {
+    public JNodeSequenceConverter(Expression sequence, Supplier<RoleDiagnostic> roleSupplier) {
         super(sequence);
         this.roleSupplier = roleSupplier;
     }
@@ -92,7 +92,7 @@ public final class GNodeSequenceConverter extends UnaryExpression {
             // This is particularly needed for streamability analysis of xsl:map
             List<Expression> checkedOperands = new ArrayList<>();
             for (Operand o : block.operands()) {
-                GNodeSequenceConverter checkedOp = new GNodeSequenceConverter(o.getChildExpression(), roleSupplier);
+                JNodeSequenceConverter checkedOp = new JNodeSequenceConverter(o.getChildExpression(), roleSupplier);
                 checkedOperands.add(checkedOp);
             }
             Block newBlock = new Block(checkedOperands.toArray(new Expression[0]));
@@ -277,7 +277,7 @@ public final class GNodeSequenceConverter extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        GNodeSequenceConverter exp = new GNodeSequenceConverter(getBaseExpression().copy(rebindings), roleSupplier);
+        JNodeSequenceConverter exp = new JNodeSequenceConverter(getBaseExpression().copy(rebindings), roleSupplier);
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -387,7 +387,7 @@ public final class GNodeSequenceConverter extends UnaryExpression {
 
         @Override
         public PullEvaluator elaborateForPull() {
-            GNodeSequenceConverter exp = (GNodeSequenceConverter) getExpression();
+            JNodeSequenceConverter exp = (JNodeSequenceConverter) getExpression();
             Expression arg = exp.getBaseExpression();
             PullEvaluator argEval = arg.makeElaborator().elaborateForPull();
 
@@ -396,7 +396,7 @@ public final class GNodeSequenceConverter extends UnaryExpression {
 
         @Override
         public ItemEvaluator elaborateForItem() {
-            GNodeSequenceConverter expr = (GNodeSequenceConverter) getExpression();
+            JNodeSequenceConverter expr = (JNodeSequenceConverter) getExpression();
             Expression arg = expr.getBaseExpression();
             ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 

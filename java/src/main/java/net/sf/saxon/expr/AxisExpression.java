@@ -35,6 +35,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.JNodeSequenceConverter;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.GNodeType;
@@ -162,9 +163,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             if (!th.isSubType(contextItemType, AnyGNodeType.getInstance())) {
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(
                         RoleDiagnostic.AXIS_STEP, "", axis);
-                //Expression coercer = SequenceCoercer.makeSequenceCoercer(new ContextItemExpression(), AnyGNodeType.getInstance().zeroOrMore(), role, true);
-                //Expression coercer = new ItemChecker(new ContextItemExpression(), AnyGNodeType.getInstance(), role);
-                Expression coercer = new net.sf.saxon.type.coercion.GNodeSequenceConverter(new ContextItemExpression(), role);
+                Expression coercer = new JNodeSequenceConverter(new ContextItemExpression(), role);
                 return new SimpleStepExpression(coercer, this).typeCheck(visitor, contextInfo);
             }
         }
