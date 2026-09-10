@@ -1763,11 +1763,13 @@
       </signatures>
       <status>
         <p>Available since Saxon 9.3, provided XPath 3.0 is enabled.</p>
+        <p>Localization capabilities extended (a little) in Saxon 12.0</p>
       </status>
       <saxon-edition>ALL_SINCE_9.6</saxon-edition>
       <description>
         <p>Formats an integer according to a given picture string, using the conventions of a given
           natural language if specified.</p>
+        <p>For localization details, see <a href="/localization/localizing-numbers-and-dates" class="bodylink code">Localizing numbers and dates</a>.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
