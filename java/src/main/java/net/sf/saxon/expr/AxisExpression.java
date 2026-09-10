@@ -760,7 +760,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         if (axis == AxisInfo.SELF) {
             pat = new NodeTestPattern(test);
         } else if (axis == AxisInfo.ATTRIBUTE) {
-            if (kind == Type.XNODE) {
+            if (kind == Type.XNODE || kind == Type.GNODE) {
                 // attribute::node() matches any attribute, and only an attribute
                 pat = new NodeTestPattern(NodeKindType.ATTRIBUTE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
