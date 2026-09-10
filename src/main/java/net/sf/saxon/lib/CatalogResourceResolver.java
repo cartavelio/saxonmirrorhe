@@ -1,8 +1,5 @@
 package net.sf.saxon.lib;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.trans.XPathException;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -14,7 +11,6 @@ import org.xmlresolver.XMLResolverConfiguration;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
-import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.util.Collections;
 
