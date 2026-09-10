@@ -283,8 +283,6 @@ with PySaxonProcessor(license=False) as proc:
   if isinstance(item,saxonc.PyXdmNode):
     print(item.string_value)
     ]]></samp>
-
-      <p>Please note on Windows the <code>PySaxonApiError</code> is not available. Exceptions are thrown as <code>RuntimeError</code></p>
      
      <p>Example 2: Python script using PyXsltExecutable (with SaxonC-HE):</p>
      
