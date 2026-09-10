@@ -2,19 +2,16 @@
 <article id="about" title="About Saxon">
    <h1>About Saxon</h1>
 
-   <aside>If you need help finding your way around this documentation, there is a full <a
-            href="../help-system" class="bodylink">guide to the documentation system</a>.
-   </aside>
-   
-   <p>This is the documentation for the Saxon version 11 series.</p>
+   <p>
+      <i>If you need help finding your way around this documentation, there is a full <a
+            href="../help-system" class="bodylink">guide to the documentation system</a>.</i>
+   </p>
 
    <p>A full history of changes over successive releases appears in the <a class="bodylink" href="/changes">Change
          History</a>.</p>
    
-   <h2 class="subtitle">Technology platforms</h2>
-   
-   <p>The documentation includes information specific to the Java, C#, and C/C++, PHP and Python
-      versions of the Saxon product, referred to as <b>SaxonJ</b>, <b>SaxonCS</b> and <b>SaxonC</b> respectively.</p>
+   <p>The documentation includes information specific to the Java and C# versions of the Saxon product, referred to as
+      <b>SaxonJ</b> and <b>SaxonCS</b> respectively.</p>
    
    <p class="javaonly">Information specific to the Java product (SaxonJ) is highlighted like this, and can be hidden
    using the "Java" checkbox at the bottom of the page. Although APIs are always described using Java syntax,
@@ -23,11 +20,6 @@
    <p class="csonly">Information specific to the C# product (SaxonCS) is highlighted like this, and can be hidden
       using the "C#" checkbox at the bottom of the page. Although APIs are always described using C# syntax,
       they can also be used from other .NET-based languages such as VB.NET.</p>
-   
-   <p class="conly">Information specific to the C/C++, PHP and Python product (SaxonC) is highlighted like
-      this, and can be hidden using the "C" checkbox at the bottom of the page.</p>
-   
-   <h2 class="subtitle">XML technologies</h2>
 
    <p>Saxon 11 includes highly conformant implementations of the current W3C Recommendations: XSLT
       3.0, XQuery 3.1, XPath 3.1, and XSD 1.1. See <a class="bodylink" href="/conformance">Standards
@@ -40,60 +32,55 @@
    
    <p>XSLT 2.0 and 3.0 define a "backwards compatibility mode" for running XSLT 1.0 stylesheets:
       this is available in all Saxon editions.</p>
-   
-   <h2 class="subtitle">Product editions</h2>
 
-   <!--<div class="javaonly">-->
-      <p>For SaxonJ and SaxonC this documentation covers three Saxon editions: home, professional, and enterprise (HE, PE,
+
+
+   <div class="javaonly">
+      <p>For SaxonJ this documentation covers three Saxon editions: home, professional, and enterprise (HE, PE,
       and EE). The Home Edition remains open source (under the Mozilla Public License 2.0). An
       outline of what is present in each edition can be found in the <a class="bodylink"
          href="http://www.saxonica.com/products/feature-matrix-11.xml">feature matrix</a>. Broadly
       speaking:</p>
       <ul>
-        <li>Saxon-HE includes support for published W3C recommendations at the minimum
+        <li>SaxonJ-HE includes support for published W3C recommendations at the minimum
           conformance level;</li>
-        <li>Saxon-PE includes support for optional W3C features and for Saxon
+        <li>SaxonJ-PE includes support for optional W3C features and for Saxon
           extensions;</li>
-        <li>Saxon-EE includes features needed for advanced applications and high
+        <li>SaxonJ-EE includes features needed for advanced applications and high
           performance.</li>
       </ul> 
-   <!--</div>-->
+   </div>
    <p class="csonly">SaxonCS is currently available only in the Enterprise Edition (SaxonCS-EE), so the
       suffix -EE is normally omitted; however statements about Enterprise Edition should be taken
       as referring both to SaxonJ-EE and SaxonCS-EE unless otherwise specified.
    </p>
-   <p>See also <a class="bodylink" href="packages">Choosing a software package</a>.</p>
-   
-   <h2 class="subtitle">Other documentation</h2>
+  <p>See also <a class="bodylink" href="packages">Choosing a software package</a>.</p>
 
-   <p class="conly">Much of this documentation is applicable to the SaxonC product, but you should also check
-      the <a href="http://www.saxonica.com/saxon-c/documentation11" class="bodylink">SaxonC documentation</a>
-      for aspects specific to that platform (including full details of the APIs for C/C++, PHP and Python).</p>
-   
-   <p>The documentation also contains information relevant to SaxonJS (in particular the Reference
-      sections on <a class="bodylink" href="/xsl-elements">XSLT Elements</a>, <a class="bodylink"
-         href="/expressions">XPath Syntax</a>, and <a class="bodylink" href="/functions">Functions
-            Library</a>), but please see the main <a class="bodylink"
-               href="http://www.saxonica.com/saxon-js/documentation">SaxonJS documentation</a> for specific
-      SaxonJS product information.</p>
-   
-   <p>See also the <a href="/javadoc" class="bodylink">Java API specifications</a> for SaxonJ and <a
-      href="/dotnetdoc" class="bodylink">C# API specifications</a> for SaxonCS.</p>
+
+   <p>Much of this documentation is also applicable
+   to the Saxon/C product, but you should check the Saxon/C documentation for aspects specific to that platform.
+   The same applies to Saxon-JS.</p>
+
 
    <aside>This documentation (including full API documentation for both the Java and .NET platforms)
       is provided on the <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.
       It is also included in the <code>saxon-resources-11.zip</code> file available for download
-      from the <a href="http://www.saxonica.com/download/download_page.xml" class="bodylink">Saxonica
+      either from <a href="http://sourceforge.net/project/showfiles.php?group_id=29872"
+         class="bodylink">SourceForge</a> or from the <a
+            href="http://www.saxonica.com/download/download_page.xml" class="bodylink">Saxonica
             download page</a>. The resources file is separate from the software download, and it
-      includes sample applications as well as this documentation for all Saxon editions.</aside>
+      includes sample applications as well as this documentation for all editions (SaxonCS, SaxonJ-HE, SaxonJ-PE,
+      and SaxonJ-EE). SaxonJ-HE source code for the latest release is also available for
+      download from the SourceForge project page.</aside>
+
+   <p><a href="/javadoc" class="bodylink">Java API specifications</a> and <a href="/dotnetdoc"
+         class="bodylink">C# API specifications</a> are also available.</p>
+
+   <p>A full <a class="bodylink" href="/changes">change log</a> is provided.</p>
 
 
    <section id="gettingstarted" title="Getting Started">
       <h1>Getting Started</h1>
-      
-      <p class="conly">For information on getting started with SaxonC, please see <a class="bodylink"
-         href="http://www.saxonica.com/saxon-c/documentation11/#!about/gettingstarted">Getting Started</a> in
-         the SaxonC documentation.</p>
 
       <p>If you are new to Saxon, or to the Java or .NET platform, 
          or to XML, XSLT, and XQuery, this section provides a
@@ -398,23 +385,16 @@
    <section id="packages" title="Choosing the Saxon Edition">
       <h1>Choosing the Saxon Edition</h1>
 
-      <p class="javaonly">SaxonJ (on the Java platform) is distributed in three editions: SaxonJ-HE,
-         SaxonJ-PE, and SaxonJ-EE. SaxonJ-HE is available under an open-source
+      <p class="javaonly">SaxonJ (on the Java platform) is distributed in three editions: SaxonJ-HE, SaxonJ-PE, and SaxonJ-EE, each of which is
+         available for both the Java and .NET platforms. SaxonJ-HE is available under an open-source
          license (specifically, the Mozilla Public License 2.0), and all its features are available
          to all users. SaxonJ-PE and SaxonJ-EE are commercial products and require activation by a
          license key.</p>
       
       <p class="csonly">SaxonCS (on the .NET platform) currently offers only the Enterprise Edition functionality.
          SaxonCS is a commercial product and requires activation by a Saxon-EE license key.</p>
-      
-      <p class="conly">SaxonC (on the Native platform) is distributed in three editions: SaxonC-HE,
-         SaxonC-PE, and SaxonC-EE. SaxonC-HE is available under an open-source
-         license (specifically, the Mozilla Public License 2.0), and all its features are available
-         to all users. SaxonC-PE and SaxonC-EE are commercial products and require activation by a
-         license key.</p>
 
-      <p>There are also restricted licenses that work with SaxonJ-EE, SaxonCS or SaxonC-EE but restrict its
-         capability:</p>
+      <p>There are also restricted licenses that work with SaxonJ-EE or SaxonCS but restrict its capability:</p>
 
       <ul>
          <li>
@@ -431,8 +411,8 @@
          </li>
       </ul>
 
-      <p>For a full table showing the features available in each edition and licensing variant, on each
-         platform, see the <a href="http://www.saxonica.com/products/feature-matrix-11.xml" class="bodylink"
+      <p>For a full table showing the features available in each edition and licensing variant, see
+         the <a href="http://www.saxonica.com/products/feature-matrix-11.xml" class="bodylink"
             >feature matrix</a>.</p>
 
       <p>For information on obtaining and setting up a license key, see the <a class="bodylink"
@@ -441,7 +421,7 @@
 
       <p>For commercial information including prices, terms and conditions, maintenance and upgrade
          offerings, site licensing, and redistribution licensing, see the <a
-            href="http://www.saxonica.com/shop/shop.xml" class="bodylink">online store</a>.</p>
+            href="http://www.saxonica.com/shop/index.html" class="bodylink">online store</a>.</p>
    </section>
 
 
@@ -989,22 +969,12 @@
 
       
    </section>
-   
-   <section id="installationnative" title="Installation: C/C++, PHP and Python platform" class="conly">
-      <h1>Installation: C/C++, PHP and Python platform</h1>
-      
-      <p>Details about installing SaxonC and the PHP and Python extensions, on Linux, Mac OS and Windows, is
-         contained in the <a class="bodylink"
-            href="https://www.saxonica.com/saxon-c/documentation/index.html#!starting">Getting Started</a>
-         section of the SaxonC documentation.</p>
-      
-   </section>
 
    <section id="license" title="Saxon Licenses">
       <h1>Saxon Licenses</h1>
 
       <p>This section provides further information on the license keys needed to run Saxon products,
-         for the Java, .NET, and C/C++ platforms.</p>
+         for both the Java and .NET platforms.</p>
 
       <nav>
          <ul/>
@@ -1013,8 +983,8 @@
       <section id="licensekey" title="Setting up a license key">
          <h1>Setting up a license key</h1>
 
-         <p>The open-source Saxon-HE product does not require any license key. For Saxon-PE and
-            Saxon-EE (Java and C/C++), and also for SaxonCS, you need to obtain a license key from Saxonica. You can order a free
+         <p>The open-source SaxonJ-HE product does not require any license key. For SaxonJ-PE and
+            SaxonJ-EE, and also for SaxonCS, you need to obtain a license key from Saxonica. You can order a free
             license key for a 30-day evaluation, or purchase an unrestricted license key, from the
                <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.</p>
          
@@ -1022,7 +992,7 @@
             the terms under which you purchased the product. If the license has expired, Saxon will continue to run,
          but with degraded performance. Messages are logged when expiry is imminent.</i></p>
          
-         <p>License files are interchangeable across the Java, .NET, and C/C++ products. License files issued
+         <p>License files are interchangeable across the Java and .NET products. License files issued
          for previous releases continue to function with Saxon 11 until the date on which their upgrade 
          entitlement ends.</p>
 
@@ -1344,10 +1314,10 @@
       <p>In 2010 Saxonica started work on a prototype of Saxon-CE, a cut-down version of Saxon
          cross-compiled to run in the browser using the Google Web Toolkit (GWT). This was released as a product in June 2012.
          However, the use of GWT imposed severe constraints, and in 2016 Saxonica embarked on a replacement, 
-         SaxonJS, written in pure Javascript, which was released in February 2017.</p>
+         Saxon-JS, written in pure Javascript, which was released in February 2017.</p>
       
-      <p>SaxonC was first released (as a beta) in November 2013, and new releases have appeared regularly since.
-      SaxonC uses the Excelsior JET technology to compile the Java source code "ahead of time" into executable
+      <p>Saxon/C was first released (as a beta) in November 2013, and new releases have appeared regularly since.
+      Saxon/C uses the Excelsior JET technology to compile the Java source code "ahead of time" into executable
       machine code for the target hardware architecture; the Java code is augmented with an API layer providing
       call interfaces from C, C++, PHP, and Python. Although the company that produced Excelsior JET is now defunct,
       the technology still works, and we are completing current work in progress using JET while at the same time
