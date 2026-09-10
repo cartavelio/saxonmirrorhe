@@ -14,6 +14,9 @@
 #include <string>
 #include <thread>
 
+#include "../../src/include/saxonc/SaxonProcessor.h"
+#include "../../src/include/saxonc/Xslt30Processor.h"
+
 
 using namespace std;
 
@@ -3246,6 +3249,65 @@ void testTransformCommand(const string * const dataDir, sResultCount *sresult) {
 }
 
 
+void testTransformCommandOnInvisibleXmlXSLT(const string * const dataDir, SaxonProcessor *proc,
+                           sResultCount *sresult) {
+
+  cout << endl << "Test testTransformCommandOnInvisibleXmlXSLT:" << endl;
+
+
+
+  Xslt30Processor * trans = proc->newXslt30Processor();
+
+  trans->setXsltLanguageVersion("4.0");
+  XsltExecutable *executable = nullptr;
+  try {
+    executable = trans->compileFromFile(CppTestUtils::concat(2, dataDir->c_str(), "/fn-invisible-xml-test1.xsl").c_str());
+
+    if (executable == nullptr) {
+      sresult->failure++;
+      sresult->failureList.push_back("testTransformCommandOnInvisibleXmlXSLT-1");
+      delete executable;
+      return;
+    }
+    const char *output = executable->callTemplateReturningString();
+
+    if (output == nullptr) {
+      sresult->failure++;
+      sresult->failureList.push_back("testTransformCommandOnInvisibleXmlXSLT-2");
+      delete executable;
+      return;
+    }
+
+    string sresulti = string(output);
+    if (sresulti.find("<A>a</A>") != std::string::npos == 0) {
+      cout << "Output:" << output<< endl;
+      sresult->success++;
+      operator delete((char *)output);
+    } else {
+      cout << "Result is " << output << " <br/> ======= fail ===== " << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("testTransformCommandOnInvisibleXmlXSLT-3");
+      operator delete((char *)output);
+    }
+
+
+    fflush(stdout);
+    delete executable;
+
+  } catch (SaxonApiException &e) {
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cout << "Error message =" << message << endl;
+    }
+    sresult->failure++;
+    sresult->failureList.push_back("testTransformCommandOnInvisibleXmlXSLT-4");
+
+    return;
+  }
+
+}
+
+
 
 static int NUM_THREADS = 10;
 
@@ -3761,6 +3823,13 @@ int main(int argc, char *argv[]) {
      << endl;
 
   testTransformCommand(&dataDir, sresult);
+
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+
+  testTransformCommandOnInvisibleXmlXSLT(&dataDir, processor, sresult);
 
   cout << endl
        << "============================================================="
