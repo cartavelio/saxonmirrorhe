@@ -273,9 +273,19 @@
     </xsl:template>
     
     <xsl:template name="scrollpage">
-        <ixsl:set-property
-            object="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"
-            name="scrollTop" select="0"/>
+        <xsl:variable name="scrollTop" select="ixsl:call(ixsl:window(), 'getViewerScrollState', [])"/>
+        <xsl:choose>
+            <xsl:when test="$scrollTop gt 0">
+                <ixsl:set-property
+                    object="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"
+                    name="scrollTop" select="$scrollTop"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <ixsl:set-property
+                    object="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"
+                    name="scrollTop" select="0"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <xsl:template match="section|article" mode="get-section">
@@ -598,6 +608,17 @@
 
     <xsl:function name="f:anchor-navigation">
         <xsl:param name="c" as="node()"/>
+        
+        <xsl:variable name="doctitle" select="ixsl:get(ixsl:page(), 'title')"/>
+        <xsl:variable name="fragid" select="substring-after(ixsl:location(), '#')"/>
+        <xsl:variable name="scrollTop"
+            select="ixsl:get(ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main'],
+            'scrollTop')"/>
+        
+        <xsl:variable name="hstate" select="ixsl:eval('{scrollTop: ' || $scrollTop || '}')"/>
+        <xsl:sequence select="ixsl:call(ixsl:window(),
+            'history.replaceState', [$hstate, $doctitle, '#'||$fragid])"/>
+        
         <xsl:variable name="href">
             <xsl:variable name="ahref"
                 select="resolve-uri($c/@data-href, concat('http://a.com/', f:get-hash(),'/'))"/>
