@@ -460,6 +460,72 @@ public class TestSerializer {
 
     }
 
+    @Test
+    public void testExplicitSpecVersion40() {
+        try {
+            Processor proc = new Processor(false);
+            Serializer ser = proc.newSerializer();
+            ser.setOutputProperty(Serializer.Property.METHOD, "json");
+            ser.setOutputProperty(Serializer.Property.SAXON_SPEC_VERSION, "4.0");
+            XdmValue value = XdmArray.makeArray(new double[]{12.2e0, -1.5e0, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY});
+            String out = ser.serializeToString(value);
+            assertEquals("[12.2,-1.5,null,1e9999,-1e9999]", out);
+        } catch (SaxonApiException e) {
+            fail(e);
+        }
+    }
+
+
+    @Test
+    public void testExplicitSpecVersion31() {
+        try {
+            Processor proc = new Processor(false);
+            Serializer ser = proc.newSerializer();
+            ser.setOutputProperty(Serializer.Property.METHOD, "json");
+            ser.setOutputProperty(Serializer.Property.SAXON_SPEC_VERSION, "3.1");
+            XdmValue value = XdmArray.makeArray(new double[]{12.2e0, -1.5e0, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY});
+            String out = ser.serializeToString(value);
+            fail("Should have thrown an exception");
+        } catch (SaxonApiException e) {
+            assertEquals("JSON has no way of representing NaN", e.getMessage());
+            // OK
+        }
+    }
+
+    @Test
+    public void testXQueryVersion40Serialization() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.setLanguageVersion("4.0");
+            XQueryEvaluator eval = comp.compile("[12.2e0, -1.5e0, number('NaN'), 1e0 div 0, -1e0 div 0]").load();
+            StringWriter sw = new StringWriter();
+            Serializer ser = proc.newSerializer(sw);
+            ser.setOutputProperty(Serializer.Property.METHOD, "json");
+            eval.setDestination(ser);
+            eval.run();
+            String out = sw.toString();
+            assertEquals("[12.2,-1.5,null,1e9999,-1e9999]", out);
+        } catch (SaxonApiException e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    public void testImplicitSpecVersion31() {
+        try {
+            Processor proc = new Processor(false);
+            Serializer ser = proc.newSerializer();
+            ser.setOutputProperty(Serializer.Property.METHOD, "json");
+            XdmValue value = XdmArray.makeArray(new double[]{12.2e0, -1.5e0, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY});
+            String out = ser.serializeToString(value);
+            fail("Should have thrown an exception");
+        } catch (SaxonApiException e) {
+            assertEquals("JSON has no way of representing NaN", e.getMessage());
+            // OK
+        }
+    }
+
 
     @Test
     public void testIndentation() {
