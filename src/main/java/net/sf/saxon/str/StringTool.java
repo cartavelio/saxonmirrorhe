@@ -183,6 +183,24 @@ public class StringTool {
     }
 
     /**
+     * Get the last codepoint in a UnicodeString
+     * @param str the input string
+     */
+
+    public static int lastCodePoint(UnicodeString str) {
+        return str.codePointAt(str.length() - 1);
+    }
+
+    public static long lastIndexOf(UnicodeString str, int codePoint) {
+        for (long i=str.length()-1; i>=0; i--) {
+            if (str.codePointAt(i) == codePoint) {
+                return i;
+            }
+        }
+        return -1L;
+    }
+
+    /**
      * Utility method for use where strings longer than 2^31 characters cannot yet be handled.
      * @param value the actual value of a character position within a string, or the length of
      *              a string

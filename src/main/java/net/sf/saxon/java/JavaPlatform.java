@@ -12,7 +12,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Platform;
 import net.sf.saxon.dom.DOMEnvelope;
 import net.sf.saxon.dom.DOMObjectModel;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.sort.*;
@@ -53,6 +52,7 @@ import java.text.CollationKey;
 import java.text.Collator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 /**
@@ -68,6 +68,24 @@ public class JavaPlatform implements Platform {
      */
 
     public JavaPlatform() {
+    }
+
+    /**
+     * Get the default language for localization.
+     *
+     * @return the default language
+     */
+    public String getDefaultLanguage() {
+        return Locale.getDefault().getLanguage();
+    }
+
+    /**
+     * Get the default country for localization.
+     *
+     * @return the default country
+     */
+    public String getDefaultCountry() {
+        return Locale.getDefault().getCountry();
     }
 
     /**
@@ -298,25 +316,6 @@ public class JavaPlatform implements Platform {
         }
         // Fallback - use whatever parser we can find
         return loadParser();
-    }
-
-    /**
-     * Convert a StreamSource to either a SAXSource or a PullSource, depending on the native
-     * parser of the selected platform
-     *
-     * @param pipe          the pipeline configuration
-     * @param input         the supplied StreamSource
-     * @param validation    indicates whether schema validation is required
-     * @param dtdValidation indicates whether DTD validation is required
-     * @return the PullSource or SAXSource, initialized with a suitable parser, or the original
-     * input Source, if now special handling is required or possible. This implementation
-     * always returns the original input unchanged.
-     */
-
-    @Override
-    public Source getParserSource(PipelineConfiguration pipe, StreamSource input, int validation,
-                                  boolean dtdValidation) {
-        return input;
     }
 
     /**

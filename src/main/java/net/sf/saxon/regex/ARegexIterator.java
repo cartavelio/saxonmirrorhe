@@ -9,6 +9,7 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -176,12 +177,18 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
 
     @Override
     public String getRegexGroup(int number) {
+        return getRegexGroupUnicode(number).toString();
+    }
+
+    public UnicodeString getRegexGroupUnicode(int number) {
         if (!isMatching()) {
             return null;
         }
-        if (number >= _matcher.getParenCount() || number < 0) return "";
+        if (number >= _matcher.getParenCount() || number < 0) {
+            return EmptyUnicodeString.getInstance();
+        }
         UnicodeString us = _matcher.getParen(number);
-        return (us == null ? "" : us.toString());
+        return (us == null ? EmptyUnicodeString.getInstance() : us);
     }
 
     /**

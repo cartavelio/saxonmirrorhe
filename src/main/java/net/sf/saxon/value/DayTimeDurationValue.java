@@ -416,7 +416,7 @@ public final class DayTimeDurationValue extends DurationValue
         return multiply(factor);
     }
 
-    private DayTimeDurationValue multiply(BigDecimal factor) throws XPathException {
+    public DayTimeDurationValue multiply(BigDecimal factor) throws XPathException {
         BigDecimal secs = getTotalSeconds();
         BigDecimal product = secs.multiply(factor);
         try {

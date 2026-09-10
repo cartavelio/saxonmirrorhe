@@ -7,7 +7,6 @@
 
 package net.sf.saxon;
 
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
@@ -20,7 +19,6 @@ import net.sf.saxon.type.ExternalObjectType;
 import org.xml.sax.XMLReader;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
@@ -32,7 +30,8 @@ import java.util.Properties;
 public interface Platform {
 
     /**
-     * Perform platform-specific initialization of the configuration
+     * Perform platform-specific initialization of the configuration. Note that this
+     * should not undo any configuration settings defined in the configuration file.
      *
      * @param config the Saxon Configuration
      */
@@ -79,6 +78,21 @@ public interface Platform {
     IDynamicLoader getDefaultDynamicLoader();
 
     /**
+     * Get the default language for localization.
+     * @return the default language
+     */
+
+    String getDefaultLanguage();
+
+    /**
+     * Get the default country for localization.
+     *
+     * @return the default country
+     */
+
+    String getDefaultCountry();
+
+    /**
      * Read a resource file issued with the Saxon product
      *
      * @param filename the filename of the file to be read
@@ -109,20 +123,6 @@ public interface Platform {
 
     XMLReader loadParserForXmlFragments();
     //#endif
-    /**
-     * Convert a StreamSource to a different kind of Source, depending on the native
-     * parser of the selected platform
-     *
-     * @param pipe          the pipeline Configuration
-     * @param input         the supplied StreamSource
-     * @param validation    required validation mode, for example Validation.STRICT
-     * @param dtdValidation true if DTD-based input validation is required
-     * @return the PullSource or SAXSource, initialized with a suitable parser, or the original
-     *         input Source, if now special handling is required or possible
-     */
-
-    Source getParserSource(PipelineConfiguration pipe, StreamSource input,
-                           int validation, boolean dtdValidation);
 
     /**
      * Convert a Source to an ActiveSource. This method is present in the Platform

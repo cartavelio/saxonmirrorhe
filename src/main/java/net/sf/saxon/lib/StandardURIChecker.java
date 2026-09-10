@@ -10,7 +10,7 @@ package net.sf.saxon.lib;
 import net.sf.saxon.expr.sort.LFUCache;
 import net.sf.saxon.functions.IriToUri;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
@@ -75,8 +75,10 @@ public class StandardURIChecker implements URIChecker {
         // Allow a string if the java.net.URI class accepts it
         try {
             URI uri = new URI(sv);
-            cache.put(value, uri);
-            return true;
+            if (passesAdditionalChecks(uri)) {
+                cache.put(value, uri);
+                return true;
+            }
         } catch (URISyntaxException e) {
             // keep trying
             // Note: it's expensive to throw exceptions on a success path, so we keep a cache.
@@ -86,11 +88,24 @@ public class StandardURIChecker implements URIChecker {
         sv = IriToUri.iriToUri(StringView.tidy(sv)).toString();
         try {
             URI uri = new URI(sv);
-            CSharp.emitCode("if (!uri.IsWellFormedOriginalString()) return false");
-            cache.put(value, uri);
-            return true;
+            if (passesAdditionalChecks(uri)) {
+                cache.put(value, uri);
+                return true;
+            }
         } catch (URISyntaxException e) {
             return false;
+        }
+        return false;
+    }
+
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.UriUtils.passesAdditionalChecks(uri);")
+    public boolean passesAdditionalChecks(URI uri) {
+        return true;
+    }
+
+    public void checkThoroughly(URI uri) throws URISyntaxException {
+        if (!passesAdditionalChecks(uri)) {
+            throw new URISyntaxException(uri.toString(), "Fails detailed checking");
         }
     }
 

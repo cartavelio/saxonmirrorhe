@@ -8,12 +8,14 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.str.*;
+import net.sf.saxon.regex.ARegularExpression;
+import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.StringValue;
 
 import java.math.BigInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A Comparer that treats strings as an alternating sequence of alpha parts and numeric parts. The
@@ -27,7 +29,7 @@ import java.util.regex.Pattern;
 public class AlphanumericCollator implements StringCollator {
 
     private final StringCollator baseCollator;
-    private static final Pattern pattern = Pattern.compile("\\d+");
+    private static final ARegularExpression pattern = ARegularExpression.compile("\\d+", "");
     public final static String PREFIX = "http://saxon.sf.net/collation/alphaNumeric?base=";
 
     /**
@@ -62,52 +64,47 @@ public class AlphanumericCollator implements StringCollator {
 
     @Override
     public int compareStrings(UnicodeString cs1, UnicodeString cs2) {
-        String s1 = cs1.toString();
-        String s2 = cs2.toString();
-        int pos1 = 0;
-        int pos2 = 0;
-        Matcher m1 = pattern.matcher(s1);
-        Matcher m2 = pattern.matcher(s2);
+
+        RegexIterator iter1 = pattern.analyze(cs1);
+        RegexIterator iter2 = pattern.analyze(cs2);
+
+
         while (true) {
 
-            // find the next number in each string
+            // find the next numeric or non-numeric substring in each string
 
-            boolean b1 = m1.find(pos1);
-            boolean b2 = m2.find(pos2);
-            int m1start = b1 ? m1.start() : s1.length();
-            int m2start = b2 ? m2.start() : s2.length();
+            StringValue sv1 = iter1.next();
+            StringValue sv2 = iter2.next();
 
-            // compare an alphabetic pair (even if zero-length)
-
-            int c = baseCollator.compareStrings(StringView.tidy(s1.substring(pos1, m1start)),
-                                                StringView.tidy(s2.substring(pos2, m2start)));
-            if (c != 0) {
-                return c;
+            if (sv1 == null) {
+                return sv2 == null ? 0 : -1;
             }
 
-            // if one match found a number and the other didn't, exit accordingly
-
-            if (b1 && !b2) {
+            if (sv2 == null) {
                 return +1;
-            } else if (b2 && !b1) {
-                return -1;
-            } else if (!b1) {
-                return 0;
             }
 
-            // a number was found in each of the strings: compare the numbers
+            boolean numeric1 = iter1.isMatching();
+            boolean numeric2 = iter2.isMatching();
 
-            BigInteger n1 = new BigInteger(s1.substring(m1start, m1.end()));
-            BigInteger n2 = new BigInteger(s2.substring(m2start, m2.end()));
-            c = n1.compareTo(n2);
-            if (c != 0) {
-                return c;
+            if (numeric1 && numeric2) {
+                BigInteger n1 = new BigInteger(sv1.getStringValue());
+                BigInteger n2 = new BigInteger(sv2.getStringValue());
+                int c = n1.compareTo(n2);
+                if (c != 0) {
+                    return c;
+                }
+            } else {
+                UnicodeString u1 = numeric1 ? EmptyUnicodeString.getInstance() : sv1.getUnicodeStringValue();
+                UnicodeString u2 = numeric2 ? EmptyUnicodeString.getInstance() : sv2.getUnicodeStringValue();
+                int c = baseCollator.compareStrings(u1, u2);
+                if (c != 0) {
+                    return c;
+                }
             }
 
-            // the numbers are equal: move on to the next part of the string
+            // otherwise, the substrings are equal: move on to the next part of the string
 
-            pos1 = m1.end();
-            pos2 = m2.end();
         }
     }
 
@@ -135,38 +132,19 @@ public class AlphanumericCollator implements StringCollator {
     @Override
     public AtomicMatchKey getCollationKey(/*@NotNull*/ UnicodeString cs) {
         // The string is normalized by removing leading zeros in a numeric component
-        String s = cs.toString();
+
         UnicodeString sb = EmptyUnicodeString.getInstance();
-        int pos1 = 0;
-        Matcher m1 = pattern.matcher(s);
-        while (true) {
-
-            // find the next number in the string
-
-            boolean b1 = m1.find(pos1);
-            int m1start = b1 ? m1.start() : s.length();
-
-            // handle an alphabetic part (even if zero-length)
-
-            AtomicMatchKey part = baseCollator.getCollationKey(cs.substring(pos1, m1start));
-            sb = sb.concat(((StringValue) part).getContent());
-
-
-            // reached end?
-
-            if (!b1) {
-                return sb;
+        RegexIterator iter = pattern.analyze(cs);
+        for (StringValue sv; (sv = iter.next()) != null;) {
+            if (iter.isMatching()) {
+                BigInteger n = new BigInteger(sv.getStringValue());
+                sb = sb.concat(BMPString.of(n.toString()));
+            } else {
+                AtomicMatchKey part = baseCollator.getCollationKey(sv.getUnicodeStringValue());
+                sb = sb.concat(((StringValue) part).getContent());
             }
-
-            // handle a numeric part
-
-            int n1 = Integer.parseInt(s.substring(m1start, m1.end()));
-            sb = sb.concat(StringValue.bmp(n1 + "").getContent());
-
-            // move on to the next part of the string
-
-            pos1 = m1.end();
         }
+        return sb;
     }
 
 }
