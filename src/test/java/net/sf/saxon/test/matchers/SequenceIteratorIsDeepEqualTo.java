@@ -1,12 +1,12 @@
 package net.sf.saxon.test.matchers;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
@@ -64,7 +64,7 @@ public class SequenceIteratorIsDeepEqualTo extends TypeSafeDiagnosingMatcher<Seq
         XPathContext ctxt = new EarlyEvaluationContext(new Configuration());
         StringCollator collator = CodepointCollator.getInstance();
         AtomicMatcher atomicMatcher = GenericAtomicComparer.getTransitiveAtomicMatcher(collator, 0);
-        return DeepEqual.deepEqual(expected.iterate(), actual, atomicMatcher, ctxt, 0);
+        return SaxonDeepEqual.deepEqual(expected.iterate(), actual, atomicMatcher, ctxt, 0);
     }
 
     public static Matcher<SequenceIterator> deepEquals(GroundedValue expected) {

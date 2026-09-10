@@ -8,10 +8,10 @@
 package internaltests;
 
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -66,7 +66,7 @@ public class ZenoSequenceTest {
             }
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), Objects::equals, context, 0));
+            assertTrue(SaxonDeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), Objects::equals, context, 0));
             assertEquals(51, ((IntegerValue)chain.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -123,7 +123,7 @@ public class ZenoSequenceTest {
             ZenoSequence chain3 = ZenoSequence.join(l3);
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain3.iterate(), new AscendingRangeIterator(1, 1, 100), Objects::equals, context, 0));
+            assertTrue(SaxonDeepEqual.deepEqual(chain3.iterate(), new AscendingRangeIterator(1, 1, 100), Objects::equals, context, 0));
             assertEquals(51, ((IntegerValue)chain3.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -152,7 +152,7 @@ public class ZenoSequenceTest {
             GroundedValue sub = chain3.subsequence(40, 20);
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(sub.iterate(), new AscendingRangeIterator(41, 1, 60), Objects::equals, context, 0));
+            assertTrue(SaxonDeepEqual.deepEqual(sub.iterate(), new AscendingRangeIterator(41, 1, 60), Objects::equals, context, 0));
         } catch (XPathException e) {
             fail();
         }

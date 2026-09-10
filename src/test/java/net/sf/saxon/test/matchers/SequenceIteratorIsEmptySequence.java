@@ -1,14 +1,6 @@
 package net.sf.saxon.test.matchers;
 
-import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.EarlyEvaluationContext;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.AtomicMatcher;
-import net.sf.saxon.expr.sort.CodepointCollator;
-import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.Count;
-import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;

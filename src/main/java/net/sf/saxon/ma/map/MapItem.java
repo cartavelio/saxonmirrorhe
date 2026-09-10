@@ -7,13 +7,13 @@
 
 package net.sf.saxon.ma.map;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -443,8 +443,8 @@ public abstract class MapItem implements FunctionItem {
                 if (otherValue == null) {
                     return false;
                 }
-                if (!DeepEqual.deepEqual(otherValue.iterate(),
-                                         thisValue.iterate(), comparer, context, flags)) {
+                if (!SaxonDeepEqual.deepEqual(otherValue.iterate(),
+                                              thisValue.iterate(), comparer, context, flags)) {
                     return false;
                 }
             }
@@ -454,7 +454,7 @@ public abstract class MapItem implements FunctionItem {
     }
 
     @Override
-    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
             AtomicIterator keyIter = keys();
@@ -466,7 +466,7 @@ public abstract class MapItem implements FunctionItem {
                 if (otherValue == null) {
                     return false;
                 }
-                if (!DeepEqual40.deepEqual(otherValue.iterate(),
+                if (!DeepEqual.deepEqual(otherValue.iterate(),
                                          thisValue.iterate(), context, options)) {
                     return false;
                 }

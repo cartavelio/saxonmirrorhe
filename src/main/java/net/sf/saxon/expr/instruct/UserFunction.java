@@ -17,7 +17,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.sort.AtomicMatcher;
-import net.sf.saxon.functions.DeepEqual40;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
@@ -932,7 +932,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     }
 
     @Override
-    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         return this == other;
     }
 

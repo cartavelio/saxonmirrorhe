@@ -1,9 +1,9 @@
 package s9apitest;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
-import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ public class TestBuildingWriter {
 
                 AtomicMatcher matcher = GenericAtomicComparer.getTransitiveAtomicMatcher(
                         CodepointCollator.getInstance(), 0);
-                assertNull(DeepEqual.deepEqualNodes(
+                assertNull(SaxonDeepEqual.deepEqualNodes(
                         actual.getUnderlyingNode(),
                         expected.getUnderlyingNode(),
                         matcher,

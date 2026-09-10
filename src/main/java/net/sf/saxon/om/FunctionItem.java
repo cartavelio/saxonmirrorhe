@@ -12,7 +12,7 @@ import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
-import net.sf.saxon.functions.DeepEqual40;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -120,7 +120,7 @@ public interface FunctionItem extends Item, Callable, GroundedValue {
 
     boolean deepEquals(FunctionItem other, XPathContext context, AtomicMatcher comparer, int flags) throws XPathException;
 
-    boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException;
+    boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException;
 
     /**
      * Get a description of this function for use in error messages. For named functions, the description

@@ -146,7 +146,7 @@ public abstract class AbstractFunction implements FunctionItem {
     }
 
     @Override
-    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         return this.equals(other);
     }
 

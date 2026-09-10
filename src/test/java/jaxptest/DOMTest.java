@@ -6,6 +6,7 @@ import com.saxonica.config.ProfessionalTransformerFactory;
 import com.saxonica.ee.domino.DominoNode;
 import com.saxonica.ee.domino.DominoTree;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.dom.*;
@@ -1197,7 +1198,7 @@ public class DOMTest {
             NodeInfo one = DOMObjectModel.getInstance().wrap(node, config);
             NodeInfo two = DOMObjectModel.getInstance().wrap(((Document) result.getNode()).getDocumentElement(), config);
             XPathContext context = config.getConversionContext();
-            boolean comparison = net.sf.saxon.functions.DeepEqual.deepEqual(
+            boolean comparison = SaxonDeepEqual.deepEqual(
                     one.iterate(), two.iterate(), Objects::equals, context, 0);
             assertTrue(comparison, "Copy is not deep-equal");
 

@@ -7,10 +7,10 @@
 
 package net.sf.saxon.ma.arrays;
 
+import com.saxonica.functions.extfn.SaxonDeepEqual;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
-import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
@@ -174,7 +174,7 @@ public abstract class AbstractArrayItem extends ArrayItem {
                 return false;
             }
             for (int i = 0; i < this.arrayLength(); i++) {
-                if (!DeepEqual.deepEqual(this.get(i).iterate(), that.get(i).iterate(), comparer, context, flags)) {
+                if (!SaxonDeepEqual.deepEqual(this.get(i).iterate(), that.get(i).iterate(), comparer, context, flags)) {
                     return false;
                 }
             }
@@ -185,14 +185,14 @@ public abstract class AbstractArrayItem extends ArrayItem {
     }
 
     @Override
-    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException {
         if (other instanceof ArrayItem) {
             ArrayItem that = (ArrayItem) other;
             if (this.arrayLength() != that.arrayLength()) {
                 return false;
             }
             for (int i = 0; i < this.arrayLength(); i++) {
-                if (!DeepEqual40.deepEqual(this.get(i).iterate(), that.get(i).iterate(), context, options)) {
+                if (!DeepEqual.deepEqual(this.get(i).iterate(), that.get(i).iterate(), context, options)) {
                     return false;
                 }
             }

@@ -11,7 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.Count;
-import net.sf.saxon.functions.DeepEqual40;
+import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
@@ -230,7 +230,7 @@ public class RangeKey extends MapItem {
     }
 
     @Override
-    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) {
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) {
         if (other instanceof RangeKey) {
             RangeKey rk = (RangeKey) other;
             return min.equals(rk.min) && max.equals(rk.max) && index.equals(rk.index);
