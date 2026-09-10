@@ -466,8 +466,7 @@ for (buildArch in architectures) {
   val configure = tasks.register<DotNetConfiguration>("configure_${buildArch}") {
     group = LifecycleBasePlugin.BUILD_GROUP
     arch = buildArch
-    inputs.files(layout.projectDirectory.file("../tools/generateCSProj.xsl"))
-    inputs.files(layout.projectDirectory.file("../tools/generateTestDriverCSProj.xsl"))
+    inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
     outputs.files(layout.buildDirectory.file("${buildArch}/SaxonCS/SaxonCS.csproj"))
     outputs.files(layout.buildDirectory.file("${buildArch}/TestDrivers/TestDrivers.csproj"))
   }
@@ -795,6 +794,7 @@ tasks.register<JavaExec>("csproj-template") {
   args("-it",
        "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
        "-o:${layout.projectDirectory.file("${templateName}.sln")}",
+       "release=${saxonCS.release.get()}",
        "platform=${saxonCS.platform.get()}",
        "arch=${saxonCS.arch.get()}",
        "edition=${saxonCS.edition.get()}",

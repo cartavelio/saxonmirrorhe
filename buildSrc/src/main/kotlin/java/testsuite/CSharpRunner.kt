@@ -140,17 +140,16 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
     }
 
     if (!showOutput) {
-      if (errOutput.size() > 0) {
-        println("==> ${reportDir.get()}/stderr.txt")
-        var outputStream = PrintStream(File("${reportDir.get()}/stderr.txt"))
-        var lines = errOutput.toString("utf-8")
-        outputStream.print(lines)
-        outputStream.close()
-      }
+      println("==> ${reportDir.get()}/stderr.txt")
+      var outputStream = PrintStream(File("${reportDir.get()}/stderr.txt"))
+      outputStream.println(testargs.joinToString(" "))
+      var lines = errOutput.toString("utf-8")
+      outputStream.print(lines)
+      outputStream.close()
 
       println("==> ${reportDir.get()}/stdout.txt")
-      var outputStream = PrintStream(File("${reportDir.get()}/stdout.txt"))
-      var lines = stdOutput.toString("utf-8")
+      outputStream = PrintStream(File("${reportDir.get()}/stdout.txt"))
+      lines = stdOutput.toString("utf-8")
       outputStream.print(lines)
       outputStream.close()
 
