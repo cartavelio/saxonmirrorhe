@@ -10,7 +10,6 @@ package net.sf.saxon.type;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.type.gnode.NamedXNodeType;
 
 import java.util.*;
@@ -135,10 +134,8 @@ public class TypeHierarchy {
         if (t2 instanceof ErrorType) {
             return SUBSUMES;
         }
-        Instrumentation.count("TH.relationship cache requests");
         ItemTypePair pair = new ItemTypePair(t1, t2);
         if (map.containsKey(pair)) {
-            Instrumentation.count("TH.relationship cache hits");
             return map.get(pair);
         }
         Affinity affinity = Subsumption.computeRelationship(t1, t2);

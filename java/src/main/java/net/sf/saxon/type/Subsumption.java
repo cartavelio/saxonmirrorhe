@@ -80,7 +80,7 @@ public abstract class Subsumption {
             case ARRAY -> relationshipFromArray((ArrayItemType) t1, t2);
             case JNODE -> relationshipFromJNode((JNodeType) t1, t2);
             case XNODE -> relationshipFromXNode((XNodeType) t1, t2);
-            case ATOMIC -> relationshipFromAtomic((AtomicType) t1, t2);
+            case ATOMIC -> relationshipFromAtomic((PlainType) t1, t2);
             case FUNCTION -> relationshipFromFunction((FunctionItemType) t1, t2);
             case EXTERNAL -> relationshipFromExternal((ExternalObjectType) t1, t2);
         };
@@ -154,39 +154,76 @@ public abstract class Subsumption {
         return DISJOINT;
     }
 
-    private static Affinity relationshipFromAtomic(AtomicType a1, ItemType t2) {
-        // Note, union types are choice types, so we won't see them here.
-        if (t2 == BuiltInAtomicType.ANY_ATOMIC || t2 == AnyItemType.INSTANCE) {
-            return SUBSUMED_BY;
-        }
-        if (a1 == BuiltInAtomicType.ANY_ATOMIC) {
-            return t2 instanceof AtomicType ? SUBSUMES : DISJOINT;
-        }
-        if (t2 instanceof AtomicType a2) {
-
-            if (a1.getFingerprint() == a2.getFingerprint()) {
-                return SAME_TYPE;
-            }
-            // For built-in atomic types, use the alphacode, which is designed to
-            // capture the type hierarchy: for example AD = decimal, ADI = integer, ADIL = long.
-            if (a1 instanceof BuiltInAtomicType && a2 instanceof BuiltInAtomicType) {
-                String alpha1 = a1.getBasicAlphaCode();
-                String alpha2 = a2.getBasicAlphaCode();
-                if (alpha1.startsWith(alpha2)) {
-                    return SUBSUMED_BY;
-                }
-                if (alpha2.startsWith(alpha1)) {
-                    return SUBSUMES;
-                }
-                return DISJOINT;
-            }
-            if (derivesFrom(a2, a1)) {
-                return SUBSUMES;
-            }
-            if (derivesFrom(a1, a2)) {
+    private static Affinity relationshipFromAtomic(PlainType p1, ItemType t2) {
+        if (p1 instanceof AtomicType a1) {
+            if (t2 == BuiltInAtomicType.ANY_ATOMIC || t2 == AnyItemType.INSTANCE) {
                 return SUBSUMED_BY;
             }
-            return DISJOINT;
+            if (a1 == BuiltInAtomicType.ANY_ATOMIC) {
+                return t2 instanceof AtomicType ? SUBSUMES : DISJOINT;
+            }
+            if (t2 instanceof AtomicType a2) {
+
+                if (a1.getFingerprint() == a2.getFingerprint()) {
+                    return SAME_TYPE;
+                }
+                // For built-in atomic types, use the alphacode, which is designed to
+                // capture the type hierarchy: for example AD = decimal, ADI = integer, ADIL = long.
+                if (a1 instanceof BuiltInAtomicType && a2 instanceof BuiltInAtomicType) {
+                    String alpha1 = a1.getBasicAlphaCode();
+                    String alpha2 = a2.getBasicAlphaCode();
+                    if (alpha1.startsWith(alpha2)) {
+                        return SUBSUMED_BY;
+                    }
+                    if (alpha2.startsWith(alpha1)) {
+                        return SUBSUMES;
+                    }
+                    return DISJOINT;
+                }
+                if (derivesFrom(a2, a1)) {
+                    return SUBSUMES;
+                }
+                if (derivesFrom(a1, a2)) {
+                    return SUBSUMED_BY;
+                }
+
+                return DISJOINT;
+            }
+            if (t2.isPlainType()) {
+                // relationship(atomic, union)
+                Affinity inv = computeRelationship(t2, p1);
+                return inverseRelationship(inv);
+            }
+        } else {
+            if (t2 instanceof PlainType p2 && t2.isPlainType()) {
+                // relationship(union, atomic) or relationship(union, union)
+                Set<? extends PlainType> s1 = toSet(p1.getPlainMemberTypes());
+                Set<? extends PlainType> s2 = toSet(p2.getPlainMemberTypes());
+
+                if (!unionOverlaps(s1, s2)) {
+                    return DISJOINT;
+                }
+
+                boolean gt = s1.containsAll(s2);
+                boolean lt = s2.containsAll(s1);
+                if (gt && lt) {
+                    return SAME_TYPE;
+                } else if (gt) {
+                    return SUBSUMES;
+                } else if (lt) {
+                    return SUBSUMED_BY;
+                } else if (unionSubsumes(s1, s2)) {
+                    return SUBSUMES;
+                } else if (unionSubsumes(s2, s1)) {
+                    return SUBSUMED_BY;
+                } else {
+                    return OVERLAPS;
+                }
+
+            } else {
+                Affinity inv = computeRelationship(t2, p1);
+                return inverseRelationship(inv);
+            }
         }
 
         return DISJOINT;
@@ -646,5 +683,69 @@ public abstract class Subsumption {
         //#endif
         return result;
     }
-}
+
+        /**
+         * Convert a collection to a set
+         *
+         * @param in  the input collection
+         * @param <X> the member type of the collection
+         * @return a set with the same members as the supplied collection
+         */
+
+
+        private static <X> Set <X> toSet(Iterable <X> in) {
+            Set<X> s = new HashSet<>();
+            for (X x : in) {
+                s.add(x);
+            }
+            return s;
+        }
+
+        /**
+         * Ask whether one union type subsumes another
+         * @param s1 the member types of the first union type
+         * @param s2 the member types of the second union type
+         * @return true if every type t2 in s2 is subsumed by the first union type; except that
+         * we assume this is the case only if t2 is subsumed by some member type of the first union type.
+         */
+
+        private static boolean unionSubsumes (Set < ? extends PlainType > s1, Set < ? extends PlainType > s2){
+            // s1 subsumes s2 if every t2 in s2 is subsumed by some t1 in s1 (we'll discount the possibility
+            // of some t2 in s2 being subsumed by a combination of multiple types in s1)
+            for (PlainType t2 : s2) {
+                boolean t2isSubsumed = false;
+                for (PlainType t1 : s1) {
+                    Affinity rel = computeRelationship(t1, t2);
+                    if (rel == SUBSUMES || rel == SAME_TYPE) {
+                        t2isSubsumed = true;
+                        break;
+                    }
+                }
+                if (!t2isSubsumed) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Ask whether two union types are disjoint
+         * @param s1 the set of member types of the first union type
+         * @param s2 the set of member types of the second union type
+         * @return true if some S1 in s1 has instances in common with some S2 in s2
+         */
+
+        private static boolean unionOverlaps (Set < ? extends PlainType > s1, Set < ? extends PlainType > s2){
+            for (PlainType t2 : s2) {
+                for (PlainType t1 : s1) {
+                    Affinity rel = computeRelationship(t1, t2);
+                    if (rel != DISJOINT) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+    }
 
