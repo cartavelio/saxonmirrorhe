@@ -9,7 +9,7 @@ import net.sf.saxon.trans.XPathException;
 import org.junit.Assert;
 
 public class TestMapBuilder implements BuilderDsl {
-    StringMapBuilder map = new StringMapBuilder();
+    StringMapBuilder map = new StringMapBuilder(40);
 
     public static MapItem build(DslLambda<TestMapBuilder> definition) {
         TestMapBuilder builder = new TestMapBuilder();
