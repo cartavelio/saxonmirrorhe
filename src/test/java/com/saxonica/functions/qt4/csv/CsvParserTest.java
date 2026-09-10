@@ -2,6 +2,7 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +29,7 @@ public class CsvParserTest {
         options = defaultOptionParameters(ParseCsv.OPTION_DETAILS);
         handler = new CsvContentHandler(options);
     }
+
     @Test
     void emptyInput() throws XPathException{
         subject = new CsvParser(stringValue(""), options, handler);
@@ -50,7 +52,7 @@ public class CsvParserTest {
 
             assertAll(
                     () -> { assertSequenceLength(1, result, "expected 1 Record"); },
-                    () -> { assertXPathDeepEqual(stringsArrayItem("abc", "def", "ghi"), first_row, "expected (abc,def,ghi)"); }
+                    () -> { assertXPathDeepEqual(makeRow("abc", "def", "ghi"), first_row, "expected (abc,def,ghi)"); }
             );
         }
         @Test
@@ -60,7 +62,9 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(b -> b.row("abc", "def", "ghi"), b -> b.row("123", "456", "789"));
+            Sequence expectedRows = makeRows(rows -> {
+                rows.row("abc", "def", "ghi").row("123", "456", "789");
+            });
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc,def,ghi], [123,456,789])");
         }
@@ -72,7 +76,7 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(b -> b.row("abc"), b -> b.row("123"));
+            Sequence expectedRows = makeRows(rows -> rows.row("abc").row("123"));
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc], [123])");
         }
@@ -83,8 +87,7 @@ public class CsvParserTest {
             subject = new CsvParser(stringValue("abc\r\n123\r\n"), options, handler);
 
             result = subject.parseInput();
-
-            Sequence expectedRows = makeRows(b -> b.row("abc"), b -> b.row("123"));
+            Sequence expectedRows = makeRows(rows -> rows.row("abc").row("123"));
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc], [123])");
         }
@@ -96,7 +99,7 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(b -> b.row("abc"), b -> b.row("123"));
+            Sequence expectedRows = makeRows(rows -> rows.row("abc").row("123"));
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc], [123])");
         }
@@ -111,7 +114,9 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(b -> b.row("abc", "def", "ghi"), b -> b.row("123", "456", "789"));
+            Sequence expectedRows = makeRows(rows -> {
+                rows.row("abc", "def", "ghi").row("123", "456", "789");
+            });
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc, def, ghi], [123, 456, 789])");
         }
@@ -123,10 +128,23 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRow(b -> b.row("abc \"quote\" def", "ghi"));
+            Sequence expectedRows = makeRow("abc \"quote\" def", "ghi");
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc 'quote' def, ghi])");
+        }
 
+        @Test
+        @DisplayName("non-default quote characters are handled")
+        void nonDefaultQuoteChar() throws XPathException {
+            options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts -> opts.put("quote-character", "|"));
+            handler = new CsvContentHandler(options);
+            subject = new CsvParser(stringValue("|abc ||quote|| def|,|ghi|\r\n"), options, handler);
+
+            result = subject.parseInput();
+
+            Sequence expectedRows = makeRow("abc |quote| def", "ghi");
+
+            assertXPathDeepEqual(expectedRows, result, "expected ([abc |quote| def, ghi])");
         }
     }
 
@@ -143,7 +161,9 @@ public class CsvParserTest {
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(b -> b.row("abc", "def"), b -> b.row("123", "456"));
+            Sequence expectedRows = makeRows(rows -> {
+                rows.row("abc", "def").row("123", "456");
+            });
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456])");
         }
@@ -152,14 +172,15 @@ public class CsvParserTest {
         @DisplayName("Setting row delimiter to a sequence of strings (as with \\r\\n / \\n / \\r)")
         void rowDelimiterSequence() throws XPathException {
             Map<String, GroundedValue> opts = new HashMap<>();
-            opts.put("row-delimiter", stringValueSequence("$", "£"));
+            opts.put("row-delimiter", simpleValueSequence("$", "£"));
             options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts);
 
             subject = new CsvParser(stringValue("abc,def$123,456£ghi,789"), options, handler);
 
             result = subject.parseInput();
-
-            Sequence expectedRows = makeRows(b -> b.row("abc", "def"), b -> b.row("123", "456"), b -> b.row("ghi", "789"));
+            Sequence expectedRows = makeRows(rows -> {
+                rows.row("abc", "def").row("123", "456").row("ghi", "789");
+            });
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456], [ghi, 789])");
         }
@@ -168,14 +189,33 @@ public class CsvParserTest {
         @DisplayName("Setting row delimiter to a daft sequence of strings")
         void rowDelimiterDaftSequence() throws XPathException {
             Map<String, GroundedValue> opts = new HashMap<>();
-            opts.put("row-delimiter", stringValueSequence("$$", "$"));
+            opts.put("row-delimiter", simpleValueSequence("$$", "$"));
             options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts);
 
             subject = new CsvParser(stringValue("abc,def$123,456$$ghi,789"), options, handler);
 
             result = subject.parseInput();
 
-            Sequence expectedRows = makeRows(b -> b.row("abc", "def"), b -> b.row("123", "456"), b -> b.row("ghi", "789"));
+            Sequence expectedRows = makeRows(rows -> {
+                rows.row("abc", "def").row("123", "456").row("ghi", "789");
+            });
+
+            assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456], [ghi, 789])");
+        }
+
+
+        @Test
+        @DisplayName("Setting field delimiter")
+        void fieldDelimiter() throws XPathException {
+            options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts -> opts.put("field-delimiter", ";"));
+
+            subject = new CsvParser(stringValue("abc;def\n123;456\nghi;789"), options, handler);
+
+            result = subject.parseInput();
+
+            Sequence expectedRows = makeRows(rows -> {
+                rows.row("abc", "def").row("123", "456").row("ghi", "789");
+            });
 
             assertXPathDeepEqual(expectedRows, result, "expected ([abc, def], [123, 456], [ghi, 789])");
         }

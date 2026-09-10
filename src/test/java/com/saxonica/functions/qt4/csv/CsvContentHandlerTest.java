@@ -47,7 +47,7 @@ class CsvContentHandlerTest {
 
         assertAll(
                 () -> { assertSequenceLength(1, result, "expected one row"); },
-                () -> { assertXPathDeepEqual(makeRow(b -> b.row("abc")), result, "field 1 value is abc"); }
+                () -> { assertXPathDeepEqual(makeRow("abc"), result, "field 1 value is abc"); }
         );
     }
 
@@ -64,7 +64,7 @@ class CsvContentHandlerTest {
 
         assertAll(
                 () -> { assertSequenceLength(2, result, "expected two rows"); },
-                () -> { assertXPathDeepEqual(makeRows(b -> b.row("abc"), b -> b.row("123")), result); }
+                () -> { assertXPathDeepEqual(makeRows(rows -> rows.row("abc").row("123")), result); }
         );
     }
 
@@ -89,7 +89,7 @@ class CsvContentHandlerTest {
         result = subject.getSequence();
 
         assertAll(
-                () -> { assertXPathDeepEqual(makeRow(b -> b.row("abc", "def", "ghi", "jkl", "mno", "pqr", "123", "456", "789")), result); }
+                () -> { assertXPathDeepEqual(makeRow("abc", "def", "ghi", "jkl", "mno", "pqr", "123", "456", "789"), result); }
         );
 
     }

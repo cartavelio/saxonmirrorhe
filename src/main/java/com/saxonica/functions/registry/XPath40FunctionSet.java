@@ -1,6 +1,7 @@
 package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
+import com.saxonica.functions.qt4.csv.CsvToXdm;
 import com.saxonica.functions.qt4.csv.ParseCsv;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
@@ -137,6 +138,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
         //#if EE==true || PE==true
+        register("csv-to-xdm", 1, e -> e.populate(CsvToXdm::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
+
+        register("csv-to-xdm", 2, e -> e.populate(CsvToXdm::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                .setOptionDetails(CsvToXdm.OPTION_DETAILS));
+
         register("decode-from-uri", 1, 1, e -> e.populate(DecodeFromURI::new, BuiltInAtomicType.STRING, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
         //#endif
@@ -309,11 +319,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         //#if EE==true || PE==true
         register("parse-csv", 1, e -> e.populate(ParseCsv::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .setOptionDetails(ParseCsv.OPTION_DETAILS));
 
         register("parse-csv", 2, e -> e.populate(ParseCsv::new, MapType.ANY_MAP_TYPE, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                .setOptionDetails(ParseCsv.OPTION_DETAILS));
         //#endif
 
         //#if EE==true || PE==true

@@ -9,32 +9,14 @@ import net.sf.saxon.om.EmptyAtomicSequence;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Implements XPath 4 fn:parse-csv() to parse CSV data from an xs:string into an array of sequences, with header row information optionally returned
  */
-public class ParseCsv extends SystemFunction {
-    public static OptionsParameter OPTION_DETAILS;
+public class ParseCsv extends CsvFunction {
+    public static OptionsParameter OPTION_DETAILS = coreOptions();
     private static Sequence EMPTY_CSV = EmptyAtomicSequence.getInstance();
-
-
-    static {
-        OptionsParameter o = new OptionsParameter();
-        o.addAllowedOption("trim-whitespace", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        o.addAllowedOption("quote-character", SequenceType.SINGLE_STRING, new StringValue("\""));
-        o.addAllowedOption("row-delimiter", BuiltInAtomicType.STRING.oneOrMore(), SequenceExtent.makeSequenceExtent(Stream.of("\r\n", "\n", "\r").map(StringValue::new).collect(Collectors.toList())));
-        o.addAllowedOption("field-delimiter", SequenceType.SINGLE_STRING, new StringValue(","));
-        OPTION_DETAILS = o;
-
-    }
 
     /**
      * Execute a dynamic call to the function
