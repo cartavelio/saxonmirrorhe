@@ -157,7 +157,7 @@ public class Whitespace {
         if (content instanceof WhitespaceString) {
             return true;
         }
-        return content.indexWhere(ch -> !isWhite(ch), 0) >= 0;
+        return content.indexWhere(ch -> !isWhite(ch), 0) < 0;
     }
 
     /*@NotNull*/ private static final boolean[] C0WHITE = {
