@@ -568,7 +568,7 @@ public class Validate {
                 String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();
                 final InputSource inputSource = new InputSource(System.in);
                 inputSource.setSystemId(sysId);
-                sourceInput = new SAXSource(config.getSourceParser(), inputSource);
+                sourceInput = new SAXSource(inputSource);
             } else {
                 sourceInput = new StreamSource(System.in);
             }
@@ -579,7 +579,7 @@ public class Validate {
             }
             if (Version.platform.isJava()) {
                 InputSource eis = new InputSource(sourceFile.toURI().toString());
-                sourceInput = new SAXSource(config.getSourceParser(), eis);
+                sourceInput = new SAXSource(eis);
             } else {
                 sourceInput = new StreamSource(sourceFile.toURI().toString());
             }

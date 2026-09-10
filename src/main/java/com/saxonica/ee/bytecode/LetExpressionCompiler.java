@@ -10,6 +10,7 @@ import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.Evaluator;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.Type;
@@ -422,7 +423,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
 //                    return new Chain(subsequences);
                     Block block = (Block) exp;
                     Operand[] children = block.getOperanda();
-                    ga.newInstance(Chain.class);
+                    ga.newInstance(ZenoSequence.class);
                     // Stack: Chain
                     ga.dup();
                     // Stack: Chain Chain
@@ -515,7 +516,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                         }
                     }
                     // Stack: Chain Chain ArrayList
-                    ga.invokeConstructor(Chain.class, List.class);
+                    ga.invokeConstructor(ZenoSequence.class, List.class);
                     // Stack: Chain
 
                 }

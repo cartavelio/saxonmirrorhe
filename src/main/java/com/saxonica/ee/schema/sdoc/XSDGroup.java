@@ -7,6 +7,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaException;
 
@@ -209,7 +210,7 @@ public class XSDGroup extends SchemaElement {
                     if (foundMaxOccurs) {
                         mutuallyExclusiveElementAndAttribute("all", "maxOccurs");
                     }
-                    //C#//goto case net.sf.saxon.om.StandardNames.XS_SEQUENCE;
+                    CSharp.emitCode("goto case net.sf.saxon.om.StandardNames.XS_SEQUENCE;");
                     // fall through
                 case StandardNames.XS_SEQUENCE:
                 case StandardNames.XS_CHOICE:

@@ -3,14 +3,12 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ExternalObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class supports the extension function saxon:index, which returns an indexed sequence
@@ -47,16 +45,16 @@ public class Index extends SystemFunction {
                     SequenceIterator keyIterator = new AtomizingIterator(keys.iterate());
                     AtomicValue key;
                     while ((key = (AtomicValue)keyIterator.next()) != null) {
-                        Sequence existingVal = imap.get(key);
+                        GroundedValue existingVal = imap.get(key);
                         if (existingVal == null) {
                             imap.initialPut(key, next);
-                        } else if (existingVal instanceof Chain) {
-                            ((Chain) existingVal).append(next);
+                        } else if (existingVal instanceof ZenoSequence) {
+                            ((ZenoSequence) existingVal).append(next);
                         } else {
-                            List<GroundedValue> list = new ArrayList<>();
-                            list.add(existingVal.materialize());
-                            list.add(next.materialize());
-                            imap.initialPut(key, new Chain(list));
+                            ZenoSequence chain = new ZenoSequence();
+                            chain.appendSequence(existingVal);
+                            chain.append(next);
+                            imap.initialPut(key, chain);
                         }
                     }
                 }
