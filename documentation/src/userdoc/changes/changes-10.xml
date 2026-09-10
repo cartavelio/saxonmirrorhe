@@ -551,8 +551,7 @@
       
       <ul>
         <li>
-          <p><a class="bodylink code"
-            href="/functions/saxon/analyze-uri">saxon:analyze-uri($string)</a></p>
+          <p><code>saxon:analyze-uri($string)</code></p>
           <p>Parses a supplied URI, returning a map containing its various components
             (such as the scheme, port, path, fragment, and query).</p>
          
@@ -572,15 +571,13 @@
           <p>Returns the in-scope namespaces of an element, in the form of a map from prefixes to URIs.</p>
         </li>
         <li>
-          <p><a class="bodylink code"
-            href="/functions/saxon/index-where">saxon:index-where($sequence, $predicate)</a></p>
+          <p><code>saxon:index-where($sequence, $predicate)</code></p>
           <p>Returns the integer positions of items in the sequence that match the supplied predicate
             function.</p>
         </li>
         
         <li>
-          <p><a class="bodylink code"
-            href="/functions/saxon/is-NaN">saxon:is-NaN($atomic)</a></p>
+          <p><code>saxon:is-NaN($atomic)</code></p>
           <p>Returns true if the supplied argument is the <code>xs:float</code> or <code>xs:double</code>
             value <code>NaN</code>.</p>
         </li>

@@ -434,11 +434,10 @@
  
         <h2>Extension Instructions</h2>
         
-        <p>The <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a> instruction has changed to work the
+        <p>The <code>saxon:array</code> instruction has changed to work the
             same way as the proposed XSLT 4.0 <a class="bodylink code" href="/xsl-elements/array">xsl:array</a> instruction: it has an attribute
             <code>composite="yes|no"</code>. With <code>composite="yes"</code>, the members of the new array may be arbitrary
-            sequences, and should be constructed using <a class="bodylink code"
-                href="/extensions/instructions/array-member">saxon:array-member</a> (or <code>fn:parcel()</code>). With
+            sequences, and should be constructed using <code>saxon:array-member</code> (or <code>fn:parcel()</code>). With
             <code>composite="no"</code>, the members of the array must be singletons, and are returned by the sequence constructor
             as a normal sequence of items.</p>
         
@@ -491,10 +490,8 @@
             <li>
                 <p><a class="bodylink code" href="/xsl-elements/array">xsl:array</a> and <a
                 class="bodylink code" href="/xsl-elements/array-member">xsl:array-member</a></p>
-                <p>Used to construct arrays; these instructions replace the previously available <a
-                    class="bodylink code" href="/extensions/instructions/array">saxon:array</a> and <a
-                        class="bodylink code"
-                        href="/extensions/instructions/array-member">saxon:array-member</a> (which are now
+                <p>Used to construct arrays; these instructions replace the previously
+                    availacble <code>saxon:array</code> and <code>saxon:array-member</code> (which are now
                     synonyms).</p>
             </li>
             <li>

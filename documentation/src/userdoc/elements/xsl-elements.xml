@@ -679,8 +679,7 @@
                     are enabled, but note that specification and implementation changes were made
                     between the Saxon 12 and 13 releases, so for accurate information it is best to
                     refer to the specific documentation for those versions. (It was also available
-                    in earlier releases under the synonym <a class="bodylink code"
-                        href="/extensions/instructions/array">saxon:array</a>.)</p>
+                    in earlier releases under the synonym <code>saxon:array</code>.)</p>
             </status>
             <see-also name="array-member" type="xsl-elements"/>
 
@@ -716,8 +715,7 @@
             <saxon-edition>PE/EE 13 11_EXPERIMENTAL</saxon-edition>
             <status>
                 <p>Available from Saxon 11; requires syntax extensions to be enabled. Also available
-                    in earlier releases under the synonym <a class="bodylink code"
-                        href="/extensions/instructions/array-member">saxon:array-member</a>.</p>
+                    in earlier releases under the synonym <code>saxon:array-member</code>.</p>
             </status>
             <see-also name="array" type="xsl-elements"/>
 
@@ -6507,11 +6505,11 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
                 <li>a <a class="bodylink" href="/expressions/types/named-item-types">named item type</a></li>
                 <li>
                     <code>(type1 | type2 | type3)</code>, a <a class="bodylink"
-                        href="/expressions/types/choice">choice type</a>
+                        href="/expressions/types/choice-types">choice type</a>
                 </li>
                 <li>
                     <code>record(...)</code>, a <a class="bodylink"
-                        href="/expressions/types/record">record type</a>
+                        href="/expressions/types/record-types">record type</a>
                 </li>
                 <li>
                     <code>map(...)</code>

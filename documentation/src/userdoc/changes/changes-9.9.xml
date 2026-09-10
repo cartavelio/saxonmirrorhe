@@ -460,8 +460,7 @@
     <category name="extensions">
         <h2>Extension Functions</h2>
         
-        <p>For the extension functions <a class="bodylink code" href="/functions/saxon/highest">saxon:highest</a> and <a class="bodylink code"
-            href="/functions/saxon/lowest">saxon:lowest</a>,
+        <p>For the extension functions <code>saxon:highest</code> and <code>saxon:lowest</code>,
             the function that computes the key may now return an empty sequence, in which case the relevant item from the input is excluded
             from consideration (it will not feature in the result). The implementation has been made more robust in edge cases, for example
             where the key returns a value of an unordered type, or where the set of keys are not mutually comparable, or where they include NaN values.</p>

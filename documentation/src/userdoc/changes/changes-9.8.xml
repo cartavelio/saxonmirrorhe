@@ -359,7 +359,7 @@
         to this function (for example by not lifting the call out of a loop) but order of execution is not guaranteed so there may
         still be surprises when the function is used to time program execution.</p>
         
-        <p>The new extension function <a class="bodylink code" href="/functions/saxon/array-member">saxon:array-member()</a> takes
+        <p>The new extension function <code>saxon:array-member()</code> takes
             a single argument, which evaluates to an arbitrary sequence, and it returns an external
             object of type <code>ArrayMemberValue</code> wrapping this sequence. The
             significance of this external object is that it is specially recognized by operations that construct an array,
@@ -406,20 +406,18 @@
         
         <h2>Extension Instructions</h2>
         
-        <p>The new instruction <a class="bodylink code" href="/extensions/instructions/array">&lt;saxon:array&gt;</a> has the same
+        <p>The new instruction <code>&lt;saxon:array&gt;</code> has the same
             content model as <a class="bodylink code" href="/xsl-elements/sequence">&lt;xsl:sequence&gt;</a>, but
         builds an array rather than a sequence. The members of the array will all be singleton items, unless constructed using the
         <code>saxon:array-member</code> extension function or the <code>saxon:array-member</code> extension instruction (see above).</p>
         
-        <p>The new instruction <a class="bodylink code"
-            href="/extensions/instructions/array-member">&lt;saxon:array-member&gt;</a> has the same content model as
+        <p>The new instruction <code>&lt;saxon:array-member&gt;</code> has the same content model as
             <code>&lt;xsl:sequence&gt;</code>, but builds an external object of type <code>ArrayMemberValue</code> wrapping the
             constructed sequence. The significance of this external object is that it is specially recognized by operations that
             construct an array, indicating that the sequence contained by the <code>ArrayMemberValue</code>
             is to become a single member of the resulting array, rather than having each item treated independently.</p>
             
-        <p>An extension function <a class="bodylink code" href="/functions/saxon/array-member">saxon:array-member()</a> is also
-            available.</p>
+        <p>An extension function <code>saxon:array-member()</code> is also available.</p>
         
         <h2>Collection URIs</h2>
         

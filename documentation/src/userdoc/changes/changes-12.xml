@@ -461,7 +461,7 @@
             aligned with the proposed 4.0 function <code>fn:in-scope-namespaces()</code> in that the returned map now always includes an entry for the
             XML namespace.</p>
         
-        <p>The extension function <a class="bodylink code" href="/functions/saxon/parse-html">saxon:parse-html()</a> is now a synonym for
+        <p>The extension function <code>saxon:parse-html()</code> is now a synonym for
             <code>fn:parse-html()</code>, a new function proposed for 4.0. The function has been reimplemented on SaxonJ to use the
             <code>validator.nu</code> library in place of <code>TagSoup</code>. In SaxonCS, it has been reimplemented to use <code>AngleSharp</code>
             in place of <code>HtmlAgilityPack</code>. In both cases this gives much closer conformance to the HTML5 parsing algorithm; the function
