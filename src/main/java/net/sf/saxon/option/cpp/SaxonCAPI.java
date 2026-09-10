@@ -739,6 +739,9 @@ public class SaxonCAPI {
      * @return file object
      */
     public static File absoluteFile(String cwd, String filename) {
+        if(cwd == null) {
+            return new File(filename);
+        };
         char separatorChar = '/';
         if (File.separatorChar != '/') {
             filename.replace(separatorChar, File.separatorChar);
