@@ -46,7 +46,7 @@ public class SpecificFunctionType extends AnyFunctionType {
 
 
     public final static FunctionItemType COMPONENT_FUNCTION_TYPE =
-            new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.ANY_SEQUENCE);
+            new SpecificFunctionType(SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE);
 
 
     /**

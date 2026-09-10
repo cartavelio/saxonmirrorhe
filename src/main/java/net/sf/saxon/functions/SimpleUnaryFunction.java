@@ -7,62 +7,35 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
-import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.Arrays;
-
 /**
- * A function item that wraps a Callable
+ * A simple function item that takes a single argument and that does not require access to the dynamic context
  */
 
-public class CallableFunction extends AbstractFunction {
+public class SimpleUnaryFunction extends AbstractFunction {
 
-    private Callable callable;
-    private final SymbolicName.F name;
-    private FunctionItemType type;
-    private AnnotationList annotations;
-
-    public CallableFunction(SymbolicName.F name, Callable callable, FunctionItemType type) {
-        this.name = name;
-        this.callable = callable;
-        this.type = type;
+    @FunctionalInterface
+    public interface Lambda {
+        Sequence call(Sequence argument) throws XPathException;
     }
 
-    public CallableFunction(int arity, Callable callable, FunctionItemType type) {
-        this.name = new SymbolicName.F(NamespaceUri.ANONYMOUS.qName("anon"), arity);
-        this.callable = callable;
-        this.type = type;
-    }
+    private final Lambda lambda;
+    private final SequenceType argumentType;
+    private final SequenceType resultType;
 
-    public static CallableFunction of1(CallableDelegate.Lambda lambda, FunctionItemType type) {
-        return new CallableFunction(1, new CallableDelegate(lambda), type);
-    }
-
-    public Callable getCallable() {
-        return callable;
-    }
-
-    public void setCallable(Callable callable) {
-        this.callable = callable;
-    }
-
-    public void setType(FunctionItemType type) {
-        this.type = type;
+    public SimpleUnaryFunction(Lambda lambda, SequenceType argumentType, SequenceType resultType) {
+        this.lambda = lambda;
+        this.argumentType = argumentType;
+        this.resultType = resultType;
     }
 
     /**
@@ -72,22 +45,7 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public FunctionItemType getFunctionItemType() {
-        if (type == AnyFunctionType.getInstance() && callable instanceof XQueryFunctionLibrary.UnresolvedCallable) {
-            UserFunction uf = ((XQueryFunctionLibrary.UnresolvedCallable) callable).getFunction();
-            if (uf != null) {
-                // the previously unresolved function reference is now resolved
-                if (uf.isVariadic()) {
-                    SequenceType[] argTypes = new SequenceType[getArity()];
-                    int last = uf.getArity() - 1;
-                    System.arraycopy(uf.getFunctionItemType().getArgumentTypes(), 0, argTypes, 0, last);
-                    SequenceType lastArgType = uf.getFunctionItemType().getArgumentTypes()[last];
-                    Arrays.fill(argTypes, last, argTypes.length, lastArgType);
-                    return new SpecificFunctionType(argTypes, uf.getResultType());
-                }
-                type = uf.getFunctionItemType();
-            }
-        }
-        return type;
+        return new SpecificFunctionType(argumentType, resultType);
     }
 
     /**
@@ -97,7 +55,7 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public StructuredQName getFunctionName() {
-        return name.getComponentName();
+        return null;
     }
 
     /**
@@ -109,7 +67,7 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public String getDescription() {
-        return callable.toString();
+        return "simple anonymous " + getFunctionItemType();
     }
 
     /**
@@ -119,16 +77,12 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public int getArity() {
-        return name.getArity();
-    }
-
-    public void setAnnotations(AnnotationList annotations) {
-        this.annotations = annotations;
+        return 1;
     }
 
     @Override
     public AnnotationList getAnnotations() {
-        return annotations;
+        return AnnotationList.EMPTY;
     }
 
     /**
@@ -137,12 +91,12 @@ public class CallableFunction extends AbstractFunction {
      * @param context the XPath dynamic evaluation context
      * @param args    the actual arguments to be supplied
      * @return the result of invoking the function
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if a dynamic error occurs within the function
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-        return callable.call(context, args);
+        return lambda.call(args[0]);
     }
 
 
@@ -153,6 +107,6 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public void export(ExpressionPresenter out) {
-        throw new UnsupportedOperationException("A CallableFunction is a transient value that cannot be exported");
+        throw new UnsupportedOperationException("A SimpleUnaryFunction is a transient value that cannot be exported");
     }
 }

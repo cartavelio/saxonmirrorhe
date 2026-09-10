@@ -27,10 +27,26 @@ public class ConstantFunction extends AbstractFunction  {
     private final GroundedValue value;
     private final SequenceType resultType;
 
-    private final static SequenceType[] NO_ARGS = new SequenceType[0];
-
+    /**
+     * Create a ConstantFunction
+     * @param name the function name.
+     * @param value the value to be returned by the function
+     * @param resultType the return type of the function (must match the type of {@code value}
+     */
     public ConstantFunction(StructuredQName name, GroundedValue value, SequenceType resultType) {
         this.name = name;
+        this.value = value;
+        this.resultType = resultType;
+    }
+
+    /**
+     * Create an anonymous ConstantFunction
+     *
+     * @param value      the value to be returned by the function
+     * @param resultType the return type of the function (must match the type of {@code value}
+     */
+    public ConstantFunction(GroundedValue value, SequenceType resultType) {
+        this.name = null;
         this.value = value;
         this.resultType = resultType;
     }

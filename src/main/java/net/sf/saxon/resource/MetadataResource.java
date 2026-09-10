@@ -7,16 +7,12 @@
 
 package net.sf.saxon.resource;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.type.FunctionItemType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -30,13 +26,11 @@ public class MetadataResource implements Resource {
     private final Map<String, GroundedValue> properties;
     private final String resourceURI;
     private final Resource content;
-    private final XPathContext context;
 
     public MetadataResource(String resourceURI, Resource content, Map<String, GroundedValue> properties, XPathContext context) {
         this.resourceURI = resourceURI;
         this.content = content;
         this.properties = properties;
-        this.context = context;
     }
 
     @Override
@@ -64,10 +58,7 @@ public class MetadataResource implements Resource {
         map.initialPut("name", StringValue.makeStringValue(resourceURI));
 
         // Add a fetch() function, which can be used to fetch the resource
-        Callable fetcher = new CallableDelegate((context1, arguments) -> content.getItem());
-
-        FunctionItemType fetcherType = new SpecificFunctionType(SequenceType.SINGLE_ITEM);
-        CallableFunction fetcherFunction = new CallableFunction(0, fetcher, fetcherType);
+        SimpleLazyFunction fetcherFunction = new SimpleLazyFunction(content::getItem, SequenceType.SINGLE_ITEM);
 
         map.initialPut("fetch", fetcherFunction);
         return map;

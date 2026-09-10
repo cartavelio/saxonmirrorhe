@@ -18,24 +18,30 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
 /**
- * A simple function item that takes a single argument and that does not require access to the dynamic context
+ * A simple function item that takes no arguments and that does not require access to the dynamic context.
+ * Unlike a {@link ConstantFunction}, it computes its result lazily (on demand) rather than being
+ * supplied with the result in advance.
  */
 
-public class SimpleUnaryFunction extends AbstractFunction {
+public class SimpleLazyFunction extends AbstractFunction {
 
     @FunctionalInterface
     public interface Lambda {
-        Sequence call(Sequence argument) throws XPathException;
+        Sequence call() throws XPathException;
     }
 
     private final Lambda lambda;
-    private final SequenceType argumentType;
     private final SequenceType resultType;
+    private String description;
 
-    public SimpleUnaryFunction(Lambda lambda, SequenceType argumentType, SequenceType resultType) {
+    public SimpleLazyFunction(Lambda lambda, SequenceType resultType) {
         this.lambda = lambda;
-        this.argumentType = argumentType;
         this.resultType = resultType;
+    }
+
+    public SimpleLazyFunction withDescription(String description) {
+        this.description = description;
+        return this;
     }
 
     /**
@@ -45,7 +51,7 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public FunctionItemType getFunctionItemType() {
-        return new SpecificFunctionType(argumentType, resultType);
+        return new SpecificFunctionType(resultType);
     }
 
     /**
@@ -67,7 +73,9 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public String getDescription() {
-        return "simple anonymous " + getFunctionItemType();
+        return description == null
+                ? "simple anonymous " + getFunctionItemType()
+                : description;
     }
 
     /**
@@ -77,7 +85,7 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public int getArity() {
-        return 1;
+        return 0;
     }
 
     @Override
@@ -96,7 +104,7 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-        return lambda.call(args[0]);
+        return lambda.call();
     }
 
 
@@ -107,6 +115,6 @@ public class SimpleUnaryFunction extends AbstractFunction {
      */
     @Override
     public void export(ExpressionPresenter out) {
-        throw new UnsupportedOperationException("A SimpleUnaryFunction is a transient value that cannot be exported");
+        throw new UnsupportedOperationException("A SimpleLazyFunction is a transient value that cannot be exported");
     }
 }

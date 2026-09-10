@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.AtomicConstructorFunction;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -89,16 +90,20 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
         } else if (type instanceof ListType) {
             return new ListConstructorFunction((ListType)type, resolver, true);
         } else {
-            Callable callable = new CallableDelegate((context, arguments) -> {
-                AtomicValue value = (AtomicValue) arguments[0].head();
-                if (value == null) {
-                    return EmptySequence.getInstance();
-                }
-                return UnionConstructorFunction.cast(value, (UnionType) type, resolver, context.getConfiguration().getConversionRules());
-            });
+            assert type instanceof UnionType;
+            ConversionRules rules = staticContext.getConfiguration().getConversionRules();
             SequenceType returnType = ((UnionType) type).getResultTypeOfCast();
-            return new CallableFunction(1, callable,
-                                        new SpecificFunctionType(SequenceType.OPTIONAL_ATOMIC, returnType));
+            return new SimpleUnaryFunction(
+                    arg -> {
+                        AtomicValue value = (AtomicValue) arg.head();
+                        if (value == null) {
+                            return EmptySequence.getInstance();
+                        }
+                        return UnionConstructorFunction.cast(value, (UnionType) type, resolver, rules);
+                    },
+                    SequenceType.OPTIONAL_ATOMIC,
+                    returnType
+            );
         }
     }
 

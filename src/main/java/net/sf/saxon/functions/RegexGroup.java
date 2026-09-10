@@ -22,7 +22,6 @@ import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceType;
@@ -33,10 +32,9 @@ public class RegexGroup extends ContextAccessorFunction {
 
     @Override
     public FunctionItem bindContext(XPathContext context) throws XPathException {
-        FunctionItem alwaysEmptyFunction = new CallableFunction(1, new AlwaysEmpty(),
-                                                                new SpecificFunctionType(
-                                                                        SequenceType.SINGLE_INTEGER,
-                                                                        SequenceType.SINGLE_STRING));
+        FunctionItem alwaysEmptyFunction = new SimpleUnaryFunction(arg -> StringValue.EMPTY_STRING,
+                                                                   SequenceType.SINGLE_INTEGER,
+                                                                   SequenceType.SINGLE_STRING);
         if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
             return alwaysEmptyFunction;
         }

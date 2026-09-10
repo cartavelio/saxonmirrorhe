@@ -202,7 +202,7 @@ public final class BigDecimalValue extends DecimalValue {
         }
         if (!foundDot && digits.length() < 16) {
             // For simple constructs like xs:decimal('2'), return an Int64Value. Altova MapForce generates this a lot.
-            return new Int64Value(Long.parseLong(digits.toString(), 10));
+            return new Int64Value(Long.parseLong(digits.toString()));
         }
         BigInteger bigInt = new BigInteger(digits.toString());
         BigDecimal bigDec = new BigDecimal(bigInt, scale);

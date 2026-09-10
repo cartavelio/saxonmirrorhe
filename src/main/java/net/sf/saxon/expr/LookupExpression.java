@@ -13,10 +13,13 @@ import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.ConstantAnonymousFunction;
+import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -567,15 +570,15 @@ public class LookupExpression extends BinaryExpression {
             new Twine8("root"));
 
     public static MapItem makeEntry(AtomicValue key, GroundedValue value, Item container) {
-        FunctionItem parent = new ConstantAnonymousFunction(container, SequenceType.SINGLE_ITEM);
+        FunctionItem parent = new SimpleLazyFunction(() -> container, SequenceType.SINGLE_ITEM);
         Item rootItem = container;
         List<Item> ancestorItems = new ArrayList<>();
         ancestorItems.add(container);
 
-        FunctionItem ancestors = new ConstantAnonymousFunction(
-                SequenceExtent.makeSequenceExtent(ancestorItems), SequenceType.ANY_SEQUENCE);
-        FunctionItem root = new ConstantAnonymousFunction(
-                rootItem, SequenceType.SINGLE_ITEM);
+        FunctionItem ancestors = new SimpleLazyFunction(
+                () -> SequenceExtent.makeSequenceExtent(ancestorItems), SequenceType.ANY_SEQUENCE);
+        FunctionItem root = new SimpleLazyFunction(
+                () -> rootItem, SequenceType.SINGLE_ITEM);
         return entryShape.make(key, value, parent, ancestors, root);
     }
 

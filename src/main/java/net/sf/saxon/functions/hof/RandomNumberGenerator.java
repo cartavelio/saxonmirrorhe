@@ -10,6 +10,7 @@ package net.sf.saxon.functions.hof;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
@@ -44,7 +45,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
         SequenceType.ANY_SEQUENCE);
 
 
-    private static MapItem generator(long seed, XPathContext context) throws XPathException {
+    private static MapItem generator(long seed) {
         Random random = new Random(seed);
         double number = random.nextDouble();
         long nextSeed = random.nextLong();
@@ -52,7 +53,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
         map.initialPut("number",
             new DoubleValue(number));
         map.initialPut("next",
-            new CallableFunction(0, new NextGenerator(nextSeed), NEXT_FN_TYPE));
+            new SimpleLazyFunction(() -> generator(nextSeed), SequenceType.one(RETURN_TYPE)));
         map.initialPut("permute",
             new CallableFunction(1, new Permutation(nextSeed), PERMUTE_FN_TYPE));
         return map;
@@ -137,7 +138,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return generator(nextSeed, context);
+            return generator(nextSeed);
         }
 
         /**
@@ -161,7 +162,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
             AtomicValue val = (AtomicValue) arguments[0].head();
             seed = val == null ? context.getCurrentDateTime().randomSeed() : val.hashCode();
         }
-        return generator(seed, context);
+        return generator(seed);
     }
 
 
