@@ -1330,4 +1330,36 @@ task pyenvEnvironment(
       output.close()
     }    
   }
+
+  task "${edition}c_xslt30_test_suite"(
+    dependsOn: ["pyenv_install_saxon_${edition}c"]
+  ) {
+    inputs.files fileTree(dir: "${projectDir}/src/main/c/pypi/testsuite_driver")
+    outputs.files fileTree(dir: "${buildDir}/c/${edition}c_testsuite_driver")
+
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c/pypi/testsuite_driver"
+        into "${buildDir}/c/${edition}c_testsuite_driver"
+        filter { line ->
+          line.replaceAll('@@edition@@', edition)
+        }
+      }
+    }
+
+    doLast {
+      exec {
+        workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+        commandLine "python3", "-m", "pip", "install", "-r", "requirements.txt"
+      }
+    }
+
+    doLast {
+      exec {
+        workingDir "${buildDir}/c/${edition}c_testsuite_driver"
+        commandLine "python3", "./xslt30_test_suite_driver.py", "${testsuites.w3cXslt30TestSuiteDir}"
+      }
+    }
+  }
 }
+
