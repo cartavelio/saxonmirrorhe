@@ -274,7 +274,7 @@ public class XSLMode extends StyleElement {
                 }
                 mode.getActivePart().setExplicitProperty(f, normalizedAtt, decl.getPrecedence());
                 if (mode.isMustBeTyped() && getContainingPackage().getTargetEdition().matches("JS\\d?")) {
-                    compileWarning("In Saxon-JS, all data is untyped", "XTTE3110");
+                    compileWarning("In SaxonJS, all data is untyped", "XTTE3110");
                 }
             } else if (f.equals("use-accumulators") && accumulators != null /*Can be null after an error*/) {
                 String[] names = new String[accumulators.size()];

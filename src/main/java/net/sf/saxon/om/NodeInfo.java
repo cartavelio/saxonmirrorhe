@@ -57,7 +57,7 @@ import javax.xml.transform.SourceLocator;
  */
 
 public interface NodeInfo extends Item, Location
-    // On Saxon-CS, NodeInfo doesn't implement Source because of multiple-inheritance problems
+    // On SaxonCS, NodeInfo doesn't implement Source because of multiple-inheritance problems
     // Instead, use the asActiveSource() method to get a Source (this also works on Java)
     //#if CSHARP==false
     , ActiveSource

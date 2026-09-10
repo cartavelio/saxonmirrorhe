@@ -66,7 +66,7 @@ public interface Platform {
     /**
      * Get a suffix letter to add to the Saxon version number to identify the platform
      *
-     * @return "J" for Java, "N" for .NET, "CS" for Saxon-CS
+     * @return "J" for Java, "N" for .NET, "CS" for SaxonCS
      */
 
     String getPlatformSuffix();

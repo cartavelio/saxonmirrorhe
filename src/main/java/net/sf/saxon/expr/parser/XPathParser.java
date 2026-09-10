@@ -3822,7 +3822,7 @@ public class XPathParser {
         return null;
     }
 
-    @CSharpReplaceBody(code="return \"Reflexive calls to external Java methods are not available under Saxon-CS\";")
+    @CSharpReplaceBody(code="return \"Reflexive calls to external Java methods are not available under SaxonCS\";")
     private static String diagnoseCallToJavaMethod(Configuration config) {
         if (config.getEditionCode().equals("HE")) {
             return "Reflexive calls to Java methods are not available under Saxon-HE";
@@ -3834,7 +3834,7 @@ public class XPathParser {
         }
     }
 
-    @CSharpReplaceBody(code = "return \"Reflexive calls to external .NET methods are not available under Saxon-CS\";")
+    @CSharpReplaceBody(code = "return \"Reflexive calls to external .NET methods are not available under SaxonCS\";")
     private static String diagnoseCallToCliMethod(Configuration config) {
         if (config.getEditionCode().equals("HE")) {
             return "Reflexive calls to external .NET methods are not available under Saxon-HE";

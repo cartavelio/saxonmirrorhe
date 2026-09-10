@@ -119,7 +119,7 @@ public class FunctionAvailable extends SystemFunction {
 //                if (((details.applicability & BuiltInFunctionSet.HOF) != 0) && ("HE".equals(edition) || "JS".equals(edition))) {
 //                    return false;
 //                }
-//                // TODO: some further functions are not available in Saxon-JS
+//                // TODO: some further functions are not available in SaxonJS
 //            }
 //        }
         return lib.isAvailable(sn, rsc.getPackageData().getHostLanguageVersion());

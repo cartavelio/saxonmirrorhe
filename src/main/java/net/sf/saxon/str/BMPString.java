@@ -150,8 +150,8 @@ public class BMPString extends UnicodeString {
         }
     }
 
-    // In Saxon-J, the hashCode of a UnicodeString is the same as the hashCode
-    // of the corresponding String. This is not the case in Saxon-CS. In Saxon-CS,
+    // In SaxonJ, the hashCode of a UnicodeString is the same as the hashCode
+    // of the corresponding String. This is not the case in SaxonCS. In SaxonCS,
     // we compute the hashCode by inheriting the hashCode() method from the superclass:
     // but we do this explicitly, to avoid compiler warnings that arise when there's
     // an Equals() method but no GetHashCode() method

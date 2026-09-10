@@ -132,7 +132,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
                 }
             } else if (local.equals("range-key") && uri.equals(NamespaceUri.SAXON)) {
                 if (Version.platform.isDotNet()) {
-                    compileError("saxon:range-key is not supported in Saxon-CS");
+                    compileError("saxon:range-key is not supported in SaxonCS");
                 }
                 rangeKey = processBooleanAttribute("range-key", value);
             } else {
