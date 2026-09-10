@@ -50,6 +50,28 @@
       </td>
       <td>
         <p>
+          <a class="bodylink" href="java-to-xdm-conversion">Converting Java values to XDM values</a>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>§</p>
+      </td>
+      <td>
+        <p>§</p>
+      </td>
+      <td>
+        <p>§</p>
+      </td>
+      <td>
+        <p>§</p>
+      </td>
+      <td>
+        <p>§</p>
+      </td>
+      <td>
+        <p>
           <a class="bodylink" href="integratedfunctions">Integrated extension functions</a>
         </p>
       </td>
@@ -100,7 +122,7 @@
       </td>
     </tr>
   </table>
-  <p>In the section <a class="bodylink" href="config-extend">Configuration</a> are other mechanisms for extending the
+  <p>In the section <a class="bodylink" href="config-extend">Extending the Configuration</a> are other mechanisms for extending the
     configuration, whose support is indicated thus:</p>
   <table>
     <tr>
@@ -316,6 +338,7 @@
     <nav>
       <ul/>
     </nav>
+      <!-- TODO are these supposed to be subsections? -->
     
     <h2>Conversion from Saxon-specific classes</h2>
     
