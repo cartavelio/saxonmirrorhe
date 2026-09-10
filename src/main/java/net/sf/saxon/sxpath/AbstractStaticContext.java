@@ -145,7 +145,7 @@ public abstract class AbstractStaticContext implements StaticContext {
     public final void setDefaultFunctionLibrary(int version) {
         FunctionLibraryList lib = new FunctionLibraryList();
         lib.addFunctionLibrary(config.getXPathFunctionSet(version));
-        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(31));
+        lib.addFunctionLibrary(config.getBuiltInExtensionLibraryList(version));
         lib.addFunctionLibrary(new ConstructorFunctionLibrary(config));
         lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
         config.addExtensionBinders(lib);
@@ -384,6 +384,9 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     public void setXPathLanguageLevel(int level) {
         xpathLanguageLevel = level;
+        if (packageData.getHostLanguageVersion() != level) {
+            packageData.setHostLanguage(packageData.getHostLanguage(), level);
+        }
     }
 
     /**

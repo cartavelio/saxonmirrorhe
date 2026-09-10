@@ -67,6 +67,7 @@ public class ParamKeywords {
         fnParamNames.put("compare", "value1|value2|collation");
         fnParamNames.put("concat", "value1|value2|...");
         fnParamNames.put("contains", "value|substring|collation");
+        fnParamNames.put("contains-sequence", "input|subsequence|compare");
         fnParamNames.put("contains-token", "value|token|collation");
         fnParamNames.put("count", "input");
         fnParamNames.put("current-date", "");
@@ -89,6 +90,7 @@ public class ParamKeywords {
         fnParamNames.put("empty", "input");
         fnParamNames.put("encode-for-uri", "value");
         fnParamNames.put("ends-with", "value|substring|collation");
+        fnParamNames.put("ends-with-sequence", "input|subsequence|compare");
         fnParamNames.put("environment-variable", "name");
         fnParamNames.put("error", "code|description|error-object");
         fnParamNames.put("escape-html-uri", "value");
@@ -135,6 +137,7 @@ public class ParamKeywords {
         fnParamNames.put("items-before", "input|predicate");
         fnParamNames.put("items-ending-where", "input|predicate");
         fnParamNames.put("items-starting-where", "input|predicate");
+        fnParamNames.put("iterate-while", "input|predicate|action");
         fnParamNames.put("json", "input|options");
         fnParamNames.put("json-doc", "href|options");
         fnParamNames.put("json-to-xml", "json|options");
@@ -196,6 +199,7 @@ public class ParamKeywords {
         fnParamNames.put("sort", "input|collation|key");
         fnParamNames.put("stack-trace", "");
         fnParamNames.put("starts-with", "value|substring|collation");
+        fnParamNames.put("starts-with-sequence", "input|subsequence|compare");
         fnParamNames.put("static-base-uri", "");
         fnParamNames.put("string", "item");
         fnParamNames.put("string-join", "values|separator");
@@ -227,7 +231,7 @@ public class ParamKeywords {
         fnParamNames.put("year-from-dateTime", "value");
         fnParamNames.put("years-from-duration", "value");
         fnParamNames.put("zero-or-one", "input");
-        mapParamNames.put("build", "map|key|value|combine");
+        mapParamNames.put("build", "input|key|value|combine");
         mapParamNames.put("contains", "map|key");
         mapParamNames.put("entry", "key|value");
         mapParamNames.put("filter", "map|predicate");
