@@ -8,6 +8,7 @@ import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.EmptySequence;
 
 /**
  * This class implements the function fn:distinct-ordered-nodes(), which is a proposed function for XPath 4.0
@@ -26,6 +27,9 @@ public class DistinctOrderedNodes extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (arguments.length == 0) {
+            return EmptySequence.getInstance();
+        }
         SequenceIterator in = arguments[0].iterate();
         SequenceIterator out = new DocumentOrderIterator(in, GlobalOrderComparer.getInstance());
         return new LazySequence(out);

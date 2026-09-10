@@ -192,7 +192,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
-        register("distinct-ordered-nodes", 1, e -> e.populate(DistinctOrderedNodes::new, AnyNodeTest.getInstance(), STAR, UO)
+        register("distinct-ordered-nodes", 0, 1, e -> e.populate(DistinctOrderedNodes::new, AnyNodeTest.getInstance(), STAR, UO | SEQV)
                 .arg(0, AnyNodeTest.getInstance(), STAR, EMPTY));
 
         register("distinct-values", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.ANY_ATOMIC, STAR, BASE | UO)
@@ -556,6 +556,13 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType comparator = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_INTEGER);
+
+        register("sort", 4, e -> e.populate(Sort_3::new, AnyItemType.getInstance(),
+                                            STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                .arg(2, ft, ONE, null)
+                .arg(3, AnyItemType.getInstance(), STAR, null)); // TODO: not yet implemented
 
         register("sort-with", 2, e -> e.populate(SortWith::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)

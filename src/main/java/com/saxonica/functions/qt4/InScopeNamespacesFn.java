@@ -12,6 +12,7 @@ import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SingletonEnumType;
+import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 
@@ -38,12 +39,12 @@ public class InScopeNamespacesFn extends SystemFunction {
         }
         // Can't use a dictionary map because the prefixes are of type NCName, not string
         HashTrieMap dict = new HashTrieMap();
-        dict.initialPut(new StringValue("xml", BuiltInAtomicType.NCNAME), new StringValue(NamespaceConstant.XML));
+        dict.initialPut(new StringValue("xml", BuiltInAtomicType.NCNAME), new AnyURIValue(NamespaceConstant.XML));
         for (NamespaceBinding binding : nsMap) {
             StringValue prefix = binding.getPrefix().isEmpty()
                     ? EMPTY_STRING_TYPE.getInstance()
                     : new StringValue(binding.getPrefix(), BuiltInAtomicType.NCNAME);
-            dict.initialPut(prefix, new StringValue(binding.getNamespaceUri().toUnicodeString()));
+            dict.initialPut(prefix, new AnyURIValue(binding.getNamespaceUri().toUnicodeString()));
         }
         return dict;
     }
