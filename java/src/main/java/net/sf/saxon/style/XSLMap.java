@@ -75,10 +75,13 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
                 if (requireXslt40Attribute("select")) {
                     select = makeExpression(value, att);
                 }
-            } else if (f.equals("duplicates") /*|| f.equals("on-duplicates")*/) { // TODO: drop old name
+            } else if (f.equals("duplicates")) { 
                 if (requireXslt40Attribute("duplicates")) {
                     onDuplicates = makeExpression(value, att);
                 }
+            } else if (attName.getLocalPart().equals("on-duplicates") &&
+                   (attName.hasURI(NamespaceUri.NULL) || attName.hasURI(NamespaceUri.SAXON))) {
+                compileErrorInAttribute(f + " is dropped in Saxon 13, use the new 4.0 attribute 'duplicates' instead", "XTSE0010", f);
             } else {
                 checkUnknownAttribute(attName);
             }
