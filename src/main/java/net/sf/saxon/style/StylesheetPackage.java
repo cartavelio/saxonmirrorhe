@@ -24,6 +24,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -1102,10 +1103,13 @@ public class StylesheetPackage extends PackageData {
         }
         if (!abstractComponents.isEmpty()) {
             StringBuilder buff = new StringBuilder(256);
+            Location loc = null;
             int count = 0;
             for (SymbolicName name : abstractComponents.keySet()) {
                 if (count++ > 0) {
                     buff.append(", ");
+                } else {
+                    loc = abstractComponents.get(name).getActor().getLocation();
                 }
                 buff.append(name.toString());
                 if (buff.length() > 300) {
@@ -1115,7 +1119,7 @@ public class StylesheetPackage extends PackageData {
             }
             throw new XPathException(
                     "The package is not executable, because it contains abstract components: " +
-                            buff, "XTSE3080");
+                            buff, "XTSE3080").withLocation(loc);
         }
     }
 

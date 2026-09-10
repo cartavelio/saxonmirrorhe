@@ -140,7 +140,8 @@ public class NumberSequenceFormatter extends Expression {
                     ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.tidy(language));
                     if (vf != null) {
                         langOp.setChildExpression(new StringLiteral(StringValue.EMPTY_STRING));
-                        throw new XPathException("The lang attribute must be a valid language code", "XTDE0030");
+                        throw new XPathException("The lang attribute must be a valid language code", "XTDE0030")
+                                .withLocation(getLocation());
                     }
                 }
                 numberer = config.makeNumberer(language, null);
