@@ -6,6 +6,7 @@ import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.NamespaceUri;
@@ -45,6 +46,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -2101,6 +2103,52 @@ public class TestValidator {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+    }
+
+
+    private void assertionCallingDoc(boolean allow) { // bug 6878
+
+        String href = Testdata.fileUriString("books.xml");
+        String xsd = "<xsd:schema saxon:extensions='any-xpath-version' xmlns:saxon='http://saxon.sf.net/'\n"
+                + "elementFormDefault='qualified'\n"
+                + "xmlns:xsd='http://www.w3.org/2001/XMLSchema'>\n"
+                + "<xsd:element name='AAA'><xsd:complexType><xsd:sequence><xsd:element ref='BBB'/></xsd:sequence>\n"
+                + "<xsd:assert test='doc(\"" + href + "\", {\"xsd-validation\":\"skip\"})//ITEM'/></xsd:complexType></xsd:element>\n"
+                + "<xsd:element name='BBB'/>\n"
+                + "</xsd:schema>";
+        final List<XmlProcessingError> errorList = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_RESOURCES, allow);
+            proc.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, "strict");
+            XsdCompiler sm = proc.newXsdCompiler();
+            sm.setErrorReporter(err -> {
+                                    errorList.add(err);
+                                });
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
+            SchemaValidator val = schema.newValidator();
+            val.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(sm.getErrorReporter()));
+            val.validate(new StreamSource(new StringReader("<AAA><BBB/></AAA>")));
+            if (allow) {
+                assertTrue(errorList.isEmpty());
+            } else  {
+                assertFalse(errorList.isEmpty());
+            }
+        } catch (SaxonApiException sapie) {
+            if (allow) {
+                fail(sapie.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testAssertionCallingDocAllowed() {
+        assertionCallingDoc(true);
+    }
+
+    @Test
+    public void testAssertionCallingDocNotAllowed() {
+        assertionCallingDoc(false);
     }
 
     /**
