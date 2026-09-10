@@ -8,7 +8,7 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
-import net.sf.saxon.z.IntLookaheadIterator;
+import net.sf.saxon.z.PositiveIntIterator;
 
 import java.util.Map;
 
@@ -55,12 +55,10 @@ public class CsvParser {
     private final CsvContentHandler handler;
     private final int fieldDelimiter;
     private final int rowDelimiter;
-    private final boolean normalizeNewlines;
     private final int quoteCharacter;
     private final boolean trimWhitespace;
-    private final IntLookaheadIterator codepoints;
-    private int lineNumber = 1;
-    private int columnNumber = 0;
+    private final NormalizingIterator codepoints;
+
 
     /**
      * Create a new CSV parser
@@ -69,13 +67,12 @@ public class CsvParser {
      * @param handler the content handler to receive parsing events.
      */
     public CsvParser(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) {
-        this.codepoints = new IntLookaheadIterator(input.codePoints());
+        this.codepoints = new NormalizingIterator(input.getUnicodeStringValue().iterate());
         this.handler = handler;
         this.fieldDelimiter = ((StringValue)csvOptions.get("field-delimiter")).getUnicodeStringValue().codePointAt(0);
         this.rowDelimiter = ((StringValue) csvOptions.get("row-delimiter")).getUnicodeStringValue().codePointAt(0);
         this.quoteCharacter = ((StringValue)csvOptions.get("quote-character")).getUnicodeStringValue().codePointAt(0);
         this.trimWhitespace = ((BooleanValue)csvOptions.get("trim-whitespace")).getBooleanValue();
-        this.normalizeNewlines = ((BooleanValue) csvOptions.get("normalize-newlines")).getBooleanValue();
     }
 
     /**
@@ -95,21 +92,9 @@ public class CsvParser {
      * @throws XPathException if parsing fails
      */
     public SequenceIterator parseInput() throws XPathException {
+        int cp;
         while (true) {
-            int cp = codepoints.hasNext() ? codepoints.next() : -1;
-            if (cp == '\r' && normalizeNewlines) {
-                int cp2 = codepoints.peekAhead();
-                if (cp2 == '\n') {
-                    codepoints.next();
-                }
-                cp = '\n';
-            }
-            if (cp == '\n') {
-                lineNumber++;
-                columnNumber = 0;
-            } else {
-                columnNumber++;
-            }
+            cp = codepoints.next();
             if ((cp == rowDelimiter || cp == -1) && handler.getCurrentRowSize() == 0) {
                 handler.blankRow();
                 if (cp == rowDelimiter && codepoints.peekAhead() != -1) {
@@ -147,16 +132,10 @@ public class CsvParser {
      */
     private void readQuotedField() throws XPathException {
         TwineBuilder field = TwineBuilder.make(128);
-        int startLine = lineNumber;
-        int startColumn = columnNumber;
+        int startLine = codepoints.getLineNumber();
+        int startColumn = codepoints.getColumnNumber();
         int cp = codepoints.next(); // the first character after the quote
         while (true) {
-            if (cp == '\n') {
-                lineNumber++;
-                columnNumber = 0;
-            } else {
-                columnNumber++;
-            }
             if (cp == quoteCharacter) {
                 int nextCp = codepoints.peekAhead();
                 if (nextCp == quoteCharacter) {
@@ -200,22 +179,9 @@ public class CsvParser {
         TwineBuilder field = TwineBuilder.make(16);
         boolean started = false;
         while (true) {
-            if (cp == '\r' && normalizeNewlines) {
-                int cp2 = codepoints.peekAhead();
-                if (cp2 == '\n') {
-                    codepoints.next();
-                }
-                cp = '\n';
-            }
-            if (cp == '\n') {
-                lineNumber++;
-                columnNumber = 0;
-            } else {
-                columnNumber++;
-            }
-
             if (cp == quoteCharacter) {
-                String message = String.format("Invalid CSV data: quote character appears in unquoted field at line %1$d column %2$d", lineNumber, columnNumber);
+                String message = String.format("Invalid CSV data: quote character appears in unquoted field at line %1$d column %2$d",
+                                               codepoints.getLineNumber(), codepoints.getColumnNumber());
                 error(message, ERR_QUOTING);
             }
             if (cp == fieldDelimiter || cp == rowDelimiter || cp == -1) {
@@ -232,6 +198,98 @@ public class CsvParser {
             }
         }
         return cp;
+
+    }
+
+    /**
+     * Codepoint iterator that provides the following services: (a) reading ahead, making the current
+     * and next codepoints available to the caller; (b) normalizing CR and CRLF line endings to a single LF:;
+     * (c) maintaining line number and column number.
+     */
+
+    public static class NormalizingIterator implements PositiveIntIterator {
+
+        private final PositiveIntIterator baseIterator;
+        private int pendingChar;
+        private int currentChar = -1;
+        private int lineNumber = 1;
+        private int columnNumber = 1;
+
+        /**
+         * Create an iterator that provides a single-item lookahead relative to a supplied iterator
+         *
+         * @param baseIterator the supplied iterator. A lookahead value of -1 indicates
+         *                     the end of the stream, so the base iterator should not return
+         *                     -1 as an ordinary result.
+         */
+        public NormalizingIterator(PositiveIntIterator baseIterator) {
+            this.baseIterator = baseIterator;
+            this.pendingChar = baseIterator.next();
+        }
+
+        /**
+         * Return the next integer in the sequence.
+         *
+         * @return the next integer in the sequence
+         */
+        @Override
+        public int next() {
+            currentChar = pendingChar;
+            if (currentChar != -1) {
+                pendingChar = baseIterator.next();
+            }
+            if (currentChar == '\r') {
+                if (pendingChar == '\n') {
+                    return next();
+                } else {
+                    currentChar = '\n';
+                }
+            }
+            if (currentChar == '\n') {
+                lineNumber++;
+                columnNumber = 1;
+            } else {
+                columnNumber++;
+            }
+            return currentChar;
+        }
+
+        /**
+         * Get the integer that has been most recently read
+         *
+         * @return the integer most recently returned by the next() method
+         */
+
+        public int current() {
+            return currentChar;
+        }
+
+        /**
+         * Return the next integer that will be read, without advancing the position
+         *
+         * @return the next integer in the stream, or -1 if there are no more to come.
+         */
+        public int peekAhead() {
+            return pendingChar;
+        }
+
+        /**
+         * Get the current line number
+         * @return the line number (starting at 1 for characters before the first newline)
+         */
+
+        public int getLineNumber() {
+            return lineNumber;
+        }
+
+        /**
+         * Get the current column number
+         * @return the column number (starting at 1 for the first character on a line)
+         */
+
+        public int getColumnNumber() {
+            return columnNumber;
+        }
 
     }
 

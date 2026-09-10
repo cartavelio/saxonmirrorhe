@@ -27,7 +27,6 @@ public abstract class CsvFunction extends SystemFunction {
         opts.addAllowedOption("quote-character", SequenceType.SINGLE_STRING, new StringValue("\""));
         opts.addAllowedOption("row-delimiter", SequenceType.SINGLE_STRING, new StringValue("\n"));
         opts.addAllowedOption("field-delimiter", SequenceType.SINGLE_STRING, new StringValue(","));
-        opts.addAllowedOption("normalize-newlines", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return opts;
     }
 
