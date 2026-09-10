@@ -1,6 +1,7 @@
 package com.saxonica.xqj.pull;
 
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.UnfailingPullProvider;
@@ -27,7 +28,7 @@ public class PullFromIterator implements UnfailingPullProvider {
     private final FocusIterator base;
     private UnfailingPullProvider treeWalker = null;
     private PipelineConfiguration pipe;
-    private Event currentEvent = Event.START_OF_INPUT;
+    private PullEvent currentEvent = PullEvent.START_OF_INPUT;
 
     /**
      * Create a PullProvider that wraps a supplied SequenceIterator
@@ -62,39 +63,39 @@ public class PullFromIterator implements UnfailingPullProvider {
      * Get the next event
      *
      * @return an event code indicating the type of event. The code
-     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link PullEvent#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
         if (treeWalker == null) {
             Item item = base.next();
             if (item == null) {
-                currentEvent = Event.END_OF_INPUT;
+                currentEvent = PullEvent.END_OF_INPUT;
                 return currentEvent;
             } else if (item instanceof AtomicValue) {
-                currentEvent = Event.ATOMIC_VALUE;
+                currentEvent = PullEvent.ATOMIC_VALUE;
                 return currentEvent;
             } else {
                 switch (((NodeInfo) item).getNodeKind()) {
                     case Type.TEXT:
-                        currentEvent = Event.TEXT;
+                        currentEvent = PullEvent.TEXT;
                         return currentEvent;
 
                     case Type.COMMENT:
-                        currentEvent = Event.COMMENT;
+                        currentEvent = PullEvent.COMMENT;
                         return currentEvent;
 
                     case Type.PROCESSING_INSTRUCTION:
-                        currentEvent = Event.PROCESSING_INSTRUCTION;
+                        currentEvent = PullEvent.PROCESSING_INSTRUCTION;
                         return currentEvent;
 
                     case Type.ATTRIBUTE:
-                        currentEvent = Event.ATTRIBUTE;
+                        currentEvent = PullEvent.ATTRIBUTE;
                         return currentEvent;
 
                     case Type.NAMESPACE:
-                        currentEvent = Event.NAMESPACE;
+                        currentEvent = PullEvent.NAMESPACE;
                         return currentEvent;
 
                     case Type.ELEMENT:
@@ -112,8 +113,8 @@ public class PullFromIterator implements UnfailingPullProvider {
 
         } else {
             // there is an active TreeWalker: just return its next event
-            Event event = treeWalker.next();
-            if (event == Event.END_OF_INPUT) {
+            PullEvent event = treeWalker.next();
+            if (event == PullEvent.END_OF_INPUT) {
                 treeWalker = null;
                 currentEvent = next();
             } else {
@@ -133,7 +134,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      */
 
     @Override
-    public Event current() {
+    public PullEvent current() {
         return currentEvent;
     }
 
@@ -194,7 +195,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      */
 
     @Override
-    public Event skipToMatchingEnd() {
+    public PullEvent skipToMatchingEnd() {
         if (treeWalker != null) {
             return treeWalker.skipToMatchingEnd();
         } else {
@@ -204,7 +205,7 @@ public class PullFromIterator implements UnfailingPullProvider {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link Event#END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link PullEvent#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
@@ -219,9 +220,9 @@ public class PullFromIterator implements UnfailingPullProvider {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
-     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link Event#END_ELEMENT}, but this is not guaranteed: a client who
+     * can be used after the {@link PullEvent#START_ELEMENT}, {@link PullEvent#PROCESSING_INSTRUCTION},
+     * {@link PullEvent#ATTRIBUTE}, or {@link PullEvent#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link PullEvent#END_ELEMENT}, but this is not guaranteed: a client who
      * requires the information at that point (for example, to do serialization) should insert an
      * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
@@ -249,9 +250,9 @@ public class PullFromIterator implements UnfailingPullProvider {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link Event#START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link PullEvent#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link Event#END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link PullEvent#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
@@ -276,7 +277,7 @@ public class PullFromIterator implements UnfailingPullProvider {
 
     @Override
     public AtomicValue getAtomicValue() {
-        if (currentEvent == Event.ATOMIC_VALUE) {
+        if (currentEvent == PullEvent.ATOMIC_VALUE) {
             return (AtomicValue) base.current();
         } else {
             throw new IllegalStateException();

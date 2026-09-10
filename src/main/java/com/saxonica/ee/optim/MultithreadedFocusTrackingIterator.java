@@ -3,6 +3,7 @@ package com.saxonica.ee.optim;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.EnumSet;
 
@@ -132,7 +133,7 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * @return the corresponding Value
      * @throws XPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link Property#GROUNDED} property.
+     * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
     public synchronized GroundedValue materialize() throws XPathException {
@@ -146,7 +147,7 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * @return the corresponding Value
      * @throws XPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link Property#GROUNDED} property.
+     * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
     public synchronized GroundedValue getResidue() throws XPathException {
@@ -174,14 +175,14 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     * properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     * and {@link Property#LOOKAHEAD}. It is always
+     * properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     * and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      * acceptable to return the value zero, indicating that there are no known special properties.
      * It is acceptable for the properties of the iterator to change depending on its state.
      * @since 8.6
      */
     @Override
-    public synchronized EnumSet<Property> getProperties() {
+    public synchronized EnumSet<SequenceIteratorProperty> getProperties() {
         return super.getProperties();
     }
 

@@ -1,6 +1,7 @@
 package com.saxonica.ee.stream;
 
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.regex.RegexMatchHandler;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.value.StringItem;
 
@@ -70,7 +71,7 @@ public class ManualRegexIterator extends ManualIterator implements RegexIterator
      * @param action the action to be performed on a matching substring
      */
     @Override
-    public void processMatchingSubstring(MatchHandler action) {
+    public void processMatchingSubstring(RegexMatchHandler action) {
         throw new UnsupportedOperationException();
     }
 

@@ -376,7 +376,7 @@ public class Extensions {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
         StandardLogger logger = new StandardLogger();
         logger.setPrintStream(new PrintStream(baos));
-        new StandardDiagnostics().printStackTrace(c, logger, 2);
+        new StandardDiagnostics().logStackTrace(c, logger, 2);
         return One.string(baos.toString().replace("\r", ""));
     }
 

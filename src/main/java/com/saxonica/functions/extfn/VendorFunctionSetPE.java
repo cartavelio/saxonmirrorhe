@@ -269,7 +269,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("parse", 2, Parse.class, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .optionDetails(Doc_2.makeOptionsParameter());
+                .setOptionDetails(Doc_2.makeOptionsParameter());
 
         register("parse-html", 1, ParseHtml.class, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
@@ -277,7 +277,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("parse-html", 2, ParseHtml.class, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
-                .optionDetails(Doc_2.makeOptionsParameter());
+                .setOptionDetails(Doc_2.makeOptionsParameter());
 
         register("parse-XPath", 3, ParseXPath.class, NodeKindTest.DOCUMENT, ONE, BuiltInFunctionSet.LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY)

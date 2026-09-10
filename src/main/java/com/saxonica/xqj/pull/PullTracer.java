@@ -1,6 +1,7 @@
 package com.saxonica.xqj.pull;
 
 import net.sf.saxon.om.NamePool;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullFilter;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
@@ -34,7 +35,7 @@ public class PullTracer extends PullFilter {
      */
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
         currentEvent = super.next();
         traceEvent(currentEvent);
         return currentEvent;
@@ -45,7 +46,7 @@ public class PullTracer extends PullFilter {
      * Copy a pull event to a Receiver
      */
 
-    private void traceEvent(PullProvider.Event event) {
+    private void traceEvent(PullEvent event) {
         if (pool == null) {
             pool = getPipelineConfiguration().getConfiguration().getNamePool();
         }

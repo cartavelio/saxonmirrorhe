@@ -8,6 +8,7 @@ import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.MemoSequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.type.TypeHierarchy;
@@ -59,7 +60,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
                 // assert stack SequenceIterator SequenceIterator
                 ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
                 // assert stack SequenceIterator EnumSet
-                allocateStatic(compiler, SequenceIterator.Property.GROUNDED);
+                allocateStatic(compiler, SequenceIteratorProperty.GROUNDED);
                 // assert stack SequenceIterator EnumSet Enum
                 ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
                 ga.ifTrue(grounded);
@@ -159,7 +160,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
         // Stack: baseIter baseIter
         ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
         // Stack: baseIter EnumSet
-        allocateStatic(compiler, SequenceIterator.Property.GROUNDED);
+        allocateStatic(compiler, SequenceIteratorProperty.GROUNDED);
         ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
         ga.ifTrue(grounded);
         // Stack: baseIter

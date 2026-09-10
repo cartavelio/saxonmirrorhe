@@ -10,6 +10,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -375,7 +376,7 @@ public class MultiIndex {
          * next(). It is used only when there is an explicit need to tell if we
          * are at the last element.
          * <p>This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link Property#LOOKAHEAD}</p>
+         * includes the bit setting {@link SequenceIteratorProperty#LOOKAHEAD}</p>
          *
          * @return true if there are more items in the sequence
          */
@@ -414,7 +415,7 @@ public class MultiIndex {
          * non-destructive: it does not change the state of the iterator.
          * The result is undefined if the next() method of the iterator has already returned null.
          * This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link Property#LAST_POSITION_FINDER}
+         * includes the bit setting {@link SequenceIteratorProperty#LAST_POSITION_FINDER}
          */
 
         @Override
@@ -426,16 +427,16 @@ public class MultiIndex {
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-         *         and {@link Property#LOOKAHEAD}. It is always
+         *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+         *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          * @since 8.6
          */
 
         @Override
-        public EnumSet<Property> getProperties() {
-            return EnumSet.of(Property.LOOKAHEAD, Property.LAST_POSITION_FINDER);
+        public EnumSet<SequenceIteratorProperty> getProperties() {
+            return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.LAST_POSITION_FINDER);
         }
     }
 

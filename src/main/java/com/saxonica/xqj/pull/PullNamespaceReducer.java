@@ -3,6 +3,7 @@ package com.saxonica.xqj.pull;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullFilter;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
@@ -73,7 +74,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
      */
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
 
         currentEvent = super.next();
 
@@ -147,7 +148,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
             }
             list.add(att2);
         }
-        attributeMap = AttributeMap.fromList(list);
+        attributeMap = SequenceTool.attributeMapFromList(list);
 
         if (localNamespacesSize < localNamespaces.length) {
             localNamespaces[localNamespacesSize] = null;     // add a terminator
@@ -330,7 +331,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
 
     @Override
     public NamespaceBinding[] getNamespaceDeclarations() {
-        if (currentEvent == Event.END_ELEMENT) {
+        if (currentEvent == PullEvent.END_ELEMENT) {
             // this case is sufficiently rare that we don't worry about its efficiency.
             // The namespaces that are needed are still on the namespace stack, even though the
             // top-of-stack pointer has already been decremented.

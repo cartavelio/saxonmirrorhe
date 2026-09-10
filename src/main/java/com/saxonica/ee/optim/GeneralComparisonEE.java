@@ -94,7 +94,7 @@ public class GeneralComparisonEE extends GeneralComparison {
         gc.setRetainedStaticContext(getRetainedStaticContext());
         gc.comparer = comparer;
         gc.singletonOperator = singletonOperator;
-        gc.needsRuntimeCheck = needsRuntimeCheck;
+        gc.runtimeCheckNeeded = runtimeCheckNeeded;
         gc.comparisonCardinality = comparisonCardinality;
         return gc;
     }
@@ -158,7 +158,7 @@ public class GeneralComparisonEE extends GeneralComparison {
     }
 
     private boolean compareOneToOne(AtomicValue lhsValue, AtomicValue rhsValue, XPathContext context) throws XPathException {
-        if (needsRuntimeCheck && !UType.isGenerallyComparable(lhsValue.getUType(), rhsValue.getUType())) {
+        if (runtimeCheckNeeded && !UType.isGenerallyComparable(lhsValue.getUType(), rhsValue.getUType())) {
             XPathException e2 = new XPathException("Cannot compare " + Type.displayTypeName(lhsValue) +
                                                            " to " + Type.displayTypeName(rhsValue));
             e2.setErrorCode("XPTY0004");

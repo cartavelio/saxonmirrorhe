@@ -1,5 +1,6 @@
 package com.saxonica.xqj.pull;
 
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullFilter;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
@@ -19,17 +20,17 @@ public class DocumentWrappingPullProvider extends PullFilter {
     }
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
         if (atStart) {
             atStart = false;
-            return Event.START_DOCUMENT;
+            return PullEvent.START_DOCUMENT;
         } else if (atEnd) {
-            return Event.END_OF_INPUT;
+            return PullEvent.END_OF_INPUT;
         } else {
-            Event event = getUnderlyingProvider().next();
-            if (event == Event.END_OF_INPUT) {
+            PullEvent event = getUnderlyingProvider().next();
+            if (event == PullEvent.END_OF_INPUT) {
                 atEnd = true;
-                return Event.END_DOCUMENT;
+                return PullEvent.END_DOCUMENT;
             } else {
                 return event;
             }

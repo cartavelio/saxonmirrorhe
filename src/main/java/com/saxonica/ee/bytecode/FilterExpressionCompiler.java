@@ -10,6 +10,7 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -330,7 +331,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                     ga.dup();
 
                     ga.invokeInstanceMethod(SequenceIterator.class, "getProperties");
-                    allocateStatic(compiler,SequenceIterator.Property.GROUNDED);
+                    allocateStatic(compiler, SequenceIteratorProperty.GROUNDED);
                     ga.invokeInstanceMethod(EnumSet.class, "contains", Object.class);
                     LabelInfo notGrounded = methodInfo.newLabel("notGrounded");
                     ga.ifFalse(notGrounded);

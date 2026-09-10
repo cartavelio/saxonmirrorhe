@@ -5,6 +5,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.EnumSetTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
@@ -71,18 +72,18 @@ public abstract class OneToOneMappingIterator implements SequenceIterator, Looka
      * Get properties of this iterator, as a bit-significant integer.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED},
-     *         {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
+     *         properties such as {@link SequenceIteratorProperty#GROUNDED},
+     *         {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
+     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
      *         acceptable to return the value zero, indicating that there are no known special properties.
      *         It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override
-    public EnumSet<Property> getProperties() {
+    public EnumSet<SequenceIteratorProperty> getProperties() {
         return EnumSetTool.intersect(
                 base.getProperties(),
-                EnumSet.of(Property.LAST_POSITION_FINDER, Property.LOOKAHEAD));
+                EnumSet.of(SequenceIteratorProperty.LAST_POSITION_FINDER, SequenceIteratorProperty.LOOKAHEAD));
     }
 }
 

@@ -3,6 +3,7 @@ package com.saxonica.xqj.pull;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.UnfailingPullProvider;
 import net.sf.saxon.pull.UnparsedEntity;
 import net.sf.saxon.s9api.Location;
@@ -29,7 +30,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
     private final NodeInfo startNode;
     private NodeInfo currentNode;
-    private Event currentEvent = Event.START_OF_INPUT;
+    private PullEvent currentEvent = PullEvent.START_OF_INPUT;
     private final Stack<FocusIterator> iteratorStack = new Stack<>();
     private PipelineConfiguration pipe;
     private final NamespaceBinding[] nsBuffer = new NamespaceBinding[10];
@@ -78,29 +79,29 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * Get the next event
      *
      * @return an Event object indicating the type of event. The code
-     *         {@link Event#END_OF_INPUT} is returned if there are no more events to return.
+     *         {@link PullEvent#END_OF_INPUT} is returned if there are no more events to return.
      */
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
         switch (currentEvent) {
             case START_OF_INPUT:
                 currentNode = startNode;
                 switch (currentNode.getNodeKind()) {
                     case Type.DOCUMENT:
-                        return currentEvent = Event.START_DOCUMENT;
+                        return currentEvent = PullEvent.START_DOCUMENT;
                     case Type.ELEMENT:
-                        return currentEvent = Event.START_ELEMENT;
+                        return currentEvent = PullEvent.START_ELEMENT;
                     case Type.TEXT:
-                        return currentEvent = Event.TEXT;
+                        return currentEvent = PullEvent.TEXT;
                     case Type.COMMENT:
-                        return currentEvent = Event.COMMENT;
+                        return currentEvent = PullEvent.COMMENT;
                     case Type.PROCESSING_INSTRUCTION:
-                        return currentEvent = Event.PROCESSING_INSTRUCTION;
+                        return currentEvent = PullEvent.PROCESSING_INSTRUCTION;
                     case Type.ATTRIBUTE:
-                        return currentEvent = Event.ATTRIBUTE;
+                        return currentEvent = PullEvent.ATTRIBUTE;
                     case Type.NAMESPACE:
-                        return currentEvent = Event.NAMESPACE;
+                        return currentEvent = PullEvent.NAMESPACE;
                     default:
                         throw new IllegalStateException();
                 }
@@ -118,10 +119,10 @@ public class TreeWalker implements UnfailingPullProvider, Location {
                     if (iteratorStack.isEmpty()) {
                         currentNode = startNode;
                     }
-                    if (currentEvent == Event.START_DOCUMENT) {
-                        return currentEvent = Event.END_DOCUMENT;
+                    if (currentEvent == PullEvent.START_DOCUMENT) {
+                        return currentEvent = PullEvent.END_DOCUMENT;
                     } else {
-                        return currentEvent = Event.END_ELEMENT;
+                        return currentEvent = PullEvent.END_ELEMENT;
                     }
                 }
             case TEXT:
@@ -131,13 +132,13 @@ public class TreeWalker implements UnfailingPullProvider, Location {
                 if (iteratorStack.isEmpty()) {
                     if (currentNode == startNode) {
                         currentNode = null;
-                        return currentEvent = Event.END_OF_INPUT;
+                        return currentEvent = PullEvent.END_OF_INPUT;
                     } else {
                         currentNode = startNode;
                         if (currentNode.getNodeKind() == Type.ELEMENT) {
-                            return currentEvent = Event.END_ELEMENT;
+                            return currentEvent = PullEvent.END_ELEMENT;
                         } else {
-                            return currentEvent = Event.END_DOCUMENT;
+                            return currentEvent = PullEvent.END_DOCUMENT;
                         }
                     }
                 }
@@ -149,17 +150,17 @@ public class TreeWalker implements UnfailingPullProvider, Location {
                     if (iteratorStack.isEmpty()) {
                         currentNode = startNode;
                         if (currentNode.getNodeKind() == Type.ELEMENT) {
-                            return currentEvent = Event.END_ELEMENT;
+                            return currentEvent = PullEvent.END_ELEMENT;
                         } else {
-                            return currentEvent = Event.END_DOCUMENT;
+                            return currentEvent = PullEvent.END_DOCUMENT;
                         }
                     }
                     FocusIterator uncles = iteratorStack.peek();
                     currentNode = (NodeInfo)uncles.current();
                     if (currentNode.getNodeKind() == Type.DOCUMENT) {
-                        return currentEvent = Event.END_DOCUMENT;
+                        return currentEvent = PullEvent.END_DOCUMENT;
                     } else {
-                        return currentEvent = Event.END_ELEMENT;
+                        return currentEvent = PullEvent.END_ELEMENT;
                     }
                 } else {
                     return currentEvent = mapChildNodeEvent();
@@ -168,7 +169,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
             case ATTRIBUTE:
             case NAMESPACE:
             case END_DOCUMENT:
-                return currentEvent = Event.END_OF_INPUT;
+                return currentEvent = PullEvent.END_OF_INPUT;
 
             case END_OF_INPUT:
                 throw new IllegalStateException("Cannot call next() when input is exhausted");
@@ -179,16 +180,16 @@ public class TreeWalker implements UnfailingPullProvider, Location {
         }
     }
 
-    private Event mapChildNodeEvent() {
+    private PullEvent mapChildNodeEvent() {
         switch (currentNode.getNodeKind()) {
             case Type.ELEMENT:
-                return Event.START_ELEMENT;
+                return PullEvent.START_ELEMENT;
             case Type.TEXT:
-                return Event.TEXT;
+                return PullEvent.TEXT;
             case Type.COMMENT:
-                return Event.COMMENT;
+                return PullEvent.COMMENT;
             case Type.PROCESSING_INSTRUCTION:
-                return Event.PROCESSING_INSTRUCTION;
+                return PullEvent.PROCESSING_INSTRUCTION;
             default:
                 throw new IllegalStateException();
         }
@@ -203,7 +204,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      */
 
     @Override
-    public Event current() {
+    public PullEvent current() {
         return currentEvent;
     }
 
@@ -279,14 +280,14 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      */
 
     @Override
-    public Event skipToMatchingEnd()  {
+    public PullEvent skipToMatchingEnd()  {
         // For this implementation, we simply leave the current node unchanged, and change
         // the current event
         switch (currentEvent) {
             case START_DOCUMENT:
-                return currentEvent = Event.END_DOCUMENT;
+                return currentEvent = PullEvent.END_DOCUMENT;
             case START_ELEMENT:
-                return currentEvent = Event.END_ELEMENT;
+                return currentEvent = PullEvent.END_ELEMENT;
             default:
                 throw new IllegalStateException(
                         "Cannot call skipToMatchingEnd() except when at start of element or document");
@@ -295,7 +296,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link Event#END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link PullEvent#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
@@ -318,9 +319,9 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
-     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link Event#END_ELEMENT}, but this is not guaranteed: a client who
+     * can be used after the {@link PullEvent#START_ELEMENT}, {@link PullEvent#PROCESSING_INSTRUCTION},
+     * {@link PullEvent#ATTRIBUTE}, or {@link PullEvent#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link PullEvent#END_ELEMENT}, but this is not guaranteed: a client who
      * requires the information at that point (for example, to do serialization) should insert an
      * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
@@ -342,8 +343,8 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * Get the string value of the current attribute, text node, processing-instruction,
      * or atomic value.
      * This method cannot be used to obtain the string value of an element, or of a namespace
-     * node. If the most recent event was anything other than {@link Event#START_ELEMENT}, {@link Event#TEXT},
-     * {@link Event#PROCESSING_INSTRUCTION}, or {@link Event#ATOMIC_VALUE}, the result is undefined.
+     * node. If the most recent event was anything other than {@link PullEvent#START_ELEMENT}, {@link PullEvent#TEXT},
+     * {@link PullEvent#PROCESSING_INSTRUCTION}, or {@link PullEvent#ATOMIC_VALUE}, the result is undefined.
      * @return
      */
 

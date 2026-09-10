@@ -3,6 +3,7 @@ package com.saxonica.xqj.pull;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.NamespaceContextImpl;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
@@ -239,7 +240,7 @@ public class PullToStax implements XMLStreamReader {
             throw new IllegalStateException("next() called after END_DOCUMENT");
             // Javadoc is unclear. See Saxon bug 3806, resulting in JDK bug JDK-8204329
         }
-        PullProvider.Event p;
+        PullEvent p;
         try {
             p = provider.next();
         } catch (XPathException e) {
@@ -289,7 +290,7 @@ public class PullToStax implements XMLStreamReader {
                 throw new IllegalStateException("Unknown Stax event " + p);
 
         }
-        previousAtomic = p == PullProvider.Event.ATOMIC_VALUE;
+        previousAtomic = p == PullEvent.ATOMIC_VALUE;
         return currentStaxEvent;
     }
 

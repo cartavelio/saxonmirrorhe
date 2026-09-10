@@ -1,6 +1,7 @@
 package com.saxonica.xqj.pull;
 
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pull.PullEvent;
 import net.sf.saxon.pull.PullFilter;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
@@ -32,15 +33,15 @@ public class ElementNameTracker extends PullFilter {
      */
 
     @Override
-    public Event next() throws XPathException {
+    public PullEvent next() throws XPathException {
         currentEvent = super.next();
-        if (currentEvent == Event.START_ELEMENT) {
+        if (currentEvent == PullEvent.START_ELEMENT) {
             NodeName nc = getNodeName();
             if (used >= namestack.length) {
                 namestack = Arrays.copyOf(namestack, used*2);
             }
             namestack[used++] = nc;
-        } else if (currentEvent == Event.END_ELEMENT) {
+        } else if (currentEvent == PullEvent.END_ELEMENT) {
             elementJustEnded = namestack[--used];
         }
         return currentEvent;
@@ -48,9 +49,9 @@ public class ElementNameTracker extends PullFilter {
 
     /**
      * Get the node name identifying the name of the current node. This method
-     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
-     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
-     * including this one, it can also be used after {@link Event#END_ELEMENT}: in fact, that is the
+     * can be used after the {@link PullEvent#START_ELEMENT}, {@link PullEvent#PROCESSING_INSTRUCTION},
+     * {@link PullEvent#ATTRIBUTE}, or {@link PullEvent#NAMESPACE} events. With some PullProvider implementations,
+     * including this one, it can also be used after {@link PullEvent#END_ELEMENT}: in fact, that is the
      * main purpose of this class.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
      * If called when the current node is an unnamed namespace node (a node representing the default namespace)
@@ -62,7 +63,7 @@ public class ElementNameTracker extends PullFilter {
 
     @Override
     public NodeName getNodeName() {
-        if (currentEvent == Event.END_ELEMENT) {
+        if (currentEvent == PullEvent.END_ELEMENT) {
             return elementJustEnded;
         } else {
             return super.getNodeName();

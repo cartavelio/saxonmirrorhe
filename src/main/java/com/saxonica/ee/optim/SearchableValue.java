@@ -9,6 +9,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
@@ -28,7 +29,7 @@ public abstract class SearchableValue implements GroundedValue {
     public static SearchableValue makeSearchableValue(SequenceIterator iter) throws XPathException {
         Item[] array;
         int end;
-        if (!iter.getProperties().contains(SequenceIterator.Property.LAST_POSITION_FINDER)) {
+        if (!iter.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
             int used = 0;
             array = new Item[20];
             Item it;

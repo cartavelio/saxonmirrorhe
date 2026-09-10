@@ -59,7 +59,7 @@ public class LaxValidator extends ContentValidator {
         for (AttributeInfo att : attributes) {
             attList.add(processAttribute(att));
         }
-        AttributeMap validatedAtts = AttributeMap.fromList(attList);
+        AttributeMap validatedAtts = SequenceTool.attributeMapFromList(attList);
         type = childValidator.getAnnotation();
         super.startElement(elemName, type, validatedAtts, namespaces, location, properties);
     }

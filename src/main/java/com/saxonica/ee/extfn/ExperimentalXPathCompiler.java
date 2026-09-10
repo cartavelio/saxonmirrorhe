@@ -669,7 +669,7 @@ public class ExperimentalXPathCompiler {
      */
 
     public static void stackTrace(XPathContext context) {
-        new StandardDiagnostics().printStackTrace(context, context.getConfiguration().getLogger(), 2);
+        new StandardDiagnostics().logStackTrace(context, context.getConfiguration().getLogger(), 2);
     }
 
     /**

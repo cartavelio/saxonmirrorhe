@@ -1,6 +1,7 @@
 package com.saxonica.ee.domino;
 
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -150,8 +151,8 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator {
     }
 
     @Override
-    public EnumSet<Property> getProperties() {
-        return EnumSet.of(Property.LOOKAHEAD);
+    public EnumSet<SequenceIteratorProperty> getProperties() {
+        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD);
     }
 
 }

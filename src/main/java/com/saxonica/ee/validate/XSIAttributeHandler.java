@@ -118,7 +118,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 }
 
             }
-            attMap2 = AttributeMap.fromList(list);
+            attMap2 = SequenceTool.attributeMapFromList(list);
         }
 
         // Tell the rest of the validation pipeline where to find a namespace resolver

@@ -101,7 +101,7 @@ public class AttributeSorter extends ProxyReceiver  {
             });
             //GenericSorter.quickSort(0, attributes.size(), this);
 
-            AttributeMap sorted = AttributeMap.fromList(attributes);
+            AttributeMap sorted = SequenceTool.attributeMapFromList(attributes);
             nextReceiver.startElement(elemName, type, sorted, namespaces, location, properties);
         }
 
