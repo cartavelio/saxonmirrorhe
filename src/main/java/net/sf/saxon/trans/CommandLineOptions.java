@@ -815,7 +815,8 @@ public class CommandLineOptions {
         return name.startsWith("http:") ||
             name.startsWith("https:") ||
             name.startsWith("file:") ||
-            name.startsWith("classpath:");
+            name.startsWith("classpath:") ||
+            name.startsWith("jar:");
     }
 
     public static void loadAdditionalSchemas(/*@NotNull*/ Configuration config, String additionalSchemas)
