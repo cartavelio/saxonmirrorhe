@@ -75,12 +75,13 @@
             the <code>PySaxonApiError</code> is not available therefore we throw <code>RuntimeError</code> if there are any failures.</li>
             <li>The <code>setStreaming()</code> and <code>isStreaming()</code> methods have been added to
                <code>XQueryProcessor</code>.</li>
-            <li>The <code>registerSchemaFromNode()</code> method has been added to <code>SchemaValidator</code>.</li>
-         </ul>
-         <p>From SaxonC 12.1:</p>
-         <ul>
             <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code> and <code>XQueryProcessor</code> on the
                C++, PHP and Python APIs.</li>
+            <li>The <code>registerSchemaFromNode()</code> method has been added to <code>SchemaValidator</code>.</li>
+         </ul>
+         <p>From SaxonC 12.2:</p>
+         <ul>
+            <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code> Python API.</li>
          </ul>
       </category>
       
