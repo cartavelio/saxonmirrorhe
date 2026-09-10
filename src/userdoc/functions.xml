@@ -11342,7 +11342,7 @@ return saxon:transform($splitter, $results)]]></samp>
   <xi:include href="functions/EXPath/functions-archive.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="functions/EXPath/functions-binary.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="functions/EXPath/functions-file.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-  <xi:include href="sql-extension/sql-functions.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="functions/sql-functions.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
   
 </article>
