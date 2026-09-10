@@ -416,8 +416,14 @@ PHP_METHOD(XdmItem, __toString);
 PHP_METHOD(XdmItem, getStringValue);
 PHP_METHOD(XdmItem, isAtomic);
 PHP_METHOD(XdmItem, isNode);
+PHP_METHOD(XdmItem, isMap);
+PHP_METHOD(XdmItem, isArray);
+PHP_METHOD(XdmItem, isFunctionItem);
 PHP_METHOD(XdmItem, getAtomicValue);  //check increment refCount
 PHP_METHOD(XdmItem, getNodeValue); //check increment refCount
+PHP_METHOD(XdmItem, getMap);
+PHP_METHOD(XdmItem, getArray);
+PHP_METHOD(XdmItem, getFunctionItem);
 
 /*     ============== PHP Interface of   XdmNode =============== */
 

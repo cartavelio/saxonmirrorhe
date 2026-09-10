@@ -376,12 +376,17 @@ function commonSamplesForSequences($saxonProc) {
                 if($result1a instanceof Saxon\XdmValue) {
                     echo("Test sequenceOfArraysParamC: XdmValue found\n");
                     $value1 = $result1a->getHead();
-                    if($value1 instanceof Saxon\XdmArray) {
-                        echo 'Test sequenceOfArraysParamC: XdmArray found='.$value1;
+                    if($value1->isArray()) {
+                        $arrValue1 = $value1->getArray();
+                        if($arrValue1 instanceof Saxon\XdmArray) {
+                            echo 'Test sequenceOfArraysParamC: XdmArray found='.$value1;
+                            echo "\n";
+                        } else {
+                            echo("sequenceOfArraysParamC failed type check\n");
+                        }
                     } else {
-                        echo("sequenceOfArraysParamC failed type check");
+                        echo("sequenceOfArraysParamC failed type check\n");
                     }
-                    echo "\n";
 
                 }
                 if($result1a instanceof Saxon\XdmArray) {
@@ -484,7 +489,14 @@ function handlingXdmNodes($saxonProc) {
              $result4 = $xpath->evaluateSingle("ms:nodeParam2(parse-xml('<doc><elem>text</elem></doc>')/node())");
              if($result4 != null && $result4->isNode()) {
                 $value = $result4->getNodeValue();
-                echo 'Correct Result='.$value->getStringValue();
+                $strVal = $value->getStringValue();
+                if($strVal != NULL) {
+                    echo 'Correct Result='.$strVal;
+                } else {
+                   echo 'nodeParam2 failed';
+                }
+
+
              }
          } catch (Exception $e) {
              echo 'Caught exception: ', $e->getMessage(), "\n";
