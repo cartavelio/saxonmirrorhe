@@ -181,10 +181,10 @@
       <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
    </exception>
    
-   <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
+   <!--<exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
       <created by="Michael Kay" on="2023-03-14"/>
