@@ -48,8 +48,8 @@
             the <code>ApplyXPathJAXP.java</code> sample (enhanced version of JAXP 1.3 sample)</li>
         <li>see <a class="bodylink" href="/using-xquery/api-query/xqj">Invoking XQuery using the XQJ
                 API</a> for information on the <code>XQJExamples.java</code> sample</li>
-        <li>see <a class="bodylink" href="/schema-processing/validation-api/schema-jaxp">Schema
-                Processing using JAXP</a> for information on the <code>QuickValidator.java</code>,
+        <li>see <a class="bodylink" href="/schema-processing/validation-api/schema-jaxp">Schema Validation
+            using JAXP</a> for information on the <code>QuickValidator.java</code>,
                 <code>SchemaValidatorExample.java</code>, and
                 <code>SchemaValidatorHandlerExample.java</code> samples which demonstrate the use of
             JAXP validation APIs</li>
@@ -379,10 +379,6 @@
     <section id="s9api" title="S9API Examples" class="javaonly">
         <h1>S9API Examples</h1>
 
-        <p>
-            <i>This section applies to SaxonJ.</i>
-        </p>
-
         <p>Saxon's s9api interface is a custom-designed interface for all XML processing. This API
             is useful when you want to write your own Java applications that invoke Saxon XSLT
             transforms, XQuery, and evaluate XPath expressions (for more information see <a
@@ -412,10 +408,6 @@
     <section id="jaxp" title="JAXP Transformation Examples" class="javaonly">
         <h1>JAXP Transformation Examples</h1>
 
-        <p>
-            <i>This section applies to SaxonJ only.</i>
-        </p>
-
         <p>As an alternative to the s9api interface, SaxonJ supports the Java JAXP Transformation API
             (package javax.xml.transform), originally known as TrAX, for invoking the XSLT
             stylesheet processor (see <a class="bodylink"
@@ -436,10 +428,8 @@
 
     <section id="jdom2" title="JDOM2 Example" class="javaonly">
         <h1>JDOM2 Example</h1>
-
-        <p>
-            <i>This section applies to SaxonJ only. Requires SaxonJ-PE or SaxonJ-EE</i>
-        </p>
+        
+        <aside>Requires SaxonJ-PE or SaxonJ-EE.</aside>
 
         <p>SaxonJ includes an adapter that allows the source tree to be a JDOM2 document. The sample
             application <code>JDOM2Example.java</code> illustrates how a JDOM2 tree can be used with
@@ -492,10 +482,6 @@
 
     <section id="servlet" title="Saxon Servlet" class="javaonly">
         <h1>Saxon Servlet</h1>
-
-        <p>
-            <i>This section applies to SaxonJ only.</i>
-        </p>
 
         <p>The sample application <code>SaxonServlet.java</code> is a general-purpose servlet that
             takes the name of a source document and XSLT stylesheet as URL parameters, and uses the

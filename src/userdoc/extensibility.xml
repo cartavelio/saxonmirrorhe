@@ -456,7 +456,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
     <section id="reflexive-functions" title="Reflexive Extension Functions" class="javaonly">
     <h1>Writing Reflexive Extension Functions in Java</h1>
 
-    <aside>This section applies to SaxonJ-PE and SaxonJ-EE only</aside>
+    <aside>Requires SaxonJ-PE or SaxonJ-EE.</aside>
 
     <p>Reflexive extension functions written in Java map the expanded name (namespace plus
       local-name) of the XPath function to a Java fully-qualified class name and method or field

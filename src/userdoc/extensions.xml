@@ -356,7 +356,7 @@ saxon:evaluate($expression)
     
     <aside>For the <code>select</code> attribute on <code>xsl:when</code> and <code>xsl:otherwise</code>,
     and the <code>then</code> and <code>else</code> attributes on <code>xsl:if</code>, see 
-      <a class="bodylink code" href="/v4extensions/xslt-syntax-extensions">Experimental XSLT 4.0
+      <a class="bodylink" href="/v4extensions/xslt-syntax-extensions">Experimental XSLT 4.0
         Extensions</a>.</aside>
     
     <section id="as" title="saxon:as">
