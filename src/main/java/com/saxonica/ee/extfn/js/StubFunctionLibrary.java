@@ -94,7 +94,7 @@ public class StubFunctionLibrary implements FunctionLibrary {
             throw new XPathException("Failed to read function signatures", ioErr);
         }
 
-        Item result = ParseJsonFn.parse(content.toString(), ParseJsonFn.OPTION_DETAILS.getDefaultOptions(), context);
+        Item result = ParseJsonFn.parse(content.toString(), new HashMap<>(), context);
         if (result instanceof ArrayItem) {
             for (GroundedValue member : ((ArrayItem)result).members()) {
                 if (member instanceof MapItem) {
