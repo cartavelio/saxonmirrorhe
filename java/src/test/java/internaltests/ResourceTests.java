@@ -75,7 +75,7 @@ public class ResourceTests {
     private void readFilePartly(LineNumberReader reader, XPathContext context) {
         try {
             URI uri = new URI(new ConfigTest().getDataDir() + "books.xml");
-            UnparsedTextIterator iter = new UnparsedTextIterator(reader, uri, context, "UTF-8");
+            UnparsedTextIterator iter = new UnparsedTextIterator(reader, uri, context, "UTF-8", false);
             iter.next();
             iter.next();
         } catch (URISyntaxException | XPathException e) {

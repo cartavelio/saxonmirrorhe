@@ -680,7 +680,7 @@ public class Environment implements ResourceResolver {
         }
 
         @Override
-        public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
+        public Reader resolve(URI absoluteURI, String encoding, Configuration config, boolean fallback) throws XPathException {
             try {
                 Object obj = resources.get(absoluteURI);
                 String enc = encodings.get(absoluteURI);
@@ -700,9 +700,9 @@ public class Environment implements ResourceResolver {
                     if (enc == null) {
                         enc = "UTF-8";
                     }
-                    return ResourceLoader.getReaderFromStream(stream, enc);
+                    return ResourceLoader.getReaderFromStream(stream, enc, fallback);
                 } else {
-                    return super.resolve(absoluteURI, encoding, config);
+                    return super.resolve(absoluteURI, encoding, config, fallback);
                 }
             } catch (IOException e) {
                 throw new XPathException("Failed to resolve unparsed-text URI " + absoluteURI, e);

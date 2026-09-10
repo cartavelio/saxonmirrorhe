@@ -61,7 +61,7 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
 
     public boolean evalUnparsedTextAvailable(StringValue hrefVal, String encoding, XPathContext context) {
         try {
-            UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, false, context);
+            UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, false, false, context);
             return true;
         } catch (XPathException err) {
             return false;

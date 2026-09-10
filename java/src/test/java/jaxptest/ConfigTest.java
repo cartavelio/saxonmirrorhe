@@ -611,7 +611,7 @@ public class ConfigTest {
 
     public static class LocalUnparsedTextResolver implements UnparsedTextURIResolver {
         @Override
-        public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
+        public Reader resolve(URI absoluteURI, String encoding, Configuration config, boolean fallback) throws XPathException {
             if (absoluteURI.toString().equals("http://dummy/text")) {
                 return new StringReader("Let it be");
             }

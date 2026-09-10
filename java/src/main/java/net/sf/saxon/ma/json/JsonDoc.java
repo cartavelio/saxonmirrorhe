@@ -62,7 +62,7 @@ public class JsonDoc extends SystemFunction  {
 
         Reader reader;
         try {
-            reader = context.getController().getUnparsedTextURIResolver().resolve(absoluteURI, encoding, config);
+            reader = context.getController().getUnparsedTextURIResolver().resolve(absoluteURI, encoding, config, false);
         } catch (XPathException err) {
             err.maybeSetErrorCode("FOUT1170");
             throw err;

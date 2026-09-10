@@ -197,7 +197,7 @@ public class ResourceLoader {
 
         assert resourceEncoding != null;
 
-        return getReaderFromStream(inputStream, resourceEncoding);
+        return getReaderFromStream(inputStream, resourceEncoding, false);
     }
 
     /**
@@ -209,15 +209,20 @@ public class ResourceLoader {
      * @throws UnsupportedEncodingException if there's a problem with the encoding
      */
 
-    public static BufferedReader getReaderFromStream(InputStream inputStream, String resourceEncoding) throws UnsupportedEncodingException {
+    public static BufferedReader getReaderFromStream(InputStream inputStream, String resourceEncoding, boolean fallback) throws UnsupportedEncodingException {
         try {
             Objects.requireNonNull(inputStream);
             Objects.requireNonNull(resourceEncoding);
             Charset charset2 = Charset.forName(resourceEncoding);
             // ensure that encoding errors are not recovered
-            CharsetDecoder decoder = charset2.newDecoder()
-                    .onMalformedInput(CodingErrorAction.REPORT)
-                    .onUnmappableCharacter(CodingErrorAction.REPORT);
+            CharsetDecoder decoder = charset2.newDecoder();
+            if (fallback) {
+                decoder.onMalformedInput(CodingErrorAction.REPLACE);
+                decoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+            } else {
+                decoder.onMalformedInput(CodingErrorAction.REPORT);
+                decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            }
             return new BufferedReader(new InputStreamReader(inputStream, decoder));
         } catch (Exception e) {
             throw new UnsupportedEncodingException("Unable to get reader with encoding: " + resourceEncoding);

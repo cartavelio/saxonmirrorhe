@@ -65,7 +65,7 @@ public class StandardUnparsedTextResolver
      */
 
     @Override
-    public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
+    public Reader resolve(URI absoluteURI, String encoding, Configuration config, boolean fallback) throws XPathException {
 
         Logger err = config.getLogger();
         if (debug) {
@@ -97,7 +97,7 @@ public class StandardUnparsedTextResolver
         }
 
         if (resolved instanceof StreamSource) {
-            return getReaderFromStreamSource((StreamSource)resolved, encoding, config, debug);
+            return getReaderFromStreamSource((StreamSource)resolved, encoding, config, debug, false);
         } else {
             throw new XPathException("Resolver for unparsed-text() returned non-StreamSource");
         }
@@ -147,14 +147,14 @@ public class StandardUnparsedTextResolver
             encoding = "UTF-8";
         }
         try {
-            return ResourceLoader.getReaderFromStream(inputStream, encoding);
+            return ResourceLoader.getReaderFromStream(inputStream, encoding, false);
         } catch (UnsupportedEncodingException e) {
             throw new XPathException(e).withErrorCode("FOUT1200");
         }
     }
 
     public static Reader getReaderFromStreamSource(StreamSource source, String encoding, Configuration config,
-                                                   boolean debug) throws XPathException {
+                                                   boolean debug, boolean fallback) throws XPathException {
         Logger err = config.getLogger();
         InputStream inputStream = source.getInputStream();
 
@@ -200,7 +200,7 @@ public class StandardUnparsedTextResolver
             }
             if (encoding != null) {
                 try {
-                    return ResourceLoader.getReaderFromStream(inputStream, encoding);
+                    return ResourceLoader.getReaderFromStream(inputStream, encoding, fallback);
                 } catch (UnsupportedEncodingException e) {
                     throw new XPathException(e);
                 }

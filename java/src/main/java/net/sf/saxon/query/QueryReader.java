@@ -138,7 +138,7 @@ public class QueryReader {
 
     private static String readQueryFromReader(Reader reader, IntPredicateProxy charChecker) throws XPathException {
         try {
-            UnicodeString content = UnparsedTextFunction.readFile(charChecker, reader);
+            UnicodeString content = UnparsedTextFunction.readFile(charChecker, reader, false);
             return content.toString();
         } catch (XPathException err) {
             err.setErrorCode("XPST0003");

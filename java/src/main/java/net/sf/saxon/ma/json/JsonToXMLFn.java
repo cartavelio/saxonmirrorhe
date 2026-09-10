@@ -65,9 +65,9 @@ public class JsonToXMLFn extends SystemFunction {
         String encoding = EncodingDetector.inferStreamEncoding(inputStream, "UTF-8", null);
 
         UnicodeBuilder uBuilder = new UnicodeBuilder();
-        Reader reader = ResourceLoader.getReaderFromStream(inputStream, encoding);
+        Reader reader = ResourceLoader.getReaderFromStream(inputStream, encoding, false);
         IntPredicateProxy checker = context.getConfiguration().getValidCharacterChecker();
-        UnparsedTextFunction.readFile(checker, reader, uBuilder);
+        UnparsedTextFunction.readFile(checker, reader, false, uBuilder);
         return new StringValue(uBuilder.toUnicodeString());
     }
 

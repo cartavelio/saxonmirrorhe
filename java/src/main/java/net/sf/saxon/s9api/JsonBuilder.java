@@ -163,7 +163,7 @@ public class JsonBuilder {
     public XdmValue loadJson(URI uri) throws SaxonApiException {
         Reader reader;
         try {
-            reader = new StandardUnparsedTextResolver().resolve(uri, "utf-8", config);
+            reader = new StandardUnparsedTextResolver().resolve(uri, "utf-8", config, false);
             if (reader == null) {
                 throw new XPathException("Unable to resolve json-doc() URI " + uri, "FOUT1170");
             }

@@ -35,9 +35,9 @@ public class UnparsedTextIterator extends TextLinesIterator {
      * @throws XPathException if a dynamic error occurs
      */
 
-    public UnparsedTextIterator(URI absoluteURI, /*@NotNull*/ XPathContext context, String encoding, Location location) throws XPathException {
+    public UnparsedTextIterator(URI absoluteURI, /*@NotNull*/ XPathContext context, String encoding, boolean fallback, Location location) throws XPathException {
         Configuration config = context.getConfiguration();
-        Reader reader = context.getController().getUnparsedTextURIResolver().resolve(absoluteURI, encoding, config);
+        Reader reader = context.getController().getUnparsedTextURIResolver().resolve(absoluteURI, encoding, config, fallback);
         // Note: this relies on the fact that LineNumberReader use the same definition of line endings as the unparsed-text-lines()
         // function.
 
@@ -47,16 +47,18 @@ public class UnparsedTextIterator extends TextLinesIterator {
         this.checker = context.getConfiguration().getValidCharacterChecker();
         this.encoding = encoding;
         this.location = location;
+        this.fallback = fallback;
         arrangeCleanup(reader, context);
     }
 
-    public UnparsedTextIterator(LineNumberReader reader, URI absoluteURI, /*@NotNull*/ XPathContext context, String encoding) throws XPathException {
+    public UnparsedTextIterator(LineNumberReader reader, URI absoluteURI, /*@NotNull*/ XPathContext context, String encoding, boolean fallback) throws XPathException {
         this.reader = reader;
         this.uri = absoluteURI;
         this.context = context;
         this.checker = context.getConfiguration().getValidCharacterChecker();
         this.encoding = encoding;
         this.location = null;
+        this.fallback = fallback;
         arrangeCleanup(reader, context);
     }
 }

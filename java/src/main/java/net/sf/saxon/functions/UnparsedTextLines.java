@@ -26,11 +26,12 @@ import java.util.Map;
 
 public class UnparsedTextLines extends UnparsedTextFunction implements Callable {
 
-    public final static OptionsParameter OPTION_DETAILS;
+    private final static OptionsParameter OPTION_DETAILS;
 
     static {
         OptionsParameter o = new OptionsParameter(40);
         o.addAllowedOption("encoding", SequenceType.OPTIONAL_STRING);
+        o.addAllowedOption("fallback", SequenceType.SINGLE_BOOLEAN, null);
         OPTION_DETAILS = o;
     }
 
@@ -47,6 +48,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue hrefVal = (StringValue) arguments[0].head();
         String encoding = null;
+        boolean fallback = false;
         if (getArity() == 2) {
             Item arg1 = arguments[1].head();
             if (arg1 instanceof StringValue) {
@@ -57,10 +59,15 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
                 if (encodingOption != null) {
                     encoding = encodingOption.getStringValue();
                 }
+                GroundedValue fallbackOption = options.get("fallback");
+                if (fallbackOption != null) {
+                    Item fn = fallbackOption.head();
+                    fallback = fn.effectiveBooleanValue();
+                }
             }
         }
         try {
-            return SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, context));
+            return SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, fallback, context));
         } catch (XPathException e) {
             e.maybeSetErrorCode("FOUT1170");
             if (getArity() == 2) {
@@ -70,7 +77,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
         }
     }
 
-    private SequenceIterator evalUnparsedTextLines(StringValue hrefVal, String encoding, XPathContext context) throws XPathException {
+    private SequenceIterator evalUnparsedTextLines(StringValue hrefVal, String encoding, boolean fallback, XPathContext context) throws XPathException {
         if (hrefVal == null) {
             return EmptyAtomicIterator.INSTANCE;
         }
@@ -78,15 +85,15 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         if (stable) {
             // if results have to be stable, the text has to be read into memory and cached
-            StringValue content = UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, false, context);
+            StringValue content = UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, false, false, context);
             assert content != null;
             URI abs = UnparsedTextFunction.getAbsoluteURI(href, getStaticBaseUriString(), context);
             LineNumberReader reader = new LineNumberReader(new StringReader(content.getStringValue()));
-            return new UnparsedTextIterator(reader, abs, context, encoding);
+            return new UnparsedTextIterator(reader, abs, context, encoding, fallback);
         } else {
             // with unstable results, we avoid reading the whole file into memory
             final URI absoluteURI = UnparsedTextFunction.getAbsoluteURI(href, getRetainedStaticContext().getStaticBaseUriString(), context);
-            return new UnparsedTextIterator(absoluteURI, context, encoding, null);
+            return new UnparsedTextIterator(absoluteURI, context, encoding, fallback, null);
         }
     }
 

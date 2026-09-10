@@ -38,6 +38,7 @@ public interface UnparsedTextURIResolver {
      * @param encoding    the encoding requested in the call of unparsed-text(), if any. Otherwise null.
      * @param config      The Saxon configuration. Provided in case the URI resolver
      *                    needs it.
+     * @param fallback    If true, replace non-permitted characters with U+FFFD.
      * @return a Reader, which Saxon will use to read the unparsed text. After the text has been read,
      *         the close() method of the Reader will be called. Returning null is not acceptable; if the
      *         resolver wishes to delegate to the standard resolver, it can do this by subclassing
@@ -48,6 +49,6 @@ public interface UnparsedTextURIResolver {
      */
 
     /*@NotNull*/
-    Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException;
+    Reader resolve(URI absoluteURI, String encoding, Configuration config, boolean fallback) throws XPathException;
 }
 
