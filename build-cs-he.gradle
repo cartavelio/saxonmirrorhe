@@ -103,7 +103,7 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/lib/StandardURIResolver.java"
   exclude "net/sf/saxon/lib/SystemLogger.java"
   exclude "net/sf/saxon/ma/arrays/ImmutableArrayItem.java"
-  exclude "net/sf/saxon/ma/map/HashTrieMap.java"
+  exclude "net/sf/saxon/ma/map/Vavr.java"
   exclude "net/sf/saxon/ma/trie/**"
   exclude "net/sf/saxon/om/EnumSetTool.java"
   exclude "net/sf/saxon/om/One.java"
