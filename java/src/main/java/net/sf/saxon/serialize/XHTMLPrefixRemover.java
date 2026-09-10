@@ -45,7 +45,7 @@ public class XHTMLPrefixRemover extends ProxyReceiver {
                              Location location, int properties) throws XPathException {
 
         for (NamespaceBinding ns : namespaces) {
-            if (isSpecial(ns.getNamespaceUri())) {
+            if (isSpecial(ns.getNamespaceUri()) && !ns.getPrefix().isEmpty()) {
                 namespaces = namespaces.remove(ns.getPrefix());
             }
         }
