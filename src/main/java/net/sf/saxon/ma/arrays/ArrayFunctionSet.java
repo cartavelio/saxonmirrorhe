@@ -19,6 +19,7 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -189,6 +190,14 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("index-where", 2, e -> e.populate(ArrayIndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE | INS, null));
+
+            ItemType partitionFunctionType = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM},
+                    SequenceType.SINGLE_BOOLEAN);
+
+            register("partition", 2, e -> e.populate(ArrayPartition::new, ArrayItemType.ANY_ARRAY_TYPE, STAR, 0)
+                    .arg(0, AnyItemType.getInstance(), STAR | INS, null)
+                    .arg(1, partitionFunctionType, ONE | INS, null));
 
             register("trunk", 1, e -> e.populate(ArrayTrunk::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
@@ -542,6 +551,37 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 array = array.concat(nextArray);
             }
             return array;
+        }
+
+    }
+
+    public static class ArrayPartition extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            SequenceIterator iterator = arguments[0].iterate();
+            List<ArrayItem> completePartitions = new ArrayList<>();
+            List<Item> lastPartition = new ArrayList<>();
+            FunctionItem breakWhen = (FunctionItem)arguments[1].head();
+            Item next;
+            while ((next = iterator.next()) != null) {
+                if (lastPartition.isEmpty()) {
+                    // this is the first item in the sequence
+                    lastPartition.add(next);
+                } else {
+                    Sequence val = dynamicCall(
+                            breakWhen, context, SequenceExtent.makeSequenceExtent(lastPartition), next);
+                    if (((BooleanValue)val.head()).getBooleanValue()) {
+                        completePartitions.add(SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(lastPartition)));
+                        lastPartition.clear();
+                    }
+                    lastPartition.add(next);
+                }
+            }
+            if (!lastPartition.isEmpty()) {
+                completePartitions.add(SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(lastPartition)));
+            }
+            return SequenceExtent.makeSequenceExtent(completePartitions);
         }
 
     }
