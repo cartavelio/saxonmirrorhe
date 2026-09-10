@@ -21,7 +21,7 @@ namespace SaxonCS_NUnit {
                 Assert.Fail("Error not detected");
             }
             catch (SaxonApiException e) {
-                Assert.That(e.Message.Contains("not available in Saxon-CS"));
+                Assert.That(e.Message.Contains("not available in SaxonCS"));
             }
             
         }
