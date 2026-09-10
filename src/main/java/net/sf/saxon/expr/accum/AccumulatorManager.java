@@ -58,6 +58,18 @@ public class AccumulatorManager {
     }
 
     /**
+     * Get the set of accumulators applicable to a particular tree
+     *
+     * @param tree the tree in question
+     * @return the set of applicable accumulators; a value of null indicates the universal set (all accumulators
+     * are applicable
+     */
+
+    public Set<? extends Accumulator> getApplicableAccumulators(TreeInfo tree) {
+        return applicableAccumulators.get(tree);
+    }
+
+    /**
      * Ask whether a particular accumulator is applicable to a particular tree
      * @param tree the tree in question
      * @param accumulator the accumulator in question
