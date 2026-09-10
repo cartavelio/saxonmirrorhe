@@ -17,7 +17,6 @@ import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
@@ -25,9 +24,9 @@ import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.SequenceCoercer;
@@ -115,6 +114,11 @@ public class LookupExpression extends BinaryExpression {
         return getItemType().getUType();
     }
 
+    @CSharpReplaceBody(code="ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.ANY_ARRAY_TYPE)")
+    public static ItemType getRequiredItemTypeOfLHS() {
+        return ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.ANY_ARRAY_TYPE, ExternalObjectType.THE_INSTANCE);
+    }
+
     /**
      * Type-check the expression
      */
@@ -129,9 +133,7 @@ public class LookupExpression extends BinaryExpression {
         if (Literal.isEmptySequence(getLhsExpression())) {
             return getLhsExpression();
         }
-        // Running typeCheck on the first operand can lose static type information if it's declared
-        // with a tuple type. So check this first.
-        ItemType originalType = getLhsExpression().getItemType();
+
         // Check the first operand
         getLhs().typeCheck(visitor, contextInfo);
 
@@ -148,31 +150,37 @@ public class LookupExpression extends BinaryExpression {
         isSingleContainer = getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
         if (!isArrayLookup && !isMapLookup) {
-            // TODO: improve error handling here
-            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT) {
-                if (th.relationship(containerType, AnyFunctionType.INSTANCE) == Affinity.DISJOINT &&
-                        th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
-                    if (visitor.getStaticContext().getXPathVersion() >= 40 &&
-                            th.relationship(containerType, AnyJNodeType.getInstance()) != Affinity.DISJOINT) {
-                        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
-                        setLhsExpression(SequenceCoercer.makeSequenceCoercer(
-                                getLhsExpression(),
-                                SequenceType.zeroOrMore(
-                                        ChoiceItemType.of(MapType.ANY_MAP_TYPE, AnyFunctionType.INSTANCE)),
-                                role0,
-                                true));
-                    } else if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
-                        visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
-                                                     containerType, SaxonErrorCode.SXWN9026, getLocation());
-                    } else {
-                        throw new XPathException("The left-hand operand of '?' must be a map or an array; "
-                                                         + "the supplied expression is of type " + containerType, "XPTY0004")
-                                .withLocation(getLocation())
-                                .asTypeError()
-                                .withFailingExpression(this);
-                    }
-                }
-            }
+            Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
+            setLhsExpression(SequenceCoercer.makeSequenceCoercer(
+                    getLhsExpression(),
+                    SequenceType.zeroOrMore(getRequiredItemTypeOfLHS()),
+                    role0,
+                    true));
+
+//            if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT) {
+//                if (th.relationship(containerType, AnyFunctionType.INSTANCE) == Affinity.DISJOINT &&
+//                        th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
+//                    if (visitor.getStaticContext().getXPathVersion() >= 40 &&
+//                            th.relationship(containerType, AnyJNodeType.getInstance()) != Affinity.DISJOINT) {
+//                        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
+//                        setLhsExpression(SequenceCoercer.makeSequenceCoercer(
+//                                getLhsExpression(),
+//                                SequenceType.zeroOrMore(
+//                                        ChoiceItemType.of(MapType.ANY_MAP_TYPE, AnyFunctionType.INSTANCE)),
+//                                role0,
+//                                true));
+//                    } else if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
+//                        visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
+//                                                     containerType, SaxonErrorCode.SXWN9026, getLocation());
+//                    } else {
+//                        throw new XPathException("The left-hand operand of '?' must be a map or an array; "
+//                                                         + "the supplied expression is of type " + containerType, "XPTY0004")
+//                                .withLocation(getLocation())
+//                                .asTypeError()
+//                                .withFailingExpression(this);
+//                    }
+//                }
+//            }
         }
 
         // Now check the second operand
