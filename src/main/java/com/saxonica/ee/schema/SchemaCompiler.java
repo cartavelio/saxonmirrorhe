@@ -143,7 +143,7 @@ public class SchemaCompiler {
             int numberOfSources = 0;
             List<SchemaDocument> schemaDocuments = new ArrayList<>();
             List<PreparedSchema> cachedSchemas = new ArrayList<>();
-
+            List<XPathException> failures = new ArrayList<>();
             for (Source source : sources) {
                 numberOfSources++;
 
@@ -163,7 +163,13 @@ public class SchemaCompiler {
                     // according to the XML representation constraints. It also expands included and imported
                     // schema documents
 
-                    SchemaDocument schemadoc = SchemaReader.read(source, this, null);
+                    SchemaDocument schemadoc;
+                    try {
+                        schemadoc = SchemaReader.read(source, this, null);
+                    } catch (XPathException err) {
+                        failures.add(err);
+                        continue;
+                    }
                     if (schemadoc.isCompiledSchemaDocument()) {
                         if (scmSchema != null) {
                             throw new SchemaException("An SCM input file must be loaded as a single unit");
@@ -199,6 +205,25 @@ public class SchemaCompiler {
                     throw new SchemaException("An SCM input file cannot be combined with other schema documents");
                 }
                 return scmSchema;
+            }
+
+            if (!failures.isEmpty()) {
+                if (schemaDocuments.isEmpty()) {
+                    if (numberOfSources == 1) {
+                        throw new SchemaException(failures.get(0));
+                    } else {
+                        StringBuilder msg = new StringBuilder("Failed to load a schema from any of the suggested locations. ");
+                        for (XPathException failure : failures) {
+                            msg.append(failure.getMessage());
+                            msg.append(". ");
+                        }
+                        throw new SchemaException(msg.toString());
+                    }
+                } else {
+                    for (XPathException failure : failures) {
+                        warning(failure.getMessage(), SaxonErrorCode.SXWN9000, Loc.NONE);
+                    }
+                }
             }
 
             for (SchemaDocument doc : schemaDocuments) {
