@@ -277,12 +277,13 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, AnyNodeTest.getInstance(), STAR, null)
                 .arg(1, AnyNodeTest.getInstance(), STAR, null);
 
+        //#if CSHARP==false
         register("key-map", 4, KeyMap.class, new MapType(BuiltInAtomicType.STRING, SequenceType.NODE_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, AnyNodeTest.getInstance(), ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)
                 .arg(3, BuiltInAtomicType.STRING, OPT, null);
-
+        //#endif
         //#if CSHARP==false
         register("last-modified", 1, LastModified.class, BuiltInAtomicType.DATE_TIME, OPT, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
@@ -490,8 +491,10 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("unindexed", 1, Unindexed.class, AnyItemType.getInstance(), STAR, CTRL)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance());
 
+        //#if CSHARP==false
         register("unparsed-entities", 1, UnparsedEntities.class, BuiltInAtomicType.STRING, STAR, CTRL)
                 .arg(0, NodeKindTest.DOCUMENT, ONE, null);
+        //#endif
 
         register("valid-character", 1, ValidCharacter.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null);
@@ -499,7 +502,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("with-pedigree", 1, WithPedigree.class, AnyFunctionType.getInstance(), ONE, 0)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null);
 
-
+        register("xquery", 1, XQueryFn.class, XQueryFn.functionType, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
     }
 
