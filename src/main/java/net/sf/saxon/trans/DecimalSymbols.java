@@ -321,7 +321,7 @@ public class DecimalSymbols {
             setStringProperty(propertyName, rendition,value.substring(2));
         } else {
             throw new XPathException("Value of decimal-format property " + propertyName + " must either be a single character, "
-                                             + "or have a colon (:) as its second character", "FODF1290");
+                                             + "or have a colon (:) as its second character", errorCodes[ERR_NOT_SINGLE_CHAR]);
         }
         precedences.put(marker, 0);
         precedences.put(rendition, 0);
