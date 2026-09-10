@@ -25,7 +25,7 @@ task test_graalHome(
 }
 
 task setup_graalJar(
-  dependsOn: ["test_graalHome", "eejJar"],
+  dependsOn: ["test_graalHome", "graal_eec_jar"],
   description: "Setup the EE jar file for GraalVM"
 ) {
   doLast {
@@ -33,7 +33,7 @@ task setup_graalJar(
   }
   doLast {
     copy {
-      def zipFile = file("${buildDir}/libs/saxon-ee-${saxonVersion}.jar")
+      def zipFile = file("${buildDir}/c/jars/eec/saxon-ee-${saxonVersion}.jar")
       def outputDir = "${buildDir}/graalvm"
       from(zipTree(zipFile)) {
         exclude "META-INF/TE*"
@@ -82,3 +82,374 @@ task graalImage(
     }
   }
 }
+
+
+task hec_graal_setupPreprocess(
+  type: Copy,
+  dependsOn: ["hej_featureKeys"],
+  description: "Copy HE sources for preprocessing HE"
+) {
+  into "${buildDir}/filtered/hec"
+  from("${projectDir}/src/main/java") {
+    include "net/sf/saxon/**/*.java"
+    include "net/sf/saxon/data/**"
+    exclude "javax/xml/xquery/*.java"
+    exclude "**/dotnet/**"
+    include "net/sf/saxon/**/package.html"
+    exclude "net/sf/saxon/testdriver/**"
+    exclude "net/sf/saxon/option/axiom/**"
+    exclude "net/sf/saxon/option/dom4j/**"
+    exclude "net/sf/saxon/option/jdom/**"
+    exclude "net/sf/saxon/option/jdom2/**"
+    exclude "net/sf/saxon/option/xom/**"
+    exclude "net/sf/saxon/option/sql/**"
+  }
+}
+
+task pec_graal_setupPreprocess(
+  type: Copy,
+  dependsOn: ["hej_featureKeys"],
+  description: "Copy PE sources for preprocessing PE"
+) {
+  into "${buildDir}/filtered/pec"
+  from("${projectDir}/src/main/java") {
+    include "net/sf/saxon/**/*.java"
+    include "javax/xml/xquery/*.java"
+    include "net/sf/saxon/data/**"
+    exclude "**/dotnet/**"
+    include "net/sf/saxon/**/package.html"
+    exclude "net/sf/saxon/testdriver/**"
+    exclude "net/sf/saxon/option/axiom/**"
+    exclude "net/sf/saxon/option/dom4j/**"
+    exclude "net/sf/saxon/option/jdom/**"
+    exclude "net/sf/saxon/option/jdom2/**"
+    exclude "net/sf/saxon/option/xom/**"
+    exclude "net/sf/saxon/option/sql/**"
+    include "com/saxonica/**/*.java"
+    exclude "com/saxonica/testdriver/**"
+    exclude "com/saxonica/testdriver/ee/**/*.java"
+    exclude "com/saxonica/testdriver/old/**/*.java"
+    exclude "com/saxonica/ee/**"
+    exclude "com/saxonica/config/EnterpriseConfiguration.java"
+    exclude "com/saxonica/expr/CastToUnion.java"
+    exclude "com/saxonica/expr/CastableToUnion.java"
+    exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+    exclude "com/saxonica/config/ee/**"
+    exclude "com/saxonica/js/**"
+    exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+    exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+    exclude "com/saxonica/config/DotNetPlatformPE.java"
+    exclude "com/saxonica/config/JavaPlatformPE.java"
+    exclude "com/saxonica/config/JavaPlatformEE.java"
+    exclude "com/saxonica/Validate.java"
+    exclude "com/saxonica/config/EnterpriseTransformerFactory.java"
+    exclude "com/saxonica/config/StreamingTransformerFactory.java"
+    exclude "com/saxonica/config/EnterpriseXPathFactory.java"
+    exclude "com/saxonica/config/DynamicLoaderEE.java"
+    exclude "com/saxonica/config/StandardSchemaResolver.java"
+    exclude "com/saxonica/jaxp/SchemaFactoryImpl11.java"
+  }
+}
+
+task eec_graal_setupPreprocess(
+  type: Copy,
+  dependsOn: ["hej_featureKeys"],
+  description: "Copy EE sources for preprocessing EE"
+) {
+  into "${buildDir}/filtered/eec"
+  from("${projectDir}/src/main/java") {
+    include "net/sf/saxon/**/*.java"
+    include "javax/xml/xquery/*.java"
+    include "net/sf/saxon/data/**"
+    exclude "**/dotnet/**"
+    include "net/sf/saxon/**/package.html"
+    exclude "net/sf/saxon/testdriver/**"
+    exclude "net/sf/saxon/option/axiom/**"
+    exclude "net/sf/saxon/option/dom4j/**"
+    exclude "net/sf/saxon/option/jdom/**"
+    exclude "net/sf/saxon/option/jdom2/**"
+    exclude "net/sf/saxon/option/xom/**"
+    exclude "net/sf/saxon/option/sql/**"
+    include "com/saxonica/**/*.java"
+    exclude "com/saxonica/testdriver/**/*.java"
+    exclude "com/saxonica/js/**"
+    exclude "com/saxonica/ee/bytecode/**"
+    exclude "com/saxonica/config/DotNetExtensionFunctionFactory.java"
+    exclude "com/saxonica/config/DotNetExtensionLibrary.java"
+    exclude "com/saxonica/config/DotNetPlatformPE.java"
+    exclude "com/saxonica/config/JavaPlatformPE.java"
+    exclude "com/saxonica/config/JavaPlatformEE.java"
+    exclude "com/saxonica/expr/DotNetExtensionFunctionCall.java"
+    include "com/saxonica/**/package.html"
+  }
+}
+
+task hec_graal_preprocess(
+  type: JavaExec,
+  dependsOn: ["hec_graal_setupPreprocess"],
+  description: "Preprocess HE sources"
+) {
+  inputs.files fileTree(dir: "${buildDir}/filtered/hec")
+  outputs.files fileTree(dir: "${buildDir}/preprocess/hec")
+  classpath = configurations.preprocessor
+  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args "/c",
+    "/i:${buildDir}/filtered/hec", "/o:${buildDir}/preprocess/hec",
+    "/p:EE=false", "/p:PE=false", "/p:CSHARP=false",
+    "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false"
+  doFirst {
+    mkdir "${buildDir}/preprocess/hec"
+  }
+}
+
+task pec_graal_preprocess(
+  type: JavaExec,
+  dependsOn: ["pec_graal_setupPreprocess"],
+  description: "Preprocess PE sources"
+) {
+  inputs.files fileTree(dir: "${buildDir}/filtered/pec")
+  outputs.files fileTree(dir: "${buildDir}/preprocess/pec")
+  classpath = configurations.preprocessor
+  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args "/c",
+    "/i:${buildDir}/filtered/pec", "/o:${buildDir}/preprocess/pec",
+    "/p:EE=false", "/p:PE=true", "/p:CSHARP=false",
+    "/p:SAXONC=true", "/p:BYTECODE=false", "/p:OPT=false",
+    "/p:HOF=true"
+  doFirst {
+    mkdir "${buildDir}/preprocess/pec"
+  }
+}
+
+task eec_graal_preprocess(
+  type: JavaExec,
+  dependsOn: ["eec_graal_setupPreprocess"],
+  description: "Preprocess EE sources"
+) {
+  inputs.files fileTree(dir: "${buildDir}/filtered/eec")
+  outputs.files fileTree(dir: "${buildDir}/preprocess/eec")
+  classpath = configurations.preprocessor
+  main = "com.igormaznitsa.jcp.JcpPreprocessor"
+  args "/c",
+    "/i:${buildDir}/filtered/eec", "/o:${buildDir}/preprocess/eec",
+    "/p:EE=true", "/p:PE=false", "/p:CSHARP=false",
+    "/p:SAXONC=true", "/p:BYTECODE=false", "/p:HOF=true",
+    "/p:STREAM=true", "/p:SCHEMA=true", "/p:PACKAGES=true",
+    "/p:OPT=false"
+  doFirst {
+    mkdir "${buildDir}/preprocess/eec"
+  }
+}
+
+task hec_graal_sources(
+  type: Copy,
+  dependsOn: ["hec_graal_preprocess"],
+  description: "Collect the preprocessed HE sources for compilation"
+) {
+  from "${buildDir}/preprocess/hec"
+  into "${buildDir}/src/hec"
+  filter { line ->
+    line.contains("import com.saxonica")
+      ? null
+      : line
+  }
+}
+
+task pec_graal_sources(
+  type: Copy,
+  dependsOn: ["pec_graal_preprocess"],
+  description: "Collect the preprocessed PE sources for compilation"
+) {
+  from "${buildDir}/preprocess/pec"
+  into "${buildDir}/src/pec"
+  filter { line ->
+    if (line.contains("import com.saxonica.ee")
+        || line.contains("import com.saxonica.config.ee")
+        || line.contains("net.sf.saxon.dotnet")) {
+      null
+    } else {
+      line
+    }
+  }
+}
+
+task eec_graal_sources(
+  type: Copy,
+  dependsOn: ["eec_graal_preprocess"],
+  description: "Collect the preprocessed EE sources for compilation"
+) {
+  from "${buildDir}/preprocess/eec"
+  into "${buildDir}/src/eec"
+  filter { line ->
+    line.contains("import com.saxonica.ee.bytecode")
+      ? null
+      : line
+  }
+}
+
+task graal_hecCompile(
+  type: JavaCompile,
+  dependsOn: ["hec_graal_sources"],
+  description: "Compile HE for C"
+) {
+  classpath = configurations.compileClasspath
+  source = "${buildDir}/src/hec"
+  destinationDirectory = new File("${buildDir}/classes/hec")
+}
+
+task graal_pecCompile(
+  type: JavaCompile,
+  dependsOn: ["pec_graal_sources"],
+  description: "Compile PE for C"
+) {
+  classpath = configurations.compileClasspath
+  source = "${buildDir}/src/pec"
+  destinationDirectory = new File("${buildDir}/classes/pec")
+}
+
+task graal_eecCompile(
+  type: JavaCompile,
+  dependsOn: ["eec_graal_sources"],
+  description: "Compile EE for SaxonC") {
+  classpath = configurations.compileClasspath
+  source = "${buildDir}/src/eec"
+  destinationDirectory = new File("${buildDir}/classes/eec")
+}
+
+
+
+task graal_hec_jar(
+  type: Jar,
+  dependsOn: ["graal_hecCompile", "hej_MetaInf", "rejar_Xerces", "compile_function_library"],
+  description: "Build the HE jar file for SaxonC"
+) {
+  archiveBaseName = "saxon9he"
+  destinationDirectory = file("${buildDir}/c/jars/hec")
+  manifest {
+    attributes "Project-Name": "Saxon-HE"
+    attributes "Main-Class": "net.sf.saxon.Transform"
+  }
+  from ("build/services/saxon-he") {
+    include "META-INF/**"
+  }
+  from ("build/classes/hec") {
+    include "net/**/*.class"
+  }
+  from ("src/main/resources") {
+    include "net/**"
+  }
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
+  }
+  doFirst {
+    mkdir "build/c/jars/hec"
+  }
+}
+
+task graal_pec_jar(
+  type: Jar,
+  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar", "compile_function_library"],
+  description: "Build the PE jar file for SaxonC"
+) {
+  archiveBaseName = "saxon9pe"
+  destinationDirectory = file("${buildDir}/c/jars/pec")
+  manifest {
+    attributes "Project-Name": "Saxon-PE"
+    attributes "Main-Class": "net.sf.saxon.Transform"
+  }
+  from ("build/services/saxon-pe") {
+    include "META-INF/**"
+  }
+  from ("build/classes/pec") {
+    include "net/**/*.class"
+    exclude "net/sf/saxon/ant/*.class"
+    exclude "**/sql/**/*.class"
+    include "com/saxonica/**/*.class"
+    exclude "com/saxonica/ee/**/*.class"
+    exclude "com/saxonica/expr/CastToUnion.class"
+    exclude "com/saxonica/expr/CastableToUnion.class"
+    exclude "com/saxonica/expr/CastToList.class"
+    exclude "com/saxonica/expr/CastableToList.class"
+    exclude "com/saxonica/Validate.class"
+    exclude "com/saxonica/CompileStylesheet.class"
+    exclude "com/saxonica/CompileStylesheet\$TracingObjectOutputStream.class"
+    exclude "com/saxonica/config/EnterpriseConfiguration.class"
+    exclude "com/saxonica/config/EnterpriseConfiguration\$SurrogateSchema.class"
+    exclude "com/saxonica/config/EnterpriseTransformerFactory.class"
+    exclude "com/saxonica/config/StreamingTransformerFactory.java"
+    exclude "com/saxonica/config/EnterpriseXPathFactory.class"
+    include "javax/xml/xquery/*.class"
+  }
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("src/main/resources") {
+    include "net/**"
+  }
+  from ("${buildDir}/icu") {
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
+  }
+  doFirst {
+    mkdir "build/c/pec"
+  }
+}
+
+task graal_eec_jar(
+  type: Jar,
+  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_ICU4jJar", "compile_function_library"],
+  description: "Build the EE jar file for SaxonC"
+) {
+  archiveBaseName = "saxon-ee-${saxonVersion}"
+  destinationDirectory = file("${buildDir}/c/jars/eec")
+  manifest {
+    attributes "Project-Name": "Saxon-EE"
+    attributes "Main-Class": "net.sf.saxon.Transform"
+  }
+  from ("build/services/saxon-ee") {
+    include "META-INF/**"
+  }
+  from ("build/classes/eec") {
+    include "net/**/*.class"
+    exclude "net/sf/saxon/ant/*.class"
+    exclude "**/sql/**/*.class"
+    include "com/saxonica/**/*.class"
+    include "javax/xml/xquery/*.class"
+  }
+  from ("src/main/resources") {
+    include "net/**"
+  }
+  from ("${buildDir}/xerces") {
+      include "**/*.class"
+      include "**/*.properties"
+      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from ("${buildDir}/icu") {
+      include "**/*.class"
+      include "**/*.*"
+      include "**/*.properties"
+      exclude "META-INF/MANIFEST.MF"
+    }
+  from("${buildDir}/resources/main"){
+    include "net/sf/saxon/data/sef/function-library.sef.xml"
+  }
+  doFirst {
+    mkdir "build/c/eec"
+  }
+}
+
