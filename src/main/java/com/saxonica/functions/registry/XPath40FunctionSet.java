@@ -105,9 +105,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
-//        // codepoints-to-string becomes variadic in 4.0:
-//        register("codepoints-to-string", 1, e -> e.populate(CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
-//                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
+        // codepoints-to-string becomes variadic in 4.0:
+        register("codepoints-to-string", 1, e -> e.populate(CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
+                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
         register("collation", 1, e -> e.populate(CollationFn::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
@@ -316,6 +316,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
+
+        //#if SaxonCS==false
+        register("graphemes", 1, e -> e.populate(GraphemesFn::new, BuiltInAtomicType.STRING, STAR, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
+        //#endif
 
         LocalUnionType hashInput = LocalUnionType.of(BuiltInAtomicType.STRING,
                                                       BuiltInAtomicType.HEX_BINARY,
