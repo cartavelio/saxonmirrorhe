@@ -188,7 +188,7 @@
          'hashCode#0':        '%scope%.GetHashCode()',
          'charAt#1':          '%scope%[%args%]',
          'equalsIgnoreCase#1':'Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(%scope%, %args%)',
-         'getChars#0':        'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)',
+         'getChars#4':        'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)',
          'getBytes#1':        'System.Text.Encoding.GetEncoding(%args%).GetBytes(%scope%)',
          'intern#0':          'System.String.Intern(%scope%)',
          'isEmpty#0':         '%scope%.Length==0',
@@ -535,7 +535,7 @@
          'normalize#0':               'Saxon.Impl.Helpers.UriUtils.Normalize(%scope%)',
          'resolve#1':                 'new System.Uri(%scope%, %args%)',
          'toASCIIString#0':           '%scope%.ToString()',
-         'toURL':                     'Saxon.Impl.Helpers.UriUtils.ToURL(%scope%)',
+         'toURL#0':                   'Saxon.Impl.Helpers.UriUtils.ToURL(%scope%)',
          '*':                         '%scope%.%Name%(%args%)' 
          })"/>
  
@@ -712,8 +712,10 @@
          'mod#1':           'Saxon.Impl.Helpers.BigDecimalUtils.Mod(%scope%, %args%)',
          'signum#0':        '%scope%.Sign',
          'remainder#1':     'Saxon.Impl.Helpers.BigDecimalUtils.Remainder(%scope%, %args%)',
-         'divideToIntegralValue#1':     'Saxon.Impl.Helpers.BigDecimalUtils.Idiv(%scope%, %args%)',
-         'divideAndRemainder#1':        'Saxon.Impl.Helpers.BigDecimalUtils.DiivideAndRemainder(%scope%, %args%)',
+         'divideToIntegralValue#1':     
+                            'Saxon.Impl.Helpers.BigDecimalUtils.Idiv(%scope%, %args%)',
+         'divideAndRemainder#1':        
+                            'Saxon.Impl.Helpers.BigDecimalUtils.DivideAndRemainder(%scope%, %args%)',
          'valueOf#1':        'Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(%args%)',
          'intValue#0':       '((int)%scope%)',
          'longValue#0':      '((long)%scope%)',
@@ -843,7 +845,8 @@
                'keySet#0':              'Saxon.Impl.Helpers.MapUtils.KeySet(%scope%)',
                'lastKey#0':             'Saxon.Impl.Helpers.TreeMapUtils.FirstKey(%scope%)',
                'merge#3':               'Saxon.Impl.Helpers.MapUtils.Merge(%scope%, %args%)',
-               'put#2':                 '%scope%[%arg1%] = %arg2%',
+               'put#2':                 'Saxon.Impl.Helpers.MapUtils.Put(%scope%, %args%)',
+               (:'put#2':                 '%scope%[%arg1%] = %arg2%', :)
                'putIfAbsent#2':         'Saxon.Impl.Helpers.MapUtils.PutIfAbsent(%scope%, %args%)',
                'putAll#1':              'Saxon.Impl.Helpers.MapUtils.PutAll(%scope%, %args%)',
                'setValidationParams#3': '%scope%.%name%(%args%)', 
@@ -1003,6 +1006,18 @@
    <xsl:template match="*[f:targetType(.) = 'java.util.Comparator' ]" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
+         '*':           '%scope%.%Name%(%args%)'
+         })"/>
+   </xsl:template>
+   
+   <!-- java.util.concurrent.BlockingQueue (becomes System.Collections.Concurrent.BlockingCollection) -->
+   <xsl:template match="*[f:targetType(.) = 'java.util.concurrent.BlockingQueue' ]" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'put#1':       '%scope%.Add(%args%)',
+         'take#0':      '%scope%.Take()',
+         'clear#0':     'foreach (var item in %scope%.GetConsumingEnumerable()) {}',
+         'poll#0':      'Saxon.Impl.Helpers.QueueUtils.Poll(%scope%)',
          '*':           '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
@@ -1269,7 +1284,7 @@
             <xsl:text>.ToArray()</xsl:text>           
          </xsl:when>
          <!-- stream.skip(n) becomes stream.Seek(n, SeekOrigin.Current). -->
-         <xsl:when test="name/@identifier = 'Seek' and count(arguments/argument) eq 1">
+         <xsl:when test="name/@identifier = 'skip' and count(arguments/argument) eq 1">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
             <xsl:text>.Seek(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
