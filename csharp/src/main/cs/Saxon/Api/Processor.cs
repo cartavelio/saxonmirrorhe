@@ -65,7 +65,7 @@ namespace Saxon.Api {
         /// Create a <c>Processor</c>.
         /// </summary>
         /// <param name="licensedEdition">Set to true to request Saxon-EE capability (in which case a license
-        /// is required), or false to request Saxon-HE capability.
+        /// is required), or false to request Saxon-HE capability.</param>
         public Processor(bool licensedEdition) {
             JProcessor = new Saxon.Hej.s9api.Processor(licensedEdition);
             JProcessor.getUnderlyingConfiguration().setProcessor(this);
