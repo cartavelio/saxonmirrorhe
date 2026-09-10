@@ -369,4 +369,4 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
     }
 }
 
-// Copyright (c) 2007-2022 Saxonica Limited
+// Copyright (c) 2007-2023 Saxonica Limited

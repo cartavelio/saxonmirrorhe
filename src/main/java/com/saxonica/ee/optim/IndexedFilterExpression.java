@@ -485,4 +485,4 @@ public final class IndexedFilterExpression extends Expression {
 }
 
 
-// Copyright (c) 2006-2022 Saxonica Limited
+// Copyright (c) 2006-2023 Saxonica Limited

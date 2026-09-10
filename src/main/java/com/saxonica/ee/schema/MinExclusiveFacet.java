@@ -60,4 +60,4 @@ public class MinExclusiveFacet extends ValueRangeFacet {
     }
 }
 
-// Copyright (c) 2009-2022 Saxonica Limited
+// Copyright (c) 2009-2023 Saxonica Limited

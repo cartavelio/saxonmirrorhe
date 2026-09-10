@@ -382,4 +382,4 @@ public class LocalUnionType implements PlainType, UnionType {
 
 }
 
-// Copyright (c) 2004-2022 Saxonica Limited
+// Copyright (c) 2004-2023 Saxonica Limited

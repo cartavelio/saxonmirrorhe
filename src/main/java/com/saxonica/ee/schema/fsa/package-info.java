@@ -4,3 +4,5 @@
  * <p>None of these classes will be used by typical user applications.</p>
  */
 package com.saxonica.ee.schema.fsa;
+
+// Copyright (c) 2004-2023 Saxonica Limited.

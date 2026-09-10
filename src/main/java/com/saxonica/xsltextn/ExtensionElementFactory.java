@@ -25,4 +25,4 @@ public interface ExtensionElementFactory {
 
 }
 
-// Copyright (c) 2009-2022 Saxonica Limited
+// Copyright (c) 2009-2023 Saxonica Limited

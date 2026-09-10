@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2023 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -5,6 +12,11 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.Cardinality;
 
+/**
+ * An {@link ItemElaborator} is an abstract superclass for use by expressions that deliver zero or one items
+ * as their result. A concrete subclass must implement the {@link #elaborateForItem()} method; other evaluation
+ * methods are implemented (by default) by calling {@link #elaborateForItem()}.
+ */
 public abstract class ItemElaborator extends Elaborator {
 
     @Override

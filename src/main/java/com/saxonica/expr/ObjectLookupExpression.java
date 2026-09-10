@@ -152,4 +152,4 @@ public class ObjectLookupExpression extends LookupExpression {
 
 }
 
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited

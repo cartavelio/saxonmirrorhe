@@ -114,4 +114,4 @@ public class FilterFnStreamer extends FilteringAdjunct {
 
 }
 
-// Copyright (c) 2014-2022 Saxonica Limited
+// Copyright (c) 2014-2023 Saxonica Limited

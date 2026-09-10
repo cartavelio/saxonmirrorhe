@@ -109,4 +109,4 @@ public class IndexedValue extends SearchableValue {
     }
 }
 
-// Copyright (c) 2005-2022 Saxonica Limited
+// Copyright (c) 2005-2023 Saxonica Limited

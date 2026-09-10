@@ -5,3 +5,5 @@
  * and to be compiled into a SEF file for run-time execution in SaxonJS.</p>
  */
 package com.saxonica.ee.extfn.js;
+
+// Copyright (c) 2023 Saxonica Limited.

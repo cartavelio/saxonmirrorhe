@@ -4,3 +4,5 @@
  * <p>None of these classes will be used by typical user applications.</p>
  */
 package com.saxonica.ee.s9api;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

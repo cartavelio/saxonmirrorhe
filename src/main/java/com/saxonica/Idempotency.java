@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2022 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 
 /* A program to check for idempotency in self-compilation of the XSLT-in-XSLT compiler running under Java.
 *

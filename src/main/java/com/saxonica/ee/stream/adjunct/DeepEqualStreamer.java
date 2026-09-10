@@ -150,4 +150,4 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2010-2022 Saxonica Limited - 2015.
+// Copyright (c) 2010-2023 Saxonica Limited - 2015.

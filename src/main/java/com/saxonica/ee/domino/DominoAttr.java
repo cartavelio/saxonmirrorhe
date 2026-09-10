@@ -513,6 +513,6 @@ public class DominoAttr implements NodeInfo {
     }
 }
 
-// Copyright (c) 2017-2022 Saxonica Limited
+// Copyright (c) 2017-2023 Saxonica Limited
 
 

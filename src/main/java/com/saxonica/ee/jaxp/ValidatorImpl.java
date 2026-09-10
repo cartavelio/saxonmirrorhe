@@ -360,4 +360,4 @@ public class ValidatorImpl extends Validator {
 
 }
 
-// Copyright (c) 2004-2022 Saxonica Limited
+// Copyright (c) 2004-2023 Saxonica Limited

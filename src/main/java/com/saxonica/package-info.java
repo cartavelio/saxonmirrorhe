@@ -5,3 +5,5 @@
  * <p>The classes that are directly in this package support command-line interfaces to Saxon.</p>
  */
 package com.saxonica;
+
+// Copyright (c) 2004-2023 Saxonica Limited.

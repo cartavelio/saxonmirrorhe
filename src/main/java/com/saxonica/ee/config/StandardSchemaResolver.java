@@ -190,4 +190,4 @@ public class StandardSchemaResolver implements SchemaURIResolver {
 
 }
 
-// Copyright (c) 2006-2022 Saxonica Limited
+// Copyright (c) 2006-2023 Saxonica Limited

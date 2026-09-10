@@ -3,3 +3,5 @@
  * in various processing environments.</p>
  */
 package com.saxonica.functions.registry;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

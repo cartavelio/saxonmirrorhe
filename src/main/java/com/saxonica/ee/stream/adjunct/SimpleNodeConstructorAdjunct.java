@@ -23,5 +23,5 @@ public class SimpleNodeConstructorAdjunct extends StreamingAdjunct implements Fe
     }
 }
 
-// Copyright (c) 2010-2022 Saxonica Limited
+// Copyright (c) 2010-2023 Saxonica Limited
 

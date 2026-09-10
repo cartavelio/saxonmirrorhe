@@ -21,3 +21,5 @@
  * applications.</p>
  */
 package com.saxonica.ee.validate;
+
+// Copyright (c) 2004-2023 Saxonica Limited.

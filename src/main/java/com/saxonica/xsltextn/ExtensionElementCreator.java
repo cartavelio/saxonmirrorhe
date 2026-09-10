@@ -27,4 +27,4 @@ public interface ExtensionElementCreator {
 
 }
 
-// Copyright (c) 2022 Saxonica Limited
+// Copyright (c) 2022-2023 Saxonica Limited

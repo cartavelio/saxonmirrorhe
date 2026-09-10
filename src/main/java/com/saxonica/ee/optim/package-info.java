@@ -7,3 +7,5 @@
  * <p>None of these classes will be used by typical user applications.</p>
  */
 package com.saxonica.ee.optim;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

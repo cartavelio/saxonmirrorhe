@@ -68,4 +68,4 @@ public class GeneralComparisonOperand extends Characteristic {
 
 }
 
-// Copyright (c) 2009-2022 Saxonica Limited
+// Copyright (c) 2009-2023 Saxonica Limited

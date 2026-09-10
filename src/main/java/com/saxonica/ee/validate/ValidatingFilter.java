@@ -217,4 +217,4 @@ public class ValidatingFilter extends ProxyReceiver {
     }
 }
 
-// Copyright (c) 2005-2022 Saxonica Limited No warranty.
+// Copyright (c) 2005-2023 Saxonica Limited No warranty.

@@ -74,5 +74,5 @@ public class SQLTable implements Sequence /* of MapItem */ {
     }
 }
 
-// Copyright (c) 2020-2022 Saxonica Limited
+// Copyright (c) 2020-2023 Saxonica Limited
 

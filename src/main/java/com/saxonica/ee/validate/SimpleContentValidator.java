@@ -258,5 +258,5 @@ public class SimpleContentValidator extends AttributeValidator {
 
 }
 
-// Copyright (c) 2004-2022 Saxonica Limited No warranty.
+// Copyright (c) 2004-2023 Saxonica Limited No warranty.
 

@@ -375,4 +375,4 @@ public class SendMail extends SystemFunction {
 
 }
 
-// Copyright (c) 2012-2022 Saxonica Limited
+// Copyright (c) 2012-2023 Saxonica Limited

@@ -212,4 +212,4 @@ public class ChooseAdjunct extends TransmissionAdjunct {
 
 }
 
-// Copyright 2010-2022 Saxonica Limited.
+// Copyright (c) 2010-2023 Saxonica Limited.

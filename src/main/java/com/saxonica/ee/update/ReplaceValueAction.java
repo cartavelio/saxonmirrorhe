@@ -77,4 +77,4 @@ public class ReplaceValueAction extends PendingUpdateAction {
     }
 }
 
-// Copyright (c) 2008-2022 Saxonica Limited
+// Copyright (c) 2008-2023 Saxonica Limited

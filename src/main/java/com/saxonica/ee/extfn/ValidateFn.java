@@ -375,4 +375,4 @@ public class ValidateFn extends SystemFunction {
 }
 
 
-// Copyright (c) 2009-2022 Saxonica Limited
+// Copyright (c) 2009-2023 Saxonica Limited

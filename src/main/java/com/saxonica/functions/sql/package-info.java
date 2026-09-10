@@ -5,3 +5,5 @@
  * advantage of useful new XPath 3.1 capabilities such as maps and higher-order functions.</p>
  */
 package com.saxonica.functions.sql;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

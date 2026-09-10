@@ -144,4 +144,4 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
 
 }
 
-// Copyright (c) 2020-2022 Saxonica Limited
+// Copyright (c) 2020-2023 Saxonica Limited

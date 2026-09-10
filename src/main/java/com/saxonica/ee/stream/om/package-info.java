@@ -8,3 +8,5 @@
  * and template execution in a streaming mode.</p>
  */
 package com.saxonica.ee.stream.om;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

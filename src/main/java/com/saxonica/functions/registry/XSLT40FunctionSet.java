@@ -28,3 +28,5 @@ public class XSLT40FunctionSet extends XSLT30FunctionSet {
 
 }
 
+// Copyright (c) 2020-2023 Saxonica Limited.
+

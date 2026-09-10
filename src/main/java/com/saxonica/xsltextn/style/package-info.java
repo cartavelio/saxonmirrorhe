@@ -5,3 +5,5 @@
  * expressions on the expression tree.</p>
  */
 package com.saxonica.xsltextn.style;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

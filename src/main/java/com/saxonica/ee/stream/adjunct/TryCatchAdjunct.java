@@ -118,4 +118,4 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
     }
 }
 
-// Copyright (c) 2010-2022 Saxonica Limited
+// Copyright (c) 2010-2023 Saxonica Limited

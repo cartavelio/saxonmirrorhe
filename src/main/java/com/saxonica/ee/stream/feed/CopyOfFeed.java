@@ -508,4 +508,4 @@ public class CopyOfFeed extends AbsorptionFeed {
     }
 }
 
-// Copyright (c) 2005-2022 Saxonica Limited
+// Copyright (c) 2005-2023 Saxonica Limited

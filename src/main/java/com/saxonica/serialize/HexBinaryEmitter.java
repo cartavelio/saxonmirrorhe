@@ -26,4 +26,4 @@ public class HexBinaryEmitter extends BinaryEmitter {
     }
 }
 
-// Copyright (c) 2010-2022 Saxonica Limited
+// Copyright (c) 2010-2023 Saxonica Limited

@@ -4,3 +4,5 @@
  * the code for executing the instructions at run-time.</p>
  */
 package com.saxonica.xsltextn.instruct;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

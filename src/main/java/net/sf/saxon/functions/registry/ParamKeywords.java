@@ -1,10 +1,20 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2023 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.functions.registry;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Data-only class to define the keywords used for parameters of built-in functions.
+ * Data-only class to define the keywords used for parameters of built-in functions. The parameter names
+ * are significant because they can be used as keywords in a 4.0 function call. Note that the bulk
+ * of the body of this class is system-generated from the function catalog using the tool
+ * generate-keyword-declarations.xsl.
  */
 
 public class ParamKeywords {

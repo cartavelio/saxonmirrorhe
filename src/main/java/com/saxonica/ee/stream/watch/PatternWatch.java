@@ -131,4 +131,4 @@ public abstract class PatternWatch extends AbstractWatch {
 
 }
 
-// Copyright (c) 2018-2022 Saxonica Limited No warranty.
+// Copyright (c) 2018-2023 Saxonica Limited No warranty.

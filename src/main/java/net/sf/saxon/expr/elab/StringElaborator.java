@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2023 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.om.Item;
@@ -6,17 +13,17 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.StringValue;
 
+/**
+ * An abstract Elaborator for expressions that evaluate their result as a single string (that is, as an instance
+ * of {@link UnicodeString}); they may also return null to indicate that the result is an empty sequence. The
+ * method {@link #elaborateForUnicodeString} must be implemented in a concrete subclass; other evaluation methods
+ * are implemented (by default) by calling {@link #elaborateForUnicodeString}.
+ */
 public abstract class StringElaborator extends Elaborator {
 
     public boolean returnZeroLengthWhenAbsent() {
         return false;
     }
-
-//    @Override
-//    public SequenceEvaluator eagerly() {
-//        UnicodeStringEvaluator u = elaborateForUnicodeString(returnZeroLengthWhenAbsent());
-//        return context -> new StringValue(u.eval(context));
-//    }
 
     @Override
     public PullEvaluator elaborateForPull() {

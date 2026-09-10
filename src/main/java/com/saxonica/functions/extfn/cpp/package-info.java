@@ -4,3 +4,5 @@
  * <p>None of these classes will be used directly by typical user applications.</p>
  */
 package com.saxonica.functions.extfn.cpp;
+
+// Copyright (c) 2020-2023 Saxonica Limited.

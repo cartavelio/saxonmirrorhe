@@ -75,4 +75,4 @@ public class EscapeNCName extends SystemFunction {
 
 }
 
-// Copyright (c) 2021-2022 Saxonica Limited
+// Copyright (c) 2021-2023 Saxonica Limited

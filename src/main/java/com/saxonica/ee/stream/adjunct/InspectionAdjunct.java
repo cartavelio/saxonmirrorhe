@@ -123,4 +123,4 @@ public abstract class InspectionAdjunct extends StreamingAdjunct {
 
 }
 
-// Copyright (c) 2013-2022 Saxonica Limited
+// Copyright (c) 2013-2023 Saxonica Limited

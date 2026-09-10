@@ -58,5 +58,5 @@ public class SequenceModelGroup extends ModelGroup {
     }
 }
 
-// Copyright (c) 2004-2022 Saxonica Limited
+// Copyright (c) 2004-2023 Saxonica Limited
 

@@ -176,4 +176,4 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
 
 }
 
-// Copyright (c) 2009-2022 Saxonica Limited
+// Copyright (c) 2009-2023 Saxonica Limited

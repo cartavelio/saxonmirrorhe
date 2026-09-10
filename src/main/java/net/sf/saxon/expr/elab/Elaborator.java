@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2023 Saxonica Limited
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 package net.sf.saxon.expr.elab;
 
 import net.sf.saxon.Configuration;
@@ -23,9 +30,9 @@ import net.sf.saxon.value.Cardinality;
  * Specifically: pull evaluation delivers an iterator over the result, item evaluation delivers
  * the singleton result as an item; push evaluation sends the results to an {@link Outputter},
  * boolean evaluation returns the effective boolean value, and string evaluation returns the
- * string value.</p>
+ * string value. Update evaluation is used for XQuery update expressions.</p>
  *
- * <p>The {@code Evaluator} class is the abstract root of a hierarchy of classes for elaborating
+ * <p>The {@code Elaborator} class is the abstract root of a hierarchy of classes for elaborating
  * different kinds of expression.</p>
  */
 

@@ -151,4 +151,4 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
 
 }
 
-// Copyright (c) 2009-2022 Saxonica Limited
+// Copyright (c) 2009-2023 Saxonica Limited

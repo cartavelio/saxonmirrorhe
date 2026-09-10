@@ -29,4 +29,4 @@ public class ModePE extends SimpleMode {
 
 }
 
-// Copyright (c) 2015-2022. Saxonica Limited
+// Copyright (c) 2015-2023. Saxonica Limited

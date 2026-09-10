@@ -2029,4 +2029,4 @@ public class SchemaModelLoader extends ProxyReceiver {
 
 }
 
-// Copyright (c) 2007-2022 Saxonica Limited
+// Copyright (c) 2007-2023 Saxonica Limited

@@ -7,3 +7,5 @@
  * is supplied as the input to a transformation or query.</p>
  */
 package com.saxonica.ee.domino;
+
+// Copyright (c) 2018-2023 Saxonica Limited.

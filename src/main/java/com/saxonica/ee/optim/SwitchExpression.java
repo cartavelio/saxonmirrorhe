@@ -516,4 +516,4 @@ public class SwitchExpression extends Expression implements ConditionalInstructi
     }
 }
 
-// Copyright (c) 2009-2022 Saxonica Limited
+// Copyright (c) 2009-2023 Saxonica Limited

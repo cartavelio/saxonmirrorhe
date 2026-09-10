@@ -9,3 +9,5 @@
  * version of the object at the root of the tree.</p>
  */
 package com.saxonica.xsltextn.pedigree;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

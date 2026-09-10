@@ -10,3 +10,5 @@
  * decide whether they are of interest.</p>
  */
 package com.saxonica.ee.stream.watch;
+
+// Copyright (c) 2010-2023 Saxonica Limited.

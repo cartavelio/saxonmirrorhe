@@ -32,4 +32,4 @@ public class AnalyzeUri extends SystemFunction {
 
 }
 
-// Copyright (c) 2020-2022 Saxonica Limited
+// Copyright (c) 2020-2023 Saxonica Limited
