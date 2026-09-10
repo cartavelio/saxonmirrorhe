@@ -125,8 +125,8 @@ XdmValue::~XdmValue() {
         values[i] = nullptr;
       }
     }
-    delete values;
-    delete relinquished_values;
+    delete [] values;
+    delete [] relinquished_values;
     relinquished_values = nullptr;
     values_cap =0;
   }

@@ -1781,10 +1781,12 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
   executable->setInitialTemplateParameters(parameterValues, false);
   executable->setInitialMatchSelection(node);
   XdmValue *result = executable->applyTemplatesReturningValue();
+  char * resultStr = result->getHead()->getStringValue();
   if (result != nullptr) {
     sresult->success++;
-    cout << "Result=" << result->getHead()->getStringValue() << endl;
+    cout << "Result=" << resultStr << endl;
     delete result;
+    delete resultStr;
   } else {
     sresult->failure++;
     sresult->failureList.push_back("testInitialTemplate");
@@ -1837,6 +1839,7 @@ void testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans,
     if (message != nullptr) {
       cout << "Error: " << message << endl;
     }
+    delete message;
   }
 }
 
