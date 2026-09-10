@@ -35,7 +35,7 @@ public class SomeFn extends SystemFunction {
                 : new CoercedFunction(SystemFunction.makeFunction40("identity", getRetainedStaticContext(), 1),
                                       new SpecificFunctionType(
                                             new SequenceType[]{SequenceType.SINGLE_ITEM},
-                                            SequenceType.SINGLE_BOOLEAN), false);
+                                            SequenceType.SINGLE_BOOLEAN), false, false);
         for (Item item; (item = iter.next()) != null; ) {
             boolean condition = ((BooleanValue) dynamicCall(predicate, context, new Sequence[]{item}).head()).getBooleanValue();
             if (condition) {

@@ -3,6 +3,7 @@ package com.saxonica.functions.registry;
 import com.saxonica.functions.qt4.*;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.hof.FilterFn;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
@@ -40,6 +41,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         SpecificFunctionType predicate = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.SINGLE_BOOLEAN);
+
+        SpecificFunctionType predicate2 = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
 
         SpecificFunctionType compareFnType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
@@ -181,6 +186,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
+
+        register("filter", 2, e -> e.populate(FilterFn::new, AnyItemType.getInstance(),
+                                              STAR, AS_ARG0 | LATE)
+                .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
+                .arg(1, predicate2, ONE, null));
 
         register("foot", 1, e -> e.populate(FootFn::new, AnyItemType.getInstance(), OPT, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
