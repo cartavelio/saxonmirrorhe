@@ -458,6 +458,10 @@ public final class SequenceType {
         return new SequenceType(itemType, StaticProperty.EXACTLY_ONE);
     }
 
+    public static SequenceType optional(ItemType itemType) {
+        return new SequenceType(itemType, StaticProperty.ALLOWS_ZERO_OR_ONE);
+    }
+
     /**
      * Get the "primary" part of this required type. E.g. for type element(*, xs:date) the "primary type" is element()
      *

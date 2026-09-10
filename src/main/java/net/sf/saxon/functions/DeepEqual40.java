@@ -54,6 +54,9 @@ public class DeepEqual40 extends CollatingFunctionFixed {
     public static OptionsParameter OPTION_DETAILS;
 
     static {
+        SequenceType itemsEqualFn = SequenceType.optional(
+                new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
+                                         SequenceType.OPTIONAL_BOOLEAN));
         OptionsParameter o = new OptionsParameter(40);
         o.addAllowedOption("base-uri", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("comments", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -62,13 +65,14 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         o.addAllowedOption("id-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("idrefs-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("in-scope-namespaces", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("items-equal", itemsEqualFn, BooleanValue.FALSE);
         o.addAllowedOption("namespace-prefixes", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("nilled-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         //o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("ordered", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         //o.addAllowedOption("preserve-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("processing-instructions", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        o.addAllowedOption("text-boundaries", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        //o.addAllowedOption("text-boundaries", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("timezones", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("type-annotations", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("type-variety", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
@@ -111,7 +115,6 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public boolean baseUriSignificant = false;
         public boolean commentsSignificant = false;
         public boolean debug = false;
-        public boolean falseOnError = false;
         public boolean idSignificant = false;
         public boolean idrefSignificant = false;
         public boolean inScopeNamespacesSignificant = false;
@@ -121,7 +124,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public boolean normalizeSpace = false;
         public boolean stripSpace = false;
         public boolean processingInstructionsSignificant = false;
-        public boolean textBoundariesSignificant = true;
+        //public boolean textBoundariesSignificant = true;
         public boolean timezonesSignificant = false;
         public boolean typeAnnotationsSignificant = false;
         public boolean typeVarietySignificant = true;
@@ -131,6 +134,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public String collationName;
         public StringCollator stringCollator;
         public BiFunction<AtomicValue, AtomicValue, Boolean> comparer;
+        public FunctionItem itemsEqualFn;
 
 
         private static final String[] booleanOptions = new String[]{
@@ -199,6 +203,10 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     }
                 };
             }
+            GroundedValue itemsEqual = map.get(new StringValue("items-equal"));
+            if (itemsEqual != null) {
+                itemsEqualFn = (FunctionItem)itemsEqual.head();
+            }
         }
 
         private void setBooleanOption(Map<String, GroundedValue> map, String optionName) throws XPathException {
@@ -239,9 +247,9 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     case "processing-instructions":
                         processingInstructionsSignificant = booleanValue;
                         return;
-                    case "text-boundaries":
-                        textBoundariesSignificant = booleanValue;
-                        return;
+//                    case "text-boundaries":
+//                        textBoundariesSignificant = booleanValue;
+//                        return;
                     case "timezones":
                         timezonesSignificant = booleanValue;
                         return;
@@ -269,6 +277,10 @@ public class DeepEqual40 extends CollatingFunctionFixed {
      */
 
     private static long hash(Item item, DeepEqualOptions options) {
+        if (options.itemsEqualFn != null) {
+            // We can't do any useful hashing for this case, so all items get the same hash code
+            return 1L;
+        }
         switch (item.getGenre()) {
             case ATOMIC:
                 return 0x01L << 56 | (long)((AtomicValue)item).asMapKey().hashCode();
@@ -369,10 +381,8 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         ErrorReporter reporter = context.getErrorReporter();
 
         try {
-            if (!options.textBoundariesSignificant) {
-                op1 = mergeAdjacentTextNodes(op1);
-                op2 = mergeAdjacentTextNodes(op2);
-            }
+            op1 = mergeAdjacentTextNodes(op1);
+            op2 = mergeAdjacentTextNodes(op2);
             int pos1 = 0;
             int pos2 = 0;
             while (true) {
@@ -399,10 +409,24 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     break;
                 }
 
+                if (options.itemsEqualFn != null && !(item1 instanceof NodeInfo && item2 instanceof NodeInfo)) {
+                    // Skip the callback if both items are nodes, as it will be done later
+                    Sequence comparison = options.itemsEqualFn.call(context, new Sequence[]{item1, item2});
+                    BooleanValue bv = (BooleanValue)comparison.head();
+                    if (bv != null) {
+                        if (!bv.getBooleanValue()) {
+                            return false;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+
                 if (item1 instanceof FunctionItem || item2 instanceof FunctionItem) {
                     if (!(item1 instanceof FunctionItem && item2 instanceof FunctionItem)) {
                         reason = "if one item is a function then both must be functions (position " + pos1 + ")";
-                        return false;
+                        result = false;
+                        break;
                     }
                     // two maps or arrays can be deep-equal
                     boolean fe = ((FunctionItem) item1).deepEqual40((FunctionItem) item2, context, options);
@@ -493,18 +517,33 @@ public class DeepEqual40 extends CollatingFunctionFixed {
     }
 
     /*
-     * Determine whether two nodes are deep-equal
-     * @return null if they are deep equal, or an explanation of the reason if not
+     * Determine whether two nodes are deep-equal.
      */
 
     public static String deepEqual(NodeInfo n1, NodeInfo n2, XPathContext context, DeepEqualOptions options)
             throws XPathException {
+
+        ErrorReporter reporter = context.getErrorReporter();
+
+        if (options.itemsEqualFn != null) {
+            Sequence comparison = options.itemsEqualFn.call(context, new Sequence[]{n1, n2});
+            BooleanValue bv = (BooleanValue) comparison.head();
+            if (bv != null) {
+                final String reason = "Two nodes are deemed not equal by the items-equal callback function";
+                if (!bv.getBooleanValue()) {
+                    explain(reporter, reason, options, n1, n2);
+                    return reason;
+                } else {
+                    return null;
+                }
+            }
+        }
+
         // shortcut: a node is always deep-equal to itself
         if (n1.equals(n2)) {
             return null;
         }
 
-        ErrorReporter reporter = context.getErrorReporter();
 
         if (n1.getNodeKind() != n2.getNodeKind()) {
             String reason = "node kinds differ: comparing " + showKind(n1) + " to " + showKind(n2);
@@ -565,6 +604,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                         explain(reporter, reason, options, n1, n2);
                         return reason;
                     }
+
                     String attReason = deepEqual(att1, att2, context, options);
                     if (attReason != null) {
                         final String reason = "elements have different values for the attribute " +
@@ -654,10 +694,8 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                 SequenceIterator c1 = n1.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable(node, options)));
                 SequenceIterator c2 = n2.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable(node, options)));
 
-                if (!options.textBoundariesSignificant) {
-                    c1 = mergeAdjacentTextNodes(c1);
-                    c2 = mergeAdjacentTextNodes(c2);
-                }
+                c1 = mergeAdjacentTextNodes(c1);
+                c2 = mergeAdjacentTextNodes(c2);
 
                 while (true) {
                     NodeInfo d1 = (NodeInfo)c1.next();
@@ -848,6 +886,10 @@ public class DeepEqual40 extends CollatingFunctionFixed {
     }
 
     private static int nodeHashCode(NodeInfo node, DeepEqualOptions options) {
+        // If there's a user-defined items-equal callback, hashing isn't possible
+        if (options.itemsEqualFn != null) {
+            return 1;
+        }
         // Keep it simple for now - independent of the options
         return node.getNodeKind() << 24
                 ^ node.getFingerprint()
@@ -960,7 +1002,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         return sb.toString();
     }
 
-    private static SequenceIterator mergeAdjacentTextNodes(SequenceIterator in) throws XPathException {
+    private static SequenceIterator mergeAdjacentTextNodes(SequenceIterator in) {
         List<Item> items = new ArrayList<>(20);
         boolean prevIsText = false;
         UnicodeBuilder textBuffer = new UnicodeBuilder();

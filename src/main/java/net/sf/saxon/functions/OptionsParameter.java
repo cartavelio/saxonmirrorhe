@@ -13,12 +13,16 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.Converter;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
@@ -117,6 +121,14 @@ public class OptionsParameter {
         for (String req : requiredOptions) {
             if (supplied.get(new StringValue(req)) == null) {
                 throw new XPathException("No value supplied for required option: " + req, errorCodeForAbsentValue);
+            }
+        }
+
+        // A 4.0 rule which we're applying unconditionally: reject mis-spelt option names
+        for (KeyValuePair kvp : supplied.keyValuePairs()) {
+            if (!(kvp.key instanceof StringValue && allowedOptions.containsKey(kvp.key.getStringValue())) &&
+                    !(kvp.key instanceof QNameValue && !((QNameValue)kvp.key).getNamespaceURI().isEmpty())) {
+                throw new XPathException("Unrecognized option: " + Err.depict(kvp.key), "FORG0013").asTypeError();
             }
         }
 
