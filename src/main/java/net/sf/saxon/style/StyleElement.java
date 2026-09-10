@@ -1112,8 +1112,8 @@ public abstract class StyleElement extends ElementImpl {
     void processDefaultCollationAttribute() {
         NamespaceUri ns = isInXsltNamespace() ? NamespaceUri.NULL : NamespaceUri.XSLT;
         String v = getAttributeValue(ns, "default-collation");
-        StringBuilder reasons = new StringBuilder();
         if (v != null) {
+            StringBuilder reasons = new StringBuilder();
             StringTokenizer st = new StringTokenizer(v, " \t\n\r", false);
             while (st.hasMoreTokens()) {
                 String uri = st.nextToken();

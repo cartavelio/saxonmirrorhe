@@ -151,6 +151,15 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
         return comparer;
     }
 
+    /**
+     * Get the StringCollator used to compare string values.
+     * @return the collator. May return null if the expression will never be used to compare strings
+     */
+    @Override
+    public StringCollator getStringCollator() {
+        return comparer.getCollator();
+    }
+
     @Override
     public int getSingletonOperator() {
         return operator;

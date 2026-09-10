@@ -1296,6 +1296,16 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
                 p == INTEGER;
     }
 
+    /**
+     * Ask whether a built-in type is a duration type (duration, dayTimeDuration, yearMonthDuration)
+     *
+     * @return true if the type is xs:duration or a subtype
+     */
+
+    public boolean isDurationType() {
+        return this == DURATION || this == DAY_TIME_DURATION || this == YEAR_MONTH_DURATION;
+    }
+
     //#ifdefined SCHEMA
     @Override
     public Function getComponentAsFunction() {

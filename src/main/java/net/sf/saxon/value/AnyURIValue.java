@@ -29,9 +29,6 @@ import java.nio.charset.StandardCharsets;
 
 public final class AnyURIValue extends StringValue {
 
-    /*@NotNull*/ public static final AnyURIValue EMPTY_URI = new AnyURIValue(EmptyUnicodeString.getInstance());
-
-
     /**
      * Constructor
      *
@@ -41,7 +38,7 @@ public final class AnyURIValue extends StringValue {
      */
 
     public AnyURIValue(UnicodeString value) {
-        super(value == null ? (UnicodeString) EmptyUnicodeString.getInstance() : Whitespace.collapseWhitespace(value),
+        super(value == null ? EmptyUnicodeString.getInstance() : Whitespace.collapseWhitespace(value),
               BuiltInAtomicType.ANY_URI);
     }
 
@@ -99,7 +96,7 @@ public final class AnyURIValue extends StringValue {
         //
 
         if (s == null) {
-            return s;
+            return null;
         }
         int n = s.length();
         if (n == 0) {

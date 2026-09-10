@@ -38,6 +38,7 @@ public class XSLPackage extends XSLModuleRoot {
     @Override
     public void initialise(NodeName elemName, SchemaType elementType, AttributeMap atts, NodeInfo parent, int sequenceNumber) {
         super.initialise(elemName, elementType, atts, parent, sequenceNumber);
+        processDefaultCollationAttribute();    // Bug #5636
         declaredModes = getLocalPart().equals("package");
     }
 

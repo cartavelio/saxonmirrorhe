@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.lib.StringCollator;
 
 /**
  * Interface implemented by expressions that perform a comparison
@@ -20,6 +21,14 @@ public interface ComparisonExpression {
      */
 
     AtomicComparer getAtomicComparer();
+
+    /**
+     * Get the StringCollator used to compare string values.
+     *
+     * @return the collator. May return null if the expression will never be used to compare strings
+     */
+
+    StringCollator getStringCollator();
 
     /**
      * Get the primitive (singleton) operator used: one of Token.FEQ, Token.FNE, Token.FLT, Token.FGT,

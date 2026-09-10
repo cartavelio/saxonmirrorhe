@@ -7,7 +7,9 @@
 
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.expr.CompareToConstant;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -108,6 +110,173 @@ public class GenericAtomicComparer implements AtomicComparer {
             }
         }
         return new GenericAtomicComparer(collator, context);
+    }
+
+    @FunctionalInterface
+    public interface AtomicComparisonFunction {
+        boolean compare(AtomicValue v0, AtomicValue v1, XPathContext context) throws XPathException;
+    }
+
+    private static AtomicComparisonFunction getContextFreeComparisonFunction(int operator) {
+        return (a, b, context) -> {
+            int comp = ((XPathComparable) a).compareTo((XPathComparable) b);
+            return CompareToConstant.interpretComparisonResult(operator, comp);
+        };
+    }
+
+    private static AtomicComparisonFunction getFloatingPointComparisonFunction(int operator) {
+        return (a, b, context) -> {
+            if (a.isNaN() || b.isNaN()) {
+                return operator == Token.FNE;
+            }
+            int comp = ((XPathComparable) a).compareTo((XPathComparable) b);
+            return CompareToConstant.interpretComparisonResult(operator, comp);
+        };
+    }
+
+    private static int applyPromotion(BuiltInAtomicType type) {
+        if (type.isPrimitiveNumeric()) {
+            return StandardNames.XS_DOUBLE;
+        }
+        int fp = type.getFingerprint();
+        if (fp == StandardNames.XS_UNTYPED_ATOMIC || fp == StandardNames.XS_ANY_URI) {
+            return StandardNames.XS_STRING;
+        } else {
+            return fp;
+        }
+    }
+
+    /**
+     * Factory method to make a ComparisonFunction for values of known types
+     *
+     * @param type0    primitive type of the first operand
+     * @param type1    primitive type of the second operand
+     * @param collator the collation to be used, if any. This is supplied as a SimpleCollation object
+     *                 which encapsulated both the collation URI and the collation itself.
+     * @param operator  the comparison operator, fpr example {@link Token#FEQ}
+     * @param allowRecursion flag to stop infinite recursion (the function recurses if the static types
+     *                       are not known; it then relies on testing the run-time types)
+     * @return a comparison function for two atomic values (neither of which may be null)
+     */
+
+    public static AtomicComparisonFunction makeAtomicComparisonFunction (
+            BuiltInAtomicType type0, BuiltInAtomicType type1,
+            StringCollator collator, int operator,
+            boolean allowRecursion
+    ) {
+
+        int fp0 = applyPromotion(type0);
+        int fp1 = applyPromotion(type1);
+
+        if (fp0 == fp1) {
+            switch (fp0) {
+                case StandardNames.XS_DATE_TIME:
+                case StandardNames.XS_DATE:
+                case StandardNames.XS_TIME:
+                case StandardNames.XS_G_DAY:
+                case StandardNames.XS_G_MONTH:
+                case StandardNames.XS_G_YEAR:
+                case StandardNames.XS_G_MONTH_DAY:
+                case StandardNames.XS_G_YEAR_MONTH:
+                    return (a, b, context) -> {
+                        int comp = ((CalendarValue) a).compareTo((CalendarValue) b, context.getImplicitTimezone());
+                        return CompareToConstant.interpretComparisonResult(operator, comp);
+                    };
+
+                case StandardNames.XS_DOUBLE:
+                case StandardNames.XS_FLOAT:
+                    return getFloatingPointComparisonFunction(operator);
+
+                case StandardNames.XS_BOOLEAN:
+                case StandardNames.XS_INTEGER:
+                case StandardNames.XS_DECIMAL:
+                case StandardNames.XS_DAY_TIME_DURATION:
+                case StandardNames.XS_YEAR_MONTH_DURATION:
+                case StandardNames.XS_BASE64_BINARY:
+                case StandardNames.XS_HEX_BINARY:
+                    return getContextFreeComparisonFunction(operator);
+
+                case StandardNames.XS_QNAME:
+                case StandardNames.XS_NOTATION:
+                case StandardNames.XS_DURATION:
+                    switch (operator) {
+                        case Token.FEQ:
+                            return (a, b, context) -> a.equals(b);
+                        case Token.FNE:
+                            return (a, b, context) -> !a.equals(b);
+                        default:
+                            return (a, b, context) -> {
+                                throw new XPathException(type0 + " values cannot be compared for ordering", "XPTY0004");
+                            };
+                    }
+
+                case StandardNames.XS_STRING:
+                    if (collator instanceof CodepointCollator && operator == Token.FEQ) {
+                        return (a, b, context) -> a.equals(b);
+                    }
+                    if (collator instanceof CodepointCollator && operator == Token.FNE) {
+                        return (a, b, context) -> !a.equals(b);
+                    } else {
+                        return (a, b, context) -> {
+                            int comp = collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
+                            return CompareToConstant.interpretComparisonResult(operator, comp);
+                        };
+                    }
+
+            }
+        }
+
+        if (type0.isDurationType() && type1.isDurationType()) {
+            switch (operator) {
+                case Token.FEQ:
+                    return (a, b, context) -> a.equals(b);
+                case Token.FNE:
+                    return (a, b, context) -> !a.equals(b);
+                default:
+                    // fall through and try again using the run-time types
+                    break;
+            }
+        }
+
+        return (a, b, context) -> {
+            int comp;
+            if (a instanceof StringValue && b instanceof StringValue) {
+                comp = collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
+                return CompareToConstant.interpretComparisonResult(operator, comp);
+
+            } else if (allowRecursion) {
+                // Get a comparison function using the run-time types rather than the static types
+                BuiltInAtomicType at = a.getPrimitiveType();
+                BuiltInAtomicType bt = b.getPrimitiveType();
+                AtomicComparisonFunction comparisonFunction = makeAtomicComparisonFunction(at, bt, collator, operator, false);
+                return comparisonFunction.compare(a, b, context);
+            } else if (a.isNaN() || b.isNaN()) {
+                return operator == Token.FNE;
+            } else if (a instanceof XPathComparable && b instanceof XPathComparable) {
+                XPathComparable ac = (XPathComparable) a;
+                XPathComparable bc = (XPathComparable) b;
+                try {
+                    comp = ac.compareTo(bc);
+                } catch (ClassCastException e) {
+                    throw new XPathException(e.getMessage(), "XPTY0004", context);
+                }
+                return CompareToConstant.interpretComparisonResult(operator, comp);
+            } else {
+                int implicitTimezone = context.getImplicitTimezone();
+                XPathComparable ac = a.getXPathComparable(collator, implicitTimezone);
+                XPathComparable bc = b.getXPathComparable(collator, implicitTimezone);
+                if (ac == null || bc == null) {
+                    throw new XPathException("Values are not comparable (" +
+                                                                  Type.displayTypeName(a) + ", " + Type.displayTypeName(b) + ')', "XPTY0004", context);
+                } else {
+                    try {
+                        return CompareToConstant.interpretComparisonResult(operator, ac.compareTo(bc));
+                    } catch (Exception e) {
+                        throw new XPathException(e.getMessage(), "XPTY0004", context);
+                    }
+                }
+            }
+        };
     }
 
     @Override
