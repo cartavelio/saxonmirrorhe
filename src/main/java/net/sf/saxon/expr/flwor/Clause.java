@@ -39,10 +39,10 @@ public abstract class Clause {
      * Get the location, which can be used to determine
      * the system ID and line number of the clause
      *
-     * @return the location
+     * @return the location, or {@link Loc#NONE} if not known
      */
     public Location getLocation() {
-        return location;
+        return location == null ? Loc.NONE : location;
     }
 
     /**
