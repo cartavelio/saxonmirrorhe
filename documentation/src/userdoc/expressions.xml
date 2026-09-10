@@ -503,6 +503,9 @@
 						instructions (<code>xsl:map</code>) provide detailed control over how duplicate
 						entries are handled.</p>
 					</li>
+					<li><p>The values of the entries in a map can be bound to separate variables
+					using a <code>let</code> expression. For example, <code>let {$x, $y} := $map return ...</code> is equivalent
+					to <code>let $x := $map?x, $y := $map?y return ...</code>.</p></li>
 					<li>
 						<p>A variant of the XPath <code>for</code> expression (or in XQuery, the
 							FLWOR expression) is introduced to allow iterative processing of the entries
@@ -829,6 +832,10 @@
 						<p>A variant of the <code>for</code> expression (FLWOR expression in XQuery) is introduced,
 						allowing iteration over arrays. For example, <code><![CDATA[for member $m in [<e/>, <f/>, <g/>]
 						return local-name($m)]]></code> returns the sequence <code>("e", "f", "g")</code>.</p>
+					</li>
+					<li><p>The values of the members of an array can be bound to separate variables
+					using a <code>let</code> expression. For example, <code>let [$x, $y] := $array return ...</code> is equivalent
+					to <code>let $x := $array?1, $y := $array?2 return ...</code>.</p>
 					</li>
 					<li>
 						<p>Trees of maps and arrays (called JTrees, made up of JNodes) can be processed using
@@ -2108,14 +2115,21 @@
 						<p>Multiple <code>for</code> and  <code>let</code> clauses are allowed to be
 							combined in an expression. For example:</p>
 						
-						<pre><code class="language-xquery">let $i := 2 let $j := 3 return $i + $j</code></pre>
+						<pre><code class="language-xquery">for $i in 1 to 9 let $j := $i+1 return $i × $j</code></pre>
 						
 						<p>(The use of multiple <code>let</code> clauses is implemented from Saxon 12.3; while
 							combining with <code>for</code> clauses is implemented from Saxon 13.)</p>
+						
+						<p>This example also demonstrates another new XPath 4.0 feature: the symbols <code>x</code>
+						and <code>÷</code> can be used for multiplication and division in place of <code>*</code>
+						and <code>div</code>.</p>
 					</li>
 					<li>
 						<p>The type of variables can be declared in a <code>let</code> expression.
-							(Implemented from Saxon 13.)</p>
+							(Implemented from Saxon 13.) In both XPath 4.0 and XQuery 4.0, unlike previous
+						XQuery versions, the value is coerced to the required type: so, for example, 
+						<code>let $x as xs:double := <a>1.234</a></code> binds <code>$x</code> to the
+						result of casting the string <code>"1.234"</code> to type <code>xs:double</code>.</p>
 					</li>
 					<li>
 						<p>Sequences, arrays, and maps can be destructured to extract their components into
@@ -2123,7 +2137,10 @@
 						
 						<pre><code class="language-xquery"><![CDATA[let $[ $x, $y, $z ] := [3, 4, 5] return `x={$x} y={$y} z={$z}`]]></code></pre>
 						
-						<p>returns <code>"x=3 y=4 z=5"</code>.</p>
+						<p>returns <code>"x=3 y=4 z=5"</code>. The same result is returned by the expression:</p>
+						
+						<pre><code class="language-xquery"><![CDATA[let ${ $x, $y, $z } := {'x':3, 'y':4, 'z':5} return `x={$x} y={$y} z={$z}`]]></code></pre>
+						
 					</li>
 				</ul>
 			</div>
@@ -2145,7 +2162,11 @@
 						<p>Multiple <code>for</code> and  <code>let</code> clauses are allowed to be
 							combined in an expression. For example:</p>
 						
-						<pre><code class="language-xquery">for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></pre>
+						<pre><code class="language-xquery"
+								>for $i in 0 to 9
+let $ii := $i+1								
+for $j in 1 to 3 
+return $i * $j</code></pre>
 						
 						<p>(The use of multiple <code>for</code> clauses is implemented from Saxon 12.3; while
 							combining with <code>let</code> clauses is implemented from Saxon 13.)</p>
