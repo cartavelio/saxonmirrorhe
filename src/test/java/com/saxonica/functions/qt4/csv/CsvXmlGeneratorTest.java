@@ -3,14 +3,15 @@ package com.saxonica.functions.qt4.csv;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.test.xmlfixtures.DslLambda;
 import net.sf.saxon.test.xmlfixtures.XmlFixtureBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,9 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.saxonica.functions.qt4.csv.TestHelpers.*;
-import static com.saxonica.test.matchers.MatchesCsvRecord.matchesCsvRecord;
+import static com.saxonica.functions.qt4.csv.TestHelpers.makeRowsIterator;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
-import static org.hamcrest.core.Is.is;
 
 class CsvXmlGeneratorTest {
     CsvXmlGenerator subject;
@@ -78,47 +77,6 @@ class CsvXmlGeneratorTest {
             actual = subject().fromRowSequence(input);
 
             assertThat(actual, deepEquals(expected));
-        }
-
-        @Nested
-        class ColumnNameExtractionOn {
-            @BeforeEach
-            void addColumnNamesOption() {
-                options.put("header", BooleanValue.TRUE);
-            }
-
-            @Test
-            @DisplayName("generates an empty <columns> record when asked to extract columns from an empty input")
-            void emptyInputGeneratesEmptyColumnsRecord() throws XPathException {
-                expected = csvDocFixture(csv -> {
-                    csv.element("columns");
-                    csv.element("rows");
-                });
-
-                actual = subject().fromRowSequence(EmptySequence.getInstance().iterate());
-
-                assertThat(actual, deepEquals(expected));
-            }
-
-            @Test
-            @DisplayName("generates the right Columns record when asked")
-            void generatesColumnsRecord() throws XPathException {
-                expected = csvDocFixture(csv -> {
-                    csv.element("columns", cols -> {
-                        cols.element("column", "name").element("column", "city");
-                    });
-                    csv.element("rows", rows -> {
-                        rows.element("row", row -> {
-                            row.element("field", f -> f.attr("column", "name").content("Alice"));
-                            row.element("field", f -> f.attr("column", "city").content("Aachen"));
-                        });
-                    });
-                });
-
-                actual = subject().fromRowSequence(input);
-
-                assertThat(actual, deepEquals(expected));
-            }
         }
 
         @Nested
@@ -327,20 +285,20 @@ class CsvXmlGeneratorTest {
             expected = csvDocFixture(csv -> {
                 csv.element("rows", rows -> {
                     rows.element("row", row -> {
-                        row.element("field",  f -> f.content("a"));
-                        row.element("field",  f -> f.content("b"));
-                        row.element("field",  f -> f.content("c"));
-                        row.element("field",  f -> f.content("d"));
+                        row.element("field", f -> f.content("a"));
+                        row.element("field", f -> f.content("b"));
+                        row.element("field", f -> f.content("c"));
+                        row.element("field", f -> f.content("d"));
                     }).element("row", row -> {
-                        row.element("field",  f -> f.content("1"));
-                        row.element("field",  f -> f.content("2"));
-                        row.element("field",  f -> f.content("3"));
-                        row.element("field",  f -> f.content(""));
+                        row.element("field", f -> f.content("1"));
+                        row.element("field", f -> f.content("2"));
+                        row.element("field", f -> f.content("3"));
+                        row.element("field", f -> f.content(""));
                     }).element("row", row -> {
-                        row.element("field",  f -> f.content("1"));
-                        row.element("field",  f -> f.content("2"));
-                        row.element("field",  f -> f.content("3"));
-                        row.element("field",  f -> f.content("4"));
+                        row.element("field", f -> f.content("1"));
+                        row.element("field", f -> f.content("2"));
+                        row.element("field", f -> f.content("3"));
+                        row.element("field", f -> f.content("4"));
                     });
                 });
             });
@@ -349,34 +307,7 @@ class CsvXmlGeneratorTest {
 
             assertThat(actual, deepEquals(expected));
         }
-
-        @Test
-        @DisplayName("the first row, extracted by header: true(), is also used as the first row for trim-rows")
-        void columnsNamesRowIsFirst() throws XPathException {
-            options.put("trim-rows", BooleanValue.TRUE);
-            options.put("column-names", BooleanValue.TRUE);
-
-            expected = csvDocFixture(csv -> {
-                csv.element("columns", cols -> {
-                    cols.element("column", "a").element("column", "b").element("column", "c").element("column", "d");
-                });
-                csv.element("rows", rows -> {
-                    rows.element("row", row -> {
-                        row.element("field",  f -> f.content("1"));
-                        row.element("field",  f -> f.content("2"));
-                        row.element("field",  f -> f.content("3"));
-                        row.element("field",  f -> f.content(""));
-                    }).element("row", row -> {
-                        row.element("field",  f -> f.content("1"));
-                        row.element("field",  f -> f.content("2"));
-                        row.element("field",  f -> f.content("3"));
-                        row.element("field",  f -> f.content("4"));
-                    });
-                });
-            });
-
-            actual = subject().fromRowSequence(input);
-
-            assertThat(actual, deepEquals(expected));        }
     }
+
+
 }

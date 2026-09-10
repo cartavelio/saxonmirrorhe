@@ -128,7 +128,7 @@ public class InvisibleXmlFn extends SystemFunction {
             }
 
             if (chooseAlternative != null) {
-                // T.B.D. This is an extension that lets the user supply a funtion to resolve ambiguity.
+                // T.B.D. This is an extension that lets the user supply a function to resolve ambiguity.
                 FunctionItemType ctype = chooseAlternative.getFunctionItemType();
                 if (ctype.getResultType().getPrimaryType() != MapType.ANY_MAP_TYPE) {
                     throw new XPathException("Invalid choose-alternative function item type", "FOXX0001");

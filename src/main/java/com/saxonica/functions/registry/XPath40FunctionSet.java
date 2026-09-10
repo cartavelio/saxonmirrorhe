@@ -358,12 +358,17 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate2, ONE, null));
 
-        register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
-                .arg(0, NodeKindTest.ELEMENT, STAR, null));
+        // map((xs:NCName | enum('')), xs:anyURI)
+        ItemType inScopeNamespacesResult = new MapType(
+                LocalUnionType.of(BuiltInAtomicType.NCNAME, InScopeNamespacesFn.EMPTY_STRING_TYPE),
+                                  BuiltInAtomicType.ANY_URI.one());
+        register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, inScopeNamespacesResult, ONE, LATE)
+                .arg(0, NodeKindTest.ELEMENT, ONE, null));
 
         register("intersperse", 2, e -> e.populate(Intersperse::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null));
+
 
         register("invisible-xml", 1, 2, e -> e.populate(InvisibleXmlFn::new, InvisibleXmlFn.RETURN_TYPE, OPT, 0)
                 .arg(0, ChoiceItemType.of(BuiltInAtomicType.STRING, NodeKindTest.DOCUMENT, NodeKindTest.ELEMENT), OPT, null)
@@ -676,8 +681,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, mapOrString, OPT, null));
 
-        // Result type of void() is deliberately mis-declared to prevent unwanted optimisations
-        register("void", 0, 1, e -> e.populate(VoidFn::new, AnyItemType.getInstance(), STAR, 0)
+        register("void", 0, 1, e -> e.populate(VoidFn::new, ErrorType.getInstance(), StaticProperty.EMPTY, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("while-do", 3, e -> e.populate(WhileDoFn::new, AnyItemType.getInstance(), STAR, 0)

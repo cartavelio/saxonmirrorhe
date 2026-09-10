@@ -27,7 +27,7 @@ import net.sf.saxon.value.StringValue;
 
 public class InScopeNamespacesFn extends SystemFunction {
 
-    private final static SingletonEnumType EMPTY_STRING_TYPE
+    public final static SingletonEnumType EMPTY_STRING_TYPE
             = new SingletonEnumType(EmptyUnicodeString.getInstance());
 
     @Override
