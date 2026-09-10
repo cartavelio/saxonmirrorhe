@@ -59,6 +59,8 @@ public class ConfigurationReader implements Receiver {
     private String systemId = null;
     private ArrayList<String> catalogFiles = null;
 
+    private final static int OBSOLETE_PROPERTY = -9999;
+
     public ConfigurationReader() {
     }
 
@@ -165,15 +167,23 @@ public class ConfigurationReader implements Receiver {
 
         if (!errors.isEmpty()) {
             ErrorReporter reporter;
+            XmlProcessingError foundFatal = null;
             if (targetConfig == null) {
                 reporter = new StandardErrorReporter();
             } else {
                 reporter = targetConfig.makeErrorReporter();
             }
             for (XmlProcessingError err : errors) {
+                if (!err.isWarning()) {
+                    if (foundFatal == null) {
+                        foundFatal = err;
+                    }
+                }
                 reporter.report(err.asWarning());
             }
-            throw XPathException.fromXmlProcessingError(errors.get(0));
+            if (foundFatal != null) {
+                throw XPathException.fromXmlProcessingError(foundFatal);
+            }
         }
         if (baseConfiguration != null) {
             targetConfig.importLicenseDetails(baseConfiguration);
@@ -346,8 +356,8 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "collationUriResolver", FeatureCode.COLLATION_URI_RESOLVER_CLASS, "J");
         applyProperty(props, "collectionFinder", FeatureCode.COLLECTION_FINDER_CLASS, "J");
         applyProperty(props, "compileWithTracing", FeatureCode.COMPILE_WITH_TRACING, "JN");
-        applyProperty(props, "debugByteCode", FeatureCode.DEBUG_BYTE_CODE, "J");
-        applyProperty(props, "debugByteCodeDirectory", FeatureCode.DEBUG_BYTE_CODE_DIR, "J");
+        applyProperty(props, "debugByteCode", OBSOLETE_PROPERTY, "J");
+        applyProperty(props, "debugByteCodeDirectory", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "defaultCollation", FeatureCode.DEFAULT_COLLATION, "JN");
         applyProperty(props, "defaultCollection", FeatureCode.DEFAULT_COLLECTION, "JN");
         applyProperty(props, "defaultRegexEngine", FeatureCode.DEFAULT_REGEX_ENGINE, "J");
@@ -356,19 +366,20 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "dtdValidationRecoverable", FeatureCode.DTD_VALIDATION_RECOVERABLE, "J");
         applyProperty(props, "eagerEvaluation", FeatureCode.EAGER_EVALUATION, "JN");
         applyProperty(props, "entityResolver", FeatureCode.ENTITY_RESOLVER_CLASS, "J");
-        applyProperty(props, "errorListener", FeatureCode.ERROR_LISTENER_CLASS, "J");
         applyProperty(props, "environmentVariableResolver", FeatureCode.ENVIRONMENT_VARIABLE_RESOLVER_CLASS, "J");
+        applyProperty(props, "errorListener", FeatureCode.ERROR_LISTENER_CLASS, "J");
         applyProperty(props, "expandAttributeDefaults", FeatureCode.EXPAND_ATTRIBUTE_DEFAULTS, "JN");
-        applyProperty(props, "generateByteCode", FeatureCode.GENERATE_BYTE_CODE, "J");
+        applyProperty(props, "generateByteCode", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "ignoreSAXSourceParser", FeatureCode.IGNORE_SAX_SOURCE_PARSER, "J");
+        applyProperty(props, "lazyConstructionMode", OBSOLETE_PROPERTY, "JN");
         applyProperty(props, "lineNumbering", FeatureCode.LINE_NUMBERING, "JN");
         applyProperty(props, "markDefaultedAttributes", FeatureCode.MARK_DEFAULTED_ATTRIBUTES, "J");
         applyProperty(props, "maxCompiledClasses", FeatureCode.MAX_COMPILED_CLASSES, "J");
-        applyProperty(props, "monitorHotSpotByteCode", FeatureCode.MONITOR_HOT_SPOT_BYTE_CODE, "J");
+        applyProperty(props, "monitorHotSpotByteCode", OBSOLETE_PROPERTY, "J");
         applyProperty(props, "optimizationLevel", FeatureCode.OPTIMIZATION_LEVEL, "JN");
         applyProperty(props, "parser", FeatureCode.SOURCE_PARSER_CLASS, "J");
         applyProperty(props, "preEvaluateDoc", FeatureCode.PRE_EVALUATE_DOC_FUNCTION, "JN");
-        //applyProperty(props, "preferJaxpParser", FeatureCode.PREFER_JAXP_PARSER);
+        applyProperty(props, "preferJaxpParser", OBSOLETE_PROPERTY, "N");
         applyProperty(props, "recognizeUriQueryParameters", FeatureCode.RECOGNIZE_URI_QUERY_PARAMETERS, "JN");
         applyProperty(props, "resourceResolver", FeatureCode.RESOURCE_RESOLVER_CLASS, "J");
         applyProperty(props, "retainNodeForDiagnostics", FeatureCode.RETAIN_NODE_FOR_DIAGNOSTICS, "JN");
@@ -385,6 +396,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "suppressEvaluationExpiryWarning", FeatureCode.SUPPRESS_EVALUATION_EXPIRY_WARNING, "JN");
         applyProperty(props, "suppressXPathWarnings", FeatureCode.SUPPRESS_XPATH_WARNINGS, "JN");
         applyProperty(props, "suppressXsltNamespaceCheck", FeatureCode.SUPPRESS_XSLT_NAMESPACE_CHECK, "JN");
+        applyProperty(props, "thresholdForFunctionInlining", FeatureCode.THRESHOLD_FOR_FUNCTION_INLINING, "JN");
         applyProperty(props, "thresholdForHotspotByteCode", FeatureCode.THRESHOLD_FOR_HOTSPOT_BYTE_CODE, "J");
         applyProperty(props, "timing", FeatureCode.TIMING, "JN");
         applyProperty(props, "traceExternalFunctions", FeatureCode.TRACE_EXTERNAL_FUNCTIONS, "JN");
@@ -402,6 +414,8 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "validationWarnings", FeatureCode.VALIDATION_WARNINGS, "JN");
         applyProperty(props, "versionOfXml", FeatureCode.XML_VERSION, "J");
         applyProperty(props, "xInclude", FeatureCode.XINCLUDE, "J");
+        applyProperty(props, "xpathVersionForXsd", FeatureCode.XPATH_VERSION_FOR_XSD, "JN");
+        applyProperty(props, "xpathVersionForXslt", FeatureCode.XPATH_VERSION_FOR_XSLT, "JN");
         applyProperty(props, "zipUriPattern", FeatureCode.ZIP_URI_PATTERN, "JN");
 
         for (String name : props.stringPropertyNames()) {
@@ -414,6 +428,10 @@ public class ConfigurationReader implements Receiver {
     private void applyProperty(Properties props, String attributeName, int featureCode, String flags) {
         String value = props.getProperty(attributeName);
         if (value != null) {
+            if (featureCode == OBSOLETE_PROPERTY) {
+                error(props.getProperty("#element"), attributeName, value, "#obsolete");
+                return;
+            }
             if (!checkPlatform(flags)) {
                 error(props.getProperty("#element"), attributeName, value, "Property " + attributeName + " is not available in SaxonCS");
                 return;
@@ -684,6 +702,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "emptyLeast", FeatureCode.XQUERY_EMPTY_LEAST, "JN");
         applyProperty(props, "inheritNamespaces", FeatureCode.XQUERY_INHERIT_NAMESPACES, "JN");
         applyProperty(props, "moduleUriResolver", FeatureCode.MODULE_URI_RESOLVER_CLASS, "J");
+        applyProperty(props, "multipleModuleImports", FeatureCode.XQUERY_MULTIPLE_MODULE_IMPORTS, "JN");
         applyProperty(props, "preserveBoundarySpace", FeatureCode.XQUERY_PRESERVE_BOUNDARY_SPACE, "JN");
         applyProperty(props, "preserveNamespaces", FeatureCode.XQUERY_PRESERVE_NAMESPACES, "JN");
         applyProperty(props, "requiredContextItemType", FeatureCode.XQUERY_REQUIRED_CONTEXT_ITEM_TYPE, "JN");
@@ -715,7 +734,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "initialTemplate", FeatureCode.XSLT_INITIAL_TEMPLATE, "JN");
         applyProperty(props, "messageEmitter", FeatureCode.MESSAGE_EMITTER_CLASS, "J");
         applyProperty(props, "outputUriResolver", FeatureCode.OUTPUT_URI_RESOLVER_CLASS, "J");
-        applyProperty(props, "recoveryPolicy", FeatureCode.RECOVERY_POLICY_NAME, "JN");
+        applyProperty(props, "recoveryPolicy", OBSOLETE_PROPERTY, "JN");
         applyProperty(props, "resultDocumentThreads", FeatureCode.RESULT_DOCUMENT_THREADS, "JN");
         applyProperty(props, "schemaAware", FeatureCode.XSLT_SCHEMA_AWARE, "JN");
         applyProperty(props, "staticErrorListener", FeatureCode.XSLT_STATIC_ERROR_LISTENER_CLASS, "J");
@@ -723,7 +742,7 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "strictStreamability", FeatureCode.STRICT_STREAMABILITY, "JN");
         applyProperty(props, "styleParser", FeatureCode.STYLE_PARSER_CLASS, "J");
         applyProperty(props, "version", FeatureCode.XSLT_VERSION, "JN");
-        //applyProperty(props, "versionWarning", FeatureKeys.VERSION_WARNING);
+        applyProperty(props, "versionWarning", OBSOLETE_PROPERTY, "JN");
 
         for (String name : props.stringPropertyNames()) {
             if (!name.equals("#element")) {
@@ -743,12 +762,13 @@ public class ConfigurationReader implements Receiver {
             }
         }
         props.setProperty("#element", "xsd");
+        applyProperty(props, "allowUnresolvedSchemaComponents", FeatureCode.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS, "JN");
         applyProperty(props, "assertionsCanSeeComments", FeatureCode.ASSERTIONS_CAN_SEE_COMMENTS, "JN");
         applyProperty(props, "implicitSchemaImports", FeatureCode.IMPLICIT_SCHEMA_IMPORTS, "JN");
         applyProperty(props, "multipleSchemaImports", FeatureCode.MULTIPLE_SCHEMA_IMPORTS, "JN");
         applyProperty(props, "occurrenceLimits", FeatureCode.OCCURRENCE_LIMITS, "JN");
         applyProperty(props, "schemaUriResolver", FeatureCode.SCHEMA_URI_RESOLVER_CLASS, "J");
-        applyProperty(props, "thresholdForCompilingTypes", FeatureCode.THRESHOLD_FOR_COMPILING_TYPES, "JN");
+        applyProperty(props, "thresholdForCompilingTypes", OBSOLETE_PROPERTY, "JN");
         applyProperty(props, "useXsiSchemaLocation", FeatureCode.USE_XSI_SCHEMA_LOCATION, "JN");
         applyProperty(props, "version", FeatureCode.XSD_VERSION, "JN");
 
@@ -769,6 +789,9 @@ public class ConfigurationReader implements Receiver {
         } else if (required.equals("#unrecognized")) {
             err = new XmlProcessingIncident("Unrecognized configuration property " +
                                                     element + "/@" + attribute);
+        } else if (required.equals("#obsolete")) {
+            err = new XmlProcessingIncident("Obsolete configuration property " +
+                                                    element + "/@" + attribute).asWarning();
         } else if (required.contains("is not available in")) {
             err = new XmlProcessingIncident("Configuration property " +
                                                     element + "/@" + attribute + ": " + required);
