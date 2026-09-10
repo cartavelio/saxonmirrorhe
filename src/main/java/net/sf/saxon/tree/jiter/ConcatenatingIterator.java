@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 
 /**
- * An iterator over nodes, that concatenates the nodes returned by two supplied iterators.
+ * An iterator (typically over nodes), that concatenates the nodes returned by two supplied iterators.
  */
 
 public class ConcatenatingIterator<E> implements Iterator<E> {
