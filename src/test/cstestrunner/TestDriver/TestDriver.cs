@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
 using javax.xml.transform.stream;
 using System.Diagnostics;
+using ICU4N.Text;
 
 namespace TestRunner {
     public abstract class TestDriver {
@@ -38,6 +39,7 @@ namespace TestRunner {
         protected IFeedbackListener feedback = new DefaultFeedbackListener();
         protected bool useXslt30Transformer = true; // Temporary for controlling test processor
         protected bool strict = false;
+        protected bool jitFlag = false;
         protected string edition = "EE";
         public bool schemaAware = false;
 
@@ -103,6 +105,7 @@ namespace TestRunner {
         }
 
         public static void Main(string[] args) {
+            experiment();
             string language = "XQ";
             foreach (string a in args)
             {
@@ -168,9 +171,17 @@ namespace TestRunner {
                     if (args[i].Equals("-export")) {
                         export = true;
                     }
+                    
+                    if (args[i].StartsWith("-exceptions")) {
+                        exceptionsFileName = args[i].Substring("-exceptions:".Length);
+                    }
 
                     if (args[i].Equals("-save")) {
                         saveResults = true;
+                    }
+                    
+                    if (args[i].StartsWith("-jit") && args[i] != "-jit:off") {
+                        jitFlag = true;
                     }
 
                     if (args[i].StartsWith("-lang")) {
@@ -567,6 +578,7 @@ namespace TestRunner {
                         }
                         catch (Exception ex) {
                             Console.WriteLine("*** Error in evaluating testcase:" + ex.Message);
+                            Console.WriteLine(ex.StackTrace);
                         }
                     }
                 }
@@ -620,23 +632,25 @@ namespace TestRunner {
         }
 
         public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
-    }
+        
+        public static void experiment() {
+            // ICU4N.Text.RuleBasedCollator uca = (ICU4N.Text.RuleBasedCollator)ICU4N.Text.Collator.GetInstance();
+            // uca.Strength = CollationStrength.Primary;
+            // Console.Error.WriteLine("Comparison: " +  uca.Compare("A", "a"));
+            // string aKey = "";
+            // foreach (byte b in uca.GetCollationKey("A").ToByteArray()) {
+            //     aKey = aKey + b + " ";
+            // }
+            // Console.Error.WriteLine("Collation Key (A): " + aKey);
+            // aKey = "";
+            // foreach (byte b in uca.GetCollationKey("a").ToByteArray()) {
+            //     aKey = aKey + b + " ";
+            // }
+            // Console.Error.WriteLine("Collation Key (a): " + aKey);
+        }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//
+    }
+    
+    
+
 }

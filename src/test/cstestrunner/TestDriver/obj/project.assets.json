@@ -11,6 +11,148 @@
           "lib/netstandard2.0/HtmlAgilityPack.dll": {}
         }
       },
+      "ICU4N/60.1.0-alpha.354": {
+        "type": "package",
+        "dependencies": {
+          "J2N": "2.0.0-beta-0012",
+          "Microsoft.Extensions.Caching.Memory": "2.0.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/ICU4N.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/ICU4N.dll": {}
+        }
+      },
+      "ICU4N.Collation/60.1.0-alpha.354": {
+        "type": "package",
+        "dependencies": {
+          "ICU4N": "60.1.0-alpha.354"
+        },
+        "compile": {
+          "lib/netstandard2.0/ICU4N.Collation.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/ICU4N.Collation.dll": {}
+        }
+      },
+      "ICU4N.CurrencyData/60.1.0-alpha.354": {
+        "type": "package",
+        "dependencies": {
+          "ICU4N": "60.1.0-alpha.354"
+        },
+        "compile": {
+          "lib/netstandard2.0/ICU4N.CurrencyData.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/ICU4N.CurrencyData.dll": {}
+        }
+      },
+      "ICU4N.LanguageData/60.1.0-alpha.354": {
+        "type": "package",
+        "dependencies": {
+          "ICU4N": "60.1.0-alpha.354"
+        },
+        "compile": {
+          "lib/netstandard2.0/ICU4N.LanguageData.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/ICU4N.LanguageData.dll": {}
+        }
+      },
+      "ICU4N.RegionData/60.1.0-alpha.354": {
+        "type": "package",
+        "dependencies": {
+          "ICU4N": "60.1.0-alpha.354"
+        },
+        "compile": {
+          "lib/netstandard2.0/ICU4N.RegionData.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/ICU4N.RegionData.dll": {}
+        }
+      },
+      "ICU4N.Transliterator/60.1.0-alpha.354": {
+        "type": "package",
+        "dependencies": {
+          "ICU4N": "60.1.0-alpha.354"
+        },
+        "compile": {
+          "lib/netstandard2.0/ICU4N.Transliterator.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/ICU4N.Transliterator.dll": {}
+        }
+      },
+      "J2N/2.0.0-beta-0012": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/J2N.dll": {}
+        },
+        "runtime": {
+          "lib/net5.0/J2N.dll": {}
+        }
+      },
+      "Microsoft.Extensions.Caching.Abstractions/2.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "2.0.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.Caching.Abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Caching.Abstractions.dll": {}
+        }
+      },
+      "Microsoft.Extensions.Caching.Memory/2.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "2.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.0.0",
+          "Microsoft.Extensions.Options": "2.0.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.Caching.Memory.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Caching.Memory.dll": {}
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/2.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
+        }
+      },
+      "Microsoft.Extensions.Options/2.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.0.0",
+          "Microsoft.Extensions.Primitives": "2.0.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.Options.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Options.dll": {}
+        }
+      },
+      "Microsoft.Extensions.Primitives/2.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.4.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Microsoft.Extensions.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Extensions.Primitives.dll": {}
+        }
+      },
       "Singulink.Numerics.BigDecimal/1.0.2": {
         "type": "package",
         "dependencies": {
@@ -56,6 +198,12 @@
         "framework": ".NETCoreApp,Version=v5.0",
         "dependencies": {
           "HtmlAgilityPack": "1.11.33",
+          "ICU4N": "60.1.0-alpha.354",
+          "ICU4N.Collation": "60.1.0-alpha.354",
+          "ICU4N.CurrencyData": "60.1.0-alpha.354",
+          "ICU4N.LanguageData": "60.1.0-alpha.354",
+          "ICU4N.RegionData": "60.1.0-alpha.354",
+          "ICU4N.Transliterator": "60.1.0-alpha.354",
           "Singulink.Numerics.BigDecimal": "1.0.2",
           "Singulink.Numerics.BigIntegerExtensions": "1.1.0",
           "System.Collections.Immutable": "5.0.0"
@@ -116,6 +264,210 @@
         "lib/uap10.0/HtmlAgilityPack.dll",
         "lib/uap10.0/HtmlAgilityPack.pdb",
         "lib/uap10.0/HtmlAgilityPack.pri"
+      ]
+    },
+    "ICU4N/60.1.0-alpha.354": {
+      "sha512": "X/0oiVyXFvtoTiezGcP6nZzWCJ0gh/Z98hb7lGsvbHDmz/Kuw40s0obUUNPIsT3ClgIvADewThWTUumPOFjd+A==",
+      "type": "package",
+      "path": "icu4n/60.1.0-alpha.354",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "icu4n.60.1.0-alpha.354.nupkg.sha512",
+        "icu4n.nuspec",
+        "lib/net40/ICU4N.dll",
+        "lib/net40/ICU4N.xml",
+        "lib/net451/ICU4N.dll",
+        "lib/net451/ICU4N.xml",
+        "lib/netstandard2.0/ICU4N.dll",
+        "lib/netstandard2.0/ICU4N.xml",
+        "unicode-icon-128x128.jpg"
+      ]
+    },
+    "ICU4N.Collation/60.1.0-alpha.354": {
+      "sha512": "fEMOqEhVzknM2xuTyUCZvnxK9bN7kaCVpwOcz9CLM5VYHE5DN+KQs7OSxTuL6Uk49GrrgL/tLmzgjCvFcBa3PA==",
+      "type": "package",
+      "path": "icu4n.collation/60.1.0-alpha.354",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "icu4n.collation.60.1.0-alpha.354.nupkg.sha512",
+        "icu4n.collation.nuspec",
+        "lib/net40/ICU4N.Collation.dll",
+        "lib/net40/ICU4N.Collation.xml",
+        "lib/net451/ICU4N.Collation.dll",
+        "lib/net451/ICU4N.Collation.xml",
+        "lib/netstandard2.0/ICU4N.Collation.dll",
+        "lib/netstandard2.0/ICU4N.Collation.xml",
+        "unicode-icon-128x128.jpg"
+      ]
+    },
+    "ICU4N.CurrencyData/60.1.0-alpha.354": {
+      "sha512": "/3mf4cAsQjBriKYM1cWWpaKPEzeP8KanGzkpSYsPUJ50/eqYyjE4Ki34KaNKi0/1BgG0cjSI+uAn9ISlbbkJAA==",
+      "type": "package",
+      "path": "icu4n.currencydata/60.1.0-alpha.354",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "icu4n.currencydata.60.1.0-alpha.354.nupkg.sha512",
+        "icu4n.currencydata.nuspec",
+        "lib/net40/ICU4N.CurrencyData.dll",
+        "lib/net40/ICU4N.CurrencyData.xml",
+        "lib/net451/ICU4N.CurrencyData.dll",
+        "lib/net451/ICU4N.CurrencyData.xml",
+        "lib/netstandard2.0/ICU4N.CurrencyData.dll",
+        "lib/netstandard2.0/ICU4N.CurrencyData.xml",
+        "unicode-icon-128x128.jpg"
+      ]
+    },
+    "ICU4N.LanguageData/60.1.0-alpha.354": {
+      "sha512": "SrSCrBt/e2YV/t8/6vB+VwIG+V77PXRF3X6M35phcHTaxA0UbwEQ8AbHPfkzuKQfO3vdlJ2tAf3cJx5NxnNtiw==",
+      "type": "package",
+      "path": "icu4n.languagedata/60.1.0-alpha.354",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "icu4n.languagedata.60.1.0-alpha.354.nupkg.sha512",
+        "icu4n.languagedata.nuspec",
+        "lib/net40/ICU4N.LanguageData.dll",
+        "lib/net40/ICU4N.LanguageData.xml",
+        "lib/net451/ICU4N.LanguageData.dll",
+        "lib/net451/ICU4N.LanguageData.xml",
+        "lib/netstandard2.0/ICU4N.LanguageData.dll",
+        "lib/netstandard2.0/ICU4N.LanguageData.xml",
+        "unicode-icon-128x128.jpg"
+      ]
+    },
+    "ICU4N.RegionData/60.1.0-alpha.354": {
+      "sha512": "jLB+6aaNO6Ua+wbDaqBfAOB3909VgXb2hkqbfVkShQOpTRBfqtDfxbxwS+jowK80JhNpttm94De8nPDM0bd1TQ==",
+      "type": "package",
+      "path": "icu4n.regiondata/60.1.0-alpha.354",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "icu4n.regiondata.60.1.0-alpha.354.nupkg.sha512",
+        "icu4n.regiondata.nuspec",
+        "lib/net40/ICU4N.RegionData.dll",
+        "lib/net40/ICU4N.RegionData.xml",
+        "lib/net451/ICU4N.RegionData.dll",
+        "lib/net451/ICU4N.RegionData.xml",
+        "lib/netstandard2.0/ICU4N.RegionData.dll",
+        "lib/netstandard2.0/ICU4N.RegionData.xml",
+        "unicode-icon-128x128.jpg"
+      ]
+    },
+    "ICU4N.Transliterator/60.1.0-alpha.354": {
+      "sha512": "INSNel2JF6pLfBKkh4hdJBQ6iuHI+0qtfI7KDlOjoZS++c7L/UKFLBmU4psCxSRm6ntWEx7dosxnsIkNMq5oUA==",
+      "type": "package",
+      "path": "icu4n.transliterator/60.1.0-alpha.354",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "icu4n.transliterator.60.1.0-alpha.354.nupkg.sha512",
+        "icu4n.transliterator.nuspec",
+        "lib/net40/ICU4N.Transliterator.dll",
+        "lib/net40/ICU4N.Transliterator.xml",
+        "lib/net451/ICU4N.Transliterator.dll",
+        "lib/net451/ICU4N.Transliterator.xml",
+        "lib/netstandard2.0/ICU4N.Transliterator.dll",
+        "lib/netstandard2.0/ICU4N.Transliterator.xml",
+        "unicode-icon-128x128.jpg"
+      ]
+    },
+    "J2N/2.0.0-beta-0012": {
+      "sha512": "QwXTVD41IYPmSBInJiGvv5c4X2P60p8B8JPuCMGiKuumw9kUv45jbX56Xx0bgYPWHXQVex3tV+NHHZ7cEidLFg==",
+      "type": "package",
+      "path": "j2n/2.0.0-beta-0012",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "j2n-icon-100x100.png",
+        "j2n.2.0.0-beta-0012.nupkg.sha512",
+        "j2n.nuspec",
+        "lib/net40/J2N.dll",
+        "lib/net40/J2N.xml",
+        "lib/net45/J2N.dll",
+        "lib/net45/J2N.xml",
+        "lib/net5.0/J2N.dll",
+        "lib/net5.0/J2N.xml",
+        "lib/netcoreapp3.0/J2N.dll",
+        "lib/netcoreapp3.0/J2N.xml",
+        "lib/netstandard2.0/J2N.dll",
+        "lib/netstandard2.0/J2N.xml",
+        "lib/netstandard2.1/J2N.dll",
+        "lib/netstandard2.1/J2N.xml"
+      ]
+    },
+    "Microsoft.Extensions.Caching.Abstractions/2.0.0": {
+      "sha512": "kGMEV53Od1ES0BDh7OOKbTW9Zu5dbbQ72yI936dvvbHlde3puuq/WRKAccFgcB2PuRjox1HFhA9+t53RYqfuEA==",
+      "type": "package",
+      "path": "microsoft.extensions.caching.abstractions/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Microsoft.Extensions.Caching.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Caching.Abstractions.xml",
+        "microsoft.extensions.caching.abstractions.2.0.0.nupkg.sha512",
+        "microsoft.extensions.caching.abstractions.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.Caching.Memory/2.0.0": {
+      "sha512": "NqvVdYLbX7N2J2Wz9y3zjhE66JRdROiZZsGhA2u4a9IcIq/jzINC/cLM96BHA+TSOZFPxVdWneqB6/yt9u846A==",
+      "type": "package",
+      "path": "microsoft.extensions.caching.memory/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Microsoft.Extensions.Caching.Memory.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Caching.Memory.xml",
+        "microsoft.extensions.caching.memory.2.0.0.nupkg.sha512",
+        "microsoft.extensions.caching.memory.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/2.0.0": {
+      "sha512": "eUdJ0Q/GfVyUJc0Jal5L1QZLceL78pvEM9wEKcHeI24KorqMDoVX+gWsMGLulQMfOwsUaPtkpQM2pFERTzSfSg==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "microsoft.extensions.dependencyinjection.abstractions.2.0.0.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.abstractions.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.Options/2.0.0": {
+      "sha512": "sAKBgjl2gWsECBLLR9K54T7/uZaP2n9GhMYHay/oOLfvpvX0+iNAlQ2NJgVE352C9Fs5CDV3VbNTK8T2aNKQFA==",
+      "type": "package",
+      "path": "microsoft.extensions.options/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Microsoft.Extensions.Options.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Options.xml",
+        "microsoft.extensions.options.2.0.0.nupkg.sha512",
+        "microsoft.extensions.options.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.Primitives/2.0.0": {
+      "sha512": "ukg53qNlqTrK38WA30b5qhw0GD7y3jdI9PHHASjdKyTcBHTevFM2o23tyk3pWCgAV27Bbkm+CPQ2zUe1ZOuYSA==",
+      "type": "package",
+      "path": "microsoft.extensions.primitives/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/Microsoft.Extensions.Primitives.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Primitives.xml",
+        "microsoft.extensions.primitives.2.0.0.nupkg.sha512",
+        "microsoft.extensions.primitives.nuspec"
       ]
     },
     "Singulink.Numerics.BigDecimal/1.0.2": {

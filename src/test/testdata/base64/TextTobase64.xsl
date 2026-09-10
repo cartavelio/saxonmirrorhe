@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<xsl:stylesheet version="1.0" 
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:b64="java:XBase64">
+	<xsl:output method="xml" indent="yes"/>
+	
+	<xsl:template match="/">
+    <Books>
+        <xsl:for-each select="books/book">
+          <base64>
+		  	<xsl:variable name="b64" select="b64:serializeToBase64(.)"/>
+		  	<a><xsl:value-of select="$b64"/></a>
+			<b><xsl:copy-of select="b64:parseFromBase64($b64, 'utf-8')"/></b>
+		  </base64>
+        </xsl:for-each>
+    </Books>
+  </xsl:template>
+</xsl:stylesheet><!-- Stylus Studio meta-information - (c) 2004-2009. Progress Software Corporation. All rights reserved.
+
+<metaInformation>
+	<scenarios>
+		<scenario default="yes" name="books.xml" userelativepaths="yes" externalpreview="no" url="books.xml" htmlbaseurl="" outputurl="" processortype="saxon8" useresolver="no" profilemode="0" profiledepth="" profilelength="" urlprofilexml="" commandline=""
+		          additionalpath="" additionalclasspath="" postprocessortype="none" postprocesscommandline="" postprocessadditionalpath="" postprocessgeneratedext="" validateoutput="no" validator="internal" customvalidator="">
+			<advancedProp name="sInitialMode" value=""/>
+			<advancedProp name="bXsltOneIsOkay" value="true"/>
+			<advancedProp name="bSchemaAware" value="false"/>
+			<advancedProp name="bXml11" value="false"/>
+			<advancedProp name="iValidation" value="0"/>
+			<advancedProp name="bExtensions" value="true"/>
+			<advancedProp name="iWhitespace" value="0"/>
+			<advancedProp name="sInitialTemplate" value=""/>
+			<advancedProp name="bTinyTree" value="true"/>
+			<advancedProp name="xsltVersion" value="2.0"/>
+			<advancedProp name="bWarnings" value="true"/>
+			<advancedProp name="bUseDTD" value="false"/>
+			<advancedProp name="iErrorHandling" value="0"/>
+		</scenario>
+	</scenarios>
+	<MapperMetaTag>
+		<MapperInfo srcSchemaPathIsRelative="yes" srcSchemaInterpretAsXML="no" destSchemaPath="..\Program Files (x86)\Stylus Studio 2011 XML Enterprise Suite\examples\simpleMappings\catalog.xml" destSchemaRoot="Catalog" destSchemaPathIsRelative="yes"
+		            destSchemaInterpretAsXML="no">
+			<SourceSchema srcSchemaPath="..\Program Files (x86)\Stylus Studio 2011 XML Enterprise Suite\examples\simpleMappings\books.xml" srcSchemaRoot="books" AssociatedInstance="" loaderFunction="document" loaderFunctionUsesURI="no"/>
+		</MapperInfo>
+		<MapperBlockPosition></MapperBlockPosition>
+		<TemplateContext></TemplateContext>
+		<MapperFilter side="source"></MapperFilter>
+	</MapperMetaTag>
+</metaInformation>
+-->

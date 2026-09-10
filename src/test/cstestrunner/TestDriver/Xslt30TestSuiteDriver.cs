@@ -15,6 +15,8 @@ using System.Diagnostics;
 using TestRunner;
 using System.Linq;
 using java.util;
+using static Saxon.Api.Steps;
+using static Saxon.Api.Predicates;
 
 namespace TestRunner {
     //C:/work/repositories/hg/xslt30-test C:/work/repositories/hg/xslt30-test/results/saxon/ -lang:XT30 -xt30:on
@@ -48,8 +50,8 @@ namespace TestRunner {
             new Xslt30TestSuiteDriver().go(args);
         }
 
-        public static IPredicate<XdmItem> IsTrue(string attName) {
-            return new Saxon.Api.Predicate<XdmItem>(element => {
+        public static Predicate<XdmItem> IsTrue(string attName) {
+            return element => {
                 if (element is XdmNode) {
                     string attVal = ((XdmNode) element).GetAttributeValue(attName);
                     if (attVal != null) {
@@ -59,7 +61,7 @@ namespace TestRunner {
                 }
 
                 return false;
-            });
+            };
         }
 
         private void SetDependencyData() {
@@ -139,7 +141,7 @@ namespace TestRunner {
             catch (Exception) {
             }
 
-            foreach (XdmNode env in catalog.Select(Steps.Descendant("environment"))) {
+            foreach (XdmNode env in catalog.Select(Descendant("environment"))) {
                 environment = Environment.processEnvironment(this, xpc, env, globalEnvironments, defaultEnv);
             }
 
@@ -300,14 +302,14 @@ namespace TestRunner {
             }
 
             Step<XdmNode, XdmNode> testSetDependencies =
-                Steps.Root().Then(Steps.Child("test-set").Then(Steps.Child("dependencies")));
-            Step<XdmNode, XdmNode> testCaseDependencies = Steps.Child("dependencies");
+                Root().Then(Child("test-set").Then(Child("dependencies")));
+            Step<XdmNode, XdmNode> testCaseDependencies = Child("dependencies");
 
 
             XdmValue allDependencies = new XdmValue(testCase.Select(testSetDependencies.Cat(testCaseDependencies)));
-            XdmNode lastSpecValue = allDependencies.Select(Steps.Path("spec", "@value")).FirstOrDefault();
+            XdmNode lastSpecValue = allDependencies.Select(Path("spec", "@value")).FirstOrDefault();
             String specAtt = lastSpecValue != null ? lastSpecValue.GetStringValue() : "XSLT10+";
-            foreach (XdmNode dep in allDependencies.Select(Steps.Child(Predicates.IsElement()))) {
+            foreach (XdmNode dep in allDependencies.Select(Child(IsElement()))) {
                 if (!EnsureDependencySatisfied((XdmNode) dep, env)) {
                     notrun++;
                     string type = dep.NodeName.LocalName;
@@ -351,16 +353,37 @@ namespace TestRunner {
                 env.processor.QueryResolver = mr;
             }
 
-            XdmNode testInput = testCase.Select(Steps.Child("test")).FirstOrDefault();
+            XdmNode testInput = testCase.Select(Child("test")).FirstOrDefault();
             XdmNode stylesheet = testInput
-                .Select(Steps.Child("stylesheet").Where(Predicates.Not(Predicates.AttributeEq("role", "secondary"))))
+                .Select(Child("stylesheet").Where(Not(AttributeEq("role", "secondary"))))
                 .FirstOrDefault();
-            XdmNode postureAndSweep = testInput.Select(Steps.Child("posture-and-sweep")).FirstOrDefault();
+            XdmNode postureAndSweep = testInput.Select(Child("posture-and-sweep")).FirstOrDefault();
             XdmNode principalPackage = testInput
-                .Select(Steps.Child("package").Where(Predicates.AttributeEq("role", "principal"))).FirstOrDefault();
+                .Select(Child("package").Where(AttributeEq("role", "principal"))).FirstOrDefault();
             SysCollGen.IEnumerable<XdmNode> usedPackages =
-                testInput.Select(Steps.Child("package").Where(Predicates.AttributeEq("role", "secondary")));
+                testInput.Select(Child("package").Where(AttributeEq("role", "secondary")));
 
+            bool strictStreamability = testCase.Select(
+                Child("result").Then(Steps.Descendant("error"))
+                    .Where(AttributeEq("code", "XTSE3430"))).Any();
+            if (strictStreamability) {
+                env.processor.SetProperty(Feature<bool>.STRICT_STREAMABILITY, true);
+                env.resetActions.Add(env =>
+                    env.processor.SetProperty(Feature<bool>.STRICT_STREAMABILITY, false));
+            }
+
+            // If a static error is expected, suppress JIT compilation so we catch it eagerly
+            bool IsStaticError(XdmItem item) => item.GetStringValue().StartsWith("XTSE");
+            bool staticError = testCase.Select(
+                Steps.Path("result", "//", "error", "@code").Where((Predicate<XdmItem>) IsStaticError)).Any();
+            if (staticError) {
+                bool saved = env.xsltCompiler.JustInTimeCompilation;
+                env.xsltCompiler.JustInTimeCompilation = false;
+                env.resetActions.Add(env => env.xsltCompiler.JustInTimeCompilation = saved);
+            }
+
+            
+            
 
             XsltExecutable sheet = env.xsltExecutable;
 
@@ -377,7 +400,7 @@ namespace TestRunner {
                     (specAtt.Contains("XSLT30") || specAtt.Contains("XSLT20+") ? "3.0" : "2.0");
                 compiler.ClearParameters();
 
-                SysCollGen.IEnumerable<XdmNode> paramsi = testInput.Select(Steps.Child("param").Where(IsTrue("static")));
+                SysCollGen.IEnumerable<XdmNode> paramsi = testInput.Select(Child("param").Where(IsTrue("static")));
                 foreach (XdmNode param in paramsi) {
                     String name = param.GetAttributeValue("name");
                     String select = param.GetAttributeValue("select");
@@ -445,7 +468,7 @@ namespace TestRunner {
                 XsltCompiler compiler = env.xsltCompiler;
                 compiler.ErrorReporter = err => outcome.ReportError(err.ErrorCode);
                 compiler.ClearParameters();
-                SysCollGen.IEnumerable<XdmNode> paramEnumerable = testInput.Select(Steps.Child("param").Where(IsTrue("static")));
+                SysCollGen.IEnumerable<XdmNode> paramEnumerable = testInput.Select(Child("param").Where(IsTrue("static")));
 
                 foreach (XdmNode itemxx in paramEnumerable) {
                     String name = itemxx.GetAttributeValue("name");

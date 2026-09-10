@@ -7,6 +7,7 @@ using Saxon.Api;
 using System.Collections;
 using System.Xml;
 using net.sf.saxon.om;
+using net.sf.saxon.regex;
 using net.sf.saxon.str;
 using JWhitespace = net.sf.saxon.value.Whitespace;
 using JFeatureKeys = net.sf.saxon.lib.FeatureKeys;
@@ -618,6 +619,7 @@ namespace TestRunner {
                 return false;
             }
             else {
+                assertXpc.DeclareVariable(new QName("result"));
                 XPathSelector s = assertXpc.Compile("$result instance of " + assertion.StringValue).Load();
                 s.SetVariable(new QName("result"), result.value);
                 return ((XdmAtomicValue) s.EvaluateSingle()).GetBooleanValue();
@@ -882,11 +884,10 @@ namespace TestRunner {
                     flagsAtt = "";
                 }
 
-                UnicodeString regex = StringView.of(assertion.StringValue).tidy();
+                UnicodeString regex = ((NodeInfo)assertion.Unwrap()).getUnicodeStringValue();
                 //IList warnings = new ArrayList();
                 try {
-                    JRegularExpression re = net.sf.saxon.Version.platform.compileRegularExpression(
-                        catalogXpc.Processor.Implementation, regex, flagsAtt, "XP30", new SysCollGen.List<string>());
+                    ARegularExpression re = ARegularExpression.compile(regex, flagsAtt);
                     if (re.containsMatch(StringView.of(getPrincipalSerializedResult()).tidy())) {
                         return true;
                     }
