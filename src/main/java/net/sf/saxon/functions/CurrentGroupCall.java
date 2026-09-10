@@ -202,7 +202,7 @@ public class CurrentGroupCall extends Expression implements Callable {
             err.setLocation(getLocation());
             throw err;
         }
-        return gi.iterateCurrentGroup();
+        return gi.currentGroup().iterate();
     }
 
     /**
@@ -227,7 +227,13 @@ public class CurrentGroupCall extends Expression implements Callable {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return SequenceTool.toLazySequence(iterate(context));
+        GroupIterator gi = context.getCurrentGroupIterator();
+        if (gi == null) {
+            XPathException err = new XPathException("There is no current group", "XTDE1061");
+            err.setLocation(getLocation());
+            throw err;
+        }
+        return gi.currentGroup();
     }
 
     /**

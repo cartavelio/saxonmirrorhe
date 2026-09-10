@@ -60,6 +60,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
     private boolean copyLineNumbers = false;
     private boolean copyForUpdate = false;
     private boolean isSchemaAware = true;
+    private double invocations = 1;
+    private double numberOfItems = 20;
 
     /**
      * Create an xsl:copy-of instruction (also used in XQuery for implicit copying)
@@ -965,7 +967,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     assert controller != null;
                     PipelineConfiguration pipe = controller.makePipelineConfiguration();
                     pipe.setXPathContext(context);
-                    SequenceCollector out = new SequenceCollector(pipe);
+                    SequenceCollector out = new SequenceCollector(pipe, (int)(expr.numberOfItems / expr.invocations));
                     if (expr.copyForUpdate) {
                         out.setTreeModel(TreeModel.LINKED_TREE);
                     }
@@ -977,7 +979,10 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         err.maybeSetContext(context);
                         throw err;
                     }
-                    return out.getSequence().iterate();
+                    GroundedValue result = out.getSequence();
+                    expr.invocations++;
+                    expr.numberOfItems += result.getLength();
+                    return result.iterate();
                 };
             }
         }

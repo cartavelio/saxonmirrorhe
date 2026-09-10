@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
@@ -26,6 +25,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.tiny.Statistics;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
@@ -46,6 +46,7 @@ public class DocumentInstr extends ParentNodeConstructor {
 
     private final boolean textOnly;
     private final UnicodeString constantText;
+    private Statistics treeStatistics = new Statistics();
 
     /**
      * Create a document constructor instruction
@@ -439,7 +440,6 @@ public class DocumentInstr extends ParentNodeConstructor {
                 return context -> {
                     try {
                         Controller controller = context.getController();
-                        Configuration config = controller.getConfiguration();
                         PipelineConfiguration pipe = controller.makePipelineConfiguration();
                         pipe.setXPathContext(context);
 
@@ -449,7 +449,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                         builder.setDurability(Durability.TEMPORARY);
 
                         if (builder instanceof TinyBuilder) {
-                            ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
+                            ((TinyBuilder) builder).setStatistics(expr.treeStatistics);
                         }
 
                         builder.setBaseURI(staticBaseUri);

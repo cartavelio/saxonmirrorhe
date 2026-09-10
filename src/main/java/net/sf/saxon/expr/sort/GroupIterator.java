@@ -10,6 +10,7 @@ package net.sf.saxon.expr.sort;
 import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
@@ -34,17 +35,15 @@ public interface GroupIterator extends SequenceIterator {
     AtomicSequence getCurrentGroupingKey();
 
     /**
-     * Get an iterator over the members of the current group, in population
-     * order. This must always be a clean iterator, that is, an iterator that
-     * starts at the first item of the group.
+     * Get a sequence containing the members of the current group, in population
+     * order. This may be a MemoSequence rather than a grounded value
      *
-     * @return an iterator over all the members of the current group, in population
-     *         order.
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a dynamic error occurs
+     * @return a sequence containing all the members of the current group, in population
+     * order.
+     * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs
      */
 
-    SequenceIterator iterateCurrentGroup() throws XPathException;
+    Sequence currentGroup() throws XPathException;
 
     //#if EE==true
 

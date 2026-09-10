@@ -19,6 +19,7 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
+import net.sf.saxon.value.SequenceExtent;
 
 import java.util.*;
 
@@ -168,8 +169,8 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
     }
 
     @Override
-    public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator.Of<>(currentMembers);
+    public Sequence currentGroup() throws XPathException {
+        return SequenceExtent.makeSequenceExtent(currentMembers);
     }
 
     public SequenceIterator iterateCurrentGroup(String source) {
@@ -197,11 +198,6 @@ public class MergeGroupingIterator implements GroupIterator, LookaheadIterator, 
             this.currentGroupingKey = currentGroupingKey;
             this.currenti = currenti;
             setLengthFinder(() -> currentGroup.size());
-        }
-
-        @Override
-        public SequenceIterator iterateCurrentGroup() {
-            return new ListIterator.Of<>(currentGroup);
         }
 
         @Override

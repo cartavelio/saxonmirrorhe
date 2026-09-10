@@ -464,7 +464,7 @@ public class TinyTextualElement extends TinyElementImpl {
         }
 
         /**
-         * Get all namespace undeclarations and undeclarations defined on this element.
+         * Get all namespace declarations and undeclarations defined on this element.
          *
          * @param buffer If this is non-null, and the result array fits in this buffer, then the result
          *               may overwrite the contents of this array, to avoid the cost of allocating a new array on the heap.

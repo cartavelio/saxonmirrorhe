@@ -140,7 +140,7 @@ public class CurrentMergeGroup extends SystemFunction {
             throw new XPathException("There is no current merge group", "XTDE3480");
         }
         if (source == null) {
-            return gi.iterateCurrentGroup();
+            return gi.currentGroup().iterate();
         } else {
             if (!allowedNames.contains(source)) {
                 throw new XPathException("Supplied argument (" + source +
