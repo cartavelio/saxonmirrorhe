@@ -763,6 +763,16 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
 
+      <kbd>fn:xdm-to-json($input as item()*, $options as map(*)) as xs:string</kbd>
+      
+      <p>Formats an arbitrary XDM value (including of course an XML document) as JSON. Options include <code>indent=true|false</code>
+      to request indentation, <code>uniform=true|false</code> to request that the same format be used for all elements with a given
+      name, <code>escape-solidus=true|false</code> to control whether the character <code>"/"</code> is escaped, and <code>layouts</code>
+      which is a map from QNames (element names) to the names of layout options, overriding the option chosen by default: 
+      the layout options are
+         <code>empty</code>, <code>empty-plus</code>, <code>simple</code>, <code>simple-plus</code>, 
+         <code>list</code>, <code>list-plus</code>, <code>record</code>, <code>sequence</code>, and <code>mixed</code>.</p>
+      
       <kbd>array:empty(
          $array	as array(*)	
          ) as xs:boolean</kbd>

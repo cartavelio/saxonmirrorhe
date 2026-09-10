@@ -382,6 +382,8 @@
                 but for arrays rather than sequences.</p></li>
             <li><p>The <code>map:keys#2</code> function is implemented; the second argument is a function that
                 tests each value and decides whether the corresponding key should be returned.</p></li>
+            <li><p>The <code>fn:xdm-to-json</code> function is implemented. This allows conversion of an
+            arbitrary XDM sequence (including, of course, an XML document) to JSON format.</p></li>
             
         </ul>
 
