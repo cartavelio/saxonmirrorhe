@@ -473,7 +473,7 @@
         
         <aside>These extensions are all experimental, and may change as a result of community standardisation efforts.
             They are based on proposals for an <a class="bodylink"
-                href="https://qt4cg.org/branch/master/xslt-40/Overview.html">XSLT 4.0 Specification</a>, but they do
+                href="https://qt4cg.org/specifications/xslt-40/Overview.html">XSLT 4.0 Specification</a>, but they do
             not necessarily correspond precisely with the current draft of that proposal. For more information
             see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
         
