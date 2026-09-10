@@ -251,7 +251,8 @@ public final class Atomizer extends UnaryExpression {
         if (roleSupplier == null) {
             return message;
         } else {
-            return message + ". Found while atomizing the " + roleSupplier.get().getMessage();
+            return message + ". Found while atomizing the " + roleSupplier.get().getMessage() +
+                    " in {" + toShortString() + "} on line " + getLocation().getLineNumber();
         }
     }
 
