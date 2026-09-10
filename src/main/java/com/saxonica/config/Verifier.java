@@ -31,6 +31,8 @@ public abstract class Verifier {
     private License primaryLicense = null;
     private final IntHashMap<License> secondaryLicenses = new IntHashMap<>();
 
+    private static String blacklist = "A012673";
+
     protected int status = UNREAD;
 
     private static final int UNREAD = 0;
@@ -284,6 +286,10 @@ public abstract class Verifier {
             }
             String serial = license.getFeature("Serial");
             licenseDesc += " (serial number " + serial + ")";
+            if (blacklist.contains(serial)) {
+                throw new LicenseException("The " + licenseDesc + " has been disabled because of a data breach",
+                                           LicenseException.EXPIRED);
+            }
             int daysLeft = license.daysLeft();
             if (daysLeft < 0) {
                 if ("yes".equals(features.getProperty("Evaluation")) || daysLeft < -45) {
