@@ -478,7 +478,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
 
 
     /**
-     * A JAXP ErrorListener that wraps a SAX ErrorHandler
+     * A JAXP ErrorReporter that wraps a SAX ErrorHandler
      */
 
     public static class ErrorReporterWrappingErrorHandler implements ErrorReporter {

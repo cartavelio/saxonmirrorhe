@@ -150,7 +150,7 @@ public class ValidatorImpl extends Validator {
      * Interface for reporting validation errors found during validation of an instance document
      * against a schema.
      */
-    public class InvalidityHandlerWrappingErrorHandler implements InvalidityHandler {
+    public static class InvalidityHandlerWrappingErrorHandler implements InvalidityHandler {
 
         private final ErrorHandler errorHandler;
 
