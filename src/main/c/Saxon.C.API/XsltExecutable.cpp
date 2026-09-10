@@ -178,32 +178,18 @@ void XsltExecutable::setInitialMode(const char * modeName){
 
 
 void XsltExecutable::setParameter(const char *name, XdmValue *value) {
-    if (value != nullptr && name != nullptr) {
-   // std::cout<<"setParameter() - XdmValue  name="<<name<<", value="<<value->getType()<<" valu="<<value->toString()<<std::endl;
-        //value->incrementRefCount();
-        int s = parameters.size();
-        std::string skey = "param:" + std::string(name);
-        parameters[skey] = value;
-        if (s == parameters.size()) {
-            std::map<std::string, XdmValue *>::iterator it;
-            it = parameters.find(skey);
-            if (it != parameters.end()) {
-                XdmValue *valuei = it->second;
-                if(valuei != nullptr) {
-                    valuei->decrementRefCount();
-                    parameters.erase(skey);
-                    parameters[skey] = value;
-                }
+    if(value != nullptr && name != nullptr) {
+        std::string skey = ("param:" + std::string(name));
+        std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
+        if (it != parameters.end()) {
+            XdmValue *valuei = it->second;
+            if (valuei != nullptr) {
+                valuei->decrementRefCount();
+                parameters.erase(skey);
             }
         }
+        parameters[skey] = value;
     }
-//#ifdef DEBUG
-    else {
-                std::cout<<"setParameter() - XdmValue is null"<<std::endl;
-          }
-//#endif
-
-
 }
 
 void XsltExecutable::setInitialTemplateParameters(std::map<std::string, XdmValue *> _itparameters, bool _tunnel) {
@@ -397,21 +383,17 @@ XsltExecutable * XsltExecutable::clone() {
 }
 
 void XsltExecutable::setProperty(const char *name, const char *value) {
+#ifdef DEBUG
+    if(value == nullptr) {
+		std::cerr<<"XQueryProc setProperty is nullptr"<<std::endl;
+	}
+#endif
     if (name != nullptr) {
-        int s = properties.size();
-
+        properties.erase(name);
         std::string skey = std::string(name);
-        properties.insert(std::pair<std::string, std::string>(skey, std::string((value == nullptr ? "" : value))));
-
-        if (s == properties.size()) {
-            std::map<std::string, std::string>::iterator it;
-            it = properties.find(skey);
-            if (it != properties.end()) {
-                properties.erase(skey);
-                properties[skey] = std::string((value == nullptr ? "" : value));
-            }
-        }
+        properties[skey] = std::string((value == nullptr ? "" : value));
     }
+
 }
 
 

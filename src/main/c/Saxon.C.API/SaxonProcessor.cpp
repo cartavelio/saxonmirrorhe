@@ -782,41 +782,27 @@ void SaxonProcessor::setResourcesDirectory(const char* dir){
 
 void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
     SaxonProcessor::attachCurrentThread();
-    jclass xmlResolverClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/trans/XmlCatalogResolver");
-    static jmethodID catalogMID = SaxonProcessor::sxn_environ->env->GetStaticMethodID(xmlResolverClass, "setCatalog",
-                                                                                      "(Ljava/lang/String;Lnet/sf/saxon/Configuration;Z)V");
+    static jmethodID catalogMID = SaxonProcessor::sxn_environ->env->GetMethodID(procClass, "setCatalogFiles",
+                                                                                "([Ljava/lang/String;)V");
 
     if (!catalogMID) {
-        std::cerr << "\nError: Saxonc." << "setCatalog()" << " not found" << std::endl;
+        std::cerr << "\nError: Saxonc." << "setCatalogFiles()" << " not found" << std::endl;
         return;
     }
     if (catalogFile == nullptr) {
 
         return;
     }
-    static jmethodID configMID = SaxonProcessor::sxn_environ->env->GetMethodID(procClass, "getUnderlyingConfiguration",
-                                                                               "()Lnet/sf/saxon/Configuration;");
-
-    if (!configMID) {
-        std::cerr << "\nError: Saxonc." << "getUnderlyingConfiguration()" << " not found" << std::endl;
-        return;
-    }
 
 
     if (!proc) {
-        createException("Processor is null in SaxonProcessor.setCatalog");
+        createException("Processor is null in SaxonProcessor.setCatalogFiles");
         return;
     }
 
-    jobject configObj = SaxonProcessor::sxn_environ->env->CallObjectMethod(proc, configMID);
 
-    if (!configObj) {
-        std::cerr << "proc is null in SaxonProcessor setcatalog - config obj" << std::endl;
-        return;
-    }
-    SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(xmlResolverClass, catalogMID,
-                                                           SaxonProcessor::sxn_environ->env->NewStringUTF(catalogFile),
-                                                           configObj, (jboolean) isTracing);
+    SaxonProcessor::sxn_environ->env->CallVoidMethod(proc, catalogMID,
+                                                     SaxonProcessor::sxn_environ->env->NewStringUTF(catalogFile));
 
     if (exceptionOccurred()) {
         createException();
