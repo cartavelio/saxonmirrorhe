@@ -268,7 +268,7 @@ namespace Saxon.Impl.Helpers {
                 
                 Stream inputStream = streamSource.getInputStream();
 
-                if (options.isXIncludeAware()) {
+                if (options != null && options.isXIncludeAware()) {
                     throw new XPathException("No XInclude processor is available in SaxonCS", "FODC0013");
                 }
             
@@ -321,7 +321,7 @@ namespace Saxon.Impl.Helpers {
             
                 DotNetPullProvider provider = new DotNetPullProvider(xmlReader);
                 provider.setBaseURI(source.getSystemId());
-                if (options.getDTDValidationMode() == Validation.STRICT) {
+                if (options != null && options.getDTDValidationMode() == Validation.STRICT) {
                     provider.IgnoreIgnorableWhitespace = true;
                     provider.DocTypeOk = false; // Need to check manually that there is a DOCTYPE declaration
                 } 

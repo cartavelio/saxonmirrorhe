@@ -10,14 +10,18 @@ using XdmDestination = Saxon.Hej.s9api.XdmDestination;
 
 namespace Saxon.Impl.Parallel {
     public class Validation {
-        internal static void ValidateMultiple(Processor processor, IEnumerable<Source> sources,
-                    InvalidityHandler invalidityHandler, SchemaValidatorImpl.ReportList reportDocs) {
+        internal static void ValidateMultiple(
+                Saxon.Hej.s9api.Processor processor, 
+                Saxon.Hej.s9api.XsdSchema schema, 
+                IEnumerable<Source> sources,
+                InvalidityHandler invalidityHandler, 
+                SchemaValidatorImpl.ReportList reportDocs) {
             System.Threading.Tasks.Parallel.ForEach(sources, source => {
-            //foreach (Source source in sources) {
-                Saxon.Hej.s9api.SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+                Saxon.Hej.s9api.SchemaValidator validator = schema.newValidator();
                 InvalidityHandler localHandler = invalidityHandler;
                 if (invalidityHandler is InvalidityReportGenerator) {
-                    InvalidityReportGeneratorEE singleReporter = (InvalidityReportGeneratorEE)processor.getUnderlyingConfiguration().createValidityReporter();
+                    InvalidityReportGeneratorEE singleReporter = 
+                        (InvalidityReportGeneratorEE)processor.getUnderlyingConfiguration().createValidityReporter();
                     XdmDestination dest = new XdmDestination();
                     singleReporter.setDestination(dest);
                     validator.setInvalidityHandler(singleReporter);
@@ -26,7 +30,6 @@ namespace Saxon.Impl.Parallel {
                 else {
                     validator.setInvalidityHandler(invalidityHandler);
                 }
-                //localHandler.StartReporting(source.getSystemId());
                 try {
                     validator.validate(source);
                 }
@@ -34,7 +37,6 @@ namespace Saxon.Impl.Parallel {
                     // ignore validation failure
                 }
 
-                //localHandler.EndReporting();
                 if (localHandler is InvalidityReportGeneratorEE handler) {
                     reportDocs.add(((XdmDestination)handler.getDestination()).getXdmNode());
                 }
@@ -43,4 +45,4 @@ namespace Saxon.Impl.Parallel {
     }
 }
 
-// Copyright (c) 2021 - 2023 Saxonica Limited
+// Copyright (c) 2021 - 2026 Saxonica Limited
