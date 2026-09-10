@@ -25,7 +25,7 @@ final class XSLT30Test extends TestCase
     public function testVersion(): void
     {
         $this->assertStringContainsString(
-            'Saxon/C 1.2.1 running',
+            'SaxonC 1.2.1 running',
             self::$saxonProc->version()
         );
         $this->assertStringContainsString('9.9.1.5C from Saxonica', self::$saxonProc->version());

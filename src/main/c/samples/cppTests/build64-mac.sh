@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#Build file for Saxon/C on C++
+#Build file for SaxonC on C++
 
 
 #jdkdir=/Library/Java/JavaVirtualMachines/jdk1.8.0_77.jdk/Contents/Home

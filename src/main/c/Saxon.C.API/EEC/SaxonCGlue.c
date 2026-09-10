@@ -78,12 +78,12 @@ void setDllname() {
 			free(dllname);
 			dllname = malloc(sizeof(char)*bufSize);
 			if (snprintf(dllname, bufSize, "%s%s", dllPath, tempDllname) >= bufSize) {
-				printf("Saxon/C Error: Unable to allocate space for dllname and path");
+				printf("SaxonC Error: Unable to allocate space for dllname and path");
 				exit(1);
 			}
 		}
 		if (snprintf(resources_dir, rbufSize, "%s%s", dllPath, tempResources_dir) >= rbufSize) {
-			printf("Saxon/C warning: Unable to allocate space for resources directory");
+			printf("SaxonC warning: Unable to allocate space for resources directory");
 
 		}
 	}
@@ -114,7 +114,7 @@ char * _getResourceDirectory() {
 }
 
 /*
- * Load dll using the default setting in Saxon/C
+ * Load dll using the default setting in SaxonC
  * Recommended method to use to load library
  */
 HANDLE loadDefaultDll() {
@@ -170,7 +170,7 @@ void initJavaRT(HANDLE myDllHandle, JavaVM** pjvm, JNIEnv** penv)
 	if (jvmCreated == 0) {
 		jvmCreated = 1;
 #ifdef DEBUG
-		perror("initJavaRT - load Saxon/C library\n");
+		perror("initJavaRT - load SaxonC library\n");
 #endif
 		int result;
 		JavaVMInitArgs args;
@@ -228,7 +228,7 @@ void initJavaRT(HANDLE myDllHandle, JavaVM** pjvm, JNIEnv** penv)
 	}
 	else {
 #ifdef DEBUG
-		perror("initJavaRT - Saxon/C library loaded already\n");
+		perror("initJavaRT - SaxonC library loaded already\n");
 #endif
 	}
 }

@@ -80,7 +80,7 @@ char * dllPath =
 #endif
 
 //===============================================================================================//
-/*! <code>sxnc_environment</code>. This struct captures the jni, JVM and handler to the cross compiled Saxon/C library.
+/*! <code>sxnc_environment</code>. This struct captures the jni, JVM and handler to the cross compiled SaxonC library.
  *
  */
 typedef struct {
@@ -164,12 +164,12 @@ void setDllname() {
 			free(dllname);
 			dllname = malloc(sizeof(char)*bufSize);
 			if (snprintf(dllname, bufSize, "%s%s", dllPath, tempDllname) >= bufSize) {
-				printf("Saxon/C Error: Unable to allocate space for dllname and path");
+				printf("SaxonC Error: Unable to allocate space for dllname and path");
 				exit(1);
 			}
 		}
 		if (snprintf(resources_dir, rbufSize, "%s%s", dllPath, tempResources_dir) >= rbufSize) {
-			printf("Saxon/C warning: Unable to allocate space for resources directory");
+			printf("SaxonC warning: Unable to allocate space for resources directory");
 
 		}
 	}

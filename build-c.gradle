@@ -1,4 +1,4 @@
-// Find Excelsior Jet to build the Saxon/C releases
+// Find Excelsior Jet to build the SaxonC releases
 def excelsiorJetHome = null
 ["${excelsiorJet}",
  "/opt/jet15.3-ent-amd64",
@@ -25,7 +25,7 @@ task test_jetHome(
       println("Running ExcelsiorJet ${excelsiorJetVersion} from Docker container")
     } else {
       if (excelsiorJetHome == null) {
-        throw new GradleException("Cannot build Saxon/C, no Docker container and excelsiorJetHome undefined")
+        throw new GradleException("Cannot build SaxonC, no Docker container and excelsiorJetHome undefined")
       } else {
         println("Running ExcelsiorJet from ${excelsiorJetHome}")
       }
@@ -129,7 +129,7 @@ task test_jetHome(
     task "${release}cRelease"(
       type: Exec,
       dependsOn: ["${release}c_jet", "${release}c_copyAncillary"],
-      description: "Make the ${RELEASE} release for Saxon/C"
+      description: "Make the ${RELEASE} release for SaxonC"
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-backend", "excelsior-installer",
@@ -200,7 +200,7 @@ task test_jetHome(
     task "${release}c_releaseSetup"(
       type: Exec,
       dependsOn: ["${release}c_jet", "${release}c_copyAncillary"],
-      description: "Make the ${RELEASE} release package for Saxon/C"
+      description: "Make the ${RELEASE} release package for SaxonC"
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-source", "${buildDir}/c/${release}c",
@@ -210,7 +210,7 @@ task test_jetHome(
     task "${release}cRelease"(
       type: Zip,
       dependsOn: ["${release}c_releaseSetup"],
-      description: "Make the ${RELEASE} release ZIP file for Saxon/C"
+      description: "Make the ${RELEASE} release ZIP file for SaxonC"
     ) {
       from("${buildDir}/releases/libsaxon-${RELEASE}C")
       archiveFileName = "libsaxon-${RELEASE}C-mac-setup-v${saxonVersion}.zip"
@@ -279,7 +279,7 @@ task test_jetHome(
     task "${release}c_releaseSetup"(
       type: Exec,
       dependsOn: ["${release}c_jet", "${release}c_copyAncillary"],
-      description: "Make the ${RELEASE} release package for Saxon/C"
+      description: "Make the ${RELEASE} release package for SaxonC"
     ) {
       commandLine "${excelsiorJetHome}/bin/xpack",
         "-source", "${buildDir}/c/${release}c",
@@ -289,7 +289,7 @@ task test_jetHome(
     task "${release}cRelease"(
       type: Zip,
       dependsOn: ["${release}c_releaseSetup"],
-      description: "Make the ${RELEASE} release ZIP file for Saxon/C"
+      description: "Make the ${RELEASE} release ZIP file for SaxonC"
     ) {
       from ("${buildDir}/releases/libsaxon-${RELEASE}C") {
         include "**/*"
@@ -526,7 +526,7 @@ task pecCompile(
 task eecCompile(
   type: JavaCompile,
   dependsOn: ["eec_sources"],
-  description: "Compile EE for Saxon/C") {
+  description: "Compile EE for SaxonC") {
   classpath = configurations.compileClasspath
   source = "${buildDir}/src/eec"
   destinationDirectory = new File("${buildDir}/classes/eec")
@@ -537,7 +537,7 @@ task eecCompile(
 task hec_jar(
   type: Jar,
   dependsOn: ["hecCompile", "hej_MetaInf", "rejar_Xerces"],
-  description: "Build the HE jar file for Saxon/C"
+  description: "Build the HE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9he"
   destinationDirectory = file("${buildDir}/c/jars/hec")
@@ -568,7 +568,7 @@ task hec_jar(
 task pec_jar(
   type: Jar,
   dependsOn: ["pecCompile", "pej_MetaInf", "rejar_Xerces"],
-  description: "Build the PE jar file for Saxon/C"
+  description: "Build the PE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9pe"
   destinationDirectory = file("${buildDir}/c/jars/pec")
@@ -613,7 +613,7 @@ task pec_jar(
 task eec_jar(
   type: Jar,
   dependsOn: ["eecCompile", "eej_MetaInf", "rejar_Xerces"],
-  description: "Build the EE jar file for Saxon/C"
+  description: "Build the EE jar file for SaxonC"
 ) {
   archiveBaseName = "saxon9ee"
   destinationDirectory = file("${buildDir}/c/jars/eec")

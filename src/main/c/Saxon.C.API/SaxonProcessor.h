@@ -396,14 +396,14 @@ public:
 
 
     /**
-    * Utility method for working with Saxon/C on Python
+    * Utility method for working with SaxonC on Python
     */
     XdmValue ** createXdmValueArray(int len){
 	   return (new XdmValue*[len]);
     }
 
     /**
-    * Utility method for working with Saxon/C on Python
+    * Utility method for working with SaxonC on Python
     */
     XdmAtomicValue ** createXdmAtomicValueArray(int len){
 	   return (new XdmAtomicValue*[len]);
@@ -590,7 +590,7 @@ private:
 
     void applyConfigurationProperties();
 
-    // Saxon/C method for internal use
+    // SaxonC method for internal use
     static JParameters
     createParameterJArray(std::map<std::string, XdmValue *> parameters, std::map<std::string, std::string> properties, int additions = 0);
 

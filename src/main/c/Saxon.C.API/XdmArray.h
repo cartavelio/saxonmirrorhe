@@ -45,7 +45,7 @@ public:
     std::list<XdmValue *> asList();
 
     /**
-    * Utility method for working with Saxon/C on Python
+    * Utility method for working with SaxonC on Python
     */
     XdmValue ** createXdmValueArray(int len){
 	   return (new XdmValue*[len]);

@@ -1,7 +1,7 @@
 <!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Saxon/C API design use cases</title>
+    <title>SaxonC API design use cases</title>
 </head>
 <body>
 <?php

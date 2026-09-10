@@ -1477,7 +1477,7 @@ function run_test_case($testcase, $env, $path)
 $saxon_version = $proc->version();
 echo "<a name='top'></a>";
 echo "<h1>W3 XSLT 3.0 Test Suite</h1>
-<h4>(PHP Test Harness. Version: 2.0. Saxon/C PHP Extension, Saxon product version: $saxon_version)</h4>
+<h4>(PHP Test Harness. Version: 2.0. SaxonC PHP Extension, Saxon product version: $saxon_version)</h4>
 <br/>";
 $testFiles = test_set_files($catalog);
 echo "<b>Test sets: " . count($testFiles) . "<b/> See <a href='#results'> Results here </a>";
