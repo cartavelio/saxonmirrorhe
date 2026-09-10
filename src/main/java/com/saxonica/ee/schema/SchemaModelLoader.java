@@ -45,6 +45,7 @@ public class SchemaModelLoader extends ProxyReceiver {
     private final PreparedSchema schema;
     private SchemaCompiler compiler;
     private final HashMap<String, SchemaComponent> components = new HashMap<>(100);
+    private final HashSet<NamespaceUri> targetNamespaces = new HashSet<>(10);
     private final HashSet<SchemaComponent> anonComponents = new HashSet<>(100);
     private final IdentityHashMap<UserComplexType, FiniteStateMachine> pendingCompilations = new IdentityHashMap<>();
     private final List<Fixup> fixups = new ArrayList<>();
@@ -52,7 +53,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     //private NamespaceResolver namespaceResolver;
 
-    private NodeName elementName;
+    //private NodeName elementName;
 
     private final List<PendingEdge> pendingEdges = new ArrayList<>();
     private String dmk = null;
@@ -98,6 +99,9 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
         }
 
+        for (NamespaceUri ns : targetNamespaces) {
+            schema.setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
+        }
         for (SchemaType type : schema.getAllTypes()) {
             if (type instanceof UserComplexType) {
                 FiniteStateMachine fsm = pendingCompilations.get(type);
@@ -350,6 +354,8 @@ public class SchemaModelLoader extends ProxyReceiver {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            NamespaceUri targetNS = NamespaceUri.of(namespace);
+            loader.targetNamespaces.add(targetNS);
             boolean isGlobal = toBoolean(attributes.getValue(NamespaceUri.NULL, "global"));
             boolean isNillable = toBoolean(attributes.getValue(NamespaceUri.NULL, "nillable"));
             boolean isAbstract = toBoolean(attributes.getValue(NamespaceUri.NULL, "abstract"));
@@ -370,7 +376,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             elementDecl = new ElementDecl(config, isGlobal, null);
             elementDecl.setGeneratedId(id);
             loader.components.put(id, elementDecl);
-            elementDecl.setElementName(new StructuredQName("", NamespaceUri.of(namespace), name));
+            elementDecl.setElementName(new StructuredQName("", targetNS, name));
             elementDecl.setAbstract(isAbstract);
             elementDecl.setNillable(isNillable);
             elementDecl.setBlock(blockSet);
@@ -563,8 +569,10 @@ public class SchemaModelLoader extends ProxyReceiver {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            NamespaceUri targetNS = NamespaceUri.of(namespace);
+            loader.targetNamespaces.add(targetNS);
             String key = attributes.getValue(NamespaceUri.NULL, "key");
-            StructuredQName nameCode = new StructuredQName("", NamespaceUri.of(namespace), name);
+            StructuredQName nameCode = new StructuredQName("", targetNS, name);
             IdentityConstraint ic;
             //int kind;
             switch (localName) {
@@ -681,6 +689,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             NamespaceUri namespace = NamespaceUri.of(attributes.getValue(NamespaceUri.NULL, "targetNamespace"));
+            loader.targetNamespaces.add(namespace);
             StructuredQName attributeName = null;
             if (name != null) {
                 attributeName = new StructuredQName("", namespace, name);
@@ -763,6 +772,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
             NamespaceUri namespaceUri = NamespaceUri.of(namespace);
+            loader.targetNamespaces.add(namespaceUri);
             int fp;
             if (name == null) {
                 fp = loader.config.getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, id);
@@ -868,6 +878,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
             NamespaceUri namespaceUri = NamespaceUri.of(namespace);
+            loader.targetNamespaces.add(namespaceUri);
             int fingerprint;
             if (name == null) {
                 fingerprint = config.getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, id);
@@ -972,9 +983,11 @@ public class SchemaModelLoader extends ProxyReceiver {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            NamespaceUri targetNS = NamespaceUri.of(namespace);
+            loader.targetNamespaces.add(targetNS);
             StructuredQName nameCode = null;
             if (name != null) {
-                nameCode = new StructuredQName("", NamespaceUri.of(namespace), name);
+                nameCode = new StructuredQName("", targetNS, name);
             }
 
             loader.components.put(id, group);
@@ -1005,12 +1018,14 @@ public class SchemaModelLoader extends ProxyReceiver {
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
+            NamespaceUri targetNS = NamespaceUri.of(namespace);
+            loader.targetNamespaces.add(targetNS);
             StructuredQName nameCode;
             if (name == null) {
                 nameCode = new StructuredQName("anon", NamespaceUri.ANONYMOUS, id);
                 // TODO: this won't be unique if loading several SCM schemas
             } else {
-                nameCode = new StructuredQName("", NamespaceUri.of(namespace), name);
+                nameCode = new StructuredQName("", targetNS, name);
             }
             notation.setNotationName(nameCode);
             String systemId = attributes.getValue(NamespaceUri.NULL, "systemId");
@@ -1039,6 +1054,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
             NamespaceUri namespaceUri = NamespaceUri.of(namespace);
+            loader.targetNamespaces.add(namespaceUri);
             StructuredQName modelGroupName = new StructuredQName("", namespaceUri, name);
             ModelGroupDefinition mgd = new ModelGroupDefinition(loader.config, null);
             mgd.setModelGroupName(modelGroupName);

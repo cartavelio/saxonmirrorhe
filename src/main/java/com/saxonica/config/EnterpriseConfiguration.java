@@ -3,7 +3,6 @@ package com.saxonica.config;
 import com.saxonica.ee.config.*;
 import com.saxonica.ee.extfn.VendorFunctionSetEE;
 import com.saxonica.ee.extfn.js.IXSLElementFactory;
-import com.saxonica.ee.extfn.js.StubFunctionLibrary;
 import com.saxonica.ee.optim.*;
 import com.saxonica.ee.parallel.ThreadManagerEE;
 import com.saxonica.ee.s9api.XsdCompilerEE;
@@ -21,8 +20,10 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.*;
 import com.saxonica.ee.update.PendingUpdateListImpl;
 import com.saxonica.ee.update.XQueryParserExtensionEE;
-
-import com.saxonica.ee.validate.*;
+import com.saxonica.ee.validate.AssertionTreeBuilder;
+import com.saxonica.ee.validate.InvalidityReportGeneratorEE;
+import com.saxonica.ee.validate.SkipValidator;
+import com.saxonica.ee.validate.ValidationContext;
 import com.saxonica.expr.DeepLookupExpression;
 import com.saxonica.expr.XQueryParserExtensionPE;
 import com.saxonica.trans.ModePE;
@@ -41,7 +42,6 @@ import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GroupIterator;
-import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
@@ -95,7 +95,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private int licensedFeatures = 0;
     private HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
     private ConcurrentHashMap<NamespaceUri, PreparedSchema> schemaCache = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, Schema> namedSchemaCache = new ConcurrentHashMap<>();
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
     private final SchemaURIResolver standardSchemaResolver;
@@ -542,7 +541,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Simple interface to load a schema document
+     * Simple interface to load a schema document. This method has no effect on the state of the
+     * Configuration.
      *
      * @param absoluteURI the absolute URI of the location of the schema document
      * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be read or is invalid
@@ -565,54 +565,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return new PreparedSchema(this);
     }
 
-//    /**
-//     * Read a schema from a given schema location
-//     *
-//     * @param pipe           the PipelineConfiguration
-//     * @param baseURI        the base URI for resolving relative URIs
-//     * @param schemaLocation the location "hint" where to find the schema document. Must not be null.
-//     *                       The document located may be either an XSD schema document or an SCM compiled schema.
-//     * @param expected       the target namespace expected; null if there is no
-//     *                       expectation
-//     * @return the actual target namespace of the schema
-//     */
-//
-//    @Override
-//    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
-//            throws SchemaException {
-//        int status = getNamespaceStatus(expected);
-//        if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
-//            SchemaCompiler schemaCompiler = newSchemaCompiler();
-//            if (pipe.getErrorReporter() != null) {
-//                schemaCompiler.setErrorReporter(pipe.getErrorReporter());
-//            }
-//            PreparedSchema schema = schemaCompiler.readSchema(baseURI, schemaLocation, expected);
-//            schemaCompiler.setPreparedSchema(schema);
-//            schemaCompiler.makeAllAutomata();
-//            schemaCompiler.checkAllAutomata();
-//            return schema;
-//        } else {
-//            return null;
-//        }
-//    }
-
-//    /**
-//     * Read an inline schema from a stylesheet
-//     *
-//     * @param root          the xs:schema element in the stylesheet
-//     * @param expected      the target namespace expected; "" if there is no
-//     *                      expectation
-//     * @param errorReporter The destination for error messages. May be null, in which case
-//     *                      the errorListener registered with this Configuration is used.
-//     * @return the actual target namespace of the schema
-//     */
-//
-//    @Override
-//    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
-//            throws SchemaException {
-//        Schema schema = newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
-//        return NamespaceUri.NULL; // TODO
-//    }
 
     /**
      * Load a schema, which will be available for use by all subsequent operations using
@@ -739,16 +691,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return getNamespaceStatus(targetNamespace) != PreparedSchema.NAMESPACE_UNKNOWN;
     }
 
-    /**
-     * Get the set of namespaces of imported schemas
-     * @return the set of namespaces of imported schemas
-     */
-
-    @Override
-    public synchronized Set<NamespaceUri> getImportedNamespaces() {
-        return namespaceStatus.keySet();
-    }
-
     public PreparedSchema getCachedSchema(NamespaceUri namespace) {
         return schemaCache.get(namespace);
     }
@@ -765,19 +707,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public Collection<GlobalParam> getDeclaredSchemaParameters() {
-        return Collections.emptySet();  // TODO: reinstate schema paramters
-    }
-
-    public Schema getSchemaForNamespace(NamespaceUri uri) {
-        return schemaCache.get(uri);
+        return Collections.emptySet();  // TODO: reinstate schema parameters
     }
 
     public void registerSchemaForNamespace(NamespaceUri uri, PreparedSchema schema) {
         schemaCache.put(uri, schema);
-    }
-
-    public void registerNamedSchema(String name, Schema schema) {
-        namedSchemaCache.put(name, schema);
     }
 
     public PreparedSchema getBuiltInSchema(NamespaceUri uri) {
@@ -1605,6 +1539,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     @Override
+    @CSharpModifiers(code = {"virtual", "internal"})
     public XsdCompiler makeXsdCompiler(Processor proc) {
         return new XsdCompilerEE(proc);
     }

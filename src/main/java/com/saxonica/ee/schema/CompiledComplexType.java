@@ -794,7 +794,7 @@ public class CompiledComplexType {
      * @throws SchemaException to indicate an invalid schema
      */
 
-    public void buildValidationMachinery(SchemaCompiler compiler) throws SchemaException {
+    public void buildValidationMachinery(SchemaCompiler compiler, PreparedSchema schema) throws SchemaException {
         // Only compile a type once
         if (built || type.getValidationStatus() == INVALID) {
             return;
@@ -803,7 +803,7 @@ public class CompiledComplexType {
         // Ensure the base type is compiled first
         SchemaType base = type.getBaseType();
         if (base instanceof UserComplexType) {
-            compiler.getPreparedSchema().compileComplexType(compiler, (UserComplexType) base);
+            schema.compileComplexType(compiler, (UserComplexType) base);
         }
 
         //System.err.println("Compiling type " + getDescription() + " (" + this + ")");
@@ -841,7 +841,6 @@ public class CompiledComplexType {
             }
         }
         type.makeCombinedAttributeGroup();
-        PreparedSchema schema = compiler.getPreparedSchema();
         makeContextDeterminedTypeMapForAttributes(schema);
         makeContextDeterminedTypeMapForElements(schema);
     }
@@ -896,7 +895,7 @@ public class CompiledComplexType {
             getConfiguration().getLogger().info("Recompiling type " + type.getDescription());
         }
         built = false;
-        buildValidationMachinery(compiler);
+        buildValidationMachinery(compiler, schema);
         // See bug 4554. Generation of the finite state machine is now deferred, so the expensive part
         // of the operation is only performed once, at the end
     }

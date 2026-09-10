@@ -189,13 +189,13 @@ public class SchemaTestSuiteDriver {
                     Processor scmProcessor = new Processor(true);
                     scmProcessor.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
                     scmProcessor.setConfigurationProperty(Feature.XML_VERSION, "1.1");
-                    SchemaManager sm = scmProcessor.getSchemaManager();
+                    XsdCompiler sm = scmProcessor.newXsdCompiler();
                     File scmLocation = new File(scmSchemaLocation);
                     InputStream scmInput = new FileInputStream(scmLocation);
                     StreamSource streamSource = new StreamSource(scmInput);
-                    sm.importComponents(streamSource);
+                    XsdSchema scnSchema = sm.importComponents(streamSource);
                     scmInput.close();
-                    scmValidator = sm.newSchemaValidator();
+                    scmValidator = scnSchema.newValidator();
                 } catch (SaxonApiException e) {
                     e.printStackTrace();
                     useSCM = false;
@@ -354,7 +354,7 @@ public class SchemaTestSuiteDriver {
                     boolean schemaFailed = false;
                     String bugzillaRef = null;
                     String scm = null;
-                    XsdSchema schema = null;
+                    List<XsdSchema> schemata = new ArrayList<>();
                     for (XdmNode schemaTest : testGroup.children("schemaTest")) {
                         countTests++;
                         bugzillaRef = null;
@@ -386,21 +386,15 @@ public class SchemaTestSuiteDriver {
                             schemaQueried = true;
                         }
                         println("TEST SCHEMA " + testName + (queried ? " (queried)" : ""));
-                        List<String> scmList = new ArrayList<String>(1); // Used as an output parameter
+                        //List<String> scmList = new ArrayList<String>(1); // Used as an output parameter
                         boolean success = true;
                         try {
-                            XsdSchema localSchema = loadSchemas(xpath, testProcessor, schemaTest, true, scmList);
-                            if (schema == null) {
-                                schema = localSchema;
-                            } else {
-                                schema = schema.combine(localSchema);
-                            }
+                            XsdSchema localSchema = loadSchemas(xpath, testProcessor, schemaTest);
+                            schemata.add(localSchema);
                         } catch (SaxonApiException err) {
                             success = false;
                         }
-                        if (!scmList.isEmpty()) {
-                            scm = scmList.get(0);
-                        }
+
                         XdmNode expected = (XdmNode) xpath.evaluateSingle(
                                 "expected[not(@version) or contains(@version, '" + versionUnderTest + "') or contains(@version, 'Unicode_6.0.0')]", schemaTest);
                         String expectedOutcome = (expected == null ? "indeterminate" :
@@ -434,7 +428,13 @@ public class SchemaTestSuiteDriver {
                     }
 
                     if (!schemaFailed) {
-                        //XsltExecutable xsltValidator = null;
+                        XsdSchema schema;
+                        if (schemata.size() == 1) {
+                            schema = schemata.get(0);
+                        } else {
+                            XsdCompiler compiler = testProcessor.newXsdCompiler();
+                            schema = compiler.combine(schemata.toArray(new XsdSchema[]{}));
+                        }
                         for (XdmItem instanceTestItem : xpath.evaluate("instanceTest", testGroup)) {
                             countTests++;
                             XdmNode instanceTest = (XdmNode) instanceTestItem;
@@ -581,16 +581,16 @@ public class SchemaTestSuiteDriver {
         }
     }
 
-    private XsdSchema loadSchemas(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
+    private XsdSchema loadSchemas(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest)
             throws URISyntaxException, SaxonApiException {
         if (useSCM) {
-            return loadSchemasViaSCM(xpath, testProcessor, schemaTest, success, scmList);
+            return loadSchemasViaSCM(xpath, testProcessor, schemaTest);
         } else {
-            return loadSchemasDirect(xpath, testProcessor, schemaTest, success);
+            return loadSchemasDirect(xpath, testProcessor, schemaTest);
         }
     }
 
-    private XsdSchema loadSchemasDirect(XPathCompiler xpath, Processor processor, XdmNode schemaTest, boolean success)
+    private XsdSchema loadSchemasDirect(XPathCompiler xpath, Processor processor, XdmNode schemaTest)
             throws SaxonApiException, URISyntaxException {
         List<Source> schemaSources = new ArrayList<>();
         for (XdmNode schemaDocumentRef : schemaTest.children("schemaDocument")) {
@@ -603,18 +603,18 @@ public class SchemaTestSuiteDriver {
             XdmSequenceIterator<XdmNode> si = schemaDoc.axisIterator(Axis.CHILD);
             XdmNode schemaElement = (si.hasNext() ? si.next() : null);
             String targetNamespace = (schemaElement == null ? null : schemaElement.getAttributeValue(QN_targetNamespace));
-            if (targetNamespace != null && processor.getUnderlyingConfiguration().isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
-                // do nothing
-                // TODO: this is the only way I can get MS additional test addB132 to work.
-                // This test has two schema documents, A and B; A imports B, and the test catalog
-                // requests both A and B to be loaded.
-                // It's not ideal: addSchemaSource() ought to be a no-op if the schema components
-                // are already loaded, but in fact recompiling the imported schema document on its
-                // own is losing the substitution group membership that was defined in the
-                // importing document.
-            } else {
+//            if (targetNamespace != null && processor.getUnderlyingConfiguration().isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
+//                // do nothing
+//                // TODO: this is the only way I can get MS additional test addB132 to work.
+//                // This test has two schema documents, A and B; A imports B, and the test catalog
+//                // requests both A and B to be loaded.
+//                // It's not ideal: addSchemaSource() ought to be a no-op if the schema components
+//                // are already loaded, but in fact recompiling the imported schema document on its
+//                // own is losing the substitution group membership that was defined in the
+//                // importing document.
+//            } else {
                 schemaSources.add(schemaDoc.asSource());
-            }
+//            }
         }
         if (schemaSources.isEmpty()) {
             return processor.newXsdCompiler().emptySchema();
@@ -623,7 +623,7 @@ public class SchemaTestSuiteDriver {
         }
     }
 
-    private XsdSchema loadSchemasViaSCM(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
+    private XsdSchema loadSchemasViaSCM(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest)
             throws SaxonApiException, URISyntaxException {
         Processor tempProcessor = new Processor(true);
         tempProcessor.setConfigurationProperty(Feature.XSD_VERSION, versionUnderTest);
@@ -633,8 +633,13 @@ public class SchemaTestSuiteDriver {
         EnterpriseConfiguration tempConfig = (EnterpriseConfiguration) tempProcessor.getUnderlyingConfiguration();
         //AutoActivate.activate(tempConfig);
         XPathCompiler tempXPath = tempProcessor.newXPathCompiler();
+        XsdCompiler compiler = tempProcessor.newXsdCompiler();
+        List<XsdSchema> schemata = new ArrayList<>();
         for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
             XdmNode schemaDocumentRef = (XdmNode) schemaDocRefItem;
+            if ("overridden".equals(schemaDocumentRef.getAttributeValue(new QName("role")))) {
+                continue;
+            }
             println("Loading schema via SCM at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
             XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, tempProcessor, null);
             XdmNode schemaElement =
@@ -643,15 +648,44 @@ public class SchemaTestSuiteDriver {
             if (targetNamespace != null && tempConfig.isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
                 return null;
             } else {
-                try {
-                    tempProcessor.newXsdCompiler().compile(schemaDoc.asSource());
-                    return null;// TODO: use an ErrorListener
-                } catch (SaxonApiException err) {
-                    return null;
-                }
+                XsdSchema localSchema = compiler.compile(schemaDoc.asSource());
+                schemata.add(localSchema);
             }
         }
-        return null;
+        try {
+            StringWriter sw = new StringWriter();
+            Serializer serializer = tempProcessor.newSerializer(sw);
+            serializer.setOutputProperty(new QName("method"), "xml");
+            serializer.setOutputProperty(new QName("indent"), "yes");
+
+            XsdSchema schema;
+            if (schemata.size() == 1) {
+                schema = schemata.get(0);
+            } else {
+                schema = compiler.combine(schemata.toArray(new XsdSchema[]{}));
+            }
+
+            schema.exportComponents(serializer);
+            String scm = sw.toString();
+            //System.err.println(scm);
+            try {
+                scmValidator.validate(new StreamSource(new StringReader(scm)));
+            } catch (SaxonApiException e) {
+                System.err.println("*** SCM does not validate against schema for SCM ***");
+                System.err.println(scm);
+                System.exit(2);
+            }
+            try {
+                XsdCompiler comp = testProcessor.newXsdCompiler();
+                return comp.importComponents(new StreamSource(new StringReader(scm)));
+                //testProcessor.getSchemaManager().importComponents(new StreamSource(new StringReader(scm)));
+            } catch (SaxonApiException e) {
+                e.printStackTrace();
+                throw e;
+            }
+        } catch (SaxonApiException e) {
+            throw e;
+        }
     }
 
     private boolean loadSchemasViaInstanceDocument(XPathCompiler xpath, Processor testProcessor, XdmNode instanceTest, boolean success, List<String> scmList)

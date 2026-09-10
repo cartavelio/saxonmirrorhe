@@ -941,7 +941,8 @@ public class PreparedSchema implements Schema, NotationSet {
     /**
      * Copy the components of this schema to another schema
      *
-     * @param destination the destination of the copy
+     * @param destination the destination of the copy. The destination schema is modified; this schema
+     *                    is unchanged.
      * @param compiler    used for error reporting
      * @throws SchemaException if there are name clashes between this
      *                         schema and the destination schema (that is, the same name used to refer to different components.
@@ -951,15 +952,16 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public void copyTo(PreparedSchema destination, SchemaCompiler compiler) throws SchemaException {
         List<Action> fixupActions = new ArrayList<>();
-        checkConsistency(destination, compiler, fixupActions);
-        copyWithoutChecking(destination);
-        for (Action action : fixupActions) {
-            try {
-                action.doAction();
-            } catch (XPathException e) {
-                throw new SchemaException(e);
-            }
-        }
+        Set<Object> duplicates = checkConsistency(destination, compiler);
+        copyWithoutChecking(destination, duplicates);
+
+//        for (Action action : fixupActions) {
+//            try {
+//                action.doAction();
+//            } catch (XPathException e) {
+//                throw new SchemaException(e);
+//            }
+//        }
     }
 
     private void addTargetNamespaces(Map<NamespaceUri, List<String>> map) {
@@ -987,7 +989,7 @@ public class PreparedSchema implements Schema, NotationSet {
      * @param destination the destination of the copy
      */
 
-    private void copyWithoutChecking(PreparedSchema destination) {
+    private void copyWithoutChecking(PreparedSchema destination, Set<Object> duplicates) {
 
         destination.addTargetNamespaces(getTargetNamespaceMap());
 
@@ -1003,9 +1005,13 @@ public class PreparedSchema implements Schema, NotationSet {
         }
 
         for (ElementDecl el : elementsByName.values()) {
-            destination.addElementDecl(el);
+            ElementDecl other = destination.getElementDecl(el.getFingerprint());
+            if (other == null) {
+                destination.addElementDecl(el);
+                other = el;
+            }
             for (ElementDecl member : getSubstitutionGroupMembers(el)) {
-                destination.addSubstitutionGroupMember(el, member);
+                destination.addSubstitutionGroupMember(other, member);
             }
         }
 
@@ -1089,93 +1095,123 @@ public class PreparedSchema implements Schema, NotationSet {
      * @param destination the destination schema
      * @param compiler    the schema compiler. Any conflicts will be reported as errors to the
      *                    schema compiler.
+     * @return the set of fingerprints of components that exist in both schemas. In these cases
+     * the definitions in both schemas are consistent, but they are duplicates. One of them needs
+     * to be eliminated, which means that all component references to that component need to be
+     * redirected. The duplicates returned will always be schema components in this schema.
      * @throws SchemaException thrown if there are any conflicts.
      */
 
-    private void checkConsistency(PreparedSchema destination, SchemaCompiler compiler, List<Action> fixupActions)
+    private Set<Object> checkConsistency(PreparedSchema destination, SchemaCompiler compiler)
             throws SchemaException {
         boolean conflicts = false;
+        HashSet<Object> duplicates = new HashSet<>();
         for (StructuredQName fp : typesByName.keySet()) {
             // We do it this way to allow for redefinition: the same type may have two different fingerprints
             SchemaType type = typesByName.get(fp);
 
             final SchemaType existing = destination.getSchemaType(fp);
-            if (existing != null &&
-                    type.getRedefinitionLevel() == existing.getRedefinitionLevel() &&
-                    !type.isSameType(existing)) {
-                String loc = "";
-                if (existing instanceof SourceLocator) {
-                    loc = existingLocation((SourceLocator) existing);
+            if (existing != null && existing != type &&
+                    type.getRedefinitionLevel() == existing.getRedefinitionLevel()) {
+                if (type.isSameType(existing)) {
+                    duplicates.add(type);
+                } else {
+                    String loc = "";
+                    if (existing instanceof SourceLocator) {
+                        loc = existingLocation((SourceLocator) existing);
+                    }
+                    compiler.error("Duplicate type " + Err.wrap(type.getDisplayName()) + loc,
+                                   type instanceof Location ? (Location) type : null);
+                    conflicts = true;
                 }
-                compiler.error("Duplicate type " + Err.wrap(type.getDisplayName()) + loc,
-                    type instanceof Location ? (Location) type : null);
-                conflicts = true;
             }
         }
 
         for (SchemaType schemaType : anonymousTypesByName.values()) {
             UserDefinedType type = (UserDefinedType) schemaType;
             final SchemaType existing = destination.getSchemaType(type.getTypeName());
-            if (existing != null && !type.isSameType(existing)) {
-                String loc = "";
-                if (existing instanceof SourceLocator) {
-                    loc = existingLocation((SourceLocator) existing);
+            if (existing != null && existing != type) {
+                if (type.isSameType(existing)) {
+                    duplicates.add(type);
+                } else {
+                    String loc = "";
+                    if (existing instanceof SourceLocator) {
+                        loc = existingLocation((SourceLocator) existing);
+                    }
+                    compiler.error("Duplicate type " + Err.wrap(type.getName()) + loc, type);
+                    conflicts = true;
                 }
-                compiler.error("Duplicate type " + Err.wrap(type.getName()) + loc, type);
-                conflicts = true;
             }
         }
 
         for (ElementDecl decl : elementsByName.values()) {
             final ElementDecl existing = destination.getElementDecl(decl.getComponentName());
-            if (existing != null && !existing.isSameDeclaration(decl)) {
-                String loc = existingLocation(existing);
-                compiler.error(
-                    "Duplicate element declaration " + Err.wrap(decl.getDisplayName(), Err.ELEMENT) + loc, decl);
-                conflicts = true;
+            if (existing != null && existing != decl) {
+                if (decl.isSameDeclaration(existing)) {
+                    duplicates.add(decl);
+                } else {
+                    String loc = existingLocation(existing);
+                    compiler.error(
+                            "Duplicate element declaration " + Err.wrap(decl.getDisplayName(), Err.ELEMENT) + loc, decl);
+                    conflicts = true;
+                }
             }
         }
 
         for (AttributeDecl decl : attributesByName.values()) {
             final AttributeDecl existing = destination.getAttributeDecl(decl.getComponentName());
-            if (existing != null && !existing.isSameDeclaration(decl)) {
-                String loc = existingLocation(existing);
-                compiler.error(
-                    "Duplicate attribute declaration " + Err.wrap(decl.getDisplayName()) + loc, decl);
-                conflicts = true;
+            if (existing != null && existing != decl) {
+                if (existing.isSameDeclaration(decl)) {
+                    duplicates.add(decl);
+                } else {
+                    String loc = existingLocation(existing);
+                    compiler.error(
+                            "Duplicate attribute declaration " + Err.wrap(decl.getDisplayName()) + loc, decl);
+                    conflicts = true;
+                }
             }
         }
 
         for (ModelGroupDefinition decl : groups.values()) {
             final ModelGroupDefinition existing = destination.getGroup(decl.getModelGroupName());
-            if (existing != null &&
-                existing.getRedefinitionLevel() == decl.getRedefinitionLevel() &&
-                !existing.isSameGroup(decl)) {
-                String loc = existingLocation(existing);
-                compiler.error("Duplicate group declaration " + Err.wrap(decl.getName()) + loc, decl);
-                conflicts = true;
+            if (existing != null && existing != decl &&
+                    existing.getRedefinitionLevel() == decl.getRedefinitionLevel()) {
+                if (existing.isSameGroup(decl)) {
+                    duplicates.add(decl);
+                } else {
+                    String loc = existingLocation(existing);
+                    compiler.error("Duplicate group declaration " + Err.wrap(decl.getName()) + loc, decl);
+                    conflicts = true;
+                }
             }
         }
 
         for (AttributeGroupDecl decl : attributeGroups.values()) {
             final AttributeGroupDecl existing = destination.getAttributeGroup(decl.getAttributeGroupName());
-            if (existing != null &&
-                    existing.getRedefinitionLevel() == decl.getRedefinitionLevel() &&
-                    !existing.isSameDeclaration(decl)) {
-                String loc = existingLocation(existing);
-                compiler.error(
-                    "Duplicate attribute group declaration " + Err.wrap(decl.getDisplayName()) + loc, decl);
-                conflicts = true;
+            if (existing != null &&  existing != decl &&
+                    existing.getRedefinitionLevel() == decl.getRedefinitionLevel()) {
+                if (existing.isSameDeclaration(decl)) {
+                    duplicates.add(decl);
+                } else {
+                    String loc = existingLocation(existing);
+                    compiler.error(
+                            "Duplicate attribute group declaration " + Err.wrap(decl.getDisplayName()) + loc, decl);
+                    conflicts = true;
+                }
             }
         }
 
         if (notations != null) {
             for (Notation decl : notations.values()) {
                 final Notation existing = destination.getNotation(decl.getNotationName());
-                if (existing != null && existing != decl && !decl.isSameDeclaration(existing)) {
-                    String loc = existingLocation(existing);
-                    compiler.error("Duplicate notation declaration " + Err.wrap(decl.getName()) + loc, decl);
-                    conflicts = true;
+                if (existing != null && existing != decl) {
+                    if (decl.isSameDeclaration(existing)) {
+                        duplicates.add(decl);
+                    } else {
+                        String loc = existingLocation(existing);
+                        compiler.error("Duplicate notation declaration " + Err.wrap(decl.getName()) + loc, decl);
+                        conflicts = true;
+                    }
                 }
             }
         }
@@ -1183,11 +1219,15 @@ public class PreparedSchema implements Schema, NotationSet {
         if (identityConstraints != null) {
             for (IdentityConstraint decl : identityConstraints.values()) {
                 final IdentityConstraint existing = destination.getIdentityConstraint(decl.getConstraintName());
-                if (existing != null && !existing.isSameDeclaration(decl)) {
-                    String loc = existingLocation(existing);
-                    compiler.error(
-                        "Duplicate identity constraint name " + Err.wrap(decl.getName()) + loc, decl);
-                    conflicts = true;
+                if (existing != null && existing != decl) {
+                    if (existing.isSameDeclaration(decl)) {
+                        duplicates.add(decl);
+                    } else {
+                        String loc = existingLocation(existing);
+                        compiler.error(
+                                "Duplicate identity constraint name " + Err.wrap(decl.getName()) + loc, decl);
+                        conflicts = true;
+                    }
                 }
             }
         }
@@ -1199,8 +1239,9 @@ public class PreparedSchema implements Schema, NotationSet {
             }
         }
         if (conflicts) {
-            throw new SchemaException("Duplicated components found in schema");
+            throw new SchemaException("Conflicts found when merging two schemas");
         }
+        return duplicates;
     }
 
 
@@ -1226,7 +1267,7 @@ public class PreparedSchema implements Schema, NotationSet {
             throws SchemaException {
 
         //System.err.println("*** Validating " + targetNamespace);
-
+        compiler.setPreparedSchema(this);
         boolean result = true;
 
         // Fix up all component references
@@ -1930,7 +1971,7 @@ public class PreparedSchema implements Schema, NotationSet {
         }
         cct = new CompiledComplexType(this, type);
         compiledComplexTypes.put(type, cct);
-        cct.buildValidationMachinery(compiler);
+        cct.buildValidationMachinery(compiler, this);
         return cct;
     }
 

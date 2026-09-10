@@ -10,13 +10,11 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.lib.StandardErrorReporter;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XsdCompiler;
-import net.sf.saxon.s9api.XsdSchema;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Schema;
+import net.sf.saxon.type.SchemaException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -181,6 +179,40 @@ public class XsdCompilerEE extends XsdCompiler {
         }
         return compile(sources);
     }
+
+    /**
+     * Combine a set of schemas into one
+     *
+     * @param schemas the input schemas. These are not modified.
+     * @return the combined schema
+     * @throws SaxonApiException if the schemas are not compatible, for example if they contain
+     *                           duplicate names.
+     * @since 13.0
+     */
+
+    public XsdSchema combine(XsdSchema... schemas) throws SaxonApiException {
+        if (schemas.length == 0) {
+            return emptySchema();
+        }
+        final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
+        SchemaCompiler compiler = new SchemaCompiler(config);
+        PreparedSchema initial = (PreparedSchema)config.emptySchema();
+        try {
+            for (XsdSchema s : schemas) {
+                ((PreparedSchema)s.getUnderlyingSchema()).copyTo(initial, compiler);
+            }
+            boolean valid = initial.validate(compiler);
+            if (!valid) {
+                throw new SchemaException("The combined schema is invalid");
+            }
+            compiler.makeAllAutomata();
+            compiler.checkAllAutomata();
+        } catch (SchemaException e) {
+            throw new SaxonApiException(e);
+        }
+        return new XsdSchemaImpl(processor, initial);
+    }
+
 
     /**
      * Return an empty schema. This may be useful for validating instance documents when all
