@@ -1023,10 +1023,10 @@ def saxonDocPythonSetupTask = tasks.register("saxonc_doc_pypi", PythonSetup) {
   graalImageHeaderFiles.from(tasks.named("eec_build_graal_image").map { it.headerFiles })
   pypiDir = layout.projectDirectory.dir("src/main/c/pypi")
   saxonCApiDir = layout.projectDirectory.dir("src/main/c/Saxon.C.API")
-  outputDir = layout.buildDirectory.dir("doc_pypi")
-  it.edition = "ee"
-  it.libpath = systemOs.isWindows() ? 'libs\\\\win\\\\' : ''
-  it.version3 = saxonVersion3
+  outputDir = layout.buildDirectory.dir("doc_pypi/saxoncee")
+  edition = "ee"
+  libpath = systemOs.isWindows() ? 'libs\\\\win\\\\' : ''
+  version3 = saxonVersion3
 }
 
 def docSaxoncDoxygenTask = tasks.register("saxonc_doxygen") {
@@ -1075,25 +1075,26 @@ def branchDocVenvTask = tasks.register("branch_doc_python_venv", PythonVenv) {
   suffix = "doc"
 }
 
+def docPipInstall = tasks.register("saxonc_doc_python_pipInstall", PipInstall) {
+  pipExe = branchDocVenvTask.map { it.pipExe.get() }
+  requirements = tasks.named("saxonc_doc_pypi").map { it.packageDir.map { it.file("requirements.txt") }.get() }
+}
+
 def docWheelPlatformTagTask = tasks.register("doc_python_wheel_platform_tag", WheelCompatibilityTags) {
+  wheelMetaDir = layout.buildDirectory.dir("doc_pypi/wheel-meta")
   pyenvExe = tasks.named("pyenvExe").map { it.pyenv.get() }
   pythonVersion = pyenvDocPythonTask.map { it.pythonVersion.get() }
   pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
   manylinuxTarget = "manylinux_2_24"
 }
 
-tasks.register("saxonc_doc_python_pipInstall", PipInstall) {
-  pipExe = branchDocVenvTask.map { it.pipExe.get() }
-  requirements = tasks.named("saxonc_doc_pypi").map { it.packageDir.map { it.file("requirements.txt") }.get() }
-}
-
 def docBuildWheelTask = tasks.register("saxonc_doc_python_build_wheel", BuildWheel) {
   pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
   productEdition = "ee"
   productVersion = saxonVersion3
-  wheelSuffix = docWheelPlatformTagTask.flatMap { it.wheelSuffix }
-  macosxDeploymentTarget = docWheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
-  sourceDir = tasks.named("saxonc_doc_pypi").map { it.packageDir.get() }
+  wheelSuffix = docWheelPlatformTagTask.map { it.wheelSuffix.get() }
+  macosxDeploymentTarget = docWheelPlatformTagTask.map { it.macosxDeploymentTarget.get() }
+  sourceDir = saxonDocPythonSetupTask.map { it.packageDir.get() }
   outputDir = layout.buildDirectory.dir("doc_python_wheel")
 }
 

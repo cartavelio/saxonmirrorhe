@@ -620,6 +620,7 @@ def branchDebugVenvTask = tasks.register("branchDebugVenv", PythonVenv) {
 }
 
 def wheelPlatformTagTask = tasks.register("wheelPlatformTag", WheelCompatibilityTags) {
+  wheelMetaDir = layout.buildDirectory.dir("python-wheel-meta")
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
   pythonVersion = pyenvTask.map { it.pythonVersion.get() }
   pythonExe = branchVenvTask.map { it.pythonExe.get() }
@@ -627,6 +628,7 @@ def wheelPlatformTagTask = tasks.register("wheelPlatformTag", WheelCompatibility
 }
 
 def wheelDebugPlatformTagTask = tasks.register("wheelDebugPlatformTag", WheelCompatibilityTags) {
+  wheelMetaDir = layout.buildDirectory.dir("python-debug-wheel-meta")
   pyenvExe = pyenvExeTask.map { it.pyenv.get() }
   pythonVersion = pyenvTask.map { it.pythonVersion.get() }
   pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
@@ -852,8 +854,8 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     productEdition = edition
     productVersion = saxonVersion3
-    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
-    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    wheelSuffix = wheelPlatformTagTask.map { it.wheelSuffix.get() }
+    macosxDeploymentTarget = wheelPlatformTagTask.map { it.macosxDeploymentTarget.get() }
     sourceDir = tasks.named("setup_${edition}c_pypi").map { it.packageDir.get() }
   }
 
@@ -863,7 +865,7 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
     productEdition = edition
-    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.repairedWheelSuffix }
+    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.map { it.repairedWheelSuffix.get() }
     libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
     wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
   }
@@ -872,8 +874,8 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
     pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
     productEdition = edition
     productVersion = saxonVersion3
-    wheelSuffix = wheelDebugPlatformTagTask.flatMap { it.wheelSuffix }
-    macosxDeploymentTarget = wheelDebugPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    wheelSuffix = wheelDebugPlatformTagTask.map { it.wheelSuffix.get() }
+    macosxDeploymentTarget = wheelDebugPlatformTagTask.map { it.macosxDeploymentTarget.get() }
     sourceDir = tasks.named("setup_${edition}c_pypi_debug").map { it.packageDir.get() }
     outputDir = pythonBuildRootPath(edition, true)
     debug = true
@@ -885,7 +887,7 @@ Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) 
     pythonExe = branchVenvTask.map { it.pythonExe.get() }
     pythonVenvTask = branchVenvTask
     productEdition = edition
-    repairedWheelFilePlatformSuffix = wheelDebugPlatformTagTask.flatMap { it.repairedWheelSuffix }
+    repairedWheelFilePlatformSuffix = wheelDebugPlatformTagTask.map { it.repairedWheelSuffix.get() }
     libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
     wheel = tasks.named("${edition}c_python_build_debug_wheel").map { it.wheel.get() }
   }

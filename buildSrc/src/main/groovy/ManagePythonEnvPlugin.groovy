@@ -440,6 +440,9 @@ abstract class WheelCompatibilityTags extends DefaultTask {
     abstract Property<String> getManylinuxTarget()
 
     @Internal
+    abstract DirectoryProperty getWheelMetaDir()
+
+    @Internal
     OperatingSystem systemOs = OperatingSystem.current()
 
     @Internal
@@ -452,42 +455,82 @@ abstract class WheelCompatibilityTags extends DefaultTask {
     @Internal
     Provider<String> macosxDeploymentTarget = pythonExe.map { python ->
         if (systemOs.isMacOsX()) {
-            execString(python, ["-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version]))"])
+            def pyScript = """
+import sysconfig
+
+base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]
+version = (base_version[0], 0) if base_version[0] > 10 else base_version
+print('.'.join([str(x) for x in version]))
+"""
+            execPython(pyScript)
         } else {
             ""
         }
     }
 
-    @Internal
-    Provider<String> platform = pythonVersionPath.map { path ->
-        execString(pythonExe.get(),
-                ["-c", "import os; from setuptools.command.bdist_wheel import get_platform; print(get_platform(os.environ['PYTHON_VERSION_PREFIX']))"],
-                [PYTHON_VERSION_PREFIX: path.asFile.toString()])
+    @OutputFile
+    Provider<String> wheelSuffix = wheelMetaDir.map { it.file("wheel-suffix.txt") }
+
+    @OutputFile
+    Provider<RegularFile> repairedWheelSuffix = wheelMetaDir.map { it.file("repaired-wheel-suffix.txt") }
+
+    @OutputFile
+    Provider<RegularFile> platform = wheelMetaDir.map { it.file("platform.txt") }
+
+    @TaskAction
+    generate() {
+        def platformString = generatePlatformString(pythonVersionPath.get())
+
+        def repairedWheelSuffixString = manylinuxTarget.map { manylinux ->
+            def unrepairedPlatform = platformString
+            def repairedPlatform = systemOs.isLinux() ? "${manylinux}_${unrepairedPlatform.replace("linux_", "")}" : unrepairedPlatform
+            generateWheelSuffix(repairedPlatform)
+        }.get()
+
+        platform.get().asFile.write(platformString)
+        repairedWheelSuffix.get().asFile.write(repairedWheelSuffixString)
+        wheelSuffix.get().asFile.write(generateWheelSuffix(platformString))
     }
 
-    @Internal
-    Provider<String> wheelSuffix = platform.map { generateWheelSuffix(it) }
+    String generatePlatformString(RegularFile pythonVersionPath) {
+        def pyScript = """
+import os
+from setuptools.command.bdist_wheel import get_platform 
 
-    @Internal
-    Provider<String> repairedWheelSuffix = manylinuxTarget.map { manylinux ->
-        def unrepairedPlatform = platform.get()
-        def repairedPlatform = systemOs.isLinux() ? "${manylinux}_${unrepairedPlatform.replace("linux_", "")}" : unrepairedPlatform
-        generateWheelSuffix(repairedPlatform)
+print(get_platform(os.environ['PYTHON_VERSION_PREFIX']))
+"""
+
+        execPython(pyScript, [PYTHON_VERSION_PREFIX: pythonVersionPath.asFile.toString()])
     }
 
     String generateWheelSuffix(String platform) {
-        execString(pythonExe.get(),
-                ["-c", "import os; from setuptools.command.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))"],
-                [PLATFORM_TAG: platform])
+        def pyScript = """
+import os
+from setuptools.command.bdist_wheel import get_platform
+from wheel.vendored.packaging.tags import Tag, sys_tags
+
+t = next(sys_tags())
+print(Tag(t.interpreter, t.abi, os.environ['PLATFORM_TAG']))
+"""
+        execPython(pyScript, [PLATFORM_TAG: platform])
     }
 
-    String execString(RegularFile exe, List<String> arguments, Map<String, String> env = [:]) {
+    String execPython(String script, Map<String, String> env = [:]) {
+        InputStream stdin = new ByteArrayInputStream(script.getBytes())
+        execString(pythonExe.get(),
+                ["-"],
+                env,
+                stdin)
+    }
+
+    String execString(RegularFile exe, List<String> arguments, Map<String, String> env = [:], InputStream stdin = new ByteArrayInputStream(new byte[0])) {
         (new ByteArrayOutputStream()).withStream { out ->
             project.exec {
                 environment env
                 executable exe
                 args(*arguments)
                 standardOutput out
+                standardInput stdin
             }
             out.toString().trim()
         }
@@ -530,47 +573,19 @@ abstract class BuildWheel extends DefaultTask {
     @OutputDirectory
     final Provider<Directory> buildDir = outputDir.map { it.dir("build") }
 
-    @Input
-    abstract Property<String> getWheelSuffix()
+    @InputFile
+    abstract RegularFileProperty getWheelSuffix()
 
     @Input
     abstract Property<String> getMacosxDeploymentTarget()
 
-//    @Internal
-//    Provider<String> wheelFilePlatformSuffix = pythonExe.map {python ->
-//        (new ByteArrayOutputStream()).withStream { out ->
-//            project.exec {
-//                workingDir sourceDir.get()
-//                executable python
-//                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, get_platform('.')))"
-//                standardOutput out
-//            }
-//            out.toString().trim()
-//        }
-//    }
-//
-//    @Internal
-//    Provider<String> macosxDeploymentTarget = Provider<String> wheelFilePlatformSuffix = pythonExe.map {python ->
-//        (new ByteArrayOutputStream()).withStream { out ->
-//            project.exec {
-//                workingDir sourceDir.get()
-//                executable python
-//                args "-c", "import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version])"
-//                standardOutput out
-//            }
-//            out.toString().trim()
-//        }
-//    }
-//
-//    import sysconfig; base_version = tuple(int(x) for x in sysconfig.get_platform().split('-')[1].split('.'))[:2]; base_version = (base_version[0], 0) if base_version[0] > 10 else base_version; print('.'.join([str(x) for x in base_version])
-
     @Internal
     Provider<String> wheelFilename = productEdition.map { prod ->
-        "saxonc${prod}-${productVersion.get()}-${wheelSuffix.get()}.whl"
+        "saxonc${prod}-${productVersion.get()}-${wheelSuffix.get().asFile.text.strip()}.whl"
     }
 
     @OutputFile
-    Provider<RegularFile> wheel = productEdition.flatMap { buildDir.map { it.file("dist/${wheelFilename.get()}") } }
+    Provider<RegularFile> wheel = buildDir.map { it.file("dist/${wheelFilename.get()}") }
 
     @TaskAction
     void build() {
@@ -623,38 +638,8 @@ abstract class RepairLocalWheel extends DefaultTask {
     @Internal
     def systemOsArch = System.getProperty("os.arch") == "amd64" ? "x86_64" : System.getProperty("os.arch")
 
-    @Input
-    abstract Property<String> getRepairedWheelFilePlatformSuffix()
-//    = pythonExe.map {python ->
-//        def platform = systemOs.isLinux() ? repairedLinuxPlatform() : unrepairedPlatform()
-//        (new ByteArrayOutputStream()).withStream { out ->
-//            project.exec {
-//                environment REPAIRED_PLATFORM: platform
-//                workingDir outputDir.get()
-//                executable python
-//                args "-c", "from wheel.bdist_wheel import get_platform; from wheel.vendored.packaging.tags import Tag, sys_tags; import os; t = next(sys_tags()); print(Tag(t.interpreter, t.abi, os.environ['REPAIRED_PLATFORM']))"
-//                standardOutput out
-//            }
-//            out.toString().trim()
-//        }
-//    }
-
-//    String repairedLinuxPlatform() {
-//        def arch = unrepairedPlatform().replace("linux_", "")
-//        "${manylinuxTarget.get()}_${arch}"
-//    }
-
-//    String unrepairedPlatform() {
-//        (new ByteArrayOutputStream()).withStream { out ->
-//            project.exec {
-//                workingDir outputDir.get()
-//                executable pythonExe.get()
-//                args "-c", "from wheel.bdist_wheel import get_platform; print(get_platform('.'))"
-//                standardOutput out
-//            }
-//            out.toString().trim()
-//        }
-//    }
+    @InputFile
+    abstract RegularFileProperty getRepairedWheelFilePlatformSuffix()
 
     // Linux - auditwheel
     ExecResult repairLinux() {
@@ -697,7 +682,7 @@ abstract class RepairLocalWheel extends DefaultTask {
     @Internal
     Provider<String> repairedWheelFilename = wheel.map { wheel ->
         def nonPlatformPart = wheel.asFile.name.replaceFirst(/^(saxonc[ehp]e-[0-9]+\.[0-9]+\.[0-9]+)-.+$/, '$1')
-        "${nonPlatformPart}-${repairedWheelFilePlatformSuffix.get()}.whl"
+        "${nonPlatformPart}-${repairedWheelFilePlatformSuffix.get().asFile.text.strip()}.whl"
     }
 
     @OutputFile
