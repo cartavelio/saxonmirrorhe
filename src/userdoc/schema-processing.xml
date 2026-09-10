@@ -477,31 +477,32 @@
          <p>The main steps are:</p>
          <ol>
             <li>
-               <p>Create a <a class="javalink" href="net.sf.saxon.s9api.Processor"
-                     >net.sf.saxon.s9api.Processor</a> and call its <code>getSchemaManager()</code>
-                  method to get a <a class="javalink" href="net.sf.saxon.s9api.SchemaManager"
-                     >SchemaManager</a>.</p>
+               <p>Create a <code
+                  java="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</code> and call
+                  its <code java="net.sf.saxon.s9api.Processor#getSchemaManager">getSchemaManager()</code>
+                  method to get a <code java="net.sf.saxon.s9api.SchemaManager"
+                     >SchemaManager</code>.</p>
             </li>
             <li>
-               <p>If required, set options on the <a class="javalink"
-                     href="net.sf.saxon.s9api.SchemaManager">SchemaManager</a> to control the way in
+               <p>If required, set options on the <code>SchemaManager</code> to control the way in
                   which schema documents will be loaded.</p>
             </li>
             <li>
-               <p>Load a schema document by calling the <code>load()</code> method, which takes a
+               <p>Load a schema document by calling the <code
+                  java="net.sf.saxon.s9api.SchemaManager#load">load()</code> method, which takes a
                   JAXP Source object as its argument. The resulting schema document is available to
-                  all applications run within the containing <a class="javalink"
-                     href="net.sf.saxon.s9api.Processor">Processor</a>.</p>
+                  all applications run within the containing <code>Processor</code>.</p>
             </li>
             <li>
-               <p>To validate an instance document, call the <code>newSchemaValidator()</code>
-                  method on the <a class="javalink" href="net.sf.saxon.s9api.SchemaManager"
-                     >SchemaManager</a> object. </p>
+               <p>To validate an instance document, call the <code
+                  java="net.sf.saxon.s9api.SchemaManager#newSchemaValidator">newSchemaValidator()</code>
+                  method on the <code>SchemaManager</code> object. This returns a <code
+                     java="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</code>.</p>
             </li>
             <li>
-               <p>Set options on the <a class="javalink" href="net.sf.saxon.s9api.SchemaValidator"
-                     >SchemaValidator</a> to control the way in which a particular validation
-                  episode is performed, and then invoke its <code>validate()</code> method to
+               <p>Set options on the <code>SchemaValidator</code> to control the way in which a
+                  particular validation episode is performed, and then invoke its <code
+                     java="net.sf.saxon.s9api.SchemaValidator#validate">validate()</code> method to
                   validate an instance document.</p>
             </li>
          </ol>
@@ -709,53 +710,51 @@
          <p>The main steps are:</p>
          <ol>
             <li>
-               <p>Create a <a class="cslink" href="Saxon.Api.Processor"
-                  >Processor</a> and use its <code>SchemaManager</code>
-                  method to get a <a class="cslink" href="Saxon.Api.SchemaManager"
-                     >SchemaManager</a>.</p>
+               <p>Create a <code cs="Saxon.Api.Processor">Processor</code> and use its <code
+                  cs="Saxon.Api.Processor#SchemaManager">Processor.SchemaManager</code>
+                  property to get a <code cs="Saxon.Api.SchemaManager">SchemaManager</code>.</p>
             </li>
             <li>
-               <p>If required, set options on the <a class="cslink" href="Saxon.Api.SchemaManager"
-                  >SchemaManager</a> to control the way in
+               <p>If required, set options on the <code>SchemaManager</code> to control the way in 
                   which schema documents will be loaded.</p>
             </li>
             <li>
-               <p>Load a schema document by calling one of the <code>Compile()</code> methods, which allow the input
+               <p>Load a schema document by calling one of the <code
+                  cs="Saxon.Api.SchemaManager#Compile">Compile()</code> methods, which allow the input
                   to be supplied in a variety of forms (for example, a <code>Stream</code>, a <code>TextReader</code>,
                   or a <code>Uri</code>). The resulting schema is available to
-                  all applications run within the containing <a class="cslink" href="Saxon.Api.Processor"
-                     >Processor</a>.</p>
+                  all applications run within the containing <code>Processor</code>.</p>
             </li>
             <li>
-               <p>To validate an instance document, call the <code>NewSchemaValidator()</code>
-                  method on the <a class="cslink" href="Saxon.Api.SchemaManager"
-                     >SchemaManager</a> object. This returns a <a class="cslink" href="Saxon.Api.SchemaValidator"
-                        >SchemaValidator</a>.</p>
+               <p>To validate an instance document, call the <code
+                  cs="Saxon.Api.SchemaManager#NewSchemaValidator">NewSchemaValidator()</code> 
+                  method on the <code>SchemaManager</code> object. This
+                  returns a <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code>.</p>
             </li>
             <li>
-               <p>Set options on the <a class="cslink" href="Saxon.Api.SchemaValidator"
-                  >SchemaValidator</a> to control the way in which a particular validation
-                  episode is performed, and then invoke one of its <code>Validate()</code> methods to
+               <p>Set options on the <code>SchemaValidator</code> to control the way in which a
+                  particular validation episode is performed, and then invoke one of its <code
+                     cs="Saxon.Api.SchemaValidator#Validate">Validate()</code> methods to
                   validate an instance document.</p>
             </li>
          </ol>
          
          <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
             attributes within the source documents will be loaded as necessary, unless the 
-            <code>SchemaValidator.UseXsiSchemaLocation</code> property is set to false. By default a target
+            <code cs="Saxon.Api.SchemaValidator#UseXsiSchemaLocation">SchemaValidator.UseXsiSchemaLocation</code>
+            property is set to false. By default a target
             namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
             no attempt to load multiple schemas for the same namespace and check them for
             consistency. This behavior can be changed using the configuration option <a
                class="feature" href="MULTIPLE_SCHEMA_IMPORTS"/>.</p>
         
-         <p>Although the API is defined in such a way that a <a class="cslink"
-            href="Saxon.Api.SchemaValidator">SchemaValidator</a> is created for a
-            particular <a class="cslink" href="Saxon.Api.SchemaManager"
-               >SchemaManager</a>, in the Saxon implementation the schema components that are available
-            to the validator are not only the components within that schema, but all the components
-            that form part of any schema registered with the <code>Processor</code> (or indeed, with
-            the underlying <a class="javalink" href="net.sf.saxon.Configuration"
-               >Configuration</a>).</p>
+         <p>Although the API is defined in such a way that a <code
+            cs="Saxon.Api.SchemaValidator">SchemaValidator</code> is created for a particular <code
+               cs="Saxon.Api.SchemaManager">SchemaManager</code>, in the Saxon implementation the
+            schema components that are available to the validator are not only the components within
+            that schema, but all the components that form part of any schema registered with the
+            <code>Processor</code> (or indeed, with the underlying <a class="javalink"
+               href="net.sf.saxon.Configuration">Configuration</a>).</p>
          
          
       
