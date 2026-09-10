@@ -38,7 +38,11 @@ public class DecimalDivide extends SystemFunction {
             return EmptySequence.getInstance();
         }
         int scale = (int) ((IntegerValue)arguments[2].head()).longValue();
-        return divide(d1, d2, scale);
+        try {
+            return divide(d1, d2, scale);
+        } catch (ArithmeticException e) {
+            throw new XPathException(e.getMessage(), "FOAR0001");
+        }
 
     }
 
