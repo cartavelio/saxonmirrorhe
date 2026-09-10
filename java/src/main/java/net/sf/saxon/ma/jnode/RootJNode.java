@@ -29,7 +29,7 @@ public class RootJNode extends JNode {
      * @param value the map or array to be wrapped
      */
     public RootJNode(MapOrArray value) {
-        // TODO: avaid multiple JNodes for the same map or array
+        // TODO: avoid multiple JNodes for the same map or array
         this.value = value;
     }
 
