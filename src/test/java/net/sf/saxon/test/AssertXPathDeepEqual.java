@@ -17,10 +17,8 @@ import static org.junit.jupiter.api.AssertionFailureBuilder.assertionFailure;
 import java.util.function.Supplier;
 
 /**
- * {@code AssertEquals} is a collection of utility methods that support asserting
- * equality on objects and primitives in tests.
+ * {@code AssertXPathDeepEqual} allows easier equality assertions on XDM values in tests.
  *
- * @since 5.0
  */
 class AssertXPathDeepEqual {
     private AssertXPathDeepEqual() {
