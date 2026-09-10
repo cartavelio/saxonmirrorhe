@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import os
 
 from datetime import datetime
 
@@ -66,6 +67,11 @@ class PyTestReport:
         ET.indent(tree, space=" ", level=0)
         if not cwd.endswith('/'):
             cwd = cwd + '/'
+
+        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+            print("cwd", cwd)
+            print("Saving to = ", cwd + self.product.lower() + 'c_' + self.test_driver + '_' + self.language + '.xml')
+
 
         tree.write(cwd + self.product.lower() + 'c_' + self.test_driver + '_' + self.language + '.xml')
 
