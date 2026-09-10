@@ -38,11 +38,6 @@ public class RangeExpression extends Expression {
 
     private final Operand start;
     private final Operand end;
-    private boolean defaultedStep;
-
-    public boolean isDefaultedStep() {
-        return defaultedStep;
-    }
 
     /**
      * Construct a RangeExpression with increment of 1
