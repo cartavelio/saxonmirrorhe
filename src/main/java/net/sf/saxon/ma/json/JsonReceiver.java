@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -454,7 +455,12 @@ public class JsonReceiver implements Receiver {
                     break;
                 default:
                     if (hexEscapes.test(c)) {
-                        tb = tb.append('\\').append('u').append(hex4(c));
+                        if (c > 65535) {
+                            tb = tb.append('\\').append('u').append(hex4(UTF16CharacterSet.highSurrogate(c)));
+                            tb = tb.append('\\').append('u').append(hex4(UTF16CharacterSet.lowSurrogate(c)));
+                        } else {
+                            tb = tb.append('\\').append('u').append(hex4(c));
+                        }
                     } else {
                         tb = tb.append(c);
                     }
