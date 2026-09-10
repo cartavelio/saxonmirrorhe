@@ -7,7 +7,9 @@ using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
+#if EE
 using Saxon.Eej.config;
+#endif
 using Saxon.Hej;
 using Saxon.Hej.functions;
 using Saxon.Hej.om;
