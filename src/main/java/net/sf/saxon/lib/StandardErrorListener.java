@@ -195,11 +195,12 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
                 logger.error(message);
 
             } else {
-                logger.warning(message);
-                warningCount++;
                 if (warningCount > getMaximumNumberOfWarnings()) {
-                    logger.info("No more warnings will be displayed");
-                    warningCount = 0;
+                    if (warningCount == getMaximumNumberOfWarnings() + 1) {
+                        logger.info("No more warnings will be displayed");
+                    }
+                } else {
+                    logger.warning(message);
                 }
             }
             warningsIssued.add(message);
