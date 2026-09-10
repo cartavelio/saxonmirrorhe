@@ -1,23 +1,31 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
-using System.Runtime.CompilerServices;
 using Org.XmlResolver;
 using Org.XmlResolver.Features;
-using Saxon.Ejavax.xml.transform;
+using Org.XmlResolver.Utils;
+using Saxon.Api;
 using Saxon.Ejavax.xml.transform.stream;
-using Saxon.Hej.expr.parser;
-using Saxon.Hej.lib;
 
 namespace Saxon.Callbacks {
+    
+    /// <summary>
+    /// This object provides an interface between Saxon and the <c>Org.XmlResolver</c> catalog-based
+    /// resource resolver, which is incorporated into SaxonCS as a dependency. It provides its own
+    /// API for resolving URIs, as well as implementing the (highly fragile) .NET XmlResolver interface.
+    /// </summary>
     public class CatalogResourceResolver : CommonResourceResolver {
         private readonly Org.XmlResolver.Resolver resolver;
 
         public CatalogResourceResolver() {
-            resolver = new(new XmlResolverConfiguration(null, new List<string>()));
+            XmlResolverConfiguration resolverConfig = new (null, new List<string>());
+            // Enable searching of the XmlResolverData library, which holds copies of well-known W3C resources such as DTDs
+            resolverConfig.SetFeature(ResolverFeature.ASSEMBLY_CATALOGS, "XmlResolverData.dll");
+            resolver = new(resolverConfig);
         }
 
-        public CatalogResourceResolver(Resolver resolver) {
+        public CatalogResourceResolver(Org.XmlResolver.Resolver resolver) {
             this.resolver = resolver;
         }
         
@@ -34,16 +42,22 @@ namespace Saxon.Callbacks {
             if (resolver != null) {
                 CatalogResolver catalogResolver = resolver.CatalogResolver;
                 string arg = absoluteUri.ToString();
+                ResolvedResource rr;
                 if (arg.StartsWith("-//")) {
                     // Assume it's actually a Public ID
-                    result = catalogResolver.ResolveEntity(null, arg, null, null);
+                    rr = catalogResolver.ResolveEntity(null, arg, "http://public-id/" + arg, null);
                 }
                 else {
-                    result = catalogResolver.ResolveEntity(null, null, arg, null);
+                    rr = catalogResolver.ResolveEntity(null, null, arg, null);
                 }
-                //result = resolver.GetEntity(absoluteUri, role, ofObjectToReturn);
+
+                if (rr == null) {
+                    return UriUtils.GetStream(absoluteUri);
+                } else {
+                    return rr.GetInputStream();
+                }
             }
-            if (result == null && nextResourceResolver != null) {
+            if (nextResourceResolver != null) {
                 result = nextResourceResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
             }
             return result;
@@ -76,48 +90,49 @@ namespace Saxon.Callbacks {
         /// Get a stream, and associated base URI, for a resource identified by a URI, supplied typically
         /// as the combination of a relative URI amd base URI
         /// </summary>
-        /// <param name="baseUri">The base URI for resolving the relative URI; ignored
-        /// if the <c>href</c> argument is an absolute URI.</param>
-        /// <param name="nature">Indicates the "nature" of a resource as defined
-        /// in RDDL (see www.rddl.org/2 section 3.1), which in turn corresponds to the "role"
-        /// property of a URI reference as defined in XLink. Possible values include (a) an XML namespace
-        /// URI such as <c>http://www.w3.org/2001/XmlSchema</c>, or (b) a registered media type prefixed by
-        /// <c>http://www.isi.edu/in-notes/iana/assignments/media-types/</c>.</param>
-        /// <param name="purpose">Indicates the "purpose" of the URI reference as defined in RDDL,
-        /// which in turn corresponds to the "arcrole" property of a URI reference as defined in XLink.</param>
-        /// <returns>A StreamSource containing the content of the resource as a <c>Stream</c> or
+        /// <param name="request">Details of the required resource, including its URI</param>
+        /// <returns>An <c>IResource</c> containing the content of the resource as a <c>Stream</c> or
         /// <c>TextReader</c>, together with a <c>SystemId</c> that identifies the base URI of the
         /// resource.</returns>
-
-        public override StreamSource DereferenceLocation(Uri baseUri, string href, string nature, string purpose) {
+        public override IResource DereferenceLocation(ResourceRequest request) {
             if (resolver != null) {
                 try {
+                    string href = request.RelativeUri ?? request.Uri.ToString();
+                    Uri baseUri = request.BaseUri ?? request.Uri;
                     ResolvedResource rr = resolver.CatalogResolver.ResolveUri(href, baseUri.ToString());
-                    if (rr != null) {
-                        return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
+                    if (rr == null) {
+                        Uri abs = new Uri(baseUri, href);
+                        Stream stream = UriUtils.GetStream(abs);
+                        return new TextResource(stream, abs);
+                    } else {
+                        return new TextResource(rr.GetInputStream(), rr.GetResolvedUri());
                     }
                 }
-                catch (System.ArgumentException argex) {
+
+                catch (WebException) {
+                    // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent URI
+                }
+                catch (System.ArgumentException) {
                     // Thrown for an unknown URI scheme
                 }
+                catch (System.IO.FileNotFoundException) {
+                    // Shouldn't be necessary, but the 0.4.0 resolver code is throwing this for a non-existent file
+                }
             }
-            if (nextResourceResolver != null) {
-                return nextResourceResolver.DereferenceLocation(baseUri, href, nature, purpose);
-            }
-
-            return null;
+            return nextResourceResolver?.DereferenceLocation(request);
         }
         
-        public override StreamSource DereferenceNamespace(string namespaceUri, string nature, string purpose) {
+        public override IResource DereferenceNamespace(string namespaceUri, ResourceRequest request) {
             if (resolver != null) {
-                ResolvedResource rr = resolver.CatalogResolver.ResolveNamespace(namespaceUri, null, nature, purpose);
+                ResolvedResource rr = resolver.CatalogResolver.ResolveNamespace(
+                    namespaceUri, null, request.Nature, request.Purpose);
                 if (rr != null) {
-                    return new StreamSource(rr.GetInputStream(), rr.GetResolvedUri().ToString());
+                    return new TextResource(rr.GetInputStream(), rr.GetResolvedUri());
                 }
             }
 
             if (nextResourceResolver != null) {
-                return nextResourceResolver.DereferenceNamespace(namespaceUri, nature, purpose);
+                return nextResourceResolver.DereferenceNamespace(namespaceUri, request);
             }
 
             return null;
