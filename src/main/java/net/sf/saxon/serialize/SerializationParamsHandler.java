@@ -69,7 +69,7 @@ public class SerializationParamsHandler {
             throw new XPathException("Serialization params: node must be a document or element node");
         }
         if (!node.getLocalPart().equals("serialization-parameters")) {
-            throw new XPathException("Serialization params: element name must be 'serialization-parameters");
+            throw new XPathException("Serialization params: element name must be 'serialization-parameters'");
         }
         if (!node.getNamespaceUri().equals(NAMESPACE)) {
             throw new XPathException("Serialization params: element namespace must be " + NAMESPACE);
