@@ -267,6 +267,10 @@ namespace Saxon.Impl.Helpers {
             if (source is StreamSource streamSource) {
                 
                 Stream inputStream = streamSource.getInputStream();
+
+                if (options.isXIncludeAware()) {
+                    throw new XPathException("No XInclude processor is available in SaxonCS", "FODC0013");
+                }
             
                 XmlReaderSettings settings = new XmlReaderSettings() {
                     DtdProcessing = DtdProcessing.Parse,
