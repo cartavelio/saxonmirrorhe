@@ -60,19 +60,14 @@ public class JsonHandlerMap extends JsonHandler {
     /**
      * Set the key to be written for the next entry in an object/map
      *
-     * @param unEscaped the key for the entry (null implies no key) in unescaped form (backslashes,
-     *                  if present, do not signal an escape sequence)
-     * @param reEscaped the key for the entry (null implies no key) in re-escaped form. In this form
-     *                  special characters are represented as backslash-escaped sequences if the escape
-     *                  option is yes; if escape=no, the reEscaped form is the same as the unEscaped form.
+     * @param key the key for the entry (null implies no key) in unescaped form (backslashes,
+     *            if present, do not signal an escape sequence)
      * @return true if the key is already present in the map, false if it is not
      */
     @Override
-    public boolean setKey(UnicodeString unEscaped, UnicodeString reEscaped) {
-        this.keys.push(reEscaped);
+    public boolean setKey(UnicodeString key) {
+        this.keys.push(key);
         return false;
-//        LazyStringMap.LazyStringMapBuilder map = (LazyStringMap.LazyStringMapBuilder) stack.peek();
-//        return map.get(reEscaped) != null;
     }
 
     /**
@@ -159,7 +154,8 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void writeString(UnicodeString val) throws XPathException {
-        writeItem(new StringValue(reEscape(val)));
+        //writeItem(new StringValue(reEscape(val)));
+        writeItem(new StringValue(val));
     }
 
     /**

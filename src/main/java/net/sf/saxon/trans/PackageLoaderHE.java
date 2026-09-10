@@ -31,7 +31,6 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
-import net.sf.saxon.ma.json.JsonParser;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
@@ -1502,8 +1501,8 @@ public class PackageLoaderHE implements IPackageLoader {
                 String val = eq == line.length() - 1 ? "" : line.substring(eq+1);
                 if (key.equals("item-separator") || key.equals("Q" + SaxonOutputKeys.NEWLINE)) {
                     try {
-                        val = JsonParser.unescape(StringView.of(val), 0, "", esc -> esc).toString();
-                    } catch (XPathException ignored) {
+                        val = net.sf.saxon.trace.ExpressionPresenter.jsUnescape(val);
+                    } catch (Exception ignored) {
                         // No action, leave unescaped
                     }
                 }

@@ -128,7 +128,7 @@ public class OptionsParameter {
         for (KeyValuePair kvp : supplied.keyValuePairs()) {
             if (!(kvp.key instanceof StringValue && allowedOptions.containsKey(kvp.key.getStringValue())) &&
                     !(kvp.key instanceof QNameValue && !((QNameValue)kvp.key).getNamespaceURI().isEmpty())) {
-                throw new XPathException("Unrecognized option: " + Err.depict(kvp.key), "FORG0013").asTypeError();
+                throw new XPathException("Unrecognized option: " + Err.depict(kvp.key), "XPTY0004").asTypeError();
             }
         }
 

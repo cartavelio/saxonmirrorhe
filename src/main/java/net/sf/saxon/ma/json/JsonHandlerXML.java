@@ -169,17 +169,14 @@ public class JsonHandlerXML extends JsonHandler {
     /**
      * Set the key to be written for the next entry in an object/map
      *
-     * @param unEscaped the key for the entry (null implies no key) in unescaped form (backslashes,
-     *                  if present, do not signal an escape sequence)
-     * @param reEscaped the key for the entry (null implies no key) in reescaped form. In this form
-     *                  special characters are represented as backslash-escaped sequences if the escape
-     *                  option is yes; if escape=no, the reEscaped form is the same as the unEscaped form.
+     * @param key the key for the entry (null implies no key) in unescaped form (backslashes,
+     *            if present, do not signal an escape sequence)
      * @return true if the key is already present in the map, false if it is not
      */
     @Override
-    public boolean setKey(UnicodeString unEscaped, UnicodeString reEscaped) {
-        this.keys.push(unEscaped);
-        return checkForDuplicates && !mapKeys.peek().add(reEscaped);
+    public boolean setKey(UnicodeString key) {
+        this.keys.push(key);
+        return checkForDuplicates && !mapKeys.peek().add(key);
     }
 
     /**
@@ -232,11 +229,10 @@ public class JsonHandlerXML extends JsonHandler {
                          Loc.NONE, ReceiverOption.NONE);
         if (isInMap()) {
             UnicodeString k = keys.pop();
-            UnicodeString uk = reEscape(k);
             if (escape) {
-                markAsEscaped(uk, true);
+                markAsEscaped(k, true);
             }
-            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, uk.toString(),
+            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, k.toString(),
                           Loc.NONE, ReceiverOption.NONE);
         }
     }
@@ -344,12 +340,11 @@ public class JsonHandlerXML extends JsonHandler {
     @Override
     public void writeString(UnicodeString val) throws XPathException {
         startElement(stringQN, isInMap() ? "stringWithinMapType" : "stringType");
-        UnicodeString escaped = reEscape(val);
         if (escape) {
-            markAsEscaped(escaped, false);
+            markAsEscaped(val, false);
         }
         startContent();
-        characters(escaped);
+        characters(val);
         endElement();
     }
 

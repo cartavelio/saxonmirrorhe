@@ -653,6 +653,50 @@ public class ExpressionPresenter {
         return out.toString();
     }
 
+    public static String jsUnescape(String in) {
+        // Parse an escaped string, assuming it is valid
+        StringBuilder sb = new StringBuilder(in.length());
+        for (int i = 0; i < in.length(); i++) {
+            char c = in.charAt(i);
+            if (c == '\\') {
+                c = in.charAt(i++);
+                switch (c) {
+                    case '\'':
+                    case '\\':
+                    case '/':
+                    case '"':
+                        sb.append("'");
+                        break;
+                    case 'b':
+                        sb.append("\b");
+                        break;
+                    case 'f':
+                        sb.append("\f");
+                        break;
+                    case 'n':
+                        sb.append("\n");
+                        break;
+                    case 'r':
+                        sb.append("\r");
+                        break;
+                    case 't':
+                        sb.append("\t");
+                        break;
+                    case 'u':
+                        String hex = in.substring(i, i + 4);
+                        sb.append(Integer.parseInt(hex));
+                        i += 4;
+                        break;
+                    default:
+                        throw new IllegalArgumentException();
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
     public static class ExportOptions {
         public String target = "";
         public int targetVersion = 0;
