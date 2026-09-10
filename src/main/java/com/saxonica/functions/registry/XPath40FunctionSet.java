@@ -8,6 +8,7 @@ import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
@@ -394,10 +395,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
-        register("transitive-closure", 1, 3, e -> e.populate(TransitiveClosure::new, TransitiveClosure.resultType, ONE, 0)
-                .arg(0, navigator, ONE, null)
-                .arg(1, BuiltInAtomicType.NON_NEGATIVE_INTEGER, OPT, null)
-                .arg(2, BuiltInAtomicType.POSITIVE_INTEGER, OPT, null));
+        register("transitive-closure", 2, e -> e.populate(TransitiveClosure::new, AnyNodeTest.getInstance(), STAR, 0)
+                .arg(0, AnyNodeTest.getInstance(), OPT, EmptySequence.getInstance())
+                .arg(1, navigator, ONE, null));
 
         register("trunk", 1, e -> e.populate(Trunk::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
