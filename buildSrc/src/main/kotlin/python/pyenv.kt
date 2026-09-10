@@ -115,7 +115,7 @@ abstract class PyenvPythonVersion @Inject constructor(private val ex: ExecOperat
         return execToString {
             executable("cmd.exe")
             args("/c")
-            args(pyenv, "shell", latestInstalledOfMajorVersion, "&&", pyenv, "which", "python")
+            args("${pyenv.asFile} shell ${latestInstalledOfMajorVersion} &&  ${pyenv.asFile} which python")
         }
     }
 
