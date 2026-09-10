@@ -120,7 +120,7 @@ public class Inversion {
         Expression firstStreamingChild = null;
         for (Operand info : parent.operands()) {
             Expression child = info.getChildExpression();
-            //#if CSHARP==false
+            //#if BYTECODE==true
             if (child instanceof ByteCodeCandidate) {
                 child = ((ByteCodeCandidate)child).getBaseExpression();
             }
