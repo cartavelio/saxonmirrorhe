@@ -94,14 +94,21 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="configurationFile">A stream holding the text of the XML configuration file. Details of the file format
         /// can be found in the Saxon documentation.</param>
-        /// <param name="baseUri">baseUri of the configuration file used for resolving any relative URIs in the file</param> 
+        /// <param name="baseUri">baseUri of the configuration file used for resolving any relative URIs in the file</param>
+        /// <exception cref="SaxonApiException">if the configuration file is invalid or sets properties not available
+        /// in this Saxon version</exception> 
         public Processor(Stream configurationFile, Uri baseUri) {
-            StreamSource ss = new StreamSource(configurationFile, baseUri.AbsoluteUri);
-            Configuration config = Configuration.readConfiguration(ss);
-            //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
-            JProcessor = new Saxon.Hej.s9api.Processor(config);
-            config.setProcessor(this);
-            init();
+            try {
+                StreamSource ss = new StreamSource(configurationFile, baseUri.AbsoluteUri);
+                Configuration config = Configuration.readConfiguration(ss);
+                //config.registerExternalObjectModel(new DotNetObjectModelDefinition());
+                JProcessor = new Hej.s9api.Processor(config);
+                config.setProcessor(this);
+                init();
+            }
+            catch (XPathException e) {
+                throw new SaxonApiException(e);
+            }
         }
 
         /// <summary>
