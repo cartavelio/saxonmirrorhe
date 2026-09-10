@@ -10,7 +10,12 @@ namespace java.lang
     {
         public static void arraycopy<T>(T[] from, int fromStart, T[] to, int toStart, int len)
         {
-            Sys.Array.Copy(from, fromStart, to, toStart, len);
+            if (fromStart < 0 || toStart < 0 || len < 0 || fromStart + len > from.Length || toStart + len > to.Length) {
+                throw new IndexOutOfBoundsException($"arraycopy({from.Length},{fromStart},{to.Length},{toStart},{len})");
+            }
+            if (len > 0) {
+                Sys.Array.Copy(from, fromStart, to, toStart, len);
+            }
         }
         
         public static void exit(int exitCode)
@@ -26,7 +31,7 @@ namespace java.lang
         }
 
         public static java.util.Properties getProperties() {
-            throw new Sys.NotImplementedException();
+            return new java.util.Properties();
         }
 
         public static int identityHashCode(object o) {

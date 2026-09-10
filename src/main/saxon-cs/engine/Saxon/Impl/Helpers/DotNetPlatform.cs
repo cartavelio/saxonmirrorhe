@@ -182,9 +182,8 @@ namespace Saxon.Impl.Helpers {
         }
 
         public net.sf.saxon.lib.StringCollator makeCollation(net.sf.saxon.Configuration config,
-            java.util.Properties props, string uri) {
-            //return DotNetCollationFactory.makeCollation(config, uri, props);
-            throw new NotImplementedException();
+                    java.util.Properties props, string uri) {
+            return DotNetCollationFactory.makeCollation(config, uri, props);
         }
 
         public bool canReturnCollationKeys(net.sf.saxon.lib.StringCollator collation) {

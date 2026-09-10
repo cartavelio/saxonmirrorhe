@@ -1,97 +1,90 @@
 using System;
+using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
 
 namespace Saxon.Api {
     /// <summary>
     /// The <c>XmlProcessorError</c> class contains information about an error detected during
-    /// compilation or execution of a stylesheet, query, XPath expression, or schema.
+    /// compilation or execution of a stylesheet, query, XPath expression, or schema. 
     /// </summary>
-    public class XmlProcessingError : StaticError
+    public class XmlProcessingError
     {
-        net.sf.saxon.s9api.XmlProcessingError error;
-        internal XmlProcessingError(net.sf.saxon.s9api.XmlProcessingError err) : base(XPathException.fromXmlProcessingError(err))
+        private readonly net.sf.saxon.s9api.XmlProcessingError incident;
+        public XmlProcessingError(net.sf.saxon.s9api.XmlProcessingError err)
         {
-            this.error = err;
+            this.incident = err;
         }
 
         /// <summary>
-        /// This get property returns a <c>XmlProcessingError</c> containing the same information, but to be treated as a warning condition.
+        /// The error message
         /// </summary>
-        public XmlProcessingError AsWarning {
-            get {
-                XmlProcessingError e2 = new XmlProcessingError(error);
-                e2.IsWarning = true;
-                return e2;
-            }
+        public string Message => incident.getMessage();
+        
+        /// <summary>
+        /// The error code (if any)
+        /// </summary>
+        public QName ErrorCode => incident.getErrorCode();
+        
+        /// <summary>
+        /// The location of the error
+        /// </summary>
+        public Location Location => incident.getLocation();
+
+        /// <summary>
+        /// This property indicates whether the error is to be treated as a warning condition.
+        /// </summary>
+        public bool IsWarning => incident.isWarning();
+        
+        /// <summary>
+        /// The underlying cause
+        /// </summary>
+        public System.Exception Cause => null;
+
+        /// <summary>
+        /// Return an equivalent error condition, to be treated as a warning. The original error is not changed.
+        /// </summary>
+        public XmlProcessingError AsWarning() {
+            return new(incident.asWarning());
         }
 
         /// <summary>
         /// Property to get the host language where this error originates from.
         /// </summary>
-        public HostLanguage HostLanguage {
-
-            get {
-                if (error.getHostLanguage() == net.sf.saxon.s9api.HostLanguage.XSLT)
-                {
-                    return HostLanguage.XSLT;
-                }
-                else {
-                    return HostLanguage.XPATH;
-                }
-            }
-        }
+        public HostLanguage HostLanguage => incident.getHostLanguage();
 
         /// <summary>
-        /// Property to indicate that this error is to be treated as fatal, that is,
-        /// execution will be abandoned after reporting this error. This method may be called
-        /// by <c>ErrorReporter</c>, for example if the error is considered so server that further processing
-        /// is not worthwhile, or if too many errors have been signalled. there is no absolute guarantee that
+        /// Property to indicate that this error is to be treated as fatal, and if so,
+        /// to supply a message that will be used on termination. 
+        /// Execution will be abandoned after reporting this error. This method may be called
+        /// by an <c>ErrorReporter</c>, for example if the error is considered so severe that further processing
+        /// is not worthwhile, or if too many errors have been signalled. There is no absolute guarantee that
         /// setting this property will cause execution to be abandoned.
-        /// It can also be used to ask whether this error is to be treated as fatal, 
-        /// and if so, return the relevant message.
+        /// The property can also be used to ask whether this error is to be treated as fatal.
         /// </summary>
-        public String FatalMessage {
-
-            set {
-                error.setFatal(value);
-            }
-            get {
-                return error.getFatalErrorMessage();
-            }
+        public string TerminationMessage {
+            get => incident.getTerminationMessage();
+            set => incident.setTerminationMessage(value);
         }
 
         /// <summary>
         /// Property to check if this error is a <c>StaticError</c>.
         /// </summary>
-        public bool StaticError {
-            get { return error.isStaticError(); }
-        }
+        public bool IsStaticError => incident.isStaticError();
 
         /// <summary>
         /// Property which indicates whether this condition is a type error.
         /// </summary>
-        public bool TypeError {
-            get { return error.isTypeError(); }
-        }
-
+        public bool IsTypeError => incident.isTypeError();
 
         /// <summary>
-        /// Ask whether this static error has already been reported.
+        /// Property indicating whether this static error has already been reported.
         /// </summary>
         /// <returns></returns>
-        public bool IsAlreadyReported() {
-            return error.isAlreadyReported();
+        public bool IsAlreadyReported {
+            get => incident.isAlreadyReported();
+            set => incident.setAlreadyReported(value);
         }
-
-
-        /// <summary>
-        /// Say whether this error has already been reported.
-        /// </summary>
-        /// <param name="reported">true if the error has been reported</param>
-        public void SetAlreadyReported(bool reported)
-        {
-            error.setAlreadyReported(reported);
-        }
+        
 
     }
 }

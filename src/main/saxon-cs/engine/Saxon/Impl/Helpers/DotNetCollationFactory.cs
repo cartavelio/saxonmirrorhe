@@ -1,0 +1,131 @@
+using System;
+using System.Globalization;
+using java.text;
+using java.util;
+using net.sf.saxon;
+using net.sf.saxon.expr.sort;
+using net.sf.saxon.lib;
+using net.sf.saxon.trans;
+
+namespace SaxonCS3.Saxon.Impl.Helpers {
+    public class DotNetCollationFactory {
+        /**
+         * Make a collator with given properties
+         *
+         * @param config the Configuration
+         * @param uri the collation URI
+         * @param props  the desired properties of the collation  @return a collation with these properties
+         * @throws net.sf.saxon.trans.XPathException
+         *          if it is not possible to create a collation with the
+         *          requested properties
+         */
+
+        /*@Nullable*/
+        public static StringCollator makeCollation(Configuration config, String uri, Properties props) {
+
+            StringCollator stringCollator = null;
+            
+
+            // Start with the lang attribute
+
+            CompareInfo info;
+            CompareOptions options = CompareOptions.None;
+
+            String langAtt = props.getProperty("lang");
+            if (langAtt != null) {
+                info = CultureInfo.CreateSpecificCulture(langAtt).CompareInfo;
+            } else {
+                info = CultureInfo.CurrentCulture.CompareInfo;  // use default locale
+            }
+
+            // See if there is a strength attribute
+            String strengthAtt = props.getProperty("strength");
+            if (strengthAtt != null && options == CompareOptions.None) {
+                if (strengthAtt == "primary") {
+                    options = System.Globalization.CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreWidth;
+                } else if (strengthAtt == "secondary") {
+                    options = CompareOptions.IgnoreCase | CompareOptions.IgnoreWidth;
+                } else if (strengthAtt == "tertiary") {
+                    options = CompareOptions.IgnoreWidth;
+                } else if (strengthAtt == "identical") {
+                    options = 0;
+                } else {
+                    throw new XPathException("strength must be primary, secondary, tertiary, or identical");
+                }
+            }
+
+            // Look for the properties ignore-case, ignore-modifiers, ignore-width
+
+            String ignore = props.getProperty("ignore-case");
+            if (ignore != null) {
+                if (ignore == "yes") {
+                    options |= CompareOptions.IgnoreCase;
+                } else if (ignore == "no") {
+                    // no-op
+                } else {
+                    throw new XPathException("ignore-case must be yes or no");
+                }
+            }
+
+            ignore = props.getProperty("ignore-modifiers");
+            if (ignore != null) {
+                if (ignore == "yes") {
+                    options |= CompareOptions.IgnoreNonSpace;
+                } else if (ignore == "no") {
+                    // no-op
+                } else {
+                    throw new XPathException("ignore-modifiers must be yes or no");
+                }
+            }
+
+            ignore = props.getProperty("ignore-symbols");
+            if (ignore != null) {
+                if (ignore == "yes") {
+                    options |= CompareOptions.IgnoreSymbols;
+                } else if (ignore == "no") {
+                    // no-op
+                } else {
+                    throw new XPathException("ignore-symbols must be yes or no");
+                }
+            }
+
+            ignore = props.getProperty("ignore-width");
+            if (ignore != null) {
+                if (ignore == "yes") {
+                    options |= CompareOptions.IgnoreWidth;
+                } else if (ignore == "no") {
+                    // no-op
+                } else {
+                    throw new XPathException("ignore-width must be yes or no");
+                }
+            }
+
+            if (stringCollator == null) {
+                stringCollator = new DotNetComparator(uri, info, options);
+            }
+
+            // See if there is a case-order property
+            String caseOrder = props.getProperty("case-order");
+            if (caseOrder != null && "#default" != caseOrder) {
+                // force the base collation to ignore case
+                options |= CompareOptions.IgnoreCase;
+                stringCollator = new DotNetComparator(uri, info, options);
+                stringCollator = CaseFirstCollator.makeCaseOrderedCollator(uri, stringCollator, caseOrder);
+            }
+
+            // See if there is an alphanumeric property
+            String alphanumeric = props.getProperty("alphanumeric");
+            if (alphanumeric != null && "no" != alphanumeric) {
+                if (alphanumeric == "yes") {
+                    stringCollator = new AlphanumericCollator(stringCollator);
+                } else if (alphanumeric == "codepoint") {
+                    stringCollator = new AlphanumericCollator(CodepointCollator.getInstance());
+                } else {
+                    throw new XPathException("alphanumeric must be yes, no, or codepoint");
+                }
+            }
+
+            return stringCollator;
+        }        
+    }
+}

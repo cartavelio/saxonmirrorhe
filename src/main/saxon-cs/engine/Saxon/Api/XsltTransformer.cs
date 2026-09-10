@@ -9,6 +9,7 @@ using net.sf.saxon.@event;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.s9api;
+using net.sf.saxon.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
 using Saxon.Impl.Helpers;
@@ -33,7 +34,6 @@ namespace Saxon.Api {
     public class XsltTransformer : XmlDestination {
         private XmlDestination xmlDestination;
         private StandardLogger traceFunctionDestination;
-        private IMessageListener _messageListener;
         private IResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
         private XdmNode initialContextNode;
@@ -285,11 +285,6 @@ namespace Saxon.Api {
             return transformer;
         }
 
-        public net.sf.saxon.s9api.XsltTransformer Implemmentation {
-            get { return transformer; }
-        }
-
-
         /// <summary>
         /// The destination for the result of the transformation. The class <c>XmlDestination</c> is an abstraction 
         /// that allows a number of different kinds of destination to be specified.
@@ -300,7 +295,7 @@ namespace Saxon.Api {
         /// </remarks>
 
         public XmlDestination Destination {
-            get { return this.xmlDestination; }
+            get => this.xmlDestination;
             set {
                 this.xmlDestination = value;
                 transformer.setDestination(value.GetUnderlyingDestination());
@@ -361,9 +356,9 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Escape hatch to the underlying Java implementation
+        /// Escape hatch to the underlying implementation
         /// </summary>
 
-        public Controller Implementation => transformer.getUnderlyingController();
+        public XsltController Implementation => transformer.getUnderlyingController();
     }
 }

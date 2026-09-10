@@ -16,26 +16,21 @@ namespace Saxon.Impl.Helpers {
         }
 
         public static BigInt[] DivideAndRemainder(BigInt numerator, BigInt denominator) {
-            throw new NotImplementedException();
+            BigInt quotient = BigInteger.DivRem(numerator, denominator, out var remainder);
+            return new BigInt[] {quotient, remainder};
+
         }
         
         public static BigInt Remainder(BigInt numerator, BigInt denominator) {
-            throw new NotImplementedException();
+            return numerator % denominator;
         }
         
         public static BigInt Mod(BigInt numerator, BigInt denominator) {
-            throw new NotImplementedException();
+            return numerator % denominator;
         }
 
         public static int Signum(BigInt value) {
-            if (value > ZERO) {
-                return +1;
-            } else if (value < ZERO) {
-                return -1;
-            }
-            else {
-                return 0;
-            }
+            return value.Sign;
         }
 
         public static long LongValueExact(BigInt value) {

@@ -1,7 +1,7 @@
 using System;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
-using SaxonCS3.engine.Saxon.Api.Support;
+using Saxon.Api.Support;
 
 namespace Saxon.Api {
     /// <summary>
@@ -44,7 +44,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="uri">the absolute URI of the default collation. This URI must identify a known collation;
         /// either one that has been explicitly declared, or one that is recognized implicitly, such as a UCA collation</param>
-        public void DeclareDefaultCollation(String uri) {
+        public void DeclareDefaultCollation(string uri) {
             compiler.declareDefaultCollation(uri);
         }
 
@@ -56,7 +56,7 @@ namespace Saxon.Api {
         /// default namespace for elements and types).</param>
         /// <param name="uri">The namespace URI. It is possible to specify
         /// a zero-length string to "undeclare" a namespace.</param>
-        public void DeclareNamespace(String prefix, String uri) {
+        public void DeclareNamespace(string prefix, string uri) {
             compiler.declareNamespace(prefix, uri);
         }
 
@@ -68,8 +68,8 @@ namespace Saxon.Api {
         /// the handling of warnings
         /// </summary>
         /// <remarks>The property IErrorReporter to which warnings will be notified</remarks>
-        public IErrorReporter WarningHandler {
-            set { compiler.setWarningHandler(new ErrorReporterWrapper(value)); }
+        public ErrorReporter WarningHandler {
+            set => compiler.setWarningHandler(new ErrorReporterWrapper(value));
         }
 
 

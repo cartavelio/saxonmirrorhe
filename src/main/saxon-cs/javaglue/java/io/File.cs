@@ -44,10 +44,10 @@ namespace java.io {
         }
 
         public string getAbsolutePath() {
-            return null;
+            return this.fileName;
         }
         public string getCanonicalPath() {
-            return null;
+            return this.fileName;
         }
 
         public bool exists() {
@@ -75,7 +75,7 @@ namespace java.io {
         }
 
         public File getParentFile() {
-            return null;
+            return new File(Path.GetDirectoryName(fileName));
         }
 
         public bool isDirectory() {
@@ -86,9 +86,13 @@ namespace java.io {
             return SysIOFile.GetAttributes(Path.GetFullPath(fileName)).HasFlag(FileAttributes.Hidden);
         }
 
-        public void createNewFile() {}
+        public void createNewFile() {
+            Stream stream = SysIOFile.Create(fileName); // TODO: use the returned stream...
+            stream.Close();
+        }
 
         public void mkdirs() {
+            Directory.CreateDirectory(fileName);
         }
 
         public bool renameTo(File file) {

@@ -29,12 +29,12 @@ namespace java.lang {
         }
         
         public StringBuilder append(string str, int start, int end) {
-            this._builder.Append(str, start, end);
+            this._builder.Append(str, start, end-start);
             return this;
         }
         
-        public StringBuilder append(char[] str, int start, int end) {
-            this._builder.Append(str, start, end);
+        public StringBuilder append(char[] str, int start, int length) {
+            this._builder.Append(str, start, length);
             return this;
         }
 
@@ -108,7 +108,7 @@ namespace java.lang {
         }
         
         public string substring(int start, int end) {
-            return _builder.ToString().Substring(start, end);
+            return _builder.ToString().Substring(start, end-start);
         }
 
         public void setLength(int len) {

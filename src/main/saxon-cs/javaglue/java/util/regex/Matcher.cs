@@ -18,8 +18,8 @@ namespace java.util.regex {
             this.input = input;
         }
         public bool matches() {
-            latestMatch = regex.Match(input);
-            return latestMatch.Success;
+            latestMatch = regex.Match(input, 0);
+            return latestMatch.Success && latestMatch.Length == input.Length;
         }
 
         public bool find() {
