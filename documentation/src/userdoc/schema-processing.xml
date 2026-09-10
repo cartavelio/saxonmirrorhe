@@ -517,7 +517,7 @@
             <li>
                <p>Call the <code java="net.sf.saxon.s9api.Processor#newXsdCompiler">newSchemaCompiler()</code>
                   method to get an <code java="net.sf.saxon.s9api.XsdCompiler"
-                     >XsdCompiler</code>.It is possible to get multiple schema compilers, or to use
+                     >XsdCompiler</code>. It is possible to get multiple schema compilers, or to use
                a single schema compiler to compile multiple schemas.</p>
             </li>
             <li>
@@ -557,7 +557,7 @@
                using the method <code java="net.sf.saxon.s9api.XsdSchema#exportComponents">exportComponents()</code>
                on the <code>XsdSchema</code> object (typically supplying a <code>Serializer</code> as the
                destination), and to import a previously-saved schema by calling
-               <code java="net.sf.saxon.s9api.XsdCompiler#importComponents">XsdCompiler.importComponents</code>.</p>
+               <code java="net.sf.saxon.s9api.XsdCompiler#importComponents">XsdCompiler.importComponents()</code>.</p>
             </li>
             <li>
                <p>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression,
@@ -567,7 +567,9 @@
          </ol>
 
          <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
-            attributes within the source documents will be loaded as necessary. By default a target
+            attributes within the source documents will be loaded as necessary: see 
+            <a class="bodylink" href="/schema-processing/xsi-schema-location">Using
+               xsi:schemaLocation</a>. By default a target 
             namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
             no attempt to load multiple schemas for the same namespace and check them for
             consistency. This behaviour can be changed using the configuration option <a
@@ -780,7 +782,7 @@
             <li>
                <p>Call the <code cs="Saxon.Api.Processor#NewXsdCompiler">NewSchemaCompiler()</code>
                   method to get a <code cs="Saxon.Api.XsdCompiler"
-                     >XsdCompiler</code>.It is possible to get multiple schema compilers, or to use
+                     >XsdCompiler</code>. It is possible to get multiple schema compilers, or to use
                a single schema compiler to compile multiple schemas.</p>
             </li>
             <li>
@@ -804,7 +806,7 @@
             <li>
                <p>Set options on the <code>SchemaValidator</code> to control the way in which a
                   particular validation episode is performed, and then invoke its <code
-                     cs="Saxon.Api.SchemaValidator#validate">validate()</code> method to
+                     cs="Saxon.Api.SchemaValidator#Validate">Validate()</code> method to
                   validate an instance document. Options available include the ability to control
                whether additional schema components can be referenced from the instance document
                using <code>xsi:schemaLocation</code> attributes, and control over the reporting
@@ -817,21 +819,22 @@
             </li>
             <li>
                <p>It is possible to save a compiled schema in an SCM (schema component model) file
-               using the method <code cs="Saxon.Api.XsdSchema#exportComponents">exportComponents()</code>
+               using the method <code cs="Saxon.Api.XsdSchema#ExportComponents">ExportComponents()</code>
                on the <code>XsdSchema</code> object (typically supplying a <code>Serializer</code> as the
                destination), and to import a previously-saved schema by calling
-               <code cs="Saxon.Api.XsdCompiler#importComponents">XsdCompiler.importComponents</code>.</p>
+               <code cs="Saxon.Api.XsdCompiler#ImportComponents">XsdCompiler.ImportComponents()</code>.</p>
             </li>
             <li>
                <p>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression,
                it can be supplied to the relevant <code>XsltCompiler</code>, <code>XQueryCompiler</code>,
-               or <code>XPathCompiler</code> via its <code>useSchema()</code> method.</p>
+               or <code>XPathCompiler</code> by setting its <code>Schema</code> property.</p>
             </li>
          </ol>
 
          <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
             attributes within the source documents will be loaded as necessary: see 
-            <a class="bodylink" href="xsi-schema-location">Using xsi:schemaLocation</a>. By default a target
+            <a class="bodylink" href="/schema-processing/xsi-schema-location">Using
+               xsi:schemaLocation</a>. By default a target 
             namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
             no attempt to load multiple schemas for the same namespace and check them for
             consistency. This behaviour can be changed using the configuration option <a
@@ -1152,7 +1155,7 @@
    </section>
    
    <section id="xsi-schema-location" title="Using xsi:schemaLocation">
-      <head>The xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes</head>
+      <h1>Using xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes</h1>
       
       <aside>The effect of the <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes
       changes in Saxon 13.</aside>
@@ -1178,7 +1181,8 @@
       
       <p>Use of these attributes may be enabled globally (for a <code>Configuration</code>) using the configuration
       property <code>Feature.USE_XSI_SCHEMA_LOCATION</code>. This is not recommended because of the security implications.
-      It may also be enabled more selectively via interfaces such as <code>SchemaValidator.setUseXsiSchemaLocation()</code>.
+         It may also be enabled more selectively via interfaces such as <code
+            java="net.sf.saxon.s9api.SchemaValidator#setUseXsiSchemaLocation">SchemaValidator.setUseXsiSchemaLocation()</code>.
       If XPath 4.0 is enabled then it is also possible to control schema validation via options to the <code>fn:doc()</code>
       and <code>fn:parse-xml()</code> functions.</p>
       
