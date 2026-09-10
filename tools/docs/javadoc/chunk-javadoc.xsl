@@ -394,7 +394,7 @@ as required; implementing-classes key correction
             or $has-nonPP-subclasses))">
             <j id="{$type}" in="{f:get-att-name(.)}">
                 <xsl:apply-templates select="class" mode="tree">
-                    <xsl:sort select="@type"/>
+                    <xsl:sort select="upper-case(@type)"/>
                 </xsl:apply-templates>
             </j>
         </xsl:if>
@@ -404,7 +404,8 @@ as required; implementing-classes key correction
         <j id="{@name}" in="{substring(name(.), 1, 1)}" qy="{lower-case(@name)}"/>
     </xsl:template>
     
-    <xsl:template match="method[exists(preceding-sibling::method[@name eq current()/@name])]" mode="deeptree">
+    <xsl:template match="method[exists(preceding-sibling::method[(@name eq current()/@name) and
+        (@visibility ne 'package-private')])]" mode="deeptree">
         <!--<xsl:message>Duplicate method name <xsl:value-of select="@name"/></xsl:message>-->
     </xsl:template>
     
@@ -420,12 +421,12 @@ as required; implementing-classes key correction
         <xsl:if test="@visibility ne 'package-private' or (not($has-PP-members-only) and ($has-nonPP-implementing-classes
             or $has-nonPP-subclasses))">
             <j id="{$type}" in="{substring(name(.), 1, 1)}" qy="{lower-case($type)}">
-                <xsl:apply-templates select="class|fields/field[@visibility ne'package-private']
+                <xsl:apply-templates select="class|fields/field[@visibility ne 'package-private']
                     |enumConstants/enumConstant[@visibility ne 'package-private']" mode="deeptree">
-                    <xsl:sort select="@type"/>
+                    <xsl:sort select="if (self::class) then upper-case(tokenize(@type,'\.')[last()]) else upper-case(@name)"/>
                 </xsl:apply-templates>
                 <xsl:apply-templates select="methods/method[@visibility ne 'package-private']" mode="deeptree">
-                    <xsl:sort select="@name"/>
+                    <xsl:sort select="upper-case(@name)"/>
                 </xsl:apply-templates>
             </j>
         </xsl:if>
