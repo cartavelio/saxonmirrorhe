@@ -198,6 +198,231 @@ PHP_METHOD(SaxonProcessor, release)
 }
 
 
+
+PHP_METHOD(SaxonProcessor, createXdmMapValue)
+{
+    SaxonProcessor * proc = nullptr;
+    HashTable *arr_hash;
+
+    zval * items_zval;
+    zval * val;
+    long num_key;
+    XdmValue ** arguments = nullptr;
+    XdmAtomicValue ** c_keys = nullptr;
+    int argument_length=0;
+    zend_string *key;
+
+
+
+    if (ZEND_NUM_ARGS()!=3) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "a", &items_zval) == FAILURE) {
+        RETURN_NULL();
+    }
+	zend_object* pobj = Z_OBJ_P(getThis());
+   saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+
+    SaxonProcessor * saxonProc= obj->saxonProcessor;
+    arr_hash = Z_ARRVAL_P(items_zval);
+    argument_length = zend_hash_num_elements(arr_hash);
+
+    arguments = new XdmValue*[argument_length];
+    c_keys = new XdmAtomicValue*[argument_length];
+
+        if (saxonProc != nullptr) {
+      ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
+
+        if(key != NULL) {
+            const char * c_key =ZSTR_VAL(key);
+            c_keys[num_key] = saxonProc->makeStringValue(c_key);
+
+        } else {
+            c_keys[num_key] = saxonProc->makeIntegerValue(num_key);
+        }
+
+
+          if(Z_TYPE_P(val) != NULL) {
+	        const char * objName =ZSTR_VAL(Z_OBJCE_P(val)->name);
+
+        if(strcmp(objName, "Saxon\\XdmNode")==0) {
+		    zend_object* ooth = Z_OBJ_P(val);
+		    xdmNode_object * nobj = (xdmNode_object *)((char *)ooth - XtOffsetOf(xdmNode_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = (XdmValue *) nobj->xdmNode;
+            		arguments[num_key] = value;
+        	}
+	    } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
+		    zend_object* ooth = Z_OBJ_P(val);
+		    xdmAtomicValue_object * nobj = (xdmAtomicValue_object *)((char *)ooth - XtOffsetOf(xdmAtomicValue_object, std));
+        	if(nobj != nullptr) {
+        	    XdmValue * value = (XdmValue *) nobj->xdmAtomicValue;
+        	    arguments[num_key] = value;
+        	}
+	    } else if(strcmp(objName, "Saxon\\XdmValue")==0) {
+		zend_object* ooth = Z_OBJ_P(val);
+		xdmValue_object * nobj = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = nobj->xdmValue;
+            		arguments[num_key] = value;
+        	}
+	}
+	else {//TODO error warning}
+         }}else {
+		//TODO error warning
+        }
+      } ZEND_HASH_FOREACH_END();
+
+      XdmMap * result = saxonProc->makeMap3(c_keys, arguments, argument_length);
+
+      if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmMap_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmMap_object* vobj  = (xdmMap_object *)((char *)vvobj - XtOffsetOf(xdmMap_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmMap = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+
+    }
+    RETURN_NULL();
+}
+
+
+PHP_METHOD(SaxonProcessor, createXdmArrayValue)
+{
+    SaxonProcessor * proc = nullptr;
+    HashTable *arr_hash;
+
+    zval * items_zval;
+    zval * val;
+    long num_key;
+    XdmValue ** arguments = nullptr;
+    int argument_length=0;
+    zend_string *key;
+
+
+
+    if (ZEND_NUM_ARGS()!=3) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "a", &items_zval) == FAILURE) {
+        RETURN_NULL();
+    }
+	zend_object* pobj = Z_OBJ_P(getThis());
+   saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+
+    SaxonProcessor * saxonProc= obj->saxonProcessor;
+    arr_hash = Z_ARRVAL_P(items_zval);
+    argument_length = zend_hash_num_elements(arr_hash);
+
+    arguments = new XdmValue*[argument_length];
+
+        if (saxonProc != nullptr) {
+      ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
+        if(Z_TYPE_P(val) != NULL) {
+	        const char * objName =ZSTR_VAL(Z_OBJCE_P(val)->name);
+
+        if(strcmp(objName, "Saxon\\XdmNode")==0) {
+		    zend_object* ooth = Z_OBJ_P(val);
+		    xdmNode_object * nobj = (xdmNode_object *)((char *)ooth - XtOffsetOf(xdmNode_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = (XdmValue *) nobj->xdmNode;
+            		arguments[num_key] = value;
+        	}
+	    } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
+		    zend_object* ooth = Z_OBJ_P(val);
+		    xdmAtomicValue_object * nobj = (xdmAtomicValue_object *)((char *)ooth - XtOffsetOf(xdmAtomicValue_object, std));
+        	if(nobj != nullptr) {
+        	    XdmValue * value = (XdmValue *) nobj->xdmAtomicValue;
+        	    arguments[num_key] = value;
+        	}
+	    } else if(strcmp(objName, "Saxon\\XdmValue")==0) {
+		zend_object* ooth = Z_OBJ_P(val);
+		xdmValue_object * nobj = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = nobj->xdmValue;
+            		arguments[num_key] = value;
+        	}
+	}
+	else {//TODO error warning}
+         }}else {
+		//TODO error warning
+        }
+      } ZEND_HASH_FOREACH_END();
+
+      XdmArray * result = saxonProc->makeArray(arguments, argument_length);
+
+      if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmArray_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmArray_object* vobj  = (xdmArray_object *)((char *)vvobj - XtOffsetOf(xdmArray_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmArray = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+    }
+
+
+}
+
+
+PHP_METHOD(SaxonProcessor, createQNameValue)
+{
+    SaxonProcessor * saxonProcessor;
+    char * source;
+    size_t len1;
+
+    if (ZEND_NUM_ARGS()==1 && zend_parse_parameters(ZEND_NUM_ARGS() , "s", &source, &len1) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
+    assert (obj != nullptr);
+    saxonProcessor = obj->saxonProcessor;
+    if (saxonProcessor != nullptr) {
+
+        XdmAtomicValue* qname = saxonProcessor->makeQNameValue(source);
+        if(qname != nullptr) {
+
+            if (object_init_ex(return_value, xdmAtomicValue_ce) != SUCCESS) {
+                RETURN_NULL();
+            } else {
+
+            zend_object* vvobj = Z_OBJ_P(return_value);
+            xdmAtomicValue_object * vobj = (xdmAtomicValue_object *)((char *)vvobj - XtOffsetOf(xdmAtomicValue_object, std));
+
+                assert (vobj != nullptr);
+                qname->incrementRefCount();
+                vobj->xdmAtomicValue = qname;
+                return;
+            }
+        }  else {
+
+        }
+    }
+        RETURN_NULL();
+
+}
+
+
 PHP_METHOD(SaxonProcessor, isSchemaAware)
 {
     SaxonProcessor *saxonProcessor;
@@ -2091,7 +2316,7 @@ PHP_METHOD(XdmFunctionItem, __toString)
     }
 
 
-PHP_METHOD(XdmFunctionValue,  getName) {
+PHP_METHOD(XdmFunctionValue,  getName)
 {
     	 XdmFunctionItem *xdmFunctionItem;
          zend_object *oobj = Z_OBJ_P(getThis());
@@ -2111,7 +2336,7 @@ PHP_METHOD(XdmFunctionValue,  getName) {
 }
 
 
-PHP_METHOD(XdmAtomicValue,  getArity)  {
+PHP_METHOD(XdmFunctionItem,  getArity)  {
     	 XdmFunctionItem *xdmFunctionItem;
          zend_object *oobj = Z_OBJ_P(getThis());
          xdmFunctionItem_object* obj = (xdmFunctionItem_object *)((char *)oobj - XtOffsetOf(xdmFunctionItem_object, std));
@@ -2125,12 +2350,15 @@ PHP_METHOD(XdmAtomicValue,  getArity)  {
 
 
 }
-PHP_METHOD(XdmAtomicValue,  getSystemFunction) {
+
+
+PHP_METHOD(XdmFunctionItem,  getSystemFunction) {
 
     XdmFunctionItem *xdmFunctionItem;
     char* functionName = nullptr;
     zval * proc_zval;
     SaxonProcessor * proc = nullptr;
+    size_t len1;
 
     long arity;
 
@@ -2141,6 +2369,7 @@ PHP_METHOD(XdmAtomicValue,  getSystemFunction) {
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "zsl", &proc_zval, &functionName, &len1, &arity) == FAILURE) {
         RETURN_NULL();
     }
+    zend_object *oobj = Z_OBJ_P(getThis());
     xdmFunctionItem_object* obj = (xdmFunctionItem_object *)((char *)oobj - XtOffsetOf(xdmFunctionItem_object, std));
     xdmFunctionItem = obj->xdmFunctionItem;
 
@@ -2157,24 +2386,24 @@ PHP_METHOD(XdmAtomicValue,  getSystemFunction) {
 
                     if(result != nullptr) {
 	                    result->incrementRefCount();
-                        if (object_init_ex(return_value, functionItem_ce) != SUCCESS) {
+                        if (object_init_ex(return_value, xdmFunctionItem_ce) != SUCCESS) {
                             RETURN_NULL();
                         } else {
 		                    zend_object *ooth =  Z_OBJ_P(return_value);
 
-		                    functionItem_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmFunctionItem_object, std));
+		                    xdmFunctionItem_object* vobj  = (xdmFunctionItem_object *)((char *)ooth - XtOffsetOf(xdmFunctionItem_object, std));
                             assert (vobj != nullptr);
-                            vobj->functionItem = result;
+                            vobj->xdmFunctionItem = result;
                             return;
                         }
                     }
 		    }
     }
 
-    RETURN_NULL;
+    RETURN_NULL();
 }
 
-PHP_METHOD(XdmAtomicValue,  call) {
+PHP_METHOD(XdmFunctionItem,  call) {
     XdmFunctionItem *xdmFunctionItem;
     char* functionName = nullptr;
     zval * proc_zval;
@@ -2197,6 +2426,7 @@ PHP_METHOD(XdmAtomicValue,  call) {
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "za", &proc_zval, &arguments_zval) == FAILURE) {
         RETURN_NULL();
     }
+    zend_object *oobj = Z_OBJ_P(getThis());
     xdmFunctionItem_object* obj = (xdmFunctionItem_object *)((char *)oobj - XtOffsetOf(xdmFunctionItem_object, std));
     xdmFunctionItem = obj->xdmFunctionItem;
 
@@ -2207,30 +2437,737 @@ PHP_METHOD(XdmAtomicValue,  call) {
 		    saxonProcessor_object * nobj = (saxonProcessor_object *)((char *)ooth - XtOffsetOf(saxonProcessor_object, std));
 		    if(nobj != nullptr) {
             		proc = (SaxonProcessor *) nobj->saxonProcessor;
-                    XdmFunctionItem * result = xdmFunctionItem->call(proc, );
+
+            		arr_hash = Z_ARRVAL_P(arguments_zval);
+                    argument_length = zend_hash_num_elements(arr_hash);
+
+                    arguments = new XdmValue*[argument_length];
+            ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
+            if(Z_TYPE_P(val) != NULL) {
+            const char * objName =ZSTR_VAL(Z_OBJCE_P(val)->name);
+
+            if(strcmp(objName, "Saxon\\XdmNode")==0) {
+		            zend_object* ooth = Z_OBJ_P(val);
+		            xdmNode_object * nobj = (xdmNode_object *)((char *)ooth - XtOffsetOf(xdmNode_object, std));
+		            if(nobj != nullptr) {
+            		    XdmValue * value = (XdmValue *) nobj->xdmNode;
+            		    arguments[num_key] = value;
+        	        }
+	        } else if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
+		                zend_object* ooth = Z_OBJ_P(val);
+		                xdmAtomicValue_object * nobj = (xdmAtomicValue_object *)((char *)ooth - XtOffsetOf(xdmAtomicValue_object, std));
+        	            if(nobj != nullptr) {
+            		            XdmValue * value = (XdmValue *) nobj->xdmAtomicValue;
+            		            arguments[num_key] = value;
+        	            }
+            }else if(strcmp(objName, "Saxon\\XdmValue")==0) {
+		zend_object* ooth = Z_OBJ_P(val);
+		xdmValue_object * nobj = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
+        	if(nobj != nullptr) {
+            		XdmValue * value = nobj->xdmValue;
+            		arguments[num_key] = value;
+        	}
+	}
+	else {//TODO error warning}
+         }}else {
+		//TODO error warning
+        }
+      } ZEND_HASH_FOREACH_END();
+
+
+
+
+                    XdmValue * result = xdmFunctionItem->call(proc, arguments, argument_length);
 
                     if(result != nullptr) {
 	                    result->incrementRefCount();
-                        if (object_init_ex(return_value, functionItem_ce) != SUCCESS) {
+                        if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                             RETURN_NULL();
                         } else {
 		                    zend_object *ooth =  Z_OBJ_P(return_value);
 
-		                    functionItem_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmFunctionItem_object, std));
+		                    xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                             assert (vobj != nullptr);
-                            vobj->functionItem = result;
+                            vobj->xdmValue = result;
                             return;
                         }
                     }
 		    }
     }
 
-    RETURN_NULL;
+    RETURN_NULL();
+
+}
 
 
+
+/*     ============== PHP Interface of   XdmMap =============== */
+
+void xdmMap_free_storage(zend_object *object)
+{
+    zend_object_std_dtor(object);
+}
+
+void XdmMap_destroy_storage(zend_object *object)
+{
+    zend_objects_destroy_object(object);
+
+}
+
+zend_object *xdmMap_create_handler(zend_class_entry *type)
+{
+
+    xdmMap_object *obj = (xdmMap_object *)ecalloc(1, sizeof(xdmMap_object)+ zend_object_properties_size(type));
+
+    zend_object_std_init(&obj->std, type); /* take care of the zend_object also ! */
+    object_properties_init(&obj->std, type);
+
+    obj->std.handlers = &xdmMap_object_handlers;
+
+    return &obj->std;
+}
+
+PHP_METHOD(XdmMap, __construct)
+{
+   /* XdmAtomicValue *xdmValue = nullptr;
+    bool bVal;
+    char * sVal;
+    int len;
+    long iVal;
+    double dVal;
+    zval *zvalue;*/
+
+   // xdmAtomicValue_object *obj = (xdmAtomicValue_object *) Z_OBJ_P(getThis() TSRMLS_CC);
+
+}
+
+PHP_METHOD(XdmMap, __destruct)
+{
+//std::cerr<<"php_atomicValue  destruct"<<std::endl;
+     zval *object = getThis();
+     zend_object * zobj = Z_OBJ_P(object);
+
+    xdmMap_object * obj = (xdmMap_object *)((char *)zobj - XtOffsetOf(xdmMap_object, std));
+
+    XdmMap * xdmmap= obj->xdmMap;
+    if(xdmmap!= nullptr){
+        xdmmap->decrementRefCount();
+        if(xdmmap->getRefCount()< 1){
+            delete xdmmap;
+            xdmmap = nullptr;
+        }  else {
+        //xdmValue->decrementRefCount();
+        }
+    }
+
+}
+
+
+PHP_METHOD(XdmMap, __toString)
+    {
+    	 XdmMap *xdmMap;
+         zend_object *oobj = Z_OBJ_P(getThis());
+         xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
+         xdmMap = obj->xdmMap;
+         if (xdmMap != nullptr) {
+        	const char * value = xdmMap->getStringValue();
+        	if(value != nullptr) {
+        	    _RETURN_STRING(value);
+        	 } else {
+        	 _RETURN_STRING("");
+
+        	 }
+       	}else {
+    		_RETURN_STRING("");
+    	}
+    }
+
+
+PHP_METHOD(XdmMap,  mapSize)  {
+    	 XdmMap *xdmMap;
+         zend_object *oobj = Z_OBJ_P(getThis());
+         xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
+         xdmMap = obj->xdmMap;
+         if (xdmMap != nullptr) {
+        	int value = xdmMap->mapSize();
+            RETURN_LONG(value);
+       	}else {
+    		RETURN_LONG(-1)
+    	}
+
+}
+
+
+
+PHP_METHOD(XdmMap,  get)  {
+    XdmMap *xdmMap = nullptr;
+    XdmValue * result = nullptr;
+    zval * key_zval = nullptr;
+    long lkey = -1;
+    char* skey = nullptr;
+    size_t len1;
+
+
+    if (ZEND_NUM_ARGS()!=1) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "z", &key_zval) == FAILURE) {
+
+        if (zend_parse_parameters(ZEND_NUM_ARGS() , "l", &lkey) == FAILURE) {
+            if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &skey, &len1) == FAILURE) {
+                RETURN_NULL();
+            }
+
+        }
+
+    }
+
+
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
+    xdmMap = obj->xdmMap;
+    if (xdmMap != nullptr) {
+
+        if(key_zval != nullptr){
+            const char * objName =ZSTR_VAL(Z_OBJCE_P(key_zval)->name);
+            if(strcmp(objName, "Saxon\\XdmAtomicValue")==0) {
+	            zend_object * nobj = Z_OBJ_P(key_zval);
+
+	            xdmAtomicValue_object* ooth = (xdmAtomicValue_object *)((char *)nobj - XtOffsetOf(xdmAtomicValue_object, std));
+                if(ooth != nullptr) {
+                    XdmAtomicValue * value = ooth->xdmAtomicValue;
+                    if(value != nullptr) {
+        	            result = xdmMap->get(value); // call back to C++ API
+        	            if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmValue = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+
+                    }
+                }
+            } else {
+                RETURN_NULL();
+            }
+
+    } else if(lkey != -1){
+        	            result = xdmMap->get(lkey);
+        	            if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmValue = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+
+
+    } else if(skey != nullptr){
+        	            result = xdmMap->get(skey);
+        	            if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmValue = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+
+    } else {
+
+
+            RETURN_NULL();
+        }
+
+    }
+}
+
+
+PHP_METHOD(XdmMap, put)  {
+    XdmMap *xdmMap;
+    zval * key_zval = nullptr;
+    zval * value_zval = nullptr;
+    long lkey = -1;
+    char* skey = nullptr;
+    size_t len1;
+
+
+    if (ZEND_NUM_ARGS()!=1) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "zz", &key_zval, &value_zval) == FAILURE) {
+                RETURN_NULL();
+    }
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
+    xdmMap = obj->xdmMap;
+    if (xdmMap != nullptr) {
+                zend_object * kobj = Z_OBJ_P(key_zval);
+                XdmAtomicValue * c_key = nullptr;
+                XdmValue * c_value = nullptr;
+	            xdmAtomicValue_object* ooth = (xdmAtomicValue_object *)((char *)kobj - XtOffsetOf(xdmAtomicValue_object, std));
+                if(ooth != nullptr) {
+                    c_key = ooth->xdmAtomicValue;
+                }
+
+
+                zend_object * vobj = Z_OBJ_P(value_zval);
+
+	            xdmAtomicValue_object* vooth = (xdmAtomicValue_object *)((char *)vobj - XtOffsetOf(xdmAtomicValue_object, std));
+                if(vooth != nullptr) {
+                    c_value = vooth->xdmAtomicValue;
+                }
+
+                if(c_value != nullptr && c_key != nullptr){
+                    XdmMap * result = xdmMap->put(c_key, c_value);
+                        if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmMap_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                            zend_object *vvobj =  Z_OBJ_P(return_value);
+		                    xdmMap_object* vobj  = (xdmMap_object *)((char *)vvobj - XtOffsetOf(xdmMap_object, std));
+		                    assert (vobj != nullptr);
+		                    vobj->xdmMap = result;
+		                    return;
+                        }
+                    }
+                }
+
+    } else {
+        RETURN_NULL();
+    }
+
+}
+
+
+PHP_METHOD(XdmMap, isEmpty)
+{
+    XdmMap *xdmMap;
+    if (ZEND_NUM_ARGS()>0) {
+        WRONG_PARAM_COUNT;
+    }
+
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
+    xdmMap = obj->xdmMap;
+    if (xdmMap != nullptr) {
+        bool result = xdmMap->isEmpty();
+        RETURN_BOOL(result);
+    }
+    RETURN_BOOL(false);
+}
+
+PHP_METHOD(XdmMap, containsKey)
+{
+    XdmMap *xdmMap;
+    zval * key_zval = nullptr;
+    if (ZEND_NUM_ARGS()!= 1) {
+        WRONG_PARAM_COUNT;
+    }
+
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "z", &key_zval) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmMap_object* obj = (xdmMap_object *)((char *)oobj - XtOffsetOf(xdmMap_object, std));
+    xdmMap = obj->xdmMap;
+    if (xdmMap != nullptr) {
+
+        zend_object * kobj = Z_OBJ_P(key_zval);
+        XdmAtomicValue * c_key = nullptr;
+        xdmAtomicValue_object* ooth = (xdmAtomicValue_object *)((char *)kobj - XtOffsetOf(xdmAtomicValue_object, std));
+        if(ooth != nullptr) {
+            c_key = ooth->xdmAtomicValue;
+            bool result = xdmMap->containsKey(c_key);
+            RETURN_BOOL(result);
+        }
+    }
+    RETURN_BOOL(false);
+}
+
+PHP_METHOD(XdmMap, keys)
+{
 
 
 }
+
+PHP_METHOD(XdmMap,asMap)
+{
+
+
+}
+
+PHP_METHOD(XdmMap, values)
+{
+
+
+}
+
+
+
+
+/*     ============== PHP Interface of   XdmArray =============== */
+
+void xdmArray_free_storage(zend_object *object)
+{
+    zend_object_std_dtor(object);
+}
+
+void XdmArray_destroy_storage(zend_object *object)
+{
+    zend_objects_destroy_object(object);
+
+}
+
+zend_object *xdmArray_create_handler(zend_class_entry *type)
+{
+
+    xdmArray_object *obj = (xdmArray_object *)ecalloc(1, sizeof(xdmArray_object)+ zend_object_properties_size(type));
+
+    zend_object_std_init(&obj->std, type); /* take care of the zend_object also ! */
+    object_properties_init(&obj->std, type);
+
+    obj->std.handlers = &xdmArray_object_handlers;
+
+    return &obj->std;
+}
+
+PHP_METHOD(XdmArray, __construct)
+{
+   /* XdmAtomicValue *xdmValue = nullptr;
+    bool bVal;
+    char * sVal;
+    int len;
+    long iVal;
+    double dVal;
+    zval *zvalue;*/
+
+   // xdmAtomicValue_object *obj = (xdmAtomicValue_object *) Z_OBJ_P(getThis() TSRMLS_CC);
+
+}
+
+PHP_METHOD(XdmArray, __destruct)
+{
+//std::cerr<<"php_atomicValue  destruct"<<std::endl;
+     zval *object = getThis();
+     zend_object * zobj = Z_OBJ_P(object);
+
+    xdmArray_object * obj = (xdmArray_object *)((char *)zobj - XtOffsetOf(xdmArray_object, std));
+
+    XdmArray * xdmArray= obj->xdmArray;
+    if(xdmArray!= nullptr){
+        xdmArray->decrementRefCount();
+        if(xdmArray->getRefCount()< 1){
+            delete xdmArray;
+            xdmArray = nullptr;
+        }  else {
+        //xdmValue->decrementRefCount();
+        }
+    }
+
+}
+
+
+PHP_METHOD(XdmArray, __toString)
+    {
+    	 XdmArray *xdmArray;
+         zend_object *oobj = Z_OBJ_P(getThis());
+         xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
+         xdmArray = obj->xdmArray;
+         if (xdmArray != nullptr) {
+        	const char * value = xdmArray->getStringValue();
+        	if(value != nullptr) {
+        	    _RETURN_STRING(value);
+        	 } else {
+        	 _RETURN_STRING("");
+
+        	 }
+       	}else {
+    		_RETURN_STRING("");
+    	}
+    }
+
+
+
+PHP_METHOD(XdmArray,  get)  {
+    XdmArray *xdmArray = nullptr;
+    long lkey = -1;
+
+
+
+    if (ZEND_NUM_ARGS()!=1) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "l", &lkey) == FAILURE) {
+
+                RETURN_NULL();
+
+
+    }
+
+
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
+    xdmArray = obj->xdmArray;
+    if (xdmArray != nullptr && lkey != -1){
+        	            XdmValue * result = xdmArray->get(lkey);
+        	            if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmValue_object* vobj  = (xdmValue_object *)((char *)vvobj - XtOffsetOf(xdmValue_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmValue = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+
+    }  else {
+
+
+            RETURN_NULL();
+        }
+
+}
+
+
+
+PHP_METHOD(XdmArray,  put)  {
+    XdmArray *xdmArray;
+    long lkey = -1;
+    zval * value_zval = nullptr;
+
+
+    if (ZEND_NUM_ARGS()!=2) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "lz", &lkey, value_zval) == FAILURE) {
+
+                RETURN_NULL();
+
+    }
+
+
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
+    xdmArray = obj->xdmArray;
+     if(lkey != -1 && value_zval != nullptr){
+                 zend_object * vobj = Z_OBJ_P(value_zval);
+
+	            xdmValue_object* vooth = (xdmValue_object *)((char *)vobj - XtOffsetOf(xdmValue_object, std));
+                if(vooth != nullptr) {
+                    XdmValue * c_value = vooth->xdmValue;
+
+
+        	            XdmArray * result = xdmArray->put(lkey, c_value);
+        	            if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmArray_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmArray_object* vobj  = (xdmArray_object *)((char *)vvobj - XtOffsetOf(xdmArray_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmArray = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+    }
+    }  else {
+
+
+            RETURN_NULL();
+        }
+
+}
+
+
+PHP_METHOD(XdmArray,  addMember)  {
+    XdmArray *xdmArray;
+    long lkey = -1;
+    zval * value_zval = nullptr;
+
+
+    if (ZEND_NUM_ARGS()!=1) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "z", value_zval) == FAILURE) {
+
+                RETURN_NULL();
+
+    }
+
+
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
+    xdmArray = obj->xdmArray;
+     if(lkey != -1 && value_zval != nullptr){
+                 zend_object * vobj = Z_OBJ_P(value_zval);
+
+	            xdmValue_object* vooth = (xdmValue_object *)((char *)vobj - XtOffsetOf(xdmValue_object, std));
+                if(vooth != nullptr) {
+                    XdmValue * c_value = vooth->xdmValue;
+
+
+        	            XdmArray * result = xdmArray->put(lkey, c_value);
+        	            if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmArray_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmArray_object* vobj  = (xdmArray_object *)((char *)vvobj - XtOffsetOf(xdmArray_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmArray = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+    }
+    }  else {
+
+
+            RETURN_NULL();
+        }
+
+}
+
+
+
+
+PHP_METHOD(XdmArray,  concat)  {
+    XdmArray *xdmArray;
+    long lkey = -1;
+    zval * value_zval = nullptr;
+
+
+    if (ZEND_NUM_ARGS()!=1) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "z", value_zval) == FAILURE) {
+
+                RETURN_NULL();
+
+    }
+
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
+    xdmArray = obj->xdmArray;
+     if(lkey != -1 && value_zval != nullptr){
+                 zend_object * vobj = Z_OBJ_P(value_zval);
+
+	            xdmArray_object* vooth = (xdmArray_object *)((char *)vobj - XtOffsetOf(xdmArray_object, std));
+                if(vooth != nullptr) {
+                    XdmArray * c_value = vooth->xdmArray;
+
+        	            XdmArray * result = xdmArray->concat(c_value);
+        	            if(result != nullptr) {
+                            result->incrementRefCount();
+                            if (object_init_ex(return_value, xdmArray_ce) != SUCCESS) {
+                                RETURN_NULL();
+                            } else {
+                                zend_object *vvobj =  Z_OBJ_P(return_value);
+		                        xdmArray_object* vobj  = (xdmArray_object *)((char *)vvobj - XtOffsetOf(xdmArray_object, std));
+		                        assert (vobj != nullptr);
+		                        vobj->xdmArray = result;
+		                        return;
+                            }
+                        } else {
+        	                RETURN_NULL();
+
+        	            }
+                }
+    }  else {
+
+
+            RETURN_NULL();
+        }
+
+}
+
+
+PHP_METHOD(XdmArray,  getArity)  {
+    	 XdmArray *xdmArray = nullptr;
+         zend_object *oobj = Z_OBJ_P(getThis());
+         xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
+         xdmArray = obj->xdmArray;
+         if (xdmArray != nullptr) {
+        	int value = xdmArray->getArity();
+            RETURN_LONG(value);
+       	}else {
+    		RETURN_LONG(-1)
+    	}
+
+
+}
+
+
+PHP_METHOD(XdmArray,  arrayLength)  {
+    	 XdmArray *xdmArray = nullptr;
+         zend_object *oobj = Z_OBJ_P(getThis());
+         xdmArray_object* obj = (xdmArray_object *)((char *)oobj - XtOffsetOf(xdmArray_object, std));
+         xdmArray = obj->xdmArray;
+         if (xdmArray != nullptr) {
+        	int value = xdmArray->arrayLength();
+            RETURN_LONG(value);
+       	}else {
+    		RETURN_LONG(-1)
+    	}
+
+
+}
+
+/*PHP_ME(XdmArray,  values,      nullptr, ZEND_ACC_PUBLIC) */
+
 
 
 
@@ -2335,12 +3272,12 @@ zend_function_entry xdmAtomicValue_methods[] = {
 
 zend_function_entry xdmFunctionItem_methods[] = {
     PHP_ME(XdmFunctionItem,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmFunctionValue,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
-    PHP_ME(XdmFunctionValue,  __toString,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmFunctionValue,  getName,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmAtomicValue,  getArity,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmAtomicValue,  getSystemFunction,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(XdmAtomicValue,  call,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XdmFunctionItem,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmFunctionItem,  __toString,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XdmFunctionItem,  getName,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XdmFunctionItem,  getArity,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XdmFunctionItem,  getSystemFunction,      nullptr, ZEND_ACC_PUBLIC)
+    PHP_ME(XdmFunctionItem,  call,      nullptr, ZEND_ACC_PUBLIC)
     {nullptr, nullptr, nullptr}
 };
 
@@ -2490,7 +3427,7 @@ PHP_MINIT_FUNCTION(saxon)
     xdmFunctionItem_ce = zend_register_internal_class(&ce);
     xdmFunctionItem_ce->create_object = xdmFunctionItem_create_handler;
     memcpy(&xdmFunctionItem_object_handlers, zend_get_std_object_handlers(), sizeof(xdmFunctionItem_object_handlers));
-    xdmItem_object_handlers.offset = XtOffsetOf(xdmFunctionItem_object, std);
+    xdmFunctionItem_object_handlers.offset = XtOffsetOf(xdmFunctionItem_object, std);
     xdmFunctionItem_object_handlers.free_obj = xdmFunctionItem_free_storage;
     xdmFunctionItem_object_handlers.dtor_obj = XdmFunctionItem_destroy_storage;
 

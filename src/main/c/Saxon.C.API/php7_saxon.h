@@ -411,7 +411,8 @@ PHP_RINIT_FUNCTION(saxon);
 
 
  /*     ============== PHP Interface of   XdmFunctionItem =============== */
-
+    PHP_METHOD(XdmFunctionItem,  __construct);
+    PHP_METHOD(XdmFunctionItem,  __destruct);
     PHP_METHOD(XdmFunctionItem,  getName);
     PHP_METHOD(XdmFunctionItem,  getArity);
     PHP_METHOD(XdmFunctionItem,  getSystemFunction);
