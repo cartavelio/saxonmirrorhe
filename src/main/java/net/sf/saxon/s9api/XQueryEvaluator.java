@@ -373,7 +373,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * By default, the destination is System.err. If a TraceListener is in use,
      * this is ignored, and the trace() output is sent to the TraceListener.
      *
-     * @param stream the PrintStream to which trace output will be sent. If set to
+     * @param stream the Logger to which trace output will be sent. If set to
      *               null, trace output is suppressed entirely. It is the caller's responsibility
      *               to close the stream after use.
      * @since 9.1. Changed in 9.6 to use a Logger
