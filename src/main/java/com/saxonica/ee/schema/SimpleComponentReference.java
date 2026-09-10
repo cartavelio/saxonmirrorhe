@@ -137,7 +137,7 @@ public class SimpleComponentReference extends SchemaStructure implements Compone
                 tryToResolve(compiler.getPreparedSchema());
             }
             if (target == null) {
-                tryToResolve(compiler.getConfiguration().getSuperSchema());
+                tryToResolve(compiler.getConfiguration().getUnnamedSchema());
             }
             if (target == null) {
                 dangling = true;

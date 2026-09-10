@@ -152,8 +152,8 @@ public abstract class AttributeValidator extends ContentValidator {
                         if (process.equals("skip")) {
                             // do nothing
                         } else {
-                            decl = (AttributeDecl)
-                                    getConfiguration().getAttributeDeclaration(attName.getStructuredQName());
+                            StructuredQName attributeName = attName.getStructuredQName();
+                            decl = getValidationContext().getSchema().getAttributeDecl(attributeName);
                             if (decl == null && process.equals("strict")) {
                                 noAttributeDeclarationAvailable(attName, location);
                             }
@@ -490,8 +490,7 @@ public abstract class AttributeValidator extends ContentValidator {
         SchemaType xsiType = getValidationContext().getXSIType();
         switch (mode) {
             case "strict": {
-                ElementDecl decl = (ElementDecl)
-                        getConfiguration().getElementDeclaration(fingerprint);
+                ElementDecl decl = getValidationContext().getSchema().getElementDecl(fingerprint);
                 if (decl == null) {
                     if (xsiType == null) {
                         String message = "No element declaration found for element " +
@@ -517,7 +516,7 @@ public abstract class AttributeValidator extends ContentValidator {
                 break;
             }
             case "lax": {
-                ElementDecl decl = (ElementDecl) getConfiguration().getElementDeclaration(fingerprint);
+                ElementDecl decl = getValidationContext().getSchema().getElementDecl(fingerprint);
                 if (decl == null) {
                     if (xsiType != null) {
                         List<ValidationFailure> failures = new ArrayList<>(1);

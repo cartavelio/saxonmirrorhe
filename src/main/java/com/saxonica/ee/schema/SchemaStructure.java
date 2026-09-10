@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * The base class for all XML Schema stuctures. Generally represents a schema component
+ * The base class for all XML Schema structures. Generally represents a schema component
  * in the sense of the XML Schema specification, though the correspondence is not always
  * one to one. Maintains information about the location of the schema construct in an
  * XML Schema document, for diagnostic purposes.
@@ -55,6 +55,12 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
      */
 
     private EnterpriseConfiguration config;
+
+    /**
+     * The schema under which this component was created
+     */
+
+    private PreparedSchema schema;
 
     /**
      * The redefinition level of this component
@@ -275,7 +281,7 @@ public abstract class SchemaStructure implements UserSchemaComponent, Location {
     }
 
     /**
-     * Get the schema containing this structure
+     * Get the Saxon configuration containing this structure
      *
      * @return the Saxon configuration
      */

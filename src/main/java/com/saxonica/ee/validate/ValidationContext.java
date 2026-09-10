@@ -1,10 +1,11 @@
 package com.saxonica.ee.validate;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Controller;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.InvalidityHandler;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationFailure;
@@ -17,6 +18,7 @@ import net.sf.saxon.value.EmptySequence;
 
 public class ValidationContext extends ConversionRules {
 
+    private PreparedSchema schema;
     private ValidationParams validationParams;
     private Controller controller;
     private InvalidityHandler invalidityHandler;
@@ -32,6 +34,14 @@ public class ValidationContext extends ConversionRules {
 
     public ValidationContext(ConversionRules rules) {
         rules.copyTo(this);
+    }
+
+    public void setSchema(PreparedSchema ps) {
+        this.schema = ps;
+    }
+
+    public PreparedSchema getSchema() {
+        return schema;
     }
 
     /**

@@ -22,6 +22,7 @@ import java.util.*;
  */
 public class Wildcard extends SchemaStructure implements UserSchemaComponent, SerializableSchemaComponent, Term {
 
+    private final PreparedSchema schema;
     /**
      * The set of permitted namespaces. The value "" represents the no-namespace, referred to as
      * "absent" in the specifications. The set may be empty, indicating that no namespaces are
@@ -58,7 +59,13 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
     private IntSet disallowedQNames;
 
-    public Wildcard() {
+    public Wildcard(PreparedSchema schema) {
+        this.schema = schema;
+        setConfiguration(schema.getConfiguration());
+    }
+
+    public PreparedSchema getSchema() {
+        return schema;
     }
 
     /**
@@ -200,8 +207,8 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 fingerprint = name.obtainFingerprint(config.getNamePool());
             }
             if ((isElement ?
-                config.getElementDeclaration(fingerprint) :
-                        config.getAttributeDeclaration(fingerprint)) != null) {
+                         schema.getElementDecl(fingerprint) :
+                         schema.getAttributeDecl(fingerprint)) != null) {
                 return false;
             }
         }
@@ -243,8 +250,8 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         }
         if (disallowsDefinedNames &&
                 (isElement ?
-                        config.getElementDeclaration(fingerprint) :
-                        config.getAttributeDeclaration(fingerprint)) != null) {
+                         schema.getElementDecl(fingerprint) :
+                         schema.getAttributeDecl(fingerprint)) != null) {
             return "There is a global " + (isElement ? "element" : "attribute") +
                     " declaration for the name, and the wildcard specifies notQName='##defined'. ";
         }
@@ -603,11 +610,14 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public static Wildcard makeIntersection(Wildcard wat1, Wildcard wat2, NamePool pool) {
+        if (wat1.getSchema() != wat2.getSchema()) {
+            throw new IllegalArgumentException("Cannot combine wildcards from different schemas");
+        }
         Set<NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
         Set<NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
         Set<NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
         Set<NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
-        Wildcard result = new Wildcard();
+        Wildcard result = new Wildcard(wat1.getSchema());
         result.setConfiguration(wat1.getConfiguration());
         result.setProcessContents(wat1.getProcessContents());
         result.setLocator(wat1);
@@ -673,11 +683,14 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public static Wildcard makeUnion(Wildcard wat1, Wildcard wat2, NamePool pool) {
+        if (wat1.getSchema() != wat2.getSchema()) {
+            throw new IllegalArgumentException("Cannot combine wildcards from different schemas");
+        }
         Set<NamespaceUri> allowed1 = wat1.getAllowedNamespaces();
         Set<NamespaceUri> allowed2 = wat2.getAllowedNamespaces();
         Set<NamespaceUri> disallowed1 = wat1.getDisallowedNamespaces();
         Set<NamespaceUri> disallowed2 = wat2.getDisallowedNamespaces();
-        Wildcard result = new Wildcard();
+        Wildcard result = new Wildcard(wat1.getSchema());
         result.setConfiguration(wat1.getConfiguration());
         result.setProcessContents(wat1.getProcessContents());
         result.setLocator(wat1);

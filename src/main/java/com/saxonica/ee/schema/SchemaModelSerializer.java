@@ -68,7 +68,7 @@ public class SchemaModelSerializer {
         if (dmk != null) {
             emitAttribute("dmk", dmk);
         }
-        PreparedSchema schema = config.getSuperSchema();
+        PreparedSchema schema = config.getUnnamedSchema();
         // System.err.println("Serializing schema " + schema);
         for (SchemaType type : schema.getAllTypes()) {
             SchemaType sType = type;

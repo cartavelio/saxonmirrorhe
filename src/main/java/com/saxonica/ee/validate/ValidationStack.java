@@ -2,6 +2,7 @@ package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.Assertion;
 import com.saxonica.ee.schema.ElementDecl;
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.UserComplexType;
 import com.saxonica.ee.stream.Inversion;
 import com.saxonica.ee.stream.Sweep;
@@ -46,9 +47,9 @@ import java.util.*;
 
 public class ValidationStack extends ValidatingFilter {
 
+    private final PreparedSchema schema;
     private final Stack<ContentValidator> stack = new Stack<>();
     private final Stack<Location> locationStack = new Stack<>();
-//    private boolean contentStarted = false;
     private final Receiver outputReceiver;
     private ContentValidator initialValidator;
     private List<ValidationFailure> xsiValidationErrors;
@@ -70,13 +71,15 @@ public class ValidationStack extends ValidatingFilter {
      * @param initialType           the initial type to validate against, if any
      */
 
-    public ValidationStack(Receiver next, int initialValidationMode, SchemaType initialType) {
+    public ValidationStack(ValidationContext vc, Receiver next, int initialValidationMode, SchemaType initialType) {
         super(next);
         outputReceiver = next;
         this.initialValidationMode = initialValidationMode;
         this.initialType = initialType;
         final PipelineConfiguration pipe = next.getPipelineConfiguration();
         setPipelineConfiguration(pipe);
+        setValidationContext(vc);
+        schema = vc.getSchema();
         assertionBuilder = (AssertionTreeBuilder) pipe.getComponent("com.saxonica.ee.validate.AssertionTreeBuilder");
         watchManager = (WatchManager) pipe.getComponent("com.saxonica.ee.stream.watch.WatchManager");
     }
@@ -220,7 +223,7 @@ public class ValidationStack extends ValidatingFilter {
                             ((ComplexContentValidator) initialReceiver).setSchemaType((UserComplexType) xsiType);
                             initial = (ContentValidator) getNextReceiver();
                         } else {
-                            ElementDecl decl = (ElementDecl) getConfiguration().getElementDeclaration(fp);
+                            ElementDecl decl = schema.getElementDecl(fp);
                             initial = ContentValidator.makeValidator(decl, elemName.getStructuredQName(), location,
                                     getValidationContext(), xsiType,
                                     initialValidationMode, pipe,
@@ -232,7 +235,7 @@ public class ValidationStack extends ValidatingFilter {
                         initial = ContentValidator.makeValidatorForType(
                                 null, initialType, pipe, outputReceiver, failures);
                     } else {
-                        ElementDecl decl = (ElementDecl) getConfiguration().getElementDeclaration(fp);
+                        ElementDecl decl = schema.getElementDecl(fp);
                         initial = ContentValidator.makeValidator(
                                 decl, elemName.getStructuredQName(), location, getValidationContext(), null, initialValidationMode,
                                 pipe, outputReceiver, failures);

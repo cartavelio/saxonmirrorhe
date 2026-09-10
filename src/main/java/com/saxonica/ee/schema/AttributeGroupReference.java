@@ -235,7 +235,7 @@ public final class AttributeGroupReference extends SchemaStructure
                 target = schema.getAttributeGroup(getTargetComponentName());
             }
             if (target == null) {
-                target = getConfiguration().getSuperSchema().getAttributeGroup(getTargetComponentName());
+                target = getConfiguration().getUnnamedSchema().getAttributeGroup(getTargetComponentName());
             }
             if (target == null) {
                 if (compiler.isAllowDanglingReferences()) {

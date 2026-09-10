@@ -86,10 +86,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     private int licensedFeatures = 0;
     private HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
+    private ConcurrentHashMap<NamespaceUri, Schema> schemaCache = new ConcurrentHashMap<>();
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
     private final SchemaURIResolver standardSchemaResolver;
-    private transient PreparedSchema superSchema;
+    private PreparedSchema unnamedSchema;
     private int resultDocumentThreadsLimit = Runtime.getRuntime().availableProcessors();
     private int thresholdForCompilingTypes = 100;
     private int thresholdForInliningFunctions = 100;
@@ -117,7 +118,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         optimizerOptions = OptimizerOptions.FULL_EE_OPTIMIZATION;
         defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
         standardSchemaResolver = new StandardSchemaResolver(this);
-        superSchema = new PreparedSchema(this);
+        unnamedSchema = new PreparedSchema(this);
     }
 
     @Override
@@ -546,7 +547,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
             throws SchemaException {
         //noinspection SynchronizeOnNonFinalField
-        synchronized(superSchema) {
+        synchronized(unnamedSchema) {
             int status = getNamespaceStatus(expected);
             if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
                 SchemaCompiler schemaCompiler = newSchemaCompiler();
@@ -672,7 +673,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     public synchronized void addSchema(PreparedSchema pschema) throws SchemaException {
         checkLicensedFeature(LicenseFeature.SCHEMA_VALIDATION, "schema processing", pschema.getLocalLicenseId());
-        if (pschema == superSchema) {
+        if (pschema == unnamedSchema) {
             return;
         }
         if (pschema instanceof SingleNamespaceSchema) {
@@ -683,8 +684,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
             }
         }
-        pschema.copyTo(superSchema, newSchemaCompiler());
-        superSchema.setLocalLicenseId(pschema.getLocalLicenseId());
+        pschema.copyTo(unnamedSchema, newSchemaCompiler());
+        unnamedSchema.setLocalLicenseId(pschema.getLocalLicenseId());
 
     }
 
@@ -825,8 +826,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @return the PreparedSchema containing the schema components for all loaded target namespaces
      */
 
-    public PreparedSchema getSuperSchema() {
-        return superSchema;
+    public PreparedSchema getUnnamedSchema() {
+        return unnamedSchema;
     }
 
     /**
@@ -866,7 +867,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public Collection<GlobalParam> getDeclaredSchemaParameters() {
-        return getSuperSchema().getGlobalParams();
+        return getUnnamedSchema().getGlobalParams();
     }
 
     /**
@@ -882,7 +883,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (type instanceof UserDefinedType) {
             return ((UserDefinedType) type).getExtensionTypes();
         } else {
-            return getSuperSchema().getExtensionsOfBuiltInType(type.getFingerprint());
+            return getUnnamedSchema().getExtensionsOfBuiltInType(type.getFingerprint());
         }
     }
 
@@ -900,7 +901,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             SchemaModelLoader loader = new SchemaModelLoader(this);
             PreparedSchema schema = loader.load(source);
             addSchema(schema);
-            schema.copyTo(superSchema, newSchemaCompiler());
+            schema.copyTo(unnamedSchema, newSchemaCompiler());
             for (NamespaceUri ns : schema.getTargetNamespaces()) {
                 setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
             }
@@ -923,100 +924,16 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         serializer.serialize();
     }
 
-    /**
-     * Remove all schema components that have been loaded into this Configuration.
-     * This method must not be used if any processes (such as stylesheet or query compilations
-     * or executions) are currently active. In a multi-threaded environment, it is the user's
-     * responsibility to ensure that this method is not called unless it is safe to do so.
-     */
-
-    @Override
-    public void clearSchemaCache() {
-        superSchema = new PreparedSchema(this);
-        namespaceStatus = new HashMap<>();
+    public Schema getSchema() {
+        return unnamedSchema;
     }
 
-
-    /**
-     * Get a global element declaration by fingerprint
-     *
-     * @param fingerprint the NamePool fingerprint of the element name
-     * @return the element declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    @Override
-    public SchemaDeclaration getElementDeclaration(int fingerprint) {
-        return superSchema.getElementDecl(fingerprint);
+    public Schema getSchemaForNamespace(NamespaceUri uri) {
+        return schemaCache.get(uri);
     }
 
-    /**
-     * Get a global element declaration by name.
-     *
-     * @param qName the name of the required
-     *              element declaration
-     * @return the element declaration whose name matches the given
-     * name, or null if no element declaration with this name has
-     * been registered.
-     */
-
-
-    @Override
-    public SchemaDeclaration getElementDeclaration(StructuredQName qName) {
-        return superSchema.getElementDecl(qName);
-    }
-
-    /**
-     * Get a global attribute declaration by fingerprint
-     *
-     * @param fingerprint the NamePool fingerprint of the element name
-     * @return the attribute declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    @Override
-    public SchemaDeclaration getAttributeDeclaration(int fingerprint) {
-        return superSchema.getAttributeDecl(fingerprint);
-    }
-
-    /**
-     * Get a global attribute declaration by name
-     *
-     * @param attributeName the name of the required attribute declaration
-     * @return the attribute declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    @Override
-    public SchemaDeclaration getAttributeDeclaration(StructuredQName attributeName) {
-        return superSchema.getAttributeDecl(attributeName);
-    }
-
-    /**
-     * Get the top-level schema type definition with a given QName.
-     *
-     * @param name the name of the required schema type
-     * @return the schema type , or null if there is none
-     * with this name.
-     * @since 9.7
-     */
-
-    /*@Nullable*/
-    @Override
-    public SchemaType getSchemaType(StructuredQName name) {
-        if (name.hasURI(NamespaceUri.SCHEMA)) {
-            SchemaType t = BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
-            if (t != null) {
-                return t;
-            }
-            // Otherwise fall through. This can happen when validating against the schema for schemas:
-            // there are types such as xs:attribute whose names are built-in names with codes < 1024,
-            // but which are not built-in types.
-        }
-        return superSchema.getType(name);
+    public void registerSchemaForNamespace(NamespaceUri uri, Schema schema) {
+        schemaCache.put(uri, schema);
     }
 
     /**
@@ -1059,7 +976,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public boolean isDeclaredNotation(NamespaceUri uri, String local) {
-        return superSchema.getNotation(new StructuredQName("", uri, local)) != null;
+        return unnamedSchema.getNotation(new StructuredQName("", uri, local)) != null;
     }
 
     /**
@@ -1119,110 +1036,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                                          String systemId,
                                          ParseOptions validationOptions,
                                          Location initiatingLocation) {
-//        if (isLicenseNotFound()) {
-//            return receiver;
-//        }
-        int validationMode = validationOptions.getSchemaValidationMode();
-        SpaceStrippingRule stripRules = validationOptions.getSpaceStrippingRule();
-        SchemaType schemaType = validationOptions.getTopLevelType();
-        StructuredQName topLevelElementName = validationOptions.getTopLevelElement();
-        ValidationParams params = validationOptions.getValidationParams();
-
-        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
-        if (validationMode == Validation.STRICT || validationMode == Validation.LAX || schemaType != null) {
-            Receiver destination = receiver;
-            if (stripRules == null) {
-                stripRules = getParseOptions().getSpaceStrippingRule();
-            }
-            if (stripRules == IgnorableSpaceStrippingRule.getInstance()) {
-                destination = stripRules.makeStripper(destination);
-            }
-
-            ValidationContext vc = new ValidationContext(getConversionRules());
-            vc.setInitiatingLocation(initiatingLocation);
-            vc.setErrorLimit(validationOptions.getValidationErrorLimit());
-            if (pipe.getController() == null) {
-                pipe.setController(new Controller(this));
-                pipe.getController().getExecutable().setSchemaAware(true);
-            }
-            vc.setController(pipe.getController());
-            vc.setValidationParams(params);
-
-            pipe.setComponent("com.saxonica.ee.validate.ValidationContext", vc);
-
-            if (validationOptions.isCheckEntityReferences()) {
-                EntityValidator ev = new EntityValidator(destination);
-                ev.setValidationContext(vc);
-                destination = ev;
-            }
-
-            allocateInvalidityHandler(validationOptions, vc);
-
-            IdValidator idval = new IdValidator(destination);
-            idval.setValidationContext(vc);
-            ConstraintChecker checker = new ConstraintChecker(pipe /*idval*/);
-            checker.setValidationContext(vc);
-
-            destination = new TeeOutputter(idval, checker);
-
-            // If running XSD 1.1, add an assertion tree builder before the constraint checker
-            destination = allocateAssertionTreeBuilder(destination, pipe, vc);
-
-
-            ValidationStack val = new ValidationStack(destination, validationMode, schemaType);
-            val.setPipelineConfiguration(pipe);
-            val.setValidationContext(vc);
-
-            vc.setConstraintChecker(checker);
-            if (topLevelElementName != null) {
-                val.setTopLevelElement(new FingerprintedQName(
-                        topLevelElementName.getPrefix(),
-                        topLevelElementName.getNamespaceUri(),
-                        topLevelElementName.getLocalPart()));
-            }
-            HostLanguage hostLanguage = pipe.getHostLanguage();
-            if (hostLanguage == HostLanguage.XSLT) {
-                if (schemaType != null) {
-                    vc.setErrorCode("XTTE1540");
-                } else if (validationMode == Validation.STRICT) {
-                    vc.setErrorCode("XTTE1510");
-                } else {
-                    vc.setErrorCode("XTTE1515");
-                }
-            } else if (hostLanguage == HostLanguage.XQUERY) {
-                vc.setErrorCode("XQDY0027");
-            } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
-                vc.setErrorCode(null);
-            }
-
-            XSIAttributeHandler xsi = new XSIAttributeHandler(val);
-            xsi.setSystemId(systemId);
-
-            AttributeInheritor stb = new AttributeInheritor(xsi);
-            vc.setAttributeInheritor(stb);
-            xsi.setValidationContext(vc);
-
-            PathMaintainer pathMaintainer = new PathMaintainer(stb);
-            pipe.setComponent("net.sf.saxon.event.PathMaintainer", pathMaintainer);
-
-            DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
-
-            LocationCopier copier = new LocationCopier(true, systemId);
-            pipe.setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
-
-            vc.startValidation(systemId);
-
-            return dv;
-
-        } else if (validationMode == Validation.STRIP) {
-            SkipValidator a = new SkipValidator(receiver);
-            ValidationContext vc = new ValidationContext(getConversionRules());
-            a.setValidationContext(vc);
-            a.setSystemId(systemId);
-            return a;
-        } else {
-            return receiver;
-        }
+        return getUnnamedSchema().getDocumentValidator(receiver, systemId, validationOptions, initiatingLocation);
     }
 
     private void allocateInvalidityHandler(ParseOptions validationOptions, ValidationContext vc) {
@@ -1317,7 +1131,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             if (elemName == null) {
                 throw new IllegalArgumentException("When validating an element, either a type or an element name must be supplied");
             }
-            ElementDecl decl = (ElementDecl) getElementDeclaration(elemName);
+            ElementDecl decl = (ElementDecl) getSchema().getElementDecl(elemName);
             if (decl == null || !decl.hasTypeAlternatives()) {
                 List<ValidationFailure> failures = new ArrayList<>(1);
                 contentValidator = ContentValidator.makeValidator(decl, elemName, location,
@@ -1330,8 +1144,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             }
         }
 
-        ValidationStack vs = new ValidationStack(destination, Validation.STRICT, null);
-        vs.setValidationContext(vc);
+        ValidationStack vs = new ValidationStack(vc, destination, Validation.STRICT, null);
         vs.setPipelineConfiguration(pipe);
         HostLanguage hostLanguage = pipe.getHostLanguage();
         if (hostLanguage == HostLanguage.XSLT) {
@@ -1391,34 +1204,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (isLicenseNotFound()) {
             return BuiltInAtomicType.UNTYPED_ATOMIC;
         }
-        AttributeDecl decl = (AttributeDecl) getAttributeDeclaration(nodeName);
-        if (decl == null) {
-            if (validation == Validation.STRICT) {
-                ValidationFailure ve = new ValidationFailure(
-                        "No global attribute declaration found for attribute " +
-                                nodeName.getDisplayName());
-                ve.setErrorCode("XTTE1512");
-                throw ve.makeException();
-            } else {
-                // lax validation
-                return BuiltInAtomicType.UNTYPED_ATOMIC;
-            }
-        }
-        SimpleType type = decl.getSimpleType();
-        if (type.isNamespaceSensitive()) {
-            ValidationFailure nsErr = new ValidationFailure("Cannot create a parentless attribute whose " +
-                                                                  "type is namespace-sensitive (such as xs:QName)");
-            nsErr.setSchemaType(type);
-            nsErr.setErrorCode("XTTE1545");
-            throw nsErr.makeException();
-        }
-        ValidationFailure contentErr = type.validateContent(value, DummyNamespaceResolver.getInstance(), getConversionRules());
-        if (contentErr != null) {
-            contentErr.setSchemaType(type);
-            contentErr.setErrorCode(validation == Validation.STRICT ? "XTTE1510" : "XTTE1515");
-            throw contentErr.makeException();
-        }
-        return type;
+        return unnamedSchema.validateAttribute(nodeName, value, validation);
     }
 
     /**

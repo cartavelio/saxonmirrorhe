@@ -138,7 +138,7 @@ public class TypeReference extends SchemaStructure implements ComponentReference
                 target = compiler.getPreparedSchema().getType(qName);
             }
             if (target == null) {
-                target = getConfiguration().getSuperSchema().getType(qName);
+                target = getConfiguration().getUnnamedSchema().getType(qName);
             }
             if (target == null) {
                 if (compiler.isAllowDanglingReferences() && !fatal) {

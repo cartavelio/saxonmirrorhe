@@ -20,15 +20,17 @@ public class ElementWildcard extends Particle {
      */
 
     private Wildcard wildcard;
+    private final PreparedSchema schema;
 
-    public ElementWildcard(EnterpriseConfiguration config) {
-        wildcard = new Wildcard();
-        wildcard.setConfiguration(config);
-        setConfiguration(config);
+    public ElementWildcard(PreparedSchema schema) {
+        this.schema = schema;
+        wildcard = new Wildcard(schema);
+        wildcard.setConfiguration(schema.getConfiguration());
+        setConfiguration(schema.getConfiguration());
     }
 
     public ElementWildcard copy() {
-        ElementWildcard e = new ElementWildcard(getConfiguration());
+        ElementWildcard e = new ElementWildcard(schema);
         e.wildcard = wildcard;
         e.setMinOccurs(getMinOccurs());
         e.setMaxOccurs(getMaxOccurs());
@@ -37,6 +39,7 @@ public class ElementWildcard extends Particle {
 
     public ElementWildcard(Wildcard wc) {
         wildcard = wc;
+        schema = wc.getSchema();
     }
 
     public void setWildcard(Wildcard wildcard) {
@@ -111,7 +114,7 @@ public class ElementWildcard extends Particle {
             if (wildcard.getProcessContents().equals("skip")) {
                 return AnyType.getInstance();
             } else if (wildcard.getProcessContents().equals("strict")) {
-                ElementDecl decl = getConfiguration().getSuperSchema().getElementDecl(elementName);
+                ElementDecl decl = getConfiguration().getUnnamedSchema().getElementDecl(elementName);
                 if (decl == null) {
                     return null;
                 } else {
@@ -122,7 +125,7 @@ public class ElementWildcard extends Particle {
                     }
                 }
             } else { // processContents = "lax"
-                ElementDecl decl = getConfiguration().getSuperSchema().getElementDecl(elementName);
+                ElementDecl decl = getConfiguration().getUnnamedSchema().getElementDecl(elementName);
                 if (decl == null) {
                     return AnyType.getInstance();
                 } else {

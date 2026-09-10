@@ -261,10 +261,9 @@ public class XSIAttributeHandler extends ValidatingFilter {
      */
 
     private SchemaType processXsiType(String value, NamespaceResolver nsResolver) {
-        final Configuration config = getConfiguration();
         try {
             StructuredQName qName = StructuredQName.fromLexicalQName((value), true, false, nsResolver);
-            SchemaType type = config.getSchemaType(qName);
+            SchemaType type = getValidationContext().getSchema().getSchemaType(qName);
 
             if (type == null) {
                 String message = "Unknown type " + Err.wrap(value) + " specified in xsi:type attribute";
@@ -343,8 +342,8 @@ public class XSIAttributeHandler extends ValidatingFilter {
                 pipe = new PipelineConfiguration(getPipelineConfiguration());
                 EnterpriseConfiguration config = (EnterpriseConfiguration) pipe.getConfiguration();
                 SchemaCompiler compiler = config.newSchemaCompiler();
-                compiler.setPreparedSchema(config.getSuperSchema());
-                config.getSuperSchema().validate(compiler);
+                compiler.setPreparedSchema(config.getUnnamedSchema());
+                config.getUnnamedSchema().validate(compiler);
                 // Revalidation succeeded
                 ErrorReporter reporter = pipe.getErrorReporter();
                 reporter.report(new XmlProcessingException(e).asWarning());

@@ -30,7 +30,7 @@ public class XSDAny extends AnnotationParent {
 
     @Override
     protected void prepareAttributes() throws SchemaException {
-        wildcard = new ElementWildcard(getSchema().getConfiguration());
+        wildcard = new ElementWildcard(getSchema());
         wildcard.setLocator(this);
 
         AttributeMap atts = attributes();

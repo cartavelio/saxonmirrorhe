@@ -222,10 +222,12 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             }
         }
         StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
-        SchemaType st = getConfiguration().getSchemaType(sqName);
+        Configuration configuration1 = getConfiguration();
+        SchemaType st = configuration1.getSchema().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
-            st = getConfiguration().getSchemaType(sqName);
+            Configuration configuration = getConfiguration();
+            st = configuration.getSchema().getSchemaType(sqName);
         }
         if (st == null) {
             throw new XQException("Type " + typename + " not found in schema");
@@ -266,10 +268,12 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         Configuration config = getConfiguration();
 
         StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
-        SchemaType st = getConfiguration().getSchemaType(sqName);
+        Configuration configuration1 = getConfiguration();
+        SchemaType st = configuration1.getSchema().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
-            st = getConfiguration().getSchemaType(sqName);
+            Configuration configuration = getConfiguration();
+            st = configuration.getSchema().getSchemaType(sqName);
         }
         if (st == null) {
             throw new XQException("Type " + typename + " not found in schema");
@@ -379,10 +383,12 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         Configuration config = getConfiguration();
 
         StructuredQName sqName = new StructuredQName("", NamespaceUri.of(typename.getNamespaceURI()), typename.getLocalPart());
-        SchemaType st = getConfiguration().getSchemaType(sqName);
+        Configuration configuration1 = getConfiguration();
+        SchemaType st = configuration1.getSchema().getSchemaType(sqName);
         if (st == null) {
             loadSchema(schemaURI);
-            st = getConfiguration().getSchemaType(sqName);
+            Configuration configuration = getConfiguration();
+            st = configuration.getSchema().getSchemaType(sqName);
         }
         if (st == null) {
             throw new XQException("Type " + typename + " not found in schema");
@@ -930,10 +936,10 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         checkNotClosed();
         Configuration config = getConfiguration();
         StructuredQName nn = new StructuredQName(name.getPrefix(), NamespaceUri.of(name.getNamespaceURI()), name.getLocalPart());
-        SchemaDeclaration attributeDecl = config.getAttributeDeclaration(nn);
+        SchemaDeclaration attributeDecl = config.getSchema().getAttributeDecl(nn);
         if (attributeDecl == null && schemaURI != null) {
             loadSchema(schemaURI);
-            attributeDecl = config.getAttributeDeclaration(nn);
+            attributeDecl = config.getSchema().getAttributeDecl(nn);
         }
         if (attributeDecl == null) {
             throw new XQException("Attribute declaration " + nn.getDisplayName() + " not found in schema");
@@ -952,10 +958,10 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         checkNotClosed();
         Configuration config = getConfiguration();
         int fp = getFingerprint(nodename);
-        SchemaDeclaration elementDecl = config.getElementDeclaration(fp);
+        SchemaDeclaration elementDecl = config.getSchema().getElementDecl(fp);
         if (elementDecl == null && schemaURI != null) {
             loadSchema(schemaURI);
-            elementDecl = config.getElementDeclaration(fp);
+            elementDecl = config.getSchema().getElementDecl(fp);
         }
         if (elementDecl == null) {
             throw new XQException("Element declaration " + nodename + " not found in schema");

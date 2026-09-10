@@ -1,20 +1,32 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.sdoc.SchemaDocument;
+import com.saxonica.ee.schema.sdoc.SchemaReader;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
+import com.saxonica.ee.validate.*;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.Controller;
+import net.sf.saxon.event.*;
+import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.instruct.GlobalParam;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.*;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 
+import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
+import javax.xml.transform.sax.SAXSource;
 import java.util.*;
+
+import static net.sf.saxon.Configuration.XSD11;
 
 
 /**
@@ -32,7 +44,7 @@ import java.util.*;
  * must happen in a single thread.</p>
  */
 
-public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
+public class PreparedSchema implements Schema, NotationSet {
 
     public static final int NAMESPACE_UNKNOWN = 1;
     public static final int NAMESPACE_UNDER_CONSTRUCTION = 2;
@@ -50,6 +62,8 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
      */
 
     private final Set<NamespaceUri> targetNamespaces = new HashSet<>();
+
+    private final HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
 
     /**
      * The global attribute declarations for this Schema, indexed by their name
@@ -179,7 +193,6 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
      * Set the configuration
      */
 
-    //@Override
     public void setConfiguration(EnterpriseConfiguration config) {
         this.config = config;
     }
@@ -188,7 +201,6 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
      * Get the configuration
      */
 
-    //@Override
     public EnterpriseConfiguration getConfiguration() {
         return config;
     }
@@ -1019,7 +1031,7 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
                 if (result && (s instanceof SimpleTypeDefinition)) {
                     UserSimpleType st = ((SimpleTypeDefinition) s).getWorkingType();
                     typesByName.put(st.getTypeName(), st);
-                    PreparedSchema superSchema = compiler.getConfiguration().getSuperSchema();
+                    PreparedSchema superSchema = compiler.getConfiguration().getUnnamedSchema();
                     if (superSchema.getSchemaType(st.getTypeName()) == s) {
                         superSchema.typesByName.put(st.getTypeName(), st);
                     }
@@ -1037,9 +1049,9 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
         components = null;
 
         // if valid, add the components of this schema to the cache maintained by the Configuration
-        if (result) {
-            config.addSchema(this);
-        }
+//        if (result) {
+//            config.addSchema(this);
+//        }
         return result;
 
     }
@@ -1237,6 +1249,331 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
     public boolean isDeclaredNotation(NamespaceUri uri, String local) {
         return notations != null && notations.get(new StructuredQName("", uri, local)) != null;
     }
+
+
+    /**
+     * Load a schema, which will be available for use by all subsequent operations using
+     * this EnterpriseConfiguration.
+     *
+     * @param schemaSource  the JAXP Source object identifying the schema document to be loaded. This may be either
+     *                      a source schema document in XSD format, or a compiled schema in Saxon's SCM format
+     * @param errorReporter the ErrorListener to be notified of any errors in the schema. If null,
+     *                      the configuration's errorListener is used
+     * @param compiler      the schema compiler to be used. This allows a cache of schema documents (retained by the
+     *                      schema compiler) to be reused when compiling multiple schema documents. See bug #4982.
+     * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
+     */
+
+    public synchronized void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorReporter errorReporter, SchemaCompiler compiler) throws SchemaException {
+        try {
+            //#if CSHARP==false
+            if (schemaSource instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
+                // This option is provided to allow the parser set by applications such as Ant to be overridden by
+                // the parser requested using FeatureKeys.SOURCE_PARSER or FeatureKeys.STYLE_PARSER
+                ((SAXSource) schemaSource).setXMLReader(null);
+            }
+            //#endif
+            if (errorReporter != null) {
+                compiler.setErrorReporter(errorReporter);
+            }
+            final PipelineConfiguration pipe = config.makePipelineConfiguration();
+            pipe.setErrorReporter(errorReporter == null ? config.makeErrorReporter() : errorReporter);
+            pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
+            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
+            if (schemadoc.isCompiledSchemaDocument()) {
+                try {
+                    importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
+                } catch (XPathException e) {
+                    throw new SchemaException(e);
+                }
+            } else {
+                PreparedSchema ps = compiler.validate(schemadoc);
+                addSchema(ps);
+                setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
+            }
+
+        } catch (UncheckedXPathException e) {
+            // indicates that the error reporter asked for termination
+            XPathException xe = e.getXPathException();
+            if (xe instanceof SchemaException) {
+                throw (SchemaException) xe;
+            } else {
+                throw new SchemaException(xe);
+            }
+        }
+    }
+
+    /**
+     * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
+     * document are added to the cache of schema components maintained by this SchemaManager
+     *
+     * @param source the XML file containing the schema component model, as generated by a previous call on
+     *               {@link Configuration#exportComponents}
+     */
+
+
+    public void importComponents(Source source) throws XPathException {
+        try {
+            SchemaModelLoader loader = new SchemaModelLoader(config);
+            PreparedSchema schema = loader.load(source);
+            addSchema(schema);
+            //schema.copyTo(this, config.newSchemaCompiler());
+            for (NamespaceUri ns : schema.getTargetNamespaces()) {
+                setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
+            }
+        } catch (SchemaException e) {
+            throw new XPathException(e);
+        }
+    }
+
+    /**
+     * Add a schema (a collection of schema components) to the cache
+     *
+     * @param pschema The schema to be added
+     * @throws net.sf.saxon.type.SchemaException if the schema cannot be added because components in the schema
+     *                                           are incompatible with components already in the cache
+     */
+
+    public synchronized void addSchema(PreparedSchema pschema) throws SchemaException {
+        config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", pschema.getLocalLicenseId());
+        if (pschema == this) {
+            return;
+        }
+        if (pschema instanceof SingleNamespaceSchema) {
+            NamespaceUri targetNamespace = ((SingleNamespaceSchema) pschema).getTargetNamespace();
+            setNamespaceStatus(targetNamespace, PreparedSchema.NAMESPACE_KNOWN);
+        } else {
+            for (NamespaceUri ns : pschema.getTargetNamespaces()) {
+                setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
+            }
+        }
+        pschema.copyTo(this, config.newSchemaCompiler());
+        setLocalLicenseId(pschema.getLocalLicenseId());
+
+    }
+
+
+    /**
+     * Get the status of a particular schema namespace.
+     *
+     * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
+     * @return one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
+     * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     */
+
+    public synchronized int getNamespaceStatus(NamespaceUri namespace) {
+        return namespaceStatus.getOrDefault(namespace, PreparedSchema.NAMESPACE_UNKNOWN);
+    }
+
+    /**
+     * Set the status of a particular schema namespace.
+     *
+     * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
+     * @param status    one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
+     *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     */
+
+    public synchronized void setNamespaceStatus(NamespaceUri namespace, int status) {
+        if (status == PreparedSchema.NAMESPACE_UNKNOWN) {
+            namespaceStatus.remove(namespace);
+        } else {
+            namespaceStatus.put(namespace, status);
+        }
+    }
+
+    /**
+     * Get a document-level validator to add to a Receiver pipeline
+     *
+     * @param receiver           The receiver to which events should be sent after validation
+     * @param systemId           the base URI of the document being validated
+     * @param validationOptions  Supplies options relevant to XSD validation
+     * @param initiatingLocation (optional) Location in query or stylesheet of instruction
+     *                           that requested validation
+     * @return A Receiver to which events can be sent for validation
+     */
+
+    public Receiver getDocumentValidator(Receiver receiver,
+                                         String systemId,
+                                         ParseOptions validationOptions,
+                                         Location initiatingLocation) {
+
+        int validationMode = validationOptions.getSchemaValidationMode();
+        SpaceStrippingRule stripRules = validationOptions.getSpaceStrippingRule();
+        SchemaType schemaType = validationOptions.getTopLevelType();
+        StructuredQName topLevelElementName = validationOptions.getTopLevelElement();
+        ValidationParams params = validationOptions.getValidationParams();
+
+        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
+        if (validationMode == Validation.STRICT || validationMode == Validation.LAX || schemaType != null) {
+            Receiver destination = receiver;
+            if (stripRules == null) {
+                stripRules = config.getParseOptions().getSpaceStrippingRule();
+            }
+            if (stripRules == IgnorableSpaceStrippingRule.getInstance()) {
+                destination = stripRules.makeStripper(destination);
+            }
+
+            ValidationContext vc = new ValidationContext(config.getConversionRules());
+            vc.setInitiatingLocation(initiatingLocation);
+            vc.setErrorLimit(validationOptions.getValidationErrorLimit());
+            vc.setSchema(this);
+            if (pipe.getController() == null) {
+                pipe.setController(new Controller(config));
+                pipe.getController().getExecutable().setSchemaAware(true);
+            }
+            vc.setController(pipe.getController());
+            vc.setValidationParams(params);
+
+            pipe.setComponent("com.saxonica.ee.validate.ValidationContext", vc);
+
+            if (validationOptions.isCheckEntityReferences()) {
+                EntityValidator ev = new EntityValidator(destination);
+                ev.setValidationContext(vc);
+                destination = ev;
+            }
+
+            allocateInvalidityHandler(validationOptions, vc);
+
+            IdValidator idval = new IdValidator(destination);
+            idval.setValidationContext(vc);
+            ConstraintChecker checker = new ConstraintChecker(pipe /*idval*/);
+            checker.setValidationContext(vc);
+
+            destination = new TeeOutputter(idval, checker);
+
+            // If running XSD 1.1, add an assertion tree builder before the constraint checker
+            destination = allocateAssertionTreeBuilder(destination, pipe, vc);
+
+
+            ValidationStack val = new ValidationStack(vc, destination, validationMode, schemaType);
+            val.setPipelineConfiguration(pipe);
+
+            vc.setConstraintChecker(checker);
+            if (topLevelElementName != null) {
+                val.setTopLevelElement(new FingerprintedQName(
+                        topLevelElementName.getPrefix(),
+                        topLevelElementName.getNamespaceUri(),
+                        topLevelElementName.getLocalPart()));
+            }
+            HostLanguage hostLanguage = pipe.getHostLanguage();
+            if (hostLanguage == HostLanguage.XSLT) {
+                if (schemaType != null) {
+                    vc.setErrorCode("XTTE1540");
+                } else if (validationMode == Validation.STRICT) {
+                    vc.setErrorCode("XTTE1510");
+                } else {
+                    vc.setErrorCode("XTTE1515");
+                }
+            } else if (hostLanguage == HostLanguage.XQUERY) {
+                vc.setErrorCode("XQDY0027");
+            } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
+                vc.setErrorCode(null);
+            }
+
+            XSIAttributeHandler xsi = new XSIAttributeHandler(val);
+            xsi.setSystemId(systemId);
+
+            AttributeInheritor stb = new AttributeInheritor(xsi);
+            vc.setAttributeInheritor(stb);
+            xsi.setValidationContext(vc);
+
+            PathMaintainer pathMaintainer = new PathMaintainer(stb);
+            pipe.setComponent("net.sf.saxon.event.PathMaintainer", pathMaintainer);
+
+            DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
+
+            LocationCopier copier = new LocationCopier(true, systemId);
+            pipe.setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
+
+            vc.startValidation(systemId);
+
+            return dv;
+
+        } else if (validationMode == Validation.STRIP) {
+            SkipValidator a = new SkipValidator(receiver);
+            ValidationContext vc = new ValidationContext(config.getConversionRules());
+            a.setValidationContext(vc);
+            a.setSystemId(systemId);
+            return a;
+        } else {
+            return receiver;
+        }
+    }
+
+    private void allocateInvalidityHandler(ParseOptions validationOptions, ValidationContext vc) {
+        if (validationOptions.getInvalidityHandler() == null) {
+            ErrorReporter reporter = validationOptions.getErrorReporter();
+            if (reporter == null) {
+                Controller controller = vc.getController();
+                if (controller != null) {
+                    reporter = controller.getErrorReporter();
+                } else {
+                    reporter = config.makeErrorReporter();
+                }
+            }
+            vc.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));
+        } else {
+            vc.setInvalidityHandler(validationOptions.getInvalidityHandler());
+        }
+    }
+
+    private Receiver allocateAssertionTreeBuilder(Receiver destination, PipelineConfiguration pipe, ValidationContext vc) {
+        if (config.getXsdVersion() == XSD11) {
+            // TODO: allow this to vary per schema
+            boolean retainComments = config.getBooleanProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS);
+            AssertionTreeBuilder atb = new AssertionTreeBuilder(destination, retainComments);
+            atb.setPipelineConfiguration(pipe);
+            vc.setAssertionTreeBuilder(atb);
+            pipe.setComponent("com.saxonica.ee.validate.AssertionTreeBuilder", atb);
+            destination = atb;
+        }
+        return destination;
+    }
+
+    /**
+     * Validate an attribute value (XSLT only)
+     *
+     * @param nodeName   the name of the attribute
+     * @param value      the value of the attribute as a string
+     * @param validation STRICT or LAX
+     * @return an int, containing the type annotation to apply to the attribute node
+     * @throws ValidationException if the value is invalid
+     */
+
+
+    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
+            throws ValidationException, MissingComponentException {
+
+        AttributeDecl decl = getAttributeDecl(nodeName);
+        if (decl == null) {
+            if (validation == Validation.STRICT) {
+                ValidationFailure ve = new ValidationFailure(
+                        "No global attribute declaration found for attribute " +
+                                nodeName.getDisplayName());
+                ve.setErrorCode("XTTE1512");
+                throw ve.makeException();
+            } else {
+                // lax validation
+                return BuiltInAtomicType.UNTYPED_ATOMIC;
+            }
+        }
+        SimpleType type = decl.getSimpleType();
+        if (type.isNamespaceSensitive()) {
+            ValidationFailure nsErr = new ValidationFailure("Cannot create a parentless attribute whose " +
+                                                                    "type is namespace-sensitive (such as xs:QName)");
+            nsErr.setSchemaType(type);
+            nsErr.setErrorCode("XTTE1545");
+            throw nsErr.makeException();
+        }
+        ValidationFailure contentErr = type.validateContent(value, DummyNamespaceResolver.getInstance(), config.getConversionRules());
+        if (contentErr != null) {
+            contentErr.setSchemaType(type);
+            contentErr.setErrorCode(validation == Validation.STRICT ? "XTTE1510" : "XTTE1515");
+            throw contentErr.makeException();
+        }
+        return type;
+    }
+
 
 }
 

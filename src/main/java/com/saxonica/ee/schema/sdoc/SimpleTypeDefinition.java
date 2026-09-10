@@ -497,7 +497,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
 
         if (getName() == null) {
             // the type is anonymous
-            getConfiguration().getSuperSchema().addAnonymousType(workingType);
+            getConfiguration().getUnnamedSchema().addAnonymousType(workingType);
         }
         return true;
     }

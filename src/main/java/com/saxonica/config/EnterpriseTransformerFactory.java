@@ -1,16 +1,9 @@
 package com.saxonica.config;
 
 import com.saxonica.config.pe.ConfigurationReaderPE;
-import com.saxonica.ee.schema.SchemaCompiler;
-import com.saxonica.ee.schema.sdoc.SchemaDocument;
-import com.saxonica.ee.schema.sdoc.SchemaReader;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.trans.XPathException;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 
@@ -42,23 +35,6 @@ public class EnterpriseTransformerFactory extends ProfessionalTransformerFactory
 
     public EnterpriseTransformerFactory(EnterpriseConfiguration config) {
         setConfiguration(config);
-    }
-
-    /**
-     * Load a schema, which will be available for use by all subsequent operations using
-     * this TransformerFactory.
-     *
-     * @param schemaSource the JAXP Source object identifying the schema document to be loaded
-     * @throws TransformerException if the schema cannot be read or parsed or if it is invalid
-     */
-
-    public void addSchema(Source schemaSource) throws TransformerException {
-        EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
-        SchemaCompiler compiler = config.newSchemaCompiler();
-        PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-        SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
-        compiler.validate(schemadoc);
     }
 
     /**

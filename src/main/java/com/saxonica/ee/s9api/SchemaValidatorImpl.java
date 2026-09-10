@@ -1,6 +1,7 @@
 package com.saxonica.ee.s9api;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.trans.Outcome;
 import com.saxonica.ee.validate.InvalidityReportGeneratorEE;
 import net.sf.saxon.Configuration;
@@ -56,6 +57,7 @@ import java.util.concurrent.*;
 public class SchemaValidatorImpl extends SchemaValidator {
 
     private final Processor processor;
+    private final PreparedSchema schema;
     private boolean lax;
     private InvalidityHandler invalidityHandler;
     private Destination destination;
@@ -71,8 +73,9 @@ public class SchemaValidatorImpl extends SchemaValidator {
     private int threadCount = Runtime.getRuntime().availableProcessors();
 
     @CSharpModifiers(code = {"internal"})
-    public SchemaValidatorImpl(Processor processor) {
+    public SchemaValidatorImpl(Processor processor, PreparedSchema schema) {
         this.processor = processor;
+        this.schema = schema;
         this.useXsiSchemaLocation = processor.getConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION);
         this.invalidityHandler = new InvalidityHandlerWrappingErrorReporter(
                 processor.getUnderlyingConfiguration().makeErrorReporter());
@@ -308,8 +311,8 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
     @Override
     public void setDocumentElementTypeName(QName name) throws SaxonApiException {
-        Configuration config = processor.getUnderlyingConfiguration();
-        documentElementType = config.getSchemaType(name.getStructuredQName());
+        StructuredQName name1 = name.getStructuredQName();
+        documentElementType = schema.getSchemaType(name1);
         if (documentElementType == null) {
             throw new SaxonApiException("Unknown type " + name.getClarkName());
         }
@@ -684,7 +687,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         Controller controller = new Controller(config);
         Executable exec = controller.getExecutable();
         PackageData pack = new PackageData(config);
-        pack.setLocalLicenseId(((EnterpriseConfiguration)config).getSuperSchema().getLocalLicenseId());
+        pack.setLocalLicenseId(schema.getLocalLicenseId());
         pack.setSchemaAware(true);
         exec.setTopLevelPackage(pack);
         exec.setSchemaAware(true);
@@ -719,7 +722,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());
         output.setPipelineConfiguration(pipe);
 
-        return config.getDocumentValidator(output, systemId, options, null);
+        return schema.getDocumentValidator(output, systemId, options, null);
     }
 
     /**

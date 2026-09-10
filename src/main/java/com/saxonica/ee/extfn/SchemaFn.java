@@ -75,14 +75,14 @@ public class SchemaFn extends SystemFunction {
                     return StringValue.bmp("Schema");
                 case "type definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (SchemaType st : config.getSuperSchema().getAllTypes()) {
+                    for (SchemaType st : config.getUnnamedSchema().getAllTypes()) {
                         list.add(st.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute declarations": {
                     List<Item> list = new ArrayList<>();
-                    for (AttributeDecl decl : config.getSuperSchema().getAttributeDeclarations()) {
+                    for (AttributeDecl decl : config.getUnnamedSchema().getAttributeDeclarations()) {
                         list.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -90,14 +90,14 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "element declarations": {
                     List<Item> list = new ArrayList<>();
-                    for (ElementDecl decl : config.getSuperSchema().getElementDeclarations()) {
+                    for (ElementDecl decl : config.getUnnamedSchema().getElementDeclarations()) {
                         list.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute group definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (AttributeGroupDecl group : config.getSuperSchema().getAllAttributeGroups()) {
+                    for (AttributeGroupDecl group : config.getUnnamedSchema().getAllAttributeGroups()) {
                         list.add(group.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -105,7 +105,7 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "model group definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (ModelGroupDefinition group : config.getSuperSchema().getAllModelGroups()) {
+                    for (ModelGroupDefinition group : config.getUnnamedSchema().getAllModelGroups()) {
                         list.add(group.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -113,7 +113,7 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "notation declarations": {
                     List<Item> list = new ArrayList<>();
-                    for (Notation notation : config.getSuperSchema().getAllNotations()) {
+                    for (Notation notation : config.getUnnamedSchema().getAllNotations()) {
                         list.add(notation.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -121,7 +121,7 @@ public class SchemaFn extends SystemFunction {
                 }
                 case "identity-constraint definitions": {
                     List<Item> list = new ArrayList<>();
-                    for (IdentityConstraint constraint : config.getSuperSchema().getIdentityConstraints()) {
+                    for (IdentityConstraint constraint : config.getUnnamedSchema().getIdentityConstraints()) {
                         list.add(constraint.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
@@ -139,31 +139,31 @@ public class SchemaFn extends SystemFunction {
             throws XPathException {
         switch (kind) {
             case "attribute declaration": {
-                AttributeDecl decl = (AttributeDecl) config.getAttributeDeclaration(name);
+                AttributeDecl decl = (AttributeDecl) config.getSchema().getAttributeDecl(name);
                 return getComponentInfo(config, decl);
             }
             case "element declaration": {
-                ElementDecl decl = (ElementDecl) config.getElementDeclaration(name);
+                ElementDecl decl = (ElementDecl) config.getSchema().getElementDecl(name);
                 return getComponentInfo(config, decl);
             }
             case "attribute group definition": {
-                AttributeGroupDecl decl = config.getSuperSchema().getAttributeGroup(name);
+                AttributeGroupDecl decl = config.getUnnamedSchema().getAttributeGroup(name);
                 return getComponentInfo(config, decl);
             }
             case "model group definition": {
-                ModelGroupDefinition decl = config.getSuperSchema().getGroup(name);
+                ModelGroupDefinition decl = config.getUnnamedSchema().getGroup(name);
                 return getComponentInfo(config, decl);
             }
             case "notation declarations": {
-                Notation decl = config.getSuperSchema().getNotation(name);
+                Notation decl = config.getUnnamedSchema().getNotation(name);
                 return getComponentInfo(config, decl);
             }
             case "identity-constraint definitions": {
-                IdentityConstraint decl = config.getSuperSchema().getIdentityConstraint(name);
+                IdentityConstraint decl = config.getUnnamedSchema().getIdentityConstraint(name);
                 return getComponentInfo(config, decl);
             }
             case "type definition":
-                SchemaType type = config.getSchemaType(name);
+                SchemaType type = config.getSchema().getSchemaType(name);
                 return getComponentInfo(config, type);
             default:
                 throw new XPathException("Unknown component kind " + kind);

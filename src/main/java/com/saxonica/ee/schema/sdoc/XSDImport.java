@@ -93,7 +93,7 @@ public class XSDImport extends AnnotationParent {
                 // Use the built-in version, or none if already loaded
                 if (config.getNamespaceStatus(targetNamespace) != PreparedSchema.NAMESPACE_KNOWN) {
                     importedSchema = XMLNamespaceSchema.buildSchema(config);
-                    config.addSchema(importedSchema);
+                    //config.addSchema(importedSchema);
                 }
                 return;
             }
@@ -170,7 +170,7 @@ public class XSDImport extends AnnotationParent {
         if (schemaLocation == null) {
             if (namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
                 importedSchema = XSINamespaceSchema.buildSchema(config);
-                config.addSchema(importedSchema);
+                //config.addSchema(importedSchema);
                 return;
             } else if (targetNamespace.equals(NamespaceUri.FN)) {
                 if (!config.isSchemaAvailable(NamespaceUri.FN)) {
@@ -245,7 +245,7 @@ public class XSDImport extends AnnotationParent {
         }
 
         //  Add schema to list of imported schemas (if not already present)
-        config.addSchema(importedSchema);
+        //config.addSchema(importedSchema);
     }
 
     private void processSchemaException(String schemaLocation, String namespace, SchemaException e)

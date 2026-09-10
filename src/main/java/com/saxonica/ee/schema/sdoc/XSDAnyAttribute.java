@@ -32,7 +32,7 @@ public class XSDAnyAttribute extends AnnotationParent {
     @Override
     protected void prepareAttributes() throws SchemaException {
 
-        wildcard = new AttributeWildcard(getSchema().getConfiguration());
+        wildcard = new AttributeWildcard(getSchema());
         wildcard.setLocator(this);
 
         AttributeMap atts = attributes();

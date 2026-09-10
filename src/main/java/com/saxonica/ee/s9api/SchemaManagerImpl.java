@@ -1,9 +1,13 @@
 package com.saxonica.ee.s9api;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
+import com.saxonica.ee.schema.SchemaCompiler;
+import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -21,6 +25,7 @@ public class SchemaManagerImpl extends SchemaManager {
 
     private final Processor processor;
     private ErrorReporter errorReporter;
+    private PreparedSchema schema;
 
     public SchemaManagerImpl(Processor processor) {
         this.processor = processor;
@@ -161,7 +166,21 @@ public class SchemaManagerImpl extends SchemaManager {
                     }
                 }
             }
-            processor.getUnderlyingConfiguration().addSchemaSource(source, errorReporter);
+            final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
+            if (schema == null) {
+                schema = new PreparedSchema(config);
+            }
+            //PreparedSchema schema = config.getUnnamedSchema();
+            schema.addSchemaSource(source, errorReporter, new SchemaCompiler(config));
+            if (schema instanceof SingleNamespaceSchema) {
+                config.registerSchemaForNamespace(((SingleNamespaceSchema)schema).getTargetNamespace(), schema);
+            }
+            // TODO: handle multiple namespaces properly
+            else {
+                for (NamespaceUri uri : schema.getTargetNamespaces()) {
+                    config.registerSchemaForNamespace(uri, schema);
+                }
+            }
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
@@ -217,7 +236,7 @@ public class SchemaManagerImpl extends SchemaManager {
 
     @Override
     public SchemaValidator newSchemaValidator() {
-        return new SchemaValidatorImpl(processor);
+        return new SchemaValidatorImpl(processor, schema);
     }
 
 

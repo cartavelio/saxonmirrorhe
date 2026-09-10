@@ -288,7 +288,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
         } catch (SchemaException e) {
             throw toSAXException(e);
         }
-        return new SchemaReference(config.getSuperSchema());
+        return new SchemaReference(config.getUnnamedSchema());
     }
 
     /**
@@ -311,7 +311,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
 
     @Override
     public Schema newSchema() {
-        return new SchemaReference(config.getSuperSchema());
+        return new SchemaReference(config.getUnnamedSchema());
     }
 
     /**

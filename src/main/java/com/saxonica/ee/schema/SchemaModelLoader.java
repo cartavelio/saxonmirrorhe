@@ -66,7 +66,6 @@ public class SchemaModelLoader extends ProxyReceiver {
         ParseOptions options = config.getParseOptions()
                         .withSchemaValidationMode(Validation.SKIP);
         getPipelineConfiguration().setParseOptions(options);
-        //config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
         this.config = (EnterpriseConfiguration) config;
         schema = new PreparedSchema((EnterpriseConfiguration) config);
     }
@@ -149,6 +148,10 @@ public class SchemaModelLoader extends ProxyReceiver {
         } catch (SchemaException err) {
             throw new XPathException(err);
         }
+        return schema;
+    }
+
+    public PreparedSchema getSchema() {
         return schema;
     }
 
@@ -1206,7 +1209,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                     particle = new ElementParticle(config, null);
                     break;
                 case "elementWildcard":
-                    particle = new ElementWildcard(config);
+                    particle = new ElementWildcard(loader.getSchema());
                     break;
                 case "modelGroupParticle":
                     particle = new ModelGroupParticle(config, null);
@@ -1453,7 +1456,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         @Override
         public void processElementStart(String localName, AttributeMap attributes) {
-            AttributeWildcard awc = new AttributeWildcard((EnterpriseConfiguration) loader.getConfiguration());
+            AttributeWildcard awc = new AttributeWildcard(loader.getSchema());
             if (container instanceof AttributeGroupDecl) {
                 ((AttributeGroupDecl) container).setAnyAttribute(awc);
             } else if (container instanceof UserComplexType) {
@@ -1541,8 +1544,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
             String type = attributes.getValue(NamespaceUri.NULL, "type");
-            BuiltInAtomicType t = (BuiltInAtomicType) loader.config.getSchemaType(
-                new StructuredQName("", NamespaceUri.SCHEMA, type.substring(1)));
+            BuiltInAtomicType t = (BuiltInAtomicType) loader.getSchema().getSchemaType(new StructuredQName("", NamespaceUri.SCHEMA, type.substring(1)));
             String value = attributes.getValue(NamespaceUri.NULL, "value");
             String namespaceAtt = attributes.getValue(NamespaceUri.NULL, "namespace");
             AtomicValue typedValue;
@@ -1589,8 +1591,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes) throws SchemaException {
 
-            Wildcard wildcard = new Wildcard();
-            wildcard.setConfiguration((EnterpriseConfiguration) loader.getConfiguration());
+            Wildcard wildcard = new Wildcard(loader.getSchema());
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             if (id != null) {
                 loader.components.put(id, wildcard);

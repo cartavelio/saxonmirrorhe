@@ -93,7 +93,8 @@ public class ValidateFn extends SystemFunction {
             val = options.get(StringValue.bmp("type"));
             if (val != null) {
                 if (val instanceof QNameValue) {
-                    schemaType = config.getSchemaType(((QNameValue) val).getStructuredQName());
+                    StructuredQName name = ((QNameValue) val).getStructuredQName();
+                    schemaType = config.getSchema().getSchemaType(name);
                     if (schemaType == null) {
                         throw new XPathException("Unknown type " + val, "XPTY0004");
                     }

@@ -242,7 +242,8 @@ public class XSDSchema extends SchemaElement {
                 }
             }
             schema.setTargetNamespace(nsURI);
-            ((EnterpriseConfiguration) config).addSurrogateSchema(nsURI);
+            schema.setNamespaceStatus(nsURI, PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION);
+            //((EnterpriseConfiguration) config).addSurrogateSchema(nsURI);
             targetNamespace = nsURI;
         } else {
             if (referrer instanceof XSDInclude || referrer instanceof XSDRedefine || referrer instanceof XSDOverride) {

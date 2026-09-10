@@ -59,8 +59,8 @@ public class SchemaCompiler {
     private SchemaDocumentTransformer chameleonTransformer = null;
     private SchemaDocumentTransformer overrideTransformer = null;
     private final Set<String> componentsReportedMissing = new HashSet<>();
-    private Set<UserComplexType> scheduledForAutomaton = new HashSet<>();
-    private Set<UserComplexType[]> scheduledForAutomatonCheck = new HashSet<>();
+    private final Set<UserComplexType> scheduledForAutomaton = new HashSet<>();
+    private final Set<UserComplexType[]> scheduledForAutomatonCheck = new HashSet<>();
 
 
     /**

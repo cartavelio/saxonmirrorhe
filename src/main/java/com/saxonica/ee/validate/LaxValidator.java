@@ -4,6 +4,7 @@ import com.saxonica.ee.schema.AttributeDecl;
 import com.saxonica.ee.schema.ElementDecl;
 import com.saxonica.ee.schema.UserAtomicType;
 import com.saxonica.ee.schema.ValueConstraint;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -12,10 +13,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
@@ -52,7 +50,7 @@ public class LaxValidator extends ContentValidator {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         int fp = elemName.obtainFingerprint(getNamePool());
-        ElementDecl decl = (ElementDecl) getConfiguration().getElementDeclaration(fp);
+        ElementDecl decl = getValidationContext().getSchema().getElementDecl(fp);
         makeChildValidator(decl, elemName.getStructuredQName(), location, Validation.LAX);
         checkNoChildrenWhenNil(location);
         List<AttributeInfo> attList = new ArrayList<>(attributes.size());
@@ -80,7 +78,9 @@ public class LaxValidator extends ContentValidator {
         SimpleType annotation = BuiltInAtomicType.UNTYPED_ATOMIC;
         // During lax validation, if an attribute is found for which a global attribute declaration
         //  exists, the attribute must be valid against that declaration.
-        AttributeDecl decl = (AttributeDecl) getConfiguration().getAttributeDeclaration(att.getNodeName().getStructuredQName());
+        Configuration configuration = getConfiguration();
+        StructuredQName attributeName = att.getNodeName().getStructuredQName();
+        AttributeDecl decl = getValidationContext().getSchema().getAttributeDecl(attributeName);
         if (decl != null) {
             SimpleType type = decl.getSimpleType();
             ValidationFailure err = type.validateContent(

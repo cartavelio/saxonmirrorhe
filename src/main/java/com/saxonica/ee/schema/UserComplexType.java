@@ -1964,7 +1964,7 @@ public class UserComplexType extends UserDefinedType
                 // weird thing to do, and it doesn't make sense unless the extension is empty.
                 if (isLocallyEmpty()) {
                     // this is equivalent to a content model of xs:any namespace="##any"
-                    ElementWildcard any = new ElementWildcard(getConfiguration());
+                    ElementWildcard any = new ElementWildcard(compiler.getPreparedSchema());
                     any.setMinOccurs(0);
                     any.setMaxOccurs(-1);
                     any.getWildcard().setProcessContents("lax");
@@ -2173,7 +2173,7 @@ public class UserComplexType extends UserDefinedType
                 case "skip":
                     return AnySimpleType.getInstance();
                 case "strict": {
-                    AttributeDecl decl = getConfiguration().getSuperSchema().getAttributeDecl(attributeName);
+                    AttributeDecl decl = getConfiguration().getUnnamedSchema().getAttributeDecl(attributeName);
                     if (decl != null) {
                         return decl.getType();
                     } else {
@@ -2181,7 +2181,7 @@ public class UserComplexType extends UserDefinedType
                     }
                 }
                 default: { // processContents() = lax
-                    AttributeDecl decl = getConfiguration().getSuperSchema().getAttributeDecl(attributeName);
+                    AttributeDecl decl = getConfiguration().getUnnamedSchema().getAttributeDecl(attributeName);
                     if (decl != null) {
                         return decl.getType();
                     } else {

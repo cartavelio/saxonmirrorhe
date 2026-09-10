@@ -9,6 +9,7 @@ import com.saxonica.ee.stream.StreamableUserFunction;
 import com.saxonica.ee.update.*;
 import com.saxonica.ee.xtupdate.SaxonInsert;
 import com.saxonica.trans.PackageLoaderPE;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.UserFunction;
@@ -124,7 +125,8 @@ public class PackageLoaderEE extends PackageLoaderPE {
             SchemaType schemaType = null;
             StructuredQName typeAtt = loader.getQNameAttribute(element, "schemaType");
             if (typeAtt != null) {
-                schemaType = loader.getConfiguration().getSchemaType(typeAtt);
+                Configuration configuration = loader.getConfiguration();
+                schemaType = configuration.getSchema().getSchemaType(typeAtt);
                 validation = Validation.BY_TYPE;
             }
             final ParseOptions options = loader.getConfiguration().getParseOptions()

@@ -149,7 +149,7 @@ public class ModelGroupParticle extends Particle {
             target = compiler.getPreparedSchema().getGroup(getTargetComponentName());
         }
         if (target == null) {
-            target = compiler.getConfiguration().getSuperSchema().getGroup(getTargetComponentName());
+            target = compiler.getConfiguration().getUnnamedSchema().getGroup(getTargetComponentName());
         }
         if (target == null) {
             String name = getTargetComponentName().getEQName();
