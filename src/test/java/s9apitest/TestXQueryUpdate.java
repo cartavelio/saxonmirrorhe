@@ -11,13 +11,13 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.util.Iterator;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static net.sf.saxon.s9api.streams.Steps.descendant;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * JUnit tests for XQuery Update using the s9api XQueryCompiler
@@ -89,6 +89,12 @@ public class TestXQueryUpdate {
     @Test
     public void testCopyModify() {
         try {
+            try {
+                Files.copy(new File(ConfigTest.DATA_DIR + "books.xml").toPath(),
+                           new File(ConfigTest.TEMP_DIR + "books.xml").toPath());
+            } catch (FileAlreadyExistsException e) {
+                // ignore the failure
+            }
             Processor proc = new Processor(true);
             //proc.setConfigurationProperty(FeatureKeys.TREE_MODEL, Builder.LINKED_TREE);
             //proc.setConfigurationProperty(FeatureKeys.TREE_MODEL_NAME, "linkedTree");
@@ -114,9 +120,8 @@ public class TestXQueryUpdate {
             System.err.println(writer);
             assertTrue(writer.toString().contains("NEW-PRICE"), "renamed");
 
-        } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        } catch (URISyntaxException e) {
+        } catch (SaxonApiException | IOException | URISyntaxException e) {
+            e.printStackTrace();
             fail(e.getMessage());
         }
     }
