@@ -993,7 +993,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             if (call.getArity() == 1) {
                 HashTrieMap options = new HashTrieMap();
                 options.initialPut(StringValue.bmp("duplicates"), new StringValue(duplicates));
-                options.initialPut(StringValue.bmp("duplicates-error-code"), new StringValue(duplicatesErrorCode));
+                options.initialPut(StringValue.bmp("Q{" + NamespaceUri.SAXON + "}duplicates-error-code"), new StringValue(duplicatesErrorCode));
                 Literal.exportValue(options, out);
             }
         }
