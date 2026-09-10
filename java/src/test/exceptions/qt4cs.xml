@@ -376,136 +376,34 @@
       <reason>Two-argument callback not yet implemented</reason>
    </exception>-->
    
-<!--   <exception test-set="fn-duplicate-values" test-case="cbcl-duplicate-values-002c
-      fn-duplicate-values-1a
-      fn-duplicate-values-mixed-args-012
-      fn-duplicate-values-mixed-args-013" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Numeric precision changes not yet implemented</reason>
-   </exception>-->
+
    
-<!--   <exception test-set="fn-function-annotations" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Function fn:function-annotations not yet implemented</reason>
-   </exception>-->
-   
-   <exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
+  <!-- <exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Bug 6104</reason>
+   </exception>-->
+   
+   <exception test-set="fn-serialize" 
+      test-case="serialize-html-004 serialize-html-005 serialize-html-006" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-20"/>
+      <reason>PR2372 not yet implemented (HTML processing instructions)</reason>
    </exception>
    
-   
-   
-   
-   
-   <!--<exception test-set="app-spec-examples" 
-               test-case="
-                     fo-test-map-values-001
-                     fo-test-map-values-002
-               " 
+   <exception test-set="fn-serialize" 
+      test-case="serialize-json-340 serialize-json-341 serialize-json-342" 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-json-001
-      fo-test-fn-json-002
-      fo-test-fn-json-003
-      fo-test-fn-json-004
-      fo-test-fn-json-005
-      fo-test-fn-json-006
-      fo-test-fn-json-007
-      fo-test-fn-json-008
-      fo-test-fn-json-009
-      " 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Implementation is ahead of the spec</reason>
-   </exception>-->
-   
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-array-partition-001
-      fo-test-array-partition-002
-      fo-test-array-partition-003
-      fo-test-array-partition-004
-      fo-test-array-partition-005
-      " 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Function has been dropped from spec</reason>
-   </exception>-->
-   
-  <!-- <exception test-set="app-spec-examples" 
-      test-case="fo-test-array-values-001
-                 fo-test-array-values-002
-      " 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
- <!--  <exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-chain-001
-      fo-test-fn-chain-002
-      fo-test-fn-chain-003
-      fo-test-fn-chain-004
-      fo-test-fn-chain-005
-      fo-test-fn-chain-006
-      fo-test-fn-chain-007
-      fo-test-fn-chain-008
-      fo-test-fn-chain-009
-      fo-test-fn-chain-010
-      fo-test-fn-chain-011
-      fo-test-fn-chain-012
-      fo-test-fn-chain-013
-      fo-test-fn-chain-014
-      fo-test-fn-chain-015
-      fo-test-fn-chain-016
-      fo-test-fn-chain-017" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
+      <created by="Michael Kay" on="2026-01-20"/>
+      <reason>PR2372 not yet implemented (JSON representation of INF and NaN)</reason>
    </exception>
-   -->
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-csv-to-simple-rows-001
-      fo-test-fn-csv-to-simple-rows-002
-      fo-test-fn-csv-to-simple-rows-003
-      fo-test-fn-csv-to-simple-rows-004
-      fo-test-fn-csv-to-simple-rows-005
-      fo-test-fn-csv-to-simple-rows-006
-      fo-test-fn-csv-to-simple-rows-007
-      fo-test-fn-csv-to-simple-rows-008" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
    
-<!--   <exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-csv-to-xml-001
-      fo-test-fn-csv-to-xml-002
-      fo-test-fn-csv-to-xml-003
-      fo-test-fn-csv-to-xml-004
-      fo-test-fn-csv-to-xml-005
-      fo-test-fn-csv-to-xml-006
-      fo-test-fn-csv-to-xml-007
-      fo-test-fn-csv-to-xml-008
-      fo-test-fn-csv-to-xml-009" 
+   <exception test-set="fn-serialize" 
+      test-case="serialize-xhtml-149" 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-function-annotations-001
-      fo-test-fn-function-annotations-002
-      fo-test-fn-function-annotations-003" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
+      <created by="Michael Kay" on="2026-01-07"/>
+      <reason>Canonical XHTML serialization not yet implemented</reason>
+   </exception>
+ 
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-invisible-xml-001
       fo-test-fn-invisible-xml-002
@@ -515,87 +413,13 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
- <!--  <exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-parse-csv-001
-      fo-test-fn-parse-csv-002
-      fo-test-fn-parse-csv-003
-      fo-test-fn-parse-csv-005
-      fo-test-fn-parse-csv-006
-      fo-test-fn-parse-csv-007
-      fo-test-fn-parse-csv-008
-      fo-test-fn-parse-csv-009
-      fo-test-fn-parse-csv-010
-      fo-test-fn-parse-csv-011
-      fo-test-fn-parse-csv-012
-      fo-test-fn-parse-csv-013
-      fo-test-fn-parse-csv-014
-      fo-test-fn-parse-csv-015
-      fo-test-fn-parse-csv-016
-      fo-test-fn-parse-csv-017
-      fo-test-fn-parse-csv-018
-      fo-test-fn-parse-csv-019
-      fo-test-fn-parse-csv-020
-      fo-test-fn-parse-csv-021
-      fo-test-fn-parse-csv-022" 
+   <exception test-set="fn-invisible-xml"
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
-   -->
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-map-substitute-001
-      fo-test-map-substitute-002" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-map-replace-001
-      fo-test-map-replace-002
-      fo-test-map-replace-003" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
- <!--  <exception test-set="app-spec-examples" 
-      test-case="fo-test-array-filter-004
-      fo-test-array-fold-left-004
-      fo-test-array-fold-right-004
-      fo-test-array-for-each-004
-      fo-test-array-for-each-pair-003
-      fo-test-array-index-where-006
-      fo-test-fn-every-008
-      fo-test-fn-every-009
-      fo-test-fn-filter-003
-      fo-test-fn-fold-left-009
-      fo-test-fn-fold-right-004
-      fo-test-fn-for-each-004
-      fo-test-fn-for-each-pair-004
-      fo-test-fn-index-where-005
-      fo-test-fn-items-after-006
-      fo-test-fn-items-before-007
-      fo-test-fn-items-ending-where-006
-      fo-test-fn-items-starting-where-006
-      fo-test-fn-iterate-while-002
-      fo-test-fn-partition-006
-      fo-test-fn-some-008" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Position argument on callback function not yet implemented.</reason>
-   </exception>
-   -->
- <!--  <exception test-set="app-spec-examples" test-case="
-      fo-test-fn-transitive-closure-001" run="false" edition="HE PE" report="n/a">
-      <created by="Michael Kay" on="2023-11-21"/>
-      <reason>Spec has changed, implementation needs updating.</reason>
-   </exception> 
-   -->
-
-   
-   
-   
+ 
  
    
 
