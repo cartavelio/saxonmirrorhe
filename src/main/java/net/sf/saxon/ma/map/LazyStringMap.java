@@ -147,6 +147,7 @@ public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePai
     private final List<GroundedValue> valueList;
     private Map<UnicodeString, GroundedValue> baseMap; // constructed lazily on demand
 
+    private static boolean DEBUG = true;
 
     /**
      * Create a lazy string map.
@@ -158,6 +159,15 @@ public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePai
     public LazyStringMap(List<UnicodeString> keys, List<GroundedValue> values) {
         this.keyList = keys;
         this.valueList = values;
+//        if (DEBUG) {
+//            HashSet<UnicodeString> keySet = new HashSet<>();
+//            for (UnicodeString s : keys) {
+//                if (keySet.contains(s)) {
+//                    throw new IllegalArgumentException("Duplicate key " + s);
+//                }
+//                keySet.add(s);
+//            }
+//        }
     }
 
     /**
