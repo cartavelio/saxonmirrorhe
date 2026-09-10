@@ -6,7 +6,7 @@ using Saxon.Hej.om;
 namespace Saxon.Api.Support {
     /// <summary>
     /// This class is an implementation of <c>IEnumerable</c> that wraps
-    /// a (Java) <c>SequenceIterator</c>.
+    /// a supplier of a (Java) <c>SequenceIterator</c>.
     /// </summary>
     /// <remarks>
     /// Because the underlying value can be evaluated lazily, it is possible
@@ -18,21 +18,21 @@ namespace Saxon.Api.Support {
         where T : XdmItem
     {
 
-        private SequenceIterator iterator;
+        private Func<SequenceIterator> iteratorFactory;
 
-        internal SequenceEnumerable(SequenceIterator iterator)
+        internal SequenceEnumerable(Func<SequenceIterator> iteratorFactory)
         {
-            this.iterator = iterator;
+            this.iteratorFactory = iteratorFactory;
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iterator);
+            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iteratorFactory.Invoke());
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iterator);
+            return (IEnumerator<T>)new SequenceEnumerator<XdmNode>(iteratorFactory.Invoke());
         }
     }
 }

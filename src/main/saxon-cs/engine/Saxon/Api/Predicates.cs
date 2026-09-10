@@ -284,7 +284,7 @@ namespace Saxon.Api {
         /// <returns>A predicate which returns true if the string value of the item being tested
         /// is equal to the given string under Java comparison rules for comparing strings.</returns>
         public static Predicate<XdmItem> Eq(string value) {
-            return item => item.GetStringValue().Equals(value);
+            return item => item.StringValue.Equals(value);
         }
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace Saxon.Api {
         /// use anchors "^" and "$" in the regular expression.</returns>
         /// 
         public static Predicate<XdmItem> MatchesRegex(String regex) {
-            return item1 => System.Text.RegularExpressions.Regex.Match(item1.GetStringValue(), regex).Success;
+            return item1 => System.Text.RegularExpressions.Regex.Match(item1.StringValue, regex).Success;
         }
 
         /// <summary>

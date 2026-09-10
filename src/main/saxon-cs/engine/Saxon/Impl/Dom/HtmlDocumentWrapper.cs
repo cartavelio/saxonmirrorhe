@@ -1,5 +1,6 @@
 using System.Xml;
 using HtmlAgilityPack;
+using Saxon.Api;
 using Saxon.Hej.om;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
@@ -10,14 +11,24 @@ namespace Saxon.Impl.Dom {
      * Wraps an HTML DOM tree produced by HTMLAgilityPack. This object represents the document node.
      */
     public class HtmlDocumentWrapper : AbstractNodeWrapper, HtmlContainerNodeWrapper, SteppingNode, SiblingCountingNode {
+        
+        
 
         private readonly HtmlDocument htmlDocument;
         private readonly HtmlNodeWrapper outermostElement;
+        
+
         public HtmlDocumentWrapper(HtmlDocument doc, string baseURI, Saxon.Hej.Configuration config) {
             htmlDocument = doc;
-            setSystemId(baseURI);
             treeInfo = new GenericTreeInfo(config);
-            outermostElement = HtmlNodeWrapper.makeWrapper(htmlDocument.DocumentNode, this, this, 0);
+            ((GenericTreeInfo) treeInfo).setSystemId(baseURI);
+            ((GenericTreeInfo) treeInfo).setRootNode(this);
+            foreach (HtmlNode node in doc.DocumentNode.ChildNodes) {
+                if (node.NodeType == HtmlNodeType.Element) {
+                    outermostElement = HtmlNodeWrapper.makeWrapper(node, this, this, 0);
+                    break;
+                }
+            }
         }
 
         public override object getUnderlyingNode() {
@@ -77,6 +88,14 @@ namespace Saxon.Impl.Dom {
 
         public int getSiblingPosition() {
             return 0;
+        }
+
+        public override string getSystemId() {
+            return ((GenericTreeInfo)getTreeInfo()).getSystemId();
+        }
+
+        public override string getBaseURI() {
+            return ((GenericTreeInfo)getTreeInfo()).getSystemId();
         }
 
         protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {

@@ -10,6 +10,7 @@ namespace Saxon.Impl.Helpers {
             Saxon.Hej.Configuration config = controller.getConfiguration();
             Saxon.Hej.value.AtomicValue content = (Saxon.Hej.value.AtomicValue)(arguments[0].head());
             HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(content.getStringValue());
             return new HtmlDocumentWrapper(doc, getStaticBaseUriString(), config);
             
         }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace Saxon.Api {
     /// <summary>
@@ -9,35 +10,18 @@ namespace Saxon.Api {
     /// <c>xsi:noNamespaceSchemaLocation</c>, to <c>xsl:import-schema</c> in XSLT, and to
     /// the <c>import schema</c> declaration in XQuery.
     /// </summary>
+    /// <param name="targetNamespace">The target namespace of the required schema components</param>
+    /// <param name="baseUri">The base URI of the module containing the reference to a schema document
+    /// declaration</param>
+    /// <param name="locationHint">The URI (if any) provided as a location hint.
+    /// Note: the <c>import schema</c> declaration in XQuery permits several location hints; if
+    /// there is more than one, all but the first are ignored</param>
+    /// <returns>An XdmNode representing the root document node of the schema document to be loaded.
+    /// </returns>
 
-    public interface SchemaResolver
-    {
 
-        /// <summary>
-        /// Given a target namespace and a set of location hints, return a set of schema documents.
-        /// </summary>
-        /// <param name="targetNamespace">The target namespace of the required schema components</param>
-        /// <param name="baseUri">The base URI of the module containing the reference to a schema document
-        /// declaration</param>
-        /// <param name="locationHints">The sequence of URIs (if any) listed as location hints.
-        /// In most cases there will only be one; but the <c>import schema</c> declaration in
-        /// XQuery permits several.</param>
-        /// <returns>A set of absolute URIs identifying the schema documents to be loaded. There is no requirement
-        /// that these correspond one-to-one with the URIs defined in the <c>locationHints</c>. The 
-        /// returned URIs will be dereferenced by calling the <c>GetEntity</c> method.
-        /// </returns>
+    public delegate XdmNode SchemaResolver(string targetNamespace, Uri baseUri, Uri locationHint);
+    
 
-        /**public**/ Uri[] GetSchemaDocuments(string targetNamespace, Uri baseUri, string[] locationHints);
-
-        /// <summary>
-        /// Dereference a URI returned by <c>GetSchemaDocuments</c> to retrieve a <c>Stream</c> containing
-        /// the actual XML schema document.
-        /// </summary>
-        /// <param name="absoluteUri">A URI returned by the <code>GetSchemaDocuments</code> method.</param>
-        /// <returns>Either a <c>Stream</c> or a <c>String</c> containing the schema text. 
-        /// The supplied URI will be used as the base URI of the schema document.</returns>
-
-        /**public**/ object GetEntity(Uri absoluteUri);
-
-    }
+    
 }

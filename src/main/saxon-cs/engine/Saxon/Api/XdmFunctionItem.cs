@@ -50,7 +50,7 @@ namespace Saxon.Api {
         public QName FunctionName {
             get {
                 StructuredQName sqName = ((Function) value).getFunctionName();
-                return (sqName == null ? null : QName.FromStructuredQName(sqName));
+                return (sqName == null ? null : new QName(sqName));
             }
         }
 

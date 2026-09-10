@@ -10,13 +10,13 @@ namespace Saxon.Api {
     /// </summary>
     public class Resource : IResource
     {
-        internal Saxon.Hej.lib.Resource resource;
+        private readonly Saxon.Hej.lib.Resource resource;
         
         /// <summary>
         /// Construct a <c>Resource</c> by wrapping an internal representation of the resource
         /// </summary>
         /// <param name="rc">The wrapped resource</param>
-        public Resource(Saxon.Hej.lib.Resource rc) {
+        private Resource(Saxon.Hej.lib.Resource rc) {
             resource = rc;
         }
 

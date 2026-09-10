@@ -17,13 +17,8 @@ namespace Saxon.Api {
     [Serializable]
     public sealed class QName {
         private StructuredQName sqName;
-        //private String prefix;
-        //private String uri;
-        //private String local;
-        //int hashcode = -1;      // evaluated lazily
 
-
-        private static String XS = NamespaceConstant.SCHEMA;
+        private static string XS = NamespaceConstant.SCHEMA;
 
         /// <summary>QName constant for the name xs:string</summary>
         public static readonly QName XS_STRING = new QName(XS, "xs:string");
@@ -64,7 +59,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="local">The local part of the name
         /// </param>
-        public QName(String local) {
+        public QName(string local) {
             // TODO: check for validity
             int colon = local.IndexOf(':');
             if (colon < 0) {
@@ -90,7 +85,7 @@ namespace Saxon.Api {
         /// <param name="lexical">Either the local part of the name, or the prefix
         /// and local part in the format <c>prefix:local</c>
         /// </param>
-        public QName(String uri, String lexical) {
+        public QName(string uri, string lexical) {
             // TODO: check for validity
             uri = (uri == null ? "" : uri);
             int colon = lexical.IndexOf(':');
@@ -119,7 +114,7 @@ namespace Saxon.Api {
         /// for names that are not in any namespace.
         /// </param>
         /// <param name="local">The local part of the name</param>
-        public QName(String prefix, String uri, String local) {
+        public QName(string prefix, string uri, string local) {
             sqName = new StructuredQName(prefix, uri, local);
         }
 
@@ -141,7 +136,7 @@ namespace Saxon.Api {
         /// <exception cref="ArgumentException">If the lexical QName is invalid 
         /// (for example, if it contains invalid characters)</exception>
         /// 
-        public QName(String lexicalQName, XdmNode element) {
+        public QName(string lexicalQName, XdmNode element) {
             try {
                 NodeInfo node = (NodeInfo) element.value;
                 sqName = StructuredQName.fromLexicalQName(lexicalQName, true, true,
@@ -189,7 +184,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="expandedName">The URI in Clark notation: <c>{uri}local</c> if the
         /// name is in a namespace, or simply <c>local</c> if not.</param> 
-        public static QName FromClarkName(String expandedName) {
+        public static QName FromClarkName(string expandedName) {
             String namespaceURI;
             String localName;
             if (expandedName[0] == '{') {
@@ -226,10 +221,10 @@ namespace Saxon.Api {
         /// forms <c>Q{}local</c> or simply <c>local</c> are accepted.</param>
         /// <returns> the QName corresponding to the supplied name in EQName notation. This will always
         /// have an empty prefix.</returns>
-        public static QName FromEQName(String expandedName) {
-            String namespaceURI;
-            String localName;
-            if (expandedName[0] == 'Q' && expandedName[1] == '{') {
+        public static QName FromEQName(string expandedName) {
+            string namespaceURI;
+            string localName;
+            if (expandedName.StartsWith("Q{")) {
                 int closeBrace = expandedName.IndexOf('}');
                 if (closeBrace < 0) {
                     throw new ArgumentException("No closing '}' in EQName");
@@ -254,7 +249,7 @@ namespace Saxon.Api {
         // representation.
 
         internal static QName FromStructuredQName(StructuredQName sqn) {
-            return new QName(sqn.getPrefix(), sqn.getURI(), sqn.getLocalPart());
+            return new QName(sqn);
         }
 
         /// <summary>
@@ -344,7 +339,7 @@ namespace Saxon.Api {
         /// Convert the value to a string. The resulting string is the lexical form of the QName,
         /// using the original prefix if there was one.
         /// </summary>
-        public override String ToString() {
+        public override string ToString() {
             if (Prefix.Equals("")) {
                 return LocalName;
             }

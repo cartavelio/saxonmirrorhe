@@ -17,33 +17,21 @@ namespace Saxon.Api {
         /// The context item. May be null if no context item is defined
         /// </summary>
 
-        public XdmItem ContextItem {
-            get {
-                return context.getContextItem() == null ? null : (XdmItem)XdmItem.Wrap(context.getContextItem());
-            }
-        }
+        public XdmItem ContextItem => context.getContextItem() == null ? null : (XdmItem)XdmItem.Wrap(context.getContextItem());
 
         /// <summary>
         /// The context position (equivalent to the XPath <c>position()</c> function).
         /// </summary>
         /// <remarks>Calling this method throws an exception if the context item is undefined.</remarks>
 
-        public int ContextPosition {
-            get {
-                return context.getCurrentIterator().position();
-            }
-        }
+        public int ContextPosition => context.getCurrentIterator().position();
 
         /// <summary>
         /// The context size (equivalent to the XPath <c>last()</c> function).
         /// </summary>
         /// <remarks>Calling this method throws an exception if the context item is undefined.</remarks>
 
-        public int ContextSize {
-            get {
-                return context.getLast();
-            }
-        }
+        public int ContextSize => context.getLast();
 
         /// <summary>
         /// The underlying object in the Saxon implementation, an instance of class
@@ -60,10 +48,6 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
 
-        public XPathContext Implementation
-        {
-            get { return context; }
-        }
-
+        public XPathContext Implementation => context;
     }
 }

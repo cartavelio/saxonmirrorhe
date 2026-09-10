@@ -211,12 +211,6 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Get the string value of the node.
-        /// </summary>
-
-        public string StringValue => ((NodeInfo) value).getStringValue();
-
-        /// <summary>
         /// Get the parent of this node.
         /// </summary>
         /// <remarks>
@@ -298,7 +292,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns> an <c>Iterable</c> containing all nodes on the child axis.</returns>
         public IEnumerable<XdmNode> Children() {
-            return new SequenceEnumerable<XdmNode>(((NodeInfo) value).iterateAxis(GetAxisNumber(XdmAxis.Child)));
+            return new SequenceEnumerable<XdmNode>(() => ((NodeInfo) value).iterateAxis(GetAxisNumber(XdmAxis.Child)));
         }
 
         /// <summary>
@@ -336,7 +330,7 @@ namespace Saxon.Api {
         /// axis, reverse document order for a reverse axis.
         /// </remarks>
         public IEnumerable<XdmNode> EnumerableOverAxis(XdmAxis axis) {
-            return new SequenceEnumerable<XdmNode>(((NodeInfo) value).iterateAxis(GetAxisNumber(axis)));
+            return new SequenceEnumerable<XdmNode>(() => ((NodeInfo) value).iterateAxis(GetAxisNumber(axis)));
         }
 
 

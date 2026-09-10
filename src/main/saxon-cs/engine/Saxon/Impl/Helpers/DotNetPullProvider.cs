@@ -319,6 +319,7 @@ namespace System.Impl.Helpers {
 
         public string getSystemId() {
             string @base = parser.BaseURI;
+            Console.WriteLine("BASE " + @base);
             if (((@base == null) || (@base.Length == 0))) {
                 return baseURI;
             }
@@ -330,19 +331,7 @@ namespace System.Impl.Helpers {
         public Saxon.Hej.s9api.Location saveLocation() {
             return new Saxon.Hej.expr.parser.Loc(this);
         }
-
-        public int getLineNumber(int locationId) {
-            return getLineNumber();
-        }
-
-        public int getColumnNumber(int locationId) {
-            return getColumnNumber();
-        }
-
-        public string getSystemId(int locationId) {
-            return getSystemId();
-        }
-
+        
         public SysCollGen.IList<Saxon.Hej.pull.UnparsedEntity> getUnparsedEntities() {
             return null;
         }
