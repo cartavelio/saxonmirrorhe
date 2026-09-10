@@ -122,7 +122,7 @@ public class DocumentKey {
         return uri;
     }
 
-    @CSharpReplaceBody(code="return new Saxon.Ejava.io.File(uri.Substring(5)).getCanonicalPath();")
+    @CSharpReplaceBody(code="return new Saxon.Ejava.io.File(uri.Substring(6)).getCanonicalPath();")
     private static String getCanonicalPath(String uri) {
         return Paths.get(uri.substring(6)).normalize().toString();
     }
