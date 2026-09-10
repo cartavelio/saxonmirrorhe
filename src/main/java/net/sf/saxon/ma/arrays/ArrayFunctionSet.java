@@ -77,6 +77,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null)
                 .arg(2, foldFunctionType, ONE | INS, null));
 
+        register("foot", 1, e -> e.populate(ArrayFoot::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
         ItemType forEachFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
@@ -147,6 +150,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         register("tail", 1, e -> e.populate( ArrayTail::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
+        register("truncate", 1, e -> e.populate(ArrayTruncate::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
+
 
         // TODO: the following functions should be private
 
@@ -348,6 +355,24 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             }
             return zero;
         }
+    }
+
+    /**
+     * Implementation of the proposed 4.0 function array:foot(array) =&gt; item()*
+     */
+    public static class ArrayFoot extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem array = (ArrayItem) arguments[0].head();
+            assert array != null;
+            int len = array.arrayLength();
+            if (len == 0) {
+                throw new XPathException("Argument to array:foot is an empty array", "FOAY0001");
+            }
+            return array.get(len - 1);
+        }
+
     }
 
     /**
@@ -616,6 +641,23 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 throw new XPathException("Argument to array:tail is an empty array","FOAY0001");
             }
             return array.remove(0);
+        }
+    }
+
+    /**
+     * Implementation of the function array:tail(array) =&gt; item()*
+     */
+    public static class ArrayTruncate extends SystemFunction {
+
+        @Override
+        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem array = (ArrayItem) arguments[0].head();
+            assert array != null;
+            int len = array.arrayLength();
+            if (len < 1) {
+                throw new XPathException("Argument to array:truncate is an empty array", "FOAY0001");
+            }
+            return array.remove(len - 1);
         }
     }
 
