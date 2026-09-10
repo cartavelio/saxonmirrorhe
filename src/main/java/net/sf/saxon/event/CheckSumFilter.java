@@ -26,6 +26,8 @@ import java.util.HashMap;
  *
  * <p>The checksum takes account of element, attribute, and text nodes only. The order of attributes
  * within an element makes no difference.</p>
+ *
+ * <p>For the SIGMA2 checksum, the order of attributes within an element does make a difference.</p>
  */
 
 public class CheckSumFilter extends ProxyReceiver {
@@ -83,6 +85,7 @@ public class CheckSumFilter extends ProxyReceiver {
 
     @Override
     public void endDocument() throws XPathException {
+        trace("Σ ::= " + Integer.toHexString(checksum));
         nextReceiver.endDocument();
     }
 
@@ -184,13 +187,9 @@ public class CheckSumFilter extends ProxyReceiver {
             NodeName name = namemap.get(key);
             String value = attrmap.get(key);
             checksum ^= hash(name, sequence);
+            trace("After attribute name " + name.getDisplayName() + ": " + checksum);
             checksum ^= hash(value, sequence);
-            //#if CSHARP==false
-            if (DEBUG) {
-                System.err.println("After attribute " + name.getDisplayName() + ": " + checksum +
-                        "(" + hash(name, sequence) + "," + hash(value, sequence) + ")");
-            }
-            //#endif
+            trace("After attribute value " + name.getDisplayName() + ": " + checksum);
         }
 
         super.startElement(elemName, type, attributes, namespaces, location, properties);
@@ -203,16 +202,20 @@ public class CheckSumFilter extends ProxyReceiver {
     public void endElement() throws XPathException {
         depth--;
         if (depth == 0 && target.startsWith("JS")) {
-            // We've reached the end. Update the checksum with a checksum of the
+            // We've reached the end. First calculate the SIGMA2 hash, and then
+            // update the checksum with a checksum of the
             // SIGMA2 hash (because that's what SaxonJS2 is going to have done).
             // The sequence is 1 when SIGMA2 is seen by the JS2 verifier.
             //
             // This only applies when the output is JSON because when the output
             // is XML, the checksums are stored in processing instructions and
             // are always ignored by the verifier.
-            checksum ^= hash("", 1); // SIGMA2 is in no namespace
+
+            String sigma2Hash = getDigest(); // the digest changes with subsequent hash calls, so fix it first
             checksum ^= hash(SIGMA2, 1);
-            checksum ^= hash(getDigest(), 1);
+            checksum ^= hash("", 1); // SIGMA2 is in no namespace
+            checksum ^= hash(sigma2Hash, 1);
+            trace("After SIGMA2: " + checksum);
         }
 
         checksum ^= 1;
@@ -308,7 +311,6 @@ public class CheckSumFilter extends ProxyReceiver {
     }
 
     private int hash(NodeName n, int sequence) {
-        //System.err.println("hash(" + n.getLocalPart() + ") " + hash(n.getLocalPart(), sequence) + "/" + hash(n.getURI(), sequence));
         return hash(n.getLocalPart(), sequence) ^ hash(n.getNamespaceUri().toString(), sequence);
     }
 }
