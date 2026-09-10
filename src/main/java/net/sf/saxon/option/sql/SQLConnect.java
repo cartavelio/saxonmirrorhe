@@ -78,6 +78,29 @@ public class SQLConnect extends ExtensionInstruction {
         } else {
             driver = Literal.makeEmptySequence();
         }
+
+        // Get user attribute
+
+        AttributeInfo dbUser = atts.get("", "user");
+        String dbUserName = null;
+        if (dbUser == null) {
+            reportAbsence("user");
+        } else {
+            dbUserName = dbUser.getValue();
+        }
+        user = makeAttributeValueTemplate(dbUserName, dbUser);
+
+        // Get password attribute
+
+        AttributeInfo dbPass = atts.get("", "password");
+        String dbPassword = null;
+        if (dbPass == null) {
+            reportAbsence("password");
+        } else {
+            dbPassword = dbPass.getValue();
+        }
+        password = makeAttributeValueTemplate(dbPassword, dbPass);
+
     }
 
     @Override
