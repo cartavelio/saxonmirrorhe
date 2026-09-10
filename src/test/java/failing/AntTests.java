@@ -1,19 +1,20 @@
 package failing;
 
 import jaxptest.ConfigTest;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+
 /*
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
  */
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
 
 /**
- * Tests invocation of Saxon via Ant
+ * Tests invocation of Saxon via Ant.
+ * These tests are currently inactive. They have been used in the past to investigate Saxon problems
+ * that could only be reproduced when Saxon was invoked from Ant.
  */
 public class AntTests {
 
@@ -42,11 +43,10 @@ public class AntTests {
 
     }
 
-    @Test
-    @Tag("mikeonly")
-    public void testWalmsleyBug() {
-        runAnt("/Users/mike/bugs/2015/Walmsley/saxonbug/build.xml");
-    }
+
+//    public void testWalmsleyBug() {
+//        runAnt("/Users/mike/bugs/2015/Walmsley/saxonbug/build.xml");
+//    }
 
 //    public void testXmlCatalog() {
     // removed because it depends too much on the machine setup, e.g CatalogManager.properties

@@ -1,6 +1,8 @@
 package s9apitest;
 
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.push.Document;
+import net.sf.saxon.s9api.push.Element;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -42,9 +44,9 @@ public class TestPush {
             StringWriter sw = new StringWriter();
             Serializer destination = processor.newSerializer(sw);
             destination.setOutputProperty(Serializer.Property.INDENT, "no");
-            Push.Document doc = processor.newPush(destination).document(true);
+            Document doc = processor.newPush(destination).document(true);
             doc.setDefaultNamespace("http://www.example.org/ns");
-            Push.Element top = doc.element("root");
+            Element top = doc.element("root");
             top.attribute("version", "1.5");
             for (Employee emp : getData()) {
                 top.element("emp").attribute("ssn", emp.ssn)
@@ -64,9 +66,9 @@ public class TestPush {
             StringWriter sw = new StringWriter();
             Serializer destination = processor.newSerializer(sw);
             destination.setOutputProperty(Serializer.Property.INDENT, "no");
-            Push.Document doc = processor.newPush(destination).document(true);
+            Document doc = processor.newPush(destination).document(true);
             doc.setDefaultNamespace("http://www.example.org/ns");
-            Push.Element top = doc.element(new QName("top", "http://www.example.org/ns", "root"));
+            Element top = doc.element(new QName("top", "http://www.example.org/ns", "root"));
             top.attribute("version", "1.5");
             for (Employee emp : getData()) {
                 top.element(new QName("top", "http://www.example.org/ns", "emp"))
@@ -88,7 +90,7 @@ public class TestPush {
         try {
             Processor processor = new Processor(false);
             XdmDestination destination = new XdmDestination();
-            Push.Document doc = processor.newPush(destination).document(false);
+            Document doc = processor.newPush(destination).document(false);
             doc.setDefaultNamespace("http://www.example.org/ns");
             for (Employee emp : getData()) {
                 doc.element(new QName("top", "http://www.example.org/ns", "emp"))
@@ -112,7 +114,7 @@ public class TestPush {
         try {
             Processor processor = new Processor(false);
             XdmDestination destination = new XdmDestination();
-            Push.Document doc = processor.newPush(destination).document(true);
+            Document doc = processor.newPush(destination).document(true);
             for (Employee emp : getData()) {
                 doc.element(new QName("emp"))
                         .attribute("ssn", emp.ssn)
@@ -136,9 +138,9 @@ public class TestPush {
             StringWriter sw = new StringWriter();
             Serializer destination = processor.newSerializer(sw);
             destination.setOutputProperty(Serializer.Property.INDENT, "no");
-            Push.Document doc = processor.newPush(destination).document(true);
+            Document doc = processor.newPush(destination).document(true);
             doc.setDefaultNamespace("http://www.example.org/ns");
-            Push.Element top = doc.element("root");
+            Element top = doc.element("root");
             top.attribute("version", "1.5");
             for (Employee emp : getData()) {
                 top.element("emp").text(emp.name).attribute("ssn", emp.ssn);
