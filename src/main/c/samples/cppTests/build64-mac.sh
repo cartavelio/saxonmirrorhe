@@ -16,8 +16,6 @@ gcc -fPIC -I../../Saxon.C.API/graalvm  -c ../../Saxon.C.API/SaxonCGlue.c -o bin/
 
 gcc -fPIC -I../../Saxon.C.API/graalvm   -c ../../Saxon.C.API/SaxonCXPath.c -o bin/SaxonCXPath.o $@
 
-#g++ -std=c++14 -g -fPIC -I../../Saxon.C.API/graalvm   -c cppExtensionFunction.cpp -o bin/cppExtensionFunction.o
-
 g++ -std=c++14 -g  -fPIC -I../../Saxon.C.API/graalvm   -c ../../Saxon.C.API/XdmValue.cpp -o bin/XdmValue.o $@
 
 g++ -std=c++14 -g  -fPIC -I../../Saxon.C.API/graalvm   -c ../../Saxon.C.API/XdmItem.cpp -o bin/XdmItem.o $@
