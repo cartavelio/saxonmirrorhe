@@ -1,0 +1,7 @@
+<project name="testproject" default="validate" basedir=".">
+  <target name="validate">
+    <schemavalidate failonerror="no" noNamespaceFile="books.xsd" classname="com.saxonica.ee.jaxp.ValidatingReader">
+      <fileset dir="data" includes="*.xml"/>
+    </schemavalidate>
+  </target>
+</project>
