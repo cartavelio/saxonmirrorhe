@@ -78,7 +78,7 @@ task graalImage(
         "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
         "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
         "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
-        "--shared"
+        "--shared", '-g'
     }
   }
 }
