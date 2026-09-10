@@ -485,7 +485,7 @@ public abstract class TestDriver {
                     }
                 }
                 if (appliesThisEdition && specVal.equals(spec.specAndVersion)) {
-                    if (runVal.equals("false")) {
+                    if (runVal.equals("false") || runVal.equals("XQ")) {
                         for (String tc : testName.trim().split("\\s+")) {
                             exceptionsMap.put(tc, entry);
                         }

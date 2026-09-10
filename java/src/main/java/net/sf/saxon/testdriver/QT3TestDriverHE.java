@@ -498,7 +498,7 @@ public class QT3TestDriverHE extends TestDriver {
                 }
             }
 
-            if ("false".equals(runAtt)) {
+            if ("false".equals(runAtt) || ("XQ".equals(runAtt) && lang.startsWith("XP"))) {
                 writeTestcaseElement(testCaseName, reportAtt, reasonMsg.orElse("no reason given"));
                 notrun++;
                 return;
