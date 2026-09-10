@@ -154,9 +154,15 @@ public class ObjectLookupExpression extends LookupExpression {
                 return context -> {
                     SequenceIterator baseIterator = lhsPull.iterate(context);
                     return ItemMappingIterator.map(baseIterator, item -> {
+                        // Given a function F(self, X, Y, Z) we partially apply it as F(item, ?, ?, ?)
+                        // TODO: make a fast path for the case where arity=1.
                         Sequence[] boundArgs = new Sequence[arity];
                         boundArgs[0] = item;
-                        return new CurriedFunction(reflexiveFunction, boundArgs, null); // TODO: FIXME
+                        int[] unboundArgs = new int[arity-1];
+                        for (int i=0; i<unboundArgs.length; i++) {
+                            unboundArgs[i] = i+1;
+                        }
+                        return new CurriedFunction(reflexiveFunction, boundArgs, unboundArgs);
                     });
                 };
             } else {

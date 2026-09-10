@@ -96,7 +96,11 @@ public class ObjectMap extends SystemFunction {
                 FunctionItem method = interfaceMap.get(key);
                 Sequence[] boundArgs = new Sequence[method.getArity()];
                 boundArgs[0] = value;
-                CurriedFunction fn = new CurriedFunction(method, boundArgs, new int[0]);
+                int[] unboundArgs = new int[method.getArity() - 1];
+                for (int i = 0; i < unboundArgs.length; i++) {
+                    unboundArgs[i] = i + 1;
+                }
+                CurriedFunction fn = new CurriedFunction(method, boundArgs, unboundArgs);
                 mapView.initialPut(key, fn);
             }
         }
@@ -107,7 +111,11 @@ public class ObjectMap extends SystemFunction {
                 FunctionItem method = methodMap.get(key);
                 Sequence[] boundArgs = new Sequence[method.getArity()];
                 boundArgs[0] = value;
-                CurriedFunction fn = new CurriedFunction(method, boundArgs, new int[0]);
+                int[] unboundArgs = new int[method.getArity() - 1];
+                for (int i = 0; i < unboundArgs.length; i++) {
+                    unboundArgs[i] = i + 1;
+                }
+                CurriedFunction fn = new CurriedFunction(method, boundArgs, unboundArgs);
                 mapView.initialPut(key, fn);
             }
         }
