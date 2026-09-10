@@ -145,11 +145,11 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     </ItemGroup>
 
    <xsl:if test="$edition != 'ee'">
-<<<<<<< HEAD
+
     <!-- <ItemGroup>
        <Compile Remove="..\..\..\..\cs\Saxon\Impl\Helpers\UcaCollatorUsingCSharp.cs" />
        <Compile Remove="..\..\..\..\cs\Saxon\Ejava\text\CollationKeyUsingCSharp.cs" />
-=======
+  -->
      <!--<ItemGroup>
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Api/**" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Callbacks/**" />
@@ -180,7 +180,7 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
        <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdSchemaEE.cs" />
        <Compile Remove="..\..\..\..\src\main\cs\Saxon/Impl/Parallel" />
        <Compile Remove="..\..\..\..\src\main\cs\Saxon/commands/*.cs" />
->>>>>>> d5ca50c97 (Update to xsl for HE build)
+
      </ItemGroup> -->
    </xsl:if>
   </Project>
