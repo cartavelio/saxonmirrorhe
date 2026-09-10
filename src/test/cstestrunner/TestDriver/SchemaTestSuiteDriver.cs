@@ -91,9 +91,10 @@ namespace TestDriver {
          * @throws URISyntaxException
          */
         private void go(String[] args) {
+            string usage =
+                "SchemaTestSuiteDriver testDir -lang:XSD [-w] [-onwards] -c:contributor? -s:setName? -g:groupName? [-o:outputdir]";
             if (args.Length == 0 || args[0] == "-?") {
-                Console.WriteLine(
-                    "SchemaTestSuiteDriver testDir -lang:XSD [-w] [-onwards] -c:contributor? -s:setName? -g:groupName?");
+                Console.WriteLine(usage);
             }
 
             Processor processor = new Processor(true);
@@ -106,6 +107,8 @@ namespace TestDriver {
 
             string saxonDir = testSuiteDir.Replace("xsdtests", "xsdtests-results");
             exceptionsFile = saxonDir + "/exceptions11.xml";
+
+            string outputDir = saxonDir;
 
             string testSetPattern = null; // TODO use a regex
             string testGroupPattern = null;
@@ -137,12 +140,14 @@ namespace TestDriver {
                     // it only offers 1.1 conformance.
                     versionUnderTest = args[i][3..];
                 }
+                else if (args[i].StartsWith("-o:")) {
+                    outputDir = args[i][3..];
+                }
                 else if (args[i].StartsWith("-exceptions:")) {
                     exceptionsFile = args[i].Substring("-exceptions:".Length);
                 }
                 else if (args[i] == "-?") {
-                    Console.WriteLine(
-                        "Usage: SchemaTestSuiteDriver testDir [-w] [-s:testSetPattern] [-g:testGroupPattern]");
+                    Console.WriteLine(usage);
                 }
             }
 
@@ -168,7 +173,7 @@ namespace TestDriver {
                     new FileStream(testSuiteDir + "/suite.xml", FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 
-                results = new StreamWriter(saxonDir + "/SaxonResults"
+                results = new StreamWriter(outputDir + "/SaxonResults"
                                                         + processor.ProductVersion + "n.xml");
 
                 results.Write("<testSuiteResults xmlns='" + testNS + "' xmlns:saxon='http://saxon.sf.net/' " +
