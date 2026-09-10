@@ -159,7 +159,7 @@ public class OrderedMapTests {
 
     @Test
     public void testBuildFromEmpty() {
-        MapItem o = EmptyMap.getInstance(40);
+        MapItem o = EmptyMap.INSTANCE_40;
         o = o.put(new StringValue("a"), new DoubleValue(1));
         o = o.put(new StringValue("b"), new DoubleValue(2));
         o = o.put(new StringValue("c"), new DoubleValue(3));

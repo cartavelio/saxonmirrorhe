@@ -18,7 +18,7 @@ public class TestMapBuilder implements BuilderDsl {
     }
 
     public static MapItem empty() {
-        return EmptyMap.getInstance(40);
+        return EmptyMap.INSTANCE_40;
     }
 
     @Override

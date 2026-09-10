@@ -11,7 +11,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 public class GroundedValueIsEmptySequence extends TypeSafeDiagnosingMatcher<GroundedValue> {
-    private static final GroundedValue emptySequence = EmptySequence.getInstance();
+    private static final GroundedValue emptySequence = EmptySequence.INSTANCE;
 
     @Override
     public boolean matchesSafely(GroundedValue actual, Description mismatchDescription) {
