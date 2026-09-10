@@ -501,39 +501,11 @@ public class Validate {
             return quit("Validation of source document failed", 2);
         } catch (XPathException err) {
             config.reportFatalError(err);
-//            if (reportHandler != null) {
-//                try {
-//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endElement();
-//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endDocument();
-//                    reportSerializer.close();
-//                } catch (XPathException e) {
-//                } catch (SaxonApiException e) {
-//                }
-//            }
             return quit("Processing failed", 2);
         } catch (TransformerFactoryConfigurationError err) {
-            //err.printStackTrace();
-//            if (reportHandler != null) {
-//                try {
-//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endElement();
-//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endDocument();
-//                    reportSerializer.close();
-//                } catch (XPathException e) {
-//                } catch (SaxonApiException e) {
-//                }
-//            }
             return quit("Validation failed: " + err.getMessage(), 2);
         } catch (Exception err2) {
             err2.printStackTrace();
-//            if (reportHandler != null) {
-//                try {
-//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endElement();
-//                    reportSerializer.getReceiver(processor.getUnderlyingConfiguration()).endDocument();
-//                    reportSerializer.close();
-//                } catch (XPathException e) {
-//                } catch (SaxonApiException e) {
-//                }
-//            }
             return quit("Fatal error during validation: " + err2.getMessage(), 2);
         }
         if (unreadableCount > 0) {

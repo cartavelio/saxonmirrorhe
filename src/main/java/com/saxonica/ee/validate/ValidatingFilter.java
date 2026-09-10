@@ -211,6 +211,7 @@ public class ValidatingFilter extends ProxyReceiver {
                 err.setErrorCode(getPipelineConfiguration().isXSLT() ? "XTTE1510" : "XQDY0027");
             }
             ValidationException ve = err.makeException();
+            ve.setHasBeenReported(true); // Don't send this summary message to the error reporter - bug 6068
             ve.setErrorObject(validationContext.getValidationErrorObject());
             throw ve;
         }
