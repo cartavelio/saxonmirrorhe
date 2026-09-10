@@ -11,9 +11,13 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.JPConverter;
+import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.NoElementsSpaceStrippingRule;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
@@ -24,6 +28,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.net.URI;
+import java.util.Objects;
 
 /**
  * A document builder holds properties controlling how a Saxon document tree should be built, and
@@ -306,9 +311,7 @@ public class DocumentBuilder {
      */
 
     public XdmNode build(Source source) throws SaxonApiException {
-        if (source == null) {
-            throw new NullPointerException("source");
-        }
+        Objects.requireNonNull(source, "source");
         ParseOptions options = getParseOptions(source);
         try {
             TreeInfo doc = config.buildDocumentTree(source, options);
@@ -365,6 +368,9 @@ public class DocumentBuilder {
             if (ff != null) {
                 options.addFilter(ff);
             }
+        }
+        if (source instanceof AugmentedSource) {
+            options.merge(((AugmentedSource)source).getParseOptions());
         }
         return options;
     }

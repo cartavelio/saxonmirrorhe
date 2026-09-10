@@ -15,11 +15,8 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.*;
-import net.sf.saxon.trans.CommandLineOptions;
-import net.sf.saxon.trans.CompilerInfo;
-import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.Timer;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.transpile.CSharp;
@@ -1353,23 +1350,30 @@ public class Transform {
                 }
                 if (buildSourceTree) {
                     DocumentBuilder builder = processor.newDocumentBuilder();
-                    //#if CSHARP==false
-                    StylesheetPackage top = pss.getTopLevelPackage();
-                    if (!top.isStripsTypeAnnotations()) {
-                        int validationMode = getConfiguration().getSchemaValidationMode();
-                        if (validationMode == Validation.STRICT) {
-                            builder.setSchemaValidator(processor.getSchemaManager().newSchemaValidator());
-                        } else if (validationMode == Validation.LAX) {
-                            SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
-                            validator.setLax(true);
-                            builder.setSchemaValidator(validator);
-                        }
-                    }
-                    //#endif
+                    // Following code believed redundant - bug 5201 - MHK 2022-01-12
+//                    //#if CSHARP==false
+//                    StylesheetPackage top = pss.getTopLevelPackage();
+//                    if (!top.isStripsTypeAnnotations()) {
+//                        int validationMode = getConfiguration().getSchemaValidationMode();
+//                        if (validationMode == Validation.STRICT) {
+//                            builder.setSchemaValidator(processor.getSchemaManager().newSchemaValidator());
+//                        } else if (validationMode == Validation.LAX) {
+//                            SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+//                            validator.setLax(true);
+//                            builder.setSchemaValidator(validator);
+//                        }
+//                    }
+//                    //#endif
                     builder.setDTDValidation(getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION));
                     builder.setWhitespaceStrippingPolicy(sheet.getWhitespaceStrippingPolicy());
                     if (getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE)) {
                         source = new AugmentedSource(source, getConfiguration().getParseOptions());
+                    }
+                    StylesheetPackage top = pss.getTopLevelPackage();
+                    if (top.isStripsTypeAnnotations()) {
+                        source = AugmentedSource.makeAugmentedSource(source);
+                        ((AugmentedSource)source).getParseOptions().addFilter(
+                                receiver -> getConfiguration().getAnnotationStripper(receiver));
                     }
                     XdmNode node = builder.build(source);
                     transformer.setGlobalContextItem(node, true);

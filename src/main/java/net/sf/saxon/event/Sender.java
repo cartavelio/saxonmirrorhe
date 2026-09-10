@@ -72,8 +72,6 @@ public abstract class Sender {
         receiver.setSystemId(systemId);
         Receiver next = receiver;
 
-        next = makeValidator(next, source.getSystemId(), options);
-
         List<FilterFactory> filters = options.getFilters();
         if (filters != null) {
             for (int i = filters.size() - 1; i >= 0; i--) {
@@ -83,6 +81,9 @@ public abstract class Sender {
                 next = filter;
             }
         }
+
+        next = makeValidator(next, source.getSystemId(), options);
+
 
         SpaceStrippingRule strippingRule = options.getSpaceStrippingRule();
         if (strippingRule != null && !(strippingRule instanceof NoElementsSpaceStrippingRule)) {
