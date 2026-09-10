@@ -155,10 +155,6 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
         register("current-mode-name", 0, CurrentModeName.class, BuiltInAtomicType.QNAME, OPT, CITEM | LATE);
 
-        register("discard-document", 1, DiscardDocument.class, NodeKindTest.DOCUMENT, OPT, 0)
-                .arg(0, NodeKindTest.DOCUMENT, OPT, null);
-
-
         register("deep-equal", 4, SaxonDeepEqual.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null)
@@ -169,6 +165,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.DECIMAL, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.DECIMAL, OPT, EMPTY)
                 .arg(2, BuiltInAtomicType.INTEGER, ONE, null);
+
+        register("discard-document", 1, DiscardDocument.class, NodeKindTest.DOCUMENT, OPT, 0)
+                .arg(0, NodeKindTest.DOCUMENT, OPT, null);
 
         register("EQName", 1, EQName.class, BuiltInAtomicType.QNAME, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
@@ -222,6 +221,10 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, EMPTY);
 
+        register("has-same-nodes", 2, HasSameNodes.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
+                .arg(0, AnyNodeTest.getInstance(), STAR, null)
+                .arg(1, AnyNodeTest.getInstance(), STAR, null);
+
         register("hexBinary-to-octets", 1, HexBinaryToOctets.class, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, BuiltInAtomicType.HEX_BINARY, ONE, null);
 
@@ -272,10 +275,6 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("items-until", 2, Ending.ItemsUntil.class, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
                 .arg(1, predicate, ONE, EMPTY);
-
-        register("has-same-nodes", 2, HasSameNodes.class, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, AnyNodeTest.getInstance(), STAR, null)
-                .arg(1, AnyNodeTest.getInstance(), STAR, null);
 
         //#if CSHARP==false
         register("key-map", 4, KeyMap.class, new MapType(BuiltInAtomicType.STRING, SequenceType.NODE_SEQUENCE), ONE, 0)
