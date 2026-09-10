@@ -27,7 +27,7 @@ public class SmallAttributeMap implements AttributeMap {
 
     public final static int LIMIT = 8;
 
-    private final List<AttributeInfo> attributes;
+    private final ArrayList<AttributeInfo> attributes;
 
     public SmallAttributeMap(List<AttributeInfo> attributes) {
         // TODO: check uniqueness of names?
@@ -83,7 +83,7 @@ public class SmallAttributeMap implements AttributeMap {
     }
 
     @Override
-    public List<AttributeInfo> asList() {
+    public ArrayList<AttributeInfo> asList() {
         return attributes;
     }
 

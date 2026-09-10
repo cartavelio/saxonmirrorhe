@@ -237,6 +237,7 @@ public abstract class AbstractXsltTransformer {
     /**
      * Set a message handler to be notified of {@code xsl:message} and {@code xsl:assert} output.
      * @param messageHandler the message handler to be notified
+     * @since 11
      */
 
     public void setMessageHandler(Consumer<Message> messageHandler) {

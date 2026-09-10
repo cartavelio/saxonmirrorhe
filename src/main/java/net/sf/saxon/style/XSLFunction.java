@@ -490,8 +490,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      */
     @Override
     public void generateByteCode(Optimizer opt) throws XPathException {
+        //#if BYTECODE==true
         // Generate byte code if appropriate
-
         if (getCompilation().getCompilerInfo().isGenerateByteCode() &&
                 streamability == FunctionStreamability.UNCLASSIFIED) {
             try {
@@ -507,6 +507,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 throw new XPathException(e);
             }
         }
+        //#endif
     }
 
 

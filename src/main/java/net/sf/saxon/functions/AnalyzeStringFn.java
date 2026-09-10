@@ -7,8 +7,8 @@
 
 package net.sf.saxon.functions;
 
+import com.saxonica.ee.config.StandardSchemaResolver;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.ReceiverOption;
@@ -27,11 +27,6 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Untyped;
-import org.xml.sax.InputSource;
-
-import javax.xml.transform.sax.SAXSource;
-import java.io.InputStream;
-import java.util.ArrayList;
 
 /**
  * Implements the fn:analyze-string function defined in XPath 3.0.
@@ -104,15 +99,7 @@ public class AnalyzeStringFn extends RegexFunction {
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(config) {
                 if (schemaAware && !config.isSchemaAvailable(NamespaceConstant.FN)) {
-                    InputStream inputStream = Version.platform.locateResource("xpath-functions.scm", new ArrayList<>());
-                    if (inputStream == null) {
-                        throw new XPathException("Failed to load xpath-functions.scm from the classpath");
-                    }
-                    InputSource is = new InputSource(inputStream);
-                    if (config.isTiming()) {
-                        config.getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
-                    }
-                    config.addSchemaSource(new SAXSource(is));
+                    config.addSchemaSource(StandardSchemaResolver.fetchResource("xpath-functions.scm", config));
                 }
             }
             //#endif

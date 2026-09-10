@@ -1009,7 +1009,11 @@ public class Transform {
      */
 
     protected void quit(String message, int code) {
-        getConfiguration().getLogger().warning(message);
+        try {
+            getConfiguration().getLogger().warning(message);
+        } catch (Exception err) {
+            System.err.println(message);
+        }
         if (allowExit) {
             System.exit(code);
         } else {

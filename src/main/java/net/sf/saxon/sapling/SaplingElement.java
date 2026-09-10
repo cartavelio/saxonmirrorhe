@@ -17,10 +17,11 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.ma.trie.ImmutableList;
 import net.sf.saxon.ma.trie.ImmutableMap;
-import net.sf.saxon.ma.trie.Tuple2;
+import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
@@ -56,9 +57,14 @@ import java.util.Objects;
 public class SaplingElement extends SaplingNode {
 
     private final StructuredQName nodeName;
-    private ImmutableList<SaplingNode> reversedChildren = ImmutableList.empty();
-    private ImmutableMap<StructuredQName, String> attributes = ImmutableHashTrieMap.empty();
+    private ImmutableList<SaplingNode> reversedChildren;
+    private ImmutableMap<StructuredQName, String> attributes = emptyAttributes();
     private NamespaceMap namespaces = NamespaceMap.emptyMap();
+
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<net.sf.saxon.om.StructuredQName, string>.Empty;")
+    private static ImmutableMap<StructuredQName, String> emptyAttributes() {
+        return ImmutableHashTrieMap.empty();
+    }
 
     /**
      * Create an empty element, in no namespace
@@ -68,6 +74,7 @@ public class SaplingElement extends SaplingNode {
 
     public SaplingElement(String name) {
         Objects.requireNonNull(name);
+        reversedChildren = emptyNodeList();
         nodeName = StructuredQName.fromEQName((name));
     }
 
@@ -81,6 +88,7 @@ public class SaplingElement extends SaplingNode {
 
     public SaplingElement(QName name) {
         Objects.requireNonNull(name);
+        reversedChildren = emptyNodeList();
         nodeName = name.getStructuredQName();
         if (!nodeName.getPrefix().isEmpty() && nodeName.getURI().isEmpty()) {
             throw new IllegalArgumentException("No namespace URI for prefixed element name: " + name);
@@ -90,6 +98,7 @@ public class SaplingElement extends SaplingNode {
 
     private SaplingElement(StructuredQName name) {
         this.nodeName = name;
+        reversedChildren = emptyNodeList();
     }
 
     @Override
@@ -238,11 +247,12 @@ public class SaplingElement extends SaplingNode {
             ns = ns.put(nodeName.getPrefix(), nodeName.getURI());
         }
         AttributeMap atts = EmptyAttributeMap.getInstance();
-        for (Tuple2<StructuredQName, String> attribute : attributes) {
-            atts = atts.put(new AttributeInfo(new FingerprintedQName(attribute._1, namePool), BuiltInAtomicType.UNTYPED_ATOMIC,
-                              attribute._2, Loc.NONE, ReceiverOption.NONE));
-            if (!attribute._1.getURI().isEmpty()) {
-                ns = ns.put(attribute._1.getPrefix(), attribute._1.getURI());
+        for (TrieKVP<StructuredQName, String> attribute : attributes) {
+            StructuredQName qName = attribute.getKey();
+            atts = atts.put(new AttributeInfo(new FingerprintedQName(qName, namePool), BuiltInAtomicType.UNTYPED_ATOMIC,
+                                              attribute.getValue(), Loc.NONE, ReceiverOption.NONE));
+            if (!qName.getURI().isEmpty()) {
+                ns = ns.put(qName.getPrefix(), qName.getURI());
             }
         }
         receiver.startElement(new FingerprintedQName(nodeName, namePool), Untyped.getInstance(),

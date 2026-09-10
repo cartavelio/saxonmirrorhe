@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StaticProperty;
@@ -1296,12 +1295,11 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
                 p == INTEGER;
     }
 
-    //#ifdefined SCHEMA
     @Override
     public Function getComponentAsFunction() {
-        return UserSimpleType.getComponentAsFunction(this);
+        // Not supported, because a built-in atomic type is never exported
+        throw new UnsupportedOperationException();
     }
-    //#endif
 
 }
 

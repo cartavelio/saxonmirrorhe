@@ -1122,7 +1122,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     @Override
     public void generateByteCode(Optimizer opt) throws XPathException {
         // Generate byte code if appropriate
-
+        //#if BYTECODE==true
         if (getCompilation().getCompilerInfo().isGenerateByteCode() && !isTailRecursive) {
             ICompilerService compilerService = getConfiguration().makeCompilerService(HostLanguage.XSLT);
             if (getTemplateName() != null) {
@@ -1156,6 +1156,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                 }
             }
         }
+        //#endif
     }
 
 

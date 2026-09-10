@@ -182,8 +182,8 @@ public class LargeAttributeMap implements AttributeMap {
     }
 
     @Override
-    public synchronized List<AttributeInfo> asList() {
-        List<AttributeInfo> result = new ArrayList<>(_size);
+    public synchronized ArrayList<AttributeInfo> asList() {
+        ArrayList<AttributeInfo> result = new ArrayList<>(_size);
         for (AttributeInfo att : this) {
             result.add(att);
         }

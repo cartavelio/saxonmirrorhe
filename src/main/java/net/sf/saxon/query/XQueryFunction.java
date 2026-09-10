@@ -489,6 +489,7 @@ public class XQueryFunction implements Declaration, Location {
 
         compiledFunction.computeEvaluationMode();
         ExpressionTool.allocateSlots(body, arity, compiledFunction.getStackFrameMap());
+        //#if BYTECODE==true
         if (config.isGenerateByteCode(HostLanguage.XQUERY)) {
             if (config.getCountDown() == 0) {
                 ICompilerService compilerService = config.makeCompilerService(HostLanguage.XQUERY);
@@ -505,6 +506,7 @@ public class XQueryFunction implements Declaration, Location {
             compiledFunction.setBody(body);
             compiledFunction.computeEvaluationMode();
         }
+        //#endif
     }
 
     /**

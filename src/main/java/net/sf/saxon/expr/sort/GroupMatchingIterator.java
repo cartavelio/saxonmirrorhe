@@ -86,16 +86,19 @@ public abstract class GroupMatchingIterator implements LookaheadIterator, LastPo
 
     @Override
     public ManualGroupIterator getSnapShot(XPathContext context) {
-        return new ManualGroupMatchingIterator();
+        return new ManualGroupMatchingIterator(current, position, currentMembers, runningContext.newMinorContext());
     }
 
-    private class ManualGroupMatchingIterator extends ManualGroupIterator {
-        List<Item> cMembers = currentMembers;
-        XPathContext savedcontext = runningContext.newMinorContext();
+    private static class ManualGroupMatchingIterator extends ManualGroupIterator {
+        private final List<Item> cMembers;
+        private final XPathContext savedcontext;
 
-        ManualGroupMatchingIterator() {
+        public ManualGroupMatchingIterator(Item current, int position, List<Item> currentMembers, XPathContext savedContext) {
             super(current, position);
-            setLengthFinder(() -> savedcontext.getLast());
+            this.cMembers = currentMembers;
+            this.savedcontext = savedContext;
+            //noinspection Convert2MethodRef
+            setLengthFinder(() -> this.savedcontext.getLast());
         }
 
         @Override

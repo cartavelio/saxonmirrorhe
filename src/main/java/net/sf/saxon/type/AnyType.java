@@ -11,7 +11,10 @@ import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.IntHashSet;
 
@@ -174,23 +177,6 @@ public enum AnyType implements ComplexType {
     public int getFinalProhibitions() {
         return 0;
     }
-
-    //#ifdefined SCHEMA
-    /**
-     * Get the schema component in the form of a function item. This allows schema information
-     * to be made visible to XSLT or XQuery code. The function makes available the contents of the
-     * schema component as defined in the XSD specification. The function takes a string as argument
-     * representing a property name, and returns the corresponding property of the schema component.
-     * There is also a property "class" which returns the kind of schema component, for example
-     * "Attribute Declaration".
-     *
-     * @return the schema component represented as a function from property names to property values.
-     */
-    @Override
-    public Function getComponentAsFunction() {
-        return UserComplexType.getComponentAsFunction(this);
-    }
-    //#endif
 
     /**
      * Test whether this ComplexType has been marked as abstract.
@@ -647,5 +633,14 @@ public enum AnyType implements ComplexType {
     public boolean hasAssertions() {
         return false;
     }
+
+    //#ifdefined SCHEMA
+
+    @Override
+    public net.sf.saxon.om.Function getComponentAsFunction() {
+        return UserComplexType.getComponentAsFunction(this);
+    }
+    //#endif
+
 }
 

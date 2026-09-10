@@ -3113,31 +3113,6 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
-     * Get information about the schema in the form of a function item. Supports the extension function
-     * saxon:schema
-     *
-     * @return null for a non-schema-aware configuration
-     */
-
-    public Function getSchemaAsFunctionItem() {
-        return null;
-    }
-
-    /**
-     * Get information about the schema in the form of a function item. Supports the extension function
-     * saxon:schema
-     *
-     * @param kind the component kind, e.g. "element declaration"
-     * @param name the component name
-     * @return null for a non-schema-aware configuration
-     * @throws XPathException if an error occurs
-     */
-
-    public Function getSchemaComponentAsFunctionItem(String kind, QNameValue name) throws XPathException {
-        return null;
-    }
-
-    /**
      * Get a global element declaration by fingerprint
      *
      * @param fingerprint the NamePool fingerprint of the element name
@@ -3915,7 +3890,7 @@ public class Configuration implements SourceResolver, NotationSet {
      *
      * @param factory the factory class to be used when a new StaticQueryContext is required.
      *                Note that this is not used for the default StaticQueryContext held in the Configuration itself.
-     * @since 9.5.1.2
+     * @since 9.5.1.2. 
      */
 
     public void setStaticQueryContextFactory(StaticQueryContextFactory factory) {
@@ -4313,7 +4288,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param feature details of the property to be set
      * @param value value of the property to be set
      */
-    @CSharpModifiers(code="public")
+    @CSharpModifiers(code={"public", "virtual"})
     protected void setFeature(FeatureData feature, Object value) {
         String name = feature.uri;
         int code = feature.code;

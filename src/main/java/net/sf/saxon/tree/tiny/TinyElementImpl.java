@@ -257,7 +257,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         Configuration config = tree.getConfiguration();
         NamePool pool = config.getNamePool();
         int next = nodeNr;
-        CopyInformee informee = (CopyInformee) receiver.getPipelineConfiguration().getComponent(CopyInformee.class.getName());
+        CopyInformee informee = (CopyInformee) receiver.getPipelineConfiguration().getComponent("net.sf.saxon.event.CopyInformee");
         SchemaType elementType = Untyped.getInstance();
         SimpleType attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
 

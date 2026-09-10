@@ -46,7 +46,6 @@ public class CollectionFn extends SystemFunction implements Callable {
      */
     public static String EMPTY_COLLECTION_URI = "http://saxon.sf.net/collection/empty";
 
-    //#if CSHARP==false
     /**
      * An empty collection
      */
@@ -89,7 +88,6 @@ public class CollectionFn extends SystemFunction implements Callable {
             return false;
         }
     }
-    //#endif
 
     @Override
     public int getSpecialProperties(Expression[] arguments) {

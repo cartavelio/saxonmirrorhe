@@ -1,5 +1,6 @@
 package net.sf.saxon.type;
 
+import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
@@ -658,9 +659,10 @@ public class EnumerationType implements AtomicType {
      *
      * @return the schema component represented as a function from property names to property values.
      */
+
     @Override
-    public Function getComponentAsFunction() {
-        return null;
+    public net.sf.saxon.om.Function getComponentAsFunction() {
+        return UserSimpleType.getComponentAsFunction(this);
     }
     //#endif
 }
