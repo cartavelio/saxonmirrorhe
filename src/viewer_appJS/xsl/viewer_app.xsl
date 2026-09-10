@@ -197,9 +197,7 @@
                 
                 <xsl:variable name="count" select="count($hash-parts)"/>
                 <xsl:variable name="hpart" select="$hash-parts[$count]"/>
-                <xsl:variable name="subpage"
-                    select="if ($start = ('javadoc', 'dotnetdoc')) then substring-after($hpart, '@') 
-                    else ''"/>
+                <xsl:variable name="subpage" select="substring-after($hpart, '@')"/>
                 
                 <xsl:variable name="hash-parts-simp" select="if ($subpage eq '') then $hash-parts else
                     (subsequence($hash-parts, 1, $count - 1), substring-before($hpart, '@'))"/>
@@ -242,8 +240,7 @@
         <xsl:variable name="start" select="$hash-parts[1]"/>
         <xsl:variable name="count" select="count($hash-parts)"/>
         <xsl:variable name="hpart" select="$hash-parts[$count]"/>
-        <xsl:variable name="subpage"
-            select="if (contains($hpart, '@')) then substring-after($hpart, '@') else ''"/>
+        <xsl:variable name="subpage" select="substring-after($hpart, '@')"/>
         
         <xsl:variable name="hash-parts-simp" select="if ($subpage eq '') then $hash-parts else
             (subsequence($hash-parts, 1, $count - 1), substring-before($hpart, '@'))"/>
@@ -301,11 +298,15 @@
                         </xsl:otherwise>
                     </xsl:choose>
                     
-                    <xsl:sequence select="f:scrollpage($subpage)"/>
-                    
                 </xsl:result-document>
             </xsl:otherwise>
         </xsl:choose>
+        
+        <ixsl:schedule-action wait="1">
+            <xsl:call-template name="scrollpage">
+                <xsl:with-param name="id" select="$subpage"/>
+            </xsl:call-template>
+        </ixsl:schedule-action>
     </xsl:template>
     
     <xsl:template name="apidoc-page">
@@ -367,7 +368,6 @@
                                 <xsl:apply-templates mode="summarise-pkg" select="$packageDoc"/>
                                 <xsl:apply-templates mode="jdp" select="."/>
                             </xsl:for-each>
-                            <xsl:sequence select="f:scrollpage($subpage)"/>
                         </xsl:result-document>
                     </xsl:when>
                     <xsl:when test="$count gt 2">
@@ -381,10 +381,7 @@
                             </xsl:result-document>
                         </xsl:if>
                         <xsl:if test="exists($showclass)">
-                            <xsl:apply-templates select="$showclass" mode="show-class">
-                                <xsl:with-param name="subpage" select="$subpage" as="xs:string*"/>
-                                <!-- $subpage is substring-after($hash-parts[$count], '@') -->
-                            </xsl:apply-templates>
+                            <xsl:apply-templates select="$showclass" mode="show-class"/>
                         </xsl:if>
                     </xsl:when>
                 </xsl:choose>
@@ -393,8 +390,11 @@
         </xsl:choose>
     </xsl:template>
     
-    <!-- Used by javadoc and dotnetdoc to scroll to particular method, etc. -->
-    <!-- Also used for feature keys -->
+    <!-- Used by javadoc and dotnetdoc to scroll to particular method, etc. 
+        Also used to scroll to features in configuration/config-features.
+        (In fact should now be possible to scroll to any subsection with @id in page.)
+        Scrollpage is also used for preserving page position when navigating with "back" button.
+    -->
     <xsl:template name="scrollpage">
         <xsl:param name="id"/>
 
@@ -408,9 +408,9 @@
           </xsl:when>
           <xsl:otherwise>
             <xsl:variable name="subnode"
-                          select="(ixsl:page()/html/body/(./div[@id = 'wrap']/div[@id = 'main']/div[@class
-                                  = 'section']/div[@class = 'method']/h3[. eq $id], .//*[@id = $id]))[1]"
-                          as="node()?"/>
+                select="(ixsl:page()/html/body/(./div[@id = 'wrap']/div[@id = 'main']/div[@class =
+                'section']/div[@class = 'method']/h3[. eq $id], ./div[@id = 'wrap']/div[@id = 'main']//*[@id = $id]))[1]"
+                as="node()?"/>
             <!-- Note that scroll to overpopulated method just goes to first one  -->
         
             <xsl:choose>
@@ -426,15 +426,6 @@
           </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-    
-    <xsl:function name="f:scrollpage">
-        <xsl:param name="id"/>
-        <ixsl:schedule-action wait="1">
-            <xsl:call-template name="scrollpage">
-                <xsl:with-param name="id" select="$id"/>
-            </xsl:call-template>
-        </ixsl:schedule-action>
-    </xsl:function>
     
     
     <xsl:template name="platform-info">
