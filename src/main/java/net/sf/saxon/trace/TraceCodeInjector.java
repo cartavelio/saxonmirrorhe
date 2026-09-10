@@ -30,6 +30,27 @@ public class TraceCodeInjector implements CodeInjector {
         this.traceLevel = traceLevel;
     }
 
+    /**
+     * Convert trace level from string to integer
+     * @param level one of "none", "low", "normal", "high"
+     * @return the corresponding integer constant, for example {@link TraceLevel#HIGH}
+     */
+    public static int levelValue(String level) {
+        switch (level) {
+            case "none":
+                return TraceLevel.NONE;
+            case "low":
+                return TraceLevel.LOW;
+            case "normal":
+                return TraceLevel.NORMAL;
+            case "high":
+                return TraceLevel.HIGH;
+            default:
+                throw new IllegalArgumentException("Trace level " + level);
+        }
+    }
+
+
     @Override
     public Expression inject(Expression exp) {
         if (exp instanceof FLWORExpression) {

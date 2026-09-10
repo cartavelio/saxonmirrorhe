@@ -10,6 +10,7 @@ package net.sf.saxon;
 //import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
+import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
@@ -537,26 +538,23 @@ public class Transform {
 
                 value = options.getOptionValue("Tlevel");
                 if (value != null && traceListener instanceof AbstractTraceListener) {
-                    CompilerInfo info = compiler.getUnderlyingCompilerInfo();
-                    TraceCodeInjector injector = (TraceCodeInjector)info.getCodeInjector();
-                    switch (value) {
-                        case "none":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.NONE);
-                            injector.setTraceLevel(TraceLevel.NONE);
-                            break;
-                        case "low":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.LOW);
-                            injector.setTraceLevel(TraceLevel.LOW);
-                            break;
-                        case "normal":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.NORMAL);
-                            injector.setTraceLevel(TraceLevel.NORMAL);
-                            break;
-                        case "high":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.HIGH);
-                            injector.setTraceLevel(TraceLevel.HIGH);
-                            break;
+                    int level = TraceLevel.NONE;
+                    try {
+                        level = TraceCodeInjector.levelValue(value);
+                    } catch (IllegalArgumentException e) {
+                        quit("Invalid trace level " + value, 2);
                     }
+                    CompilerInfo info = compiler.getUnderlyingCompilerInfo();
+                    TraceCodeInjector injector = (TraceCodeInjector) info.getCodeInjector();
+                    CodeInjector globalXsltInjector = config.getDefaultXsltCompilerInfo().getCodeInjector();
+                    if (globalXsltInjector instanceof XSLTTraceCodeInjector) {
+                        // This is to handle the case where the configuration-level options are picked up
+                        // in a call of fn:transform - see bug #6498
+                        ((XSLTTraceCodeInjector) globalXsltInjector).setTraceLevel(level);
+                    }
+                    ((AbstractTraceListener) traceListener).setLevelOfDetail(level);
+                    injector.setTraceLevel(level);
+
                 }
             }
 

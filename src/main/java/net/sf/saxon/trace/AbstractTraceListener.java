@@ -62,10 +62,9 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     @Override
     public void open(Controller controller) {
-        out.info("<trace " +
+        out.info(spaces(indent++) + "<trace " +
                          "saxon-version=\"" + Version.getProductVersion() + "\" " +
                          getOpeningAttributes() + '>');
-        indent++;
     }
 
     protected String getOpeningAttributes() {
@@ -78,8 +77,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     @Override
     public void close() {
-        indent--;
-        out.info("</trace>");
+        out.info(spaces(indent--) + "</trace>");
     }
 
     /**
