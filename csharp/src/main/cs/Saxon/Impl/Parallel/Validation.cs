@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Hej.lib;
 using Saxon.Api;
@@ -15,8 +15,12 @@ namespace Saxon.Impl.Parallel {
                 Saxon.Hej.s9api.XsdSchema schema, 
                 IEnumerable<Source> sources,
                 InvalidityHandler invalidityHandler, 
-                SchemaValidatorImpl.ReportList reportDocs) {
-            System.Threading.Tasks.Parallel.ForEach(sources, source => {
+                SchemaValidatorImpl.ReportList reportDocs,
+                int threads) {
+            ParallelOptions options = new() {
+                MaxDegreeOfParallelism = threads
+            };
+            System.Threading.Tasks.Parallel.ForEach(sources, options, source => {
                 Saxon.Hej.s9api.SchemaValidator validator = schema.newValidator();
                 InvalidityHandler localHandler = invalidityHandler;
                 if (invalidityHandler is InvalidityReportGenerator) {
