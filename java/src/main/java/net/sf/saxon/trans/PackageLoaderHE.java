@@ -1344,7 +1344,7 @@ public class PackageLoaderHE implements IPackageLoader {
         if (attValue == null) {
             return SequenceType.ANY_SEQUENCE;
         } else {
-            return parser.parseExtendedSequenceType(attValue, env);
+            return parser.parseSequenceType(attValue, env);
         }
     }
 
@@ -1516,7 +1516,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     private ItemType parseItemType(NodeInfo element, String attValue) throws XPathException {
         IndependentContext env = makeStaticContext(element);
-        return parser.parseExtendedItemType(attValue, env);
+        return parser.parseItemType(attValue, env);
     }
 
     public AtomicComparer makeAtomicComparer(String name, NodeInfo element) throws XPathException {

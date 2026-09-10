@@ -674,7 +674,13 @@ public class SaxonErrorCode {
      * 4.0 incompatibility, union pattern whose branches have differing priority
      */
 
-    public static final String SQWN9052 = "SXWN9052";
+    public static final String SXWN9052 = "SXWN9052";
+
+    /**
+     * SXWN9053: saxon:as is deprecated in Saxon 13
+     */
+
+    public static final String SXWN9053 = "SXWN9053";
 
     /**
      * SXSD1000: unknown attribute group

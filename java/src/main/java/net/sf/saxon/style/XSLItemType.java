@@ -125,7 +125,7 @@ public class XSLItemType extends StyleElement {
                 reportAbsence("as");
                 typeAtt = "item()";
             }
-            SequenceType st = parser.parseExtendedSequenceType(typeAtt, env);
+            SequenceType st = parser.parseSequenceType(typeAtt, env);
             if (st.getCardinality() != StaticProperty.ALLOWS_ONE) {
                 compileError("Item type must not include an occurrence indicator");
             }

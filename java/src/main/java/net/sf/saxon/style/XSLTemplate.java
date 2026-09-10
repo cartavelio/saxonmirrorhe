@@ -379,6 +379,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
 
         if (extraAsAtt != null) {
+            compileWarning("saxon:as is deprecated", SaxonErrorCode.SXWN9053);
             SequenceType extraResultType;
             declaresRequiredType = true;
             try {
@@ -626,7 +627,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                                                    + " different default priority has changed in XSLT 4.0."
                                                    + " For compatibility, allocate an explicit priority,"
                                                    + " or split into multiple template rules",
-                                           SaxonErrorCode.SQWN9052);
+                                           SaxonErrorCode.SXWN9052);
                             break;
                         }
                     }

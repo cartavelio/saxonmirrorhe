@@ -17,6 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -213,6 +214,8 @@ public class SourceBinding {
                 setProperty(BindingProperty.TUNNEL, tunnel);
             } else if (NamespaceUri.SAXON.equals(attName.getNamespaceUri())) {
                 if (attName.getLocalPart().equals("as")) {
+                    sourceElement.compileWarning("saxon:as is deprecated",
+                                                 SaxonErrorCode.SXWN9053);
                     extraAsAtt = att.getValue();
                 }
             }

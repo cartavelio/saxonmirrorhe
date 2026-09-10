@@ -257,9 +257,9 @@ public class XSLMode extends StyleElement {
 
         if (asAtt != null) {               // TODO: ignore the complications of multiple xsl:mode declarations for now
             try {
-                requiredType = makeExtendedSequenceType(asAtt);
+                requiredType = makeSequenceType(asAtt);
             } catch (XPathException e) {
-                compileErrorInAttribute(e, "saxon:as");
+                compileErrorInAttribute(e, "as");
                 requiredType = SequenceType.ANY_SEQUENCE; // error recovery
             }
             //mode.setDefaultResultType(extraResultType);

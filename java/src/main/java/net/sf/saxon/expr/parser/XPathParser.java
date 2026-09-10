@@ -488,7 +488,6 @@ public class XPathParser {
                 break;
             case XSLT_PATTERN:
             case SEQUENCE_TYPE:
-            case EXTENDED_ITEM_TYPE:
                 if (!(version == 20 || version == 30 || version == 31 || version == 40)) {
                     throw new IllegalArgumentException("Unsupported language version " + version);
                 }
@@ -518,7 +517,6 @@ public class XPathParser {
             case XSLT_PATTERN -> "XSLT Pattern";
             case SEQUENCE_TYPE -> "SequenceType";
             case XQUERY -> "XQuery";
-            case EXTENDED_ITEM_TYPE -> "Extended ItemType";
             default -> "XPath";
         };
     }
@@ -717,12 +715,10 @@ public class XPathParser {
      * @throws XPathException if any error is encountered
      */
 
-    public ItemType parseExtendedItemType(String input, StaticContext env) throws XPathException {
+    public ItemType parseItemType(String input, StaticContext env) throws XPathException {
         this.env = env;
-        setLanguage(ParsedLanguage.EXTENDED_ITEM_TYPE, env.getXPathVersion());
         t = new Tokenizer();
         t.languageLevel = env.getXPathVersion();
-        allowSaxonExtensions = t.allowSaxonExtensions = true;
         try {
             t.tokenize(input, 0, -1);
         } catch (XPathException err) {
@@ -746,7 +742,7 @@ public class XPathParser {
      * @throws XPathException if any error is encountered
      */
 
-    public SequenceType parseExtendedSequenceType(String input, /*@NotNull*/ StaticContext env) throws XPathException {
+    public SequenceType parseExtendedSequenceType(String input, StaticContext env) throws XPathException {
         this.env = env;
         language = ParsedLanguage.EXTENDED_ITEM_TYPE;
         t = new Tokenizer();
@@ -2115,13 +2111,7 @@ public class XPathParser {
      * @throws XPathException if a static error is found
      */
 
-    /*@NotNull*/
     public ItemType parseItemType() throws XPathException {
-        ItemType extended = parserExtension.parseExtendedItemType(this);
-        return extended == null ? parseSimpleItemType() : extended;
-    }
-
-    private ItemType parseSimpleItemType() throws XPathException {
         ItemType primaryType;
         if (t.currentToken == Token.LPAREN) {
             primaryType = parseParenthesizedItemType();
@@ -4814,8 +4804,8 @@ public class XPathParser {
                 for (int pm = 0; pm < placeMarkerArgs.size(); pm++) {
                     Object pmId = placeMarkerArgs.get(pm);
                     if (pmId instanceof StructuredQName name) {
-                        boolean present = paramNameMap.containsKey(name);
-                        if (!present) {
+                        //boolean present = paramNameMap.containsKey(name);
+                        if (!paramNameMap.containsKey(name)) {
                             throw new XPathException("Keyword " + name.getEQName()
                                                              + " does not identify any parameter in the function being partially applied",
                                                      "XPST9999");

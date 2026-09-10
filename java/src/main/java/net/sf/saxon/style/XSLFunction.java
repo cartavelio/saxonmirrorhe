@@ -190,6 +190,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         }
 
         if (extraAsAtt != null) {
+            compileWarning("saxon:as is deprecated", SaxonErrorCode.SXWN9053);
             SequenceType extraResultType = null;
             try {
                 extraResultType = makeExtendedSequenceType(extraAsAtt);
