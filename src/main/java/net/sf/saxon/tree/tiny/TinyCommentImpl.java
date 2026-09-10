@@ -15,7 +15,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -53,7 +53,7 @@ final class TinyCommentImpl extends TinyNodeImpl {
 
     @Override
     public AtomicSequence atomize() {
-        return new StringItem(getUnicodeStringValue());
+        return new StringValue(getUnicodeStringValue());
     }
 
 

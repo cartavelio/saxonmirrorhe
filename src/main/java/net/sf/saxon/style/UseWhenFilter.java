@@ -409,7 +409,7 @@ public class UseWhenFilter extends ProxyReceiver {
                                                        + "empty sequence, but no value has been supplied", "XTDE0700", location);
                 } else {
                     if (asStr == null) {
-                        value = StringItem.EMPTY_STRING;
+                        value = StringValue.EMPTY_STRING;
                     } else {
                         value = EmptySequence.getInstance();
                     }

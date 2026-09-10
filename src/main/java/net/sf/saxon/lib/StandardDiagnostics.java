@@ -28,7 +28,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
@@ -497,7 +497,7 @@ public class StandardDiagnostics {
         if (threshold >= UTF16CharacterSet.NONBMP_MAX) {
             return in;
         }
-        StringItem str = new StringItem(in);
+        StringValue str = new StringValue(in);
 
         StringBuilder fsb = new StringBuilder(str.length32() * 2);
         IntIterator iter = str.codePoints();

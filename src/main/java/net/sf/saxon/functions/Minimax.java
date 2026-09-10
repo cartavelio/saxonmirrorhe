@@ -226,7 +226,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
                     foundDouble = true;
                 } else if (prim instanceof FloatValue) {
                     foundFloat = true;
-                } else if (prim instanceof StringItem && !(prim instanceof AnyURIValue)) {
+                } else if (prim instanceof StringValue && !(prim instanceof AnyURIValue)) {
                     foundString = true;
                 }
             }
@@ -283,7 +283,7 @@ public abstract class Minimax extends CollatingFunctionFixed {
                     foundDouble = true;
                 } else if (prim instanceof FloatValue) {
                     foundFloat = true;
-                } else if (prim instanceof StringItem && !(prim instanceof AnyURIValue)) {
+                } else if (prim instanceof StringValue && !(prim instanceof AnyURIValue)) {
                     foundString = true;
                 }
             }

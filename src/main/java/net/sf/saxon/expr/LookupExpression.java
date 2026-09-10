@@ -389,7 +389,7 @@ public class LookupExpression extends BinaryExpression {
                         );
                     }
                     case EXTERNAL: {
-                        if (!(rhs instanceof StringItem)) {
+                        if (!(rhs instanceof StringValue)) {
                             XPathException exception = new XPathException(
                                     "An item on the LHS of the '?' operator is an external object, but a value on the RHS of the operator (" +
                                             baseItem.toShortString() + ") is not a singleton string", "XPTY0004");
@@ -398,8 +398,8 @@ public class LookupExpression extends BinaryExpression {
                             exception.setFailingExpression(LookupExpression.this);
                             throw exception;
                         }
-                        String key = ((StringItem) rhs).getStringValue();
-                        return config.externalObjectAsMap((ObjectValue<?>) baseItem, key).get((StringItem) rhs).iterate();
+                        String key = ((StringValue) rhs).getStringValue();
+                        return config.externalObjectAsMap((ObjectValue<?>) baseItem, key).get((StringValue) rhs).iterate();
                     }
                     default: {
                         mustBeArrayOrMap(this, baseItem);

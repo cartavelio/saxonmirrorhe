@@ -878,7 +878,7 @@ public class XQueryParser extends XPathParser {
                             return null;
                     }
                     GroundedValue val = arg.getGroundedValue();
-                    if (val instanceof StringItem || val instanceof NumericValue) {
+                    if (val instanceof StringValue || val instanceof NumericValue) {
                         annotation.addAnnotationParameter((AtomicValue) val);
                     } else {
                         grumble("Annotation parameter must be a string or number");
@@ -2846,7 +2846,7 @@ public class XQueryParser extends XPathParser {
             return exp;
         } else {
             RetainedStaticContext rsc = new RetainedStaticContext(env);
-            Expression fn = SystemFunction.makeCall("string-join", rsc, exp, new StringLiteral(StringItem.SINGLE_SPACE));
+            Expression fn = SystemFunction.makeCall("string-join", rsc, exp, new StringLiteral(StringValue.SINGLE_SPACE));
             ExpressionTool.copyLocationInfo(exp, fn);
             return fn;
         }
@@ -3520,8 +3520,8 @@ public class XQueryParser extends XPathParser {
             GroundedValue vName = ((Literal) name).getGroundedValue();
             // if element name is supplied as a literal, treat it like a direct element constructor
             NodeName elemName;
-            if (vName instanceof StringItem && !(vName instanceof AnyURIValue)) {
-                String lex = ((StringItem) vName).getStringValue();
+            if (vName instanceof StringValue && !(vName instanceof AnyURIValue)) {
+                String lex = ((StringValue) vName).getStringValue();
                 try {
                     QNameParser oldQP = getQNameParser();
                     setQNameParser(oldQP.withUnescaper(null));
@@ -3650,8 +3650,8 @@ public class XQueryParser extends XPathParser {
         nextToken();
         if (name instanceof Literal) {
             GroundedValue vName = ((Literal) name).getGroundedValue();
-            if (vName instanceof StringItem && !(vName instanceof AnyURIValue)) {
-                String lex = ((StringItem) vName).getStringValue();
+            if (vName instanceof StringValue && !(vName instanceof AnyURIValue)) {
+                String lex = ((StringValue) vName).getStringValue();
                 if (lex.equals("xmlns") || lex.startsWith("xmlns:")) {
                     grumble("Cannot create a namespace using an attribute constructor", "XQDY0044", offset);
                 }
@@ -4036,7 +4036,7 @@ public class XQueryParser extends XPathParser {
 
     protected void makeSimpleContent(Expression content, SimpleNodeConstructor inst, int offset) {
         if (content == null) {
-            inst.setSelect(new StringLiteral(StringItem.EMPTY_STRING));
+            inst.setSelect(new StringLiteral(StringValue.EMPTY_STRING));
         } else {
             inst.setSelect(stringify(content, false, env));
         }
@@ -4517,7 +4517,7 @@ public class XQueryParser extends XPathParser {
         // is it empty?
 
         if (components.isEmpty()) {
-            return new StringLiteral(StringItem.EMPTY_STRING);
+            return new StringLiteral(StringValue.EMPTY_STRING);
         }
 
         // is it a single component?
@@ -4681,7 +4681,7 @@ public class XQueryParser extends XPathParser {
                         (containsEntities |
                                  ((QueryModule) env).isPreserveBoundarySpace() ||
                                  !Whitespace.isAllWhite(StringView.of(textStr)))) {
-                    ValueOf inst = new ValueOf(new StringLiteral(new StringItem(textStr)), false, false);
+                    ValueOf inst = new ValueOf(new StringLiteral(new StringValue(textStr)), false, false);
                     setLocation(inst);
                     components.add(inst);
                     afterEnclosedExpr = false;
@@ -4715,7 +4715,7 @@ public class XQueryParser extends XPathParser {
                         if (!previousComponentIsNodeTest) {
                             // Add a zero-length text node, to prevent {"a"}{"b"} generating an intervening space
                             // See tests (qxmp132, qxmp261)
-                            ValueOf inst = new ValueOf(new StringLiteral(StringItem.EMPTY_STRING), false, false);
+                            ValueOf inst = new ValueOf(new StringLiteral(StringValue.EMPTY_STRING), false, false);
                             setLocation(inst);
                             components.add(inst);
                         }
@@ -4830,7 +4830,7 @@ public class XQueryParser extends XPathParser {
             }
             String commentText = comment.substring(0, comment.length() - 2);
             Comment instruction = new Comment();
-            instruction.setSelect(new StringLiteral(new StringItem(commentText.toString())));
+            instruction.setSelect(new StringLiteral(new StringValue(commentText.toString())));
             setLocation(instruction);
             return instruction;
         } catch (StringIndexOutOfBoundsException err) {
@@ -4866,7 +4866,7 @@ public class XQueryParser extends XPathParser {
         exp = new AtomicSequenceConverter(exp, BuiltInAtomicType.STRING);
         //((AtomicSequenceConverter) exp).allocateConverter(config, false);
         // Join the resulting strings with a separator
-        exp = SystemFunction.makeCall("string-join", exp.getRetainedStaticContext(), exp, new StringLiteral(StringItem.SINGLE_SPACE));
+        exp = SystemFunction.makeCall("string-join", exp.getRetainedStaticContext(), exp, new StringLiteral(StringValue.SINGLE_SPACE));
         assert exp != null;
         if (noNodeIfEmpty) {
             ((StringJoin) ((SystemFunctionCall) exp).getTargetFunction()).setReturnEmptyIfEmpty(true);
@@ -4894,7 +4894,7 @@ public class XQueryParser extends XPathParser {
             lit = new StringLiteral(token);
         } else {
             CharSequence sb = unescape(token);
-            lit = new StringLiteral(StringItem.makeStringValue(sb));
+            lit = new StringLiteral(StringValue.makeStringValue(sb));
         }
         setLocation(lit);
         return lit;
@@ -5069,7 +5069,7 @@ public class XQueryParser extends XPathParser {
         while (true) {
             boolean emptyExpression = t.currentToken == Token.RCURLY;
             if (emptyExpression) {
-                components.add(new StringLiteral(StringItem.EMPTY_STRING));
+                components.add(new StringLiteral(StringValue.EMPTY_STRING));
             } else {
                 Expression enclosed = parseExpression();
                 Expression stringJoin = SystemFunction.makeCall(

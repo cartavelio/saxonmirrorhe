@@ -62,7 +62,7 @@ public class Number_1 extends ScalarSystemFunction {
             return Converter.BooleanToDouble.INSTANCE.convert(arg0);
         } else if (arg0 instanceof NumericValue) {
             return (DoubleValue) Converter.NumericToDouble.INSTANCE.convert(arg0).asAtomic();
-        } else if (arg0 instanceof StringItem && !(arg0 instanceof AnyURIValue)) {
+        } else if (arg0 instanceof StringValue && !(arg0 instanceof AnyURIValue)) {
             // Always use the XSD 1.1 rules, which permit "+INF"
             ConversionResult cr = StringToDouble11.getInstance().convert(arg0);
             if (cr instanceof ValidationFailure) {
@@ -98,7 +98,7 @@ public class Number_1 extends ScalarSystemFunction {
             if (value instanceof NumericValue) {
                 return new DoubleValue(((NumericValue) value).getDoubleValue());
             }
-            if (value instanceof StringItem && !(value instanceof AnyURIValue)) {
+            if (value instanceof StringValue && !(value instanceof AnyURIValue)) {
                 double d = config.getConversionRules().getStringToDoubleConverter().stringToNumber(value.getUnicodeStringValue());
                 return new DoubleValue(d);
             }

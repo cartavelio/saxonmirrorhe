@@ -9,7 +9,7 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -24,7 +24,7 @@ public interface RegexIterator extends SequenceIterator {
      * iterator.
      */
     @Override
-    StringItem next();
+    StringValue next();
 
     /**
      * Determine whether the current item in the sequence is a matching item or a non-matching item

@@ -258,7 +258,7 @@ public class Parts extends SystemFunction implements Callable {
                     String prefix = ((QNameValue) a).getStructuredQName().getPrefix();
                     return prefix.isEmpty()
                             ? EmptyIterator.ofAtomic()
-                            : SingletonIterator.makeIterator(new StringItem(prefix, BuiltInAtomicType.NCNAME));
+                            : SingletonIterator.makeIterator(new StringValue(prefix, BuiltInAtomicType.NCNAME));
                  }
         );
         register(BuiltInAtomicType.QNAME, "namespace-uri", SequenceType.OPTIONAL_STRING,
@@ -266,49 +266,49 @@ public class Parts extends SystemFunction implements Callable {
                      String uri = ((QNameValue) a).getStructuredQName().getURI();
                      return uri.isEmpty()
                              ? EmptyIterator.ofAtomic()
-                             : SingletonIterator.makeIterator(new StringItem(uri, BuiltInAtomicType.ANY_URI));
+                             : SingletonIterator.makeIterator(new StringValue(uri, BuiltInAtomicType.ANY_URI));
                  }
         );
         register(BuiltInAtomicType.QNAME, "local-name", SequenceType.SINGLE_STRING,
                  a -> {
                      String local = ((QNameValue) a).getStructuredQName().getLocalPart();
-                     return SingletonIterator.makeIterator(new StringItem(local, BuiltInAtomicType.NCNAME));
+                     return SingletonIterator.makeIterator(new StringValue(local, BuiltInAtomicType.NCNAME));
                  }
         );
         register(BuiltInAtomicType.ANY_URI, "scheme", SequenceType.OPTIONAL_STRING,
                  a -> {
                      MapItem map = uriComponents(a.getStringValue());
-                     return SingletonIterator.makeIterator((StringItem)map.get(new StringItem("scheme")));
+                     return SingletonIterator.makeIterator((StringValue)map.get(new StringValue("scheme")));
                  }
         );
         register(BuiltInAtomicType.ANY_URI, "authority", SequenceType.OPTIONAL_STRING,
                  a -> {
                      MapItem map = uriComponents(a.getStringValue());
-                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("authority")));
+                     return SingletonIterator.makeIterator((StringValue) map.get(new StringValue("authority")));
                  }
         );
         register(BuiltInAtomicType.ANY_URI, "path", SequenceType.OPTIONAL_STRING,
                  a -> {
                      MapItem map = uriComponents(a.getStringValue());
-                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("path")));
+                     return SingletonIterator.makeIterator((StringValue) map.get(new StringValue("path")));
                  }
         );
         register(BuiltInAtomicType.ANY_URI, "query", SequenceType.OPTIONAL_STRING,
                  a -> {
                      MapItem map = uriComponents(a.getStringValue());
-                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("query")));
+                     return SingletonIterator.makeIterator((StringValue) map.get(new StringValue("query")));
                  }
         );
         register(BuiltInAtomicType.ANY_URI, "fragment", SequenceType.OPTIONAL_STRING,
                  a -> {
                      MapItem map = uriComponents(a.getStringValue());
-                     return SingletonIterator.makeIterator((StringItem) map.get(new StringItem("fragment")));
+                     return SingletonIterator.makeIterator((StringValue) map.get(new StringValue("fragment")));
                  }
         );
         register(BuiltInAtomicType.ANY_URI, "query-parameters", MapType.SINGLE_MAP_ITEM,
                  a -> {
                      MapItem map = uriComponents(a.getStringValue());
-                     return SingletonIterator.makeIterator((MapItem) map.get(new StringItem("queryParams")));
+                     return SingletonIterator.makeIterator((MapItem) map.get(new StringValue("queryParams")));
                  }
         );
 
@@ -375,35 +375,35 @@ public class Parts extends SystemFunction implements Callable {
             dict.initialPut("isOpaque", BooleanValue.get(test));
             String val = uri.getAuthority();
             if (val != null) {
-                dict.initialPut("authority", new StringItem(val));
+                dict.initialPut("authority", new StringValue(val));
             }
             val = uri.getRawAuthority();
             if (val != null) {
-                dict.initialPut("rawAuthority", new StringItem(val));
+                dict.initialPut("rawAuthority", new StringValue(val));
             }
             val = uri.getUserInfo();
             if (val != null) {
-                dict.initialPut("userInfo", new StringItem(val));
+                dict.initialPut("userInfo", new StringValue(val));
             }
             val = uri.getRawUserInfo();
             if (val != null) {
-                dict.initialPut("rawUserInfo", new StringItem(val));
+                dict.initialPut("rawUserInfo", new StringValue(val));
             }
             val = uri.getScheme();
             if (val != null) {
-                dict.initialPut("scheme", new StringItem(val));
+                dict.initialPut("scheme", new StringValue(val));
             }
             val = uri.getHost();
             if (val != null) {
-                dict.initialPut("host", new StringItem(val));
+                dict.initialPut("host", new StringValue(val));
             }
             val = uri.getSchemeSpecificPart();
             if (val != null) {
-                dict.initialPut("schemeSpecificPart", new StringItem(val));
+                dict.initialPut("schemeSpecificPart", new StringValue(val));
             }
             val = uri.getRawSchemeSpecificPart();
             if (val != null) {
-                dict.initialPut("rawSchemeSpecificPart", new StringItem(val));
+                dict.initialPut("rawSchemeSpecificPart", new StringValue(val));
             }
             int port = uri.getPort();
             if (port >= 0) {
@@ -411,19 +411,19 @@ public class Parts extends SystemFunction implements Callable {
             }
             val = uri.getPath();
             if (val != null) {
-                dict.initialPut("path", new StringItem(val));
+                dict.initialPut("path", new StringValue(val));
             }
             val = uri.getRawPath();
             if (val != null) {
-                dict.initialPut("rawPath", new StringItem(val));
+                dict.initialPut("rawPath", new StringValue(val));
             }
             val = uri.getRawQuery();
             if (val != null) {
-                dict.initialPut("rawQuery", new StringItem(val));
+                dict.initialPut("rawQuery", new StringValue(val));
             }
             val = uri.getQuery();
             if (val != null) {
-                dict.initialPut("query", new StringItem(val));
+                dict.initialPut("query", new StringValue(val));
                 DictionaryMap params = new DictionaryMap();
                 StringTokenizer t = new StringTokenizer(val, ";&");
                 while (t.hasMoreTokens()) {
@@ -432,7 +432,7 @@ public class Parts extends SystemFunction implements Callable {
                     if (eq >= 0) {
                         String keyword = tok.substring(0, eq);
                         String value = tok.substring(eq + 1);
-                        params.initialAppend(keyword, new StringItem(value));
+                        params.initialAppend(keyword, new StringValue(value));
                     } else {
                         params.initialAppend(tok, BooleanValue.TRUE);
                     }
@@ -441,20 +441,20 @@ public class Parts extends SystemFunction implements Callable {
             }
             val = uri.getRawFragment();
             if (val != null) {
-                dict.initialPut("rawFragment", new StringItem(val));
+                dict.initialPut("rawFragment", new StringValue(val));
             }
             val = uri.getFragment();
             if (val != null) {
-                dict.initialPut("fragment", new StringItem(val));
+                dict.initialPut("fragment", new StringValue(val));
             }
             val = uri.toASCIIString();
             if (val != null) {
-                dict.initialPut("asciiString", new StringItem(val));
+                dict.initialPut("asciiString", new StringValue(val));
             }
             return dict;
         } catch (URISyntaxException e) {
             dict.initialPut("isValid", BooleanValue.FALSE);
-            dict.initialPut("error", new StringItem(e.getMessage()));
+            dict.initialPut("error", new StringValue(e.getMessage()));
             return dict;
         }
     }

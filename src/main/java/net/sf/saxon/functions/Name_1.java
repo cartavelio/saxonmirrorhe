@@ -12,7 +12,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class supports the name() function with one argument
@@ -21,13 +21,13 @@ import net.sf.saxon.value.StringItem;
 public class Name_1 extends ScalarSystemFunction {
 
     @Override
-    public StringItem evaluate(Item item, XPathContext context) throws XPathException {
-        return StringItem.makeStringValue(((NodeInfo) item).getDisplayName());
+    public StringValue evaluate(Item item, XPathContext context) throws XPathException {
+        return StringValue.makeStringValue(((NodeInfo) item).getDisplayName());
     }
 
     @Override
     public Sequence resultWhenEmpty() {
-        return StringItem.EMPTY_STRING;
+        return StringValue.EMPTY_STRING;
     }
 
     @Override

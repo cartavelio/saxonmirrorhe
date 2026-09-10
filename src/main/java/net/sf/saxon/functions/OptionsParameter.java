@@ -25,7 +25,7 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.*;
 
@@ -111,7 +111,7 @@ public class OptionsParameter {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
         for (String req : requiredOptions) {
-            if (supplied.get(new StringItem(req)) == null) {
+            if (supplied.get(new StringValue(req)) == null) {
                 throw new XPathException("No value supplied for required option: " + req, errorCodeForAbsentValue);
             }
         }
@@ -122,17 +122,17 @@ public class OptionsParameter {
             if (nominalKey.startsWith("Q{")) {
                 actualKey = new QNameValue(StructuredQName.fromEQName((nominalKey)), BuiltInAtomicType.QNAME);
             } else {
-                actualKey = new StringItem(nominalKey);
+                actualKey = new StringValue(nominalKey);
             }
             SequenceType required = allowed.getValue();
             GroundedValue actual = supplied.get(actualKey);
             if (actual != null) {
                 if (!required.matches(actual, th)) {
                     boolean ok = false;
-                    if (actual instanceof StringItem && allowCastFromString
+                    if (actual instanceof StringValue && allowCastFromString
                             && required.getPrimaryType() instanceof AtomicType) {
                         try {ConversionRules rules = context.getConfiguration().getConversionRules();
-                            actual = Converter.convert((StringItem)actual, (AtomicType)required.getPrimaryType(), rules);
+                            actual = Converter.convert((StringValue)actual, (AtomicType)required.getPrimaryType(), rules);
                             ok = true;
                         } catch (XPathException err) {
                             ok = false;

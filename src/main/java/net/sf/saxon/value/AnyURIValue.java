@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
  * before constructing the AnyURIValue.</p>
  */
 
-public final class AnyURIValue extends StringItem {
+public final class AnyURIValue extends StringValue {
 
     /*@NotNull*/ public static final AnyURIValue EMPTY_URI = new AnyURIValue(EmptyUniString.getInstance());
 
@@ -78,8 +78,8 @@ public final class AnyURIValue extends StringItem {
         return v;
     }
 
-    public StringItem convertToString() {
-        return new StringItem(getContent(), BuiltInAtomicType.STRING);
+    public StringValue convertToString() {
+        return new StringValue(getContent(), BuiltInAtomicType.STRING);
     }
 
     /*@NotNull*/

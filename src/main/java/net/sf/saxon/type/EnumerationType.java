@@ -6,7 +6,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Collections;
@@ -316,7 +316,7 @@ public class EnumerationType implements AtomicType {
      */
     @Override
     public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
-        return new StringItem(value);
+        return new StringValue(value);
     }
 
     /**

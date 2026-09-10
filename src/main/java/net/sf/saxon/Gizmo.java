@@ -711,7 +711,7 @@ public class Gizmo {
     private void save(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         Whitespace.Tokenizer tokens = new Whitespace.Tokenizer(StringView.tidy(buffer.toString()));
-        StringItem fileName = tokens.next();
+        StringValue fileName = tokens.next();
         if (fileName == null) {
             throw new XPathException("No file name supplied");
         }
@@ -730,7 +730,7 @@ public class Gizmo {
         }
         StreamResult out = new StreamResult(dest);
         SerializationProperties props = new SerializationProperties();
-        StringItem prop;
+        StringValue prop;
         while ((prop = tokens.next()) != null) {
             try {
                 String[] parts = prop.getStringValue().split("=");

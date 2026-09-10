@@ -508,7 +508,7 @@ public class Whitespace {
         }
 
         @Override
-        public StringItem next() {
+        public StringValue next() {
             long start = position;
             long eol = input.length();
             while (start < eol && isWhite(input.codePointAt(start))) {
@@ -522,7 +522,7 @@ public class Whitespace {
                 end++;
             }
             position = end;
-            return new StringItem(input.substring(start, end));
+            return new StringValue(input.substring(start, end));
         }
 
         @Override

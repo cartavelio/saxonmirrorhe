@@ -12,7 +12,7 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.CalendarValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A comparer that compares atomic values for equality, with the properties:
@@ -46,7 +46,7 @@ public class EquivalenceComparer extends GenericAtomicComparer {
     @Override
     public boolean comparesEqual (AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         // System.err.println("Comparing " + a.getClass() + ": " + a + " with " + b.getClass() + ": " + b);
-        if (a instanceof StringItem && b instanceof StringItem) {
+        if (a instanceof StringValue && b instanceof StringValue) {
             return getStringCollator().comparesEqual(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else if (a instanceof CalendarValue && b instanceof CalendarValue) {
             return ((CalendarValue) a).compareTo((CalendarValue) b, getContext().getImplicitTimezone()) == 0;

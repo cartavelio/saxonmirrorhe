@@ -174,7 +174,7 @@ public class ComputedElement extends ElementCreator {
             // Check we have a valid lexical QName, whose prefix is in scope where necessary
             try {
                 AtomicValue val = (AtomicValue) ((Literal) getNameExp()).getGroundedValue();
-                if (val instanceof StringItem) {
+                if (val instanceof StringValue) {
                     String[] parts = NameChecker.checkQNameParts(val.getStringValue());
                     if (getNamespaceExp() == null) {
                         String prefix = parts[0];
@@ -299,7 +299,7 @@ public class ComputedElement extends ElementCreator {
             throw dynamicError(getLocation(), err1, context);
         }
         //nameValue = nameValue.getPrimitiveValue();
-        if (nameValue instanceof StringItem) {  // which includes UntypedAtomic
+        if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
             // this will always be the case in XSLT
             String rawName = nameValue.getStringValue();
             rawName = Whitespace.trim(rawName);

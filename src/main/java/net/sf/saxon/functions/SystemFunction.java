@@ -586,7 +586,7 @@ public abstract class SystemFunction extends AbstractFunction {
      */
 
     protected UnicodeString getUniStringArg(Sequence supplied) throws XPathException {
-        StringItem item = (StringItem)supplied.head();
+        StringValue item = (StringValue)supplied.head();
         return item == null ? EmptyUniString.getInstance() : item.getUnicodeStringValue();
     }
 

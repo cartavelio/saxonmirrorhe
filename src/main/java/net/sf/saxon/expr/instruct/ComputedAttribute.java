@@ -218,7 +218,7 @@ public final class ComputedAttribute extends AttributeCreator {
             // Check we have a valid lexical QName, whose prefix is in scope where necessary
             try {
                 AtomicValue val = (AtomicValue) ((Literal) getNameExp()).getGroundedValue();
-                if (val instanceof StringItem) {
+                if (val instanceof StringValue) {
                     String[] parts = NameChecker.checkQNameParts(val.getStringValue());
                     if (getNamespaceExp() == null) {
                         String uri = getNamespaceResolver().getURIForPrefix(parts[0], false);
@@ -333,7 +333,7 @@ public final class ComputedAttribute extends AttributeCreator {
         String localName;
         String uri = null;
 
-        if (nameValue instanceof StringItem) {
+        if (nameValue instanceof StringValue) {
             // this will always be the case in XSLT
             String rawName = nameValue.getStringValue();
             rawName = Whitespace.trim(rawName); // required in XSLT; possibly wrong in XQuery

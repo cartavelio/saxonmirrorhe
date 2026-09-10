@@ -15,7 +15,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class supports the generate-id() function with one argument
@@ -39,7 +39,7 @@ public class GenerateId_1 extends ScalarSystemFunction {
 
     @Override
     public Sequence resultWhenEmpty() {
-        return StringItem.EMPTY_STRING;
+        return StringValue.EMPTY_STRING;
     }
 
     @Override
@@ -47,10 +47,10 @@ public class GenerateId_1 extends ScalarSystemFunction {
         return generateId((NodeInfo)arg);
     }
 
-    public static StringItem generateId(NodeInfo node) {
+    public static StringValue generateId(NodeInfo node) {
         StringBuilder buffer = new StringBuilder(16);
         node.generateId(buffer);
-        return new StringItem(buffer.toString());
+        return new StringValue(buffer.toString());
 
     }
 

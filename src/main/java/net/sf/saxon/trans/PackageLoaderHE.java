@@ -3160,7 +3160,7 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("str", (loader, element) -> StringLiteral.makeLiteral(
-                new StringItem(element.getAttributeValue("", "val"))
+                new StringValue(element.getAttributeValue("", "val"))
         ));
 
 

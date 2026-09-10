@@ -14,7 +14,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * CommentImpl is an implementation of a Comment node
@@ -46,7 +46,7 @@ public class CommentImpl extends NodeImpl {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() {
-        return new StringItem(getUnicodeStringValue());
+        return new StringValue(getUnicodeStringValue());
     }
 
     @Override

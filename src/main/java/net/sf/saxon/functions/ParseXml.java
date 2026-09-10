@@ -27,7 +27,7 @@ import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
@@ -52,7 +52,7 @@ public class ParseXml extends SystemFunction implements Callable {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem input = (StringItem) arguments[0].head();
+        StringValue input = (StringValue) arguments[0].head();
         if (input == null) {
             return EmptySequence.getInstance();
             //#if CSHARP==false
@@ -77,7 +77,7 @@ public class ParseXml extends SystemFunction implements Callable {
      * @return the parsed document, as a tree
      * @throws XPathException if parsing fails
      */
-    private NodeInfo parseXmlPush(StringItem inputArg, XPathContext context) throws XPathException {
+    private NodeInfo parseXmlPush(StringValue inputArg, XPathContext context) throws XPathException {
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
 
         RetentiveErrorHandler errorHandler = new RetentiveErrorHandler();
@@ -167,7 +167,7 @@ public class ParseXml extends SystemFunction implements Callable {
      * @return the parsed document, as a tree
      * @throws XPathException if parsing fails
      */
-    private NodeInfo parseXmlPull(StringItem inputArg, XPathContext context) throws XPathException {
+    private NodeInfo parseXmlPull(StringValue inputArg, XPathContext context) throws XPathException {
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
 
         try {

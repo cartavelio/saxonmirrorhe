@@ -62,11 +62,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 ON_DUPLICATES_CALLBACK_TYPE, StaticProperty.EXACTLY_ONE);
 
         OptionsParameter mergeOptionDetails = new OptionsParameter();
-        mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringItem.bmp("use-first"));
+        mergeOptionDetails.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));
         // duplicates=unspecified is retained because that's what the XSLT 3.0 Rec incorrectly uses
         mergeOptionDetails.setAllowedValues("duplicates", "FOJS0005", "use-first", "use-last", "combine", "reject", "unspecified", "use-any", "use-callback");
-        mergeOptionDetails.addAllowedOption(MapMerge.errorCodeKey, SequenceType.SINGLE_STRING, StringItem.bmp("FOJS0003"));
-        mergeOptionDetails.addAllowedOption(MapMerge.keyTypeKey, SequenceType.SINGLE_STRING, StringItem.bmp("anyAtomicType"));
+        mergeOptionDetails.addAllowedOption(MapMerge.errorCodeKey, SequenceType.SINGLE_STRING, StringValue.bmp("FOJS0003"));
+        mergeOptionDetails.addAllowedOption(MapMerge.keyTypeKey, SequenceType.SINGLE_STRING, StringValue.bmp("anyAtomicType"));
         mergeOptionDetails.addAllowedOption(MapMerge.finalKey, SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         mergeOptionDetails.addAllowedOption(MapMerge.onDuplicatesKey, oneOnDuplicatesFunction, null);
 
@@ -451,15 +451,15 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 MapItem options = (MapItem) ((Literal)arguments[1]).getGroundedValue().head();
                 Map<String, Sequence> values = getDetails().optionDetails.processSuppliedOptions(
                         options, visitor.getStaticContext().makeEarlyEvaluationContext());
-                String duplicates = ((StringItem) values.get("duplicates")).getStringValue();
-                String duplicatesErrorCode = ((StringItem) values.get(errorCodeKey)).getStringValue();
+                String duplicates = ((StringValue) values.get("duplicates")).getStringValue();
+                String duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
                 Function onDuplicates = (Function)values.get(onDuplicatesKey);
                 if (onDuplicates != null) {
                     duplicates = "use-callback";
                 }
 
                 boolean isFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
-                String keyType = ((StringItem) values.get(keyTypeKey)).getStringValue();
+                String keyType = ((StringValue) values.get(keyTypeKey)).getStringValue();
                 MapMerge mm2 = (MapMerge)MapFunctionSet.getInstance().makeFunction("merge", 1);
                 mm2.duplicates = duplicates;
                 mm2.duplicatesErrorCode = duplicatesErrorCode;
@@ -488,7 +488,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     maybeCombined = false;
                 } else if (args[1] instanceof Literal) {
                     MapItem options = (MapItem) ((Literal) args[1]).getGroundedValue().head();
-                    GroundedValue dupes = options.get(StringItem.bmp("duplicates"));
+                    GroundedValue dupes = options.get(StringValue.bmp("duplicates"));
                     try {
                         if (dupes != null && !"combine".equals(dupes.getStringValue())) {
                             maybeCombined = false;
@@ -518,10 +518,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             if (arguments.length > 1) {
                 MapItem options = (MapItem) arguments[1].head();
                 Map<String, Sequence> values = getDetails().optionDetails.processSuppliedOptions(options, context);
-                duplicates = ((StringItem) values.get("duplicates")).getStringValue();
-                duplicatesErrorCode = ((StringItem) values.get(errorCodeKey)).getStringValue();
+                duplicates = ((StringValue) values.get("duplicates")).getStringValue();
+                duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
                 treatAsFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
-                allStringKeys = "string".equals(((StringItem)values.get(keyTypeKey)).getStringValue());
+                allStringKeys = "string".equals(((StringValue)values.get(keyTypeKey)).getStringValue());
                 onDuplicates = (Function) values.get(onDuplicatesKey);
                 if (onDuplicates != null) {
                     duplicates = "use-callback";
@@ -541,7 +541,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     case "use-last":
                         while ((next = (MapItem) iter.next()) != null) {
                             for (KeyValuePair pair : next.keyValuePairs()) {
-                                if (!(pair.key instanceof StringItem)) {
+                                if (!(pair.key instanceof StringValue)) {
                                     throw new XPathException("The keys in this map must all be strings (found " + pair.key.getItemType() + ")");
                                 }
                                 baseMap.initialPut(pair.key.getStringValue(), pair.value);
@@ -551,7 +551,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     default:
                         while ((next = (MapItem) iter.next()) != null) {
                             for (KeyValuePair pair : next.keyValuePairs()) {
-                                if (!(pair.key instanceof StringItem)) {
+                                if (!(pair.key instanceof StringValue)) {
                                     throw new XPathException("The keys in this map must all be strings (found " + pair.key.getItemType() + ")");
                                 }
                                 Sequence existing = baseMap.get(pair.key);
@@ -685,8 +685,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public void exportAdditionalArguments(SystemFunctionCall call, ExpressionPresenter out) throws XPathException {
             if (call.getArity() == 1) {
                 HashTrieMap options = new HashTrieMap();
-                options.initialPut(StringItem.bmp("duplicates"), new StringItem(duplicates));
-                options.initialPut(StringItem.bmp("duplicates-error-code"), new StringItem(duplicatesErrorCode));
+                options.initialPut(StringValue.bmp("duplicates"), new StringValue(duplicates));
+                options.initialPut(StringValue.bmp("duplicates-error-code"), new StringValue(duplicatesErrorCode));
                 Literal.exportValue(options, out);
             }
         }

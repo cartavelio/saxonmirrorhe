@@ -15,7 +15,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
@@ -84,7 +84,7 @@ public final class WhitespaceTextImpl extends TinyNodeImpl {
      */
 
     @Override
-    public StringItem atomize() {
+    public StringValue atomize() {
         return new UntypedAtomicValue(getUnicodeStringValue());
     }
 

@@ -286,7 +286,7 @@ public abstract class Converter {
     public static class ToUntypedAtomicConverter extends UnfailingConverter {
         public static final ToUntypedAtomicConverter INSTANCE = new ToUntypedAtomicConverter();
         @Override
-        public StringItem convert(AtomicValue input) {
+        public StringValue convert(AtomicValue input) {
             return new UntypedAtomicValue(input.getUnicodeStringValue());
         }
     }
@@ -298,8 +298,8 @@ public abstract class Converter {
     public static class ToStringConverter extends UnfailingConverter {
         public static final ToStringConverter INSTANCE = new ToStringConverter();
         @Override
-        public StringItem convert(AtomicValue input) {
-            return new StringItem(input.getUnicodeStringValue().tidy());
+        public StringValue convert(AtomicValue input) {
+            return new StringValue(input.getUnicodeStringValue().tidy());
         }
     }
 

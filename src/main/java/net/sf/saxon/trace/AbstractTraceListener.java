@@ -23,7 +23,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.Map;
@@ -95,8 +95,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                 Object val = entry.getValue();
                 if (val instanceof StructuredQName) {
                     val = ((StructuredQName)val).getDisplayName();
-                } else if (val instanceof StringItem) {
-                    val = ((StringItem)val).getUnicodeStringValue();
+                } else if (val instanceof StringValue) {
+                    val = ((StringValue)val).getUnicodeStringValue();
                 }
                 if (val != null) {
                     msg.append(' ').append(entry.getKey()).append("=\"").append(escape(val.toString())).append('"');

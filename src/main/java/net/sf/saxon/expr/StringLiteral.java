@@ -11,7 +11,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Subclass of Literal used specifically for string literals, as this is a common case
@@ -24,7 +24,7 @@ public class StringLiteral extends Literal {
      * @param value     the StringValue
      */
 
-    public StringLiteral(StringItem value) {
+    public StringLiteral(StringValue value) {
         super(value);
     }
 
@@ -35,7 +35,7 @@ public class StringLiteral extends Literal {
      */
 
     public StringLiteral(UnicodeString value) {
-        this(new StringItem(value));
+        this(new StringValue(value));
     }
 
     /**
@@ -45,7 +45,7 @@ public class StringLiteral extends Literal {
      */
 
     public StringLiteral(String value) {
-        this(new StringItem(StringTool.fromCharSequence(value)));
+        this(new StringValue(StringTool.fromCharSequence(value)));
     }
 
     /**
@@ -54,8 +54,8 @@ public class StringLiteral extends Literal {
      * @return the constant value
      */
     @Override
-    public StringItem getGroundedValue() {
-        return (StringItem)super.getGroundedValue();
+    public StringValue getGroundedValue() {
+        return (StringValue)super.getGroundedValue();
     }
 
     /**

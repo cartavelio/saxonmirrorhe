@@ -16,7 +16,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.CalendarValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * An AtomicComparer used for comparing atomic values of arbitrary item types. It encapsulates
@@ -168,7 +168,7 @@ public class GenericAtomicComparer implements AtomicComparer {
             return +1;
         }
 
-        if (a instanceof StringItem && b instanceof StringItem) {
+        if (a instanceof StringValue && b instanceof StringValue) {
             return collator.compareStrings(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else {
             int implicitTimezone = context.getImplicitTimezone();
@@ -200,7 +200,7 @@ public class GenericAtomicComparer implements AtomicComparer {
     @Override
     public boolean comparesEqual(AtomicValue a, AtomicValue b) throws NoDynamicContextException {
         // System.err.println("Comparing " + a.getClass() + ": " + a + " with " + b.getClass() + ": " + b);
-        if (a instanceof StringItem && b instanceof StringItem) {
+        if (a instanceof StringValue && b instanceof StringValue) {
             return collator.comparesEqual(a.getUnicodeStringValue(), b.getUnicodeStringValue());
         } else if (a instanceof CalendarValue && b instanceof CalendarValue) {
             return ((CalendarValue) a).compareTo((CalendarValue) b, context.getImplicitTimezone()) == 0;

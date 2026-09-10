@@ -18,7 +18,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +99,7 @@ public abstract class AttributeValueTemplate {
                 } else {
                     components.add(XSLLeafNodeConstructor.makeSimpleContentConstructor(
                             exp,
-                            new StringLiteral(StringItem.SINGLE_SPACE), env).simplify());
+                            new StringLiteral(StringValue.SINGLE_SPACE), env).simplify());
                 }
 
             } else {
@@ -112,7 +112,7 @@ public abstract class AttributeValueTemplate {
         // is it empty?
 
         if (components.isEmpty()) {
-            result = new StringLiteral(StringItem.EMPTY_STRING);
+            result = new StringLiteral(StringValue.EMPTY_STRING);
         }
 
         // is it a single component?

@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.HexBinaryValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A compiled xsl:where-populated instruction (formerly xsl:conditional-content).
@@ -138,7 +138,7 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
                 default:
                     return item.getUnicodeStringValue().length() == 0;
             }
-        } else if (item instanceof StringItem || item instanceof HexBinaryValue || item instanceof Base64BinaryValue) {
+        } else if (item instanceof StringValue || item instanceof HexBinaryValue || item instanceof Base64BinaryValue) {
             return item.getUnicodeStringValue().length() == 0;
         } else if (item instanceof MapItem) {
             return ((MapItem)item).isEmpty();

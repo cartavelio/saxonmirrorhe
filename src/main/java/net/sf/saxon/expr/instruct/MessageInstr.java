@@ -27,7 +27,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.Result;
@@ -255,7 +255,7 @@ public class MessageInstr extends Instruction {
         try {
             getSelect().process(cco, context);
         } catch (XPathException e) {
-            cco.append(StringItem.bmp("Error " + e.getErrorCodeLocalPart() +
+            cco.append(StringValue.bmp("Error " + e.getErrorCodeLocalPart() +
                                                " while evaluating xsl:message at line "
                                                + getLocation().getLineNumber() + " of " + getLocation().getSystemId() +
                                                ": " + e.getMessage()));

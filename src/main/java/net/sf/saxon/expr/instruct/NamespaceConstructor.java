@@ -122,7 +122,7 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         if (value == null) {
             return "";
         }
-        if (!(value instanceof StringItem) || value instanceof AnyURIValue) {
+        if (!(value instanceof StringValue) || value instanceof AnyURIValue) {
             // Can only happen in XQuery
             XPathException err = new XPathException(
                 "Namespace prefix is not an xs:string or xs:untypedAtomic", "XPTY0004", getLocation());

@@ -138,7 +138,7 @@ public class NumberSequenceFormatter extends Expression {
                 if (!language.isEmpty()) {
                     ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.tidy(language));
                     if (vf != null) {
-                        langOp.setChildExpression(new StringLiteral(StringItem.EMPTY_STRING));
+                        langOp.setChildExpression(new StringLiteral(StringValue.EMPTY_STRING));
                         throw new XPathException("The lang attribute must be a valid language code", "XTDE0030");
                     }
                 }
@@ -171,7 +171,7 @@ public class NumberSequenceFormatter extends Expression {
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         optimizeChildren(visitor, contextInfo);
         if (hasFixedOperands()) {
-            StringItem val = evaluateItem(visitor.makeDynamicContext());
+            StringValue val = evaluateItem(visitor.makeDynamicContext());
             StringLiteral literal = new StringLiteral(val);
             ExpressionTool.copyLocationInfo(this, literal);
             return literal;
@@ -228,7 +228,7 @@ public class NumberSequenceFormatter extends Expression {
     }
 
     @Override
-    public StringItem evaluateItem(XPathContext context) throws XPathException {
+    public StringValue evaluateItem(XPathContext context) throws XPathException {
         List<Object> vec = new ArrayList<>(4);    // a list whose items may be of type either Long or
                                                   // BigInteger or the string to be output (e.g. "NaN")
         final ConversionRules rules = context.getConfiguration().getConversionRules();
@@ -353,7 +353,7 @@ public class NumberSequenceFormatter extends Expression {
         }
 
         UnicodeString s = nf.format(vec, gpsize, gpseparator, letterVal, ordinalVal, numb);
-        return new StringItem(s);
+        return new StringValue(s);
     }
 
     public List<Integer> parseStartAtValue(String value) throws XPathException {

@@ -17,7 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class ArraySort extends SystemFunction {
         if (arguments.length == 1) {
             collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
         } else {
-            StringItem collName = (StringItem)arguments[1].head();
+            StringValue collName = (StringValue)arguments[1].head();
             if (collName == null) {
                 collation = context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
             } else {

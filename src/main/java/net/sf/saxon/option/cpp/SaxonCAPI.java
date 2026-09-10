@@ -24,9 +24,7 @@ import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 import org.xml.sax.InputSource;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -582,7 +580,7 @@ public class SaxonCAPI {
 
 
         try {
-            return XdmValue.wrap(converter.convert(new StringItem(valueStr)).asAtomic());
+            return XdmValue.wrap(converter.convert(new StringValue(valueStr)).asAtomic());
         } catch (ValidationException e) {
             throw new SaxonApiException(e);
         }
@@ -609,7 +607,7 @@ public class SaxonCAPI {
         } else if (value instanceof Long) {
             valueForCpp = XdmValue.wrap(Int64Value.makeIntegerValue((((Long) value).longValue())));
         } else if (value instanceof String) {
-            valueForCpp = XdmValue.wrap(StringItem.makeStringValue(((String) value)));
+            valueForCpp = XdmValue.wrap(StringValue.makeStringValue(((String) value)));
         }
         return valueForCpp;
     }

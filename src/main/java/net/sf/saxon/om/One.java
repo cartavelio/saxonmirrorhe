@@ -48,8 +48,8 @@ public class One<T extends Item> extends ZeroOrOne<T> {
      * @return the string value wrapped as a One&lt;StringValue&gt;
      */
 
-    public static One<StringItem> string (String value) {
-        return new One<>(new StringItem(value));
+    public static One<StringValue> string (String value) {
+        return new One<>(new StringValue(value));
     }
 
     /**
@@ -59,8 +59,8 @@ public class One<T extends Item> extends ZeroOrOne<T> {
      * @return the string value wrapped as a One&lt;StringValue&gt;
      */
 
-    public static One<StringItem> string(UnicodeString value) {
-        return new One<>(new StringItem(value));
+    public static One<StringValue> string(UnicodeString value) {
+        return new One<>(new StringValue(value));
     }
 
     /**

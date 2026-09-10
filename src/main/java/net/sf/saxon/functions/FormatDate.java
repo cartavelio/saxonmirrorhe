@@ -819,13 +819,13 @@ public class FormatDate extends SystemFunction implements Callable {
         }
         String format = arguments[1].head().getStringValue();
 
-        StringItem calendarVal = null;
-        StringItem countryVal = null;
-        StringItem languageVal = null;
+        StringValue calendarVal = null;
+        StringValue countryVal = null;
+        StringValue languageVal = null;
         if (getArity() > 2) {
-            languageVal = (StringItem) arguments[2].head();
-            calendarVal = (StringItem) arguments[3].head();
-            countryVal = (StringItem) arguments[4].head();
+            languageVal = (StringValue) arguments[2].head();
+            calendarVal = (StringValue) arguments[3].head();
+            countryVal = (StringValue) arguments[4].head();
         }
 
         String calendar = calendarVal == null ? null : calendarVal.getStringValue();
@@ -838,7 +838,7 @@ public class FormatDate extends SystemFunction implements Callable {
         if (calendarVal != null) {
             result = adjustCalendar(calendar, result, context);
         }
-        return new StringItem(result);
+        return new StringValue(result);
     }
 
     private CalendarValue adjustTimezoneToPlace(CalendarValue value, String place) {

@@ -16,7 +16,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -98,7 +98,7 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
             if (first == null) {
                 // there are no child nodes and no select attribute
                 //stringValue = "";
-                select = new StringLiteral(StringItem.EMPTY_STRING);
+                select = new StringLiteral(StringValue.EMPTY_STRING);
                 select.setRetainedStaticContext(makeRetainedStaticContext());
             } else {
                 if (kids.next() == null && !isExpandingText()) {
@@ -123,7 +123,7 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
 
     protected void compileContent(Compilation exec, ComponentDeclaration decl, SimpleNodeConstructor inst, Expression separator) throws XPathException {
         if (separator == null) {
-            separator = new StringLiteral(StringItem.SINGLE_SPACE);
+            separator = new StringLiteral(StringValue.SINGLE_SPACE);
         }
         try {
             if (select == null) {

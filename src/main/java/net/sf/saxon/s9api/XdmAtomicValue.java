@@ -120,7 +120,7 @@ public class XdmAtomicValue extends XdmItem {
      */
 
     public XdmAtomicValue(String value) {
-        this(new StringItem(value), true);
+        this(new StringValue(value), true);
     }
 
     /**
@@ -374,7 +374,7 @@ public class XdmAtomicValue extends XdmItem {
     @SuppressWarnings({"AutoBoxing"})
     public Object getValue() {
         AtomicValue av = getUnderlyingValue();
-        if (av instanceof StringItem) {
+        if (av instanceof StringValue) {
             return av.getUnicodeStringValue();
         } else if (av instanceof IntegerValue) {
             return ((IntegerValue) av).asBigInteger();
@@ -416,7 +416,7 @@ public class XdmAtomicValue extends XdmItem {
             return ((BooleanValue) av).getBooleanValue();
         } else if (av instanceof NumericValue) {
             return !av.isNaN() && ((NumericValue) av).signum() != 0;
-        } else if (av instanceof StringItem) {
+        } else if (av instanceof StringValue) {
             String s = Whitespace.trim(av.getUnicodeStringValue().tidy()).toString();
             return "1".equals(s) || "true".equals(s);
         } else {
@@ -441,7 +441,7 @@ public class XdmAtomicValue extends XdmItem {
             } catch (XPathException e) {
                 throw new SaxonApiException("Cannot cast item to an integer");
             }
-        } else if (av instanceof StringItem) {
+        } else if (av instanceof StringValue) {
             StringToDouble converter = StringToDouble.getInstance();
             return (long) converter.stringToNumber(av.getUnicodeStringValue().tidy());
         } else {
@@ -464,7 +464,7 @@ public class XdmAtomicValue extends XdmItem {
             return ((BooleanValue) av).getBooleanValue() ? 0.0 : 1.0;
         } else if (av instanceof NumericValue) {
             return ((NumericValue) av).getDoubleValue();
-        } else if (av instanceof StringItem) {
+        } else if (av instanceof StringValue) {
             try {
                 StringToDouble converter = StringToDouble11.getInstance();
                 return converter.stringToNumber(av.getUnicodeStringValue().tidy());
@@ -493,7 +493,7 @@ public class XdmAtomicValue extends XdmItem {
             } catch (XPathException e) {
                 throw new SaxonApiException("Cannot cast item to a decimal");
             }
-        } else if (av instanceof StringItem) {
+        } else if (av instanceof StringValue) {
             return new BigDecimal(av.getStringValue());
         } else {
             throw new SaxonApiException("Cannot cast item to a decimal");

@@ -20,7 +20,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.*;
 import java.util.function.Function;
@@ -169,7 +169,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
         }
         MapItem map = (MapItem)item;
         for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
-            GroundedValue val = map.get(new StringItem(field.getKey()));
+            GroundedValue val = map.get(new StringValue(field.getKey()));
             if (val == null) {
                 if (!isOptionalField(field.getKey())) {
                     return false;
@@ -182,7 +182,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
             AtomicIterator keyIter = map.keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
-                if (!(key instanceof StringItem) || !fieldTypes.containsKey(key.getStringValue())) {
+                if (!(key instanceof StringValue) || !fieldTypes.containsKey(key.getStringValue())) {
                     return false;
                 }
             }
@@ -480,7 +480,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
             for (Map.Entry<String, SequenceType> entry : fieldTypes.entrySet()) {
                 String key = entry.getKey();
                 SequenceType required = entry.getValue();
-                GroundedValue value = ((MapItem) item).get(new StringItem(key));
+                GroundedValue value = ((MapItem) item).get(new StringValue(key));
                 if (value == null) {
                     if (!Cardinality.allowsZero(required.getCardinality())) {
                         return Optional.of("Field " + key + " is absent; it must have a value");
@@ -503,7 +503,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                 AtomicIterator keyIter = ((MapItem)item).keys();
                 AtomicValue key;
                 while ((key = keyIter.next()) != null) {
-                    if (!(key instanceof StringItem)) {
+                    if (!(key instanceof StringValue)) {
                         return Optional.of("Undeclared field " + key + " is present, but it is not a string, and the record type is not extensible");
                     } else if (!fieldTypes.containsKey(key.getStringValue())) {
                         return Optional.of("Undeclared field " + key + " is present, but the record type is not extensible");

@@ -544,7 +544,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 return new UntypedAtomicValue(stringValue);
             } else if (annotation == StandardNames.XS_STRING) {
                 UnicodeString stringValue = TinyParentNodeImpl.getStringValue(this, nodeNr);
-                return new StringItem(stringValue);
+                return new StringValue(stringValue);
             } else if (annotation == StandardNames.XS_ANY_URI) {
                 UnicodeString stringValue = TinyParentNodeImpl.getStringValue(this, nodeNr);
                 return new AnyURIValue(stringValue);
@@ -579,11 +579,11 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
             if (annotation == StandardNames.XS_UNTYPED_ATOMIC || annotation == StandardNames.XS_UNTYPED) {
                 return new UntypedAtomicValue(TinyParentNodeImpl.getStringValue(this, nodeNr));
             } else if (annotation == StandardNames.XS_STRING) {
-                return new StringItem(TinyParentNodeImpl.getStringValue(this, nodeNr).tidy());
+                return new StringValue(TinyParentNodeImpl.getStringValue(this, nodeNr).tidy());
             } else if (annotation == StandardNames.XS_ANY_URI) {
                 return new AnyURIValue(TinyParentNodeImpl.getStringValue(this, nodeNr));
             } else if (annotation == StandardNames.XS_ID) {
-                return new StringItem(TinyParentNodeImpl.getStringValue(this, nodeNr).tidy(), BuiltInAtomicType.ID);
+                return new StringValue(TinyParentNodeImpl.getStringValue(this, nodeNr).tidy(), BuiltInAtomicType.ID);
             } else {
                 TinyNodeImpl element = getNode(nodeNr);
                 AtomicSequence value = stype.atomize(element);
@@ -615,14 +615,14 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     public AtomicSequence getTypedValueOfAttribute(/*@Nullable*/ TinyAttributeImpl att, int nodeNr) throws XPathException {
         if (attType == null) {
             // it's an untyped tree
-            return new StringItem(attValue[nodeNr], BuiltInAtomicType.UNTYPED_ATOMIC);
+            return new StringValue(attValue[nodeNr], BuiltInAtomicType.UNTYPED_ATOMIC);
         }
         if (attTypedValue == null || attTypedValue[nodeNr] == null) {
             SimpleType type = getAttributeType(nodeNr);
             if (type.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                return new StringItem(attValue[nodeNr], BuiltInAtomicType.UNTYPED_ATOMIC);
+                return new StringValue(attValue[nodeNr], BuiltInAtomicType.UNTYPED_ATOMIC);
             } else if (type.equals(BuiltInAtomicType.STRING)) {
-                return new StringItem(attValue[nodeNr]);
+                return new StringValue(attValue[nodeNr]);
             } else if (type.equals(BuiltInAtomicType.ANY_URI)) {
                 return new AnyURIValue((attValue[nodeNr].toString()));
             } else {
@@ -973,7 +973,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 // where it has a single text node as a child.
 
                 if (depth[next] <= level) {
-                    return StringItem.ZERO_LENGTH_UNTYPED;
+                    return StringValue.ZERO_LENGTH_UNTYPED;
                 } else if (nodeKind[next] == Type.TEXT && depth[next + 1] <= level) {
                     //return new UntypedAtomicValue(textChunks[alpha[next]]);
                     int length = beta[next];
@@ -998,7 +998,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 return sb.toStringItem(BuiltInAtomicType.UNTYPED_ATOMIC);
 
             case Type.TEXT:
-                return new StringItem(TinyTextImpl.getStringValue(this, nodeNr));
+                return new StringValue(TinyTextImpl.getStringValue(this, nodeNr));
             case Type.WHITESPACE_TEXT: {
                 long compressedValue = ((long) alpha[nodeNr] << 32) | ((long) beta[nodeNr] & 0xffffffffL);
                 return new UntypedAtomicValue(new CompressedWhitespace(compressedValue));
@@ -1008,11 +1008,11 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 int start2 = alpha[nodeNr];
                 int len2 = beta[nodeNr];
                 if (len2 == 0) {
-                    return StringItem.ZERO_LENGTH_UNTYPED;
+                    return StringValue.ZERO_LENGTH_UNTYPED;
                 }
                 char[] dest = new char[len2];
                 assert commentBuffer != null;
-                return new StringItem(commentBuffer.substring(start2, start2 + len2));
+                return new StringValue(commentBuffer.substring(start2, start2 + len2));
             }
             default:
                 throw new IllegalStateException("Unknown node kind");

@@ -20,7 +20,7 @@ import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -141,17 +141,17 @@ public class DirectoryCollection extends AbstractResourceCollection {
             URI uri = new URI(resource.getResourceURI());
 
             if (details.contentType != null) {
-                properties.put("content-type", StringItem.makeStringValue(details.contentType));
+                properties.put("content-type", StringValue.makeStringValue(details.contentType));
             }
             if (details.encoding != null) {
-                properties.put("encoding", StringItem.makeStringValue(details.encoding));
+                properties.put("encoding", StringValue.makeStringValue(details.encoding));
             }
 
             if ("file".equals(uri.getScheme())) {
                 File file = new File(uri);
-                properties.put("path", StringItem.makeStringValue(file.getPath()));
-                properties.put("absolute-path", StringItem.makeStringValue(file.getAbsolutePath()));
-                properties.put("canonical-path", StringItem.makeStringValue(file.getCanonicalPath()));
+                properties.put("path", StringValue.makeStringValue(file.getPath()));
+                properties.put("absolute-path", StringValue.makeStringValue(file.getAbsolutePath()));
+                properties.put("canonical-path", StringValue.makeStringValue(file.getCanonicalPath()));
                 properties.put("can-read", BooleanValue.get(file.canRead()));
                 properties.put("can-write", BooleanValue.get(file.canWrite()));
                 properties.put("can-execute", BooleanValue.get(file.canExecute()));

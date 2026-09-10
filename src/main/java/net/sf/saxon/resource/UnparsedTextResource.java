@@ -13,7 +13,7 @@ import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.lib.StandardUnparsedTextResolver;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -97,7 +97,7 @@ public class UnparsedTextResource implements Resource {
 
     @Override
     public Item getItem(XPathContext context) throws XPathException {
-        return new StringItem(getContent());
+        return new StringValue(getContent());
     }
 
     /**

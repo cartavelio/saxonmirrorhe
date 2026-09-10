@@ -34,7 +34,7 @@ public class ParseIetfDate extends SystemFunction implements Callable {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem stringValue = (StringItem) arguments[0].head();
+        StringValue stringValue = (StringValue) arguments[0].head();
         if (stringValue == null) {
             return EmptySequence.getInstance();
         }

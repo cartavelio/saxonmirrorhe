@@ -19,7 +19,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Outputter: This interface represents a recipient of XML tree-walking (push) events. It was
@@ -388,7 +388,7 @@ public abstract class Outputter implements Receiver {
                 @Override
                 @CSharpModifiers(code = {"public", "override"})
                 public void close() throws XPathException {
-                    Outputter.this.append(new StringItem(buffer.toUnicodeString()));
+                    Outputter.this.append(new StringValue(buffer.toUnicodeString()));
                 }
             };
         }

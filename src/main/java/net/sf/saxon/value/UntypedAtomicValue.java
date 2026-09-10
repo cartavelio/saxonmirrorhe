@@ -19,7 +19,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
  * <p>TODO: Still needed? Some untypedAtomic values are not instances of this class any more</p>
  */
 
-public class UntypedAtomicValue extends StringItem {
+public class UntypedAtomicValue extends StringValue {
 
     public static final UntypedAtomicValue ZERO_LENGTH_UNTYPED =
             new UntypedAtomicValue(EmptyUniString.getInstance());

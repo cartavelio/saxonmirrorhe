@@ -24,31 +24,31 @@ import org.jetbrains.annotations.NotNull;
  * An atomic value of type xs:string. This class is also used for types derived from xs:string.
  * Subclasses of StringValue are used for xs:untypedAtomic and xs:anyURI values.
  *
- * <p>Internally the value is held as a wrapper around a {@link CodePoints}, which allows
+ * <p>Internally the value is held as a wrapper around a {@link UnicodeString}, which allows
  * a variety of implementations</p>
  *
  * <p>The {@code equals} and {@code compareTo} methods support ordering in codepoint
  * collation sequence.</p>
  */
 
-public class StringItem extends AtomicValue {
+public class StringValue extends AtomicValue {
 
 
     protected UnicodeString content;
 
-    public static final StringItem EMPTY_STRING = new StringItem(EmptyUniString.getInstance());
-    public static final StringItem SINGLE_SPACE = new StringItem(StringConstants.SINGLE_SPACE);
-    public static final StringItem TRUE = new StringItem(StringConstants.TRUE);
-    public static final StringItem FALSE = new StringItem(StringConstants.FALSE);
+    public static final StringValue EMPTY_STRING = new StringValue(EmptyUniString.getInstance());
+    public static final StringValue SINGLE_SPACE = new StringValue(StringConstants.SINGLE_SPACE);
+    public static final StringValue TRUE = new StringValue(StringConstants.TRUE);
+    public static final StringValue FALSE = new StringValue(StringConstants.FALSE);
 
-    public static final StringItem ZERO_LENGTH_UNTYPED = new UntypedAtomicValue(EmptyUniString.getInstance());
+    public static final StringValue ZERO_LENGTH_UNTYPED = new UntypedAtomicValue(EmptyUniString.getInstance());
 
 
     /**
      * Protected constructor for use by subtypes
      */
 
-    protected StringItem() {
+    protected StringValue() {
         content = EmptyUniString.getInstance();
         typeLabel = BuiltInAtomicType.STRING;
     }
@@ -58,7 +58,7 @@ public class StringItem extends AtomicValue {
      * type xs:string
      */
 
-    public StringItem(UnicodeString content) {
+    public StringValue(UnicodeString content) {
         this(content, BuiltInAtomicType.STRING);
     }
 
@@ -66,7 +66,7 @@ public class StringItem extends AtomicValue {
      * Construct an instance that wraps a supplied {@code UniString}, with a supplied atomic type
      */
 
-    public StringItem(UnicodeString content, AtomicType type) {
+    public StringValue(UnicodeString content, AtomicType type) {
         this.content = content;
         this.typeLabel = type;
     }
@@ -76,7 +76,7 @@ public class StringItem extends AtomicValue {
      * @param value the String value.
      */
 
-    public StringItem(String value) {
+    public StringValue(String value) {
         this(value, BuiltInAtomicType.STRING);
     }
 
@@ -90,7 +90,7 @@ public class StringItem extends AtomicValue {
      *                  a type derived from xs:string and that the string is valid against this type.
      */
 
-    public StringItem(String value, AtomicType typeLabel) {
+    public StringValue(String value, AtomicType typeLabel) {
         this.content = StringView.of(value).tidy();
         this.typeLabel = typeLabel;
     }
@@ -103,11 +103,11 @@ public class StringItem extends AtomicValue {
      */
 
     @Override
-    public StringItem copyAsSubType(AtomicType typeLabel) {
+    public StringValue copyAsSubType(AtomicType typeLabel) {
         if (typeLabel == this.typeLabel) {
             return this;
         } else {
-            StringItem v = new StringItem();
+            StringValue v = new StringValue();
             v.typeLabel = typeLabel;
             v.content = content;
             return v;
@@ -121,8 +121,8 @@ public class StringItem extends AtomicValue {
      *                no surrogate pairs
      * @return the corresponding StringItem
      */
-    public static StringItem bmp(String content) {
-        return new StringItem(BMPString.of(content));
+    public static StringValue bmp(String content) {
+        return new StringValue(BMPString.of(content));
     }
 
     /**
@@ -146,11 +146,11 @@ public class StringItem extends AtomicValue {
      */
 
     /*@NotNull*/
-    public static StringItem makeStringValue(CharSequence value) {
+    public static StringValue makeStringValue(CharSequence value) {
         if (value == null || value.length() == 0) {
-            return StringItem.EMPTY_STRING;
+            return StringValue.EMPTY_STRING;
         } else {
-            return new StringItem(value.toString());
+            return new StringValue(value.toString());
         }
     }
 
@@ -284,8 +284,8 @@ public class StringItem extends AtomicValue {
      */
 
     public boolean equals(Object o) {
-        if (o instanceof StringItem) {
-            return content.equals(((StringItem)o).content);
+        if (o instanceof StringValue) {
+            return content.equals(((StringValue)o).content);
         } else {
             return false;
         }
@@ -338,8 +338,8 @@ public class StringItem extends AtomicValue {
         return new XPathComparable() {
             @Override
             public int compareTo(@NotNull XPathComparable o) {
-                if (o instanceof StringItem) {
-                    return collator.compareStrings(getContent(), ((StringItem)o).content);
+                if (o instanceof StringValue) {
+                    return collator.compareStrings(getContent(), ((StringValue)o).content);
                 } else {
                     throw new ClassCastException("Cannot compare xs:string to " + o.toString());
                 }
@@ -362,7 +362,7 @@ public class StringItem extends AtomicValue {
 
     @Override
     public boolean isIdentical(/*@NotNull*/ AtomicValue v) {
-        return v instanceof StringItem &&
+        return v instanceof StringValue &&
                 (this instanceof AnyURIValue == v instanceof AnyURIValue) &&
                 (this.isUntypedAtomic() == v.isUntypedAtomic()) &&
                 equals(v);

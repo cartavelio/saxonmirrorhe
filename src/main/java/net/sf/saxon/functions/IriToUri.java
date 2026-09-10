@@ -14,7 +14,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.Arrays;
@@ -43,12 +43,12 @@ public class IriToUri extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        return new StringItem(iriToUri(arg.getUnicodeStringValue()));
+        return new StringValue(iriToUri(arg.getUnicodeStringValue()));
     }
 
     @Override
     public Sequence resultWhenEmpty() {
-        return StringItem.EMPTY_STRING;
+        return StringValue.EMPTY_STRING;
     }
 
     /**

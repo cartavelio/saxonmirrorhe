@@ -19,7 +19,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
@@ -257,7 +257,7 @@ public final class Orphan implements MutableNodeInfo {
         switch (getNodeKind()) {
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return new StringItem(stringValue);
+                return new StringValue(stringValue);
             case Type.TEXT:
             case Type.DOCUMENT:
             case Type.NAMESPACE:

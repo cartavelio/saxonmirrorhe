@@ -21,7 +21,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BigDecimalValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.OutputKeys;
@@ -1293,7 +1293,7 @@ public class SerializerFactory {
     protected static String checkListOfEQNames(String key, String value) throws XPathException {
         Whitespace.Tokenizer tokenizer = new Whitespace.Tokenizer(StringView.of(value).tidy());
         StringBuilder builder = new StringBuilder();
-        StringItem tok;
+        StringValue tok;
         while ((tok = tokenizer.next()) != null) {
             String s = tok.getStringValue();
             if (isValidEQName(s) || NameChecker.isValidNCName(tok.codePoints())) {
@@ -1316,7 +1316,7 @@ public class SerializerFactory {
     protected static String checkListOfEQNamesAllowingStar(String key, String value) throws XPathException {
         Whitespace.Tokenizer tokenizer = new Whitespace.Tokenizer(StringView.of(value).tidy());
         StringBuilder builder = new StringBuilder();
-        StringItem tok;
+        StringValue tok;
         while ((tok = tokenizer.next()) != null) {
             String s = tok.getStringValue();
             if ("*".equals(s) || isValidEQName(s) || NameChecker.isValidNCName(s)) {

@@ -20,7 +20,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -114,9 +114,9 @@ public final class XSLAttribute extends XSLLeafNodeConstructor {
 
         if (separatorAtt == null) {
             if (selectAtt == null) {
-                separator = new StringLiteral(StringItem.EMPTY_STRING);
+                separator = new StringLiteral(StringValue.EMPTY_STRING);
             } else {
-                separator = new StringLiteral(StringItem.SINGLE_SPACE);
+                separator = new StringLiteral(StringValue.SINGLE_SPACE);
             }
         }
 

@@ -28,7 +28,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
@@ -83,19 +83,19 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         return formatInteger(
                 (IntegerValue) arguments[0].head(),
-                (StringItem) arguments[1].head(),
-                arguments.length == 2 ? null : (StringItem) arguments[2].head(),
+                (StringValue) arguments[1].head(),
+                arguments.length == 2 ? null : (StringValue) arguments[2].head(),
                 context);
     }
 
-    private StringItem formatInteger(IntegerValue num, StringItem picture, /*@Nullable*/ StringItem language, XPathContext context) throws XPathException {
+    private StringValue formatInteger(IntegerValue num, StringValue picture, /*@Nullable*/ StringValue language, XPathContext context) throws XPathException {
         Configuration config = context.getConfiguration();
 
         if (num == null) {
-            return StringItem.EMPTY_STRING;
+            return StringValue.EMPTY_STRING;
         }
 
         Function<IntegerValue, String> localFormatter = formatter;
@@ -114,7 +114,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
 
 
         try {
-            return new StringItem(localFormatter.apply(num));
+            return new StringValue(localFormatter.apply(num));
         } catch (UncheckedXPathException e) {
             throw e.getXPathException();
         }

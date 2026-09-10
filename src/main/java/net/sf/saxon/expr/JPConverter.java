@@ -104,7 +104,7 @@ public abstract class JPConverter {
 
     static {
         itemTypeMap.put(BooleanValue.class, BuiltInAtomicType.BOOLEAN);
-        itemTypeMap.put(StringItem.class, BuiltInAtomicType.STRING);
+        itemTypeMap.put(StringValue.class, BuiltInAtomicType.STRING);
         itemTypeMap.put(DoubleValue.class, BuiltInAtomicType.DOUBLE);
         itemTypeMap.put(FloatValue.class, BuiltInAtomicType.FLOAT);
         itemTypeMap.put(BigDecimalValue.class, BuiltInAtomicType.DECIMAL);
@@ -358,7 +358,7 @@ public abstract class JPConverter {
 
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
-            return new StringItem((String) object);
+            return new StringValue((String) object);
         }
 
         @Override
@@ -500,7 +500,7 @@ public abstract class JPConverter {
 
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
-            return new StringItem(object.toString());
+            return new StringValue(object.toString());
         }
 
         @Override
@@ -849,7 +849,7 @@ public abstract class JPConverter {
 
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
-            return StringItem.makeStringValue(new String((char[]) object));
+            return StringValue.makeStringValue(new String((char[]) object));
         }
 
         @Override
