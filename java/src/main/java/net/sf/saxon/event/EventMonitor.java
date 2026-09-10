@@ -24,7 +24,7 @@ import net.sf.saxon.type.SimpleType;
  * @since 9.9
  */
 
-public class EventMonitor extends Outputter {
+public class EventMonitor extends AbstractOutputter {
 
     private boolean written = false;
     private final Outputter next;

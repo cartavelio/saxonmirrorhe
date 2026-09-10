@@ -63,7 +63,7 @@ import static net.sf.saxon.event.RegularSequenceChecker.State.START_TAG;
  *
  */
 
-public final class ComplexContentOutputter extends Outputter implements Receiver, Result {
+public final class ComplexContentOutputter extends AbstractOutputter implements Receiver, Result {
 
     private Receiver nextReceiver;
     // the next receiver in the output pipeline

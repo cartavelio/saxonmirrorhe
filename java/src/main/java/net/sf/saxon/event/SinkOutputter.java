@@ -19,7 +19,7 @@ import net.sf.saxon.type.SimpleType;
  * An Outputter that swallows (discards) all input supplied to it
  */
 
-public class SinkOutputter extends Outputter {
+public class SinkOutputter extends AbstractOutputter {
 
     @Override
     public void startDocument(int properties) throws XPathException {
