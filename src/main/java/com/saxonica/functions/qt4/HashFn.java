@@ -8,20 +8,32 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.*;
-import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.SequenceExtent;
+import net.sf.saxon.transpile.CSharpReplaceException;
+import net.sf.saxon.value.*;
 
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 /**
  * This class implements the function fn:sort-with#2, introduced in XPath 4.0
  */
 
-public class SortWith extends SystemFunction {
+public class HashFn extends SystemFunction {
+
+    public static OptionsParameter getOptionDetails() {
+        OptionsParameter details = new OptionsParameter(40);
+        details.addAllowedOption("algorithm", SequenceType.SINGLE_STRING, StringValue.bmp("MD5"));
+        return details;
+    }
 
     /**
      * Evaluate the expression
@@ -32,38 +44,33 @@ public class SortWith extends SystemFunction {
      * @throws XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
+    @CSharpReplaceException(from="java.security.NoSuchAlgorithmException", to="Saxon.Hej.trans.UncheckedXPathException")
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        SequenceIterator inputIter = arguments[0].iterate();
-        ArrayList<Item> inputList = new ArrayList<>();
-        Item it;
-        while ((it = inputIter.next()) != null) {
-            inputList.add(it);
-        }
-        GroundedValue comparatorFunctions = arguments[1].materialize();
         try {
-            inputList.sort((a,b) -> {
-                Sequence[] comparands = new Sequence[]{a, b};
-                for (Item item : comparatorFunctions.asIterable()) {
-                    try {
-                        // call the user-supplied comparator function
-                        Sequence result = ((FunctionItem) item).call(context, comparands);
-                        // convert xs:integer result to Java int
-                        int c = Long.signum(((IntegerValue) result.head()).longValue());
-                        if (c != 0) {
-                            return c;
-                        }
-                    } catch (XPathException e) {
-                        throw new UncheckedXPathException(e);
-                    }
-                }
-                return 0;
-            });
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
+            AtomicValue input = (AtomicValue)arguments[0].head();
+            if (input == null) {
+                return EmptySequence.getInstance();
+            }
+            byte[] binaryInput;
+            if (input instanceof StringValue) {
+                binaryInput = input.getStringValue().getBytes(StandardCharsets.UTF_8);
+            } else {
+                binaryInput = ((BinaryValue)input).getBinaryValue();
+            }
+            MapItem options = null;
+            if (arguments.length > 1) {
+                options = (MapItem)arguments[1].head();
+            }
+            if (options == null) {
+                options = new DictionaryMap();
+            }
+            Map<String, GroundedValue> checkedOptions =
+                    getDetails().optionDetails.processSuppliedOptions(options, context);
+            String algorithm = checkedOptions.get("algorithm").getStringValue().trim().toUpperCase();
+            byte[] hash = MessageDigest.getInstance(algorithm).digest(binaryInput);
+            return new HexBinaryValue(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new XPathException(e.getMessage(), "FOHA0001");
         }
-        return SequenceExtent.makeSequenceExtent(inputList);
     }
-
-
-
 }

@@ -297,6 +297,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
+        LocalUnionType hashInput = new LocalUnionType(BuiltInAtomicType.STRING,
+                                                      BuiltInAtomicType.HEX_BINARY,
+                                                      BuiltInAtomicType.BASE64_BINARY);
+        register("hash", 1, 2, e -> e.populate(HashFn::new, BuiltInAtomicType.HEX_BINARY, OPT, 0)
+                .arg(0, hashInput, OPT, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(HashFn.getOptionDetails()));
+
         register("highest", 1, e -> e.populate(HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
