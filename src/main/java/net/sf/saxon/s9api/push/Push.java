@@ -54,7 +54,7 @@ public interface Push {
      *                   If the document is not required to be well-formed, the children
      *                   of the document node may comprise any sequence of element, text,
      *                   comment, and processing instruction nodes.
-     * @return a Doc object which may be used to add content to the document, or to
+     * @return a Document object which may be used to add content to the document, or to
      * close the document when it has been fully written.
      * @throws SaxonApiException if the specified constraints are violated, or if the
      * implementation detects any problems
