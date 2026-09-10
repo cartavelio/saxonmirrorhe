@@ -1045,9 +1045,7 @@ cdef class PyXslt30Processor:
             2) executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef", target="HE")
             3) executable = xsltproc.compile_stylesheet(associated_file="foo.xml")
         """
-        py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file)"
-        if len(kwds) >3:
-          raise Exception(py_error_message)
+        py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file, target)"
         cdef char * c_outputfile
         cdef char * c_stylesheet
         py_output_string = None
