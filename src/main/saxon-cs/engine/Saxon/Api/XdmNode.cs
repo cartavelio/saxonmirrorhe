@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using Saxon.Ejava.util;
 using Saxon.Hej;
 using Saxon.Hej.@event;
@@ -202,7 +203,7 @@ namespace Saxon.Api {
         }
 
         /// <summary>
-        /// Unwraps the underlying DOM <c>XmlNode</c> object from the <c>XdmValue</c>.
+        /// Unwraps the underlying DOM <c>XmlNode</c> object from this <c>XdmNode</c>.
         /// If the method does not wrap a DOM <c>XmlNode</c> then null is returned
         /// </summary>
         /// <returns>The underlying <c>XmlNode</c></returns>
@@ -216,6 +217,41 @@ namespace Saxon.Api {
             }
             if (value is Saxon.Impl.Dom.DomNodeWrapper wrapper) {
                 return (XmlNode) wrapper.getRealNode();
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// Incorrectly-named synonym of GetUnderlyingXmlNode, retained temporarily for compatibility with 11.0 and 11.1
+        /// </summary>
+        /// <returns>The underlying <c>XmlNode</c> if there is one</returns>
+    
+        [Obsolete("This is an obsolete synonym of GetUnderlyingXmlNode")]
+        public XmlNode getUnderlyingXmlNode() {
+            return GetUnderlyingXmlNode();
+        }
+        
+        /// <summary>
+        /// Unwraps the underlying Linq <c>XNode</c> object from this <c>XdmNode</c>.
+        /// If the method does not wrap a Linq <c>XNode</c> then null is returned
+        /// </summary>
+        /// <remarks>
+        /// <para>The result will always be null if the supplied node is an attribute or namespace node,
+        /// even if it is within a tree that wraps a Linq tree.
+        /// </para>
+        /// </remarks>
+        /// <returns>The underlying <c>XNode</c> if there is one, or null otherwise</returns>
+        public XNode GetUnderlyingXNode() {
+            NodeInfo localNode = (NodeInfo)value;
+            if (localNode is VirtualNode virtualNode) {
+                object realNode = virtualNode.getRealNode();
+                if (realNode is XNode xNode) {
+                    return xNode;
+                }
+            }
+            if (value is Saxon.Impl.XDoc.XNodeWrapper wrapper) {
+                return (XNode) wrapper.getRealNode();
             }
 
             return null;
