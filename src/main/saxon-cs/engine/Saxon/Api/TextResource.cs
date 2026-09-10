@@ -148,7 +148,7 @@ namespace Saxon.Api {
                         return sr.ReadToEnd();
                     }
                     else {
-                        string enc = EncodingDetector.inferStreamEncoding(inputStream, null /*new StandardLogger()*/);
+                        string enc = EncodingDetector.inferStreamEncoding(inputStream, "utf-8", null /*new StandardLogger()*/);
                         StreamReader sr = new StreamReader(inputStream, Encoding.GetEncoding(enc));
                         return sr.ReadToEnd();
                     }
@@ -180,7 +180,7 @@ namespace Saxon.Api {
                     return new StringReader(_content);
                 }
                 else if (inputStream != null) {
-                    string enc = EncodingDetector.inferStreamEncoding(inputStream, null /*new StandardLogger()*/);
+                    string enc = EncodingDetector.inferStreamEncoding(inputStream, "utf-8", null /*new StandardLogger()*/);
                     return new StreamReader(inputStream, Encoding.GetEncoding(enc));
                 }
                 else {
