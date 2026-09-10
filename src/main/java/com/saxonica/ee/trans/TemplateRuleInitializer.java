@@ -3,6 +3,7 @@ package com.saxonica.ee.trans;
 
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ErrorExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -52,7 +53,8 @@ public class TemplateRuleInitializer {
             try {
                 xslTemplate.jitCompile(compilation, decl);
 
-                ExpressionVisitor visitor = new ExpressionVisitor(compilation.getConfiguration());
+                Configuration config = compilation.getConfiguration();
+                ExpressionVisitor visitor = new ExpressionVisitor(config);
                 visitor.setStaticContext(xslTemplate.getStaticContext());
                 ContextItemStaticInfo cisi = new ContextItemStaticInfo(
                         xslTemplate.getContextItemTypeForTemplateRule(), false);
@@ -61,8 +63,16 @@ public class TemplateRuleInitializer {
                 Mode m = mgr.obtainMode(modeName, false);
                 visitor.setOptimizeForStreaming(m.isDeclaredStreamable());
                 Expression body = templateRule.getBody().typeCheck(visitor, cisi);
+//
+//                if (templateRule.getRequiredType() != null && templateRule.getRequiredType() != SequenceType.ANY_SEQUENCE) {
+//                    Supplier<RoleDiagnostic> role = () ->
+//                            new RoleDiagnostic(RoleDiagnostic.TEMPLATE_RESULT, xslTemplate.getDiagnosticId(), 0, "XTTE0505");
+//                    body = config.getTypeChecker(false).staticTypeCheck(body, templateRule.getRequiredType(), role, visitor);
+//                }
+
                 templateRule.setBody(ExpressionTool.optimizeComponentBody(
                         body, compilation, visitor, cisi, false));
+
                 SimpleMode.allocateBindingSlotsRecursive(
                         xslTemplate.getPackageData(), m, templateRule.getBody(),
                         m.getDeclaringComponent().getComponentBindings());
