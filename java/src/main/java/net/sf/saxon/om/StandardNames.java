@@ -30,12 +30,12 @@ public abstract class StandardNames {
     private static final int XS_NS = 4;
     private static final int XSI_NS = 5;
 
-    public static final int DFLT = 0;             //   0
-    public static final int XSL = 128;            // 128
-    public static final int SAXON = 128 * 2;      // 256
-    public static final int XML = 128 * 3;        // 384
-    public static final int XS = 128 * 4;         // 512
-    public static final int XSI = 128 * 5;        // 640
+    private static final int DFLT = 0;             //   0
+    private static final int XSL = 128;            // 128
+    private static final int SAXON = 128 * 2;      // 256
+    private static final int XML = 128 * 3;        // 384
+    private static final int XS = 128 * 4;         // 512
+    private static final int XSI = 128 * 5;        // 640
 
     public static final int XSL_ACCEPT = XSL;
     public static final int XSL_ACCUMULATOR = XSL + 1;
@@ -101,9 +101,10 @@ public abstract class StandardNames {
     public static final int XSL_OUTPUT_CHARACTER = XSL + 65;
     public static final int XSL_PACKAGE = XSL + 66;
     public static final int XSL_PARAM = XSL + 67;
-    public static final int XSL_PERFORM_SORT = XSL + 70;
-    public static final int XSL_PRESERVE_SPACE = XSL + 71;
-    public static final int XSL_PROCESSING_INSTRUCTION = XSL + 72;
+    public static final int XSL_PERFORM_SORT = XSL + 68;
+    public static final int XSL_PRESERVE_SPACE = XSL + 70;
+    public static final int XSL_PROCESSING_INSTRUCTION = XSL + 71;
+    public static final int XSL_RECORD = XSL + 72;
     public static final int XSL_RESULT_DOCUMENT = XSL + 73;
     public static final int XSL_SELECT = XSL + 74;
     public static final int XSL_SEQUENCE = XSL + 75;
@@ -408,6 +409,7 @@ public abstract class StandardNames {
         bindXSLTName(XSL_PERFORM_SORT, "perform-sort");
         bindXSLTName(XSL_PRESERVE_SPACE, "preserve-space");
         bindXSLTName(XSL_PROCESSING_INSTRUCTION, "processing-instruction");
+        bindXSLTName(XSL_RECORD, "record");
         bindXSLTName(XSL_RESULT_DOCUMENT, "result-document");
         bindXSLTName(XSL_SELECT, "select");
         bindXSLTName(XSL_SEQUENCE, "sequence");

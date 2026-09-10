@@ -657,6 +657,9 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     public void processStandardAttributes(NamespaceUri namespace) {
+        if (namespace == NamespaceUri.NULL && isXslRecord()) {
+            namespace = NamespaceUri.XSLT;
+        }
         processExtensionElementAttribute(namespace);
         processExcludedNamespaces(namespace);
         processVersionAttribute(namespace);
@@ -1183,12 +1186,16 @@ public abstract class StyleElement extends ElementImpl {
         return getEffectiveVersion() < 20;
     }
 
+    protected boolean isXslRecord() {
+        return getFingerprint() == StandardNames.XSL_RECORD;
+    }
+
     /**
      * Process the [xsl:]default-collation attribute if there is one.
      */
 
     void processDefaultCollationAttribute() {
-        NamespaceUri ns = isInXsltNamespace() ? NamespaceUri.NULL : NamespaceUri.XSLT;
+        NamespaceUri ns = isInXsltNamespace() && !isXslRecord() ? NamespaceUri.NULL : NamespaceUri.XSLT;
         String v = getAttributeValue(ns, "default-collation");
         if (v != null) {
             StringBuilder reasons = new StringBuilder();
@@ -1285,7 +1292,7 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     void processDefaultMode() {
-        NamespaceUri ns = isInXsltNamespace() ? NamespaceUri.NULL : NamespaceUri.XSLT;
+        NamespaceUri ns = isInXsltNamespace() && !isXslRecord() ? NamespaceUri.NULL : NamespaceUri.XSLT;
         String v = getAttributeValue(ns, "default-mode");
         if (v != null) {
             if (v.equals("#unnamed")) {
@@ -1466,7 +1473,7 @@ public abstract class StyleElement extends ElementImpl {
         NodeInfo anc = this;
         while (anc instanceof StyleElement) {
             StyleElement el = (StyleElement)anc; 
-            String x = anc.getNamespaceUri() == NamespaceUri.XSLT 
+            String x = (anc.getNamespaceUri() == NamespaceUri.XSLT && !isXslRecord())
                     ? el.getAttributeValue("schema-role")
                     : el.getAttributeValue(NamespaceUri.XSLT, "schema-role");
             if (x != null) {
@@ -1525,7 +1532,7 @@ public abstract class StyleElement extends ElementImpl {
 
 
     /**
-     * Process the [xsl:]expand-text attribute if there is one
+     * Process the [xsl:]default-validation attribute if there is one
      *
      * @param ns the namespace URI of the attribute required  (the default namespace or the XSLT namespace.)
      */

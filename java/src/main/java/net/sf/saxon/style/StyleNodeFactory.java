@@ -130,16 +130,18 @@ public class StyleNodeFactory implements NodeFactory {
 
         if (e != null) {  // recognized as an XSLT element
 
+            NamespaceUri specialNs = f == StandardNames.XSL_RECORD
+                    ? NamespaceUri.XSLT : NamespaceUri.NULL;
             e.setCompilation(compilation);
             e.setNamespaceMap(namespaces);
             e.initialise(elemName, elemType, attlist, parent, sequence);
             e.setLocation(baseURI, lineNumber, columnNumber);
-            e.processExtensionElementAttribute(NamespaceUri.NULL);
-            e.processExcludedNamespaces(NamespaceUri.NULL);
-            e.processVersionAttribute(NamespaceUri.NULL);
-            e.processDefaultXPathNamespaceAttribute(NamespaceUri.NULL);
-            e.processExpandTextAttribute(NamespaceUri.NULL);
-            e.processDefaultValidationAttribute(NamespaceUri.NULL);
+            e.processExtensionElementAttribute(specialNs);
+            e.processExcludedNamespaces(specialNs);
+            e.processVersionAttribute(specialNs);
+            e.processDefaultXPathNamespaceAttribute(specialNs);
+            e.processExpandTextAttribute(specialNs);
+            e.processDefaultValidationAttribute(specialNs);
 
             if (toplevel && !e.isDeclaration() && !(e instanceof XSLExpose) && e.forwardsCompatibleModeIsEnabled()) {
                 DataElement d = new DataElement();

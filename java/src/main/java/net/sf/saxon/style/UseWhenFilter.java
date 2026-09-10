@@ -131,7 +131,8 @@ public class UseWhenFilter extends ProxyReceiver {
                              Location location, int properties) throws XPathException {
         int fp = elemName.obtainFingerprint(getNamePool());
         boolean inXsltNamespace = elemName.hasURI(NamespaceUri.XSLT);
-        NamespaceUri stdAttUri = inXsltNamespace ? NamespaceUri.NULL : NamespaceUri.XSLT;
+        NamespaceUri stdAttUri = (inXsltNamespace && fp != StandardNames.XSL_RECORD)
+                                          ? NamespaceUri.NULL : NamespaceUri.XSLT;
 
         DocumentImpl includedDoc = null;
 
@@ -319,15 +320,15 @@ public class UseWhenFilter extends ProxyReceiver {
     private ParsedAttributes startElementProcessAttributes(
             NodeName elemName, AttributeMap attributes, NamespaceMap namespaces, boolean inXsltNamespace, NamespaceUri stdAttUri) {
         boolean inSaxonNamespace = elemName.hasURI(NamespaceUri.SAXON);
-
+        boolean isXslRecord = elemName.getFingerprint() == StandardNames.XSL_RECORD;
         ParsedAttributes pa = new ParsedAttributes();
 
         for (AttributeInfo att : attributes) {
             NodeName attName = att.getNodeName();
             attName.obtainFingerprint(getNamePool());
             String local = attName.getLocalPart();
-            boolean underscored = local.startsWith("_");
-            if (local.equals("default-mode") && (attName.hasURI(NamespaceUri.XSLT) != inXsltNamespace)) {
+            boolean underscored = local.startsWith("_") && !isXslRecord;
+            if (local.equals("default-mode") && (attName.hasURI(NamespaceUri.XSLT) != inXsltNamespace) && !isXslRecord) {
                 registerModeName(att.getValue(), namespaces);
             }
             if (attName.hasURI(stdAttUri)) {

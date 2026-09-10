@@ -612,9 +612,10 @@ public class Executable {
             if (topLevelPackage.getHostLanguageVersion() >= 40) {
                 SequenceType type = globalContextRequirement.getRequiredTypes().get(0);
                 CoercionRules rules = CoercionRules.forVersion(config, topLevelPackage.getHostLanguageVersion());
+                String errorCode = topLevelPackage.getHostLanguage() == HostLanguage.XSLT ? "XTTE0590" : "XPTY0004";
                 Sequence converted = rules.coerce(contextValue, type, SequenceType.ANY_SEQUENCE,
                                                   config,
-                                                  () -> new RoleDiagnostic(RoleDiagnostic.MISC, "defaulted global context item", 0),
+                                                  () -> new RoleDiagnostic(RoleDiagnostic.MISC, "defaulted global context item", 0, errorCode),
                                                   Loc.NONE);
                 contextValue = converted.materialize();
             }
