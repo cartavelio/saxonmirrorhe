@@ -369,11 +369,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null));
 
-
+        //#if EE==true || PE==true
+        //#if CSHARP==false
         register("invisible-xml", 1, 2, e -> e.populate(InvisibleXmlFn::new, InvisibleXmlFn.RETURN_TYPE, OPT, 0)
                 .arg(0, ChoiceItemType.of(BuiltInAtomicType.STRING, NodeKindTest.DOCUMENT, NodeKindTest.ELEMENT), OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(InvisibleXmlFn.getOptionDetails()));
+        //#endif
+        //#endif
 
         register("is-NaN", 1, e -> e.populate(IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
