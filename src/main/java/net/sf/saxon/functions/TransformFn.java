@@ -40,6 +40,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -117,13 +118,13 @@ public class TransformFn extends SystemFunction implements Callable {
      * options with recognized names and type-valid values.
      */
 
-    private void checkTransformOptions(Map<String, Sequence> options, XPathContext context, boolean isXslt30Processor) throws XPathException {
+    private void checkTransformOptions(Map<String, Sequence> options, XPathContext context, int languageVersion) throws XPathException {
         if (options.isEmpty()) {
             throw new XPathException("No transformation options supplied", "FOXT0002");
         }
 
         for (String keyName : options.keySet()) {
-            if (isTransformOptionName30(keyName) && !isXslt30Processor) {
+            if (isTransformOptionName30(keyName) && languageVersion < 30) {
                 throw new XPathException("The transform option " + keyName + " is only available when using an XSLT 3.0 processor", "FOXT0002");
             }
         }
@@ -569,15 +570,15 @@ public class TransformFn extends SystemFunction implements Callable {
         }
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(Feature.CONFIGURATION, targetConfig);
-        boolean isXslt30Processor = true;
-        checkTransformOptions(options, context, isXslt30Processor);
-        boolean useXslt30Processor = isXslt30Processor;
+        int languageVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        checkTransformOptions(options, context, languageVersion);
         if (options.get("xslt-version") != null) {
-            BigDecimalValue xsltVersion = (BigDecimalValue) options.get("xslt-version").head();
-            if ((xsltVersion.compareTo(BigDecimalValue.THREE) >= 0 && !isXslt30Processor) || (xsltVersion.compareTo(BigDecimalValue.THREE) > 0 && isXslt30Processor)) {
-                throw new XPathException("The transform option xslt-version is higher than the XSLT version supported by this processor", "FOXT0002");
+            BigDecimalValue thisVersion = new BigDecimalValue(new BigDecimal(languageVersion).divide(BigDecimal.TEN));
+            BigDecimalValue targetVersion = (BigDecimalValue) options.get("xslt-version").head();
+            if (targetVersion.compareTo(thisVersion) > 0) {
+                throw new XPathException("The transform option xslt-version is higher than the language version supported by this processor", "FOXT0002");
             }
-            useXslt30Processor = xsltVersion.compareTo(BigDecimalValue.THREE) == 0;
+
         }
         String principalInput = oneOf(options, "source-node", "source-location", "initial-match-selection");
 
