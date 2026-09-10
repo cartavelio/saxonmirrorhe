@@ -38,10 +38,15 @@ int transform(sxnc_environment * environi, int argc, const char* argv[]) {
 
     int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, argc);
     for (int i =1; i < argc; i++) {
+#ifdef DEBUG
+        printf("\nArgument = %s", (char *)argv[i]);
+#endif
         addProcessorProperty(environi->thread, (void *)processorDataRef, (char *)argv[i]);
     }
-
-     j_run_transform(environi->thread, 0, (void *)processorDataRef);
+#ifdef DEBUG
+    printf("\nprocessorData = %i", (int)processorDataRef);
+#endif
+     j_run_transform(environi->thread, (void *)processorDataRef);
 	return 0;
 }
 

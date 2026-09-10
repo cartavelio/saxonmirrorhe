@@ -18,6 +18,8 @@ long long int j_db_setDTDValidation(graal_isolatethread_t*, void *, int);
 
 int run_main(int argc, char** argv);
 
+long long int j_run_validate(graal_isolatethread_t*, void *);
+
 long long int createProcessorDataWithArray(graal_isolatethread_t*, void *);
 
 long long int createProcessorData(graal_isolatethread_t*);
@@ -36,7 +38,9 @@ void clearProcessorData(graal_isolatethread_t*, void *);
 
 long long int createSaxonProcessor(graal_isolatethread_t*, int);
 
-long long int j_run_transform(graal_isolatethread_t*, int, void *);
+long long int j_run_transform(graal_isolatethread_t*, void *);
+
+long long int j_run_query(graal_isolatethread_t*, void *);
 
 void j_handles_destroy(graal_isolatethread_t*, void *);
 
