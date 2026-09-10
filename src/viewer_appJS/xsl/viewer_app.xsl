@@ -433,6 +433,11 @@
         <xsl:variable name="maindiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"/>
         <xsl:variable name="platformdiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id eq 'platform']"/>
         
+        <xsl:variable name="on-changes-page" select="exists($maindiv/div[@id = 'changes-content'])"/>
+        <xsl:variable name="changeContentDivs" select="if ($on-changes-page) then (ixsl:page()/html/body/div[@id =
+            'wrap']/div[@id = 'main']/div[@id = 'changes-content']//div[@class = 'changeContent']) else
+            ()"/>
+        
         <xsl:variable name="platformfndiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id =
             'main']/div/div[@id eq 'platform-fn']"/>
         <xsl:variable name="on-fn-list-page" select="exists($platformfndiv)"/>
@@ -490,6 +495,25 @@
                     <ixsl:set-style name="display" select="'none'" object="$platformfndiv"/>
                 </xsl:otherwise>
             </xsl:choose>
+        </xsl:if>
+        
+        <xsl:if test="$on-changes-page">
+            <xsl:for-each select="$changeContentDivs">
+                <xsl:variable name="platform-ch-div" select="preceding-sibling::div[@class eq 'platform-ch']"/>
+                <xsl:variable name="count" select="count(./*[ixsl:style(.)?display eq 'block'])"/>
+                <!--<xsl:message>count displayed changes content: <xsl:value-of select="$count"/></xsl:message>-->
+                <xsl:choose>
+                    <xsl:when test="$count eq 0">
+                        <xsl:call-template name="platform-ch-warning">
+                            <xsl:with-param name="platform-ch-div" select="$platform-ch-div"/>
+                        </xsl:call-template>
+                        <ixsl:set-style name="display" select="'block'" object="$platform-ch-div"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <ixsl:set-style name="display" select="'none'" object="$platform-ch-div"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
         </xsl:if>
         
         <!-- Check whether there is anything displayed in the main div - if not, display info in the
@@ -579,6 +603,20 @@
                 </input>
             </div>
         </xsl:result-document>
+    </xsl:template>
+    
+    <xsl:template name="platform-ch-warning">
+        <xsl:param name="platform-ch-div" as="element(div)"/>
+        <xsl:message>platform-ch-warning called</xsl:message>
+        <xsl:for-each select="$platform-ch-div">
+            <xsl:result-document href="?." method="ixsl:replace-content">
+                <div class="warning">
+                    <p><b>No changes in this category documented for the platforms selected.</b></p>
+                    <p>To switch to show the documented changes on other platforms, use the checkboxes in the footer.</p>
+                </div>
+            </xsl:result-document>
+        </xsl:for-each>
+        
     </xsl:template>
     
 
