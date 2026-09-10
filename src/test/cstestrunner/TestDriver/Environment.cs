@@ -81,13 +81,14 @@ namespace TestDriver {
             //environment.processor.SetProperty(JFeatureKeys.TRACE_EXTERNAL_FUNCTIONS, "true");
             string version = SpecAttr.VersionOf(spec);
             string xpVersion = version == "3.0" ? "3.1" : version;
-            string xtVersion = version == "3.1" ? "3.0" : version;
+            string xqVersion = xpVersion == "2.0" ? "3.1" : version;
+            string xtVersion = (version == "3.1" || version == "2.0") ? "3.0" : version;
             environment.xpathCompiler = environment.processor.NewXPathCompiler();
             environment.xpathCompiler.BaseUri = baseURI;
             environment.xpathCompiler.XPathLanguageVersion = xpVersion;
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = baseURI;
-            environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
+            environment.xqueryCompiler.XQueryLanguageVersion = xqVersion;
             environment.xsltCompiler = environment.processor.NewXsltCompiler();
             environment.xsltCompiler.BaseUri = baseURI;
             environment.xsltCompiler.XsltLanguageVersion = xtVersion;
@@ -140,7 +141,7 @@ namespace TestDriver {
             environment.xpathCompiler.XPathLanguageVersion = xpVersion;
             environment.xqueryCompiler = environment.processor.NewXQueryCompiler();
             environment.xqueryCompiler.BaseUri = env.BaseUri;
-            environment.xqueryCompiler.XQueryLanguageVersion = xpVersion;
+            environment.xqueryCompiler.XQueryLanguageVersion = (version == "2.0" ? "3.1" : xpVersion);
             if (driver.RequestedSpec.ToString().Contains("XT")) {
                 environment.xsltCompiler = environment.processor.NewXsltCompiler();
                 environment.xsltCompiler.XsltLanguageVersion = version;
