@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
@@ -138,7 +138,7 @@ public class TestJsonBuilder {
     @Test
     public void testParseFromURI() {
         try {
-            URI uri = new File(new ConfigTest().getDataDir() + "sample.json").toURI();
+            URI uri = Testdata.file("sample.json").toURI();
             XdmValue val = new Processor(false).newJsonBuilder().loadJson(uri);
             assertTrue(val instanceof XdmMap);
             XdmMap m = (XdmMap) val;

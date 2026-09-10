@@ -1,8 +1,8 @@
 package net.sf.saxon.test.xdmfixtures;
 
-import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.StringMapBuilder;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;

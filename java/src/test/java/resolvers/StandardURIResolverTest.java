@@ -1,6 +1,5 @@
 package resolvers;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.StandardURIResolver;
@@ -11,14 +10,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
-import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class StandardURIResolverTest {
-
-    private static String DATA_DIR = new ConfigTest().getDataDir();
-    private static String REPO_ROOT = DATA_DIR.replace("src/test/testdata/", "");
     @Test
     public void noConfigurationOk() throws XPathException, SaxonApiException {
         StandardURIResolver resolver = new StandardURIResolver();

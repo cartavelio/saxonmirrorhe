@@ -1,6 +1,5 @@
 package nativetests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
@@ -20,8 +19,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test options on schema validation interfaces
  */
 public class SubtypingTest {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testAtomicTypes() {
         Processor proc = new Processor(false);
