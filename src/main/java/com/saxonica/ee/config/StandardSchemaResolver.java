@@ -131,6 +131,10 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         }
         //#endif
 
+        if (locations == null || locations.length == 0) {
+            return EMPTY_SOURCE_ARRAY;
+        }
+
         try {
             Source[] sources = new Source[locations.length];
             for (int i = 0; i < locations.length; i++) {
