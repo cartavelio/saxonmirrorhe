@@ -528,6 +528,18 @@ public class UserFunctionReference extends Expression
         public void export(ExpressionPresenter out) throws XPathException {
             agent.export(out);
         }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other instanceof BoundUserFunction) {
+                BoundUserFunction buf = (BoundUserFunction) other;
+                return getTargetFunction() == buf.getTargetFunction() && getArity() == buf.getArity();
+            }
+            return false;
+        }
     }
 
 }

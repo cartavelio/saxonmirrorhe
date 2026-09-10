@@ -914,9 +914,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
 
     @Override
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
-        throw new XPathException("Cannot compare functions using deep-equal", "FOTY0015")
-                .asTypeError()
-                .withXPathContext(context);
+        return this == other;
     }
 
     /**

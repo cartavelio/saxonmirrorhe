@@ -326,15 +326,7 @@ public abstract class SystemFunction extends AbstractFunction {
         ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) throws XPathException {
         //default: no action
     }
-
-    /**
-     * Determine whether two functions are equivalent
-     */
-    @Override
-    public boolean equals(Object o) {
-        return (o instanceof SystemFunction) && super.equals(o);
-    }
-
+    
     @Override
     public int hashCode() {
         // included explicitly because equals() is overridden: prevents compiler warnings
@@ -598,6 +590,18 @@ public abstract class SystemFunction extends AbstractFunction {
 
     public Elaborator getElaborator() {
         return null;
+    }
+
+    /**
+     * Test whether two functions are identical (used in deep-equal comparisons)
+     */
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other || (other instanceof SystemFunction &&
+                getFunctionName().equals(((SystemFunction)other).getFunctionName()) &&
+                        getArity() == ((SystemFunction) other).getArity() &&
+                (details.properties & (BuiltInFunctionSet.FOCUS | BuiltInFunctionSet.DEPENDS_ON_STATIC_CONTEXT)) == 0);
     }
 
 
