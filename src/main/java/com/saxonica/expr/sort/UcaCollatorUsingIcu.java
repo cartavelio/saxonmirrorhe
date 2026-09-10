@@ -417,10 +417,10 @@ public class UcaCollatorUsingIcu implements SubstringMatcher {
     //#if CSHARP==true
     private static Locale makeCSharpLocale(String language, String country, String variant) {
         StringBuilder sb = new StringBuilder(language);
-        if (country != null) {
+        if (country != null && !country.isEmpty()) {
             sb.append("-").append(country);
         }
-        if (variant != null) {
+        if (variant != null && !variant.isEmpty()) {
             sb.append("-").append(variant);
         }
         return new Locale(sb.toString());
