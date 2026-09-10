@@ -4646,13 +4646,6 @@ public class XPathParser {
         Expression exp = env.getFunctionLibrary().bind(functionName, arguments, keywordArgs, env, reasons);
         if (exp == null) {
             exp = reportMissingFunction(offset, functionQName, arguments, reasons);
-//            StringBuilder sb = new StringBuilder();
-//            sb.append("Cannot find a ").append(arguments.length).append(
-//                    "-argument function named ").append(functionName.getComponentName().getEQName()).append("()");
-//            for (String reason : reasons) {
-//                sb.append(". ").append(reason);
-//            }
-//            throw new XPathException(sb.toString(), "XPST0017").asStaticError();
         }
 
         // In most cases, bind() returns a function call
@@ -4664,10 +4657,10 @@ public class XPathParser {
                     if (fc instanceof UserFunctionCall ufc) {
                         UserFunction uf = ufc.getFunction();
                         Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
-                        if (def == null) {
-                            throw new XPathException("Argument " + (i + 1) + " has no default value in function " + functionQName.getEQName(), "XPST0017");
+                        if (def != null) {
+                            fc.setArg(i, def.get().copy(new RebindingMap()));
+                            // Otherwise, no action: it's a forward reference that will be resolved later
                         }
-                        fc.setArg(i, def.get().copy(new RebindingMap()));
                     } else if (fc instanceof SystemFunctionCall sfc) {
                         Supplier<Expression> def = sfc.getTargetFunction().getDetails().getDefaultValueExpression(i);
                         fc.setArg(i, def == null ? Literal.makeEmptySequence() : def.get());
@@ -4684,22 +4677,17 @@ public class XPathParser {
 
             if (placeHolderSequence > 0) {
                 SymbolicName.F sn2 = new SymbolicName.F(functionName.getComponentName(), fc.getArguments().length);
-                FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(sn2, env);
-                return new DynamicPartialApply(new FunctionLiteral(functionItem), fc.getArguments());
+                FunctionItem target = env.getFunctionLibrary().getFunctionItem(sn2, env);
+                Expression targetExp = makeNamedFunctionReference(functionName.getComponentName(), target);
+                setLocation(targetExp, offset);
+                return new DynamicPartialApply(targetExp, fc.getArguments());
             }
 
             // There are special rules for certain functions appearing in a pattern
             if (language == ParsedLanguage.XSLT_PATTERN) {
                 if (exp.isCallOn(RegexGroup.class)) {
                     return Literal.makeEmptySequence();
-                } else if (exp instanceof CurrentGroupCall) {
-                    grumble("The current-group() function cannot be used in a pattern",
-                            "XTSE1060", offset);
-                    return new ErrorExpression();
-                } else if (exp instanceof CurrentGroupingKeyCall) {
-                    grumble("The current-grouping-key() function cannot be used in a pattern",
-                            "XTSE1070", offset);
-                    return new ErrorExpression();
+
                 } else if (exp.isCallOn(CurrentMergeGroup.class)) {
                     grumble("The current-merge-group() function cannot be used in a pattern",
                             "XTSE3470", offset);
@@ -4722,7 +4710,7 @@ public class XPathParser {
             FunctionItem functionItem = env.getFunctionLibrary().getFunctionItem(functionName, env);
             return new DynamicPartialApply(new FunctionLiteral(functionItem), arguments);
         }
-
+        
 
         exp.setRetainedStaticContext(env.makeRetainedStaticContext());
         setLocation(exp, offset);

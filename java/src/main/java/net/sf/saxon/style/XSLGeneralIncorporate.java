@@ -96,7 +96,6 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
             // error already reported
             return null;
         }
-
         //checkEmpty();
         //checkTopLevel((this instanceof XSLInclude ? "XTSE0170" : "XTSE0190"));
 
@@ -120,7 +119,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 incModule.setImporter(importer);
 
                 // in 4.0, ignore the xsl:include if the import precedence is the same
-                if (getCompilation().getCompilerInfo().getXsltVersion() == 40 && incModule.getPrecedence() == precedence) {
+                if (!isImport() && getCompilation().getCompilerInfo().getXsltVersion() == 40 && incModule.getPrecedence() == precedence) {
                     return null;
                 }
 

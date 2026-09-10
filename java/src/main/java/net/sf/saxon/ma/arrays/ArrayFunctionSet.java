@@ -54,7 +54,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     }
 
     public final static UnicodeString valueRecordKey = new Twine8("value");
-    public final static Shape valueRecord = new Shape(valueRecordKey);
+    public final static Shape VALUE_RECORD = new Shape(valueRecordKey);
 
     private void init(int version) {
 
@@ -880,7 +880,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public static GroundedValue members(ArrayItem input) {
             List<MapItem> parcels = new ArrayList<>(input.arrayLength());
             for (GroundedValue member : input.members()) {
-                parcels.add(new ShapedMap(valueRecord, member));
+                parcels.add(new ShapedMap(VALUE_RECORD, member));
             }
             return SequenceExtent.makeSequenceExtent(parcels);
         }
