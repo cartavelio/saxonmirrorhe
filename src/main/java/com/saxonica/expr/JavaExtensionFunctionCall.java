@@ -3,10 +3,7 @@ package com.saxonica.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.SequenceEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.IntegratedFunctionCall;
 import net.sf.saxon.lib.Feature;
@@ -35,19 +32,21 @@ import java.util.function.Supplier;
  * class {@link com.saxonica.config.JavaExtensionLibrary}</p>
  */
 
+@SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "SynchronizeOnNonFinalField"})
 public class JavaExtensionFunctionCall extends FunctionCall implements Callable {
 
     private Configuration config;
     private StructuredQName name;
     private AccessibleObject theMethod;
-    private Class[] theParameterTypes;
+    private Class<?>[] theParameterTypes;
     private Type[] theGenericParameterTypes;
     private PJConverter[] argumentConverters;
     private JPConverter resultConverter;
     private boolean checkForNodes;
-    private Class theClass;
+    private Class<?> theClass;
     private JavaExternalObjectType declaredType;
     private boolean returnVoidAsThis = false;
+    private SequenceEvaluator[] argumentEvaluators = null;
 
     /**
      * Default constructor
@@ -65,13 +64,13 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @param config       the Configuration
      */
 
-    public void init(StructuredQName functionName, Class theClass, AccessibleObject object, Configuration config) {
+    public void init(StructuredQName functionName, Class<?> theClass, AccessibleObject object, Configuration config) {
         this.config = config;
         this.name = functionName;
         this.theClass = theClass;
         theMethod = object;
         if (theMethod instanceof Constructor) {
-            theParameterTypes = ((Constructor) theMethod).getParameterTypes();
+            theParameterTypes = ((Constructor<?>) theMethod).getParameterTypes();
         } else if (theMethod instanceof Method) {
             theParameterTypes = ((Method) theMethod).getParameterTypes();
         } else {
@@ -141,7 +140,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         int firstArg = 0;
         if (theMethod instanceof Constructor) {
             if (theParameterTypes == null) {
-                theParameterTypes = ((Constructor) theMethod).getParameterTypes();
+                theParameterTypes = ((Constructor<?>) theMethod).getParameterTypes();
             }
         }
         if (theMethod instanceof Method) {
@@ -236,6 +235,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 // Constructors always return wrapped external objects, even if the Java class
                 // is one known to Saxon such as java.util.Date
                 JavaExternalObjectType result;
+                //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized(config) {
                     result = JavaExternalObjectType.of(theClass);
                 }
@@ -243,10 +243,11 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 resultConverter = new JPConverter.ExternalObjectWrapper(resultType);
                 //resultConverter = JPConverter.allocate(theClass, config);
             } else if (theMethod instanceof Method) {
-                Class resultClass = ((Method) theMethod).getReturnType();
+                Class<?> resultClass = ((Method) theMethod).getReturnType();
                 Type genericResultType = ((Method) theMethod).getGenericReturnType();
                 if (genericResultType == Void.TYPE && isReturnVoidAsThis()) {
                     JavaExternalObjectType result;
+                    //noinspection SynchronizationOnLocalVariableOrMethodParameter
                     synchronized(config) {
                         result = JavaExternalObjectType.of(theClass);
                     }
@@ -255,7 +256,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     resultConverter = JPConverter.allocate(resultClass, genericResultType, config);
                 }
             } else if (theMethod instanceof Field) {
-                Class resultClass = ((Field) theMethod).getType();
+                Class<?> resultClass = ((Field) theMethod).getType();
                 Type genericResultType = ((Field) theMethod).getGenericType();
                 resultConverter = JPConverter.allocate(resultClass, genericResultType, config);
             } else {
@@ -289,8 +290,6 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             firstParam = usesContext ? 1 : 0;
         }
         if (firstArg != 0) {
-//            argumentConverters[0] = PJConverter.allocate(
-//                    config, AnyItemType.getInstance(), StaticProperty.ALLOWS_MANY, theClass);
             argumentConverters[0] = PJConverter.UnwrapExternalObject.INSTANCE;
         }
         int j = firstParam;
@@ -311,7 +310,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             resultConverter = new JPConverter.ExternalObjectWrapper(resultType);
             //resultConverter = JPConverter.allocate(theClass, config);
         } else if (theMethod instanceof Method) {
-            Class resultClass = ((Method) theMethod).getReturnType();
+            Class<?> resultClass = ((Method) theMethod).getReturnType();
             Type resultType = ((Method) theMethod).getGenericReturnType();
             if (resultType == Void.TYPE && isReturnVoidAsThis()) {
                 JavaExternalObjectType result;
@@ -323,7 +322,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 resultConverter = JPConverter.allocate(resultClass, resultType, config);
             }
         } else if (theMethod instanceof Field) {
-            Class resultClass = ((Field) theMethod).getType();
+            Class<?> resultClass = ((Field) theMethod).getType();
             Type resultType = ((Field) theMethod).getGenericType();
             resultConverter = JPConverter.allocate(resultClass, resultType, config);
         } else {
@@ -402,7 +401,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     public int getIntrinsicDependencies() {
         int depend = StaticProperty.HAS_SIDE_EFFECTS;
         if (theMethod instanceof Method) {
-            Class[] theParameterTypes = ((Method) theMethod).getParameterTypes();
+            Class<?>[] theParameterTypes = ((Method) theMethod).getParameterTypes();
             if (theParameterTypes.length > 0 && theParameterTypes[0] == XPathContext.class) {
                 depend |=
                         StaticProperty.DEPENDS_ON_CONTEXT_ITEM |
@@ -499,7 +498,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @return the class containing the target method
      */
 
-    public Class getTargetClass() {
+    public Class<?> getTargetClass() {
         return theClass;
     }
 
@@ -520,7 +519,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      *         or constructor
      */
 
-    public Class[] getParameterTypes() {
+    public Class<?>[] getParameterTypes() {
         return theParameterTypes;
     }
 
@@ -538,7 +537,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     public Sequence call(XPathContext context, Sequence[] argValues) throws XPathException {
 
         if (theMethod instanceof Constructor) {
-            Constructor constructor = (Constructor) theMethod;
+            Constructor<?> constructor = (Constructor<?>) theMethod;
             if (theParameterTypes == null) { // WH
                 theParameterTypes = constructor.getParameterTypes();
             }
@@ -745,7 +744,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
     private void setupParams(Sequence[] argValues,
                              Object[] params,
-                             Class[] paramTypes,
+                             Class<?>[] paramTypes,
                              int firstParam,
                              int firstArg,
                              XPathContext context) throws XPathException {
@@ -795,7 +794,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
     @Override
     protected int computeCardinality() {
-        Class resultClass = getReturnClass();
+        Class<?> resultClass = getReturnClass();
         if (resultClass.equals(Void.TYPE)) {
             // this always returns an empty sequence, but we'll model it as
             // zero or one
@@ -814,9 +813,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      * @return the Java class of the value returned by the method
      */
 
-    public Class getReturnClass() {
+    public Class<?> getReturnClass() {
         if (theMethod instanceof Method) {
-            Class returnClass = ((Method) theMethod).getReturnType();
+            Class<?> returnClass = ((Method) theMethod).getReturnType();
             if (returnClass == Void.TYPE && returnVoidAsThis) {
                 return theClass;
             } else {
@@ -865,7 +864,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
      *                                   when the constructor itself throws an exception)
      */
 
-    protected Object invokeConstructor(Constructor constructor, Object[] params)
+    protected Object invokeConstructor(Constructor<?> constructor, Object[] params)
             throws java.lang.InstantiationException,
             java.lang.IllegalAccessException,
             java.lang.reflect.InvocationTargetException {
@@ -999,6 +998,33 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     }
 
     /**
+     * Allocate evaluation functions for each argument (in field {@code argumentEvaluators})
+     */
+
+    protected void allocateArgumentEvaluators() {
+        int arity = getArity();
+        argumentEvaluators = new SequenceEvaluator[arity];
+        for (int i = 0; i < arity; i++) {
+            argumentEvaluators[i] = getArg(i).makeElaborator().eagerly();
+        }
+    }
+
+    public Sequence[] evaluateArguments(XPathContext c) throws XPathException {
+        int numArgs = getArity();
+        Sequence[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
+        synchronized(this) {
+            if (argumentEvaluators == null) {
+                allocateArgumentEvaluators();
+            }
+        }
+        for (int i = 0; i < numArgs; i++) {
+            actualArgs[i] = argumentEvaluators[i].evaluate(c);
+        }
+        return actualArgs;
+    }
+
+
+    /**
      * Make an elaborator for this expression
      *
      * @return an appropriate {@link Elaborator}
@@ -1008,32 +1034,15 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         return new JavaExtensionFunctionCallElaborator();
     }
 
-    private static class JavaExtensionFunctionCallElaborator extends UserFunctionCall.UserFunctionCallAbstractElaborator {
+    private static class JavaExtensionFunctionCallElaborator extends PullElaborator {
 
-        /**
-         * Allocate evaluation functions for each argument (in field {@code argumentEvaluators})
-         *
-         * @param expr             the function call
-         * @param allowRepeatedUse true if the value of the argument must be supplied
-         *                         to the function in a way that allows repeated use. This
-         *                         will be true for user-written functions, false for system functions,
-         *                         where the implementation is arranged to only use the value once.
-         */
-        @Override
-        protected void allocateArgumentEvaluators(FunctionCall expr, boolean allowRepeatedUse) {
-            int arity = expr.getArity();
-            argumentEvaluators = new SequenceEvaluator[arity];
-            for (int i = 0; i < arity; i++) {
-                argumentEvaluators[i] = expr.getArg(i).makeElaborator().eagerly();
-            }
-        }
 
         @Override
         public PullEvaluator elaborateForPull() {
             JavaExtensionFunctionCall expr = (JavaExtensionFunctionCall)getExpression();
-            allocateArgumentEvaluators(expr, true);
+            expr.allocateArgumentEvaluators();
             return context -> {
-                Sequence[] actualArgs = evaluateArguments(context);
+                Sequence[] actualArgs = expr.evaluateArguments(context);
                 return expr.call(context, actualArgs).iterate();
             };
         }
@@ -1041,9 +1050,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         @Override
         public ItemEvaluator elaborateForItem() {
             JavaExtensionFunctionCall expr = (JavaExtensionFunctionCall) getExpression();
-            allocateArgumentEvaluators(expr, true);
+            expr.allocateArgumentEvaluators();
             return context -> {
-                Sequence[] actualArgs = evaluateArguments(context);
+                Sequence[] actualArgs = expr.evaluateArguments(context);
                 return expr.call(context, actualArgs).head();
             };
         }

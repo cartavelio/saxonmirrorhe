@@ -180,6 +180,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         switch (code) {
 
             case Evaluators.EVALUATE_LITERAL:
+            case Evaluators.EAGER_SEQUENCE:
                 //return ((Literal)exp).getValue();
                 compiler.compileToSequence(exp);
                 break;
