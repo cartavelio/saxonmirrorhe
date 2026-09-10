@@ -312,6 +312,16 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         return null;
     }
 
+    /**
+     * Bind a function call using this XQuery function library, in the situation where
+     * it was not possible to bind it earlier, typically because it was encountered as a forwards
+     * reference.
+     *
+     * @param ufc    The unbound function call, which will include a non-null <code>UnboundFunctionCallDetails</code>
+     * @param reasons a list which can be populated with messages indicating why binding failed
+     * @return true if the function call is now bound; false if it remains unbound.
+     */
+
     public boolean bindUnboundFunctionCall(UserFunctionCall ufc, List<String> reasons) {
         UnboundFunctionLibrary.UnboundFunctionCallDetails details = ufc.getUnboundCallDetails();
         assert details != null;

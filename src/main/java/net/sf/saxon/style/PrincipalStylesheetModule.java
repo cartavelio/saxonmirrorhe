@@ -604,14 +604,15 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
             // see if there is already a named function with this precedence
             ComponentDeclaration otherDecl = functionIndex.get(sName);
-            if (otherDecl == null) {
-                // this is the first
+            Component otherComp = componentIndex.get(sName);
+            if (otherDecl == null && otherComp == null) {
+                // this is the first one in this stylesheet; but there may be one in a used package
                 if (arity == maxArity) {
                     componentIndex.put(sName, declaringComponent);
                 }
                 functionIndex.put(sName, decl);
             } else {
-                Component other = componentIndex.get(new SymbolicName.F(sourceFunction.getObjectName(), ((XSLFunction)otherDecl.getSourceElement()).getNumberOfParameters()));
+                Component other = componentIndex.get(new SymbolicName.F(sourceFunction.getObjectName(), maxArity));
                 if (other != null && other.getDeclaringPackage() == getStylesheetPackage()) {
                     // check the precedences
                     int thisPrecedence = decl.getPrecedence();
