@@ -345,6 +345,7 @@ PHP_METHOD(XPathProcessor, evaluate);
 PHP_METHOD(XPathProcessor, evaluateSingle);
 PHP_METHOD(XPathProcessor, declareNamespace);
 PHP_METHOD(XPathProcessor, setBackwardsCompatible);
+PHP_METHOD(XPathProcessor, setUnprefixedElementMatchingPolicy);
 PHP_METHOD(XPathProcessor, setCaching);
 PHP_METHOD(XPathProcessor, setLanguageVersion);
 PHP_METHOD(XPathProcessor, importSchemaNamespace);

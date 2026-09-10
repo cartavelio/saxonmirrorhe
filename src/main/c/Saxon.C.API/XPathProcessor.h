@@ -203,6 +203,21 @@ public:
 
   void setCaching(bool caching);
 
+  //! Set the policy for matching unprefixed element names in XPath expressions
+  /**
+  * @param policy the policy to be used
+  *
+  */
+  void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
+
+  UnprefixedElementMatchingPolicy convertEnumPolicy(int n) { return static_cast<UnprefixedElementMatchingPolicy>(n); }
+
+  //!! Get the policy for matching unprefixed element names in XPath expressions
+  /**
+   * @return the policy being used
+  */
+  UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
+
   //! Import a schema namespace
   /**
    * Here we add the element and attribute declarations and type definitions
@@ -307,6 +322,7 @@ private:
                      string) pairs */
   SaxonApiException
       *exception; /*!< exception object created when there is an error */
+  UnprefixedElementMatchingPolicy unprefixedElementPolicy;
 };
 
 #endif /* SAXON_XPATH_H */

@@ -3582,6 +3582,16 @@ cdef class PyXPathProcessor:
         c_uri = py_uri_string if uri is not None else ""
         self.thisxpptr.declareNamespace(c_prefix, c_uri)
 
+     def set_unprefixed_element_matching_policy(self, policy):
+         """
+         set_unprefixed_element_matching_policy(self, int policy)
+         Set the policy for matching unprefixed element names in XPath expressions.
+         Possible int values: DEFAULT_NAMESPACE = 0, ANY_NAMESPACE = 1 or DEFAULT_NAMESPACE_OR_NONE = 3
+         Args:
+         policy (int): The policy to be used
+         """
+         self.thisxpptr.setUnprefixedElementMatchingPolicy(self.thisxpptr.convertEnumPolicy(policy))
+
 
 
      def declare_variable(self, str name):

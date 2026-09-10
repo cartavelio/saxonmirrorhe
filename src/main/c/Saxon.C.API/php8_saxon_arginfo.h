@@ -1,7 +1,7 @@
 
 //============================= SaxonProcessor
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonproc_construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonproc_construct, 0, 0, 0)
 // the first argument to this is if this is a reference
 // the second argument to this is the name
 ZEND_ARG_INFO(0, license)
@@ -555,6 +555,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_evaluate, 0, 0, 1)
 ZEND_ARG_INFO(0, xpath)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setUnprefixedElementMatchingPolicy 0, 0, 1)
+ZEND_ARG_INFO(0, policy)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_evaluateSingle, 0, 0, 1)

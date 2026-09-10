@@ -376,7 +376,18 @@ public class XPathProcessor extends SaxonCAPI {
                     System.err.println("DEBUG setUnprefixedElementMatchingPolicy value=" + valueInt);
                     System.err.println("DEBUG setUnprefixedElementMatchingPolicy size=" + UnprefixedElementMatchingPolicy.values().length);
                 }
-                compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.values()[valueInt]);
+                switch (valueInt) {
+
+                    case 0:
+                        compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE);
+                        break;
+                    case 1:
+                        compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+                        break;
+                    case 2:
+                        compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
+                        break;
+                }
             }
 
         }

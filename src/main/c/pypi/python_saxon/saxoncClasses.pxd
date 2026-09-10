@@ -9,6 +9,10 @@ cdef extern from "@@location@@Saxon.C.API/CythonExceptionHandler.h":
 
 
 cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
+
+    cdef cppclass UnprefixedElementMatchingPolicy:
+      pass
+
     cdef cppclass SaxonProcessor:
         SaxonProcessor(bool) except +raise_py_error
         SaxonProcessor(const char * configFile) except +raise_py_error
@@ -444,6 +448,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setLax(bool l)
 
     cdef cppclass XPathProcessor:
+
         XPathProcessor() except +raise_py_error
 
         void setBaseURI(const char * uriStr)
@@ -453,6 +458,12 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         XdmValue * evaluate(const char * xpathStr)  except +raise_py_error
    
         XdmItem * evaluateSingle(const char * xpathStr)  except +raise_py_error
+
+        void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
+
+        UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
+
+        UnprefixedElementMatchingPolicy convertEnumPolicy(int n);
 
         void setContextItem(XdmItem * item)
         
