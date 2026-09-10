@@ -280,11 +280,7 @@ const char *SchemaValidator::checkException() { return proc->checkException(); }
 
 void SchemaValidator::setSourceNode(XdmNode *value) {
   if (value != nullptr) {
-    XdmValue * value = getParameter("node", false);
-    if(value != nullptr) {
-         parameters.erase(std::string("node"));
-    }
-    parameters["node"] = (XdmValue *)value;
+    setParameter("node", value, false);
   }
 }
 
@@ -297,10 +293,10 @@ XdmValue *SchemaValidator::getParameter(const char *name, bool withParam) {
   return nullptr;
 }
 
-void SchemaValidator::setParameter(const char *name, XdmValue *value) {
+void SchemaValidator::setParameter(const char *name, XdmValue *value,  bool withParam) {
   if (value != nullptr) {
     // value->incrementRefCount();
-    std::string skey = ("param:" + std::string(name));
+    std::string skey = ((withParam ? "param:" : "") + std::string(name));
     std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
     if (it != parameters.end()) {
       XdmValue *valuei = it->second;
