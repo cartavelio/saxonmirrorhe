@@ -216,8 +216,6 @@ public class StyleNodeFactory implements NodeFactory {
                 // Trying to be clever about constructing the list also ran afoul of
                 // transpiler problems. FIXME: revisit this.
                 List<String> validNames = new ArrayList<>();
-                validNames.add("array");
-                validNames.add("array-member");
                 validNames.add("assign");
                 validNames.add("deep-update");
                 validNames.add("do");
