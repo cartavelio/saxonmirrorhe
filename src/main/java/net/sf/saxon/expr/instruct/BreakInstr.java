@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.TailCallLoop;
@@ -77,13 +76,6 @@ public class BreakInstr extends Instruction implements TailCallLoop.TailCallInfo
     @Override
     public int getInstructionNameCode() {
         return StandardNames.XSL_BREAK;
-    }
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        markContext(context);
-        return null;
     }
 
     public void markContext(XPathContext context) {

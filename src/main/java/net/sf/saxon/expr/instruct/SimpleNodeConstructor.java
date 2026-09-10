@@ -221,20 +221,6 @@ public abstract class SimpleNodeConstructor extends Instruction {
         return "SimpleNodeConstructor";
     }
 
-    /**
-     * Process this instruction
-     *
-     *
-     * @param output the destination for the result
-     * @param context the dynamic context of the transformation
-     * @return a TailCall to be executed by the caller, always null for this instruction
-     */
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-    }
-
 
     /**
      * Process the value of the node, to create the new node.

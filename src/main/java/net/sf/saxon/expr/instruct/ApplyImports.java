@@ -8,10 +8,8 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushElaborator;
@@ -63,11 +61,6 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
         return ai2;
     }
 
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-    }
 
     /**
      * Diagnostic print of expression structure. The abstract expression tree

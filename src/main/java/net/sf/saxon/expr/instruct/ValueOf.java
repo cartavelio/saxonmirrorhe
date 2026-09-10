@@ -29,7 +29,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
@@ -302,22 +301,6 @@ public final class ValueOf extends SimpleNodeConstructor {
             Expression sf = SystemFunction.makeCall("string", getRetainedStaticContext(), getSelect());
             return new CastExpression(sf, BuiltInAtomicType.UNTYPED_ATOMIC, false);
         }
-    }
-
-    /**
-     * Process this instruction
-     *
-     *
-     * @param output the destination for the result
-     * @param context the dynamic context of the transformation
-     * @return a TailCall to be executed by the caller, always null for this instruction
-     */
-
-    /*@Nullable*/
-    @Override
-    @CSharpInnerClass(outer = true, extra = {"Saxon.Hej.s9api.Location instructionLoc"})
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**

@@ -71,12 +71,6 @@ public class NextMatch extends ApplyNextMatchingTemplate {
     }
 
 
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-    }
-
     /**
      * Diagnostic print of expression structure. The abstract expression tree
      * is written to the supplied output destination.

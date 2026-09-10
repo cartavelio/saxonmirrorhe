@@ -412,23 +412,6 @@ public class ComputedElement extends ElementCreator {
         return allowNameAsQName;
     }
 
-    /**
-     * Evaluate the instruction to produce a new element node. This method is typically used when there is
-     * a parent element or document in a result tree, to which the new element is added.
-     *
-     * @param output  the destination for the result
-     * @param context XPath dynamic evaluation context
-     * @return null (this instruction never returns a tail call)
-     * @throws XPathException if a dynamic error occurs
-     */
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context)
-            throws XPathException {
-        ElementCreationDetails details = makeElementCreationDetails();
-        specificProcess(output, context, details);
-        return null;
-    }
-
     @Override
     @CSharpInnerClass(outer = true)
     public ElementCreationDetails makeElementCreationDetails() {

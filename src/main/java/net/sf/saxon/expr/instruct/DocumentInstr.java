@@ -236,11 +236,6 @@ public class DocumentInstr extends ParentNodeConstructor {
         return NodeKindTest.DOCUMENT;
     }
 
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
-    }
-
     /**
      * Evaluate as an item.
      */

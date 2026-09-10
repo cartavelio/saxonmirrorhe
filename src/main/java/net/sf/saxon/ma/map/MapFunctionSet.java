@@ -123,6 +123,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                 .arg(1, actionType, ONE | INS, null));
 
+        register("key-value-pairs", 1, e -> e.populate(MapKeyValuePairs::new, MapType.ANY_MAP_TYPE, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+        
         register("entries", 1, e -> e.populate( MapEntries::new, MapType.ANY_MAP_TYPE, STAR, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
@@ -387,9 +390,26 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the proposed 4.0 function map:entries(Map) =&gt; record(key, value*
+     * Implementation of the proposed 4.0 function map:entries(Map) =&gt; map(*)*
      */
     public static class MapEntries extends SystemFunction {
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem map = (MapItem) arguments[0].head();
+            ZenoSequence results = new ZenoSequence();
+            for (KeyValuePair pair : map.keyValuePairs()) {
+                SingleEntryMap entry = new SingleEntryMap(pair.key, pair.value);
+                results = results.append(entry);
+            }
+            return results;
+        }
+    }
+
+    /**
+     * Implementation of the proposed 4.0 function map:key-value-pairs(Map) =&gt; record(key, value*
+     */
+    public static class MapKeyValuePairs extends SystemFunction {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {

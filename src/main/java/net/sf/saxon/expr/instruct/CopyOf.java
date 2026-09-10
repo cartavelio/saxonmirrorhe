@@ -522,22 +522,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         return new PathMap.PathMapNodeSet(pathMap.makeNewRoot(this));
     }
 
-    /**
-     * Process this xsl:copy-of instruction
-     *
-     *
-     * @param out     the destination for the result
-     * @param context the dynamic context for the transformation
-     * @return null - this implementation of the method never returns a TailCall
-     */
-
-    @Override
-    public TailCall processLeavingTail(Outputter out, XPathContext context) throws XPathException {
-        PushEvaluator push = makeElaborator().elaborateForPush();
-        return push.processLeavingTail(out, context);
-    }
-
-//        try {
+    //        try {
 //            if (copyAccumulators) {
 //                // Try to create a virtual copy if we can. This is cheaper
 //                if (mustPush()) {

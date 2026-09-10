@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
@@ -746,11 +745,6 @@ public class Block extends Instruction {
     @Override
     public String toShortString() {
         return "(" + child(0).toShortString() + ", ...)";
-    }
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**

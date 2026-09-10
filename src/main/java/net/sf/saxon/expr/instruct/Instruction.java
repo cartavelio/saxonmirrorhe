@@ -33,7 +33,7 @@ import javax.xml.transform.SourceLocator;
  * the source instruction was located.
  */
 
-public abstract class Instruction extends Expression implements TailCallReturner {
+public abstract class Instruction extends Expression /*implements TailCallReturner*/ {
 
     /**
      * Constructor
@@ -112,22 +112,22 @@ public abstract class Instruction extends Expression implements TailCallReturner
     @Override
     public abstract Iterable<Operand> operands();
 
-    /**
-     * ProcessLeavingTail: called to do the real work of this instruction. This method
-     * must be implemented in each subclass. The results of the instruction are written
-     * to the current Receiver, which can be obtained via the Controller.
-     *
-     *
-     * @param output the destination for the result
-     * @param context The dynamic context of the transformation, giving access to the current node,
-     *                the current variables, etc.
-     * @return null if the instruction has completed execution; or a TailCall indicating
-     *         a function call or template call that is delegated to the caller, to be made after the stack has
-     *         been unwound so as to save stack space.
-     */
-
-    @Override
-    public abstract TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException;
+//    /**
+//     * ProcessLeavingTail: called to do the real work of this instruction. This method
+//     * must be implemented in each subclass. The results of the instruction are written
+//     * to the current Receiver, which can be obtained via the Controller.
+//     *
+//     *
+//     * @param output the destination for the result
+//     * @param context The dynamic context of the transformation, giving access to the current node,
+//     *                the current variables, etc.
+//     * @return null if the instruction has completed execution; or a TailCall indicating
+//     *         a function call or template call that is delegated to the caller, to be made after the stack has
+//     *         been unwound so as to save stack space.
+//     */
+//
+//    @Override
+//    public abstract TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException;
 
     /**
      * Process the instruction, without returning any tail calls
@@ -139,7 +139,7 @@ public abstract class Instruction extends Expression implements TailCallReturner
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
         try {
-            TailCall tc = processLeavingTail(output, context);
+            TailCall tc = makeElaborator().elaborateForPush().processLeavingTail(output, context);
             dispatchTailCall(tc);
         } catch (XPathException err) {
             err.maybeSetFailingExpression(this);

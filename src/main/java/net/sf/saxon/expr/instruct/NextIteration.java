@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushElaborator;
@@ -112,13 +111,6 @@ public class NextIteration extends Instruction implements TailCallLoop.TailCallI
     @Override
     public String getStreamerName() {
         return "NextIteration";
-    }
-
-    /*@Nullable*/
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        PushEvaluator push = makeElaborator().elaborateForPush();
-        return push.processLeavingTail(output, context);
     }
 
 

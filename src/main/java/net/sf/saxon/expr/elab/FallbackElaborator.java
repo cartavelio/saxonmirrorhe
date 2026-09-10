@@ -41,7 +41,7 @@ public class FallbackElaborator extends Elaborator {
     }
 
     public PushEvaluator elaborateForPush() {
-        return (out, context) -> getExpression().processLeavingTail(out, context);
+        throw new UnsupportedOperationException("Push mode is not supported for " + getExpression().getClass());
     }
 
     public ItemEvaluator elaborateForItem() {

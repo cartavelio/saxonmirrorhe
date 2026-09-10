@@ -7,17 +7,13 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Outputter;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FocusIterator;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.StringView;
@@ -346,53 +342,6 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
                     (StaticProperty.DEPENDS_ON_FOCUS | StaticProperty.DEPENDS_ON_REGEX_GROUP);
         }
         return dependencies;
-    }
-
-
-    /**
-     * ProcessLeavingTail: called to do the real work of this instruction. This method
-     * must be implemented in each subclass. The results of the instruction are written
-     * to the current Receiver, which can be obtained via the Controller.
-     *
-     *
-     * @param output the destination for the result
-     * @param context The dynamic context of the transformation, giving access to the current node,
-     *                the current variables, etc.
-     * @return null if the instruction has completed execution; or a TailCall indicating
-     *         a function call or template call that is delegated to the caller, to be made after the stack has
-     *         been unwound so as to save stack space.
-     */
-
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        RegexIterator iter = getRegexIterator(context);
-        processInput(iter, output, context);
-        return null;
-    }
-
-    private void processInput(RegexIterator iter, Outputter output, XPathContext context) throws XPathException {
-        XPathContextMajor c2 = context.newContext();
-        c2.setOrigin(this);
-        FocusIterator focusIter = c2.trackFocus(iter);
-        c2.setCurrentRegexIterator(iter);
-
-        PipelineConfiguration pipe = output.getPipelineConfiguration();
-        pipe.setXPathContext(c2);
-
-        while (focusIter.next() != null) {
-            if (iter.isMatching()) {
-                if (getMatching() != null) {
-                    getMatching().process(output, c2);
-                }
-            } else {
-                if (getNonMatching() != null) {
-                    getNonMatching().process(output, c2);
-                }
-            }
-        }
-
-        pipe.setXPathContext(context);
-
     }
 
     /**

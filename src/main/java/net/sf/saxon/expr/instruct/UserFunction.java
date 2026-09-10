@@ -681,7 +681,8 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
     public void process(XPathContextMajor context, Sequence[] actualArgs, Outputter output)
             throws XPathException {
         context.setStackFrame(getStackFrameMap(), actualArgs);
-        getBody().process(output, context);
+        TailCall tc = getBody().makeElaborator().elaborateForPush().processLeavingTail(output, context);
+        Expression.dispatchTailCall(tc);
     }
 
     /**

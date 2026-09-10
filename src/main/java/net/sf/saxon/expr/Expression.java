@@ -964,11 +964,6 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         }
     }
 
-    public TailCall processLeavingTail(Outputter outputter, XPathContext context) throws XPathException {
-        process(outputter, context);
-        return null;
-    }
-
     public static void dispatchTailCall(TailCall tc) throws XPathException {
         while (tc != null) {
             tc = tc.processLeavingTail();

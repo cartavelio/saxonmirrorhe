@@ -127,7 +127,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
     @Override
     public void setBody(Expression body) {
         super.setBody(body);
-        bodyIsTailCallReturner = (body instanceof TailCallReturner);
+        //bodyIsTailCallReturner = (body instanceof TailCallReturner);
     }
 
     /**

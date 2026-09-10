@@ -7,11 +7,9 @@
 
 package net.sf.saxon.expr.instruct;
 
-import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushElaborator;
 import net.sf.saxon.expr.elab.PushEvaluator;
@@ -142,19 +140,6 @@ public class Fork extends Instruction {
         Fork f2 = new Fork(e2);
         ExpressionTool.copyLocationInfo(this, f2);
         return f2;
-    }
-
-    /**
-     * Process the instruction, without returning any tail calls. This is the
-     * non-streamed mode of operation, which processes the child expressions
-     * in turn exactly like a sequence constructor.
-     *
-     * @param output the destination for the result
-     * @param context The dynamic context, giving access to the current node,
-     */
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**

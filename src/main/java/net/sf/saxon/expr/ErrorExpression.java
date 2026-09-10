@@ -8,7 +8,8 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.FallbackElaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -237,7 +238,28 @@ public class ErrorExpression extends Expression {
     }
 
     public Elaborator getElaborator() {
-        return new FallbackElaborator();
+        return new ErrorExpressionElaborator();
+    }
+
+    private static class ErrorExpressionElaborator extends PullElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            // copy the exception for thread-safety, because we want to add context information
+            ErrorExpression expr = (ErrorExpression)getExpression();
+            XmlProcessingError exception = expr.getException();
+            return context -> {
+                XPathException err = new XPathException(exception.getMessage());
+                err.setLocation(exception.getLocation());
+                err.maybeSetLocation(expr.getLocation());
+                if (exception.getErrorCode() != null) {
+                    err.setErrorCodeQName(exception.getErrorCode().getStructuredQName());
+                }
+                err.maybeSetContext(context);
+                err.setIsTypeError(exception.isTypeError());
+                throw err;
+            };
+        }
     }
     
 }

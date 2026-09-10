@@ -280,36 +280,6 @@ public class SourceDocument extends Instruction {
     }
 
     /**
-     * ProcessLeavingTail: called to do the real work of this instruction. This method
-     * must be implemented in each subclass. The results of the instruction are written
-     * to the current Receiver, which can be obtained via the Controller.
-     *
-     *
-     * @param output the destination for the result
-     * @param context The dynamic context of the transformation, giving access to the current node,
-     *                the current variables, etc.
-     * @return null if the instruction has completed execution; or a TailCall indicating
-     *         a function call or template call that is delegated to the caller, to be made after the stack has
-     *         been unwound so as to save stack space.
-     */
-    @Override
-    public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        try {
-            push(output, context);
-        } catch (QuitParsingException q) {
-            // no action, this is an early exit indicating success
-            //throw q;
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            if (e.getErrorCodeQName() == null) {
-                e.setErrorCode("FODC0002");
-            }
-            throw e;
-        }
-        return null;
-    }
-
-    /**
      * Evaluate the instruction in push mode
      * @param output  the destination for the result
      * @param context the evaluation context

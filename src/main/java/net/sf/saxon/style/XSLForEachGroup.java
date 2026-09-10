@@ -96,14 +96,14 @@ public final class XSLForEachGroup extends StyleElement {
                 case "select":
                     select = makeExpression(value, att);
                     break;
-                case "array":
-                    requireXslt40("array");
-                    select = arrayToSequence(makeExpression(value, att));
-                    break;
-                case "map":
-                    requireXslt40("map");
-                    select = mapToSequence(makeExpression(value, att));
-                    break;
+//                case "array":
+//                    requireXslt40("array");
+//                    select = arrayToSequence(makeExpression(value, att));
+//                    break;
+//                case "map":
+//                    requireXslt40("map");
+//                    select = mapToSequence(makeExpression(value, att));
+//                    break;
                 case "group-by":
                     groupByAtt = value;
                     groupBy = makeExpression(groupByAtt, att);
@@ -141,11 +141,7 @@ public final class XSLForEachGroup extends StyleElement {
 
         if (select == null) {
             select = Literal.makeEmptySequence();
-            if (getEffectiveVersion() >= 40) {
-                compileError("One of the attributes select|array|map must be present");
-            } else {
-                reportAbsence("select");
-            }
+            reportAbsence("select");
         }
 
         int c = (groupByAtt == null ? 0 : 1) +
