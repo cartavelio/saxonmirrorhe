@@ -52,7 +52,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
     }
 
     /**
-     * Get the qualified of the function being called
+     * Get the qualified name of the function being called
      *
      * @return the qualified name
      */
@@ -178,7 +178,11 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return resultType.getPrimaryType();
+        if (function.getDefinition().trustResultType()) {
+            return resultType.getPrimaryType();
+        } else {
+            return AnyItemType.getInstance();
+        }
     }
 
     /**
@@ -191,7 +195,11 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
 
     @Override
     protected int computeCardinality() {
-        return resultType.getCardinality();
+        if (function.getDefinition().trustResultType()) {
+            return resultType.getCardinality();
+        } else {
+            return StaticProperty.ALLOWS_ZERO_OR_MORE;
+        }
     }
 
     /**

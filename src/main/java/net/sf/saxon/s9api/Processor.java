@@ -120,9 +120,9 @@ public class Processor implements Configuration.ApiProvider {
     public Processor(Source source) throws SaxonApiException {
         try {
             config = Configuration.readConfiguration(source);
-            if (config.getEditionCode().equals("EE")) {
-                schemaManager = makeSchemaManager();
-            }
+            //#if CSHARP==false
+            schemaManager = makeSchemaManager();
+            //#endif
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
@@ -306,33 +306,11 @@ public class Processor implements Configuration.ApiProvider {
     //#endif
 
     /**
-     * Create an {@link XsdCompiler}. This provides capabilities to load
-     * XML schema definitions.
-     *
-     * @return a new {@code XsdCompiler}. In Saxon-HE and Saxon-PE the resulting {@code XsdCompiler}
-     * will be a dummy implementation that throws {@link UnsupportedOperationException} from most methods.
-     * @since 13.0.
-     */
-
-    public XsdCompiler newXsdCompiler() {
-        return config.makeXsdCompiler(this);
-    }
-
-    /**
-     * Get the associated {@code SchemaManager}. The {@code SchemaManager} provides capabilities to load and cache
-     * XML schema definitions. There is exactly one {@code SchemaManager} in a schema-aware Processor, and none
-     * in a Processor that is not schema-aware. The {@code SchemaManager} is created automatically by the system.
-     *
-     * <p>The {@code SchemaManager} is retained in Saxon 13 to provide a degree of compatibility with
-     * older releases. However, the model of schema processing has changed. In previous releases, all
-     * compiled schema information was held globally in the {@link Configuration} (that is, at the
-     * level of the {@link Processor}. From Saxon 13, schemas are more modular, which means that
-     * it becomes an application responsibility to ensure that the correct schema is used for each
-     * aspect of processing. To take advantage of this flexibility, use of the central {@link SchemaManager}
-     * should be replaced with the {@link XsdCompiler}.</p>
+     * Get the associated SchemaManager. The SchemaManager provides capabilities to load and cache
+     * XML schema definitions. There is exactly one SchemaManager in a schema-aware Processor, and none
+     * in a Processor that is not schema-aware. The SchemaManager is created automatically by the system.
      *
      * @return the associated SchemaManager, or null if the Processor is not schema-aware.
-     * @deprecated since 13.0. Use {@link #newXsdCompiler}.
      */
 
     public SchemaManager getSchemaManager() {
@@ -704,7 +682,8 @@ public class Processor implements Configuration.ApiProvider {
          *         be an instance of the declared result type. The default value is false, in which case
          *         the result will be checked at run-time to ensure that it conforms to the declared type.
          *         If the value true is returned, but the function returns a value of the wrong type, the
-         *         consequences are unpredictable.
+         *         consequences are unpredictable. No attempt is made to coerce the returned value to
+         *         the declared result type.
          */
         @Override
         public boolean trustResultType() {

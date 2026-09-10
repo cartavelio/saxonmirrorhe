@@ -2550,9 +2550,6 @@ public class PackageLoaderHE implements IPackageLoader {
                     ((IntegratedFunctionCall) exp).setResultType(type);
                 }
             }
-//            if (exp instanceof SystemFunctionCall) {
-//                ((SystemFunctionCall)exp).allocateArgumentEvaluators(args);
-//            }
             return exp;
         });
 

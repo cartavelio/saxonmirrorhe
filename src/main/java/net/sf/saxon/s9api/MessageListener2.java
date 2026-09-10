@@ -13,9 +13,6 @@ import javax.xml.transform.SourceLocator;
  * A user-written implementation of the MessageListener interface may be registered with the XsltTransformer
  * to receive notification of xsl:message output. Each xsl:message instruction that is evaluated results in
  * a single call to the MessageListener.
- *
- * <p>The <code>MessageListener2</code> interface differs from <code>MessageListener</code>
- * in allowing the error code supplied to <code>xsl:message</code> to be made available.</p>
  */
 @Deprecated
 public interface MessageListener2 {

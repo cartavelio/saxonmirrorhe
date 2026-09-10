@@ -97,7 +97,8 @@ public abstract class ExtensionFunctionDefinition {
      *         be an instance of the declared result type. The default value is false, in which case
      *         the result will be checked at run-time to ensure that it conforms to the declared type.
      *         If the value true is returned, but the function returns a value of the wrong type, the
-     *         consequences are unpredictable.
+     *         consequences are unpredictable. No attempt is made to coerce the returned value
+     *         to the declared result type.
      */
 
     public boolean trustResultType() {
