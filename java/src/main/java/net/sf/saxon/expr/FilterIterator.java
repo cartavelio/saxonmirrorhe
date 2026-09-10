@@ -23,10 +23,10 @@ import net.sf.saxon.value.*;
 public class FilterIterator implements SequenceIterator {
 
     private FocusIterator base;
-    private Expression filter;
+    private final Expression filter;
     private XPathContext filterContext;
 
-    private boolean isXPath40;
+    private final boolean isXPath40;
 
     /**
      * Constructor
@@ -157,12 +157,11 @@ public class FilterIterator implements SequenceIterator {
         if (first == null) {
             return false;
         }
-        if (first instanceof NodeInfo) {
+        if (first instanceof GNode) {
             iterator.close();
             return true;
 
-        } else if (first instanceof NumericValue) {
-            NumericValue val = (NumericValue) first;
+        } else if (first instanceof NumericValue val) {
             while (true) {
                 if (val.compareTo(position) == 0) {
                     iterator.close();

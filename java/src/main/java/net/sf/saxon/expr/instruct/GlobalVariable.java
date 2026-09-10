@@ -472,7 +472,9 @@ public class GlobalVariable extends Actor
             Expression value2 = TypeChecker.strictTypeCheck(
                     value.simplify().typeCheck(visitor, cit),
                     getRequiredType(), role, visitor.getStaticContext());
-            value2 = value2.optimize(visitor, cit);
+            if (visitor.obtainOptimizer().getOptimizerOptions().isSet(OptimizerOptions.MISCELLANEOUS)) {
+                value2 = value2.optimize(visitor, cit);
+            }
             setBody(value2);
             // the value expression may declare local variables
             SlotManager map = getConfiguration().makeSlotManager();

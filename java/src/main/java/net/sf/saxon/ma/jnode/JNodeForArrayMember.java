@@ -147,7 +147,12 @@ public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNo
         }
         if (getParent().equals(other.getParent())) {
             // Comparing two members in the same array
-            return getSiblingPosition() - ((JNodeForArrayMember) other).getSiblingPosition();
+            int c = Integer.compare(getPosition(), ((JNode) other).getPosition());
+            if (c == 0) {
+                return getSiblingPosition() - ((JNodeForArrayMember) other).getSiblingPosition();
+            } else {
+                return c;
+            }
         }
         return Navigator.compareOrder(this, (SiblingCountingNode)other);
     }
