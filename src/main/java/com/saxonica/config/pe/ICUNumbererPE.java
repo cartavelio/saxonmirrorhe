@@ -460,7 +460,7 @@ public class ICUNumbererPE extends AbstractNumberer {
             for (char c : s.toCharArray()) {
                 boolean isLetter = Character.isLetter(c);
                 result.append(isLetter ? precedingLetter ? Character.toLowerCase(c) : Character.toUpperCase(c) : c);
-                precedingLetter = isLetter;
+                precedingLetter = isLetter || c == 0xAD; // soft hyphen
             }
             /* Lower case all the 'and' words - note that this may not be correct for all languages,
              * and the technique relies on none of the number/day/month words starting with the 'and'
