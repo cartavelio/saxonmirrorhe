@@ -143,6 +143,10 @@ namespace Saxon.Api {
             set {
                 if (value != null) {
                     SchemaAware = true;
+                    Implementation.setSchemaAware(true);
+                    ((Saxon.Hej.sxpath.IndependentContext)Implementation.getUnderlyingStaticContext())
+                        .setImportedSchema(value.UnderlyingSchema);
+                    
                     Implementation.getUnderlyingStaticContext().getPackageData()
                         .setImportedSchema("", value.UnderlyingSchema);
                     _usedSchema = value;
