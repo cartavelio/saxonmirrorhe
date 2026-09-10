@@ -131,7 +131,7 @@ public:
    * XPath string() function. <p>For atomic values, the result is the same as
    * the result of calling <code>toString</code>. This is not the case for
    * nodes, where <code>toString</code> returns an XML serialization of the
-   * node. The caller should deallocate memory using `operator delete`.</p>
+   * node. The caller is responsible for memory deallocation using `operator delete`.</p>
    *
    * @return the result of converting the item to a string.
    */
@@ -143,7 +143,7 @@ public:
  * of the node. For an atomic value, it has the same effect as casting the value
  * to a string. In all cases the result is the same as applying the XPath string()
  * function.
- * The caller should deallocate memory using `operator delete`.
+ * The caller is responsible for memory deallocation using `operator delete`.
  * @returns const char * - The string representation of the XdmItem.
   */
   const char *toString();
@@ -163,7 +163,7 @@ public:
    * zero return nullptr  if n is less than zero or greater than or equal to the
    * number of items in the value return nullptr if the value is lazily
    * evaluated and the delayed evaluation fails with a dynamic error.
-   * The caller is responsible for memory deallocation
+   * The caller is responsible for memory deallocation.
    */
   XdmItem *itemAt(int n);
 

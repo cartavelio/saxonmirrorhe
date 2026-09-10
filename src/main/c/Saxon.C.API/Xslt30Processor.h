@@ -32,7 +32,7 @@ class Xslt30Processor {
 public:
   //! Default constructor.
   /*!
-   * Creates a Saxon-HE product
+   * Creates a Saxon-HE XSLT processor
    * @throws SaxonApiException
    */
   Xslt30Processor();
@@ -59,7 +59,7 @@ public:
    */
   SaxonProcessor *getSaxonProcessor() { return proc; }
 
-  //! set the current working directory (cwd).
+  //! Set the current working directory (cwd).
   /**
    * This method also applies to the static base URI for XSLT stylesheets when
    * supplied as lexical string. The cwd is used to set the base URI is part of
@@ -70,7 +70,7 @@ public:
   void setcwd(const char *cwd);
 
 
- //! Get the current working directory (cwd). Memory management of string internally handled
+ //! Get the current working directory (cwd). Memory deallocation is handled internally.
  /**
   * The cwd is used to set the base URI is part of the static context, and is
   * used to resolve any relative URIs appearing within XSLT.
@@ -108,7 +108,7 @@ public:
    */
   void setJustInTimeCompilation(bool jit);
 
- //! get the status of just-in-time compilation of template flag.
+ //! Get the status of just-in-time compilation of template flag.
  /**
   * <p><b>Recommendation:</b> disable this option unless you are confident that
   * the stylesheet you are compiling is error-free.</p>
@@ -251,7 +251,7 @@ public:
    * @param stylesheetfile - The file name of the stylesheet document.
    * @return char array - result string of the transformation as a char pointer array.
    *  A zero length string is returned if the executed query is an Empty Sequence.
-   * The caller is responsible for memory deallocation. Must use `operator delete`
+   * The caller is responsible for memory deallocation using `operator delete`.
    * @throws SaxonApiException if the transformation fails
    */
   const char *transformFileToString(const char *sourcefile,
@@ -263,7 +263,7 @@ public:
    * @param sourcefile - The file name of the source document
    * @param stylesheetfile - The file name of the stylesheet document.
    * @return XdmValue - result of the transformation
-   * The caller is responsible for memory deallocation using `delete`
+   * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the transformation fails
    */
   XdmValue *transformFileToValue(const char *sourcefile,
@@ -280,7 +280,7 @@ public:
    */
   void importPackage(const char *packageFile);
 
-  //! compile a stylesheet file.
+  //! Compile a stylesheet file.
   /**
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
@@ -289,12 +289,12 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
-   * The caller is responsible for memory deallocation using `delete`
+   * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromFile(const char *stylesheet);
 
-  //! compile a stylesheet received as a string.
+  //! Compile a stylesheet received as a string.
   /**
    *
    * Note: the term "compile" here indicates that the stylesheet is converted
@@ -306,20 +306,13 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
-   * The caller is responsible for memory deallocation using `delete`
+   * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromString(const char *stylesheet,
                                     const char *encoding = nullptr);
 
-  //! Get the stylesheet associated
-  /* via the xml-stylesheet processing instruction (see
-   * http://www.w3.org/TR/xml-stylesheet/) with the document
-   * specified in the source parameter, and that match
-   * the given criteria.  If there are several suitable xml-stylesheet
-   * processing instructions, then the returned Source will identify
-   * a synthesized stylesheet module that imports all the referenced
-   * stylesheet module.*/
+  //! Compile a stylesheet as referenced in a specified XML document via the xml-stylesheet processing instruction.
   /**
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
@@ -328,12 +321,12 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
-   * The caller is responsible for memory deallocation using `delete`
+   * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromAssociatedFile(const char *sourceFile);
 
-  //! compile a stylesheet received as a string and save to an exported file (SEF).
+  //! Compile a stylesheet received as a string and save to an exported file (SEF).
   /**
    *
    * The compiled stylesheet is saved as SEF to file store
@@ -345,7 +338,7 @@ public:
   void compileFromStringAndSave(const char *stylesheet, const char *filename,
                                 const char *encoding = nullptr);
 
-  //! compile a stylesheet received as a file and save to an exported file (SEF).
+  //! Compile a stylesheet received as a file and save to an exported file (SEF).
   /**
    *
    * The compiled stylesheet is saved as SEF to file store
@@ -355,7 +348,7 @@ public:
    */
   void compileFromFileAndSave(const char *xslFilename, const char *filename);
 
-  //! compile a stylesheet received as an XdmNode.
+  //! Compile a stylesheet received as an XdmNode.
   /**
    * The compiled stylesheet is cached and available for execution later.
    * @param node - the XdmNode object for the stylesheet
@@ -364,7 +357,7 @@ public:
    */
   void compileFromXdmNodeAndSave(XdmNode *node, const char *filename);
 
-  //! compile a stylesheet received as an XdmNode.
+  //! Compile a stylesheet received as an XdmNode.
   /**
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
@@ -373,7 +366,7 @@ public:
    * @return an XsltExecutable, which represents the compiled stylesheet. The
    * XsltExecutable is immutable and thread-safe; it may be used to run multiple
    * transformations, in series or concurrently.
-   * The caller is responsible for memory deallocation using `delete`
+   * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   XsltExecutable *compileFromXdmNode(XdmNode *node);
@@ -415,18 +408,19 @@ public:
 private:
   void createException(const char *message = nullptr);
 
+  //! Set a property specific to the XSLT processor in use.
   /**
-   * Set a property specific to the processor in use.
+   *
    * XsltProcessor: set serialization properties (names start with '!' i.e. name
-   * "!method" -> "xml") 'o':outfile name, 'it': initial template, 'im': initial
-   * mode, 's': source as file name 'm': switch on message listener for
+   * "!method" -> "xml"), 'o':outfile name, 'it': initial template, 'im': initial
+   * mode, 's': source as file name, 'm': switch on message listener for
    * xsl:message instructions
    * @param name of the property
    * @param value of the property
    */
   void setProperty(const char *name, const char *value);
 
- //! Get properties specified on the Xslt30 processor.
+ //! Get properties specified on the XSLT processor.
  /**
   * @returns map (string, string) pair
   */

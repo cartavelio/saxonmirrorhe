@@ -64,7 +64,7 @@ class XPathProcessor {
 public:
   //! Default constructor.
   /*!
-    Creates a Saxon-HE XPath product
+  * Creates a Saxon-HE XPath processor
   */
   XPathProcessor();
 
@@ -84,7 +84,7 @@ public:
    */
   XPathProcessor(const XPathProcessor &other);
 
-  //! Set the static base URI for XPath expressions compiled using this XPathCompiler.
+  //! Set the static base URI for XPath expressions compiled using this XPathProcessor.
   /**
    * The base URI is part of the static context, and is used to resolve any
    * relative URIs appearing within an XPath expression, for example a relative
@@ -94,37 +94,37 @@ public:
    */
   void setBaseURI(const char *uriStr);
 
-  //! Get the static base URI for XPath expressions compiled using this XPathCompiler.
+  //! Get the static base URI for XPath expressions compiled using this XPathProcessor.
   /**
-   * The memory deallocation is internally managed.
-   * @return base URI as string of the xPathProcessor
+   * Note that memory deallocation is handled internally.
+   * @return the static base URI as a string
    */
   const char *getBaseURI();
 
-  //! Compile and evaluate an XPath expression
+  //! Compile and evaluate an XPath expression.
   /**
-   *  @param xpathStr - supplied as a character string
-   * @param encoding -  the encoding of the string. If not specified then the
+   * @param xpathStr - the XPath expression supplied as a character string
+   * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
-   *  @return XdmValue - representing the results of the expression or nullptr if
+   *  @return an XdmValue representing the result of evaluating the expression or nullptr if
    *  the expression returns an empty sequence.
-   *  The caller is responsible for memory deallocation using `delete`
+   *  The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException
    */
   XdmValue *evaluate(const char *xpathStr, const char *encoding = nullptr);
 
   //! Compile and evaluate an XPath expression. The result is expected to be a single XdmItem or nullptr
   /**
-    * @param xpathStr - supplied as a character string
-    * @param encoding -  the encoding of the string. If not specified then the
-   platform default encoding is used.
-    * @return XdmItem - XdmItem object or nullptr if the expression returns an
-   empty sequence.
+   * @param xpathStr - the XPath expression supplied as a character string
+   * @param encoding - the encoding of the string. If not specified then the
+   * platform default encoding is used.
+   * @return an XdmItem representing the result of evaluating the expression
+   * or nullptr if the expression returns an empty sequence.
    * If the expression returns a sequence of more than one item, any items after
-   the first are ignored.
-   * The caller is responsible for memory deallocation using `delete`
+   * the first are ignored.
+   * The caller is responsible for memory deallocation using `delete`.
    * @throws SaxonApiException
-  */
+   */
   XdmItem *evaluateSingle(const char *xpathStr, const char *encoding = nullptr);
 
   /** Set the context item
@@ -132,13 +132,13 @@ public:
   void setContextItem(XdmItem *item);
 
   /**
-   * set the current working directory
+   * Set the current working directory
    */
   void setcwd(const char *cwd);
 
  /**
   * Get the current working directory.
-  * Memory dellocation of string internally handled
+  * Memory deallocation is handled internally.
   * @returns const char* - cwd of the XPath Processor
   */
  const char * getcwd();
@@ -148,8 +148,9 @@ public:
   void setContextFile(const char *filename);
 
   //! Evaluate the XPath expression, returning the effective boolean value of the result.
-  /** @param xpathStr - supplied as a character string
-   * @param encoding -  the encoding of the string. If not specified then the
+  /**
+   * @param xpathStr - the XPath expression supplied as a character string
+   * @param encoding - the encoding of the string. If not specified then the
    * platform default encoding is used.
    *  @return bool
    * @throws SaxonApiException
@@ -158,11 +159,11 @@ public:
                              const char *encoding = nullptr);
 
   /**
-   * Set a parameter value used in the query
+   * Set a parameter value used in the XPath expression
    *
-   * @param name  of the parameter, as a string. For namespaced parameter use
-   * the JAXP solution i.e. "{uri}name"
-   * @param value of the query parameter, or nullptr to clear a previously set
+   * @param name - the name of the parameter, as a string. For a namespaced name use
+   * clark notation i.e. "{uri}name"
+   * @param value - the value of the parameter, or nullptr to clear a previously set
    * value
    * @param withParam Internal use only
    */
@@ -172,7 +173,7 @@ public:
   /**
    * Remove a parameter (name, value) pair
    *
-   * @param name  of the parameter
+   * @param name - the name of the parameter
    * @return bool - outcome of the removal
    */
   bool removeParameter(const char *name);
@@ -180,21 +181,21 @@ public:
   //! Set a property specific to the XPath processor in use.
   /**
    * XPathProcessor: set serialization properties (names start with '!' i.e.
-   * name "!method" -> "xml") 'o':outfile name, 's': context item supplied as
+   * name "!method" -> "xml"), 'o':outfile name, 's': context item supplied as
    * file name
    * @param name of the property
    * @param value of the property
    */
   void setProperty(const char *name, const char *value);
 
- //! Get a property specified on the XPath processor in use. Memory deallocation internally handled.
+ //! Get a property specified on the XPath processor in use. Memory deallocation is handled internally.
  /**
-  * @param name of the property.
-  * @returns const char * - value of the property or nullptr is property not found. Memory deallocation internally handled.
+  * @param name - the name of the property.
+  * @returns const char * - value of the property or nullptr if the property is not found. Memory deallocation is handled internally.
   */
  const char * getProperty(const char *name);
 
-  //! Declare a namespace binding as part of the static context for XPath expressions compiled using this XPathCompiler
+  //! Declare a namespace binding as part of the static context for XPath expressions compiled using this XPathProcessor
   /**
    *
    * @param prefix The namespace prefix. If the value is a zero-length string,
@@ -208,7 +209,7 @@ public:
    */
   void declareNamespace(const char *prefix, const char *uri);
 
-  //! Declare a variable as part of the static context for XPath expressions compiled using this <code>XPathCompiler</code>.
+  //! Declare a variable as part of the static context for XPath expressions compiled using this XPathProcessor.
   /**
    *  It is an error for the XPath expression to refer to a variable unless it
    * has been declared. This method declares the existence of the variable, but
@@ -275,7 +276,7 @@ public:
     return static_cast<UnprefixedElementMatchingPolicy>(n);
   }
 
-  //!! Get the policy for matching unprefixed element names in XPath expressions
+  //! Get the policy for matching unprefixed element names in XPath expressions
   /**
    * @return the policy being used
    */

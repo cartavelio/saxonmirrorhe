@@ -69,7 +69,7 @@ public:
    * Get the error code associated with the exception, if it exists.
    * The caller does not need to deallocate memory.
    * @return the associated error code, or null if no error code is available.
-   * Deallocation of memory is internally managed
+   * Memory deallocation is handled internally.
    */
   const char *getErrorCode();
 
@@ -85,7 +85,7 @@ public:
    * Returns the detail message string as a char array of the throwable, if
    * there is one. The caller does not need to deallocate memory.
    * @return the detail message string of this <tt>Throwable</tt> instance
-   *         (which may be <tt>null</tt>). Deallocation of memory is internally managed
+   *         (which may be <tt>null</tt>). Memory deallocation is handled internally.
    */
   const char *getMessage();
 
@@ -94,7 +94,7 @@ public:
    * there is one.  The caller does not need to deallocate memory.
    * @return the detail message string of this <tt>Throwable</tt> instance with
    * the error code as prefix if there is an error code associated with the
-   * exception. Deallocation of memory is internally managed
+   * exception. Memory deallocation is handled internally.
    */
   const char *getMessageWithErrorCode();
 
@@ -103,7 +103,7 @@ public:
    * there are any.  The caller does not need to deallocate memory.
    * @return the detail message string of this <tt>Throwable</tt> instance with
    * the error code as prefix if there is an error code associated with the
-   * exception. Deallocation of memory is internally managed
+   * exception. Memory deallocation is handled internally.
    */
   const char *getCombinedStaticErrorMessages();
 
@@ -114,7 +114,7 @@ public:
   int staticErrorCount();
 
   /**
-   * Get the URI of the module associated with the exception, if known. Deallocation of memory is internally managed
+   * Get the URI of the module associated with the exception, if known. Memory deallocation is handled internally.
    */
   const char *getSystemId();
 

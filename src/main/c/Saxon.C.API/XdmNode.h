@@ -115,7 +115,7 @@ public:
    */
   XDM_NODE_KIND getNodeKind();
 
-  //! Get the name of the node, as a string in the form of a EQName. Deallocation of memory is done internally.
+  //! Get the name of the node, as a string in the form of a EQName. Memory deallocation is handled internally.
   /**
    *
    *
@@ -124,7 +124,7 @@ public:
    */
   const char *getNodeName();
 
-  //! Get the local name of the node. Deallocation of memory is done internally.
+  //! Get the local name of the node. Memory deallocation is handled internally.
   /**
    *
    *
@@ -159,7 +159,7 @@ public:
    */
   int getColumnNumber();
 
-  //! Get the base URI of this node. Deallocation of memory is done internally.
+  //! Get the base URI of this node. Memory deallocation is handled internally.
   /**
    *
    * @return the base URI, as defined in the XDM model. The value may be null if
@@ -175,7 +175,7 @@ public:
    * string() function. <p>For atomic values, the result is the same as the
    * result of calling <code>toString</code>. This is not the case for nodes,
    * where <code>toString</code> returns an XML serialization of the node.</p>
-   * The caller should deallocate memory using `operator delete`
+   * <p>The caller is responsible for memory deallocation using `operator delete`.</p>
    *
    * @return the result of converting the item to a string.
    * @remark the SaxonProcessor argument has been removed from release
@@ -205,7 +205,7 @@ public:
    * escaped form. To get the unescaped string value of a text node, use
    * <code>getStringValue()</code> instead.</p>
    *
-   * The caller must deallocate memory using `operator delete`
+   * <p>The caller is responsible for memory deallocation using `operator delete`.</p>
    *
    * @return a simple XML serialization of the node. Under error conditions the
    * method may return an error message which will always begin with the label
@@ -225,7 +225,7 @@ public:
   //! Get the string value of a named attribute (in no namespace) of this element
   /**
    *
-   * User is responsible for memory management for the attribute nodes. Deallocate using `operator delete`
+   * The caller is responsible for deallocation of memory for the attribute nodes using `operator delete`.
    * @param name the name of the required attribute, interpreted as a
    * no-namespace name
    * @return NULL if this node is not an element, or if this element has no
@@ -247,7 +247,7 @@ public:
    *
    *
    * @param cache - deprecated.
-   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
+   * The caller is responsible for deallocation of memory for the attribute nodes using `delete`.
    * @return NULL if this node is not an element, or if this element has no
    * attribute with the specified name. Otherwise return the attribute nodes as
    * a pointer array.
@@ -256,7 +256,7 @@ public:
 
   //! Get the array of nodes reachable from this node via a given axis.
   /**
-  * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
+  * The caller is responsible for deallocation of memory for the attribute nodes using `delete`.
   * @param axis - identifies which axis is to be navigated. Axis options are as
   follows:
          * ANCESTOR = 0, ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
@@ -299,26 +299,28 @@ public:
 
   //! Get all the child nodes from the current parent node.
   /**
-   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
+   * The caller is responsible for deallocation of memory for the attribute nodes using `delete`.
+   * @param cache - deprecated and will be removed in a later version.
    * Caching is no longer used, the value of cache is ignored.
-   * This param is deprecated and will be removed in a later version.
    * @return pointer array of XdmNode objects
    */
   XdmNode **getChildren(bool cache = false);
 
-  //! Get the ith child nodes from the current parent node
+  //! Get the ith child node from the current parent node.
   /**
-   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
-   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.
+   * The caller is responsible for deallocation of memory for the attribute nodes using `delete`.
+   * @param i - the index of the required child node
+   * @param cache - deprecated and will be removed in a later version.
+   * Caching is no longer used, the value of cache is ignored.
    * @return a pointer to the ith child node
    */
 
   XdmNode *getChild(int i, bool cache = false);
 
-  //! Get the count of child nodes from the current node
+  //! Get the number of child nodes of the current node.
   /**
    *
-   * @return int for the count of child nodes
+   * @return the number of child nodes as an int
    */
   int getChildCount();
 

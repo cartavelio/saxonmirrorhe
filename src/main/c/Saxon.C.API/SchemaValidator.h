@@ -31,7 +31,7 @@ public:
    */
   SchemaValidator();
 
-  //! A constructor with a SaxonProcessor.
+  //! Constructor with the SaxonProcessor supplied.
   /*!
    * The supplied processor should have license flag set to true for the Schema
    * Validator to operate.
@@ -43,7 +43,7 @@ public:
 
   //! Copy constructor.
   /*!
-    Creates Schema Validator
+    Create a copy of the SchemaValidator.
   */
   SchemaValidator(const SchemaValidator &other);
 
@@ -57,17 +57,17 @@ public:
    */
   SchemaValidator &operator=(const SchemaValidator &other);
 
-  //! Set the Current working Directory
+  //! Set the current working directory for the validator
   /**
-   * Set the current working directory for the Schema Validator
+   *
    * @param cwd  - Supplied working directory which replaces any set cwd. Ignore
    * if cwd is NULL.
    */
   void setcwd(const char *cwd);
 
- //! Get the Current working Directory. Memory dellocation of string internally handled
+ //! Get the current working directory. Memory dellocation is handled internally.
  /**
-  * Set the current working directory for the Schema Validator
+  *
   * @returns const char * - Supplied working directory which replaces any set cwd.
   */
  const char * getcwd();
@@ -75,7 +75,7 @@ public:
   //! Register the schema from file name.
   /**
    * The schema components derived from this schema document are added to
-   * the cache of schema components maintained by this SchemaManager
+   * the cache of schema components maintained by this SchemaValidator
    * @param xsd - File name of the schema relative to the cwd or full path if
    * cwd is null. The document may be either a schema document in source XSD
    * format, or a compiled schema in Saxon-defined SCM format (as produced using
@@ -117,7 +117,7 @@ public:
 
  //! Get the output file that will be used by the validator.
  /**
-  * @return const char * - string of the output file. Memory management handled internally. String not to be deallocated
+  * @return const char * - string of the output file. Memory deallocation is handled internally.
   */
  const char *getOutputFile();
 
@@ -134,7 +134,7 @@ public:
   /**
    * @param sourceFile The name of the file to be validated. Default is nullptr
    * @return XdmNode - the validated document returned to the calling program.
-   * The caller is responsible for deallocation of memory. Use `delete`
+   * The caller is responsible for deallocation using `delete`.
    * @throws SaxonApiException
    */
   XdmNode *validateToNode(const char *sourceFile = nullptr);
@@ -143,17 +143,16 @@ public:
   /**
    * @param source - The source document supplied as an XdmNode, which will be
    * used to validate against the schema using the validate methods.
-   * The deletion of allocated memory associated with the source node is the
-   * responsibility of the caller.
+   * The caller is responsible for deallocation of memory associated with the source node.
    */
   void setSourceNode(XdmNode *source);
 
-  //! Get the Validation report
+  //! Get the validation report
   /**
    * The validation-report option must have been set to true in the properties
    * to use this feature.
    * @return XdmNode - Pointer to XdmNode. Return nullptr if validation
-   * reporting feature has not been enabled. The caller is responsible for deallocation of memory
+   * reporting feature has not been enabled. The caller is responsible for memory deallocation.
    * @throws SaxonApiException
    */
   XdmNode *getValidationReport();
@@ -203,7 +202,7 @@ public:
    * Get a parameter value by name
    * @param name - Specified parameter name to get
    * @param withParam Internal use only
-   * @return XdmValue. Deallocation of memory internally handled
+   * @return XdmValue. Memory deallocation is handled internally.
    */
   XdmValue *getParameter(const char *name, bool withParam=true);
 

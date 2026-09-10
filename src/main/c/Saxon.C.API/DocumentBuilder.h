@@ -42,7 +42,7 @@ public:
   ~DocumentBuilder();
 
   /**
-   * Say whether line and column numbering and is to be enabled for documents
+   * Set whether line and column numbering is to be enabled for documents
    * constructed using this DocumentBuilder. This has the effect that the line
    * and column number in the original source document is maintained in the
    * constructed tree, for each element node (and only for elements). The line
@@ -72,7 +72,7 @@ public:
   bool isLineNumbering();
 
   /**
-   * Set the schemaValidator to be used. This determines whether schema
+   * Set the SchemaValidator to be used. This determines whether schema
    * validation is applied to an input document and whether type annotations in
    * a supplied document are retained. If no schemaValidator is supplied, then
    * schema validation does not take place. <p>This option requires the
@@ -90,7 +90,7 @@ public:
    * Get the SchemaValidator used to validate documents loaded using this
    * <code>DocumentBuilder</code>.
    *
-   * @return the SchemaValidator if one has been set; otherwise null. The caller management the deallocation.
+   * @return the SchemaValidator if one has been set; otherwise null. The caller is responsible for memory deallocation.
    */
   SchemaValidator *getSchemaValidator();
 
@@ -106,7 +106,7 @@ public:
 
   /**
    * Ask whether DTD validation is to be applied to documents loaded using this
-   * <code>DocumentBuilder</code>
+   * <code>DocumentBuilder</code>.
    *
    * @return true if DTD validation is to be applied
    */
@@ -132,7 +132,7 @@ public:
    * Get the base URI of documents loaded using this DocumentBuilder when no
    * other URI is available.
    *
-   * @return the base URI to be used, or null if no value has been set. Deallocation is handled internally
+   * @return the base URI to be used, or null if no value has been set. Memory deallocation is handled internally.
    */
 
   const char *getBaseUri();
@@ -146,7 +146,7 @@ public:
    * platform default encoding is used
    * @return An <code>XdmNode</code>. This will be
    *         the document node at the root of the tree of the resulting
-   * in-memory document. The caller is responsible for deallocation
+   * in-memory document. The caller is responsible for memory deallocation.
  * @throws SaxonApiException if there is a failure in the parsing of the XML
   * document
    */
@@ -166,7 +166,7 @@ public:
   XdmNode *parseXmlFromFile(const char *filename);
 
   /**
-   * Build a document from a supplied URI source
+   * Build a document from a supplied URI source.
    *
    * @param source - URI to the XML source
    *
@@ -179,7 +179,7 @@ public:
   XdmNode *parseXmlFromUri(const char *source);
 
   /**
-   * Checks for pending exceptions without creating a local reference to the
+   * Deprecated. Checks for pending exceptions without creating a local reference to the
    * exception object
    * @deprecated
    * @return bool - true when there is a pending exception; otherwise return
@@ -187,13 +187,13 @@ public:
    */
   bool exceptionOccurred();
 
-  //! Clear any exception thrown
+  //! Deprecated. Clear any exception thrown
  /**
   * @deprecated
   */
   void exceptionClear();
 
-  //! Get the error message if an error has been reported by JNI
+  //! Deprecated. Get the error message if an error has been reported by JNI
   /**
    * A transformation may have a number of errors reported against it.
    * @deprecated
@@ -201,7 +201,7 @@ public:
    */
   const char *getErrorMessage();
 
-  //! Get the error code if an error has been reported by JNI
+  //! Deprecated. Get the error code if an error has been reported by JNI
   /**
    * After the execution of the XPath expression there may be  a number of
    * errors reported against it.
@@ -210,7 +210,7 @@ public:
    */
   const char *getErrorCode();
 
-  //! Get the SaxonApiException object created when we have an error
+  //! Deprecated. Get the SaxonApiException object created when we have an error
   /**
    * @deprecated - exception are now thrown directly
    * After the execution of the processor if there is an error, then a

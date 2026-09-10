@@ -74,7 +74,7 @@ public:
    * @param n the member that is required, counting the first member in the
    * array as member zero
    * @return the n'th member in the sequence making up the array, counting from
-   * zero. The caller is responsible for memory deallocation
+   * zero. The caller is responsible for memory deallocation.
    * @remark  if n is less than zero or greater than or equal to the number
    *                                    of members in the array we return null.
    * User should clear any exception thrown
@@ -89,7 +89,7 @@ public:
    * @param value - is the new member for the new array.
    * The value itself is not stored internally therefore safe for memory deallocation by the caller.
    * @return a new array, the same length as the original, with one member
-   * replaced by a new value. The caller is responsible for memory deallocation
+   * replaced by a new value. The caller is responsible for memory deallocation.
    * @remark if n is less than zero or greater than or equal to the number
    *                                   of members in the array then return null
    */
@@ -123,15 +123,15 @@ public:
 
   /**
    * Utility method for working with SaxonC on Python
-   * Create an array of xdmValue objects
+   * Create an array of XdmValue objects
    * @param len - the length of the array to create
-   * @return an empty array of XdmValue of length len. The caller is responsible for memory deallocation
+   * @return an empty array of XdmValue of length len. The caller is responsible for memory deallocation.
    */
   XdmValue **createXdmValueArray(int len) { return (new XdmValue *[len]); }
 
   /**
    * Get the members of the array in the form of an array
-   * @return an array of the members of this XdmArray. The caller is responsible for memory deallocation
+   * @return an array of the members of this XdmArray. The caller is responsible for memory deallocation.
    */
   XdmValue **values();
 
@@ -197,7 +197,7 @@ public:
    *
    * @return a simple XML serialization of the node. Under error conditions the
    * method may return an error message which will always begin with the label "Error: ".
-   * The caller is responsible for memory deallocation using `operator delete`
+   * The caller is responsible for memory deallocation using `operator delete`.
    */
   const char *toString();
 

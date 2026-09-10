@@ -68,7 +68,7 @@ public:
    * Set a parameter value used in the query
    *
    * @param name  of the parameter, as a string. For namespaced parameter use
-   * the JAXP solution i.e. "{uri}name"
+   * clark notation i.e. "{uri}name"
    * @param value of the query parameter, or nullptr to clear a previously set
    * value
    * @param withParam Internal use only
@@ -118,7 +118,7 @@ public:
   /**
    *
    * XQueryProcessor: set serialization properties (names start with '!' i.e.
-   * name "!method" -> "xml") 'o':outfile name, 's': source as file name 'q':
+   * name "!method" -> "xml"), 'o':outfile name, 's': source as file name 'q':
    * query file name, 'q': current by name, 'qs': string form of the query,
    * 'base': set the base URI of the query, 'dtd': set DTD validation 'on' or
    * 'off'
@@ -172,7 +172,7 @@ public:
    * @param query - The query as string representation
    * @param encoding -  the encoding of the query string. If not specified then
    * the platform default encoding is used.
-   * @return XdmValue - result of the query as a XdmValue. The caller is responsible for memory deallocation
+   * @return XdmValue - result of the query as a XdmValue. The caller is responsible for memory deallocation.
    * @throws SaxonApiException
    */
   XdmValue *executeQueryToValue(const char *infilename, const char *query,
@@ -186,7 +186,7 @@ public:
    * the platform default encoding is used.
    * @return char array - result string as a char pointer array. A zero length string is returned if
    * the executed query is an Empty Sequence.
-   * The caller is responsible for memory deallocation using `operator delete`
+   * The caller is responsible for memory deallocation using `operator delete`.
    * @throws SaxonApiException
    */
   const char *executeQueryToString(const char *infilename, const char *query,
@@ -195,7 +195,7 @@ public:
   //! Execute the Query cached.
   /**
    * The use of the context item would have had to be set in advance
-   * @return XdmValue of the result. The caller is responsible for memory deallocation
+   * @return XdmValue of the result. The caller is responsible for memory deallocation.
    * @throws SaxonApiException
    *
    */
@@ -206,7 +206,7 @@ public:
    * The use of the context item would have had to be set in advance
    * @return char array - result string as a char pointer array. A zero length string is returned if
    * the executed query is an Empty Sequence.
-   * The caller is responsible for memory deallocation using `operator delete`
+   * The caller is responsible for memory deallocation using `operator delete`.
    * @throws SaxonApiException
    *
    */
@@ -287,7 +287,7 @@ public:
 
  /**
   * Get the current working directory set on the XQueryProcessor.
-  * Memory dellocation of string internally handled
+  * Memory dellocation is handled internally.
   * @return const char * - cwd set on this XQueryProcessor
   */
  const char * getcwd();
