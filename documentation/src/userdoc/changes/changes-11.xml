@@ -343,7 +343,7 @@
             experimental implementations for version 4.0 extensions to XPath, XSLT, and XQuery. A W3C
             Community Group is working on these proposals; for more information see the <a
                 href="https://qt4cg.org/">QT4CG Specifications</a>, and documentation about the Saxon
-            implementations at <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
+            implementations in the Experimental 4.0 extensions section.</p>
         
         <h2>Changes to Extension Functions</h2>
         
@@ -448,7 +448,7 @@
         <h2>XPath Syntax Extensions</h2>
         
         <aside>These extensions are all experimental, and may change as a result of community standardisation
-            efforts. For more information see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
+            efforts.</aside>
         
         <p>The <a class="bodylink" href="/expressions/range">range expression</a> <code> A to B</code> has been extended to allow
             <code>A by S to B</code>, for example <code>1 by 3 to 10</code> returns <code>(1, 4, 7, 10)</code>. The step may be
@@ -457,7 +457,7 @@
         <p>The ternary conditional syntax <code>A ?? B !! C</code> is implemented (it is semantically equivalent
         to <code>if (A) then B else C</code>). <em>The syntax is borrowed from Perl6.</em></p>
         
-        <p>The <a class="bodylink" href="/v4extensions/new-types/record-types">Tuple type</a> construct
+        <p>The Tuple type construct
             <code>tuple(x,y,x)</code> is now renamed <code>record(x,y,z)</code>, though the old keyword is retained for
             compatibility. The flag "?" after a field name, indicating that the field is optional, is now implemented; permitting
             an empty sequence is no longer enough to make the field optional.</p>
@@ -476,8 +476,7 @@
         
         <aside>These extensions are all experimental, and may change as a result of community standardisation efforts.
             They are based on proposals for an <a href="https://qt4cg.org/specifications/xslt-40/Overview.html">XSLT 4.0 Specification</a>, but they do
-            not necessarily correspond precisely with the current draft of that proposal. For more information
-            see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</aside>
+            not necessarily correspond precisely with the current draft of that proposal.</aside>
         
         <p>An extension instruction can be used to invoke a named template. For example, a template with name <code>x:error</code>
         with declared parameters <code>message</code> and <code>code</code> might be called using the instruction
@@ -496,8 +495,7 @@
                     class="bodylink code" href="/extensions/instructions/array">saxon:array</a> and <a
                         class="bodylink code"
                         href="/extensions/instructions/array-member">saxon:array-member</a> (which are now
-                    synonyms). For more details see <a class="bodylink"
-                        href="/v4extensions/xslt-syntax-extensions/creating-arrays">Creating arrays</a>.</p>
+                    synonyms).</p>
             </li>
             <li>
                 <p><a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a></p>

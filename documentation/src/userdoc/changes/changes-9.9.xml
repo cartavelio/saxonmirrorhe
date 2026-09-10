@@ -478,11 +478,11 @@
                 returns much more information about where the match was found.</li>
         </ol>
         
-        <p>The new function <a class="bodylink code" href="/functions/saxon/with-pedigree">saxon:with-pedigree()</a> takes a map or array as input (typically, the result of parsing JSON),
+        <p>The new function <code>saxon:with-pedigree()</code> takes a map or array as input (typically, the result of parsing JSON),
             and returns an equivalent map or array whose implementation has special behavior: any downward selections
             of nested maps/arrays using subscripting or key lookup return a map/array that has "pedigree" information;
             the pedigree information tells you how the map/array was selected within its containing tree, and enables
-            you to retrace your steps. If a map or array has pedigree information, the <a  class="bodylink code" href="/functions/saxon/pedigree">saxon:pedigree()</a> function returns
+            you to retrace your steps. If a map or array has pedigree information, the <code>saxon:pedigree()</code> function returns
             a map, with an entry "container" identifying the containing map or array, and an entry "key" or "index"
             identifying the key value in the containing map, or the index value in the containing array.</p>
         

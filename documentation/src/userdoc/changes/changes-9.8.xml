@@ -71,8 +71,7 @@
         
         <p>Type checking on maps has been improved. In particular, the static type of the expression <code>map:get(M, K)</code> (or equivalent
         constructs such as <code>M(K)</code> or <code>M?K</code> is now deduced from the type of the map if known. The checking is even
-        stronger if the new (Saxon-specific) mechanism of tuple types (now renamed "record types") is used: see 
-            <a class="bodylink" href="/v4extensions/new-types/record-types">Record types</a>.</p>
+        stronger if the new (Saxon-specific) mechanism of tuple types (now renamed "record types") is used.</p>
  
     </category>
     
@@ -135,8 +134,7 @@
         
         <p>Type checking on maps has been improved. In particular, the static type of the expression <code>map:get(M, K)</code> (or equivalent
             constructs such as <code>M(K)</code> or <code>M?K</code> is now deduced from the type of the map if known. The checking is even
-            stronger if the new (Saxon-specific) mechanism of tuple types (now renamed "record types") is used: see 
-            <a class="bodylink" href="/v4extensions/new-types/record-types">Record types</a>.</p>
+            stronger if the new (Saxon-specific) mechanism of tuple types (now renamed "record types") is used.</p>
         
         <p>Annotations on functions, including annotation assertions, are now fully supported. The annotation information is now retained
         as a property of a function and its type. Multiple annotations with the same name are allowed (which requires some change to internal
@@ -488,14 +486,12 @@
             These types can conveniently be used in function signatures
             when writing a function that is designed to take arguments of more than one type. They can also be used in other
             places where an <code>ItemType</code> is required, for example in a <code>cast as</code> expression. 
-            Requires Saxon-EE. The semantics are the same as for union types defined in a schema. For further details
-            see <a class="bodylink" href="/v4extensions/new-types/choice-types">Union types</a></p>
+            Requires Saxon-EE. The semantics are the same as for union types defined in a schema.</p>
         
         <p><b>Tuple Types</b> (subsequently renamed <b>Record Types</b>). A tuple type is an extension to the syntax for an <code>ItemType</code>. An example is
         <code>tuple(ssn: xs:string, emp: element(employee))</code>. A tuple type is essentially a way of defining a more
         precise type for maps. This example type will be satisfied by any map that has an entry whose key is "ssn" and whose
-        value is a string, plus an entry whose key is "emp" and whose value is an <code>employee</code> element. More details: 
-            see <a class="bodylink" href="/v4extensions/new-types/record-types">Record types</a>.</p>
+        value is a string, plus an entry whose key is "emp" and whose value is an <code>employee</code> element.</p>
         
         <!--<p>saxon:split-before(sequence, function), saxon:split-after(sequence, function): these extension functions partition a sequence
             into an array of non-empty sequences, splitting the sequence immediately before|after any item for which the specified function

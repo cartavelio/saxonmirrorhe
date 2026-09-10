@@ -38,11 +38,6 @@
 
   <p>Saxon also provides a set of extension elements providing access to SQL databases, see <a
       class="bodylink" href="/sql-extension">Saxon SQL extension</a>.</p>
-  
-  <p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which
-    could eventually become part of a version 4.0 set of specifications. Saxon includes experimental
-  implementations of some of these proposals. For details of what is implemented in Saxon, and how
-  to enable these features, see <a class="bodylink" href="/v4extensions">Experimental 4.0 extensions</a>.</p>
 
   <p>Further information:</p>
   <nav>
@@ -369,11 +364,6 @@ saxon:evaluate($expression)
       <ul/>
     </nav>
     
-    <aside>For the <code>select</code> attribute on <code>xsl:when</code> and <code>xsl:otherwise</code>,
-    and the <code>then</code> and <code>else</code> attributes on <code>xsl:if</code>, see 
-      <a class="bodylink" href="/v4extensions/xslt-syntax-extensions">Experimental XSLT 4.0
-        extensions</a>.</aside>
-    
     <section id="as" title="saxon:as">
       <h1>saxon:as</h1>
       
@@ -416,9 +406,8 @@ saxon:evaluate($expression)
       <p>The <code>saxon:as</code> attribute will be ignored by a conformant XSLT processor that does not recognize
       the Saxon namespace. The attribute therefore allows type information to be specified for use by Saxon, which
       will be ignored by other XSLT processors (this applies to XSLT 1.0 and 2.0 processors as well as XSLT 3.0 processors).
-      It therefore allows stylesheets to take advantage of Saxon extensions to the sequence type syntax (notably,
-      tuple types, union types, and type aliases; see <a class="bodylink"
-        href="/v4extensions/new-types">New types</a>) without sacrificing stylesheet portability.</p>
+      It therefore allows stylesheets to take advantage of QT4 and Saxon extensions to the sequence type syntax (notably,
+      record types, choice types, and type aliases) without sacrificing stylesheet portability.</p>
       
       <p>The <code>saxon:as</code> attribute can also be defined on the <a class="bodylink code"
         href="/xsl-elements/mode">xsl:mode</a> element. Used here, it 

@@ -44,7 +44,7 @@
 
     <p>Information about some of the other sample applications is documented elsewhere: </p>
     <ul>
-        <li>see <a class="bodylink" href="/xpath-api/jaxp-xpath">JAXP XPath API</a> for details on
+        <li>see <a class="bodylink" href="/xpath-api/java-xpath/jaxp-xpath">JAXP XPath API</a> for details on
             the <code>ApplyXPathJAXP.java</code> sample (enhanced version of JAXP 1.3 sample)</li>
         <li>see <a class="bodylink" href="/using-xquery/api-query/xqj">Invoking XQuery using the XQJ
                 API</a> for information on the <code>XQJExamples.java</code> sample</li>
@@ -382,7 +382,8 @@
             transforms, XQuery, and evaluate XPath expressions (for more information see <a
                 class="bodylink" href="/using-xsl/embedding/s9api-transformation">Using s9api for
                 transformations</a>, <a class="bodylink" href="/using-xquery/api-query/s9api-query"
-                >Using s9api for XQuery</a>, and <a class="bodylink" href="/xpath-api/s9api-xpath"
+                    >Using s9api for XQuery</a>, and <a class="bodylink"
+                        href="/xpath-api/java-xpath/s9api-xpath"
                 >Evaluating XPath expressions using s9api</a> respectively).</p>
 
         <p>A sample program that illustrates many features of the s9api interface is included in the
