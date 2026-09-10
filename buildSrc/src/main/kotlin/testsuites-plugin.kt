@@ -111,23 +111,8 @@ abstract class TestSuitesExtension
     }
   }
 
-  fun exceptions(suite: String, impl: String = "java"): Provider<RegularFile> {
-    if (impl == "csharp") {
-      return when (suite) {
-        "qt3" -> exceptionsDir.file("qt3cs.xml")
-        "qt3extra" -> exceptionsDir.file("qt3extra-cs.xml")
-        "expath" -> exceptionsDir.file("expath-cs.xml")
-        "xslt30" -> exceptionsDir.file("xslt30.xml")
-        "xslt30extra" -> exceptionsDir.file("xslt30extra-cs.xml")
-        "xsltfromqt4" -> exceptionsDir.file("qt4-xslt.xml")
-        "qt4" -> exceptionsDir.file("qt4.xml")
-        "xslt40" -> exceptionsDir.file("xslt40cs.xml")
-        "xsd" -> exceptionsDir.file("xsd11cs.xml")
-        "xsdextra" -> exceptionsDir.file("xsd-extra.xml")
-        else -> throw GradleException("Unknown exceptions for test suite: ${suite}")
-      }
-    }
-
+  fun exceptions(suite: String): Provider<RegularFile> {
+    // N.B. The exceptionsDir is set appropriately in the Java/C# configuration
     return when (suite) {
       "qt3" -> exceptionsDir.file("qt3.xml")
       "qt3extra" -> exceptionsDir.file("qt3extra.xml")
@@ -255,7 +240,7 @@ abstract class TestSuitesExtension
       this.dotnetBuildType = plugin.dotnetBuildType
       this.platform = plugin.platform
       this.testargs = testargs
-      exceptionsFile = exceptions(suite, "csharp")
+      exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
     }
 
@@ -282,7 +267,7 @@ abstract class TestSuitesExtension
     val xsdVersion = "11"
 
     val directory = suiteDir(suite)
-    val exceptionsFile = exceptions(suite, "csharp")
+    val exceptionsFile = exceptions(suite)
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
