@@ -47,9 +47,10 @@
 		</xsl:for-each-group>
 		<xsl:text>{$line-feed}</xsl:text>
 		<xsl:text>## Sources{$line-feed}{$line-feed}</xsl:text>
+		<xsl:text>_Last pulled: {/*/function[1]/@registry-pulled}_{$line-feed}{$line-feed}</xsl:text>
 		<xsl:for-each-group select="/*/function" group-by="@registry">
 			<xsl:sort select="current-grouping-key()" data-type="text" order="ascending" />
-			<xsl:text>* `{current-grouping-key()}` ({current-group()[1]/@registry-pulled}){$line-feed}</xsl:text>
+			<xsl:text>* `{current-grouping-key()}`{$line-feed}</xsl:text>
 		</xsl:for-each-group>
 		
 	</xsl:template>
