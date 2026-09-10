@@ -207,14 +207,15 @@ class TestSuite {
       def reportdir = options['reportDirectory']
 
       doLast {
-        if (this.testReportArchive != null
-            && reportdir.startsWith(resultOutputPath)) {
-          if (run.executionResult.isPresent()
-              && run.executionResult.get().getExitValue() == 0) {
+        if (run.executionResult.isPresent()
+            && run.executionResult.get().getExitValue() == 0) {
+          summarize(options, new File("${options['report']}.xml"))
+          if (testReportArchive != null
+              && reportdir.startsWith(resultOutputPath)) {
             def arcpath = "${this.testReportArchive}/${options['product']}/"
             arcpath += "${project.ext.saxonVersion}/"
             arcpath += "${options['suite']}/${project.ext.DSTAMP}"
-            this.saveTheResults(options, arcpath)
+            saveTheResults(options, arcpath)
           }
         }
       }
@@ -451,14 +452,15 @@ class TestSuite {
       def reportdir = options['reportDirectory']
 
       doLast {
-        if (this.testReportArchive != null
-            && reportdir.startsWith(resultOutputPath)) {
-          if (run.executionResult.isPresent()
-              && run.executionResult.get().getExitValue() == 0) {
+        if (run.executionResult.isPresent()
+            && run.executionResult.get().getExitValue() == 0) {
+          summarize(options, new File("${options['report']}.xml"))
+          if (testReportArchive != null
+              && reportdir.startsWith(resultOutputPath)) {
             def arcpath = "${this.testReportArchive}/${options['product']}/"
             arcpath += "${project.ext.saxonVersion}/"
             arcpath += "${options['suite']}/${project.ext.DSTAMP}"
-            this.saveTheResults(options, arcpath)
+            saveTheResults(options, arcpath)
           }
         }
       }
@@ -538,7 +540,6 @@ class TestSuite {
       }
     } else {
       println("No previous results for ${options['name']}.")
-      this.summarize(options, new File(reportfn))
     }
 
     Files.copy(Paths.get(reportfn), Paths.get(arcfn),
@@ -606,8 +607,6 @@ class TestSuite {
         throw new GradleException(msg)
       }
     }
-
-    summarize(options, current)
 
     return failing == 0
   }
