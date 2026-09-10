@@ -446,7 +446,8 @@ val (editionDownloadJarTask, editionMavenJarTask) = extension.editionJarTasks(pr
         include(extension.editionJarInclusions.get())
 
         manifest {
-            attributes(mapOf("Main-Class" to extension.manifestMainClass))
+            attributes(mapOf("Main-Class" to extension.manifestMainClass,
+                             "Automatic-Module-Name" to "net.sf.saxon"))
         }
     }
 
