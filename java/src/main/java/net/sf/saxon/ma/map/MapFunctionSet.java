@@ -3,7 +3,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 package net.sf.saxon.ma.map;
 
@@ -836,7 +836,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public static MapItem mergeMaps(SequenceIterator iter, XPathContext context,
                                         OnDuplicatesAction onDuplicates, int version)
                 throws XPathException {
-            //MapBuilder mapBuilder = context.getConfiguration().makeMapBuilder(retainOrder, false);
             MapItem next;
             //Old method
             /*
@@ -857,35 +856,30 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             }
             if (firstMap instanceof ExtensibleMap || firstMap instanceof DeltaMap || firstMap.size() > 50) {
                 while ((next = (MapItem) iter.next()) != null) {
-                    int keyCount = next.size();
-                    boolean possibleDuplicate = false;
+
                     for (KeyValuePair kvp : next.keyValuePairs()) {
                         AtomicValue keyi = kvp.key();
-                        possibleDuplicate = GeneralMapBuilder.hasPossibleDuplicate(keyi, keyCount, version);
+                        GroundedValue existing = firstMap.get(keyi);
 
-                        if (possibleDuplicate) {
-                            // if(!(firstMap instanceof ExtensibleMap) && !(firstMap instanceof DeltaMap)) {
-                            GroundedValue existing = firstMap.get(keyi);
-                            if (existing == null) {
-                                firstMap = firstMap.put(keyi, kvp.value());
-                            } else if (onDuplicates == null) {
-                                throw new XPathException("Duplicate key " + Err.depict(keyi) + " in map");
-                            } else {
-                                System.err.println("mergeMap cp0 possible duplicate key found - combining");
-                                GroundedValue newVal;
-                                try {
-                                    newVal = onDuplicates.combine(existing, kvp.value(), context);
-                                } catch (UncheckedXPathException e) {
-                                    throw new XPathException("Duplicate key " + Err.depict(keyi)
-                                            + " in map. First value: "
-                                            + Err.depictSequence(existing) + "; second value: "
-                                            + Err.depictSequence(kvp.value()), e).withErrorCode(e.getXPathException().getErrorCodeQName());
-                                }
-                                firstMap = firstMap.put(keyi, newVal);
-                            }
-                        } else {
+                        if (existing == null) {
                             firstMap = firstMap.put(keyi, kvp.value());
+                        } else if (onDuplicates == null) {
+                            throw new XPathException("Duplicate key " + Err.depict(keyi) + " in map");
+                        } else {
+                            GroundedValue newVal;
+                            try {
+                                newVal = onDuplicates.combine(existing, kvp.value(), context);
+                            } catch (UncheckedXPathException e) {
+                                throw new XPathException("Duplicate key " + Err.depict(keyi)
+                                        + " in map. First value: "
+                                        + Err.depictSequence(existing) + "; second value: "
+                                        + Err.depictSequence(kvp.value()), e).withErrorCode(e.getXPathException().getErrorCodeQName());
+                            }
+                            firstMap = firstMap.put(keyi, newVal);
                         }
+                        /*} else {
+                            firstMap = firstMap.put(keyi, kvp.value());
+                        } */
                     }
 
                 }

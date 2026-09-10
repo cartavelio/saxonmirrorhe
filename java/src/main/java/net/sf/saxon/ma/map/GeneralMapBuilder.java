@@ -233,41 +233,5 @@ public class GeneralMapBuilder {
         return false;
     }
 
-
-    /**
-     * Quick check for possible duplicates in a set of keys, using a Bloom filter
-     * @param key the set of keys to be checked
-     * @param specVersion the XPath language version (determines how binary keys are compared)
-     * @return true if the set might or might not contain duplicates; false if it definitely
-     * contains no duplicates
-     */
-
-    protected static boolean hasPossibleDuplicate(AtomicValue key, int keyCount, int specVersion) {
-
-        // A Bloom filter, in principle, uses K independent hashing algorithms. We always set K=3,
-        // and the three "algorithms" partition a 64-bit hash code into three 20-bit chunks. In practice
-        // for data types other than string the 64-bit hash is really a 32-bit hash, duplicated, so
-        // this is far from optimal. For this reason there is little point in allocating a bit set
-        // exceeding 65535 bits; for larger key sets we just accept that we will get false positives,
-        // and it's better to get them sooner rather than later.
-
-        int filterSize = keyCount < 50 ? 1024 : 65536;
-        int mask = filterSize - 1;
-        BitSet bloom = new BitSet(filterSize);
-        AtomicMatchKey matchKey = key.asMapKey(specVersion);
-        long hash = matchKey.longHashCode();
-        int hash0 = (int) (hash >> 40 & mask);
-        int hash1 = (int) (hash >> 20 & mask);
-        int hash2 = (int) hash & mask;
-        if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
-            return true;
-        }
-        bloom.set(hash0);
-        bloom.set(hash1);
-        bloom.set(hash2);
-
-        return false;
-    }
-
 }
 
