@@ -5008,13 +5008,8 @@
                 <attribute name="version" use="mandatory">
                     <p>Standard attribute that may appear on any XSLT element. Indicates the version
                         of XSLT required by the stylesheet.</p>
-                    <p>To request XLST 3.0 processing (which requires Saxon-PE or Saxon-EE), setting
-                            <code>version="3.0"</code> on the <code>xsl:stylesheet</code> element is
-                        recommended, but is not sufficient on its own. An explicit request must be
-                        made on the command line or by the API. Using the XSLT 3.0 processor, a
-                        value greater than <code>3.0</code> invokes forwards compatibility mode.</p>
-                    <p>When using the XSLT 2.0 processor (in particular, using Saxon-HE), a value
-                        greater than <code>2.0</code> invokes forwards compatibility mode.</p>
+                    <p>A value greater than <code>3.0</code> invokes forwards compatibility
+                        mode.</p>
                 </attribute>
                 <attribute name="xpath-default-namespace" use="optional">Standard attribute that may
                     appear on any XSLT element. Determines the namespace used for any unprefixed
