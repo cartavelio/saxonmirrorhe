@@ -51,7 +51,7 @@ public class NodeTestPattern extends Pattern {
 
     @Override
     public boolean matches(Item item, XPathContext context) {
-        return item instanceof NodeInfo && nodeTest.test((NodeInfo)item);
+        return item instanceof NodeInfo node && nodeTest.test(node);
     }
 
     /**

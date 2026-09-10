@@ -171,11 +171,10 @@ public final class RuleManager {
      * @param part     Zero for a "real" rule; an incremented integer for rules generated
      *                 by splitting a real rule on a union pattern, in cases where no user-specified
      *                 priority is supplied.
-     * @return the number of (sub-)rules registered
      * @see Pattern
      */
 
-    public int registerRule(Pattern pattern, TemplateRule eh,
+    public void registerRule(Pattern pattern, TemplateRule eh,
                             Mode mode, StylesheetModule module, double priority, int position, int part) {
 
         if (Double.isNaN(priority)) {
@@ -187,7 +186,6 @@ public final class RuleManager {
         } else {
             mode.getActivePart().addRule(pattern, eh, module, mode.getMaxPrecedence(), priority, position, part);
         }
-        return 1;
     }
 
 

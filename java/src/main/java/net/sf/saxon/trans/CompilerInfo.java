@@ -327,7 +327,7 @@ public class CompilerInfo {
 
     /**
      * Set the optimizer options to be used for compiling queries that use this static context.
-     * By default the optimizer options set in the {@link Configuration} are used.
+     * By default, the optimizer options set in the {@link Configuration} are used.
      *
      * @param options the optimizer options to be used
      */

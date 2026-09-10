@@ -768,6 +768,9 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 // for example, attribute::comment()
                 pat = new ItemTypePattern(ErrorType.getInstance());
             } else {
+                // TODO: a NodeTestPattern only matches XNodes, but this turns out to be OK with
+                //  template rules because the code for compiling template rules expands it to a union
+                //  pattern. But it might not be OK for patterns in other contexts.
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) {

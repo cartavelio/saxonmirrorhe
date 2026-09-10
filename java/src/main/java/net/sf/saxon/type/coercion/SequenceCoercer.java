@@ -100,6 +100,15 @@ public class SequenceCoercer extends UnaryExpression {
     public SequenceType getRequiredType() {
         return requiredType;
     }
+
+    @Override
+    public int computeSpecialProperties() {
+        int p = super.computeSpecialProperties();
+        if (requiredType.getPrimaryType().isAtomicType()) {
+            return p | StaticProperty.NO_NODES_NEWLY_CREATED;
+        }
+        return p;
+    }
     /**
      * Simplify an expression
      *

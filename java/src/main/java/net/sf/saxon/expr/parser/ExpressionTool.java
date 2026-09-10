@@ -942,7 +942,7 @@ public class ExpressionTool {
             body.setParentExpression(null);
             if (extractGlobals && compilation != null) {
                 Expression exp2 = opt.promoteExpressionsToGlobal(body, compilation.getPrincipalStylesheetModule(), visitor);
-                if (exp2 != null) {
+                if (exp2 != null && exp2 != body) {
                     // Try another optimization pass: extracting global variables can identify things that are indexable
                     ExpressionTool.resetPropertiesWithinSubtree(exp2);
                     body = exp2.optimize(visitor, cisi);
