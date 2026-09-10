@@ -864,8 +864,7 @@ TODO: rethink redefines and override
             <li><p>PR957 - scan-left and scan-right functions</p></li>
             <li><p>PR2552 - system-properties function</p></li>
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
-            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This
-                is due to limitations in the ICU4N library.</p></li>
+            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This is due to limitations in the ICU4N library.</p></li>
         </ul>
         
  
@@ -873,15 +872,14 @@ TODO: rethink redefines and override
     
     <category name="extensions">
         
-        <p>In the EXPath binary module, the handling of byte order marks in <code>bin:encode-string</code>
-        and <code>bin:decode-string</code> has been clarified in the specification, and this has resulted
-        in changes to the Saxon implementation. The changed behaviour applies whether or not 4.0 is enabled.
-        (PR 1765)</p>
-        
-        <p>The new EXPath function <code>bin:infer-encoding</code> is implemented.</p>
-        
-        <p>The new EXPath functions <code>file:is-absolute</code>, <code>file:list-roots</code>
-            and <code>file:descendants</code> are not yet implemented.</p>
+        <h2>In the EXPath binary module</h2>>
+    	<ul>
+    		<li><p>The handling of byte order marks in <code>bin:encode-string</code> and <code>bin:decode-string</code> has been clarified in the specification, and this has resulted in changes to the Saxon implementation. The changed behaviour applies whether or not 4.0 is enabled. (PR 1765)</p></li>
+    		<li><p>The non-standard function <code>bin:version</code> is dropped.</p></li>
+    		<li><p>The new EXPath function <code>bin:infer-encoding</code> is implemented.</p></li>
+    		<li><p>The new EXPath functions <code>file:is-absolute</code>, <code>file:list-roots</code> and <code>file:descendants</code> are not yet implemented.</p></li>
+    	</ul>
+    	
         
         <h2>Dropped experimental features</h2>
         
@@ -921,7 +919,7 @@ TODO: rethink redefines and override
             <li>The <code>fn:pin</code> and <code>fn:label</code> functions are dropped
             (replaced by JNodes). For the time being, though, the <code>saxon:deep-update</code> extension function
             continues to use pinned and labelled items; this is likely to change in due course.</li>
-            <li>The functions <code>fn:parcel</code> and <code>fn:unparcel</code> are dropped.
+            <li>The functions <code>fn:</code> and <code>fn:unparcel</code> are dropped.
             In Saxon 12, <code>fn:parcel($x)</code> simply did <code>{'value': $x}</code>, and
             <code>fn:unparcel($p)</code> simply did <code>$p?value</code>.</li>
             <li><p>The functions <code>fn:items-after</code>, <code>fn:items-before</code>,
@@ -935,10 +933,13 @@ TODO: rethink redefines and override
             <li><p>The function <code>fn:xdm-to-json</code> is dropped.</p></li>
             <li><p>The function <code>array:of</code> is renamed <code>array:of-members</code>.</p></li>
             <li><p>The function <code>array:exists</code> is dropped.</p></li>
+        	<li><p>The function <code>array:replace</code> is dropped.</p></li>
             <li><p>The second argument for <code>map:keys</code> is dropped, replaced by the new
                 function <code>map:keys-where</code>.</p></li>
             <li><p>Following PR2572, the proposed <code>map:keys-where</code> function is dropped.</p></li>
-            <li><p>The function <code>map:pairs</code> is dropped.</p></li>
+            <li><p>The functions <code>map:pair</code>, <code>map:pairs</code> and <code>map:of-pairs</code> are dropped.</p></li>
+        	<li><p>The function <code>map:index</code> is dropped.</p></li>    
+        	<li><p>The function <code>fn:compose</code> is replaced by the extension function <code>saxon:compose</code>.</p></li>
         </ul>
         
         <p>Some Saxon extension functions that were essentially prototypes of 
@@ -956,7 +957,7 @@ TODO: rethink redefines and override
             <li><p><code>saxon:is-NaN</code> is dropped, superseded by <code>fn:is-NaN</code>.</p></li>
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>, but
                 note that the specification for <code>fn:parse-html</code> has changed.</p></li>
-            <li><p><code>saxon:pedigree</code> and <code>saxon:with-pedigree</code> are dropped.
+            <li><p><code>saxon:pedigree</code> and <code>saxon:with-</code> are dropped.
             Applications using these functions should be rewritten to use JNodes, which build on the
             same idea but provide much more flexibility.</p></li>
         </ul>
@@ -1009,6 +1010,9 @@ TODO: rethink redefines and override
                  ))
    }
 </xsl:select>]]></code></pre>
+    
+    	<p>The <code>saxon:create-map</code> and <code>saxon:map-as-sequence-of-maps</code> functions are dropped.</p>
+    	<p>The <code>saxon:analyze-uri</code> function is dropped.</p>
     
     </category>
     
