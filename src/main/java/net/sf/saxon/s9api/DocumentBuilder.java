@@ -518,6 +518,8 @@ public class DocumentBuilder {
                 return XdmItem.wrapItem(nodeInfo);
             } catch (XPathException e) {
                 throw new IllegalArgumentException(e.getMessage());
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException("Class " + node.getClass() + " is not a recognized external node type");
             }
         }
     }
