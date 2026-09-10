@@ -1038,7 +1038,7 @@ public class XsltCompiler {
 
     /**
      * Get the value of the default namespace for elements and types
-     * @return the value that was set using the method {@link #getDefaultElementNamespace()},
+     * @return the value that was set using the method {@link #setDefaultElementNamespace(String)},
      * if any; otherwise, the default value which is an empty string, representing "no namespace".
      */
 

@@ -557,10 +557,11 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      */
     @Override
     public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
+        String uriString = uri.toString();
         if (nodeKind == Type.ELEMENT) {
             for (Object o : ((Element) node).attributes()) {
                 Attribute att = (Attribute) o;
-                if (att.getName().equals(local) && att.getNamespaceURI().equals(uri)) {
+                if (att.getName().equals(local) && att.getNamespaceURI().equals(uriString)) {
                     return att.getValue();
                 }
             }
@@ -661,7 +662,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             next = getFollowingNode(next, stop, (DOM4JNodeWrapper) treeInfo.getRootNode());
         } while (next != null &&
                 !(next.getNodeType() == Node.ELEMENT_NODE &&
-                        (uri == null || uri.equals(((Element) next).getNamespaceURI())) &&
+                        (uri == null || uri.toString().equals(((Element) next).getNamespaceURI())) &&
                         (local == null || local.equals(next.getName()))));
         if (next == null) {
             return null;

@@ -474,7 +474,7 @@ public class Environment implements ResourceResolver {
                 } else {
                     File file = new File(env.getBaseURI().resolve(href));
                     try {
-                        manager.load(new StreamSource(file));
+                        manager.load(file);
                     } catch (SaxonApiException err) {
                         driver.println("*** Failed to load schema: " + href + " - " + err.getMessage());
                     } catch (NullPointerException err) {
