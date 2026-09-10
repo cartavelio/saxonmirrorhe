@@ -7,10 +7,7 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.event.EventMonitor;
-import net.sf.saxon.event.Outputter;
-import net.sf.saxon.event.OutputterEventBuffer;
-import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.BreakInstr;
 import net.sf.saxon.expr.instruct.TailCall;
@@ -360,6 +357,7 @@ public class TryCatch extends Expression {
                 if (c1.getController().isTracing()) {
                     checkpoint = c1.getController().getTraceListener().checkpoint();
                 }
+                boolean suppressCatch = false;
                 try {
                     try {
                         TailCall tc = tryPush.processLeavingTail(o2, c1);
@@ -373,7 +371,16 @@ public class TryCatch extends Expression {
                         }
                         if (expr.rollbackOutput) {
                             assert o2 instanceof OutputterEventBuffer;
-                            ((OutputterEventBuffer) o2).replay(output);
+                            // Bug 7096. First replay the events to a dummy Outputter in case this triggers any errors
+                            Outputter temp = new ComplexContentOutputter(new Sink(output.getPipelineConfiguration()));
+                            ((OutputterEventBuffer) o2).replay(temp);
+                            // If all is well, replay them again to the real outputter
+                            try {
+                                ((OutputterEventBuffer) o2).replay(output);
+                            } catch (XPathException e) {
+                                suppressCatch = true;
+                                throw e;
+                            }
                         }
                     } catch (UncheckedXPathException ue) {
                         throw ue.getXPathException();
@@ -381,7 +388,7 @@ public class TryCatch extends Expression {
                 } catch (XPathException err) {
                     if (err.isGlobalError()) {
                         err.setIsGlobalError(false);
-                    } else if (!(err instanceof XPathException.StackOverflow)) {
+                    } else if (!(err instanceof XPathException.StackOverflow) && !suppressCatch) {
                         StructuredQName code = err.getErrorCodeQName();
                         if (code == null) {
                             code = new StructuredQName("saxon", NamespaceUri.SAXON, "XXXX9999");
