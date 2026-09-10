@@ -643,7 +643,7 @@ val copyTestDrivers = tasks.register<Copy>("copyTestDrivers") {
 }
 
 tasks.register<DotNetBuild>("dotnetBuildTestDrivers") {
-//  dependsOn("dotnetBuild") ?? is this (running SaxonCS build) needed?
+  dependsOn(buildTask)
   dotnet = extension.dotnet
   version = saxonBuild.version
   dotnetversion = saxonBuild.dotnetversion
