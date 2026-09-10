@@ -186,6 +186,17 @@ TODO: rethink redefines and override
     
     <category name="spi">
         
+        <p>The <code>NodeInfo</code> interface has changed: in place of the two <code>iterateAxis</code>
+        methods (taking an integer argument to identify the required axis), there is now one method
+        for each axis, for example <code>iterateChildAxis</code> and <code>iterateDescendantAxis</code>
+        For the rare cases where the required axis is not statically known, there is a static method
+        <code>Navigator.iterateAxis()</code> that takes the required axis as a parameter. The change is
+        made partly for performance reasons (it avoids the switch, and makes methods smaller, which gives
+        the Java JIT compiler more scope for optimizations), and partly because it makes it easier
+        to inherit implementations of specific axes from a superclass, thus improving code reuse.     
+        </p>
+   
+        
         <p>The internal APIs for manipulating values of type <code>xs:duration</code>
         and <code>xs:dayTimeDuration</code> have changed, reflecting the fact that
         the seconds component is now held as a <code>BigDecimal</code> value.</p>
@@ -210,9 +221,10 @@ TODO: rethink redefines and override
         references (<code>fn:contains#2</code>) and dynamic access using <code>function-lookup</code>.
         If it is set for a function, <code>function-available</code> returns false.</p>
         
-        
-   
+       
     </category>
+    
+
 
     <category name="serialization">
         
