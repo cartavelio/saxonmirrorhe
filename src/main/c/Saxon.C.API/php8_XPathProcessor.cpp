@@ -149,7 +149,7 @@ PHP_METHOD(XPathProcessor, declareNamespace) {
     xpathProcessor = obj->xpathProcessor;
     if (xpathProcessor != nullptr) {
       try {
-        xpathProcessor->declareNamespace((len1 == 0 ? nullptr : prefixi),
+        xpathProcessor->declareNamespace((len1 == 0 ? "" : prefixi),
                                          (len2 == 0 ? "" : ns));
       } catch (SaxonApiException &e) {
         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
