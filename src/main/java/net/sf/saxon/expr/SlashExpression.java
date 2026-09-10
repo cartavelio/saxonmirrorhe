@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
@@ -1135,7 +1136,7 @@ public class SlashExpression extends BinaryExpression
                     for (Item a; (a = outer.next()) != null; ) {
                         AxisIterator inner = step.iterate((NodeInfo)a);
                         for (NodeInfo b; (b = inner.next()) != null;) {
-                           out.append(b);
+                           out.append(b, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                         }
                     }
                     return null;
