@@ -19,6 +19,13 @@ from libc.stdlib cimport free, malloc, realloc
 from libc.string cimport memcpy
 from cython import Py_ssize_t
 
+from cpython.ref cimport PyObject
+
+class PySaxonApiError(RuntimeError):
+  pass
+
+cdef public PyObject* pysaxonapierror = <PyObject*>PySaxonApiError
+
 
 def create_xdm_dict(proc, mmap):
     """

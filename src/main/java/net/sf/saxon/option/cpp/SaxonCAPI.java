@@ -860,66 +860,64 @@ public class SaxonCAPI {
         String cwd = null;
         String xml = null;
         SchemaValidator validator = null;
-        try {
-            if (cxml == WordFactory.nullPointer()) {
-                throw new SaxonApiException("XML string is null");
-            } else {
-                xml = CTypeConversion.toJavaString(cxml);
-            }
-            if (xml == null) {
-                throw new SaxonApiException("XML string is null");
-            }
-
-            if (procRef == WordFactory.nullPointer()) {
-                throw new SaxonApiException("Processor pointer is null");
-            } else {
-                proci = objectHandles.get(procRef);
-                if (proci == null) {
-                    throw new SaxonApiException("Processor object is null");
-                }
-            }
-
-
-            StringReader reader = new StringReader(xml);
-            if (builderRef == WordFactory.nullPointer()) {
-                builder = proci.newDocumentBuilder();
-                if (debug) {
-
-                    System.err.println("New documentBuilder obj: " + System.identityHashCode(builder));
-                }
-            } else {
-                builder = objectHandles.get(builderRef);
-                if (debug) {
-
-                    System.err.println("documentBuilder obj passed as argument: " + System.identityHashCode(builder));
-                }
-            }
-            if (validatorRef != WordFactory.nullPointer()) {
-                validator = objectHandles.get(validatorRef);
-                builder.setSchemaValidator(validator);
-            }
-            Source source = new SAXSource(new InputSource(reader));
-            if (cwd != null && cwd.length() > 0) {
-                if (!cwd.endsWith("/")) {
-                    cwd = cwd.concat("/");
-                }
-                source.setSystemId(cwd);
-            }
-
-            XdmNode doc = builder.build(source);
-            if (debug) {
-                System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
-                System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
-                if (doc != null) {
-                    System.err.println("XdmNode: " + System.identityHashCode(doc));
-                }
-            }
-            ObjectHandle handle = createHandle(doc);
-
-            return handle.rawValue();
-        } catch (SaxonApiException ex) {
-            throw ex;
+        if (cxml == WordFactory.nullPointer()) {
+            throw new SaxonApiException("XML string is null");
+        } else {
+            xml = CTypeConversion.toJavaString(cxml);
         }
+        if (xml == null) {
+            throw new SaxonApiException("XML string is null");
+        }
+
+        if (procRef == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Processor pointer is null");
+        } else {
+            proci = objectHandles.get(procRef);
+            if (proci == null) {
+                throw new SaxonApiException("Processor object is null");
+            }
+        }
+
+
+        StringReader reader = new StringReader(xml);
+        if (builderRef == WordFactory.nullPointer()) {
+            builder = proci.newDocumentBuilder();
+            if (debug) {
+
+                System.err.println("New documentBuilder obj: " + System.identityHashCode(builder));
+            }
+        } else {
+            builder = objectHandles.get(builderRef);
+            if (debug) {
+
+                System.err.println("documentBuilder obj passed as argument: " + System.identityHashCode(builder));
+            }
+        }
+        if (validatorRef != WordFactory.nullPointer()) {
+            validator = objectHandles.get(validatorRef);
+            builder.setSchemaValidator(validator);
+        }
+        Source source = new SAXSource(new InputSource(reader));
+        if (cwd != null && cwd.length() > 0) {
+            if (!cwd.endsWith("/")) {
+                cwd = cwd.concat("/");
+            }
+            source.setSystemId(cwd);
+        }
+
+        XdmNode doc = builder.build(source);
+        if (debug) {
+            System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
+            System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
+            if (doc != null) {
+                System.err.println("XdmNode: " + System.identityHashCode(doc));
+            }
+        }
+        ObjectHandle handle = createHandle(doc);
+
+        return handle.rawValue();
+
+
     }
 
 
