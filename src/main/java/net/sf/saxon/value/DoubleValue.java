@@ -352,7 +352,7 @@ public final class DoubleValue extends NumericValue {
 
         // In the general case, go via xs:decimal
 
-        BigDecimalValue decimalValue = new BigDecimalValue(BigDecimal.valueOf(value));
+        BigDecimalValue decimalValue = new BigDecimalValue(new BigDecimal(value));
         NumericValue rounded = decimalValue.round(scale, roundingRule);
         double result = rounded.getDoubleValue();
         if (result == 0.0e0) {
