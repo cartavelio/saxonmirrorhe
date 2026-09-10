@@ -157,9 +157,6 @@
                 
                 <a id="PDs" class="anchor"></a>
                 <h2>Product descriptions</h2>
-                <p>This chart describes the features present in each edition of Saxon <xsl:value-of
-                    select="$version"/> available for Java, .NET, and C/C++, PHP and Python, and the latest
-                    release of SaxonJS.</p>
                 <p>The table below contains links to the full product descriptions for each edition of Saxon <xsl:value-of
                     select="$version"/> available for Java, .NET, and C/C++, PHP and Python, and the latest
                     release of SaxonJS.</p>
@@ -244,8 +241,9 @@
                 <div id="aside">
                     <h2>Packages by platform</h2>
                     <p><b>Java:</b> SaxonJ 11 first released Feb 2022.</p>
-                    <p><b>.NET:</b> SaxonCS 11 for .NET 5 available only as the Enterprise Edition.</p>
-                    <p><b>Native:</b> SaxonC 11 first release (built from SaxonJ 11) released Feb 2022.</p>
+                    <p><b>.NET:</b> SaxonCS 11 for .NET 5 available only as the Enterprise Edition, first
+                        released Oct 2021.</p>
+                    <p><b>Native:</b> SaxonC 11 first released Feb 2022, built from SaxonJ 11.</p>
                     <p><b>JavaScript:</b> SaxonJS 2 does not require a commercial license.</p>
                 </div>
                 
