@@ -21,8 +21,10 @@ import javax.inject.Inject
 
 import com.saxonica.build.java.testsuite.JavaRunner
 import com.saxonica.build.java.testsuite.CSharpRunner
+import org.gradle.api.DefaultTask
 import org.gradle.api.file.*
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.assign
 
 abstract class TestSuitesExtension
@@ -42,7 +44,7 @@ abstract class TestSuitesExtension
 
   fun configure(suite: String, language: String,
                 options: Map<String,String> = emptyMap(),
-                taskName: String? = null) {
+                taskName: String? = null): TaskProvider<DefaultTask> {
 
     val name = if (taskName == null) {
       val keys = options.keys.sorted()
@@ -55,17 +57,19 @@ abstract class TestSuitesExtension
       "test_suite_${taskName}"
     }
 
-    when (product.get()) {
+    return when (product.get()) {
       "java" -> if (suite.startsWith("xsd")) {
-                  configureJavaXsd(suite, language, options, name)
-                } else {
-                  configureJava(suite, language, options, name)
-                }
+        configureJavaXsd(suite, language, options, name)
+      } else {
+        configureJava(suite, language, options, name)
+      }
+
       "csharp" -> if (suite.startsWith("xsd")) {
-                    configureCsharpXsd(suite, language, options, name)
-                } else {
-                  configureCsharp(suite, language, options, name)
-                }
+        configureCsharpXsd(suite, language, options, name)
+      } else {
+        configureCsharp(suite, language, options, name)
+      }
+
       else -> throw GradleException("Unexpected test product: ${product.get()}")
     }
   }
@@ -102,7 +106,7 @@ abstract class TestSuitesExtension
   
   fun configureJava(suite: String, language: String,
                     @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
-                    taskName: String) {
+                    taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
     // This is annoying. We have to copy the suite because
@@ -171,9 +175,10 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
+    return thisSuite as TaskProvider<DefaultTask>
   }
 
-  fun configureJavaXsd(suite: String, language: String, options: Map<String,String>, taskName: String) {
+  fun configureJavaXsd(suite: String, language: String, options: Map<String,String>, taskName: String): TaskProvider<DefaultTask> {
     val dateStamp = SimpleDateFormat("yyyyMMdd").format(Date()).toString()
 
     val xsdVersion = "1.1"
@@ -220,11 +225,13 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
+
+    return thisSuite as TaskProvider<DefaultTask>
   }
 
   fun configureCsharp(suite: String, language: String,
                       @Suppress("UNUSED_PARAMETER") options: Map<String,String>,
-                      taskName: String) {
+                      taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
     // This is annoying. We have to copy the suite because
@@ -280,11 +287,13 @@ abstract class TestSuitesExtension
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
       dependsOn(thisSuite)
     }
+
+    return thisSuite as TaskProvider<DefaultTask>
   }
 
-  fun configureCsharpXsd(suite: String, 
+  fun configureCsharpXsd(suite: String,
                          @Suppress("UNUSED_PARAMETER") language: String,
-                         options: Map<String,String>, taskName: String) {
+                         options: Map<String,String>, taskName: String): TaskProvider<DefaultTask> {
     val allSuites = tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME).get()
     val build = tasks.named("dotnetBuildTestDrivers").get()
 
@@ -351,6 +360,8 @@ abstract class TestSuitesExtension
     }
 
     allSuites.dependsOn(thisSuite)
+
+    return thisSuite as TaskProvider<DefaultTask>
   }
 }
 
