@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
@@ -57,7 +58,11 @@ public class TypeOf_1 extends SystemFunction {
             case NODE:
                 return nodeKind(((NodeInfo)it));
             case ATOMIC:
-                StructuredQName name = ((AtomicValue)it).getItemType().getTypeName();
+                AtomicType at = ((AtomicValue) it).getItemType();
+                while (at.isAnonymousType()) {
+                    at = (AtomicType)at.getBaseType();
+                }
+                StructuredQName name = at.getTypeName();
                 if (name.hasURI(NamespaceUri.SCHEMA)) {
                     return "xs:" + name.getLocalPart();
                 } else {
