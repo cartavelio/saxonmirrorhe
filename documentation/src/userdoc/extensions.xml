@@ -459,7 +459,7 @@ saxon:evaluate($expression)
     <section id="capture" title="saxon:capture">
       <h1>saxon:capture</h1>
       
-      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9.</aside>
+      <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 9.9. Deprecated since Saxon 13.</aside>
       
       <p>This Saxon extension attribute is now a synonym for the XSLT 4.0 attribute
         <code>capture</code> on <code>xsl:accumulator-rule</code>.</p>
