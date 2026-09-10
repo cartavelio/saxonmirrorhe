@@ -281,7 +281,10 @@ void SaxonProcessor::setExtensionLibrary(const char * libraryName){
       if (status == SXN_EXCEPTION) {
         throw SaxonApiException();
       }
+      j_testNativeC(SaxonProcessor::sxn_environ->thread);
 }
+
+
 
 void SaxonProcessor::attachCurrentThread() {
 #ifdef DEBUG

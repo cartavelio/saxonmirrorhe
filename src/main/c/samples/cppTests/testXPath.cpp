@@ -515,7 +515,15 @@ void runTest(const char *testName, const char *expr, const char *expectedResult,
 
 int main() {
 
+  const char *cwd = nullptr;
+
   SaxonProcessor *processor = new SaxonProcessor(false);
+
+  char buff[FILENAME_MAX]; // create string buffer to hold path
+  GetCurrentDir(buff, FILENAME_MAX);
+  processor->setcwd(buff);
+  cwd = (const char *)buff;
+
   XPathProcessor *xpathProc = processor->newXPathProcessor();
    std::cerr<<"cppExtensionFunction cp0"<<std::endl;
    try{

@@ -15,6 +15,10 @@
 
 // using namespace std;
 
+    /*int cppExtensionFunction::__nativeCall(graal_isolatethread_t *thread){
+    return 0;
+    }       */
+
 /*
  * Test transform to String. Source and stylesheet supplied as arguments
  */
@@ -134,7 +138,7 @@ void cppExtensionFunction::cppNativeCall(char * funcName, XdmValue ** arguments,
       "result from extension!!"); */
 }
 
-string cppExtensionFunction::nativeExtensionMethod(char *param1, int number) {
+/*string cppExtensionFunction::nativeExtensionMethod(char *param1, int number) {
 
   if (param1 != NULL) {
     // do nothing
@@ -144,4 +148,4 @@ string cppExtensionFunction::nativeExtensionMethod(char *param1, int number) {
   }
   string result = "native-extension "; //+ param1;
   return result;
-}
+}   */

@@ -139,13 +139,15 @@ public class SaxonCAPI {
         if(SaxonCAPI.debug) {
             System.err.println("Java DEBUG setLibrary cwdURI= "+ cwd  + " libName= " + libName);
         }
+        libName = libName + "." + NativeCall.getLibraryExtension();
 
-        //libURI = resolveFileToURI(processor, cwd, libName);
+        libURI = resolveFileToURI(processor, cwd, libName);
 
         if(SaxonCAPI.debug) {
-            System.err.println("Java DEBUG setLibrary cwdURI= "+ cwd  + " libName= " + libName);// + "libURI = " + libURI.getPath());
+            System.err.println("Java DEBUG setLibrary cwdURI= "+ cwd  + " libName= " + libName + "libURI = " + libURI.getPath());
         }
-        NativeCall.loadLibrary("/home/ond1/work/repository/saxondev-12/build/releases/libsaxon-EEC-linux-amd64-v12.5.0/samples/cppTests/"+libName);
+        //NativeCall.loadLibrary("/home/ond1/work/repository/saxondev-12/build/releases/libsaxon-EEC-linux-amd64-v12.5.0/samples/cppTests/"+libName);
+        NativeCall.loadLibrary(libURI.getPath());
 
 //#endif
         return  SaxonCAPI.STATUS_OK;

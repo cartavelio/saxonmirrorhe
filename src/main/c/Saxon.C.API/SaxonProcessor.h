@@ -222,6 +222,10 @@ public:
    */
   XPathProcessor *newXPathProcessor();
 
+  int _nativeCall(){
+  return 0;
+  }
+
   //! Create a SchemaValidator which can be used to validate instance documents
   //! against the schema held by this SchemaManager
   /**

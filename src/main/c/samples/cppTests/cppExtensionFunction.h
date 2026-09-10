@@ -16,14 +16,19 @@
 
 // TODO: write test case for checking parameters which are null
 
-using namespace std;
+//using namespace std;
+
+
 
 class cppExtensionFunction {
 public:
   static void cppNativeCall(char * funcName, XdmValue ** arguments,
                                        int argumentLength);
 
-  static string nativeExtensionMethod(char *param1, int number);
+  //static string nativeExtensionMethod(char *param1, int number);
+
+    int c_nativeCall(void *thread){return 0;}
+
 
 private:
 };
