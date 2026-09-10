@@ -2,7 +2,7 @@
 <!-- exceptions file for the QT4 Test Suite -->
 <exceptions>
    
-   <exception test-set="fn-deep-equal" 
+  <!-- <exception test-set="fn-deep-equal" 
       test-case="deep-equal-40-functions-001
       deep-equal-40-functions-002
       deep-equal-40-functions-003
@@ -12,13 +12,13 @@
       deep-equal-40-functions-007" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-24"/>
       <reason>change for comparing function items not yet implemented</reason>
-   </exception>
+   </exception>-->
 
-   <exception test-set="fn-deep-equal" 
+  <!-- <exception test-set="fn-deep-equal" 
       test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="fn-doc" test-case="fn-doc-40-044 fn-doc-40-051 fn-doc-40-053" run="false" report="known restriction">
     <created by="Michael Kay" on="2021-08-23"/>
@@ -41,56 +41,56 @@
       <reason>ICU4N bug https://github.com/NightOwl888/ICU4N/issues/70</reason>
    </exception>
    
-   
+ <!--  
    
    <exception test-set="op-same-key" 
       test-case="same-key-006a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-12-13"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-divide-decimals" 
+ <!--  <exception test-set="fn-divide-decimals" 
       test-case="divide-decimals-018" run="false" report="tooBig">
       <created by="Michael Kay" on="2025-03-07"/>
       <reason>Chronically slow - needs investigation</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-distinct-values" 
+ <!--  <exception test-set="fn-distinct-values" 
       test-case="cbcl-distinct-values-002c
                  fn-distinct-values-mixed-args-012a
                  fn-distinct-values-mixed-args-013a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-distinct-values" 
+ <!--  <exception test-set="fn-distinct-values" 
       test-case="fn-distinct-values-1a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="fn-resolve-uri" 
+ <!--  <exception test-set="fn-resolve-uri" 
       test-case="fn-resolve-uri-36 fn-resolve-uri-37" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-29"/>
       <reason>Empty sequence in arg2 - not yet implemented</reason>
    </exception>
-
+-->
    
   
-   
+ <!--  
    <exception test-set="fn-tokenize" test-case="  
       fn-tokenize-40-001
       fn-tokenize-40-002" run="false" report="n/a">
       <created by="Michael Kay" on="2023-01-17"/>
       <reason>Tokenize#2 does not currently allow second argument to be an empty sequence</reason>
-   </exception>
+   </exception>-->
    
-
+<!--
    <exception test-set="prod-Recordtest" test-case="RecordTest-010" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-18"/>
       <reason>Coercion on fields of record test not yet implemented</reason>
    </exception>
- 
+ -->
 
    <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
       <created by="Michael Kay" on="2018-02-01"/>
@@ -98,7 +98,7 @@
    </exception>
    
  
-
+<!--
    <exception test-set="misc-BuiltInKeywords" 
       test-case="Keywords-array-subarray-1
       Keywords-fn-resolve-uri-1
@@ -112,9 +112,9 @@
        " run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>See bug #6102</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="misc-BuiltInKeywords" 
+ <!--  <exception test-set="misc-BuiltInKeywords" 
       test-case="Keywords-map-of-1
       Keywords-map-pairs-1
       Keywords-map-values-1
@@ -123,25 +123,25 @@
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Function not implemented yet</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="misc-BuiltInKeywords" 
+ <!--  <exception test-set="misc-BuiltInKeywords" 
       test-case="Keywords-fn-json-1" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Function likely to be renamed</reason>
-   </exception>
+   </exception>-->
 
 
-   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="known bug in ICU">
+ <!--  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009" run="false" report="known bug in ICU">
       <created by="Michael Kay" on="2018-02-01"/>
       <reason>Known bug in ICU</reason>
    </exception>
-   
-   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-010" run="false" report="known bug in ICU">
+   -->
+ <!--  <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-010" run="false" report="known bug in ICU">
       <created by="Michael Kay" on="2018-02-01"/>
       <reason>Known bug in ICU</reason>
    </exception>
-   
+   -->
    <exception test-set="fn-collection" test-case="cbcl-collection-002" run="false" report="test queried">
       <created by="Michael Kay" on="2021-08-23"/>
       <reason>Saxon-CS delivers collection results in wrong order due to multithreading. Should this be allowed? See bug 5067.</reason>
@@ -244,7 +244,7 @@
       <reason>Exceeds Saxon limit on max length of a sequence</reason>
    </exception>
    
-   <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
+  <!-- <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
       try-catch-map2
       try-catch-map3
       try-catch-map4
@@ -253,13 +253,13 @@
       try-catch-map7" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Try/Catch binding a map of error information - not yet implemented</reason>
-   </exception>
+   </exception>-->
  
-   <exception test-set="prod-CastExpr" test-case=" K-SeqExprCast-76a
+  <!-- <exception test-set="prod-CastExpr" test-case=" K-SeqExprCast-76a
       K-SeqExprCast-81a"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
+   </exception>-->
    
   
  <!--  
@@ -268,20 +268,20 @@
       <reason>Not yet implemented</reason>
    </exception>
    -->
-   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
+   <!--<exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
    </exception>
    
-   <exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
+   <!--<exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
       <created by="Michael Kay" on="2023-03-14"/>
       <reason>Placeholders currently not allowed as keyword arguments</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="prod-FunctionDecl" test-case="
       function-decl-40-019
@@ -300,20 +300,20 @@
       <reason>XQuery item types: forwards references and self-references not yet implemented</reason>
    </exception>
    
-   <exception test-set="misc-BuiltInKeywords" test-case="
+   <!--<exception test-set="misc-BuiltInKeywords" test-case="
       Keywords-fn-char-1
       Keywords-fn-remove-1
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Function (changes) not implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="misc-BuiltInKeywords" test-case="
+  <!-- <exception test-set="misc-BuiltInKeywords" test-case="
       Keywords-fn-parse-html-1
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Generated test case contains incorrect syntax</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="misc-HtmlTestSuite" test-case="
       html-test-0011
@@ -398,7 +398,7 @@
    
    
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
                test-case="
                      fo-test-map-values-001
                      fo-test-map-values-002
@@ -406,9 +406,9 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-json-001
       fo-test-fn-json-002
       fo-test-fn-json-003
@@ -422,9 +422,9 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Implementation is ahead of the spec</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-array-partition-001
       fo-test-array-partition-002
       fo-test-array-partition-003
@@ -434,16 +434,16 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Function has been dropped from spec</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="app-spec-examples" 
+  <!-- <exception test-set="app-spec-examples" 
       test-case="fo-test-array-values-001
                  fo-test-array-values-002
       " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
  <!--  <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-chain-001
@@ -468,7 +468,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    -->
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-csv-to-simple-rows-001
       fo-test-fn-csv-to-simple-rows-002
       fo-test-fn-csv-to-simple-rows-003
@@ -480,7 +480,7 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
 <!--   <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-csv-to-xml-001
@@ -497,14 +497,14 @@
       <reason>Functionality not yet implemented</reason>
    </exception>-->
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-function-annotations-001
       fo-test-fn-function-annotations-002
       fo-test-fn-function-annotations-003" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-invisible-xml-001
@@ -542,22 +542,22 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    -->
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-map-substitute-001
       fo-test-map-substitute-002" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-map-replace-001
       fo-test-map-replace-002
       fo-test-map-replace-003" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
  <!--  <exception test-set="app-spec-examples" 
       test-case="fo-test-array-filter-004
