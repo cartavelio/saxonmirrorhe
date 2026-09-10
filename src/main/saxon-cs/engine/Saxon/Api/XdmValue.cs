@@ -486,7 +486,7 @@ namespace Saxon.Api {
                 net.sf.saxon.expr.sort.DocumentOrderIterator sorted = 
                     new net.sf.saxon.expr.sort.DocumentOrderIterator(iter,
                         net.sf.saxon.expr.sort.GlobalOrderComparer.getInstance());
-                return XdmValue.Wrap(sorted.materialize());
+                return XdmValue.Wrap(SequenceTool.toGroundedValue(sorted));
             }
             catch (net.sf.saxon.trans.XPathException e) {
                 throw new StaticError(e);

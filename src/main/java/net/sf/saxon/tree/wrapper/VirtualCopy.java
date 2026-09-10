@@ -718,7 +718,7 @@ public class VirtualCopy implements NodeInfo {
      */
 
     protected VirtualCopier makeCopier(AxisIterator axis, VirtualCopy newParent, boolean testInclusion) {
-        return new VirtualCopier(axis, newParent, testInclusion);
+        return new VirtualCopier(this, axis, newParent, testInclusion);
     }
 
     /**
@@ -729,13 +729,15 @@ public class VirtualCopy implements NodeInfo {
      * the original copied node must be truncated.
      */
 
-    protected class VirtualCopier implements AxisIterator {
+    protected static class VirtualCopier implements AxisIterator {
 
+        protected VirtualCopy node;
         protected AxisIterator base;
         private final VirtualCopy parent;
         protected boolean testInclusion;
 
-        public VirtualCopier(AxisIterator base, VirtualCopy parent, boolean testInclusion) {
+        public VirtualCopier(VirtualCopy node, AxisIterator base, VirtualCopy parent, boolean testInclusion) {
+            this.node = node;
             this.base = base;
             this.parent = parent;
             this.testInclusion = testInclusion;
@@ -753,15 +755,15 @@ public class VirtualCopy implements NodeInfo {
         public NodeInfo next() {
             NodeInfo next = base.next();
             if (next != null) {
-                if (testInclusion && !isIncludedInCopy(next)) {
+                if (testInclusion && !node.isIncludedInCopy(next)) {
                     // we're only interested in nodes within the subtree that was copied.
                     // Assert: once we find a node outside this subtree, all further nodes will also be outside
                     //         the subtree.
                     return null;
                 }
-                VirtualCopy vc = wrap(next);
+                VirtualCopy vc = node.wrap(next);
                 vc.parent = parent;
-                vc.systemIdSupplier = systemIdSupplier;
+                vc.systemIdSupplier = node.systemIdSupplier;
                 next = vc;
             }
             return next;
