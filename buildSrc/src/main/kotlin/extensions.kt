@@ -3,14 +3,18 @@ import com.saxonica.build.java.BranchInfo
 import com.saxonica.build.java.JarTaskBuilder
 import com.saxonica.build.java.JarTaskBuilder.SaxonJarTasks
 import com.saxonica.build.AsInput
-import com.saxonica.build.doc.SaxonCReadme
 import com.saxonica.build.python.PythonVersion
 import com.saxonica.build.python.PythonVersions
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.plugins.jvm.JvmTestSuite
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
@@ -25,6 +29,7 @@ import java.io.PrintStream
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
@@ -217,17 +222,35 @@ interface SaxonBuildExtension {
     }
 }
 
-interface SaxonJExtension {
+abstract class SaxonJExtension @Inject constructor(private val layout: ProjectLayout) {
     abstract val edition: Property<String>
     abstract val version: Property<String>
     abstract val metaInfServices: MapProperty<String, String>
     abstract val manifestMainClass: Property<String>
     abstract val sourceRoot: DirectoryProperty
+    abstract val editionSourceRoots: ConfigurableFileCollection
+    abstract val javaTestPathSuffix: Property<String>
     abstract val testDataDir: DirectoryProperty
     abstract val jarManifestClasspath: ListProperty<String>
     abstract val jarManifestClasspathDefaults: ListProperty<String>
     abstract val editionJarInclusions: ListProperty<String>
     abstract val editionJarExclusions: ListProperty<String>
+    abstract val editionTestSuite: Property<JvmTestSuite>
+
+    val javaTestSourceRoot: Provider<Directory> get() = sourceRoot.map { it.dir(javaTestPathSuffix.get()) }
+    val additionalJavaTestSourceRoots: FileCollection get() = layout.files(editionSourceRoots.files.map {  it.resolve(javaTestPathSuffix.get()) })
+
+    fun editionSourceRoots(vararg sources: Directory) {
+        val suite = editionTestSuite.get()
+        editionSourceRoots.from(sources)
+        suite.sources {
+            java {
+                // N.B. additionalJavaTestSourceRoots won't return anything
+                // until editionSourceRoots has been populated above...
+                srcDirs(additionalJavaTestSourceRoots)
+            }
+        }
+    }
 
     fun jarClasspath(vararg entries: String): List<String> {
         return jarManifestClasspathDefaults.get().plus(entries)
