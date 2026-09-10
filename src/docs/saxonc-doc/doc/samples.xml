@@ -251,22 +251,19 @@ queryProc->runQueryToString();
 
 with PySaxonProcessor(license=False) as proc:
 
-  print(proc.version)  
-  xsltproc = proc.new_xslt30_processor()
-  document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-  executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
+  print(proc.version)
+  try:
+      xsltproc = proc.new_xslt30_processor()
+      document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
+      executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
 
-  if(xsltproc.exception_occurred):
-      print("Error found: ")
-      print(xsltproc.error_message)
+      print(document)
 
-  print(document) 
-
-  output = executable.transform_to_string(xdm_node=document)
-  if output is None:
-      print(executable.error_message)
-  else:
+      output = executable.transform_to_string(xdm_node=document)
       print(output)
+  except PySaxonApiError as err:
+              print('Error during function call', err)
+      
 
 
   print('Example 2 \n')
@@ -284,6 +281,8 @@ with PySaxonProcessor(license=False) as proc:
   if isinstance(item,saxonc.PyXdmNode):
     print(item.string_value)
     ]]></samp>
+
+      <p>Please note on Windows the <code>PySaxonApiError</code> is not available. Exceptions are thrown as <code>RuntimeError</code></p>
      
      <p>Example 2: Python script using PyXsltExecutable (with SaxonC-HE):</p>
      
