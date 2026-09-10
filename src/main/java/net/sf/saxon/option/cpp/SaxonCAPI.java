@@ -1135,6 +1135,8 @@ public class SaxonCAPI {
 
             return source;
         } catch (XPathException exception) {
+            //source = resolveFileToSource_fallback(cwd, filename);
+            //return source;
             throw new SaxonApiException(exception);
         }
 

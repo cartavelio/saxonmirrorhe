@@ -155,6 +155,14 @@ cdef extern from "../SaxonProcessor.h":
         # Say whether just-in-time compilation of template rules should be used.
         void setJustInTimeCompilation(bool jit)
 
+        void setXsltLanguageVersion(const char* version)
+
+        void setFastCompilation(bool fast)
+
+        void setTargetEdition(const char* edition)
+
+        void setRelocatable(bool relocatable)
+
         void setResultAsRawValue(bool option)
 
         # Set the base output URI.

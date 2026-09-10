@@ -1032,6 +1032,11 @@ cdef class PyXslt30Processor:
             **kwds: Possible keyword arguments: one of stylesheet_text (str), stylesheet_file (str),
                 associated_file (str) or stylesheet_node (PyXdmNode). It is also possible to add the options
                 save (bool) and output_file (str), which creates an exported stylesheet to file (SEF).
+                The following keywards are related to `save`: target (str), which sets the target edition under
+                which the stylesheet will be executed, and relocate(bool) which say whether any package produced
+                by this compiler can be deployed to a different location, with a different base URI. The other availables keywords are lang (str),
+                which sets the XSLT (and XPath) language level to be supported by the processor. Possible values: '3.0' and '4.0'
+                and fast_compile (bool), which request fast compilation.
         Returns:
             PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
             and thread-safe; it may be used to run multiple transformations, in series or concurrently.
@@ -1043,7 +1048,7 @@ cdef class PyXslt30Processor:
                                              <xsl:for-each select='$values' >
                                                <out><xsl:value-of select='. * 3'/></out>
                                              </xsl:for-each></output></xsl:template></xsl:stylesheet>")
-            2) executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef")
+            2) executable = xsltproc.compile_stylesheet(stylesheet_file="test1.xsl", save=True, output_file="test1.sef", target="HE")
             3) executable = xsltproc.compile_stylesheet(associated_file="foo.xml")
         """
         py_error_message = "Error: compile_stylesheet should only contain one of the following keyword arguments: (associated_file|stylesheet_text|stylesheet_file|stylesheet_node) (with optional additional arguments: save, output_file)"
@@ -1057,6 +1062,7 @@ cdef class PyXslt30Processor:
         cdef saxoncClasses.XsltExecutable * cexecutable = NULL
         py_save = False
         cdef int option = 0
+        cdef bool c_relocate
         cdef PyXdmNode py_xdmNode = None
         if kwds.keys() >= {"stylesheet_text", "stylesheet_file"}:
           raise Exception(py_error_message)
@@ -1064,8 +1070,31 @@ cdef class PyXslt30Processor:
           raise Exception(py_error_message)
         if kwds.keys() >= {"stylesheet_node", "stylesheet_file"}:
           raise Exception(py_error_message)
+        if "lang" in kwds:
+          py_lang_string = kwds["lang"]
+          py_ta_string = py_lang_string.encode('UTF-8') if py_lang_string is not None else None
+          c_lang = py_ta_string if py_lang_string is not None else ""
+          self.thisxptr.setXsltLanguageVersion(c_lang)
+
+        if "fast_compile" in kwds:
+          py_fast_string = kwds["fast_compile"]
+          py_ta_string = py_fast_string.encode('UTF-8') if py_fast_string is not None else None
+          c_fast = py_ta_string if py_fast_string is not None else ""
+          self.thisxptr.setFastCompilation(c_fast)
+
         if ("save" in kwds) and kwds["save"]==True:
           del kwds["save"]
+          if "target" in kwds:
+              py_target_string = kwds["target"]
+              py_ta_string = py_target_string.encode('UTF-8') if py_target_string is not None else None
+              c_target = py_ta_string if py_target_string is not None else ""
+              self.thisxptr.setTargetEdition(c_target)
+
+          if "relocate" in kwds:
+              py_relocate = kwds["relocate"]
+              c_relocate = py_relocate
+              self.thisxptr.setRelocatable(c_relocate)
+
           if "output_file" not in kwds:
             raise Exception("output_file keyword argument is required for compile_stylesheet when save=True")
           py_output_string = kwds["output_file"]

@@ -134,10 +134,11 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param outFilename - the file to which the compiled package should be saved
      */
     @CEntryPoint(name = "j_compileFromFileAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long compileFromFileAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename) throws SaxonApiException {
+    public static long compileFromFileAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer xsl, CCharPointer outFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
         XsltCompiler compiler = processor.newXsltCompiler();
+        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
             cwd = CTypeConversion.toJavaString(ccwd);
@@ -194,7 +195,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param filename - the file to which the compiled package should be saved
      */
     @CEntryPoint(name = "j_compileFromStringAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long compileFromStringAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cstr, CCharPointer cfilename) throws SaxonApiException {
+    public static long compileFromStringAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, CCharPointer ccwd, CCharPointer cstr, CCharPointer cfilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
 
@@ -209,6 +210,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
         }
         XsltCompiler compiler = processor.newXsltCompiler();
+        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
         compiler.setErrorList(SaxonCException.errorList);
         XsltPackage pack = null;
         try {
@@ -234,7 +236,7 @@ public class Xslt30Processor extends SaxonCAPI {
      * @param filename - the file to which the compiled package should be saved
      */
     @CEntryPoint(name = "j_compileFromXdmNodeAndSave", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long compileFromXdmNodeAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xdmNodeRef, CCharPointer ccwd, CCharPointer cfilename) throws SaxonApiException {
+    public static long compileFromXdmNodeAndSave(IsolateThread thread, ObjectHandle xslt30ProcessorRef, ObjectHandle xdmNodeRef, CCharPointer ccwd, CCharPointer cfilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         Xslt30Processor xslt30Processor = objectHandles.get(xslt30ProcessorRef);
         Processor processor = xslt30Processor.getProcessor();
         if(processor == null) {
@@ -242,6 +244,7 @@ public class Xslt30Processor extends SaxonCAPI {
             return SaxonCAPI.STATUS_FAIL;
         }
         XsltCompiler compiler = processor.newXsltCompiler();
+        setStaticParametersFromArray(compiler, processorDataAccumulatorRef);
         XdmNode node = objectHandles.get(xdmNodeRef);
         if (node == null) {
             SaxonApiException ex = new SaxonApiException("Failed to create Stylesheet from XdoNode");
@@ -464,11 +467,31 @@ public class Xslt30Processor extends SaxonCAPI {
                     }
                     valueForCpp = convertObjectToXdmValue(values[i]);
                     compiler.setParameter(qname, valueForCpp);
+                } else if (sparams[i].equals("-target")) {
+                    String value = (String)values[i];
+                    compiler.setTargetEdition(value);
+                } else if(sparams[i].equals("-relocate")) {
+                    String value = (String)values[i];
+                    if(value.equals("1")) {
+                        compiler.setRelocatable(true);
+                    } else {
+                        compiler.setRelocatable(false);
+                    }
+                } else if(sparams[i].equals("-lang")) {
+                    String value = (String)values[i];
+                    compiler.setXsltLanguageVersion(value);
+                } else if(sparams[i].equals("-fastCompile")) {
+                    String value = (String)values[i];
+                    if(value.equals("1")) {
+                        compiler.setFastCompilation(true);
+                    }
                 }
             }
 
         }
     }
+
+
 
 
     public Xslt30Transformer getXslt30Transformer(String cwd, XsltExecutable executable, String stylesheet, Map<QName, XdmValue> staticParameters) throws SaxonApiException {
