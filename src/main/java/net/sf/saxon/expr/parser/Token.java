@@ -342,6 +342,7 @@ public abstract class Token {
      */
     public static final int FOR_VALUE = 77;
 
+
     // map colon key-entry separator
     /**
      * ":" (XPath 3.0 maps)
@@ -635,10 +636,10 @@ public abstract class Token {
      */
     public static final int LET = 216;
     /**
-     * "&lt;" at the start of a tag (XQuery only). The pseudo-XML syntax that
+     * "&lt;" at the start of a direct element constructor XQuery only). The pseudo-XML syntax that
      * follows is read character-by-character by the XQuery parser
      */
-    public static final int TAG = 217;
+    public static final int START_TAG = 217;
     /**
      * A token representing an XQuery pragma.
      * This construct "(# .... #)" is regarded as a single token, for the QueryParser to sort out.
@@ -652,6 +653,9 @@ public abstract class Token {
      * "count" keyword
      */
     public static final int COUNT = 220;
+
+
+
     /**
      * Complete string constructor with no embedded expressions
      */
@@ -665,6 +669,9 @@ public abstract class Token {
 
     public static final int HEX_INTEGER = 224;
     public static final int BINARY_INTEGER = 225;
+
+    public static final int DIRECT_PI_CONSTRUCTOR = 231;
+    public static final int DIRECT_COMMENT_CONSTRUCTOR = 232;
 
     /**
      * Unary minus sign
@@ -811,7 +818,9 @@ public abstract class Token {
         tokens[WHERE] = "where";
         tokens[WHILE] = "while";
         tokens[VALIDATE] = "validate {";
-        tokens[TAG] = "<element>";
+        tokens[START_TAG] = "<element>";
+        tokens[DIRECT_COMMENT_CONSTRUCTOR] = "<!-- comment -->";
+        tokens[DIRECT_PI_CONSTRUCTOR] = "<?pi?>";
         tokens[PRAGMA] = "(# ... #)";
         tokens[SEMICOLON] = ";";
         tokens[COPY] = "copy";

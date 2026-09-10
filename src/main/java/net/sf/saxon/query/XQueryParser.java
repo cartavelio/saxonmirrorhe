@@ -831,7 +831,7 @@ public class XQueryParser extends XPathParser {
                         return;
                     } else if (t.currentToken == Token.RCURLY) {
                         t.lookAhead();
-                    } else if (t.currentToken == Token.TAG) {
+                    } else if (t.currentToken == Token.START_TAG) {
                         parsePseudoXML(true);
                     }
                 }
@@ -3679,7 +3679,7 @@ public class XQueryParser extends XPathParser {
     protected Expression parseConstructor() throws XPathException {
         int offset = t.currentTokenStartOffset;
         switch (t.currentToken) {
-            case Token.TAG:
+            case Token.START_TAG:
                 Expression tag = parsePseudoXML(false);
                 lookAhead();
                 t.setState(Tokenizer.OPERATOR_STATE);
@@ -3757,6 +3757,56 @@ public class XQueryParser extends XPathParser {
                 return parseNamedProcessingInstructionConstructor(offset);
         }
         return new ErrorExpression();
+    }
+
+    protected Expression parseDirectPIConstructor() throws XPathException {
+        String body = t.currentTokenValue;
+        int firstSpace = -1;
+        for (int i=0; i<body.length(); i++) {
+            if (Whitespace.isWhite(body.charAt(i))) {
+                firstSpace = i;
+                break;
+            }
+        }
+        String target;
+        String data = "";
+        if (firstSpace < 0) {
+            // there is no data part
+            target = body;
+        } else {
+            // trim leading space from the data part, but not trailing space
+            target = body.substring(0, firstSpace);
+            firstSpace++;
+            while (firstSpace < body.length() && " \t\r\n".indexOf(body.charAt(firstSpace)) >= 0) {
+                firstSpace++;
+            }
+            data = body.substring(firstSpace);
+        }
+
+        if (!NameChecker.isValidNCName(target)) {
+            grumble("Invalid processing instruction name " + Err.wrap(target));
+        }
+
+        if (target.equalsIgnoreCase("xml")) {
+            grumble("A processing instruction must not be named 'xml' in any combination of upper and lower case");
+        }
+
+        ProcessingInstruction instruction =
+                new ProcessingInstruction(new StringLiteral(target));
+        instruction.setSelect(new StringLiteral(data));
+        setLocation(instruction);
+        nextToken();
+        return makeTracer(instruction, null);
+
+    }
+
+    protected Expression parseDirectCommentConstructor() throws XPathException {
+        String body = t.currentTokenValue;
+        Comment instruction = new Comment();
+        instruction.setSelect(new StringLiteral(body));
+        setLocation(instruction);
+        nextToken();
+        return makeTracer(instruction, null);
     }
 
     /**
@@ -5493,7 +5543,7 @@ public class XQueryParser extends XPathParser {
 
     @Override
     protected boolean atStartOfRelativePath() {
-        return t.currentToken == Token.TAG || super.atStartOfRelativePath();
+        return t.currentToken == Token.START_TAG || super.atStartOfRelativePath();
         // "<" after "/" is recognized in XQuery but not in XPath.
     }
 

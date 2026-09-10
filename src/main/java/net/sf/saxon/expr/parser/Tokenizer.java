@@ -8,6 +8,8 @@
 package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.regex.ARegularExpression;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -247,11 +249,11 @@ public final class Tokenizer {
                     currentToken = optype;
                 }
                 break;
-            case Token.LT:
-                if (isXQuery && followsOperator(precedingToken) && !currentTokenValue.equals("" + FULL_WIDTH_LT)) {
-                    currentToken = Token.TAG;
-                }
-                break;
+//            case Token.LT:
+//                if (isXQuery && followsOperator(precedingToken) && !currentTokenValue.equals("" + FULL_WIDTH_LT)) {
+//                    currentToken = Token.START_TAG;
+//                }
+//                break;
             case Token.STAR:
                 if (!followsOperator(precedingToken)) {
                     currentToken = Token.MULT;
@@ -259,7 +261,7 @@ public final class Tokenizer {
                 break;
         }
 
-        if (currentToken == Token.TAG || currentToken == Token.RCURLY || currentToken == Token.BACKTICK) {
+        if (currentToken == Token.START_TAG || currentToken == Token.RCURLY || currentToken == Token.BACKTICK) {
 
             // No lookahead after encountering "<" at the start of an XML-like tag.
             // After an RCURLY, the parser must do an explicit lookahead() to continue
@@ -706,9 +708,7 @@ public final class Tokenizer {
                     nextToken = Token.DOLLAR;
                     return;
                 case FULL_WIDTH_LT:
-                case '<':
-                    // TODO: disallow mixing symbols in '<<'
-                    if (c == FULL_WIDTH_LT && languageLevel < 40) {
+                    if (languageLevel < 40) {
                         throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
                     }
                     if (inputOffset < inputLength
@@ -717,10 +717,42 @@ public final class Tokenizer {
                         nextToken = Token.LE;
                         return;
                     }
-                    if (inputOffset < inputLength && c == input.charAt(inputOffset)) {
+                    if (inputOffset < inputLength && input.charAt(inputOffset) == FULL_WIDTH_LT) {
                         inputOffset++;
                         nextToken = Token.PRECEDES;
                         return;
+                    }
+                    nextToken = Token.LT;
+                    nextTokenValue = c + "";  // The parser needs to know which character was used
+                    return;
+                case '<':
+                    if (inputOffset < inputLength) {
+                        int c2 = input.charAt(inputOffset);
+                        if (c2 == '=') {
+                            inputOffset++;
+                            nextToken = Token.LE;
+                            return;
+                        } else if (c2 == '<') {
+                            inputOffset++;
+                            nextToken = Token.PRECEDES;
+                            return;
+                        } else if (isXQuery && c2 == '?') {
+                            if (readDirectPIConstructor()) {
+                                return;
+                            }
+                        } else if (isXQuery && c2 == '!') {
+                            if (inputOffset + 1 < inputLength) {
+                                int c3 = input.charAt(inputOffset + 1);
+                                if (c3 == '-' && readDirectCommentConstructor()) {
+                                    return;
+                                }
+                            }
+                        } else if (isXQuery && NameChecker.isNCNameStartChar(c2)) {
+                            if (readDirectElementConstructor()) {
+                                nextToken = Token.START_TAG;
+                                return;
+                            }
+                        }
                     }
                     nextToken = Token.LT;
                     nextTokenValue = c + "";  // The parser needs to know which character was used
@@ -1397,6 +1429,72 @@ public final class Tokenizer {
 
     public int getColumnNumber(int offset) {
         return (int) (getLineAndColumn(offset) & 0x7fffffff);
+    }
+
+    private static ARegularExpression piRegex = ARegularExpression.compile("\\i\\c*(\\s+.*)?", "");
+    public boolean readDirectPIConstructor() {
+        int end = input.indexOf("?>", inputOffset);
+        if (end < 0) {
+            return false;
+        }
+        if (!piRegex.matches(StringTool.fromCharSequence(input.substring(inputOffset+1, end)))) {
+            return false;
+        }
+        nextToken = Token.DIRECT_PI_CONSTRUCTOR;
+        nextTokenValue = input.substring(inputOffset+1, end);
+        inputOffset = end + 2;
+        return true;
+    }
+
+    public boolean readDirectCommentConstructor() {
+        // On entry, we have seen "<!-" and are positioned at "!"
+        int start = inputOffset + 3;
+        if (start > inputLength) {
+            return false;
+        }
+        int end = input.indexOf("-->", start);
+        if (end < 0) {
+            return false;
+        }
+        if (!"!--".equals(input.substring(inputOffset, start))) {
+            return false;
+        }
+        nextToken = Token.DIRECT_COMMENT_CONSTRUCTOR;
+        nextTokenValue = input.substring(start, end);
+        inputOffset = end + 3;
+        return true;
+    }
+
+    public boolean readDirectElementConstructor() {
+        // On entry, we have seen "<X" where X is an NCNameStartChar, and we are positioned at "X"
+        // This method checks whether the content looks plausibly like a direct element constructor,
+        // and if so it returns true.
+        int pos = inputOffset;
+        while (pos < inputLength && NameChecker.isNCNameChar(input.charAt(pos++))) {
+            // continue
+        }
+        while (pos < inputLength && Whitespace.isWhite(input.charAt(pos++))) {
+            // continue
+        }
+        if (pos >= inputLength) {
+            return false;
+        }
+        int ch = input.charAt(pos);
+        if (ch == '/' && input.charAt(pos) == '>') {
+            return true;
+        }
+        if (ch == '>') {
+            return true;
+        }
+        if (NameChecker.isNCNameStartChar(ch)) {
+            // check that we have an attribute name followed by "="
+            int eq = input.indexOf('=', pos);
+            if (eq < 0) {
+                return false;
+            }
+            return NameChecker.isQName(StringTool.codePoints(input.substring(pos, eq).trim()));
+        }
+        return false;
     }
 
 }

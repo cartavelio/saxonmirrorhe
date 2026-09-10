@@ -824,6 +824,10 @@ public class XPathParser {
                     Expression pne = new AxisExpression(AxisInfo.PARENT, null);
                     setLocation(pne);
                     return pne;
+                case Token.DIRECT_PI_CONSTRUCTOR:
+                    Expression piCons = parseDirectPIConstructor();
+                    setLocation(piCons);
+                    return piCons;
                 case Token.EOF:
                     // fall through
                 default:
@@ -2526,7 +2530,8 @@ public class XPathParser {
      * ('+'|'-')* ValueExpr
      * parsed as ('+'|'-')? UnaryExpr
      *
-     * @return the resulting subexpression
+     * @return the resulting subexpression. On return, the current token must be the
+     * token that follows the expression.
      * @throws XPathException if any error is encountered
      */
 
@@ -3261,8 +3266,13 @@ public class XPathParser {
             case Token.ATTRIBUTE_QNAME:
             case Token.NAMESPACE_QNAME:
             case Token.PI_QNAME:
-            case Token.TAG:
+            case Token.START_TAG:
                 return parseConstructor();
+
+            case Token.DIRECT_PI_CONSTRUCTOR:
+                return parseDirectPIConstructor();
+            case Token.DIRECT_COMMENT_CONSTRUCTOR:
+                return parseDirectCommentConstructor();
 
             case Token.NAMED_FUNCTION_REF:
                 return parseNamedFunctionReference();
@@ -3628,6 +3638,16 @@ public class XPathParser {
 
     /*@NotNull*/
     protected Expression parseConstructor() throws XPathException {
+        grumble("Node constructor expressions are allowed only in XQuery, not in XPath");
+        return new ErrorExpression();
+    }
+
+    protected Expression parseDirectPIConstructor() throws XPathException {
+        grumble("Node constructor expressions are allowed only in XQuery, not in XPath");
+        return new ErrorExpression();
+    }
+
+    protected Expression parseDirectCommentConstructor() throws XPathException {
         grumble("Node constructor expressions are allowed only in XQuery, not in XPath");
         return new ErrorExpression();
     }

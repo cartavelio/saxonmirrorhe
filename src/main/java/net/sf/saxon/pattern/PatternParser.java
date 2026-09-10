@@ -313,7 +313,7 @@ public class PatternParser extends XPathParser {
                 case Token.ATTRIBUTE_QNAME:
                 case Token.NAMESPACE_QNAME:
                 case Token.PI_QNAME:
-                case Token.TAG:
+                case Token.START_TAG:
                 case Token.NAMED_FUNCTION_REF:
                 case Token.DOTDOT:
                     grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
