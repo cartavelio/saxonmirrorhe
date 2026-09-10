@@ -778,7 +778,7 @@ public:
   /**
    * Internal method for diagnostics
    */
-  void createHeapDump(bool live);
+  static void createHeapDump(bool live);
 
   static XdmItem *makeXdmItemFromRef(int64_t valueRef);
 

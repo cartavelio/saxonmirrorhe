@@ -1108,6 +1108,8 @@ void SaxonProcessor::release() {
       j_printObjectHandlesPoolInfo(sxn_environ->thread);
     }
 
+    //SaxonProcessor::createHeapDump(true);
+
     // finalizeJavaRT(SaxonProcessor::sxn_environ->jvm);
 
     // delete SaxonProcessor::sxn_environ;
