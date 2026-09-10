@@ -1,28 +1,34 @@
 package net.sf.saxon.ma;
 
+import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.JavaExternalObjectType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.ObjectValue;
+import net.sf.saxon.str.Twine8;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
-public class Parcel extends ObjectValue<GroundedValue> {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-    public static JavaExternalObjectType TYPE = new JavaExternalObjectType(Parcel.class);
+public class Parcel extends SingleEntryMap {
+
+    private static <T> List<T> singletonList(T value) {
+        List<T> result = new ArrayList<>(1);
+        result.add(value);
+        return result;
+    }
+
+    public static final StringValue key = new StringValue(new Twine8("parcel"));
+    public static RecordTest TYPE = new RecordTest(
+            singletonList("parcel"),
+            singletonList(SequenceType.ANY_SEQUENCE),
+            Collections.emptyList(),
+            false);
 
     public Parcel(GroundedValue content) {
-        super(content);
+        super(key, content);
     }
 
-    /**
-     * Determine the data type of the items in the expression, if possible
-     *
-     * @param th The TypeHierarchy.
-     * @return for the default implementation: AnyItemType (not known)
-     */
-    @Override
-    public ItemType getItemType(/*@Nullable*/ TypeHierarchy th) {
-        return TYPE;
-    }
 }
 

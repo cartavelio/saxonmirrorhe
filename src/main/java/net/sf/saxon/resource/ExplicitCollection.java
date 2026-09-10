@@ -57,7 +57,7 @@ public class ExplicitCollection extends AbstractResourceCollection {
     @Override
     public boolean stripWhitespace(SpaceStrippingRule rules) {
         this.whitespaceRules = rules;
-        return true;
+        return false;
     }
 
     @Override

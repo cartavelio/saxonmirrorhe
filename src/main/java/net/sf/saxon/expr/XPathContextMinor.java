@@ -36,7 +36,7 @@ public class XPathContextMinor implements XPathContext {
 
     Controller controller;
     FocusIterator currentIterator;
-    /*@Nullable*/ LastValue last = null;
+    LastValue last = null;
 
     XPathContext caller = null;
     protected StackFrame stackFrame;
@@ -248,7 +248,10 @@ public class XPathContextMinor implements XPathContext {
             return last.value;
         }
         try {
-            return currentIterator.getLength();
+            int length = currentIterator.getLength();
+            System.err.println("Current iterator.length = " + length);
+            last = new LastValue(length);
+            return length;
         } catch (XPathException err) {
             throw new UncheckedXPathException(err);
         }
@@ -577,9 +580,10 @@ public class XPathContextMinor implements XPathContext {
      */
 
     protected static class LastValue {
-        public int value = 0;
+        public final int value;
 
         public LastValue(int count) {
+            //System.err.println("Last := " + count);
             value = count;
         }
     }
