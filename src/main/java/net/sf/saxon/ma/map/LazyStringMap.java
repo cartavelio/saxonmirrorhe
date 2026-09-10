@@ -16,6 +16,7 @@ import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.MappedAtomicIterator;
+import net.sf.saxon.tree.jiter.ReverseListIterable;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -38,7 +39,6 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
 
         private final List<UnicodeString> keys = new ArrayList<>();
         private final List<GroundedValue> values = new ArrayList<>();
-        private final BitSet bloom = new BitSet(1000);
         private final int flags;
         private Set<UnicodeString> keySet; // used only if the bloom filter indicates possible duplicates
         private boolean duplicatesFound = false;
@@ -56,39 +56,6 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
 
         public void put(UnicodeString key, GroundedValue value) throws XPathException {
             Instrumentation.count("LazyStringMapBuilder.put()");
-            int hash = key.hashCode();
-            int hash0 = hash >> 20 & 0x7ff;
-            int hash1 = hash >> 10 & 0x7ff;
-            int hash2 = hash &0x7ff;
-            if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
-                // This is a possible duplicate
-                Instrumentation.count("Bloom clash");
-                if (keySet == null) {
-                    keySet = new HashSet<>(keys);
-                }
-                if (keySet.contains(key)) {
-                    // Duplicate key found
-                    Instrumentation.count("Duplicate key");
-                    if ((flags & JsonParser.DUPLICATES_REJECTED) != 0) {
-                        Instrumentation.count("Duplicate rejected");
-                        throw new XPathException("Duplicate key value in JSON object'" + key + "'", "FOJS0003");
-                    } else if ((flags & JsonParser.DUPLICATES_FIRST) != 0) {
-                        // ignore this entry
-                        Instrumentation.count("Duplicate ignored");
-                        return;
-                    } else {
-                        // note that there are duplicates; we'll deal with them later
-                        Instrumentation.count("Duplicate deferred");
-                        duplicatesFound = true;
-                    }
-                }
-            }
-            if (keySet != null) {
-                keySet.add(key);
-            }
-            bloom.set(hash0);
-            bloom.set(hash1);
-            bloom.set(hash2);
             keys.add(key);
             values.add(value);
         }
@@ -98,23 +65,54 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
          * lists of keys and values are used within the constructed map and are mutable.
          *
          * @return the constructed map
+         * @throws XPathException if duplicate keys were found, and not detected earlier
          */
 
-        public MapItem getCompletedMap() {
+        public MapItem getCompletedMap() throws XPathException {
             if (keys.size() == 0) {
                 return EmptyMap.getInstance();
             } else if (keys.size() == 1) {
                 return new SingleEntryMap(new StringValue(keys.get(0)),values.get(0));
             }
-            if (duplicatesFound) {
-                // Indicates that duplicate keys were found, and the selected option is to retain the last.
-                // In this case we build the map eagerly.
-                MapBuilder target = HashTrieMap.getBuilder();
-                for (int i = 0; i < keys.size(); i++) {
-                    target.put(new StringValue(keys.get(i)), values.get(i));
-                }
-                return target.getCompletedMap();
+            // look for duplicates
+            BitSet bloom = new BitSet(1000);
+            boolean reverseOrder = (flags & JsonParser.DUPLICATES_LAST) != 0;
 
+            for (UnicodeString key : (reverseOrder ? new ReverseListIterable<>(keys) : keys)) {
+                boolean duplicate = false;
+                if (keySet == null) {
+                    int hash = key.hashCode();
+                    int hash0 = hash >> 20 & 0x7ff;
+                    int hash1 = hash >> 10 & 0x7ff;
+                    int hash2 = hash & 0x7ff;
+                    if (bloom.get(hash0) && bloom.get(hash1) && bloom.get(hash2)) {
+                        // This is a possible duplicate
+                        Instrumentation.count("Bloom clash");
+                        if (keySet == null) {
+                            keySet = new HashSet<>(keys);
+                        }
+                        if (keySet.contains(key)) {
+                            duplicate = true;
+                        }
+                    }
+                    bloom.set(hash0);
+                    bloom.set(hash1);
+                    bloom.set(hash2);
+                } else {
+                    duplicate = !keySet.add(key);
+                }
+                if (duplicate) {
+                    // Duplicate key found
+                    Instrumentation.count("Duplicate key");
+                    if ((flags & JsonParser.DUPLICATES_REJECTED) != 0) {
+                        Instrumentation.count("Duplicate rejected");
+                        throw new XPathException("Duplicate key value '" + key + "' in JSON object", "FOJS0003");
+                    } else {
+                        // ignore this entry
+                        Instrumentation.count("Duplicate ignored");
+                        break;
+                    }
+                }
             }
             return new LazyStringMap(keys, values);
         }
