@@ -362,8 +362,7 @@ namespace SaxonCS_NUnit
             XsltCompiler comp = processor.NewXsltCompiler();
             Xslt30Transformer transformer = comp.Compile(new StringReader(xslt)).Load30();
             var p = new Dictionary<QName, XdmValue>();
-            NpgsqlConnection pgconn = new NpgsqlConnection();
-            p.Add(new QName("pgconn"), new XdmExternalObject<NpgsqlConnection>(pgconn));
+            p.Add(new QName("pgconn"), new XdmExternalObject(Encoding.UTF8));
             transformer.SetStylesheetParameters(p);
             Serializer serializer = processor.NewSerializer();
             serializer.OutputWriter = Console.Out;
@@ -397,13 +396,11 @@ namespace SaxonCS_NUnit
     {
         public override XdmValue Call(XdmValue[] arguments, DynamicContext context)
         {
-            var arg = (XdmExternalObject<NpgsqlConnection>)arguments[0][0];
-            NpgsqlConnection pgconn = arg.GetObject();
+            var arg = (XdmExternalObject)arguments[0][0];
+            Encoding pgconn = (Encoding)arg.GetObject();
+            Assert.That(ReferenceEquals(pgconn, Encoding.UTF8));
             return new XdmAtomicValue("OK");
         }
     }
-    
-    public class NpgsqlConnection {}
-
 
 }
