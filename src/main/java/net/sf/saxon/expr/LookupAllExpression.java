@@ -8,6 +8,9 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -27,8 +30,6 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpInnerClass;
-import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 
@@ -233,84 +234,8 @@ public class LookupAllExpression extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    @CSharpInnerClass(outer=true, extra={"Saxon.Hej.expr.XPathContext context"})
-    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-
-        return new SequenceIterator() {
-
-            final SequenceIterator level0 = getBaseExpression().iterate(context);
-            Iterator<GroundedValue> level1forArrays = null;
-            Iterator<KeyValuePair> level1forMaps = null;
-                // delivers GroundedValue in the case of an array, or KeyValuePair in the case of a map
-            SequenceIterator level2 = null;
-
-            @Override
-            public Item next() {
-                if (level2 == null) {
-                    if (level1forArrays == null && level1forMaps == null) {
-                        Item lhs = level0.next();
-                        if (lhs == null) {
-                            return null;
-                        } else if (lhs instanceof ArrayItem) {
-                            level1forArrays = ((ArrayItem)lhs).members().iterator();
-                            return next();
-                        } else if (lhs instanceof MapItem) {
-                            level1forMaps = ((MapItem)lhs).keyValuePairs().iterator();
-                            return next();
-                        } else {
-                            try {
-                                LookupExpression.mustBeArrayOrMap(LookupAllExpression.this, lhs);
-                            } catch (XPathException e) {
-                                throw new UncheckedXPathException(e);
-                            }
-                            return null;
-                        }
-                    } else if (level1forArrays != null && level1forArrays.hasNext()) {
-                        GroundedValue nextEntry = level1forArrays.next();
-                        level2 = nextEntry.iterate();
-                    } else if (level1forMaps != null && level1forMaps.hasNext()) {
-                        KeyValuePair nextEntry = level1forMaps.next();
-                        GroundedValue value = nextEntry.value;
-                        level2 = value.iterate();
-                    } else {
-                        level1forMaps = null;
-                        level1forArrays = null;
-                    }
-                    return next();
-                } else {
-                    Item nextItem = level2.next();
-                    if (nextItem == null) {
-                        level2 = null;
-                        return next();
-                    } else {
-                        return nextItem;
-                    }
-                }
-            }
-
-            @Override
-            public void close() {
-                if (level0 != null) {
-                    level0.close();
-                }
-                if (level2 != null) {
-                    level2.close();
-                }
-            }
-
-            @Override
-            public void discharge() {
-                if (level0 != null) {
-                    level0.discharge();
-                }
-                if (level2 != null) {
-                    level2.discharge();
-                }
-            }
-
-        };
-
+        return new LookupAllIterator(this, getBaseExpression().iterate(context));
     }
 
     /**
@@ -342,5 +267,101 @@ public class LookupAllExpression extends UnaryExpression {
         return getBaseExpression().toShortString() + "?*";
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new LookupAllElaborator();
+    }
+
+    public static class LookupAllElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+            LookupAllExpression expr = (LookupAllExpression) getExpression();
+            PullEvaluator baseEval = Elaborator.makeElaborator(expr.getBaseExpression()).elaborateForPull();
+            return (context) -> new LookupAllIterator(expr, baseEval.eval(context));
+        }
+    }
+
+    private static class LookupAllIterator implements SequenceIterator {
+
+        final LookupAllExpression expr;
+        final SequenceIterator level0;
+        Iterator<GroundedValue> level1forArrays;
+        Iterator<KeyValuePair> level1forMaps;
+        // delivers GroundedValue in the case of an array, or KeyValuePair in the case of a map
+        SequenceIterator level2;
+
+        public LookupAllIterator(LookupAllExpression expr, SequenceIterator baseIterator) {
+            level0 = baseIterator;
+            level1forArrays = null;
+            level1forMaps = null;
+            level2 = null;
+            this.expr = expr;
+        }
+
+        @Override
+        public Item next() {
+            if (level2 == null) {
+                if (level1forArrays == null && level1forMaps == null) {
+                    Item lhs = level0.next();
+                    if (lhs == null) {
+                        return null;
+                    } else if (lhs instanceof ArrayItem) {
+                        level1forArrays = ((ArrayItem)lhs).members().iterator();
+                        return next();
+                    } else if (lhs instanceof MapItem) {
+                        level1forMaps = ((MapItem)lhs).keyValuePairs().iterator();
+                        return next();
+                    } else {
+                        try {
+                            LookupExpression.mustBeArrayOrMap(expr, lhs);
+                        } catch (XPathException e) {
+                            throw new UncheckedXPathException(e);
+                        }
+                        return null;
+                    }
+                } else if (level1forArrays != null && level1forArrays.hasNext()) {
+                    GroundedValue nextEntry = level1forArrays.next();
+                    level2 = nextEntry.iterate();
+                } else if (level1forMaps != null && level1forMaps.hasNext()) {
+                    KeyValuePair nextEntry = level1forMaps.next();
+                    GroundedValue value = nextEntry.value;
+                    level2 = value.iterate();
+                } else {
+                    level1forMaps = null;
+                    level1forArrays = null;
+                }
+                return next();
+            } else {
+                Item nextItem = level2.next();
+                if (nextItem == null) {
+                    level2 = null;
+                    return next();
+                } else {
+                    return nextItem;
+                }
+            }
+        }
+
+        @Override
+        public void close() {
+            if (level0 != null) {
+                level0.close();
+            }
+            if (level2 != null) {
+                level2.close();
+            }
+        }
+
+        @Override
+        public void discharge() {
+            if (level0 != null) {
+                level0.discharge();
+            }
+            if (level2 != null) {
+                level2.discharge();
+            }
+        }
+
+    }
 }
 

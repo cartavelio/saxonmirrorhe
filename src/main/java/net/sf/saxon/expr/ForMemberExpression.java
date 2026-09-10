@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.event.Outputter;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -289,6 +290,54 @@ public class ForMemberExpression extends Assignation {
     @Override
     public String getStreamerName() {
         return "ForMemberExpression";
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new ForMemberExprElaborator();
+    }
+
+    /**
+     * An elaborator for a "for" expression, typically written as {for $x in SEQ return R}.
+     *
+     * <p>Provides both "pull" and "push" implementations.</p>
+     */
+
+    public static class ForMemberExprElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+            final ForMemberExpression expr = (ForMemberExpression) getExpression();
+            final ItemEvaluator arrayEval = makeElaborator(expr.getSequence()).elaborateForItem();
+            final PullEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPull();
+            final int slot = expr.getLocalSlotNumber();
+
+            return context -> {
+                ArrayItem theArray = ((ArrayItem) arrayEval.eval(context));
+                int length = theArray.arrayLength();
+                AscendingRangeIterator base = new AscendingRangeIterator(0, 1, length - 1);
+                return MappingIterator.map(base, index -> {
+                    Sequence member = theArray.get((int) ((IntegerValue) index).longValue());
+                    context.setLocalVariable(slot, member);
+                    return actionEval.eval(context);
+                });
+            };
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            final ForExpression expr = (ForExpression) getExpression();
+            final ItemEvaluator selectEval = makeElaborator(expr.getSequence()).elaborateForItem();
+            final PushEvaluator actionEval = makeElaborator(expr.getAction()).elaborateForPush();
+            final int slot = expr.getLocalSlotNumber();
+            return (output, context) -> {
+                ArrayItem theArray = (ArrayItem)selectEval.eval(context);
+                for (GroundedValue member : theArray.members()) {
+                    context.setLocalVariable(slot, member);
+                    actionEval.process(output, context);
+                }
+                return null;
+            };
+        }
     }
 
 

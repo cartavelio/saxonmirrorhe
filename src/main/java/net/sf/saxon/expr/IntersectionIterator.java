@@ -20,11 +20,11 @@ import java.util.Comparator;
  */
 
 
-public class IntersectionEnumeration implements SequenceIterator {
+public class IntersectionIterator implements SequenceIterator {
 
     private final SequenceIterator e1;
     private final SequenceIterator e2;
-    /*@Nullable*/ private NodeInfo nextNode1;
+    private NodeInfo nextNode1;
     private NodeInfo nextNode2;
     private final Comparator<? super NodeInfo> comparer;
 
@@ -37,8 +37,8 @@ public class IntersectionEnumeration implements SequenceIterator {
      * @throws XPathException if an error occurs, for example reading from the input sequence
      */
 
-    public IntersectionEnumeration(SequenceIterator p1, SequenceIterator p2,
-                                   Comparator<? super NodeInfo> comparer) throws XPathException {
+    public IntersectionIterator(SequenceIterator p1, SequenceIterator p2,
+                                Comparator<? super NodeInfo> comparer) throws XPathException {
         e1 = p1;
         e2 = p2;
         this.comparer = comparer;

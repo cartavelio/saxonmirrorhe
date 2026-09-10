@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.*;
@@ -977,10 +977,6 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
     }
 
     /**
-     * Make an Elaborator for this expression.
-     */
-
-    /**
      * Evaluate an updating expression, adding the results to a Pending Update List.
      * The default implementation of this method, which is used for non-updating expressions,
      * throws an UnsupportedOperationException
@@ -1768,11 +1764,15 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
 
     /**
      * Make an elaborator for this expression
+     * @return an appropriate {@link Elaborator}
      */
 
     public Elaborator getElaborator() {
+        System.err.println("Using FallbackElaborator for " + this.getClass().getName());
         return new FallbackElaborator();
     }
+
+//    public abstract Elaborator getElaborator();
 
 
 }

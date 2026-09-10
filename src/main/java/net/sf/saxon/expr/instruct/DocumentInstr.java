@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.SystemFunction;
@@ -19,6 +20,8 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -255,62 +258,64 @@ public class DocumentInstr extends ParentNodeConstructor {
 
     @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
-        Controller controller = context.getController();
-        Configuration config = controller.getConfiguration();
-
-        NodeInfo root;
-        if (textOnly) {
-            UnicodeString textValue;
-            if (constantText != null) {
-                textValue = constantText;
-            } else {
-                UnicodeBuilder sb = new UnicodeBuilder();
-                SequenceIterator iter = getContentOperand().getOperandEvaluator(context).iterate(context);
-                Item item;
-                while ((item = iter.next()) != null) {
-                    sb.accept(item.getUnicodeStringValue());
-                }
-                textValue = sb.toUnicodeString();
-            }
-            root = TextFragmentValue.makeTextFragment(config, textValue, getStaticBaseURIString());
-        } else {
-            try {
-                PipelineConfiguration pipe = controller.makePipelineConfiguration();
-                pipe.setXPathContext(context);
-
-                Builder builder;
-                builder = controller.makeBuilder();
-                builder.setUseEventLocation(false);
-                builder.setDurability(Durability.TEMPORARY);
-
-                if (builder instanceof TinyBuilder) {
-                    ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
-                }
-
-                builder.setBaseURI(getStaticBaseURIString());
-                builder.setTiming(false);
-
-                pipe.setHostLanguage(getPackageData().getHostLanguage());
-                builder.setPipelineConfiguration(pipe);
-
-                ComplexContentOutputter out =
-                        ComplexContentOutputter.makeComplexContentReceiver(builder, getValidationOptions());
-                out.open();
-                out.startDocument(ReceiverOption.NONE);
-
-                TailCall tc = getContentOperand().getOperandEvaluator(context).processLeavingTail(out, context);
-                dispatchTailCall(tc);
-                out.endDocument();
-                out.close();
-                root = builder.getCurrentRoot();
-            } catch (XPathException e) {
-                e.maybeSetLocation(getLocation());
-                e.maybeSetContext(context);
-                throw e;
-            }
-        }
-        return root;
+        return (NodeInfo) Elaborator.makeElaborator(this).elaborateForItem().eval(context);
     }
+//        Controller controller = context.getController();
+//        Configuration config = controller.getConfiguration();
+//
+//        NodeInfo root;
+//        if (textOnly) {
+//            UnicodeString textValue;
+//            if (constantText != null) {
+//                textValue = constantText;
+//            } else {
+//                UnicodeBuilder sb = new UnicodeBuilder();
+//                SequenceIterator iter = getContentOperand().getOperandEvaluator(context).iterate(context);
+//                Item item;
+//                while ((item = iter.next()) != null) {
+//                    sb.accept(item.getUnicodeStringValue());
+//                }
+//                textValue = sb.toUnicodeString();
+//            }
+//            root = TextFragmentValue.makeTextFragment(config, textValue, getStaticBaseURIString());
+//        } else {
+//            try {
+//                PipelineConfiguration pipe = controller.makePipelineConfiguration();
+//                pipe.setXPathContext(context);
+//
+//                Builder builder;
+//                builder = controller.makeBuilder();
+//                builder.setUseEventLocation(false);
+//                builder.setDurability(Durability.TEMPORARY);
+//
+//                if (builder instanceof TinyBuilder) {
+//                    ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
+//                }
+//
+//                builder.setBaseURI(getStaticBaseURIString());
+//                builder.setTiming(false);
+//
+//                pipe.setHostLanguage(getPackageData().getHostLanguage());
+//                builder.setPipelineConfiguration(pipe);
+//
+//                ComplexContentOutputter out =
+//                        ComplexContentOutputter.makeComplexContentReceiver(builder, getValidationOptions());
+//                out.open();
+//                out.startDocument(ReceiverOption.NONE);
+//
+//                TailCall tc = getContentOperand().getOperandEvaluator(context).processLeavingTail(out, context);
+//                dispatchTailCall(tc);
+//                out.endDocument();
+//                out.close();
+//                root = builder.getCurrentRoot();
+//            } catch (XPathException e) {
+//                e.maybeSetLocation(getLocation());
+//                e.maybeSetContext(context);
+//                throw e;
+//            }
+//        }
+//        return root;
+//    }
 
 
     /**
@@ -367,6 +372,110 @@ public class DocumentInstr extends ParentNodeConstructor {
     @Override
     public String getStreamerName() {
         return "DocumentInstr";
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new DocumentInstrElaborator();
+    }
+
+    /**
+     * Elaborator for an AtomicSequenceConverter (including an UntypedAtomicConverter, which is
+     * the same except that it uses a different converter internally)
+     */
+
+    public static class DocumentInstrElaborator extends PushElaborator {
+
+        public PushEvaluator elaborateForPush() {
+            DocumentInstr expr = (DocumentInstr) getExpression();
+            PushEvaluator content = makeElaborator(expr.getContentExpression()).elaborateForPush();
+            if (expr.preservingTypes && !expr.textOnly) {
+                return (output, context) -> {
+                    output.startDocument(ReceiverOption.NONE);
+                    TailCall tc = content.process(output, context);
+                    dispatchTailCall(tc);
+                    output.endDocument();
+                    return null;
+                };
+            } else {
+                ItemEvaluator evalAsItem = elaborateForItem();
+                Location loc = expr.getLocation();
+                return (output, context) -> {
+                    Item item = evalAsItem.eval(context);
+                    if (item != null) {
+                        output.append(item, loc, ReceiverOption.ALL_NAMESPACES);
+                    }
+                    return null;
+                };
+            }
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            DocumentInstr expr = (DocumentInstr) getExpression();
+            String staticBaseUri = expr.getStaticBaseURIString();
+
+            if (expr.textOnly) {
+                if (expr.constantText != null) {
+                    UnicodeString text = expr.constantText;
+                    return context -> TextFragmentValue.makeTextFragment(
+                            context.getConfiguration(), text, staticBaseUri);
+                } else {
+                    PullEvaluator contentEval = makeElaborator(expr.getContentExpression()).elaborateForPull();
+                    return context -> {
+                        UnicodeBuilder sb = new UnicodeBuilder();
+                        SequenceIterator iter = contentEval.eval(context);
+                        Item item;
+                        while ((item = iter.next()) != null) {
+                            sb.accept(item.getUnicodeStringValue());
+                        }
+                        return TextFragmentValue.makeTextFragment(
+                                context.getConfiguration(), sb.toUnicodeString(), staticBaseUri);
+                    };
+                }
+            } else {
+                PushEvaluator contentEval = makeElaborator(expr.getContentExpression()).elaborateForPush();
+                HostLanguage hostLanguage = expr.getPackageData().getHostLanguage();
+                return context -> {
+                    try {
+                        Controller controller = context.getController();
+                        Configuration config = controller.getConfiguration();
+                        PipelineConfiguration pipe = controller.makePipelineConfiguration();
+                        pipe.setXPathContext(context);
+
+                        Builder builder;
+                        builder = controller.makeBuilder();
+                        builder.setUseEventLocation(false);
+                        builder.setDurability(Durability.TEMPORARY);
+
+                        if (builder instanceof TinyBuilder) {
+                            ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
+                        }
+
+                        builder.setBaseURI(staticBaseUri);
+                        builder.setTiming(false);
+
+                        pipe.setHostLanguage(hostLanguage);
+                        builder.setPipelineConfiguration(pipe);
+
+                        ComplexContentOutputter out =
+                                ComplexContentOutputter.makeComplexContentReceiver(builder, expr.getValidationOptions());
+                        out.open();
+                        out.startDocument(ReceiverOption.NONE);
+
+                        TailCall tc = contentEval.process(out, context);
+                        dispatchTailCall(tc);
+                        out.endDocument();
+                        out.close();
+                        return builder.getCurrentRoot();
+                    } catch (XPathException e) {
+                        e.maybeSetLocation(expr.getLocation());
+                        e.maybeSetContext(context);
+                        throw e;
+                    }
+                };
+            }
+        }
     }
 }
 

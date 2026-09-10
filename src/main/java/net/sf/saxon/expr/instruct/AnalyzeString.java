@@ -366,6 +366,11 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         RegexIterator iter = getRegexIterator(context);
+        processInput(iter, output, context);
+        return null;
+    }
+
+    private void processInput(RegexIterator iter, Outputter output, XPathContext context) throws XPathException {
         XPathContextMajor c2 = context.newContext();
         c2.setOrigin(this);
         FocusIterator focusIter = c2.trackFocus(iter);
@@ -387,7 +392,6 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         }
 
         pipe.setXPathContext(context);
-        return null;
 
     }
 

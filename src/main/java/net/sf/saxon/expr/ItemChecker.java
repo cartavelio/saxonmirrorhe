@@ -477,10 +477,7 @@ public final class ItemChecker extends UnaryExpression {
             Expression arg = exp.getBaseExpression();
             ItemEvaluator argEval = Elaborator.makeElaborator(arg).elaborateForItem();
 
-            return context -> {
-                Item item = argEval.eval(context);
-                return exp.checkItem(item, context);
-            };
+            return context -> exp.checkItem(argEval.eval(context), context);
         }
 
         // TODO: push-mode checking

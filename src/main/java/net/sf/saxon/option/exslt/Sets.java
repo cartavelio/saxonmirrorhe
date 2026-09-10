@@ -36,7 +36,7 @@ public abstract class Sets {
      */
 
     public static SequenceIterator intersection(SequenceIterator p1, SequenceIterator p2) throws XPathException {
-        return new IntersectionEnumeration(p1, p2, GlobalOrderComparer.getInstance());
+        return new IntersectionIterator(p1, p2, GlobalOrderComparer.getInstance());
     }
 
     /**
@@ -49,7 +49,7 @@ public abstract class Sets {
      */
 
     public static SequenceIterator difference(SequenceIterator p1, SequenceIterator p2) throws XPathException {
-        return new DifferenceEnumeration(p1, p2, GlobalOrderComparer.getInstance());
+        return new DifferenceIterator(p1, p2, GlobalOrderComparer.getInstance());
     }
 
     /**
@@ -64,7 +64,7 @@ public abstract class Sets {
 
     public static boolean hasSameNode(SequenceIterator p1, SequenceIterator p2) throws XPathException {
         SequenceIterator intersection =
-                new IntersectionEnumeration(p1, p2, GlobalOrderComparer.getInstance());
+                new IntersectionIterator(p1, p2, GlobalOrderComparer.getInstance());
         return intersection.next() != null;
     }
 

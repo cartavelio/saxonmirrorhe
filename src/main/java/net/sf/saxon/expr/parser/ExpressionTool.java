@@ -1850,6 +1850,7 @@ public class ExpressionTool {
                 return true;
             }
             Operand o = findOperand(parent, child);
+            assert o != null;
             if (o.getUsage() != OperandUsage.TRANSMISSION) {
                 return false;
             }

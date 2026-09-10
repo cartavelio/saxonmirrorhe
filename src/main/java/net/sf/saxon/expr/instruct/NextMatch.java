@@ -13,6 +13,8 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
@@ -238,6 +240,11 @@ public class NextMatch extends ApplyNextMatchingTemplate {
     @Override
     public String getStreamerName() {
         return "NextMatch";
+    }
+
+
+    public Elaborator getElaborator() {
+        return new FallbackElaborator();
     }
 
 

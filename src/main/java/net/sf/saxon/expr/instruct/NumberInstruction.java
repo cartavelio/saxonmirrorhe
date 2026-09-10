@@ -8,6 +8,10 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -24,6 +28,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -226,42 +231,52 @@ public class NumberInstruction extends Expression {
         return this;
     }
 
+    /**
+     * Compute the required node number as a sequence of integers
+     * @param context supplies the context for evaluation
+     * @return a SequenceIterator of {@link IntegerValue} values
+     * @throws XPathException if a failure occurs
+     */
+
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        List<AtomicValue> vec = new ArrayList<>(1);
         NodeInfo source = (NodeInfo) selectOp.getChildExpression().evaluateItem(context);
+        return iterateSource(source, context);
+    }
 
+    private SequenceIterator iterateSource(NodeInfo source, XPathContext context) throws XPathException {
+        List<AtomicValue> numbers = new ArrayList<>(1);
         switch (level) {
             case SIMPLE: {
                 long value = Navigator.getNumberSimple(source, context);
                 if (value != 0) {
-                    vec.add(Int64Value.makeIntegerValue(value));
+                    numbers.add(Int64Value.makeIntegerValue(value));
                 }
                 break;
             }
             case SINGLE: {
                 long value = Navigator.getNumberSingle(source, getCount(), getFrom(), context);
                 if (value != 0) {
-                    vec.add(Int64Value.makeIntegerValue(value));
+                    numbers.add(Int64Value.makeIntegerValue(value));
                 }
                 break;
             }
             case ANY: {
                 long value = Navigator.getNumberAny(this, source, getCount(), getFrom(), context, hasVariablesInPatterns);
                 if (value != 0) {
-                    vec.add(Int64Value.makeIntegerValue(value));
+                    numbers.add(Int64Value.makeIntegerValue(value));
                 }
                 break;
             }
             case MULTI: {
                 for (long n : Navigator.getNumberMulti(source, getCount(), getFrom(), context)) {
-                    vec.add(Int64Value.makeIntegerValue(n));
+                    numbers.add(Int64Value.makeIntegerValue(n));
                 }
                 break;
             }
         }
 
-        return new ListIterator.Of<>(vec);
+        return new ListIterator.Of<>(numbers);
     }
 
     @Override
@@ -289,6 +304,28 @@ public class NumberInstruction extends Expression {
             getFrom().export(out);
         }
         out.endElement();
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new NumberInstructionElaborator();
+    }
+
+    private static class NumberInstructionElaborator extends PullElaborator {
+        @Override
+        public PullEvaluator elaborateForPull() {
+            NumberInstruction expr = (NumberInstruction) getExpression();
+            ItemEvaluator sourceEval = Elaborator.makeElaborator(expr.selectOp.getChildExpression()).elaborateForItem();
+            return context -> {
+                NodeInfo source = (NodeInfo)sourceEval.eval(context);
+                return expr.iterateSource(source, context);
+            };
+        }
     }
 }
 

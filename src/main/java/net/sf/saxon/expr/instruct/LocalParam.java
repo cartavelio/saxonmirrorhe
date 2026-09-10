@@ -699,5 +699,8 @@ public final class LocalParam extends Instruction implements LocalBinding {
     public boolean isIndexedVariable() {
         return false;
     }
+
+
+
 }
 

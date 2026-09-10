@@ -7,11 +7,12 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -519,7 +520,14 @@ public final class CardinalityChecker extends UnaryExpression {
             return context -> exp.checkCardinality(argEval.eval(context), context);
         }
 
-        // TODO: push-mode checking
+        @Override
+        public PushEvaluator elaborateForPush() {
+            CardinalityChecker expr = (CardinalityChecker) getExpression();
+            return (output, context) -> {
+                expr.process(output, context);
+                return null;
+            };
+        }
     }
 }
 

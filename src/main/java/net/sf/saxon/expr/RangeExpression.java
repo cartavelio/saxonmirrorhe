@@ -7,6 +7,10 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
@@ -404,6 +408,28 @@ public class RangeExpression extends Expression {
         IntegerValue av2 = (IntegerValue) getStepExpression().evaluateItem(context);
         IntegerValue av3 = (IntegerValue) getEndExpression().evaluateItem(context);
         return AscendingRangeIterator.makeRangeIterator(av1, av2, av3);
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new RangeElaborator();
+    }
+
+    public static class RangeElaborator extends PullElaborator {
+        @Override
+        public PullEvaluator elaborateForPull() {
+            RangeExpression expr = (RangeExpression) getExpression();
+            ItemEvaluator iv1 = Elaborator.makeElaborator(expr.getStartExpression()).elaborateForItem();
+            ItemEvaluator iv2 = Elaborator.makeElaborator(expr.getStepExpression()).elaborateForItem();
+            ItemEvaluator iv3 = Elaborator.makeElaborator(expr.getEndExpression()).elaborateForItem();
+            return (context) -> {
+                IntegerValue av1 = (IntegerValue) iv1.eval(context);
+                IntegerValue av2 = (IntegerValue) iv2.eval(context);
+                IntegerValue av3 = (IntegerValue) iv3.eval(context);
+                return AscendingRangeIterator.makeRangeIterator(av1, av2, av3);
+            };
+        }
+
     }
 
 }

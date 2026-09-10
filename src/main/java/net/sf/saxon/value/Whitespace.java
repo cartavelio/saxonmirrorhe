@@ -118,7 +118,13 @@ public class Whitespace {
 
     public static UnicodeString removeLeadingWhitespace(UnicodeString value) {
         long start = trimmedStart(value);
-        return start < 0 ? EmptyUnicodeString.getInstance() : value.substring(start);
+        if (start == 0) {
+            return value;
+        } else if (start < 0) {
+            return EmptyUnicodeString.getInstance();
+        } else {
+            return value.substring(start);
+        }
     }
 
     /**

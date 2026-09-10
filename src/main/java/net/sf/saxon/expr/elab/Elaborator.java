@@ -12,7 +12,7 @@ import net.sf.saxon.str.UnicodeString;
  * This class is at the heart of the mechanism for elaborating expressions.
  *
  * <p>This mechanism evaluates expressions in two stages. The first stage (the elaboration stage),
- * converts the expression to a lambda expression, specifically a function of the context that can
+ * converts the expression to a lambda function, specifically a function of the context that can
  * be called to produce the expression result. The second stage invokes this function (supplying
  * the context as an argument) to generate the result.</p>
  *
@@ -94,7 +94,8 @@ public abstract class Elaborator {
      * a {@link Item}. This must only be called for expressions whose result
      * has cardinality zero or one.
      *
-     * @return an evaluator for the expression that returns an {@link Item}.
+     * @return an evaluator for the expression that returns an {@link Item}, or
+     * null to represent an empty sequence.
      */
 
     public abstract ItemEvaluator elaborateForItem();
