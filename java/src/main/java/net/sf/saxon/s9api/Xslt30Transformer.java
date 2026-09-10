@@ -596,7 +596,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
         PreparedStylesheet pss = (PreparedStylesheet) controller.getExecutable();
         Component f = pss.getComponent(fName);
         if (f == null) {
-            throw new XPathException("No public function with name " + function.getClarkName() +
+            throw new XPathException("No public function with name " + function.getEQName() +
                                              " and arity " + arguments.length + " has been declared in the stylesheet", "XTDE0041");
         } else if (f.getVisibility() != Visibility.FINAL && f.getVisibility() != Visibility.PUBLIC) {
             throw new XPathException("Cannot invoke " + fName + " externally, because it is not public", "XTDE0041");
