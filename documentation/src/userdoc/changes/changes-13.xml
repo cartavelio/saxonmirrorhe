@@ -639,6 +639,8 @@ TODO: rethink redefines and override
               <ul>
                   <li><p>In XQuery, forwards references to named item type declarations are not allowed.</p></li>
                   <li><p>In XQuery, self-references within named item type declarations are not allowed.</p></li>
+                  <li><p>In consequence, the declared result type of the function <code>fn:random-number-generator</code>
+                          is an approximation to the type defined in the specification.</p></li>
               </ul>
             </li>
             <li><p>PR1355, PR1708 - Named record types in XSLT (xsl:record-type) and XQuery</p></li>
