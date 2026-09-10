@@ -752,7 +752,7 @@ public class Transform {
                     request.baseUri = cwd.toASCIIString();
                     request.uri = cwd.resolve(styleFileName).toString();
                     request.nature = ResourceRequest.XSLT_NATURE;
-                    request.purpose = "transformation";
+                    request.purpose = ResourceRequest.ANY_PURPOSE;
                     styleSource = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
                 } else if (styleFileName.equals("-")) {
                     // take input from stdin

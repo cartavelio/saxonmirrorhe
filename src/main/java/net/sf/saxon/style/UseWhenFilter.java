@@ -251,7 +251,7 @@ public class UseWhenFilter extends ProxyReceiver {
             request.baseUri = baseUriStr;
             request.uri = key.getAbsoluteURI();
             request.nature = ResourceRequest.XSLT_NATURE;
-            request.purpose = "stylesheet module";
+            request.purpose = ResourceRequest.ANY_PURPOSE;
             Source source = request.resolve(resolver,
                                             config.getResourceResolver(),
                                             new DirectResourceResolver(config));

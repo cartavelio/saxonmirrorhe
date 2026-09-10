@@ -50,7 +50,7 @@ public class EntityResolverWrappingResourceResolver implements EntityResolver2 {
         request.publicId = publicId;
         request.uri = systemId;
         request.nature = ResourceRequest.EXTERNAL_ENTITY_NATURE;
-        request.purpose = "resolveEntity()";
+        request.purpose = ResourceRequest.ANY_PURPOSE;
         Source resolved;
         try {
             resolved = resourceResolver.resolve(request);

@@ -178,7 +178,7 @@ public class PIGrabber extends ProxyReceiver {
         ResourceRequest request = new ResourceRequest();
         request.baseUri = baseURI;
         request.nature = ResourceRequest.XSLT_NATURE;
-        request.purpose = "transformation";
+        request.purpose = ResourceRequest.ANY_PURPOSE;
         for (int i = 0; i < stylesheets.size(); i++) {
             String href = stylesheets.get(i);
             request.relativeUri = href;

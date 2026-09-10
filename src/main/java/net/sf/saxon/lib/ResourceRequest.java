@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
  */
 
 public class ResourceRequest {
-
     public static final String TEXT_NATURE = "https://www.iana.org/assignments/media-types/text/plain";
     public static final String XQUERY_NATURE = "https://www.iana.org/assignments/media-types/application/xquery";
     public static final String XSLT_NATURE = NamespaceConstant.XSLT;
@@ -27,6 +26,14 @@ public class ResourceRequest {
     public static final String DTD_NATURE = "https://www.iana.org/assignments/media-types/application/xml-dtd";
     public static final String EXTERNAL_ENTITY_NATURE = "https://www.iana.org/assignments/media-types/application/xml-external-parsed-entity";
 
+    // The whole nature/purpose thing never got fleshed out as completely as it might have. For things
+    // where there isn't a defined purpose, just use any purpose...the catalog lookup allows any
+    // value to match null.
+    public static final String ANY_PURPOSE = null;
+
+    public static final String SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema";
+    public static final String VALIDATION_PURPOSE = "http://www.rddl.org/purposes#validation";
+    public static final String ANY_NATURE = null;
 
     /**
      *  The URI to be dereferenced. If the request was for a relative URI reference, this will

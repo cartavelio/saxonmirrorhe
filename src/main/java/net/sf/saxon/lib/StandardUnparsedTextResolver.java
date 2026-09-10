@@ -80,7 +80,7 @@ public class StandardUnparsedTextResolver
         ResourceRequest rr = new ResourceRequest();
         rr.uri = absoluteURI.toString();
         rr.nature = ResourceRequest.TEXT_NATURE;
-        rr.purpose = "fn:unparsed-text";
+        rr.purpose = ResourceRequest.ANY_PURPOSE;
         Source resolved = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
         if (resolved == null) {
             throw new XPathException("unparsed-text(): failed to resolve URI " + absoluteURI);
