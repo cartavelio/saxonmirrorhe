@@ -51,7 +51,6 @@ ext_modules = [Extension(
                          extra_link_args = extra_link_args,
                        libraries=['@@libpath@@saxon-@@edition@@c-@@VERSION@@']
                         ),
-                    "python_saxon/nodekind.py",
                 ]
 setup(
     name='saxonc@@edition@@',
