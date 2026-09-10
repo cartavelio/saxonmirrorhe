@@ -51,7 +51,7 @@ namespace Saxon.Ejava.lang
         }
         
         public static long currentTimeMillis() {
-            return nanoTime() / 1_000_000L;
+            return Sys.DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
 
         public static SysCollGen.IDictionary<string,string> getenv() {

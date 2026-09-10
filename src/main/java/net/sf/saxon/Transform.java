@@ -622,7 +622,6 @@ public class Transform {
 
             // Check for a license if appropriate
 
-            //#if CSHARP==false
             if (!config.getEditionCode().equals("HE")) {
                 String lic = options.getOptionValue("license");
                 if (lic == null || "on".equals(lic)) {
@@ -631,7 +630,6 @@ public class Transform {
                     config.disableLicensing();
                 }
             }
-            //#endif
 
             //compilerInfo.setRecoveryPolicy(config.getRecoveryPolicy());
 
