@@ -140,10 +140,19 @@ dependencies {
     downloadReleaseBundled("org.nineml:coffeegrinder:${findProperty("ninemlVersion")}") {
         exclude("net.sf.saxon", "Saxon-HE")
         exclude("com.saxonica", "Saxon-EE")
+        // I don't think these should be in the dependencies for CoffeeFilter, but
+        // https://discuss.gradle.org/t/how-do-i-track-down-a-dependency/52035
+        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        exclude("org.jetbrains", "annotations")
     }
     downloadReleaseBundled("org.nineml:coffeefilter:${findProperty("ninemlVersion")}") {
         exclude("net.sf.saxon", "Saxon-HE")
         exclude("com.saxonica", "Saxon-EE")
+        exclude("org.relaxng", "jing")
+        // I don't think these should be in the dependencies for CoffeeFilter, but
+        // https://discuss.gradle.org/t/how-do-i-track-down-a-dependency/52035
+        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        exclude("org.jetbrains", "annotations")
     }
 
     editionCompileAndTestOnly("xom:xom:1.3.5")
