@@ -26,10 +26,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.z.IntHashMap;
-import net.sf.saxon.z.IntHashSet;
-import net.sf.saxon.z.IntSet;
-import net.sf.saxon.z.IntToIntHashMap;
+import net.sf.saxon.z.*;
 
 import javax.xml.transform.OutputKeys;
 import java.util.*;
@@ -51,6 +48,8 @@ public class ElementsToMaps extends SystemFunction {
                                  SequenceType.SINGLE_STRING, new StringValue("@"));
         options.addAllowedOption("uniform",
                                  SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        options.addAllowedOption("return-plan",
+                                 SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("name-format",
                                  SequenceType.one(EnumerationUnionType.of("local", "lexical", "eqname", "default")));
         options.addAllowedOption("layouts",
@@ -64,6 +63,20 @@ public class ElementsToMaps extends SystemFunction {
     @CSharpSimpleEnum
     public enum NameFormat {LEXICAL, LOCAL, DEFAULT, EQNAME}
 
+    public enum Layout {EMPTY, EMPTY_PLUS, SIMPLE, SIMPLE_PLUS, LIST, LIST_PLUS, RECORD, SEQUENCE, MIXED, XML}
+
+    public class LayoutWithChildFingerprint {
+        public Layout layout;
+        public int childFingerprint;
+
+        public LayoutWithChildFingerprint(Layout layout) {
+            this.layout = layout;
+            this.childFingerprint = -1;
+        }
+    }
+
+
+
     /**
      * A bundle of context data that is passed down the recursive calls
      */
@@ -72,11 +85,12 @@ public class ElementsToMaps extends SystemFunction {
         public Configuration config;
         public Schema schema;
         public IntToIntHashMap uniformityData = null;
-        public IntHashMap<String> layoutMap = new IntHashMap<>();
+        public IntHashMap<Layout> layoutMap = new IntHashMap<>();
         public Set<String> disabledLayouts = Collections.emptySet();
         public NameFormat nameFormat = NameFormat.DEFAULT;
         public String attributeMarker = "@";
         public Stack<StructuredQName> elementNameStack = new Stack<>();
+        public boolean returnPlan = false;
 
         /**
          * Construct a string used as a map key in the output, to represent an element
@@ -169,10 +183,12 @@ public class ElementsToMaps extends SystemFunction {
         // Process the supplied options
         Map<String, GroundedValue> checkedOptions;
         boolean uniform = false;
+        boolean returnPlan = false;
         if (arguments.length > 1) {
             MapItem suppliedOptions = (MapItem) arguments[1].head();
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             uniform = ((BooleanValue) checkedOptions.get("uniform")).getBooleanValue();
+            returnPlan = ((BooleanValue) checkedOptions.get("return-plan")).getBooleanValue();
             cc.attributeMarker = ((StringValue) checkedOptions.get("attribute-marker")).getStringValue();
             GroundedValue formatValue = checkedOptions.get("name-format");
             if (formatValue != null) {
@@ -207,6 +223,20 @@ public class ElementsToMaps extends SystemFunction {
         if (uniform) {
             val = val.materialize();
             cc.uniformityData = gatherUniformityData((GroundedValue)val);
+            if (returnPlan) {
+                NamePool pool = context.getNamePool();
+                GeneralMapBuilder mb = new GeneralMapBuilder();
+                IntIterator iter = cc.uniformityData.keyIterator();
+                while (iter.hasNext()) {
+                    int fp = iter.next();
+                    StructuredQName name = pool.getStructuredQName(fp);
+                    String layout = getInferredLayout(cc, cc.uniformityData.get(fp));
+                    mb.put(new QNameValue(name, BuiltInAtomicType.QNAME),
+                           new StringValue(layout));
+                }
+                return mb.getCompletedMapConfidently();
+            }
+            //System.err.println(showUniformityData(cc.uniformityData, context.getNamePool()));
         }
 
         SequenceIterator in = val.iterate();
@@ -226,7 +256,34 @@ public class ElementsToMaps extends SystemFunction {
         for (KeyValuePair pair : val.keyValuePairs()) {
              StructuredQName qn = ((QNameValue)pair.key).getStructuredQName();
              int fp = config.getNamePool().allocateFingerprint(qn.getNamespaceUri(), qn.getLocalPart());
-             cc.layoutMap.put(fp, ((StringValue)pair.value).getStringValue());
+             cc.layoutMap.put(fp, layoutOf(((StringValue)pair.value).getStringValue()));
+        }
+    }
+
+    private Layout layoutOf(String name) {
+        switch (name) {
+            case "empty":
+                return Layout.EMPTY;
+            case "empty-plus":
+                return Layout.EMPTY_PLUS;
+            case "simple":
+                return Layout.SIMPLE;
+            case "simple-plus":
+                return Layout.SIMPLE_PLUS;
+            case "list":
+                return Layout.LIST;
+            case "list-plus":
+                return Layout.LIST_PLUS;
+            case "record":
+                return Layout.RECORD;
+            case "sequence":
+                return Layout.SEQUENCE;
+            case "mixed":
+                return Layout.MIXED;
+            case "xml":
+                return Layout.XML;
+            default:
+                throw new IllegalArgumentException(name);
         }
     }
 
@@ -275,20 +332,14 @@ public class ElementsToMaps extends SystemFunction {
     /**
      * Property indicating that there are at least two children of an element having different names
      */
-
     private final static int HAS_DIVERSE_CHILD_ELEMENTS = 1 << 26;
 
     /**
-     * Property indicating that all the element node children of an element have the same name, and that
-     * there are at least two such children
+     * Property indicating that the element has at least two element children with the same name
      */
     private final static int HAS_REPEATED_CHILD_ELEMENTS = 1 << 25;
 
-    /**
-     * Property indicating that all the element node children of an element have different names
-     */
 
-    private final static int HAS_UNIQUE_CHILD_ELEMENTS = 1 << 24;
 
     /**
      * Get the properties of an element node, and add the details to
@@ -326,12 +377,12 @@ public class ElementsToMaps extends SystemFunction {
         if ((properties & HAS_ATTRIBUTES) == 0 && element.attributes().size() > 0) {
             properties |= HAS_ATTRIBUTES;
         }
-        if ((properties & (HAS_CHILD_ELEMENTS | HAS_NON_WHITESPACE_TEXT_NODES | HAS_DIVERSE_CHILD_ELEMENTS)) == 0
-                && element.hasChildNodes()) {
-            int firstChild = -1;
-            int countChildElements = 0;
-            boolean hasDuplicates = false;
-            IntSet fingerprints = new IntHashSet();
+        if (element.hasChildNodes()) {
+            int knownChild = properties & NamePool.FP_MASK;
+            int numberOfElementChildren = 0;
+            boolean hasRepeatedChildren = false; // True if there are two or more child elements with the same name
+            boolean hasDiverseChildren = false; // True if there are two or more children with different names
+            IntSet fingerprints = new IntHashSet(); // Fingerprints of all the element children
             for (NodeInfo child : element.children()) {
                 if (child.getNodeKind() == Type.TEXT) {
                     if (Whitespace.isAllWhite(child.getUnicodeStringValue())) {
@@ -340,36 +391,33 @@ public class ElementsToMaps extends SystemFunction {
                         properties |= HAS_NON_WHITESPACE_TEXT_NODES;
                     }
                 } else if (child.getNodeKind() == Type.ELEMENT) {
+                    numberOfElementChildren++;
                     int childFingerprint = child.getFingerprint();
                     if (fingerprints.contains(childFingerprint)) {
-                        hasDuplicates = true;
-                    }
-                    countChildElements++;
-                    properties |= HAS_CHILD_ELEMENTS;
-                    fingerprints.add(childFingerprint);
-                    if (firstChild != -1) {
-                        if (firstChild != childFingerprint) {
-                            properties |= HAS_DIVERSE_CHILD_ELEMENTS;
-                        } else {
-                            properties |= HAS_REPEATED_CHILD_ELEMENTS;
-                        }
+                        hasRepeatedChildren = true;
                     } else {
-                        firstChild = child.getFingerprint();
+                        if (!fingerprints.isEmpty()) {
+                            hasDiverseChildren = true;
+                        }
+                        fingerprints.add(childFingerprint);
+                    }
+                    if (knownChild != 0 && knownChild != childFingerprint) {
+                        hasDiverseChildren = true;
+                    }
+                    if (knownChild == 0) {
+                        properties |= childFingerprint;
                     }
                 }
             }
-            if (firstChild != -1 && ((properties & HAS_DIVERSE_CHILD_ELEMENTS) == 0)) {
-                if ((properties & NamePool.FP_MASK) == 0) {
-                    properties |= (firstChild & NamePool.FP_MASK);
-                } else {
+
+            if (numberOfElementChildren > 0) {
+                properties |= HAS_CHILD_ELEMENTS;
+                if (hasDiverseChildren) {
                     properties |= HAS_DIVERSE_CHILD_ELEMENTS;
                 }
-            }
-            if (countChildElements == 1) {
-                properties |= HAS_DIVERSE_CHILD_ELEMENTS;  // there's only one, so they are all different
-            }
-            if (!hasDuplicates) {
-                properties |= HAS_UNIQUE_CHILD_ELEMENTS;
+                if (hasRepeatedChildren) {
+                    properties |= HAS_REPEATED_CHILD_ELEMENTS;
+                }
             }
         }
         return properties;
@@ -377,40 +425,9 @@ public class ElementsToMaps extends SystemFunction {
 
     private MapItem processElement(NodeInfo element, ConversionContext cc) throws XPathException {
         // First see if an explicit layout has been chosen for this element in the supplied options
-        String explicitLayout = cc.layoutMap.get(element.getFingerprint());
+        Layout explicitLayout = cc.layoutMap.get(element.getFingerprint());
         if (explicitLayout != null) {
-            switch (explicitLayout) {
-                case "empty":
-                    return makeEmptyElementContent(element, cc);
-                case "empty-plus":
-                    return makeEmptyPlusElementContent(element, cc);
-                case "simple":
-                    return makeSimpleElementContent(element, cc);
-                case "simple-plus":
-                    return makeSimplePlusElementContent(element, cc);
-                case "list":
-                    if (isSuitableAsList(element)) {
-                        return makeListElementContent(element, cc);
-                    } else {
-                        return makeMixedElementContent(element, cc, false);
-                    }
-                case "list-plus":
-                    if (isSuitableAsList(element)) {
-                        return makeListPlusElementContent(element, cc, -1);
-                    } else {
-                        return makeMixedElementContent(element, cc, false);
-                    }
-                case "record":
-                    return makeRecordElementContent(element, cc);
-                case "sequence":
-                    return makeMixedElementContent(element, cc, true);
-                case "mixed":
-                    return makeMixedElementContent(element, cc, false);
-                case "xml":
-                    return makeXmlElementContent(element, cc);
-                default:
-                    throw new XPathException("Invalid layout selected: " + explicitLayout, "XPTY0004");
-            }
+            return processElementWithLayout(element, cc, explicitLayout, "explicit", -1);
         } else {
             // If the element is schema-validated, use schema information
             SchemaType type = element.getSchemaType();
@@ -427,37 +444,18 @@ public class ElementsToMaps extends SystemFunction {
                 } else {
                     // Rule 7c
                     ComplexType cType = (ComplexType) type;
-                    String layout = cType.getPreferredJsonLayout(cc.schema, cc.disabledLayouts);
+                    LayoutWithChildFingerprint preferred = cType.getPreferredJsonLayout(cc.schema, cc.disabledLayouts);
                     String suffix = "";
                     int sep = layout.indexOf("/");
                     if (sep > 0) {
                         suffix = layout.substring(sep + 1);
                         layout = layout.substring(0, sep);
                     }
-                    switch (layout) {
-                        case "simple-plus":
-                            return makeSimplePlusElementContent(element, cc);
-                        case "empty":
-                            return makeEmptyElementContent(element, cc);
-                        case "empty-plus":
-                            return makeEmptyPlusElementContent(element, cc);
-                        case "list":
-                            return makeListElementContent(element, cc);
-                        case "list-plus":
-                            return makeListPlusElementContent(element, cc, Integer.parseInt(suffix));
-                        case "record":
-                            return makeRecordElementContent(element, cc);
-                        case "sequence":
-                            return makeSequenceElementContent(element, cc);
-                        case "mixed":
-                            return makeMixedElementContent(element, cc, false);
-                        default:
-                            throw new IllegalStateException();
-
-                    }
+                    return processElementWithLayout(element, cc, layout, "schema", suffix.isEmpty() ? -1 : Integer.parseInt(suffix));
                 }
             } else {
                 int properties;
+
                 if (cc.uniformityData != null) {
                     assert cc.uniformityData.contains(element.getFingerprint());
                     properties = cc.uniformityData.get(element.getFingerprint());
@@ -465,50 +463,104 @@ public class ElementsToMaps extends SystemFunction {
                     properties = getElementProperties(element, 0);
                 }
 
-
-                if ((properties & (HAS_CHILD_ELEMENTS | HAS_WHITESPACE_TEXT_NODES | HAS_NON_WHITESPACE_TEXT_NODES)) == 0) {
-                    // Rule 6a
-                    if ((properties & HAS_ATTRIBUTES) == 0 && !cc.disabledLayouts.contains("empty")) {
-                        return makeEmptyElementContent(element, cc);
-                    }
-                    if (!cc.disabledLayouts.contains("empty-plus")) {
-                        return makeEmptyPlusElementContent(element, cc);
-                    }
+                String layout = getInferredLayout(cc, properties);
+                String suffix = "";
+                int sep = layout.indexOf("/");
+                if (sep > 0) {
+                    suffix = layout.substring(sep + 1);
+                    layout = layout.substring(0, sep);
                 }
-                if ((properties & HAS_CHILD_ELEMENTS) == 0) {
-                    // Rule 6b
-                    if ((properties & HAS_ATTRIBUTES) == 0 && !cc.disabledLayouts.contains("simple")) {
-                        return makeSimpleElementContent(element, cc);
-                    }
-                    if (!cc.disabledLayouts.contains("simple-plus")) {
-                        return makeSimplePlusElementContent(element, cc);
-                    }
-                }
-                if ((properties & HAS_NON_WHITESPACE_TEXT_NODES) == 0) {
-                    // Rule 6c
-                    if ((properties & HAS_DIVERSE_CHILD_ELEMENTS) == 0
-                            && ((properties & HAS_REPEATED_CHILD_ELEMENTS) != 0)) {
-                        // Rule 6c(i)
-                        if ((properties & HAS_ATTRIBUTES) == 0 && !cc.disabledLayouts.contains("list")) {
-                            return makeListElementContent(element, cc);
-                        }
-                        if (!cc.disabledLayouts.contains("list-plus")) {
-                            return makeListPlusElementContent(element, cc, properties & NamePool.FP_MASK);
-                        }
-                    }
-                    if ((properties & HAS_UNIQUE_CHILD_ELEMENTS) != 0 && !cc.disabledLayouts.contains("record")) {
-                        // Rule 6c(ii)
-                        return makeRecordElementContent(element, cc);
-                    }
-                    if (!cc.disabledLayouts.contains("sequence")) {
-                        // Rule 6c(iii)
-                        return makeSequenceElementContent(element, cc);
-                    }
-                }
-                // Rule 6d
-                return makeMixedElementContent(element, cc, false);
+                return processElementWithLayout(element, cc, layout, "inferred", suffix.isEmpty() ? -1 : Integer.parseInt(suffix));
 
             }
+        }
+    }
+
+    private LayoutWithChildFingerprint getInferredLayout(ConversionContext cc, int properties)  {
+        boolean hasAttributes = (properties & HAS_ATTRIBUTES) != 0;
+        boolean hasChildElements = (properties & HAS_CHILD_ELEMENTS) != 0;
+        boolean hasWhitespaceTextNodes = (properties & HAS_WHITESPACE_TEXT_NODES) != 0;
+        boolean hasNonWhitespaceTextNodes = (properties & HAS_NON_WHITESPACE_TEXT_NODES) != 0;
+        boolean hasDiverseChildElements = (properties & HAS_DIVERSE_CHILD_ELEMENTS) != 0;
+        boolean hasRepeatedChildElements = (properties & HAS_REPEATED_CHILD_ELEMENTS) != 0;
+
+        if (!(hasChildElements || hasWhitespaceTextNodes || hasNonWhitespaceTextNodes)) {
+            // Rule 6a
+            if (!hasAttributes && !cc.disabledLayouts.contains("empty")) {
+                return new LayoutWithChildFingerprint(Layout.EMPTY);
+            }
+            if (!cc.disabledLayouts.contains("empty-plus")) {
+                return new LayoutWithChildFingerprint(Layout.EMPTY_PLUS);
+            }
+        }
+        if (!hasChildElements) {
+            // Rule 6b
+            if (!hasAttributes && !cc.disabledLayouts.contains("simple")) {
+                return new LayoutWithChildFingerprint(Layout.SIMPLE);
+            }
+            if (!cc.disabledLayouts.contains("simple-plus")) {
+                return new LayoutWithChildFingerprint(Layout.SIMPLE_PLUS);
+            }
+        }
+        if (!hasNonWhitespaceTextNodes) {
+            // Rule 6c
+            if (hasRepeatedChildElements && !hasDiverseChildElements) {
+                // Rule 6c(i)
+                if (!hasAttributes && !cc.disabledLayouts.contains("list")) {
+                    return new LayoutWithChildFingerprint(Layout.LIST);;
+                }
+                if (!cc.disabledLayouts.contains("list-plus")) {
+                    int childFp = (properties & NamePool.FP_MASK);
+                    if (childFp != 0) {
+                        new LayoutWithChildFingerprint(Layout.LIST_PLUS, childFp);
+                    } else {
+                        new LayoutWithChildFingerprint(Layout.LIST_PLUS);
+                    }
+                }
+            }
+            if (!hasRepeatedChildElements && !cc.disabledLayouts.contains("record")) {
+                // Rule 6c(ii)
+                return "record";
+            }
+            if (!cc.disabledLayouts.contains("sequence")) {
+                // Rule 6c(iii)
+                return "sequence";
+            }
+        }
+        // Rule 6d
+        return "mixed";
+    }
+
+    private MapItem processElementWithLayout(NodeInfo element, ConversionContext cc, Layout explicitLayout, String reason, int childFingerprint) throws XPathException {
+        switch (explicitLayout) {
+            case EMPTY:
+                return makeEmptyElementContent(element, cc);
+            case EMPTY_PLUS:
+                return makeEmptyPlusElementContent(element, cc);
+            case SIMPLE:
+                return makeSimpleElementContent(element, cc);
+            case SIMPLE_PLUS:
+                return makeSimplePlusElementContent(element, cc);
+            case LIST:
+                if (!reason.equals("schema") && !isSuitableAsList(element)) {
+                    return makeMixedElementContent(element, cc, false);
+                }
+                return makeListElementContent(element, cc);
+            case LIST_PLUS:
+                if (!reason.equals("schema") && !isSuitableAsList(element)) {
+                    return makeMixedElementContent(element, cc, false);
+                }
+                return makeListPlusElementContent(element, cc, childFingerprint);
+            case RECORD:
+                return makeRecordElementContent(element, cc);
+            case SEQUENCE:
+                return makeMixedElementContent(element, cc, true);
+            case MIXED:
+                return makeMixedElementContent(element, cc, false);
+            case XML:
+                return makeXmlElementContent(element, cc);
+            default:
+                throw new XPathException("Invalid layout selected: " + explicitLayout, "XPTY0004");
         }
     }
 
@@ -712,7 +764,7 @@ public class ElementsToMaps extends SystemFunction {
         }
         cc.elementNameStack.pop();
         return new SingleEntryMap(new StringValue(cc.makeName(element)),
-                                  innerMap.getCompletedMapConfidently());
+                                  innerMap.getCompletedMap());
     }
 
     private MapItem makeSequenceElementContent(NodeInfo element, ConversionContext cc) throws XPathException {
@@ -780,6 +832,42 @@ public class ElementsToMaps extends SystemFunction {
         params.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         QueryResult.serialize(element, result, params);
         return new SingleEntryMap(new StringValue(cc.makeName(element)), new StringValue(builder.toUnicodeString()));
+    }
+
+    private String showProperties(int properties, NamePool pool) {
+        String r = "";
+        if ((properties & HAS_ATTRIBUTES) != 0) {
+            r += "A";
+        }
+        if ((properties & HAS_CHILD_ELEMENTS) != 0) {
+            r += "C";
+        }
+        if ((properties & HAS_NON_WHITESPACE_TEXT_NODES) != 0) {
+            r += "T";
+        }
+        if ((properties & HAS_WHITESPACE_TEXT_NODES) != 0) {
+            r += "W";
+        }
+        if ((properties & HAS_DIVERSE_CHILD_ELEMENTS) != 0) {
+            r += "D";
+        }
+        if ((properties & HAS_REPEATED_CHILD_ELEMENTS) != 0) {
+            r += "R:" + pool.getEQName(properties & NamePool.FP_MASK);
+        }
+        return r;
+    }
+
+    private String showUniformityData(IntToIntHashMap uniformityData, NamePool pool) {
+        StringBuilder sb = new StringBuilder();
+        IntIterator keys = uniformityData.keyIterator();
+        while (keys.hasNext()) {
+            int fp = keys.next();
+            sb.append(pool.getEQName(fp))
+                    .append(":")
+                    .append(showProperties(uniformityData.get(fp), pool))
+                    .append("\n");
+        }
+        return sb.toString();
     }
 
 
