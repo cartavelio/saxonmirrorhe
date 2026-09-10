@@ -334,6 +334,20 @@ public class TestReflexion {
     }
 
     @Test
+    public void testNodeOverNodeInfo() {
+        try {
+            XQueryCompiler c = makeCompiler();
+            XQueryExecutable exec = c.compile(
+                    "this:isDomNode(<a id='23'/>)");
+            XdmValue val = exec.load().evaluate();
+            boolean result = ((XdmAtomicValue) val).getBooleanValue();
+            assertTrue(result);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testStringSplit() {
         try {
             Processor p = new Processor(true);

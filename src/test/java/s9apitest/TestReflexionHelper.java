@@ -1,6 +1,7 @@
 package s9apitest;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.dom.NodeOverNodeInfo;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.One;
@@ -12,6 +13,7 @@ import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.DecimalValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.IntegerValue;
+import org.w3c.dom.Node;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
@@ -159,6 +161,14 @@ public class TestReflexionHelper {
     public static int mapSize(Map<?, ?> map) {
         return map.size();
     }
+
+    public static boolean isDomNode(Node supplied) {
+        return supplied instanceof NodeOverNodeInfo
+                && supplied.getNodeName().equals("a")
+                && supplied.getAttributes().getNamedItem("id").getNodeValue().equals("23");
+    }
+
+
 
 
 }
