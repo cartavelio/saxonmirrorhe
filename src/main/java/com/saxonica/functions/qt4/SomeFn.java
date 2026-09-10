@@ -1,6 +1,7 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
@@ -34,49 +35,24 @@ public class SomeFn extends SystemFunction {
         SequenceIterator iter = arguments[0].iterate();
         if (predicate == null) {
             for (Item item; (item = iter.next()) != null; ) {
-                if (item instanceof BooleanValue) {
-                    if (((BooleanValue) item).getBooleanValue()) {
-                        iter.close();
-                        return BooleanValue.TRUE;
-                    }
-                } else {
-                    throw new XPathException("Items supplied to fn:some#1 must be of type xs:boolean", "XPTY0004").asTypeError();
+                boolean ebv = ExpressionTool.effectiveBooleanValue(item);
+                if (ebv) {
+                    iter.close();
+                    return BooleanValue.TRUE;
                 }
             }
             return BooleanValue.FALSE;
         } else {
-            switch (predicate.getArity()) {
-                case 0: {
-                    boolean condition = (((BooleanValue) dynamicCall(predicate, context).head()).getBooleanValue());
-                    boolean empty = iter.next() == null;
+            int pos = 0;
+            for (Item item; (item = iter.next()) != null; ) {
+                boolean condition = ExpressionTool.effectiveBooleanValue(
+                        dynamicCall(predicate, context, item, Int64Value.makeIntegerValue(++pos)).iterate());
+                if (condition) {
                     iter.close();
-                    return BooleanValue.get(condition && !empty);
+                    return BooleanValue.TRUE;
                 }
-                case 1: {
-                    for (Item item; (item = iter.next()) != null; ) {
-                        boolean condition = ((BooleanValue) dynamicCall(predicate, context, item).head()).getBooleanValue();
-                        if (condition) {
-                            iter.close();
-                            return BooleanValue.TRUE;
-                        }
-                    }
-                    return BooleanValue.FALSE;
-                }
-                case 2:
-                    int pos = 0;
-                    for (Item item; (item = iter.next()) != null; ) {
-                        boolean condition = ((BooleanValue) dynamicCall(
-                                predicate, context, item, Int64Value.makeIntegerValue(++pos)).head()).getBooleanValue();
-                        if (condition) {
-                            iter.close();
-                            return BooleanValue.TRUE;
-                        }
-                    }
-                    return BooleanValue.FALSE;
-                default:
-                    throw new XPathException("Unsupported arity " + predicate.getArity() + " in fn:some callback");
             }
-
+            return BooleanValue.FALSE;
         }
 
     }

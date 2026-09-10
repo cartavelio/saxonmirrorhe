@@ -229,7 +229,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("every", 2, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
-                .arg(1, predicate2, OPT, null));
+                .arg(1, predicate2ebv, OPT, null));
 
         register("expanded-QName", 1, e -> e.populate(ExpandedQNameFn::new, BuiltInAtomicType.STRING, OPT, 0)
                 .arg(0, BuiltInAtomicType.QNAME, OPT, null));
@@ -454,7 +454,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("some", 2, e -> e.populate(SomeFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
-                .arg(1, predicate2, OPT, null));
+                .arg(1, predicate2ebv, OPT, null));
 
         register("starts-with", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
