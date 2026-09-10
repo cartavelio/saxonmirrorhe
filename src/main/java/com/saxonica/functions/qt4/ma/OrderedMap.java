@@ -34,8 +34,12 @@ public class OrderedMap extends MapTypeMaintainer {
          */
         @Override
         public void put(AtomicValue key, GroundedValue value) {
+//            if (counter++ % 1000 == 0) {
+//                System.err.println("Put " + counter + " at size " + map.size());
+//            }
             map = map.put(key.asMapKey(), new KeyValuePair(key, value));
         }
+        private static int counter = 0;
 
         /**
          * During initial construction of the map, add a key-value pair where the key is a string

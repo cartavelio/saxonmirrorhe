@@ -55,7 +55,7 @@ public class DivideDecimals extends SystemFunction {
 
     }
 
-    @CSharpReplaceBody(code="return new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Divide(d1.getDecimalValue(), d2.getDecimalValue(), scale < 18 ? 18 :scale, Singulink.Numerics.RoundingMode.ToZero)).round(scale);")
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.BigDecimalUtils.DivideDecimals(d1, d2, scale);")
     private MapItem divide(DecimalValue d1, DecimalValue d2, int scale) throws XPathException {
         try {
             if (scale == 0) {
