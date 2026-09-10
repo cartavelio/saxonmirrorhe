@@ -250,7 +250,7 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
                         test_case_name = test_casei.get_attribute_value("name")
                         if (test_case_name_pattern is None or test_case_name_pattern.fullmatch(test_case_name)) and test_set_name not in exceptionList:
                             print("-s:" + test_set_name + " -t:" + test_case_name)
-                            run_test_case(test_case, xpathProcForEnv)
+                            run_test_case(test_set_name, test_case, xpathProcForEnv)
                     else:
                         print("Error test_case is not a node")
 
@@ -459,7 +459,7 @@ def get_named_parameters(proc: saxonc.PySaxonProcessor, xpath_proc: saxonc.PyXPa
         return params
 
 
-def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
+def run_test_case(test_set_name, test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
     global localEnvironments
     global successes
     global failures
@@ -571,10 +571,26 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
             exp = str(xpath_proc.evaluate("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)"))
 
+            if exp is not None and environment.proc.edition == "HE" and test_set_name == "app-spec-examples":
+                'Some tests in app-spec-examples do not have their dependencies tagged'
+                if "http://www.w3.org/2013/collation/UCA?lang=en;alternate=blanked;strength=primary" in exp:
+                    test_report.write_test_case_element(str(test_name), "notRun", "requires ICU")
+                    not_run += 1
+                    return
+
+                if "validate lax" in exp:
+                    test_report.write_test_case_element(str(test_name), "notRun", "requires schema-awareness")
+                    not_run += 1
+                    return
+                if "'fallback':function($s)" in exp:
+                    test_report.write_test_case_element(str(test_name), "notRun", "requires HOF")
+                    not_run += 1
+                    return
+
             if exp is not None:
                 if "XP" == spec.short_spec_name or "XT" == spec.short_spec_name:
                     testxpc = environment.xpath_proc
-                    testxpc.set_property("sa", "true")
+                    '''testxpc.set_property("sa", "true")'''
                     testxpc.set_language_version(spec.version)
                     testxpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
                     testxpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
@@ -644,7 +660,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         errorResult = ex
 
     assert_xpc = environment.proc.new_xpath_processor()
-    assert_xpc.set_property("sa", "true")
+    '''assert_xpc.set_property("sa", "true")'''
     assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
     assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
     assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")

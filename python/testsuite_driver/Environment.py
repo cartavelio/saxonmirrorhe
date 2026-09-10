@@ -78,15 +78,22 @@ class Environment:
         ...
         self.proc = saxonc.PySaxonProcessor(license=True)
 
-        self.schema_aware = True
+        self.need_license = self.proc.edition != "HE"
 
-        try:
-            if os.getenv("SAXON_LICENSE_DIR") is not None:
-                self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
-                                                   os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
-        except saxonc.PySaxonApiError as ex:
+
+        self.schema_aware = False
+
+        if(self.need_license):
+
+            try:
+                if os.getenv("SAXON_LICENSE_DIR") is not None:
+                    self.proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                                       os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
+            except saxonc.PySaxonApiError as ex:
+                self.schema_aware = False
+                print("*** unlicensed environment :" + str(ex))
+        else:
             self.schema_aware = False
-            print("*** unlicensed environment :" + str(ex))
 
         self.lang = None
         self.proc.set_configuration_property('http://saxon.sf.net/feature/optimizationLevel', optimizer_flags)
@@ -171,8 +178,8 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
 
         for decimal_format in decimal_formats:
             if spec.short_spec_name == "XP":
-                environment.usable = False
-                break
+                '''environment.usable = False
+                break'''
             format_name = decimal_format.get_node_value().get_attribute_value("name")
             if format_name is not None:
                 '''TODO fixup format_name as EQName'''
@@ -275,65 +282,73 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
     xsd_compiler = None
 
     try:
-        xsd_compiler = environment.proc.new_xsd_compiler()
+
 
         if schemas is not None:
-            print("schema found count=" + str(schemas.size))
-            for i in range(schemas.size):
-                schema = schemas.item_at(i).get_node_value()
-                role = schema.get_attribute_value("role")
-                xsd_version = schema.get_attribute_value("xsd-version")
 
-                if xsd_version is not None:
-                    # schema_validator.set_property("xsdversion", xsd_version)
-                    xsd_compiler.set_xsd_version(xsd_version)
-                else:
-                    # schema_validator.set_property("xsdversion", "1.0")
-                    xsd_compiler.set_xsd_version("1.0")
+            if environment.need_license and environment.proc.edition == "EE":
+                xsd_compiler = environment.proc.new_xsd_compiler()
+                print("schema found count=" + str(schemas.size))
+                for i in range(schemas.size):
+                    schema = schemas.item_at(i).get_node_value()
+                    role = schema.get_attribute_value("role")
+                    xsd_version = schema.get_attribute_value("xsd-version")
 
-                if role != "secondary":
-                    href = schema.get_attribute_value("file")
-                    ns = schema.get_attribute_value("uri")
-
-                    if ns == "http://www.w3.org/2005/xpath-functions":
-                        # schema_validator.set_property("xsdversion", "1.1")
-                        xsd_compiler.set_xsd_version("1.1")
-
-                    if href is None:
-                        try:
-                            '''schema_validator.register_schema(xsd_file=ns)'''
-                            source_arr.append(str(ns))
-                        except saxonc.PySaxonApiError as ex:
-                            print("*** Failed to load schema by URI: " + ns + " - " + str(ex))
-
-
+                    if xsd_version is not None:
+                        # schema_validator.set_property("xsdversion", xsd_version)
+                        xsd_compiler.set_xsd_version(xsd_version)
                     else:
-                        try:
-                            '''schema_validator.register_schema(xsd_file=href)'''
-                            full_uri = urljoin(base_uri, href)
-                            pathi = pathlib.Path(full_uri.replace("file://", ""))
-                            source_arr.append(str(pathi))
-                        except saxonc.PySaxonApiError as ex:
-                            print("*** Failed to load schema by URI: " + href + " - " + str(ex))
+                        # schema_validator.set_property("xsdversion", "1.0")
+                        xsd_compiler.set_xsd_version("1.0")
 
-                    xpc.import_schema_namespace(str(ns))
+                    if role != "secondary":
+                        href = schema.get_attribute_value("file")
+                        ns = schema.get_attribute_value("uri")
 
-                    environment.xpath_proc.import_schema_namespace(str(ns))
+                        if ns == "http://www.w3.org/2005/xpath-functions":
+                            # schema_validator.set_property("xsdversion", "1.1")
+                            xsd_compiler.set_xsd_version("1.1")
 
-                    if role == "source-reference":
-                        validate_sources = True
-                    '''if role == "stylesheet-import": '''
+                        if href is None:
+                            try:
+                                '''schema_validator.register_schema(xsd_file=ns)'''
+                                source_arr.append(str(ns))
+                            except saxonc.PySaxonApiError as ex:
+                                print("*** Failed to load schema by URI: " + ns + " - " + str(ex))
 
-                environment.xsd_schema = xsd_compiler.compile(xsd_list=source_arr)
-                if environment.xsd_schema is not None:
-                    environment.xquery_proc.set_schema_aware(True)
-                    environment.xpath_proc.use_schema(environment.xsd_schema)
-                    environment.xslt_proc.use_schema(environment.xsd_schema)
-                    environment.xquery_proc.use_schema(environment.xsd_schema)
+
+                        else:
+                            try:
+                                '''schema_validator.register_schema(xsd_file=href)'''
+                                full_uri = urljoin(base_uri, href)
+                                pathi = pathlib.Path(full_uri.replace("file://", ""))
+                                source_arr.append(str(pathi))
+                            except saxonc.PySaxonApiError as ex:
+                                print("*** Failed to load schema by URI: " + href + " - " + str(ex))
+
+                        xpc.import_schema_namespace(str(ns))
+
+                        environment.xpath_proc.import_schema_namespace(str(ns))
+
+                        if role == "source-reference":
+                            validate_sources = True
+                        '''if role == "stylesheet-import": '''
+
+                    environment.xsd_schema = xsd_compiler.compile(xsd_list=source_arr)
+                    if environment.xsd_schema is not None:
+                        environment.xquery_proc.set_schema_aware(True)
+                        environment.xpath_proc.use_schema(environment.xsd_schema)
+                        environment.xslt_proc.use_schema(environment.xsd_schema)
+                        environment.xquery_proc.use_schema(environment.xsd_schema)
+            else:
+                environment.schema_aware = True
+                environment.usable = False
     except saxonc.PySaxonApiError as ex:
         print("*** Failed to load schema by URI: " + str(ex))
-        environment.usable = False
-        return environment
+        environment.xquery_proc.set_schema_aware(False)
+        environment.xpath_proc.set_schema_aware(False)
+        '''environment.usable = False
+        return environment'''
 
     stylesheets = xpc.evaluate("stylesheet[not(@role='secondary')]")
     if stylesheets is not None:
