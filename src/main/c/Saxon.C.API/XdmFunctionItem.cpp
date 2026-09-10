@@ -123,14 +123,12 @@
 
     XdmValue * XdmFunctionItem::call(SaxonProcessor * processor, XdmValue ** arguments, int argument_length) {
           if((argument_length > 0 && arguments == nullptr) || processor == nullptr) {
-              SaxonApiException * exception = new SaxonApiException("Error in XdmFunctionItem.call.  nullptr arguments found.");
-              throw exception;
+              throw SaxonApiException("Error in XdmFunctionItem.call.  nullptr arguments found.");
           }
 
           int64_t argumentJArrayRef = SaxonProcessor::createJArray(arguments, argument_length);
           if(argumentJArrayRef == -1 && argument_length > 0) {
-            SaxonApiException * exception = new SaxonApiException("Error in XdmFunctionItem.call when converting arguments -   nullptr arguments found.\"");
-            throw exception;
+            throw SaxonApiException("Error in XdmFunctionItem.call when converting arguments -   nullptr arguments found.\"");
           }
            int64_t results = j_xdmFunctionItem_call(SaxonProcessor::sxn_environ->thread, (void *)processor->procRef, (void *)value, (argumentJArrayRef == -1 ? (void *) nullptr: (void *)argumentJArrayRef));
            if(argumentJArrayRef != -1) {
@@ -138,8 +136,7 @@
                argumentJArrayRef = -1;
            }
            if(results == -2) {
-               SaxonApiException * exception = new SaxonApiException();
-               throw exception;
+            throw SaxonApiException();
            }
         return getXdmValueSubClass(results);
 

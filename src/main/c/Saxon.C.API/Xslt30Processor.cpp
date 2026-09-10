@@ -45,8 +45,7 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor * p, std::string curr) {
 #endif
 
 	if(cppXT < 0) {
-        createException();
-        throw exception;
+        throw SaxonApiException();
 	}
 
 	if(!(proc->cwd.empty()) && curr.empty()){
@@ -250,8 +249,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     long status = j_compileFromXdmNodeAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT,  (void *)node->getUnderlyingValue(),  (char *)cwdXT.c_str(), (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(status == -2) {
-        createException();
-        throw exception;
+        throw SaxonApiException();
     }
 
 }
@@ -261,8 +259,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
         long status = j_compileFromStringAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
         if(status == -2) {
-            createException();
-            throw exception;
+            throw SaxonApiException();
         }
 }
 
@@ -271,33 +268,28 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
     void Xslt30Processor::compileFromFileAndSave(const char* xslFilename, const char* filename){
         proc->attachCurrentThread();
         if(xslFilename == nullptr) {
-            createException("XSL filename is null");
-            throw exception;
+            throw SaxonApiException("XSL filename is null");
         }
         if(filename == nullptr) {
-            createException("Output filename is null");
-            throw exception;
+            throw SaxonApiException("Output filename is null");
         }
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
         long status = j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)xslFilename, (char *)filename, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
         if(status == -2) {
-            createException();
-            throw exception;
+            throw SaxonApiException();
         }
 }
 
 XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
     proc->attachCurrentThread();
     if(stylesheetStr == nullptr) {
-        createException("XSL string is null");
-        throw exception;
+        throw SaxonApiException("XSL string is null");
     }
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
 
 	    int64_t  objRef = j_compileFromString(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheetStr, (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
         if(objRef == -2) {
-            createException();
-            throw exception;
+            throw SaxonApiException();
         }
 	    XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
         if(processorDataRef > 0) {
@@ -312,14 +304,12 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
     proc->attachCurrentThread();
     if(node == nullptr) {
-        createException("XSL node is null");
-        throw exception;
+        throw SaxonApiException("XSL node is null");
     }
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromXdmNode(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (void *)node->getUnderlyingValue(), (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
-        createException();
-        throw exception;
+        throw SaxonApiException();
     }
     XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
     if(processorDataRef > 0) {
@@ -334,14 +324,12 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
 XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) {
     proc->attachCurrentThread();
     if(source == nullptr) {
-        createException("XSL filename is null");
-        return nullptr;
+        throw SaxonApiException("XSL filename is null");
     }
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromAssociatedFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)source, (int)jitCompilation , (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
-        createException();
-        return nullptr;
+        throw SaxonApiException();
     }
     XsltExecutable * executable = new XsltExecutable(proc, objRef, cwdXT, proc->getResourcesDirectory());
     return executable;
@@ -351,14 +339,12 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
     proc->attachCurrentThread();
     if(stylesheet == nullptr) {
-        createException("XSL filename is null");
-        return nullptr;
+        throw SaxonApiException("XSL filename is null");
     }
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheet, (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
-        createException();
-        throw exception;
+        throw SaxonApiException();
     }
     XsltExecutable * executable = new XsltExecutable(proc,objRef, cwdXT, proc->getResourcesDirectory());
     if(processorDataRef > 0) {
@@ -374,8 +360,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const ch
     proc->attachCurrentThread();
 
 	if(sourcefile == nullptr && stylesheetfile == nullptr){
-        createException("Found null file name");
-		throw exception;
+        throw SaxonApiException("Found null file name");
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -387,8 +372,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const ch
     if (result > 0) {
          return SaxonProcessor::makeXdmValueFromRef(result);
     }else if(result == -2) {
-			createException();
-            throw exception;
+        throw SaxonApiException();
 	}
 	return nullptr;
 
@@ -411,8 +395,7 @@ void Xslt30Processor::transformFileToFile(const char* source,
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     long status = j_transformToFile(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (char *)outputfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(status == -2) {
-        createException();
-        throw exception;
+        throw SaxonApiException();
     }
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
@@ -438,8 +421,7 @@ const char * Xslt30Processor::transformFileToString(const char* source,
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(void *)fn, (char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(result == nullptr) {
-        createException();
-        throw exception;
+        throw SaxonApiException();
     }
     if(processorDataRef > 0) {
         j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
