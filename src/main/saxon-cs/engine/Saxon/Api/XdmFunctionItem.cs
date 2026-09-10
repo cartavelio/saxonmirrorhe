@@ -32,9 +32,9 @@ namespace Saxon.Api {
          /// <param name="processor">The Saxon Processor object</param>
          /// <param name="name">The function name</param>
          /// <param name="arity">The function arity</param>
-         /// <return> the requested function, or null if there is no such function. Note that some functions
+         /// <returns> the requested function, or null if there is no such function. Note that some functions
          /// (those with particular context dependencies) may be unsuitable for dynamic calling.
-         /// </return>
+         /// </returns>
          
         public static XdmFunctionItem getSystemFunction(Processor processor, QName name, int arity) {
             Configuration config = processor.Implementation;
