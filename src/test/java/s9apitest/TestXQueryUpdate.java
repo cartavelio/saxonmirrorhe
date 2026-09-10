@@ -130,6 +130,80 @@ public class TestXQueryUpdate {
         }
     }
 
+    @Test
+    public void testCopyModifyDocumentFromTinyTree() {
+        try {
+            try {
+                Files.copy(new File(configTest.getDataDir() + "books.xml").toPath(),
+                           new File(configTest.getTempDir() + "books.xml").toPath(),
+                           StandardCopyOption.REPLACE_EXISTING);
+            } catch (FileAlreadyExistsException e) {
+                // ignore the failure
+            }
+            Processor proc = new Processor(true);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setTreeModel(TreeModel.TINY_TREE);
+            XdmNode input = builder.build(new File(configTest.getTempDir() + "books.xml"));
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.setBaseURI(new URI("file:///" + configTest.getTempDir()));
+            comp.setUpdatingEnabled(true);
+            XQueryExecutable exp =
+                    comp.compile("let $updated := copy $doc := .\n" +
+                                         "     modify rename node ($doc//PRICE) [1]\n " +
+                                         "            as QName('', 'NEW-PRICE')\n" +
+                                         "     return $doc\n" +
+                                         " return exists($updated//NEW-PRICE)");
+
+            XQueryEvaluator eval = exp.load();
+            eval.setContextItem(input);
+            XdmValue result = eval.evaluate();
+            assertTrue(result instanceof XdmAtomicValue);
+            assertTrue(((XdmAtomicValue)result) .getBooleanValue());
+
+        } catch (SaxonApiException | IOException | URISyntaxException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testCopyModifyElementFromTinyTree() {
+        try {
+            try {
+                Files.copy(new File(configTest.getDataDir() + "books.xml").toPath(),
+                           new File(configTest.getTempDir() + "books.xml").toPath(),
+                           StandardCopyOption.REPLACE_EXISTING);
+            } catch (FileAlreadyExistsException e) {
+                // ignore the failure
+            }
+            Processor proc = new Processor(true);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setTreeModel(TreeModel.TINY_TREE);
+            XdmNode input = builder.build(new File(configTest.getTempDir() + "books.xml"));
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.setBaseURI(new URI("file:///" + configTest.getTempDir()));
+            comp.setUpdatingEnabled(true);
+            XQueryExecutable exp =
+                    comp.compile("declare variable $updated as element() := "
+                                         + "copy $root := *[1]"
+                                         + "   modify rename node ($root//PRICE)[1]"
+                                         + "   as QName('', 'NEW-PRICE')"
+                                         + "   return $root;"
+                                         + "exists($updated//NEW-PRICE)");
+
+            XQueryEvaluator eval = exp.load();
+            eval.setContextItem(input);
+            XdmValue result = eval.evaluate();
+            assertTrue(result instanceof XdmAtomicValue);
+            assertTrue(((XdmAtomicValue) result).getBooleanValue());
+
+        } catch (SaxonApiException | IOException | URISyntaxException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
     /**
      * Test that after deletion of attribute nodes, or the content of element nodes,
      * the revalidated content contains expanded default values.
