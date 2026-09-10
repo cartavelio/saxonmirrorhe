@@ -1268,7 +1268,8 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
 
     private static void handleIOError(IOException err) throws XPathException {
         XPathException xe = new XPathException(err);
-        xe.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, ERROR_IO));
+        String localName = err instanceof UnsupportedEncodingException ? ERROR_UNKNOWN_ENCODING : ERROR_IO;
+        xe.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, localName));
         throw xe;
     }
 
@@ -1301,7 +1302,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             }
             message += " (" + err.getClass().getName() + ')';
             XPathException e = new XPathException(message, err);
-            e.setErrorCode(ERROR_IO);
+            e.setErrorCodeQName(new StructuredQName(ERROR_PREFIX, ERROR_NAMESPACE, ERROR_IO));
             return e;
         }
     }
