@@ -28,6 +28,11 @@ public abstract class DelegatingArrayItem extends AbstractArrayItem {
     }
 
     @Override
+    public GroundedValue getIfPresent(int index) {
+        return base.getIfPresent(index);
+    }
+
+    @Override
     public ArrayItem put(int index, GroundedValue newValue) {
         return base.put(index, newValue);
     }
