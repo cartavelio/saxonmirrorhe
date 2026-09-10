@@ -224,6 +224,7 @@
       <xsl:sequence select="f:applyFormat(., map{
          'parseInt#1':     'Saxon.Impl.Helpers.Utils.ParseInt(%args%)',
          'parseInt#2':     'Saxon.Impl.Helpers.Utils.ParseInt(%args%)',
+         'rotateRight#2':  'Saxon.Impl.Helpers.Utils.RotateRight(%args%)',
          'signum#1':       'System.Math.Sign(%args%)',
          'valueOf#1':      'System.Int32.Parse(%args%)',
          'compare#2':      '%arg1%.CompareTo(%arg2%)',
@@ -1376,6 +1377,15 @@
          '*':              '%scope%.%Name%(%args%)'
          })"/>
    </xsl:template>
+   
+   <!-- int[].clone() -->
+   <xsl:template match="*[@RESOLVED_TYPE = 'int[]'](:[name/@identifier = 'clone']:)" priority="20">
+      <xsl:sequence select="f:applyFormat(., map{
+         'clone#0':      'Saxon.Ejava.util.Arrays.copyOf(%scope%, %scope%.Length)',
+         '*':            '%scope%.%Name%(%args%)'
+         })"/>
+   </xsl:template>
+   
    
    <xsl:template match="*" priority="10" mode="methods">
       <xsl:variable name="targetType" select="(@RESOLVED_TYPE,@DECLARING_TYPE)[1]" as="xs:string?"/>

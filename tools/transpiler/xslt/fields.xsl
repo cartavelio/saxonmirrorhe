@@ -69,6 +69,8 @@
       <xsl:choose>
          <xsl:when test="name/@identifier = 'MAX_VALUE'">System.Int32.MaxValue</xsl:when>
          <xsl:when test="name/@identifier = 'MIN_VALUE'">System.Int32.MinValue</xsl:when>
+         <xsl:when test="name/@identifier = 'BYTES'">4</xsl:when>
+         <xsl:when test="name/@identifier = 'SIZE'">32</xsl:when>
          <xsl:otherwise>System.Int32.{name/@identifier}</xsl:otherwise>
       </xsl:choose>
    </xsl:template>
@@ -96,6 +98,7 @@
       <xsl:choose>
          <xsl:when test="name/@identifier = 'MAX_VALUE'">127</xsl:when>
          <xsl:when test="name/@identifier = 'MIN_VALUE'">-128</xsl:when>
+         <xsl:when test="name/@identifier = 'SIZE'">8</xsl:when>
          <xsl:otherwise>System.SByte.{name/@identifier}</xsl:otherwise>
       </xsl:choose>
    </xsl:template>

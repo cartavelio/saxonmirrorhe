@@ -334,7 +334,15 @@
    <xsl:template match="*[@nodeType='ConstructorDeclaration']">
       <xsl:param name="indent" tunnel="yes" as="xs:integer"/>
       <xsl:call-template name="indent"/>
-      <xsl:call-template name="modifiers"/>
+      <xsl:choose>
+         <xsl:when test="annotations/annotation[name/@identifier='CSharpModifiers']">
+            <xsl:value-of select="annotations/annotation[name/@identifier='CSharpModifiers']//@value ! string()" separator=" "/>
+            <xsl:text> </xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:call-template name="modifiers"/>
+         </xsl:otherwise>
+      </xsl:choose>   
       <xsl:text>{name/@identifier}(</xsl:text>
       <xsl:apply-templates select="parameters"/>
       <xsl:text>) </xsl:text>
@@ -1704,11 +1712,11 @@
       <xsl:text>{@value}</xsl:text>
    </xsl:template>
    
-   <xsl:template match="*[@nodeType='LongLiteralExpr'][matches(@value, '^0x[89a-f]')]" priority="20">
+   <xsl:template match="*[@nodeType='LongLiteralExpr'][matches(@value, '^0x[89a-fA-F]')]" priority="20">
       <xsl:text>unchecked((long){@value})</xsl:text>
    </xsl:template>
    
-   <xsl:template match="*[@nodeType='IntegerLiteralExpr'][matches(@value, '^0x[89a-f]')]" priority="20">
+   <xsl:template match="*[@nodeType='IntegerLiteralExpr'][matches(@value, '^0x[89a-fA-F]')]" priority="20">
       <xsl:text>unchecked((int){@value})</xsl:text>
    </xsl:template>
    
