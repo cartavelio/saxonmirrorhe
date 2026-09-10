@@ -4944,7 +4944,8 @@ public class XPathParser {
             while (true) {
                 seq++;
                 Expression key = parseExprSingle();
-                if (!(key instanceof Literal && ((Literal) key).getGroundedValue() instanceof AtomicValue)) {
+                boolean isLiteralKey = key instanceof Literal lit && lit.getGroundedValue() instanceof AtomicValue;
+                if (!isLiteralKey) {
                     allLiteralKeys = false;
                 }
                 if (!(key instanceof StringLiteral)) {
@@ -4956,8 +4957,16 @@ public class XPathParser {
                 if (t.currentToken == Token.COLON) {
                     nextToken();
                     Expression value = parseExprSingle();
-                    operands.add(
-                            MapFunctionSet.getInstance(languageVersion).makeFunction("entry", 2).makeFunctionCall(key, value));
+                    if (isLiteralKey && value instanceof Literal litValue) {
+                        SingleEntryMap entry = new SingleEntryMap(
+                                (AtomicValue)((Literal)key).getGroundedValue(),
+                                litValue.getGroundedValue(),
+                                env.getXPathVersion());
+                        operands.add(Literal.makeLiteral(entry));
+                    } else {
+                        operands.add(
+                                MapFunctionSet.getInstance(languageVersion).makeFunction("entry", 2).makeFunctionCall(key, value));
+                    }
                     if (!(value instanceof Literal)) {
                         allLiteralValues = false;
                     }
@@ -4989,43 +4998,36 @@ public class XPathParser {
                 result = Literal.makeLiteral(EmptyMap.getInstance(languageVersion));
                 break;
             case 1:
-                if (allLiteralKeys && allLiteralValues) {
-                    FunctionCall operand = (FunctionCall) operands.get(0);
-                    Literal key = (Literal) operand.getArguments()[0];
-                    Literal value = (Literal) operand.getArguments()[1];
-                    SingleEntryMap sem = new SingleEntryMap(
-                            (AtomicValue) (key.getGroundedValue()),
-                            value.getGroundedValue(),
-                            languageVersion);
-                    result = Literal.makeLiteral(sem);
+                if (operands.get(0) instanceof Literal lit) {
+                    return lit;
+                } else if (operands.get(0).isCallOn(MapFunctionSet.MapEntry.class)) {
+                    return operands.get(0);
                 } else {
                     result = new MapConstructor(operands);
-//                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
-//                    optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
-//                    optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
-//                    MapItem optionsMap = optionsBuilder.getCompletedMap();
-//                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
-//                            .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
-//                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
-
                 break;
             default:
 
                 // Check for duplicates now, among key values that are statically known
                 Set<AtomicMatchKey> matchKeys = new HashSet<>();
                 for (Expression operand : operands) {
-                    if (operand.isCallOn(MapFunctionSet.MapEntry.class)) {
-                        if (((FunctionCall) operand).getArg(0) instanceof Literal) {
-                            final AtomicValue keyValue =
-                                    (AtomicValue) ((Literal) ((FunctionCall) operand).getArg(0)).getGroundedValue();
+                    if (operand instanceof Literal literal && literal.getGroundedValue() instanceof SingleEntryMap entry) {
+                        AtomicMatchKey key = entry.getKey().asMapKey(languageVersion);
+                        boolean ok = matchKeys.add(key);
+                        if (!ok) {
+                            grumble("Duplicate key + " + Err.depict(entry.getKey()) + " in map constructor", "XQDY0137");
+                            return null;
+                        }
+                    } else if (operand.isCallOn(MapFunctionSet.MapEntry.class) &&
+                                ((FunctionCall) operand).getArg(0) instanceof Literal) {
+                        final AtomicValue keyValue =
+                                (AtomicValue) ((Literal) ((FunctionCall) operand).getArg(0)).getGroundedValue();
 
-                            AtomicMatchKey key = keyValue.asMapKey(languageVersion);
-                            boolean ok = matchKeys.add(key);
-                            if (!ok) {
-                                grumble("Duplicate key + " + Err.depict(keyValue) + " in map constructor", "XQDY0137");
-                                return null;
-                            }
+                        AtomicMatchKey key = keyValue.asMapKey(languageVersion);
+                        boolean ok = matchKeys.add(key);
+                        if (!ok) {
+                            grumble("Duplicate key + " + Err.depict(keyValue) + " in map constructor", "XQDY0137");
+                            return null;
                         }
                     }
                 }
@@ -5034,45 +5036,20 @@ public class XPathParser {
                     if (allStringKeys) {
                         StringMapBuilder mapBuilder = new StringMapBuilder(operands.size());
                         for (Expression expression : operands) {
-                            FunctionCall operand = (FunctionCall) expression;
-                            Literal keyExp = (Literal) operand.getArguments()[0];
-                            Literal valueExp = (Literal) operand.getArguments()[1];
-                            UnicodeString key = ((StringLiteral) keyExp).getUnicodeString();
-                            GroundedValue val = valueExp.getGroundedValue();
-                            mapBuilder.put(key, val);
+                            SingleEntryMap entry = ((SingleEntryMap)((Literal) expression).getGroundedValue());
+                            mapBuilder.put(entry.getKey().getUnicodeStringValue(), entry.getValue());
                         }
                         result = Literal.makeLiteral(mapBuilder.getCompletedMap());
                     } else {
                         GeneralMapBuilder builder = FixedMap.getBuilder(languageVersion);
                         for (Expression expression : operands) {
-                            FunctionCall operand = (FunctionCall) expression;
-                            Literal keyExp = (Literal) operand.getArguments()[0];
-                            Literal valueExp = (Literal) operand.getArguments()[1];
-                            AtomicValue key = (AtomicValue) keyExp.getGroundedValue();
-                            GroundedValue val = valueExp.getGroundedValue();
-                            builder.put(key, val);
+                            SingleEntryMap entry = ((SingleEntryMap) ((Literal) expression).getGroundedValue());
+                            builder.put(entry.getKey(), entry.getValue());
                         }
                         result = Literal.makeLiteral(builder.getCompletedMap());
                     }
                 } else {
                     result = new MapConstructor(operands);
-//                    Expression[] entriesArray = new Expression[operands.size()];
-//                    for (int i = 0; i < operands.size(); i++) {
-//                        entriesArray[i] = operands.get(i);
-//                    }
-//                    Block block = new Block(entriesArray);
-//                    MapItem optionsMap;
-//                    if (allLiteralKeys) {
-//                        optionsMap = EmptyMap.getInstance(languageVersion);
-//                    } else {
-//                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
-//                        optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
-//                        optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
-//                        optionsMap = optionsBuilder.getCompletedMap();
-//                    }
-//                    result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
-//                            .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
-//                    result.setRetainedStaticContext(env.makeRetainedStaticContext());
                 }
                 break;
         }
