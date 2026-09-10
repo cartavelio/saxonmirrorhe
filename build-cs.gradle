@@ -222,6 +222,7 @@ task eecs_setupPreprocess(
   exclude "com/saxonica/ee/config/DynamicLoaderEE.java"
   exclude "com/saxonica/ee/extfn/ExperimentalSequenceTypeMarshaller.java"
   exclude "com/saxonica/ee/extfn/ExperimentalXPathCompiler.java"
+  exclude "com/saxonica/functions/qt4/ma/OrderedMap.java"
   exclude "com/saxonica/ee/jaxp/**"
   exclude "com/saxonica/ee/parallel/MultithreadedContextMappingIterator.java"
   exclude "com/saxonica/ee/parallel/MultithreadedItemMappingIterator.java"
@@ -240,7 +241,6 @@ task eecs_setupPreprocess(
   exclude "com/saxonica/functions/extfn/Mailer2.java"
   exclude "com/saxonica/functions/extfn/ObjectMap.java"
   exclude "com/saxonica/functions/qt4/ParseHtml.java"
-  //exclude "com/saxonica/functions/extfn/ReadBinaryResource.java"
   exclude "com/saxonica/functions/extfn/SendMail.java"
   exclude "com/saxonica/xqj/**"
   exclude "com/saxonica/functions/qt4/ixml/**"
@@ -320,6 +320,8 @@ task eecs_transpile_to_xml(
     "-h:${projectDir}/src/main/java",
     "-src:${projectDir}/src/main/java",
     "-ee:${saxonVersion}",
+    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
+    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
     "-icu4j:${icu4jJar}"
   doFirst {
     mkdir("${buildDir}/ee_xmlout")
@@ -376,7 +378,9 @@ task eecs_generateCSharp(
     "-xml:${buildDir}/ee_xmlout",
     "-digest:${buildDir}/ee_refined-digest.xml",
     "-ee:${saxonVersion}",
-    "-icu4j:${icu4jJar}"
+    "-icu4j:${icu4jJar}",
+    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
+    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
     "-debug"
   doFirst {
     mkdir("${buildDir}/cs/ee")

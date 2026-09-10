@@ -92,6 +92,7 @@ ext {
   resolverDataJar = null
   jlineJar = null
   vavrJar = null
+  vavrMatchJar = null
   htmlparserJar = null
   coffeefilterJar = null
   coffeegrinderJar = null
@@ -541,6 +542,7 @@ tagsoupJar = "${fileSeparator}tagsoup-${tagsoupVersion}.jar"
 mailJar = "${fileSeparator}javax.mail-${mailVersion}.jar"
 jlineJar = "${fileSeparator}jline-${jlineVersion}.jar"
 vavrJar = "${fileSeparator}vavr-${vavrVersion}.jar"
+vavrMatchJar = "${fileSeparator}vavr-match-${vavrVersion}.jar"
 resolverJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}.jar"
 resolverDataJar = "${fileSeparator}xmlresolver-${xmlresolverVersion}-data.jar"
 htmlparserJar = "${fileSeparator}htmlparser-${htmlparserVersion}.jar"
@@ -567,6 +569,9 @@ configurations.compileClasspath.each { cp ->
   }
   if (cp.toString().endsWith(vavrJar)) {
     vavrJar = cp.toString()
+  }
+  if (cp.toString().endsWith(vavrMatchJar)) {
+    vavrMatchJar = cp.toString()
   }
   if (cp.toString().endsWith(htmlparserJar)) {
     htmlparserJar = cp.toString()
@@ -607,6 +612,7 @@ apply from: "dev-setup.gradle"
     outputs.files fileTree(dir: "${buildDir}/releases/${release}j/lib")
     inputs.file jlineJar
     inputs.file vavrJar
+    inputs.file vavrMatchJar
     inputs.file resolverJar
     inputs.file resolverDataJar
     inputs.file coffeegrinderJar
