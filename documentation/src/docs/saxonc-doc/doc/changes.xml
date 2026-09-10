@@ -94,7 +94,7 @@
          <li>Removed deprecated error methods on various classes: <code>getErrorMessage()</code>,
             <code>getErrorCode()</code>, <code>getExceptionCount()</code>,
             <code>exceptionOccurred()</code>, <code>exceptionClear()</code>. Since SaxonC 12.1
-            exceptions are thrown, so these methods are no longer used.</li>
+            these methods are no longer used, because exceptions are thrown.</li>
       </ul>
 
    </category>
