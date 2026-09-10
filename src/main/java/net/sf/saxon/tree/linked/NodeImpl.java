@@ -12,6 +12,7 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
@@ -24,8 +25,6 @@ import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.UntypedAtomicValue;
-
-import java.util.function.Predicate;
 
 
 /**
@@ -527,7 +526,7 @@ public abstract class NodeImpl
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
 
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:

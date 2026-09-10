@@ -14,6 +14,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
 
 /**
@@ -454,7 +454,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     }
 
     @Override
-    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
         AxisIterator iter = new AttributeEnumeration(this);
         if (nodeTest != AnyNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -463,7 +463,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     }
 
     @Override
-    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateChildren(NodeTest nodeTest) {
         AxisIterator iter = new ChildEnumeration(this, true, true);
         if (nodeTest != AnyNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -472,7 +472,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     }
 
     @Override
-    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         AxisIterator iter = new ChildEnumeration(this, false, forwards);
         if (nodeTest != AnyNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -481,7 +481,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
     }
 
     @Override
-    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
     }
 

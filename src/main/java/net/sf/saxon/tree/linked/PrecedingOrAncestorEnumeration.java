@@ -7,9 +7,7 @@
 
 package net.sf.saxon.tree.linked;
 
-import net.sf.saxon.om.NodeInfo;
-
-import java.util.function.Predicate;
+import net.sf.saxon.pattern.NodeTest;
 
 /**
  * This axis cannot be requested directly in an XPath expression
@@ -20,7 +18,7 @@ import java.util.function.Predicate;
 final class PrecedingOrAncestorEnumeration extends TreeEnumeration {
 
 
-    public PrecedingOrAncestorEnumeration(NodeImpl node, Predicate<? super NodeInfo> nodeTest) {
+    public PrecedingOrAncestorEnumeration(NodeImpl node, NodeTest nodeTest) {
         super(node, nodeTest);
         advance();
     }

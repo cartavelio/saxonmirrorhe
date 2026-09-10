@@ -255,8 +255,7 @@ public class PackageLoaderHE implements IPackageLoader {
         pack.setStripsTypeAnnotations("1".equals(packageElement.getAttributeValue("", "stripType")));
         pack.setKeyManager(new KeyManager(pack.getConfiguration(), pack));
         pack.setDeclaredModes("1".equals(packageElement.getAttributeValue("", "declaredModes")));
-        for (NodeInfo usePack : packageElement.children(
-                new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT, "package", config.getNamePool()))) {
+        for (NodeInfo usePack : packageElement.children(n -> n.getLocalPart().equals("package"))) {
             StylesheetPackage subPack = config.makeStylesheetPackage();
             subPack.setRuleManager(new RuleManager(pack));
             subPack.setCharacterMapIndex(new CharacterMapIndex());
@@ -327,7 +326,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private void readGlobalContext(NodeInfo packageElement) throws XPathException {
         GlobalContextRequirement req = null;
         NameTest condition = new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT, "glob", config.getNamePool());
-        for (NodeInfo varElement : packageElement.children(condition)) {
+        for (NodeInfo varElement : packageElement.children(n -> n.getLocalPart().equals("glob"))) {
             if (req == null) {
                 req = new GlobalContextRequirement();
                 packStack.peek().setContextItemRequirements(req);
@@ -2022,7 +2021,7 @@ public class PackageLoaderHE implements IPackageLoader {
             int count = Count.count(args.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT));
             Sequence[] argValues = new Sequence[count];
             count = 0;
-            for (NodeInfo child : args.children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo child : args.children(NodeKindTest.ELEMENT::test)) {
                 if (child.getLocalPart().equals("x")) {
                     argValues[count++] = null;
                 } else {
@@ -2209,11 +2208,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 }
             }
 
-            NameTest test = new NameTest(Type.ELEMENT, NamespaceConstant.SAXON_XSLT_EXPORT,
-                                         "withParam", loader.getConfiguration().getNamePool());
             List<WithParam> nonTunnelParams = new ArrayList<>();
             int slotNumber = 0;
-            for (NodeInfo wp : element.children(test)) {
+            for (NodeInfo wp : element.children(n -> n.getLocalPart().equals("withParam"))) {
                 WithParam withParam = new WithParam();
                 StructuredQName paramName = loader.getQNameAttribute(wp, "name");
                 withParam.setVariableQName(paramName);
@@ -2952,7 +2949,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression base = null;
             Expression[] args = new Expression[count - 1];
             count = 0;
-            for (NodeInfo child : element.children(NodeKindTest.ELEMENT)) {
+            for (NodeInfo child : element.children(NodeKindTest.ELEMENT::test)) {
                 if (count == 0) {
                     base = loader.loadExpression(child);
                 } else if (child.getLocalPart().equals("null")) {

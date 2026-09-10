@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 
 /**
  * A NodeTest is a simple kind of pattern that enables a context-free test of whether
@@ -28,12 +27,12 @@ import java.util.function.Predicate;
  * test (used, e.g. for "@comment()").
  * <p>As well as being used to support XSLT pattern matching, NodeTests act as predicates in
  * axis steps, and also act as item types for type matching.</p>
- * <p>For use in user-written application calling {@link NodeInfo#iterateAxis(int, Predicate)},
+ * <p>For use in user-written application calling {@link NodeInfo#iterateAxis(int, NodeTest)},
  * it is possible to write a user-defined subclass of <code>NodeTest</code> that implements
  * a single method, {@link #matches(int, NodeName, SchemaType)}</p>
  */
 
-public abstract class NodeTest implements Predicate<NodeInfo>, ItemTypeWithSequenceTypeCache {
+public abstract class NodeTest implements ItemTypeWithSequenceTypeCache {
 
     private SequenceType _one;
     private SequenceType _oneOrMore;

@@ -10,18 +10,17 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AtomizedValueIterator;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.IntSetPredicate;
 
 import java.util.EnumSet;
 import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 
 /**
  * This class supports both the child:: and following-sibling:: axes, which are
@@ -39,7 +38,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
 
     private final TinyTree tree;
     private int nextNodeNr;
-    /*@Nullable*/ private final Predicate<? super NodeInfo> test;
+    /*@Nullable*/ private final NodeTest test;
     private final TinyNodeImpl startNode;
     private final TinyNodeImpl parentNode;
     private final boolean getChildren;
@@ -58,7 +57,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
      */
 
     SiblingIterator(/*@NotNull*/ TinyTree tree, /*@NotNull*/ TinyNodeImpl node,
-                                 Predicate<? super NodeInfo> nodeTest, boolean getChildren) {
+                                 NodeTest nodeTest, boolean getChildren) {
         this.tree = tree;
         test = nodeTest;
         matcher = nodeTest instanceof NodeTest ? ((NodeTest)nodeTest).getMatcher(tree): IntSetPredicate.ALWAYS_TRUE;
@@ -108,8 +107,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
         if (needToAdvance) {
             final int thisNode = nextNodeNr;
             final int[] tNext = tree.next;
-            final Predicate<? super NodeInfo> nTest = test;
-            if (nTest == null) {
+            if (test == null) {
                 do {
                     nextNodeNr = tNext[nextNodeNr];
                 } while (tree.nodeKind[nextNodeNr] == Type.PARENT_POINTER);
@@ -146,9 +144,8 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
     public AtomicSequence nextAtomizedValue() throws XPathException {
         if (needToAdvance) {
             final int thisNode = nextNodeNr;
-            final Predicate<? super NodeInfo> nTest = test;
             final int[] tNext = tree.next;
-            if (nTest == null) {
+            if (test == null) {
                 do {
                     nextNodeNr = tNext[nextNodeNr];
                 } while (tree.nodeKind[nextNodeNr] == Type.PARENT_POINTER);
@@ -201,9 +198,8 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
     public boolean hasNext() {
         int n = nextNodeNr;
         if (needToAdvance) {
-            final Predicate<? super NodeInfo> nTest = test;
             final int[] tNext = tree.next;
-            if (nTest == null) {
+            if (test == null) {
                 do {
                     n = tNext[n];
                 } while (tree.nodeKind[n] == Type.PARENT_POINTER);

@@ -8,13 +8,18 @@
 package net.sf.saxon.option.jdom2;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NamespaceBinding;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.*;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
@@ -28,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.function.Predicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
@@ -442,7 +446,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateAttributes(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
         AxisIterator base = new AttributeEnumeration(this);
         if (nodeTest == AnyNodeTest.getInstance()) {
             return base;
@@ -452,7 +456,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateChildren(Predicate<? super NodeInfo> nodeTest) {
+    protected AxisIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
             AxisIterator base = new ChildEnumeration(this, true, true);
             if (nodeTest == AnyNodeTest.getInstance()) {
@@ -466,7 +470,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateSiblings(Predicate<? super NodeInfo> nodeTest, boolean forwards) {
+    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (nodeTest == AnyNodeTest.getInstance()) {
             return new ChildEnumeration(this, false, forwards);
         } else {
@@ -477,9 +481,9 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateDescendants(Predicate<? super NodeInfo> nodeTest, boolean includeSelf) {
+    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         Iterator<? extends Content> descendants;
-        if (nodeTest instanceof NodeTest && ((NodeTest)nodeTest).getUType() == UType.ELEMENT) {
+        if (nodeTest.getUType() == UType.ELEMENT) {
             // only select element nodes
             descendants = ((Parent) node).getDescendants(new ElementFilter());
         } else {

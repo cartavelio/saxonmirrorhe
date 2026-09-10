@@ -26,8 +26,6 @@ import net.sf.saxon.type.UType;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
 
-import java.util.function.Predicate;
-
 
 /**
  * A StrippedNode is a view of a node, in a virtual tree that has whitespace
@@ -249,7 +247,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     }
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
         if (nodeTest instanceof NodeTest &&
                 ((NodeTest)nodeTest).getUType().intersection(UType.TEXT) == UType.VOID ||
                 axisNumber == AxisInfo.ATTRIBUTE || axisNumber == AxisInfo.NAMESPACE) {
