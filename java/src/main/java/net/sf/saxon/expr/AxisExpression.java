@@ -619,16 +619,16 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
 
-        if (axis == AxisInfo.ATTRIBUTE && test instanceof NamedXNodePredicate fpTest) {
-            int attFingerprint = fpTest.getRequiredFingerprint();
-            if (fpTest.getNodeKind() == Type.ATTRIBUTE && attFingerprint != -1) {
+        if (axis == AxisInfo.ATTRIBUTE && test instanceof NamedXNodePredicate attFpTest) {
+            int attFingerprint = attFpTest.getRequiredFingerprint();
+            if (attFpTest.getNodeKind() == Type.ATTRIBUTE && attFingerprint != -1) {
                 StructuredQName attName = getConfiguration().getNamePool().getStructuredQName(attFingerprint);
                 Schema schema = getRetainedStaticContext().getImportedSchema();
                 SchemaType contentType = gNodeType.getContentType();
                 if (contentType instanceof ComplexType) {
                     try {
                         int card = ((ComplexType) contentType).getAttributeUseCardinality(attName, schema);
-                        if (!fpTest.isFingerprintSufficient()) {
+                        if (!attFpTest.isFingerprintSufficient()) {
                             card = Cardinality.union(card, StaticProperty.ALLOWS_ZERO);
                         }
                         return card;
@@ -642,14 +642,14 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 return StaticProperty.ALLOWS_ZERO_OR_ONE;
             }
         }
-        if (axis == AxisInfo.CHILD && test instanceof NamedXNodePredicate fpTest) {
-            int elemFingerprint = fpTest.getRequiredFingerprint();
-            if (fpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
+        if (axis == AxisInfo.CHILD && test instanceof NamedXNodePredicate childFpTest) {
+            int elemFingerprint = childFpTest.getRequiredFingerprint();
+            if (childFpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
                 Schema schema = getRetainedStaticContext().getImportedSchema();
                 SchemaType contentType = gNodeType.getContentType();
                 if (contentType instanceof ComplexType) {
                     int card = ((ComplexType) contentType).getElementParticleCardinality(elemFingerprint, schema, true);
-                    if (!fpTest.isFingerprintSufficient()) {
+                    if (!childFpTest.isFingerprintSufficient()) {
                         card = Cardinality.union(card, StaticProperty.ALLOWS_ZERO);
                     }
                     return card;
@@ -658,15 +658,15 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 }
             }
         }
-        if (axis == AxisInfo.DESCENDANT && test instanceof NamedXNodePredicate fpTest) {
-            int elemFingerprint = fpTest.getRequiredFingerprint();
-            if (fpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
+        if (axis == AxisInfo.DESCENDANT && test instanceof NamedXNodePredicate descFpTest) {
+            int elemFingerprint = descFpTest.getRequiredFingerprint();
+            if (descFpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
                 Schema schema = getRetainedStaticContext().getImportedSchema();
                 SchemaType contentType = gNodeType.getContentType();
                 if (contentType instanceof ComplexType) {
                     try {
                         int card = ((ComplexType) contentType).getDescendantElementCardinality(schema, elemFingerprint);
-                        if (!fpTest.isFingerprintSufficient()) {
+                        if (!descFpTest.isFingerprintSufficient()) {
                             card = Cardinality.union(card, StaticProperty.ALLOWS_ZERO);
                         }
                         return card;
