@@ -13,8 +13,6 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -318,7 +316,7 @@ public class MapType extends AnyFunctionType {
                 st = SequenceType.makeSequenceType(st.getPrimaryType(), Cardinality.union(st.getCardinality(), StaticProperty.ALLOWS_ZERO));
             }
             return new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.ATOMIC_SEQUENCE}, st)
+                    SequenceType.ATOMIC_SEQUENCE, st)
                     .relationship(other, th);
         }
     }
@@ -358,8 +356,7 @@ public class MapType extends AnyFunctionType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
-            throws XPathException {
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40) {
         return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
     }
 

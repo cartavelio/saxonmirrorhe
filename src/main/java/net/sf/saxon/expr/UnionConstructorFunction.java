@@ -83,11 +83,8 @@ public class UnionConstructorFunction extends AbstractFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType resultType = targetType.getResultTypeOfCast();
-
         SequenceType argType = allowEmpty ? SequenceType.OPTIONAL_ATOMIC : SequenceType.SINGLE_ATOMIC;
-
-        return new SpecificFunctionType(
-            new SequenceType[]{argType}, resultType);
+        return new SpecificFunctionType(argType, resultType);
     }
 
     /**

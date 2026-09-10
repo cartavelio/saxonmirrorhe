@@ -172,7 +172,7 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
         ft = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ITEM,
                 SequenceType.ATOMIC_SEQUENCE);
 
         register("sort", 3, e -> e.populate( Sort_3::new, AnyItemType.getInstance(),

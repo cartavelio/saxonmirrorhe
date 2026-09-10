@@ -286,7 +286,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     } else {
                         Callable callable = new CallableDelegate((cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext)));
                         return new CallableFunction(0, callable,
-                                                    new SpecificFunctionType(new SequenceType[]{}, SequenceType.OPTIONAL_STRING));
+                                                    new SpecificFunctionType(SequenceType.OPTIONAL_STRING));
                     }
                     
                 }
@@ -331,7 +331,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                         Callable callable = new CallableDelegate(
                                 (cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext)));
                         stackTraceFn = new CallableFunction(0, callable,
-                                                    new SpecificFunctionType(new SequenceType[]{}, SequenceType.OPTIONAL_STRING));
+                                                    new SpecificFunctionType(SequenceType.OPTIONAL_STRING));
                     }
 
                     return new ShapedMap(errorMapShape,

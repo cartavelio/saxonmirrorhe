@@ -37,12 +37,10 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
 
     public static final MapType RETURN_TYPE = new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_ITEM);
 
-    private final static FunctionItemType NEXT_FN_TYPE = new SpecificFunctionType(
-            new SequenceType[]{}, // zero arguments
-            SequenceType.one(RETURN_TYPE));
+    private final static FunctionItemType NEXT_FN_TYPE = new SpecificFunctionType(SequenceType.one(RETURN_TYPE));
 
     private final static FunctionItemType PERMUTE_FN_TYPE = new SpecificFunctionType(
-        new SequenceType[]{SequenceType.ANY_SEQUENCE},
+        SequenceType.ANY_SEQUENCE,
         SequenceType.ANY_SEQUENCE);
 
 

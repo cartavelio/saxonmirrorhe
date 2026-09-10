@@ -54,7 +54,7 @@ public class AtomicConstructorFunction extends AbstractFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         return new SpecificFunctionType(
-                new SequenceType[]{SequenceType.OPTIONAL_ATOMIC},
+                SequenceType.OPTIONAL_ATOMIC,
                 SequenceType.optional(targetType));
     }
 

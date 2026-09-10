@@ -247,7 +247,7 @@ public class JsonHandler {
                     throw new XPathException("Fallback function must have arity=1", "FOJS0005");
                 }
                 SpecificFunctionType required = new SpecificFunctionType(
-                        new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.ANY_SEQUENCE);
+                        SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE);
                 if (!required.matches(fallbackFunction, context.getConfiguration().getTypeHierarchy())) {
                     throw new XPathException("Fallback function does not match the required type", "XPTY0004");
                 }

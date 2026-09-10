@@ -41,7 +41,7 @@ public class UnionCastableFunction extends UnionConstructorFunction {
     public FunctionItemType getFunctionItemType() {
         // The function accepts any sequence as input, so it can do its own atomization
         return new SpecificFunctionType(
-            new SequenceType[]{SequenceType.ANY_SEQUENCE}, SequenceType.SINGLE_BOOLEAN);
+            SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_BOOLEAN);
     }
 
     /**

@@ -75,7 +75,7 @@ public class DeepEqual extends CollatingFunctionFixed {
 
     static {
         SequenceType itemsEqualFn = SequenceType.optional(
-                new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
+                new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM,
                                          SequenceType.OPTIONAL_BOOLEAN));
         OptionsParameter o = new OptionsParameter(40);
         o.addAllowedOption("base-uri", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);

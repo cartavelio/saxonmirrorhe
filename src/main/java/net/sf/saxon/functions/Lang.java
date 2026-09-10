@@ -110,7 +110,7 @@ public class Lang extends SystemFunction implements IContextAccessorFunction {
         return new CallableFunction(
                 new SymbolicName.F(getFunctionName(), 1),
                 body,
-                new SpecificFunctionType(new SequenceType[]{SequenceType.OPTIONAL_STRING}, SequenceType.SINGLE_BOOLEAN));
+                new SpecificFunctionType(SequenceType.OPTIONAL_STRING, SequenceType.SINGLE_BOOLEAN));
     }
 
     /**

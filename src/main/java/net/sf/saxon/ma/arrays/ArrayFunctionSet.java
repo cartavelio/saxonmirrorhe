@@ -63,7 +63,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR | NAV, null));
 
         ItemType buildFunctionType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE);
 
         register("build", 2, e -> e.populate(ArrayBuild::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
@@ -72,11 +72,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         //#endif
 
         SpecificFunctionType filterFunctionType31 = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE,
                 SequenceType.SINGLE_BOOLEAN);
 
         SpecificFunctionType filterFunctionType40 = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.OPTIONAL_BOOLEAN).withAcceptReducedArity();
 
         final SpecificFunctionType filterFunctionType = version >= 40 ? filterFunctionType40 : filterFunctionType31;
@@ -89,11 +89,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, null));
 
         SpecificFunctionType foldFunctionType31 = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
         SpecificFunctionType foldFunctionType40 = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
         SpecificFunctionType foldFunctionType = version >= 40 ? foldFunctionType40 : foldFunctionType31;
@@ -111,11 +111,11 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
 
         SpecificFunctionType forEachFunctionType31 = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
         SpecificFunctionType forEachFunctionType40 = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
         SpecificFunctionType forEachFunctionType = version >= 40 ? forEachFunctionType40 : forEachFunctionType31;
@@ -160,7 +160,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
         ItemType sortFunctionType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE,
                 SequenceType.ATOMIC_SEQUENCE);
 
         register("sort", 1, e -> e.populate( ArraySort::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
@@ -202,7 +202,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         if (version >= 40) {
 
             ItemType fallbackType = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_INTEGER},
+                    SequenceType.SINGLE_INTEGER,
                     SequenceType.ANY_SEQUENCE);
 
             register("get", 3, e -> e.populate(ArrayGet::new, AnyItemType.getInstance(), STAR, 0)

@@ -75,7 +75,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null));
 
         SpecificFunctionType ON_DUPLICATES_CALLBACK_TYPE = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE
         );
 
@@ -127,7 +127,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
         ItemType actionType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
+                SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
         register("for-each", 2, e -> e.populate(MapForEach::new, AnyItemType.getInstance(), STAR, 0)
@@ -144,7 +144,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         if (version >= 40) {
 
             ItemType fallbackType = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_ATOMIC},
+                    SequenceType.SINGLE_ATOMIC,
                     SequenceType.ANY_SEQUENCE);
 
             register("get", 3, e -> e.populate(MapGet::new, AnyItemType.getInstance(), STAR, 0)
@@ -153,11 +153,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(2, fallbackType, ONE | INS, null));
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                    SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                     SequenceType.ATOMIC_SEQUENCE);
 
             SpecificFunctionType mapBuildValueArg = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
+                    SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                     SequenceType.ANY_SEQUENCE);
 
 //            register("index", 2, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -172,7 +172,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 //                throw new AssertionError(e);
 //            }
             FunctionItemType opFnType = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                    SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                     SequenceType.ANY_SEQUENCE);
             register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, AnyItemType.getInstance(), STAR, null)
@@ -181,7 +181,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(3, opFnType, ONE, null));
 
             ItemType filterFunctionType = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
+                    SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
                     SequenceType.OPTIONAL_BOOLEAN);
 
             register("keys-where", 2, e -> e.populate(MapKeysWhere::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
@@ -216,7 +216,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
-                    new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE},
+                    SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
                     SequenceType.OPTIONAL_BOOLEAN
             );
 
@@ -605,7 +605,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                                      new InsertBefore.InsertIterator(args[1].iterate(), args[0].iterate(), 1)
                                              )),
                                              new SpecificFunctionType(
-                                                     new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
+                                                     SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
                                                      SequenceType.ANY_SEQUENCE) {
                                              }));
             } else {

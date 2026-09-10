@@ -66,7 +66,7 @@ public class MetadataResource implements Resource {
         // Add a fetch() function, which can be used to fetch the resource
         Callable fetcher = new CallableDelegate((context1, arguments) -> content.getItem());
 
-        FunctionItemType fetcherType = new SpecificFunctionType(new SequenceType[0], SequenceType.SINGLE_ITEM);
+        FunctionItemType fetcherType = new SpecificFunctionType(SequenceType.SINGLE_ITEM);
         CallableFunction fetcherFunction = new CallableFunction(0, fetcher, fetcherType);
 
         map.initialPut("fetch", fetcherFunction);

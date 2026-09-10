@@ -28,6 +28,7 @@ import net.sf.saxon.type.coercion.FunctionItemCoercionPlan;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -48,16 +49,42 @@ public class SpecificFunctionType extends AnyFunctionType {
             new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.ANY_SEQUENCE);
 
 
+    /**
+     * Construct a specific function type
+     * @param argTypes the types of the arguments to the function
+     * @param resultType the type of the function result
+     */
     public SpecificFunctionType(SequenceType[] argTypes, SequenceType resultType) {
         this.argTypes = Objects.requireNonNull(argTypes);
         this.resultType = Objects.requireNonNull(resultType);
         this.annotations = AnnotationList.EMPTY;
     }
 
+    /**
+     * Construct a specific function type including function annotations
+     *
+     * @param argTypes   the types of the arguments to the function
+     * @param resultType the type of the function result
+     * @param annotations the function annotations
+     */
+
     public SpecificFunctionType(SequenceType[] argTypes, SequenceType resultType, AnnotationList annotations) {
         this.argTypes = Objects.requireNonNull(argTypes);
         this.resultType = Objects.requireNonNull(resultType);
         this.annotations = Objects.requireNonNull(annotations);
+    }
+
+    /**
+     * Convenience variadic constructor
+     * @param types the argument types, followed by the result type
+     */
+    public SpecificFunctionType(SequenceType... types) {
+        if (types.length == 0) {
+            throw new IllegalArgumentException("No result type supplied");
+        }
+        this.argTypes = Arrays.copyOf(types, types.length - 1);
+        this.resultType = types[types.length - 1];
+        this.annotations = AnnotationList.EMPTY;
     }
 
     /**

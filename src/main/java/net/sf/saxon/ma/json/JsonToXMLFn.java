@@ -31,9 +31,9 @@ public class JsonToXMLFn extends SystemFunction {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         SpecificFunctionType fallbackType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
+                SequenceType.SINGLE_STRING, SequenceType.SINGLE_ATOMIC);
         SpecificFunctionType parserType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_UNTYPED_ATOMIC}, SequenceType.OPTIONAL_ITEM);
+                SequenceType.SINGLE_UNTYPED_ATOMIC, SequenceType.OPTIONAL_ITEM);
         OptionsParameter jsonToXmlOptions = new OptionsParameter(version);
         jsonToXmlOptions.addAllowedOption("liberal", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, null);

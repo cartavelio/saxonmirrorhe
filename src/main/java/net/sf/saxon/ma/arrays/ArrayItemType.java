@@ -13,7 +13,6 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
@@ -274,8 +273,7 @@ public class ArrayItemType extends AnyFunctionType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40)
-            throws XPathException {
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role, boolean allow40) {
         return new SpecificFunctionType(
                 getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
     }

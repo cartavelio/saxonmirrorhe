@@ -98,7 +98,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
             });
             SequenceType returnType = ((UnionType) type).getResultTypeOfCast();
             return new CallableFunction(1, callable,
-                                        new SpecificFunctionType(new SequenceType[]{SequenceType.OPTIONAL_ATOMIC}, returnType));
+                                        new SpecificFunctionType(SequenceType.OPTIONAL_ATOMIC, returnType));
         }
     }
 
@@ -319,8 +319,7 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
          */
         @Override
         public FunctionItemType getFunctionItemType() {
-            return new SpecificFunctionType(
-                    new SequenceType[0], arityOneConstructor.getFunctionItemType().getResultType());
+            return new SpecificFunctionType(arityOneConstructor.getFunctionItemType().getResultType());
         }
 
         /**

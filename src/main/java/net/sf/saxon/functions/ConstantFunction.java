@@ -42,7 +42,7 @@ public class ConstantFunction extends AbstractFunction  {
      */
     @Override
     public FunctionItemType getFunctionItemType() {
-        return new SpecificFunctionType(NO_ARGS, resultType);
+        return new SpecificFunctionType(resultType);
     }
 
     /**

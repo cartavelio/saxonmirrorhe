@@ -109,7 +109,7 @@ public class Idref extends SystemFunction implements IContextAccessorFunction {
         return new CallableFunction(
                 new SymbolicName.F(getFunctionName(), 1),
                 body,
-                new SpecificFunctionType(new SequenceType[]{SequenceType.STRING_SEQUENCE}, SequenceType.NODE_SEQUENCE));
+                new SpecificFunctionType(SequenceType.STRING_SEQUENCE, SequenceType.NODE_SEQUENCE));
     }
 
 

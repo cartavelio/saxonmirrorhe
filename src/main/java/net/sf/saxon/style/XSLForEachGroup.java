@@ -236,7 +236,7 @@ public final class XSLForEachGroup extends StyleElement {
             splitWhen = typeCheck("break-when", splitWhen);
             try {
                 SpecificFunctionType breakWhenType = new SpecificFunctionType(
-                        new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM}, SequenceType.SINGLE_BOOLEAN);
+                        SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_BOOLEAN);
                 Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0, "XTTE1100");
                 splitWhen = tc.staticTypeCheck(splitWhen,

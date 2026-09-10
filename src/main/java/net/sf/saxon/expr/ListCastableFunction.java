@@ -44,7 +44,7 @@ public class ListCastableFunction extends ListConstructorFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         return new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE,
                 SequenceType.SINGLE_BOOLEAN);
     }
 

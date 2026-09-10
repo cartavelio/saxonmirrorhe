@@ -90,7 +90,7 @@ public class ListConstructorFunction extends AbstractFunction {
         SequenceType argType = allowEmpty ? SequenceType.OPTIONAL_ATOMIC : SequenceType.SINGLE_ATOMIC;
 
         return new SpecificFunctionType(
-                new SequenceType[]{argType},
+                argType,
                 SequenceType.zeroOrMore(resultType));
     }
 

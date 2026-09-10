@@ -92,8 +92,7 @@ public class TransformFn extends SystemFunction implements Callable {
         op.addAllowedOption("package-node", SequenceType.SINGLE_NODE);
         op.addAllowedOption("package-version", SequenceType.SINGLE_STRING);
         op.addAllowedOption("post-process", SequenceType.one(
-                new SpecificFunctionType(
-                        new SequenceType[]{SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE},
+                new SpecificFunctionType(SequenceType.SINGLE_STRING, SequenceType.ANY_SEQUENCE,
                         SequenceType.ANY_SEQUENCE)));
         op.addAllowedOption("requested-properties", SequenceType.SINGLE_MAP);
         op.addAllowedOption("serialization-params", SequenceType.SINGLE_MAP);

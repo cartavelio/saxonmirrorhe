@@ -79,7 +79,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         SpecificFunctionType predicate = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ITEM,
                 SequenceType.SINGLE_BOOLEAN);
 
         register("filter", 2, e -> e.populate( FilterFn::new, AnyItemType.getInstance(),
@@ -88,7 +88,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(1, predicate, ONE, null));
 
         SpecificFunctionType foldLeftArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM},
+                SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM,
                 SequenceType.ANY_SEQUENCE);
         register("fold-left", 3, e -> e.populate( FoldLeftFn::new, AnyItemType.getInstance(),
                  STAR, LATE)
@@ -97,7 +97,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(2, foldLeftArg, ONE, null));
 
         SpecificFunctionType foldRightArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE},
+                SequenceType.SINGLE_ITEM, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
         register("fold-right", 3, e -> e.populate( FoldRightFn::new, AnyItemType.getInstance(),
@@ -107,7 +107,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(2, foldRightArg, ONE, null));
 
         SpecificFunctionType forEachArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ITEM,
                 SequenceType.ANY_SEQUENCE);
         register("for-each", 2, e -> e.populate( ForEachFn::new, AnyItemType.getInstance(),
                  STAR, LATE)
@@ -115,7 +115,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(1, forEachArg, ONE, null));
 
         SpecificFunctionType forEachPairArg = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM},
+                SequenceType.SINGLE_ITEM, SequenceType.SINGLE_ITEM,
                 SequenceType.ANY_SEQUENCE);
         register("for-each-pair", 3, e -> e.populate( ForEachPairFn::new, AnyItemType.getInstance(),
                  STAR, LATE)

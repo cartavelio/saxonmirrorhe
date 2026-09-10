@@ -35,7 +35,7 @@ public class RegexGroup extends ContextAccessorFunction {
     public FunctionItem bindContext(XPathContext context) throws XPathException {
         FunctionItem alwaysEmptyFunction = new CallableFunction(1, new AlwaysEmpty(),
                                                                 new SpecificFunctionType(
-                                                                        new SequenceType[]{SequenceType.SINGLE_INTEGER},
+                                                                        SequenceType.SINGLE_INTEGER,
                                                                         SequenceType.SINGLE_STRING));
         if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
             return alwaysEmptyFunction;
