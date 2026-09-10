@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<release number="11.1" date="2021-12-31" xmlns="http://www.saxonica.com/ns/doc/changes">
+    
+ 
+    
+    <category name="s9api">
+        
+        <div class="javaonly">
+            
+            <p>Extensive changes have been made to integrate catalog-based URI resolution using the open-source
+            <code>XmlResolver</code> developed by Norm Tovey-Walsh.</p>
+            
+            <ul>
+                <li><p>When resolving URIs referring to XML documents, the preferred approach now is to implement the
+                new class <code>ResourceResolver</code>. The existing JAXP class <code>URIResolver</code> is still accepted
+                in public-facing APIs for backwards compatibility, but is no longer used internally. The new 
+                <code>ResourceResolver</code> is provided with more information about the nature of the request, which
+                may be useful for some applications.</p></li>
+                <li><p>Specifically, classes such as <code>XPathContext</code>, <code>Controller</code>, and <code>Configuration</code>
+                no longer have <code>getURIResolver()</code> and <code>setURIResolver()</code> methods.</p></li>
+                <li><p>On s9api classes such as <code>XsltCompiler</code> and <code>XQueryEvaluator</code>, the 
+                    <code>getURIResolver()</code> and <code>setURIResolver()</code> are retained but deprecated; they
+                    map internally to calls on <code>getResourceResolver()</code> and <code>setResourceResolver()</code>
+                </p></li>
+                <li><p>There is now a consistent strategy for fallback from one resolver to another. If the resolver
+                    on a local class such as <code>XsltCompiler</code> returns null, then the central <code>Configuration</code> level
+                resolver is called; if this returns null, then a system default resolver is called. The default resolver
+                on local classes returns null. The default resolver at <code>Configuration</code> level invokes
+                the external <code>XmlResolver</code> (though by default, there is no catalog, so this returns null). The
+                system default resolver uses standard JDK methods for resolving <code>http</code>, <code>https</code>, and <code>file</code> URIs, and also
+                includes code for handling <code>data</code> URIs</p></li>
+                <li><p></p></li>
+                <li><p>If the Saxon serialization extension property <code>next-in-chain</code> is used, the relevant URI is now
+                resolved using the Configuration-level common resource resolver, not the Transformer-level resolver.</p></li>
+                <li><p></p></li>
+                <li><p></p></li>
+                <li><p></p></li>
+                <li><p></p></li>
+                <li><p></p></li>
+                <li><p></p></li>
+            </ul>
+        
+        </div>
+    </category>
+
+ 
+    <category name="dotnet">
+        <div class="csonly">
+ 
+        </div>
+            
+    </category>
+    
+    <category name="localization">
+        <div class="csonly">
+        
+        </div>
+    </category>
+    
+   
+    
+ 
+   
+
+
+</release>
