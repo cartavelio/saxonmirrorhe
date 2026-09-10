@@ -349,11 +349,10 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return new SimpleStepExpression(getSelect(), getAction());
         }
 
-        // Rewrite (1 to $N) ! (. + $M) as ($N to $N + $M)
-        if (getSelect() instanceof RangeExpression && isSimpleArithmeticShift(getAction())) {
+        // Rewrite (1 to $N) ! (. + $M) as (1+ $M to $N + $M)
+        if (getSelect() instanceof RangeExpression range && isSimpleArithmeticShift(getAction())) {
             ArithmeticExpression arith = (ArithmeticExpression) getAction();
 
-            RangeExpression range = (RangeExpression) getSelect();
             return new RangeExpression(
                     new ArithmeticExpression(range.getStartExpression().copy(new RebindingMap()),
                                              arith.getOperator(),
@@ -367,13 +366,12 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
         }
 
 
-        // Rewrite (1 to 1000) ! (. + $N) as ($N to 1000 + $N)
-        if (getSelect() instanceof Literal
-                && ((Literal)getSelect()).getGroundedValue() instanceof IntegerRange
+        // Rewrite (1 to 1000) ! (. + $N) as (1 + $N to 1000 + $N)
+        if (getSelect() instanceof Literal lit
+                && lit.getGroundedValue() instanceof IntegerRange range
                 &&  isSimpleArithmeticShift(getAction())
                 && getSeparatorExpression() == null) {
             ArithmeticExpression arith = (ArithmeticExpression) getAction();
-            IntegerRange range = (IntegerRange) ((Literal) getSelect()).getGroundedValue();
             Expression shift = arith.getRhsExpression();
             Expression newStart = new ArithmeticExpression(
                     Literal.makeLiteral(new Int64Value(range.start), this),
@@ -406,20 +404,21 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
      * @return true if it takes the required form
      */
     private boolean isSimpleArithmeticShift(Expression exp) {
-        if (!(exp instanceof ArithmeticExpression)) {
+        if (exp instanceof ArithmeticExpression arith) {
+            if (!(arith.getLhsExpression() instanceof ContextItemExpression)) {
+                return false;
+            }
+            if (!(arith.getOperator() == OperatorSymbol.PLUS || arith.getOperator() == OperatorSymbol.MINUS)) {
+                return false;
+            }
+            if (!(arith.getRhsExpression() instanceof Literal || arith.getRhsExpression() instanceof VariableReference)) {
+                return false;
+            }
+            // bug 7191
+            return arith.getRhsExpression().getItemType() == BuiltInAtomicType.INTEGER;
+        } else {
             return false;
         }
-        ArithmeticExpression arith = (ArithmeticExpression) exp;
-        if (!(arith.getLhsExpression() instanceof ContextItemExpression)) {
-            return false;
-        }
-        if (!(arith.getOperator() == OperatorSymbol.PLUS || arith.getOperator() == OperatorSymbol.MINUS)) {
-            return false;
-        }
-        if (!(arith.getRhsExpression() instanceof Literal || arith.getRhsExpression() instanceof VariableReference)) {
-            return false;
-        }
-        return true;
     }
 
     /**
