@@ -60,6 +60,9 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
         for (NodeName nn : groupByName.keySet()) {
             names.add(new SpecificQNameTest(nn.getStructuredQName(), pool, nn.obtainFingerprint(pool)));
         }
+        if (names.size() == 1) {
+            return names.get(0);
+        }
         return new UnionQNameTest(names);
     }
 
