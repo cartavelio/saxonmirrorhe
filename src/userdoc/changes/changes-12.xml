@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<release number="11" date="2021-10-06" xmlns="http://www.saxonica.com/ns/doc/changes">
+    
+    <category name="documentation">
+        
+ 
+        
+    </category>
+    
+    <!--<category name="xslt30">
+
+ 
+    </category>-->
+    
+    <!--<category name="xpath31">
+
+ 
+    </category>-->
+    
+    <!--<category name="functions31">
+
+ 
+    </category>-->
+    
+    <category name="s9api" class="javaonly">
+        
+  
+    </category>
+
+    <category name="JAXP" class="javaonly">
+        
+      
+        
+    </category>
+    
+    <category name="dotnet" class="csonly">
+        
+        <p>SaxonCS adds support for LINQ documents (<code>XDocument</code> class) alongside DOM support. The <code>DocumentBuilder</code>
+        has new methods to allow building from a LINQ source, or wrapping a LINQ node as an XDM node, and a new <code>LinqDestination</code>
+        class allows the result of a query or transformation to be written to a LINQ tree.</p>
+        
+        <p>With this feature, it becomes possible to run XPath 3.1 queries against LINQ documents, returning nodes in the original LINQ 
+            tree.</p>
+        
+        
+    </category>
+    
+    <category name="localization" class="javaonly">
+        
+     
+        
+    </category>
+    
+    <category name="spi">
+        
+   
+    </category>
+
+    <category name="serialization">
+        
+    
+ 
+    </category>
+    
+    <category name="command-line">
+        
+       
+        
+    </category>
+    
+    <category name="extensions">
+        
+       
+ 
+
+    
+    </category>
+    
+    <category name="sql" class="javaonly">
+        
+       
+  
+    </category>
+    
+    
+    
+    <category name="xquery-update" class="csonly">
+        
+       
+    </category>
+    
+   
+
+
+</release>
