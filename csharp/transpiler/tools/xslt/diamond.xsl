@@ -2,6 +2,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
    xmlns:xs="http://www.w3.org/2001/XMLSchema"
    xmlns:f="http://ns.saxonica.com/local-functions"
+   xmlns:map="http://www.w3.org/2005/xpath-functions/map"
    exclude-result-prefixes="#all"
    expand-text="yes"
    default-mode="diamond"
@@ -198,9 +199,28 @@
       priority="50">
       <xsl:value-of select="arguments/argument[1]/@RESOLVED_TYPE => replace('\[\]$', '') => f:adjustTypeNamespace()"/>
    </xsl:template>
-   
- 
- 
+
+   <!-- This template handles an apparently new and currently unique case in
+        ParseXml.xml. It threads a needle to avoid matching other patterns with
+        the same priority that should apply. Perhaps this could be done a
+        different/better way? -->
+   <xsl:template match="*[not(local-name(.) = ('initializer', 'argument'))
+                          and @nodeType='ObjectCreationExpr'
+                          and type/@RESOLVED_TYPE='java.util.HashMap'
+                          and ancestor::variable]">
+     <xsl:variable name="type" select="ancestor::variable/type/typeArguments"/>
+     <xsl:for-each select="$type/typeArgument">
+       <xsl:if test="position() gt 1">,</xsl:if>
+       <xsl:choose>
+         <xsl:when test="map:contains($specialTypes, @RESOLVED_TYPE)">
+           <xsl:value-of select="map:get($specialTypes, @RESOLVED_TYPE)"/>
+         </xsl:when>
+         <xsl:otherwise>
+           <xsl:value-of select="f:adjustTypeNamespace(@RESOLVED_TYPE)"/>
+         </xsl:otherwise>
+       </xsl:choose>
+     </xsl:for-each>
+   </xsl:template>   
  
    <xsl:template match="*">
       <xsl:text>/*FAILED TO RESOLVE DIAMOND OPERATOR*/</xsl:text>
