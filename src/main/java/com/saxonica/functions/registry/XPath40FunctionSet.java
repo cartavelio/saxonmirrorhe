@@ -1,7 +1,6 @@
 package com.saxonica.functions.registry;
 
 import com.saxonica.functions.qt4.*;
-import net.sf.saxon.functions.AtomicEqual;
 import net.sf.saxon.functions.CodepointsToString;
 import net.sf.saxon.functions.CollatingFunctionFree;
 import net.sf.saxon.functions.Concat;
@@ -69,10 +68,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("all-different", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
-
-        register("atomic-equal", 2, e -> e.populate(AtomicEqual::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
         register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
