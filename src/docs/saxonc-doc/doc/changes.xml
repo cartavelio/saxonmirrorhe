@@ -40,7 +40,18 @@
          print to the standard error listener (by default). Alternatively the xsl:message output can be sent to the given file name.</li>
       <li>Multi threading feature added to the processors Xslt30Processor and XQueryProcessor
          (see: bug issue <a href="https://saxonica.plan.io/issues/4428" target="_blank">#4428</a>)</li>
-      <li>Added the new <code>XsltExecutable</code></li>
+      <li>
+         XSLT30 Transformation: We have seperated the compilation and execution of a stylesheet as follows:
+         <ul>
+            <li>The Xslt30Transformer now is used to compile the stylsheet, which returns an XsltExecutable representing 
+               the compiled form of the stylesheet. We have retained the one shot methods transformFileToString, transformFiletoValue and transformFileToFile for backward compatibility. But we recommend the use of the XsltExecutable class</li>
+            <li>Added the new <code>XsltExecutable</code> for the C++ API (Similarly the Python and PHP APIs). It is possible to <code>clone</code> the XsltExecutable object to run different executables.</li>
+         </ul>
+      </li>
+      <li>ICU support added in SaxonC-PE and SaxonC-EE.</li>
+      <li>Improved memory management</li>
+      <li>Added the support of XdmFunctionItem,XdmArray and XdmMap in the Xdm data model for SaxonC. This applies to C++, Python and PHP APIs.</li>
+      
    </ul>
 
 
@@ -90,8 +101,11 @@
                catalog file with Saxon in PHP </li>
             <li>Bug <a href="https://saxonica.plan.io/issues/4302" target="_blank">#4302</a>: High memory
                usage with SaxonC + PHP </li>
+
          </ul>
       </li>
+      
+      <li>Better encoding of string: Redesigned the handling of string between the C++ JNI API and the internal Java API.</li>
       
 
    </ul>
