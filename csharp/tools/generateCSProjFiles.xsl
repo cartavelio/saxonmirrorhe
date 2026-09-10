@@ -101,7 +101,7 @@ EndGlobal
   <xsl:result-document href="{$core.csproj}" method="xml" indent="yes">
     <Project>
       <PropertyGroup>
-        <UseArtifactsOutput>true</UseArtifactsOutput>
+        <!--<UseArtifactsOutput>true</UseArtifactsOutput>-->
         <DefineConstants>{$EDITION}</DefineConstants>
         <xsl:choose>
           <xsl:when test="$nunitBuild = 'true'">
