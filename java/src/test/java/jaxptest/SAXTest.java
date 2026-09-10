@@ -10,6 +10,7 @@ import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.*;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Templates;
@@ -23,6 +24,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -50,30 +52,30 @@ public class SAXTest {
             XMLReader parser = factory.newSAXParser().getXMLReader();
             parser.setErrorHandler(new ErrorHandler() {
                 @Override
-                public void warning(SAXParseException exception) throws SAXException {
+                public void warning(SAXParseException exception) {
                     System.err.println("Called warning");
                 }
 
                 @Override
-                public void error(SAXParseException exception) throws SAXException {
+                public void error(SAXParseException exception) {
                     System.err.println("Called error");
                 }
 
                 @Override
-                public void fatalError(SAXParseException exception) throws SAXException {
+                public void fatalError(SAXParseException exception) {
                     System.err.println("Called fatalError");
                 }
             });
             SAXSource source = new SAXSource(parser, new InputSource(new StringReader(in)));
-            source.setSystemId("http://saxonica.com/");
+            source.setSystemId("https://saxonica.com/");
 
             Configuration config = new Configuration();
-            NodeInfo doc = config.buildDocumentTree(source).getRootNode();
+            config.buildDocumentTree(source).getRootNode();
             fail("parsing should have failed");
         }
-        catch (Exception e) {
-            assertTrue(e instanceof XPathException);
-            assertTrue(e.getCause() instanceof SAXException);
+        catch (XPathException | SAXException | ParserConfigurationException e) {
+            assertInstanceOf(XPathException.class, e);
+            assertInstanceOf(SAXException.class, e.getCause());
             assertTrue(((XPathException)e).hasBeenReported());
         }
     }
@@ -105,27 +107,27 @@ public class SAXTest {
             }
 
             @Override
-            public void startDocument() throws SAXException {
+            public void startDocument()  {
 
             }
 
             @Override
-            public void endDocument() throws SAXException {
+            public void endDocument()  {
 
             }
 
             @Override
-            public void startPrefixMapping(String prefix, String uri) throws SAXException {
+            public void startPrefixMapping(String prefix, String uri) {
 
             }
 
             @Override
-            public void endPrefixMapping(String prefix) throws SAXException {
+            public void endPrefixMapping(String prefix)  {
 
             }
 
             @Override
-            public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+            public void startElement(String uri, String localName, String qName, Attributes atts)  {
                 switch (localName) {
                     case "out":
                         assertEquals(3, loc.getLineNumber());
@@ -143,12 +145,12 @@ public class SAXTest {
             }
 
             @Override
-            public void endElement(String uri, String localName, String qName) throws SAXException {
+            public void endElement(String uri, String localName, String qName)  {
 
             }
 
             @Override
-            public void characters(char[] ch, int start, int length) throws SAXException {
+            public void characters(char[] ch, int start, int length) {
                 String val = new String(ch, start, length);
                 if (val.startsWith("1 2")) {
                     assertEquals(5, loc.getLineNumber());
@@ -160,17 +162,17 @@ public class SAXTest {
             }
 
             @Override
-            public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
+            public void ignorableWhitespace(char[] ch, int start, int length) {
 
             }
 
             @Override
-            public void processingInstruction(String target, String data) throws SAXException {
+            public void processingInstruction(String target, String data) {
 
             }
 
             @Override
-            public void skippedEntity(String name) throws SAXException {
+            public void skippedEntity(String name) {
 
             }
         });
@@ -200,31 +202,33 @@ public class SAXTest {
             serializer.serialize(node);
             assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><b xmlns=\"a\"/>", sw.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             fail();
         }
     }
 
     @Test
     public void testSAXResult() {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<colors>\n"
-                + "    <red>10</red>\n"
-                + "    <blue>20</blue>\n"
-                + "    <green>15</green>  \n"
-                + "</colors>";
-        String xsl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"3.0\">\n"
-                + "    <xsl:output method=\"xml\" indent=\"yes\"/>\n"
-                + "    <xsl:template match=\"/\">\n"
-                + "        <svg xmlns=\"http://www.w3.org/2000/svg\">\n"
-                + "            <xsl:apply-templates/>\n"
-                + "        </svg>\n"
-                + "    </xsl:template>\n"
-                + "    <xsl:template match=\"colors/*\">\n"
-                + "        <circle cx=\"{(position() - 1) * 100}\" cy=\"100\" r=\"{.}\"/>\n"
-                + "    </xsl:template>\n"
-                + "</xsl:stylesheet>";
+        String xml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <colors>
+                    <red>10</red>
+                    <blue>20</blue>
+                    <green>15</green> \s
+                </colors>""";
+        String xsl = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0">
+                    <xsl:output method="xml" indent="yes"/>
+                    <xsl:template match="/">
+                        <svg xmlns="http://www.w3.org/2000/svg">
+                            <xsl:apply-templates/>
+                        </svg>
+                    </xsl:template>
+                    <xsl:template match="colors/*">
+                        <circle cx="{(position() - 1) * 100}" cy="100" r="{.}"/>
+                    </xsl:template>
+                </xsl:stylesheet>""";
 
         try {
             ContentHandler ch = new ContentHandler() {
@@ -235,19 +239,18 @@ public class SAXTest {
                 }
 
                 @Override
-                public void startDocument() throws SAXException {
+                public void startDocument() {
                     assertEquals(0, eventNumber++);
                 }
 
                 @Override
-                public void endDocument() throws SAXException {
+                public void endDocument() {
                     assertEquals(21, eventNumber++);
                     //System.out.println("endDocument");
                 }
 
                 @Override
-                public void startPrefixMapping(String prefix, String uri)
-                        throws SAXException {
+                public void startPrefixMapping(String prefix, String uri) {
                     if (eventNumber == 1) {
                         assertEquals("", prefix);
                         assertEquals("http://www.w3.org/2000/svg", uri);
@@ -262,7 +265,7 @@ public class SAXTest {
                 }
 
                 @Override
-                public void endPrefixMapping(String prefix) throws SAXException {
+                public void endPrefixMapping(String prefix) {
                     if (eventNumber == 7 || eventNumber == 12
                             || eventNumber == 17 || eventNumber == 20) {
                         assertEquals("", prefix);
@@ -275,8 +278,7 @@ public class SAXTest {
 
                 @Override
                 public void startElement(
-                        String namespaceURI, String localName, String qName, Attributes atts)
-                        throws SAXException {
+                        String namespaceURI, String localName, String qName, Attributes atts) {
 
                     if (eventNumber == 2) {
                         assertEquals("svg", localName);
@@ -298,8 +300,7 @@ public class SAXTest {
 
                 @Override
                 public void endElement(
-                        String namespaceURI, String localName, String qName)
-                        throws SAXException {
+                        String namespaceURI, String localName, String qName) {
                     if (eventNumber == 6 || eventNumber == 11 || eventNumber == 16) {
                         assertEquals("circle", localName);
                         assertEquals("circle", qName);
@@ -316,27 +317,24 @@ public class SAXTest {
                 }
 
                 @Override
-                public void characters(char[] ch, int start, int length)
-                        throws SAXException {
+                public void characters(char[] ch, int start, int length) {
                     assertTrue(eventNumber == 3 || eventNumber == 8 || eventNumber == 13 || eventNumber == 18);
                     eventNumber++;
                 }
 
                 @Override
-                public void ignorableWhitespace(char[] ch, int start, int length)
-                        throws SAXException {
+                public void ignorableWhitespace(char[] ch, int start, int length) {
                     fail();
                 }
 
                 @Override
-                public void processingInstruction(String target, String data)
-                        throws SAXException {
+                public void processingInstruction(String target, String data) {
                     System.out.println("processingInstruction: " + target + ", "
                                                + data);
                 }
 
                 @Override
-                public void skippedEntity(String name) throws SAXException {
+                public void skippedEntity(String name) {
                     System.out.println("skippedEntity: " + name);
                 }
             };

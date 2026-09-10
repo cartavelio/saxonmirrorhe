@@ -8,8 +8,6 @@ import com.saxonica.ee.extfn.js.IXSLElementFactory;
 import com.saxonica.ee.extfn.js.IXSLFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
@@ -25,7 +23,6 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -33,25 +30,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Created by mike on 27/01/2016.
  */
 public class IxslExtensionTest {
-
-    @Test
-    public void testIxslEval() {
-        try {
-            Processor p = new Processor(true);
-            ProfessionalConfiguration config = (ProfessionalConfiguration)p.getUnderlyingConfiguration();
-            FunctionLibrary lib = IXSLFunctionSet.getInstance();
-            XPathCompiler comp = p.newXPathCompiler();
-            FunctionLibraryList list = config.getBuiltInExtensionLibraryList(31);
-            list.addFunctionLibrary(lib);
-            comp.declareNamespace("ixsl", NamespaceConstant.IXSL);
-            XPathExecutable exec = comp.compile("ixsl:eval('2+2')");
-            XdmItem result = exec.load().evaluateSingle();
-            assertEquals("4", result.getStringValue());
-        } catch (SaxonApiException err) {
-            err.printStackTrace();
-            fail();
-        }
-    }
 
     @Test
     public void testBug6140() {

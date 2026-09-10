@@ -61,7 +61,7 @@ public class ValidateTests {
 
         String[] args = {
                 "-xsd:" + configTest.getDataDir() + "books.xsd",
-                "-scmout:" + TEMPDIR + "books.scm",
+                "-export:" + TEMPDIR + "books.scm",
                 "-t"};
         try {
             int rc = new Validate().doValidate(args);
@@ -76,7 +76,8 @@ public class ValidateTests {
     private void testImportSCM() {
 
         String[] args = {
-                "-scmin:" + TEMPDIR + "books.scm",
+                "-xsd:" + TEMPDIR + "books.scm",
+                "-xsiloc:off",
                 "-s:" + configTest.getDataDir() + "books.xml",
                 "-t"};
         try {

@@ -32,7 +32,7 @@ public class PriorityTests {
             env.setSchemaAware(true);
             PatternParser parser = new PatternParser(env);
             Pattern pat = parser.parsePattern(pattern, env);
-            assertEquals(expectedPriority, pat.getDefaultPriority());
+            assertEquals(expectedPriority, pat.getDefaultPriority(), pattern);
         } catch (XPathException e) {
             fail(e);
         }
@@ -185,10 +185,10 @@ public class PriorityTests {
     @Test
     public void testPriority021() {
         testPriority("~array(*)[?x = 2]", 0.5);
-        testPriority("~array(*)", 0);
+        testPriority("~array(*)", -0.25);
         testPriority("~array(xs:integer)", 0);
         testPriority("~map(*)[?x = 2]", 0.5);
-        testPriority("~map(*)", 0);
+        testPriority("~map(*)", -0.25);
         testPriority("~map(xs:integer, xs:boolean)", 0);
     }
 

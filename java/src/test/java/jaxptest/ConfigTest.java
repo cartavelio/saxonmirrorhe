@@ -520,7 +520,7 @@ public class ConfigTest {
     public void testSqlExtensionPE() {
         try {
             javax.xml.transform.TransformerFactory tf = new com.saxonica.config.ProfessionalTransformerFactory();
-            tf.setAttribute(FeatureKeys.XSLT_VERSION, "2.0");
+            tf.setAttribute(FeatureKeys.XSLT_VERSION, "3.0");
             tf.setAttribute(net.sf.saxon.lib.FeatureKeys.CONFIGURATION_FILE, getDataDir() + "config-sql.xml");
             tf.newTemplates(new StreamSource(new File(getDataDir() + "books-sql.xsl")));
         } catch (TransformerException err) {

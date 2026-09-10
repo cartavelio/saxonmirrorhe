@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Test options on schema validation interfaces
  */
-public class ValidationTest {
+public class ValidationTestNative {
     private final ConfigTest configTest = new ConfigTest();
 
     private class LocalErrorListener implements ErrorReporter {

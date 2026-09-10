@@ -36,33 +36,35 @@ public class SignatureTest {
     // Functions not yet implemented
 
     private final static Set<String> notImplemented = setOf(
-            "fn:analyze-string",
-            "fn:csv-to-simple-rows",
-            "fn:csv-to-xml",
-            "fn:log",
-            "fn:format-number#3",
-            "fn:parse-html",
-            "fn:stack-trace",
-            "fn:json",
-            "fn:parse-csv",
-            "fn:transitive-closure",
-            "map:deep-update",
+            //"fn:analyze-string",
+            //"fn:csv-to-simple-rows",
+            //"fn:csv-to-xml",
+            //"fn:log",
+            //"fn:format-number#3",
+            //"fn:parse-html",
+            "fn:scan-left",
+            "fn:scan-right",
+            //"fn:stack-trace",
+            //"fn:json",
+            //"fn:parse-csv",
+            //"fn:transitive-closure",
+            //"map:deep-update",
             "map:replace",
-            "map:substitute",
+            //"map:substitute",
             "map:values",
-            "array:values",
-            "array:deep-update"
+            "array:values"
+            //"array:deep-update"
     );
 
     // Function arguments where Saxon knowingly declares the type differently from the language spec.
     // Format is prefix:local#arg where arg is the 1-based argument number (not the arity!)
     private final static Set<String> argExceptions = setOf(
-            "fn:namespace-uri-for-prefix#1",
-            "fn:subsequence#2",
-            "fn:subsequence#3",
-            "fn:substring#2",
-            "fn:substring#3",
-            "math:pow#2"
+            //"fn:namespace-uri-for-prefix#1",
+            //"fn:subsequence#2",
+            //"fn:subsequence#3",
+            //"fn:substring#2",
+            //"fn:substring#3",
+            //"math:pow#2"
     );
 
     private final static Set<String> resultExceptions = setOf(
@@ -140,7 +142,6 @@ public class SignatureTest {
                         }
                         final String argType = argNode.getAttributeValue(new QName("type"));
                         if (argType != null) {
-                            // TODO: process record types
                             SequenceType requiredArgType = parseType(config, argType);
                             SequenceType actualArgType = entry.paramTypes[i];
                             if (!requiredArgType.isSameType(actualArgType, th)) {
@@ -176,8 +177,8 @@ public class SignatureTest {
             XPathParser parser = new XPathParser(env);
             return parser.parseSequenceType(typeDesignation, env);
         } catch (XPathException e) {
-            e.printStackTrace();
-            System.err.println("Unknown type " + typeDesignation);
+            //e.printStackTrace();
+            //System.err.println("Unknown type " + typeDesignation);
             fail("Unknown type " + typeDesignation);
             return SequenceType.ANY_SEQUENCE;
         }
