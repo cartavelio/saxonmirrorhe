@@ -428,29 +428,5 @@
       <created by="Michael Kay" on="2026-04-11"/>
       <reason>Known restrictions in ICU4N</reason>
    </exception>
-   
-   <exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-invisible-xml-001
-      fo-test-fn-invisible-xml-002
-      fo-test-fn-invisible-xml-003" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented in SaxonCS</reason>
-   </exception>
-   
-   <exception test-set="fn-invisible-xml"
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Functionality not yet implemented in SaxonCS</reason>
-   </exception>
-   
-   <exception test-set="misc-BuiltInKeywords" 
-      test-case="Keywords-fn-invisible-xml-1" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2026-01-05"/>
-      <reason>Functionality not yet implemented in SaxonCS</reason>
-   </exception>
- 
-   
 
 </exceptions>
