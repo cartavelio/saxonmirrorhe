@@ -89,7 +89,7 @@ public class ZenoString extends UnicodeString {
      */
 
     private int segmentForOffset(long offset) {
-        if (segments.size() == 0) {
+        if (segments.isEmpty()) {
             throw new IndexOutOfBoundsException("ZenoString is empty");
         }
         int result = binarySearch(offset, 0, offsets.size() - 1);
@@ -100,7 +100,6 @@ public class ZenoString extends UnicodeString {
     }
 
     private int binarySearch(long offset, int start, int end) {
-        //System.err.println("BinarySearch " + start + " " + end);
         if (start == end) {
             long s = offsets.get(start);
             long e = s + segments.get(start).length();
