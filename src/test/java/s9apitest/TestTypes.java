@@ -312,13 +312,18 @@ public class TestTypes {
         try {
             Processor p = new Processor(true);
             ItemTypeFactory itf = new ItemTypeFactory(p);
-            SequenceType it = itf.parseItemType("xs:string").oneOrMore();
+            SequenceType st = itf.parseItemType("xs:string").oneOrMore();
             XdmValue v1 = new XdmAtomicValue("banana");
-            assertTrue(v1.matches(it));
-            it = itf.parseItemType("map(xs:string, xs:integer)").one();
+            assertTrue(v1.matches(st));
+            assertTrue(st.matches(v1));
+            assertFalse(XdmEmptySequence.getInstance().matches(st));
+            assertFalse(st.matches(XdmEmptySequence.getInstance()));
+            st = itf.parseItemType("map(xs:string, xs:integer)").one();
             XdmMap map = new XdmMap();
-            assertTrue(map.matches(it));
-            assertFalse(map.matches(it.getItemType().with(OccurrenceIndicator.ZERO)));
+            assertTrue(map.matches(st));
+            assertTrue(st.matches(map));
+            assertFalse(map.matches(st.getItemType().with(OccurrenceIndicator.ZERO)));
+            assertFalse(st.getItemType().with(OccurrenceIndicator.ZERO).matches(map));
         } catch (SaxonApiException e) {
             fail();
         }
