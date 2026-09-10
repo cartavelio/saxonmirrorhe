@@ -476,11 +476,18 @@ public class XPathProcessor extends SaxonCAPI {
         URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
         compiler.setBaseURI(baseURI);
         XPathSelector selector = compiler.compile(xpathStr).load();
+
         selector.setErrorReporter(SaxonCException.errorReporter);
         applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
 
 
         XdmItem item = selector.evaluateSingle();
+        if(item == null) {
+            if (debug) {
+                System.err.println("Java DEBUG item in XPathProcessor is null " );
+            }
+            return SaxonCAPI.STATUS_FAIL;
+        }
         ObjectHandle handle = SaxonCAPI.createHandle(item);
         return handle.rawValue();
 

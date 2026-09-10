@@ -356,12 +356,12 @@ void SchemaValidator::clearParameters(bool delValues) {
              itr != parameters.end(); itr++) {
             XdmValue *value = itr->second;
             if (value != nullptr) {
-#ifdef DEBUG
-                std::cerr << "XQueryProc.clearParameter() - XdmValue refCount="
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr << "SchemaValidator.clearParameter() - XdmValue refCount="
                   << value->getRefCount() << std::endl;
-#endif
-                delete value;
-                value = nullptr;
+              }
+              delete value;
+              value = nullptr;
             }
         }
     }
