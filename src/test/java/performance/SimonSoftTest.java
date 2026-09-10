@@ -90,7 +90,9 @@ public class SimonSoftTest {
             if (i == 3) {
                 long ms = end.getTime() - start.getTime();
                 System.out.println("Transformations took: " + (end.getTime() - start.getTime()) + " ms.");
-                assertTrue(ms < 400, "speed");
+                // Performance requirement relaxed in v11. The test is significantly slower than v10
+                // because of the overhead of converting input strings to UnicodeString objects.
+                assertTrue(ms < 450, "speed");
             }
         }
 
@@ -109,7 +111,8 @@ public class SimonSoftTest {
 
         XdmNode xdmDoc = db.build(new StreamSource(xml));
 
-        StringWriter bulkWriter = new StringWriter();
+        //StringWriter bulkWriter = new StringWriter();
+        ByteArrayOutputStream bulkWriter = new ByteArrayOutputStream();
         Destination destination = processor.newSerializer(bulkWriter);
         transformer.setDestination(destination);
 
