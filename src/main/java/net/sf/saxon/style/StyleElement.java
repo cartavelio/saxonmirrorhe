@@ -705,7 +705,7 @@ public abstract class StyleElement extends ElementImpl {
                 StructuredQName attName = att.getNodeName().getStructuredQName();
                 env = getStaticContext(attName);
             }
-            return ExpressionTool.make(expression, env, 0, tok -> tok == Token.EOF,
+            return ExpressionTool.make(expression, env, 0, Tokenizer.END_OF_INPUT,
                                        getCompilation().getCompilerInfo().getCodeInjector());
         } catch (XPathException err) {
             err.maybeSetLocation(allocateLocation());

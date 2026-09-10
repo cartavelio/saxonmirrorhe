@@ -65,7 +65,7 @@ public class PatternParser extends XPathParser {
         }
         allowXPath40Syntax = env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || env.getXPathVersion() == 40;
         if (isSelectionPattern(trimmed)) {
-            Expression e = parse(pattern, 0, tok -> tok == Token.EOF, env);
+            Expression e = parse(pattern, 0, Tokenizer.END_OF_INPUT, env);
             if (e instanceof Pattern) {
                 return (Pattern) e;
             } else if (e instanceof ContextItemExpression) {
@@ -148,7 +148,7 @@ public class PatternParser extends XPathParser {
             expect(Token.EOF);
             return result;
         } else {
-            Expression exp = parse(pattern, 0, tok -> tok == Token.EOF, env);
+            Expression exp = parse(pattern, 0, Tokenizer.END_OF_INPUT, env);
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
 
             // If we have a union pattern, check that neither operand is a PredicatePattern

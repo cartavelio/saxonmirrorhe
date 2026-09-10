@@ -602,7 +602,7 @@ public final class EvaluateInstr extends Expression {
                     // Now compile the expression
 
                     try {
-                        expr = ExpressionTool.make(exprText, env, 0, tok -> tok == Token.EOF, null);
+                        expr = ExpressionTool.make(exprText, env, 0, Tokenizer.END_OF_INPUT, null);
                     } catch (XPathException e) {
                         throw new XPathException("Static error in XPath expression supplied to xsl:evaluate: " +
                                                                         e.getMessage() + ". Expression: {" + exprText + "}")

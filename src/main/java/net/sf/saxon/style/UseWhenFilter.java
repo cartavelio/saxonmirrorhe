@@ -756,7 +756,7 @@ public class UseWhenFilter extends ProxyReceiver {
         staticContext.setContainingLocation(location);
         setNamespaceBindings(staticContext);
         Expression expr = ExpressionTool.make(expression, staticContext,
-                                              0, tok -> tok == Token.EOF, null);
+                                              0, Tokenizer.END_OF_INPUT, null);
         expr.setRetainedStaticContext(staticContext.makeRetainedStaticContext());
         expr = typeCheck(expr, staticContext);
         SlotManager stackFrameMap = allocateSlots(expression, expr);
@@ -899,7 +899,7 @@ public class UseWhenFilter extends ProxyReceiver {
         try {
             setNamespaceBindings(staticContext);
             Expression expr = ExpressionTool.make(expression, staticContext,
-                                                  0, tok -> tok == Token.EOF, null);
+                                                  0, Tokenizer.END_OF_INPUT, null);
             expr = typeCheck(expr, staticContext);
             SlotManager stackFrameMap = getPipelineConfiguration().getConfiguration().makeSlotManager();
             ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);

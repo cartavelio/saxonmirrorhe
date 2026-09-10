@@ -9,7 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.GroundedValue;
@@ -50,42 +50,41 @@ public abstract class AttributeValueTemplate {
 
         List<Expression> components = new ArrayList<>(5);
 
-        int i0, i1, i8, i9;
+        int nextSingleLeftBrace, nextDoubleLeftBrace, nextSingleRightBrace, nextDoubleRightBrace;
         int len = avt.length();
         int last = 0;
         while (last < len) {
 
-            i0 = avt.indexOf("{", last);
-            i1 = avt.indexOf("{{", last);
-            i8 = avt.indexOf("}", last);
-            i9 = avt.indexOf("}}", last);
+            nextSingleLeftBrace = avt.indexOf("{", last);
+            nextDoubleLeftBrace = avt.indexOf("{{", last);
+            nextSingleRightBrace = avt.indexOf("}", last);
+            nextDoubleRightBrace = avt.indexOf("}}", last);
 
-            if ((i0 < 0 || len < i0) && (i8 < 0 || len < i8)) {   // found end of string
+            if ((nextSingleLeftBrace < 0 || len < nextSingleLeftBrace) && (nextSingleRightBrace < 0 || len < nextSingleRightBrace)) {   // found end of string
                 addStringComponent(components, avt, last, len);
                 break;
-            } else if (i8 >= 0 && (i0 < 0 || i8 < i0)) {             // found a "}"
-                if (i8 != i9) {                        // a "}" that isn't a "}}"
+            } else if (nextSingleRightBrace >= 0 && (nextSingleLeftBrace < 0 || nextSingleRightBrace < nextSingleLeftBrace)) {             // found a "}"
+                if (nextSingleRightBrace != nextDoubleRightBrace) {                        // a "}" that isn't a "}}"
                     throw new XPathException("Closing curly brace in attribute value template \"" + avt.substring(0, len) + "\" must be doubled")
                             .withErrorCode("XTSE0370").asStaticError();
                 }
-                addStringComponent(components, avt, last, i8 + 1);
-                last = i8 + 2;
-            } else if (i1 >= 0 && i1 == i0) {              // found a doubled "{{"
-                addStringComponent(components, avt, last, i1 + 1);
-                last = i1 + 2;
-            } else if (i0 >= 0) {                        // found a single "{"
-                if (i0 > last) {
-                    addStringComponent(components, avt, last, i0);
+                addStringComponent(components, avt, last, nextSingleRightBrace + 1);
+                last = nextSingleRightBrace + 2;
+            } else if (nextDoubleLeftBrace >= 0 && nextDoubleLeftBrace == nextSingleLeftBrace) {              // found a doubled "{{"
+                addStringComponent(components, avt, last, nextDoubleLeftBrace + 1);
+                last = nextDoubleLeftBrace + 2;
+            } else {                        // found a single "{"
+                //assert nextSingleLeftBrace >= 0;
+                if (nextSingleLeftBrace > last) {
+                    addStringComponent(components, avt, last, nextSingleLeftBrace);
                 }
                 Expression exp;
                 XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
-                //parser.setDefaultContainer(container);
-                //parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
                 parser.setAllowAbsentExpression(true);
-                exp = parser.parse(avt, i0 + 1, tok -> tok == Token.RCURLY, env);
+                exp = parser.parse(avt, nextSingleLeftBrace + 1, Tokenizer.CLOSING_CURLY, env);
                 exp.setRetainedStaticContext(env.makeRetainedStaticContext());
                 exp = exp.simplify();
-                last = parser.getTokenizer().currentTokenStartOffset + 1;
+                last = parser.getTokenizer().inputOffset + 1;
 
                 if (env instanceof ExpressionContext && ((ExpressionContext)env).getStyleElement() instanceof XSLAnalyzeString
                         && isIntegerOrIntegerPair(exp)) {
@@ -101,8 +100,6 @@ public abstract class AttributeValueTemplate {
                             new StringLiteral(StringValue.SINGLE_SPACE), env).simplify());
                 }
 
-            } else {
-                throw new IllegalStateException("Internal error parsing AVT");
             }
         }
 

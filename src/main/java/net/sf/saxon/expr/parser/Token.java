@@ -51,7 +51,7 @@ public class Token {
      * Pseudo-token representing the end of the expression
      */
     public static final Token EOF = new Token("<eof>");
-    public static final Token VBAR = new Token("|");
+    public static final Token VBAR = new Token("|", OperatorSymbol.UNION);
     public static final Token SLASH = new Token("/");
     public static final Token AT = new Token("@");
     public static final Token LSQB = new Token("[");
@@ -184,13 +184,31 @@ public class Token {
 
     public static class NumericLiteral extends Token {
         private final NumericValue value;
-        public NumericLiteral(String lexicalForm, NumericValue value) {
+        private final int radix;
+        public NumericLiteral(String lexicalForm, NumericValue value, int radix) {
             super(lexicalForm);
             this.value = value;
+            this.radix = radix;
         }
         public NumericValue getValue() {
             return value;
         }
+
+        public int getRadix() {
+            return radix;
+        }
+    }
+
+    /**
+     * Token representing a pragma, that is the construct `(#...#)` that
+     * acts as the first part of an extension expression. The supplied value
+     * is the entire pragma including its delimiters
+     */
+    public static class Pragma extends Token {
+        public Pragma(String value) {
+            super(value);
+        }
+
     }
 
     /**
@@ -218,6 +236,10 @@ public class Token {
 
         public DirectCommentConstructor(String content) {
             super(content);
+        }
+
+        public String getContent() {
+            return super.toString();
         }
 
         public String toString() {
@@ -255,18 +277,11 @@ public class Token {
     public static abstract class ComplexToken extends Token {
 
         protected final Tokenizer tokenizer;
-        private final String input;
-        private final int startOffset;
-
-        private int position;
         protected String tokenType;
 
         public ComplexToken(Tokenizer tokenizer, String input, int startOffset) {
             super(input.substring(startOffset, Integer.min(input.length(), startOffset + 30)));
             this.tokenizer = tokenizer;
-            this.input = input;
-            this.startOffset = startOffset;
-            this.position = startOffset;
         }
 
         public void close() throws XPathException {

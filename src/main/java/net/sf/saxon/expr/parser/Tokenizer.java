@@ -20,11 +20,23 @@ import net.sf.saxon.value.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
+import java.util.function.Predicate;
 
 /**
- * Tokenizer for expressions and inputs.
- * <p>This code was originally derived from James Clark's xt, though it has been greatly modified since.
- * See copyright notice at end of file.</p>
+ * Tokenizer for XPath and XQuery expressions.
+ * <p>Heavily modified in Saxon 13, based on the principles in the XQuery 4.0 specification.
+ * Tokenization is independent of the syntactic context: the tokenizer no longer attempts to
+ * distinguish whether <code>'*'</code>, for example, is a multiplication operator, a wildcard,
+ * or an occurrence indicator; it leaves that decision to the parser.</p>
+ * <p>The main complication is "complex tokens": constructs such as string templates, string
+ * constructors, and XQuery direct element constructors that contain embedded expressions,
+ * always delimited by curly braces. The tokenizer recognises complex tokens by their initial
+ * characters, and returns an appropriate {@link Token} object to the parser, which then starts
+ * reading its content using calls on {@link Tokenizer#nextChar} calls. When an open brace
+ * identifying an embedded expression is encountered, the parser calls
+ * {@link Tokenizer#startEmbeddedExpression}, which has the effect that when the matching
+ * closing brace is encountered, and "end of expression" is signalled back to the parser</p>
  */
 
 
@@ -36,7 +48,18 @@ public final class Tokenizer {
     @CSharpModifiers(code={"public", "const"})    // The transpiler handles this for int but not for char??
     public final static char NUL = (char)0;
 
+    public static Predicate<Tokenizer> END_OF_INPUT =
+            tok -> tok.inputOffset >= tok.inputLength;
 
+    public static Predicate<Tokenizer> CLOSING_CURLY =
+            tok -> tok.inputOffset < tok.inputLength
+                    && tok.input.charAt(tok.inputOffset) == '}'
+                    && tok.braceDepth <= 0;
+
+    public static Predicate<Tokenizer> finishOnKeyword(String keyword) {
+        return tok -> tok.nextToken instanceof Token.NameToken
+                && ((Token.NameToken)tok.nextToken).getValue().equals(keyword);
+    }
 
 
     /**
@@ -85,6 +108,13 @@ public final class Tokenizer {
     private int nextLineNumber = 1;
 
     /**
+     * The depth of nesting of curly brace tokens
+     */
+
+    private int braceDepth = 0;
+    private Stack<Integer> braceDepthStack = new Stack<>();
+    private Stack<Predicate<Tokenizer>> finishConditionStack = new Stack<>();
+    /**
      * List containing the positions (offsets in the input string) at which newline characters
      * occur
      */
@@ -92,7 +122,7 @@ public final class Tokenizer {
     private List<Integer> newlineOffsets = null;
 
     /**
-     * The token number of the token that preceded the current token
+     * The token that preceded the current token
      */
     private Token precedingToken = Token.UNKNOWN;
 
@@ -126,10 +156,14 @@ public final class Tokenizer {
 
     public boolean allowSaxonExtensions = false;
 
+    private Predicate<Tokenizer> finishCondition = END_OF_INPUT;
+
     public Tokenizer() {
     }
 
-
+    public void setFinishCondition(Predicate<Tokenizer> condition) {
+        finishCondition = condition;
+    }
 
     //
     // Lexical analyser for expressions, queries, and XSLT patterns
@@ -166,6 +200,7 @@ public final class Tokenizer {
         // correct category, by looking at the following token. In addition, it combines compound tokens
         // such as "instance of" and "cast as".
 
+        skipWhitespaceAndComments();
         lookAhead();
         next();
     }
@@ -203,11 +238,22 @@ public final class Tokenizer {
         currentTokenStartOffset = nextTokenStartOffset;
         lineNumber = nextLineNumber;
 
-        if (!(currentToken instanceof Token.ComplexToken)) {
+        skipWhitespaceAndComments();
+        // This is needed because the test of finishCondition looks at characters rather than
+        // tokens, so we need to skip insignificant characters
+
+        if (currentToken instanceof Token.ComplexToken) {
+            // A complex token is one that includes embedded expressions. We can't look ahead
+            // to the next token until we have parsed these.
+            nextToken = Token.UNKNOWN;
+            nextTokenValue = null;
+        } else if (currentToken == Token.EOF) {
+            // no action
+        } else if (finishCondition.test(this)) {
+            nextToken = Token.EOF;
+            nextTokenValue = null;
+        } else {
             lookAhead();
-//            // We can't do lookahead in the case of a START_TAG because we haven't yet
-//            // parsed the direct element constructor and don't know where it will end.
-//            // The parser will call lookahead after parsing the direct element constructor
         }
 
     }
@@ -233,6 +279,13 @@ public final class Tokenizer {
      * @throws XPathException if a lexical error occurs
      */
     public void lookAhead() throws XPathException {
+
+        if (finishCondition.test(this)) {
+            nextToken = Token.EOF;
+            nextTokenValue = null;
+            return;
+        }
+
         precedingToken = nextToken;
         precedingTokenValue = nextTokenValue;
         nextTokenValue = null;
@@ -290,9 +343,11 @@ public final class Tokenizer {
                     return;
                 case '{':
                     nextToken = Token.LCURLY;
+                    braceDepth++;
                     return;
                 case '}':
                     nextToken = Token.RCURLY;
+                    braceDepth--;
                     return;
                 case ';':
                     nextToken = Token.SEMICOLON;
@@ -302,8 +357,8 @@ public final class Tokenizer {
                     return;
                 case '(':
                     if (isFollowedBy('#')) {
+                        int pragmaStart = inputOffset-1;
                         inputOffset++;
-                        int pragmaStart = inputOffset;
                         int nestingDepth = 1;
                         while (nestingDepth > 0 && inputOffset < (inputLength - 1)) {
                             if (input.charAt(inputOffset) == '\n') {
@@ -322,8 +377,8 @@ public final class Tokenizer {
                         if (nestingDepth > 0) {
                             throw new XPathException("Unclosed XQuery pragma");
                         }
-                        nextToken = Token.PRAGMA;
-                        nextTokenValue = input.substring(pragmaStart, inputOffset - 2);
+
+                        nextToken = new Token.Pragma(input.substring(pragmaStart, inputOffset));
                         return;
                     }
                     if (isFollowedBy(':')) {
@@ -475,7 +530,7 @@ public final class Tokenizer {
                         } else if (isXQuery && NameChecker.isNCNameStartChar(c2)) {
                             int savedPosition = inputOffset;
                             if (readDirectElementConstructor()) {
-                                nextToken = new Token.DirectElementConstructor(this, input, savedPosition);
+                                nextToken = new Token.DirectElementConstructor(this, input, savedPosition-1);
                                 nextTokenValue = nextToken.toString();
                                 return;
                             }
@@ -539,7 +594,7 @@ public final class Tokenizer {
                             }
                             body = body.replace("_", "");
                             IntegerValue val = parseHexLiteral(body);
-                            nextToken = new Token.NumericLiteral(body, val);
+                            nextToken = new Token.NumericLiteral(body, val, 16);
                             return;
                         } else if (input.charAt(inputOffset) == 'b') {
                             inputOffset++;
@@ -550,9 +605,9 @@ public final class Tokenizer {
                             if (body.startsWith("_") || body.endsWith("_")) {
                                 throw new XPathException("Underscore not allowed at start or end of binary literal");
                             }
-                            nextTokenValue = body.replace("_", "");
+                            body = body.replace("_", "");
                             IntegerValue val = parseBinaryLiteral(body);
-                            nextToken = new Token.NumericLiteral(body, val);
+                            nextToken = new Token.NumericLiteral(body, val, 2);
                             return;
                         }
                     }
@@ -651,7 +706,7 @@ public final class Tokenizer {
                     }
                     nextTokenValue = input.substring(nextTokenStartOffset, inputOffset).replace("_", "");
                     NumericValue value = NumericValue.parseNumber(nextTokenValue);
-                    nextToken = new Token.NumericLiteral(nextTokenValue, value); 
+                    nextToken = new Token.NumericLiteral(nextTokenValue, value, 10);
                     return;
                 case '"':
                 case '\'':
@@ -697,34 +752,6 @@ public final class Tokenizer {
                         }
                         nextToken = new Token.StringConstructor(this, input, inputOffset);
                         return;
-//                        inputOffset += 2;
-//                        int j = inputOffset;
-//                        int newlines = 0;
-//                        while (true) {
-//                            if (j >= inputLength) {
-//                                throw new XPathException("Unclosed string template in expression");
-//                            }
-//                            if (input.charAt(j) == '\n') {
-//                                newlines++;
-//                            } else if (input.charAt(j) == '`' && j + 1 < inputLength && input.charAt(j + 1) == '{') {
-//                                //nextToken = Token.STRING_CONSTRUCTOR_INITIAL;  // TODO: fix me
-//                                nextToken = new Token.StringLiteral(input.substring(inputOffset, j));
-//                                nextTokenValue = input.substring(inputOffset, j);
-//                                inputOffset = j + 2;
-//                                incrementLineNumber(newlines);
-//                                return;
-//                            } else if (input.charAt(j) == ']' && j + 2 < inputLength
-//                                    && input.charAt(j + 1) == '`' && input.charAt(j + 2) == '`') {
-//                                //nextToken = Token.STRING_LITERAL_BACKTICKED;    // TODO: fix me
-//                                nextToken = new Token.StringLiteral(input.substring(inputOffset, j));
-//                                // Can't return STRING_LITERAL because it's not accepted everywhere that a string literal is, and
-//                                // because it doesn't get unescaped (bug 5647)
-//                                nextTokenValue = input.substring(inputOffset, j);
-//                                inputOffset = j + 3;
-//                                incrementLineNumber(newlines);
-//                                return;
-//                            }
-//                            j++;
                         
                     } else {
                         nextToken = new Token.StringTemplate(this, input, inputOffset);
@@ -848,6 +875,46 @@ public final class Tokenizer {
                 && input.substring(inputOffset, inputOffset + len).equals(s);
     }
 
+    /**
+     * Skip any whitespace or comments starting at position {@code inputOffset} in the
+     * input string; on exit {@code inputOffset} is positioned beyond any such whitespace
+     * or comments. The current line and column position are maintained accordingly.
+     * @throws XPathException in the event of an unclosed comment.
+     */
+    private void skipWhitespaceAndComments() throws XPathException {
+        while (inputOffset < inputLength) {
+            char ch = input.charAt(inputOffset);
+            if (ch == ' ' || ch == '\t' || ch == '\r') {
+                inputOffset++;
+            } else if (ch == '\n') {
+                inputOffset++;
+                incrementLineNumber();
+            } else if (ch == '(' && inputOffset < (inputLength - 1) && input.charAt(inputOffset + 1) == ':') {
+                inputOffset+=2;
+                int nestingDepth = 1;
+                while (nestingDepth > 0 && inputOffset < (inputLength - 1)) {
+                    if (input.charAt(inputOffset) == '\n') {
+                        incrementLineNumber();
+                    } else if (input.charAt(inputOffset) == ':' &&
+                            input.charAt(inputOffset + 1) == ')') {
+                        nestingDepth--;
+                        inputOffset++;
+                    } else if (input.charAt(inputOffset) == '(' &&
+                            input.charAt(inputOffset + 1) == ':') {
+                        nestingDepth++;
+                        inputOffset++;
+                    }
+                    inputOffset++;
+                }
+                if (nestingDepth > 0) {
+                    throw new XPathException("Unclosed XPath comment");
+                }
+            } else {
+                return;
+            }
+        }
+    }
+
     @CSharpReplaceException(from = "java.lang.NumberFormatException", to = "System.FormatException")
     private static IntegerValue parseHexLiteral(String body) throws XPathException {
         try {
@@ -895,16 +962,22 @@ public final class Tokenizer {
         if (input.charAt(inputOffset - 1) != '{') {
             throw new AssertionError("Embedded expression must start immediately after '{'");
         }
+        braceDepthStack.push(braceDepth);
+        finishConditionStack.push(finishCondition);
+        finishCondition = CLOSING_CURLY;
+        braceDepth = 0;
+        skipWhitespaceAndComments();
         lookAhead();
         next();
     }
 
 
     public void endEmbeddedExpression() throws XPathException {
-        if (input.charAt(currentTokenStartOffset) != '}') {
+        if (input.charAt(inputOffset++) != '}') {
             throw new AssertionError("Embedded expression must end at '}'");
         }
-        inputOffset = currentTokenStartOffset+1;
+        braceDepth = braceDepthStack.pop();
+        finishCondition = finishConditionStack.pop();
     }
 
     /**
@@ -1127,6 +1200,10 @@ public final class Tokenizer {
         return true;
     }
 
+    public Token getPrecedingToken() {
+        return precedingToken;
+    }
+
     public boolean readDirectCommentConstructor() {
         // On entry, we have seen "<!-" and are positioned at "!"
         int start = inputOffset + 3;
@@ -1158,7 +1235,8 @@ public final class Tokenizer {
 
         int pos = inputOffset;
         while (pos < inputLength) {
-            if (NameChecker.isNCNameChar(input.charAt(pos))) {
+            char c = input.charAt(pos);
+            if (c == ':' || NameChecker.isNCNameChar(input.charAt(pos))) {
                 pos++;
             } else {
                 break;
@@ -1181,7 +1259,7 @@ public final class Tokenizer {
         if (ch == '>') {
             return true;
         }
-        if (NameChecker.isNCNameStartChar(ch)) {
+        if (NameChecker.isNCNameChar(ch)) {
             // check that we have an attribute name followed by "="
             int eq = input.indexOf('=', pos);
             if (eq < 0) {

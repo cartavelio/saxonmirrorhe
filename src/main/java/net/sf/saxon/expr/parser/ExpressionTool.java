@@ -63,7 +63,7 @@ public class ExpressionTool {
      * @param env          An object giving information about the compile-time
      *                     context of the expression
      * @param start        position of the first significant character in the expression
-     * @param terminator   The token that marks the end of this expression; typically
+     * @param finished   The token that marks the end of this expression; typically
      *                     Token.EOF, but may for example be a right curly brace
      * @param codeInjector true  allows injection of tracing, debugging, or performance monitoring code; null if
      *                     not required
@@ -73,13 +73,13 @@ public class ExpressionTool {
 
     /*@NotNull*/
     public static Expression make(String expression, StaticContext env,
-                                  int start, Predicate<Token> terminator,
+                                  int start, Predicate<Tokenizer> finished,
                                   CodeInjector codeInjector) throws XPathException {
         XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
         if (codeInjector != null) {
             parser.setCodeInjector(codeInjector);
         }
-        Expression exp = parser.parse(expression, start, terminator, env);
+        Expression exp = parser.parse(expression, start, finished, env);
         // TODO: parser.parse() already sets the retained static context
         setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
         exp = exp.simplify();

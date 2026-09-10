@@ -70,6 +70,7 @@ public enum OperatorSymbol {
         m.put(OperatorSymbol.MINUS, 10);
         m.put(OperatorSymbol.TIMES, 11);
         m.put(OperatorSymbol.DIV, 11);
+        m.put(OperatorSymbol.IDIV, 11);
         m.put(OperatorSymbol.MOD, 11);
         m.put(OperatorSymbol.UNION, 13);
         m.put(OperatorSymbol.INTERSECT, 14);

@@ -12,7 +12,7 @@ import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.gizmo.DefaultTalker;
 import net.sf.saxon.gizmo.JLine2Talker;
@@ -423,12 +423,12 @@ public class Gizmo {
      * @return an iterator over the results of the expression
      * @throws XPathException if evaluation of the expression fails
      */
-    private SequenceIterator getSelectedItems(StringBuilder selection, Predicate<Token> terminator) throws XPathException {
-        XPathExpression expr = getExpression(selection, terminator);
+    private SequenceIterator getSelectedItems(StringBuilder selection, Predicate<Tokenizer> finished) throws XPathException {
+        XPathExpression expr = getExpression(selection, finished);
         return evaluateExpression(expr, currentDoc);
     }
 
-    private List<NodeInfo> listOfSelectedItems(StringBuilder selection, Predicate<Token> terminator) throws XPathException {
+    private List<NodeInfo> listOfSelectedItems(StringBuilder selection, Predicate<Tokenizer> terminator) throws XPathException {
         // Gather all the items first, then delete them. See bug 5106
         List<NodeInfo> nodes = new ArrayList<>();
         Item node;
@@ -439,7 +439,7 @@ public class Gizmo {
         return nodes;
     }
 
-    private XPathExpression getExpression(StringBuilder selection, Predicate<Token> terminator) throws XPathException {
+    private XPathExpression getExpression(StringBuilder selection, Predicate<Tokenizer> terminator) throws XPathException {
         XPathEvaluator evaluator = new XPathEvaluator(config);
         evaluator.setStaticContext(env);
         for (StructuredQName var : variables.keySet()) {
@@ -507,7 +507,7 @@ public class Gizmo {
 
     private void copy(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
-        SequenceIterator iter = getSelectedItems(buffer, tok -> tok == Token.EOF);
+        SequenceIterator iter = getSelectedItems(buffer, Tokenizer.END_OF_INPUT);
         Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
         builder.open();
         builder.startDocument(0);
@@ -530,7 +530,7 @@ public class Gizmo {
         needCurrentDoc();
         saveCurrentDoc();
         // Gather all the items first, then delete them. See bug 5106
-        List<NodeInfo> nodes = listOfSelectedItems(buffer, tok -> tok == Token.EOF);
+        List<NodeInfo> nodes = listOfSelectedItems(buffer, Tokenizer.END_OF_INPUT);
         // Drop element indexes
         dropElementIndexes();
         for (Item item : nodes) {
@@ -612,10 +612,10 @@ public class Gizmo {
     private void rename(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         saveCurrentDoc();
-        List<NodeInfo> nodes = listOfSelectedItems(buffer, tok -> tok instanceof Token.NameToken && ((Token.NameToken)tok).getValue().equals("as"));
+        List<NodeInfo> nodes = listOfSelectedItems(buffer, Tokenizer.finishOnKeyword("as"));
         dropElementIndexes();
         buffer.replace(0, 3, "");
-        XPathExpression renamer = getExpression(buffer, tok -> tok == Token.EOF);
+        XPathExpression renamer = getExpression(buffer, Tokenizer.END_OF_INPUT);
         for (NodeInfo item : nodes) {
             if (item instanceof MutableNodeInfo) {
                 Item newName = evaluateExpression(renamer, item).next();
@@ -637,8 +637,7 @@ public class Gizmo {
     private void replace(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         saveCurrentDoc();
-        List<NodeInfo> nodes = listOfSelectedItems(buffer,
-                                                   tok -> tok instanceof Token.NameToken && ((Token.NameToken) tok).getValue().equals("with"));
+        List<NodeInfo> nodes = listOfSelectedItems(buffer, Tokenizer.finishOnKeyword("with"));
         dropElementIndexes();
         buffer.replace(0, 5, "");
         XQueryExpression replacement = getQuery(buffer);
@@ -725,8 +724,7 @@ public class Gizmo {
     private void update(StringBuilder buffer, String where) throws XPathException {
         needCurrentDoc();
         saveCurrentDoc();
-        List<NodeInfo> nodes = listOfSelectedItems(buffer,
-                                                   tok -> tok instanceof Token.NameToken && ((Token.NameToken) tok).getValue().equals("with"));
+        List<NodeInfo> nodes = listOfSelectedItems(buffer, Tokenizer.finishOnKeyword("with"));
         dropElementIndexes();
         buffer.replace(0, 5, "");
         XQueryExpression newContent = getQuery(buffer);
@@ -871,7 +869,7 @@ public class Gizmo {
         DocumentImpl saved = currentDoc;
 
         GroundedValue value = SequenceTool.toGroundedValue(
-                getSelectedItems(new StringBuilder(buffer.substring(ws + 1)), tok -> tok == Token.EOF));
+                getSelectedItems(new StringBuilder(buffer.substring(ws + 1)), Tokenizer.END_OF_INPUT));
         if (varName.equals(".")) {
             saveCurrentDoc();
             if (value.getLength() == 1 && value.itemAt(0) instanceof DocumentImpl) {
@@ -920,7 +918,7 @@ public class Gizmo {
 
     private void list(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
-        SequenceIterator iter = getSelectedItems(buffer, tok -> tok == Token.EOF);
+        SequenceIterator iter = getSelectedItems(buffer, Tokenizer.END_OF_INPUT);
         GroundedValue value = SequenceTool.toGroundedValue(iter);
         int size = value.getLength();
         if (size != 1) {
@@ -943,7 +941,7 @@ public class Gizmo {
         if (buffer.toString().trim().isEmpty()) {
             buffer = new StringBuilder(".");
         }
-        SequenceIterator iter = getSelectedItems(buffer, tok -> tok == Token.EOF);
+        SequenceIterator iter = getSelectedItems(buffer, Tokenizer.END_OF_INPUT);
         GroundedValue value = SequenceTool.toGroundedValue(iter);
         int size = value.getLength();
         if (size != 1) {

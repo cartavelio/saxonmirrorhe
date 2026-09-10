@@ -14,7 +14,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ResultDocument;
-import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
@@ -671,7 +671,7 @@ public class ConfigurationReader implements Receiver {
         XPathParser parser = new XPathParser(env);
         GroundedValue value = null;
         try {
-            Expression exp = parser.parse(select, 0, tok -> tok == Token.EOF, env);
+            Expression exp = parser.parse(select, 0, Tokenizer.END_OF_INPUT, env);
             value = SequenceTool.toGroundedValue(exp.iterate(env.makeEarlyEvaluationContext()));
         } catch (XPathException e) {
             error(e);
