@@ -92,6 +92,8 @@ sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
   }
 
   int size = parLen + propLen;
+
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       createProcessorDataWithCapacity(environi->thread, size);
   if (size > 0) {
@@ -101,7 +103,7 @@ sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
 
       addProcessorDataPair(environi->thread, (void *)processorDataRef,
                            (char *)parameters[i].name,
-                           (void *)parameters[i].value);
+                           (void *)parameters[i].value, &r);
     }
 
     i++;
@@ -109,12 +111,12 @@ sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
     for (; j < propLen; j++, i++) {
       addProcessorPropertyPair(environi->thread, (void *)processorDataRef,
                                (char *)properties[j].name,
-                               (char *)properties[j].value);
+                               (char *)properties[j].value, &r);
     }
   }
 
   int64_t result = j_evaluate(environi->thread, (void *)proc->xpathProc, cwd,
-                              xpathStr, encoding, (void *)processorDataRef);
+                              xpathStr, encoding, (void *)processorDataRef, &r);
   if (result == -2) {
     return NULL;
   }
@@ -138,6 +140,8 @@ sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
     }
   }
 
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+
   int size = parLen + propLen;
   int64_t processorDataRef =
       createProcessorDataWithCapacity(environi->thread, size);
@@ -148,7 +152,10 @@ sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
 
       addProcessorDataPair(environi->thread, (void *)processorDataRef,
                            (char *)parameters[i].name,
-                           (void *)parameters[i].value);
+                           (void *)parameters[i].value, &r);
+      if (r.status == -2) {
+        return NULL;
+      }
     }
 
     i++;
@@ -156,14 +163,17 @@ sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
     for (; j < propLen; j++, i++) {
       addProcessorPropertyPair(environi->thread, (void *)processorDataRef,
                                (char *)properties[j].name,
-                               (char *)properties[j].value);
+                               (char *)properties[j].value, &r);
+      if (r.status == -2) {
+        return NULL;
+      }
     }
   }
 
   int64_t result =
       j_evaluateSingle(environi->thread, (void *)proc->xpathProc, cwd, xpathStr,
-                       encoding, (void *)processorDataRef);
-  if (result == -2) {
+                       encoding, (void *)processorDataRef, &r);
+  if (r.status == -2) {
     return NULL;
   }
 
@@ -190,6 +200,7 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
 
   int64_t processorDataRef =
       createProcessorDataWithCapacity(environi->thread, size);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (size > 0) {
 
     int i = 0;
@@ -197,7 +208,10 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
 
       addProcessorDataPair(environi->thread, (void *)processorDataRef,
                            (char *)parameters[i].name,
-                           (void *)parameters[i].value);
+                           (void *)parameters[i].value, &r);
+      if (r.status == -2) {
+        return NULL;
+      }
     }
 
     i++;
@@ -205,16 +219,19 @@ bool effectiveBooleanValue(sxnc_environment *environi, sxnc_xpath *proc,
     for (; j < propLen; j++, i++) {
       addProcessorPropertyPair(environi->thread, (void *)processorDataRef,
                                (char *)properties[j].name,
-                               (char *)properties[j].value);
+                               (char *)properties[j].value, &r);
+      if (r.status == -2) {
+        return NULL;
+      }
     }
   }
 
   int result =
       j_effectiveBooleanValue(environi->thread, (void *)proc->xpathProc, cwd,
-                              xpathStr, encoding, (void *)processorDataRef);
+                              xpathStr, encoding, (void *)processorDataRef, &r);
 
-  if (result == -2) {
-    return 0;
+  if (r.status == -2) {
+    return NULL;
   }
 
   return result;
@@ -315,28 +332,55 @@ bool isAtomicvalue(sxnc_environment *environi, sxnc_value val) {
 int getIntegerValue(sxnc_environment *environi, sxnc_value value,
                     int failureVal) {
 
-  return (int)j_getLongValue(environi->thread, (void *)value.xdmvalue);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+
+  int result = (int)j_getLongValue(environi->thread, (void *)value.xdmvalue, &r);
+  if (r.status == -2) {
+    return 0;
+  }
+
+  return result;
 }
 
 bool getBooleanValue(sxnc_environment *environi, sxnc_value value) {
 
-  return (bool)j_getBooleanValue(environi->thread, (void *)value.xdmvalue);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  bool result = (bool)j_getBooleanValue(environi->thread, (void *)value.xdmvalue, &r);
+  if (r.status == -2) {
+    return false;
+  }
+  return result;
 }
 
 long getLongValue(sxnc_environment *environi, sxnc_value value,
                   long failureVal) {
 
-  return j_getLongValue(environi->thread, (void *)value.xdmvalue);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  long result = j_getLongValue(environi->thread, (void *)value.xdmvalue, &r);
+  if (r.status == -2) {
+    return 0;
+  }
+  return result;
 }
 
 float getFloatValue(sxnc_environment *environi, sxnc_value value,
                     float failureVal) {
 
-  return (float)j_getDoubleValue(environi->thread, (void *)value.xdmvalue);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  float result = (float)j_getDoubleValue(environi->thread, (void *)value.xdmvalue, &r);
+  if (r.status == -2) {
+    return 0;
+  }
+  return result;
 }
 
 double getDoubleValue(sxnc_environment *environi, sxnc_value value,
                       double failureVal) {
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  double result = j_getDoubleValue(environi->thread, (void *)value.xdmvalue, &r);
 
-  return j_getDoubleValue(environi->thread, (void *)value.xdmvalue);
+  if (r.status == -2) {
+    return 0;
+  }
+  return result;
 }

@@ -62,7 +62,7 @@ public class PathHelper {
         Source source;
         Path cwdPath = null;
         URI cwdURI = null;
-        if (cwd == null || cwd == "") {
+        if (cwd == null || cwd.isEmpty()) {
             throw new SaxonApiException("C API call error - cwd must be set to an absolute system path");
         }
         try {

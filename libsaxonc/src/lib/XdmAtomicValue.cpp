@@ -52,11 +52,12 @@ const char *XdmAtomicValue::getPrimitiveTypeName() {
 
 bool XdmAtomicValue::getBooleanValue() {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   char result =
-      j_getBooleanValue(thread, (void *)value);
+      j_getBooleanValue(thread, (void *)value, &r);
 
-  if((int)result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return result != 0;
 }
@@ -70,26 +71,22 @@ int XdmAtomicValue::getHashCode() {
 
 double XdmAtomicValue::getDoubleValue() {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   double result =
-      j_getDoubleValue(thread, (void *)value);
-  if(result == -0.9999999) {
-    char cresult = j_checkForException(thread);
-    if(cresult != 0) {
-      throw SaxonApiException();
-    }
+      j_getDoubleValue(thread, (void *)value, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return result;
 }
 
 long XdmAtomicValue::getLongValue() {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   long result =
-        j_getLongValue(thread, (void *)value);
-  if(result == -9999999) {
-    char cresult = j_checkForException(thread);
-    if(cresult != 0) {
-      throw SaxonApiException();
-    }
+        j_getLongValue(thread, (void *)value, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return result;
 }

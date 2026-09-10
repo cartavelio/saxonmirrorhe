@@ -122,7 +122,7 @@ public class XdmUtils {
      * @return C Pointer to the string value in the C memory space
      */
     @CEntryPoint(name = "getStringValueForXdmValue")
-    public static CCharPointer getStringValue_XdmValue(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws UnsupportedEncodingException {
+    public static CCharPointer getStringValue_XdmValue(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding, SaxonError error)  {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
@@ -139,13 +139,15 @@ public class XdmUtils {
         if(encoding == null){
             stream.writeBytes(itemStr.getBytes());
         } else {
-            stream.writeBytes(itemStr.getBytes(encoding));
+            try {
+                stream.writeBytes(itemStr.getBytes(encoding));
+            } catch (UnsupportedEncodingException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, error, null);
+                return WordFactory.nullPointer();
+            }
         }
 
         CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
-
-
-        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.toString());
         return a;
     }
 
@@ -155,16 +157,16 @@ public class XdmUtils {
      * @param alloc - Allocator function to create C memory space passed from the C++ application
      * @param value - the XdmItem object given as a reference into the ObjectHandles pool
      * @return C Pointer to the string value in the C memory space.  Exceptions are handled and returned to the C program as null pointer
-     * @throws SaxonApiException if the XdmItem is null
      */
-    @CEntryPoint(name = "getStringValueForXdmItem", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws SaxonApiException, UnsupportedEncodingException {
+    @CEntryPoint(name = "getStringValueForXdmItem")
+    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding, SaxonError errorStruct) {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
         XdmItem item = SaxonCAPI.objectHandles.get(value);
         if(item == null) {
-            throw new SaxonApiException("XdmItem is null cannot getStringValue");
+            SaxonCExceptionHandler.createStandardErrorResult(errorStruct,"XdmItem is null cannot getStringValue");
+            return WordFactory.nullPointer();
         }
 
         String encoding = null;
@@ -178,7 +180,12 @@ public class XdmUtils {
         if(encoding == null){
             stream.writeBytes(itemStr.getBytes());
         } else {
-            stream.writeBytes(itemStr.getBytes(encoding));
+            try {
+                stream.writeBytes(itemStr.getBytes(encoding));
+            } catch (UnsupportedEncodingException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, errorStruct, null);
+                return WordFactory.nullPointer();
+            }
         }
 
         CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
@@ -194,8 +201,8 @@ public class XdmUtils {
      * @param value - the XdmItem object given as a reference into the ObjectHandles pool
      * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
      */
-    @CEntryPoint(name = "xdmItemToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer toString_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws UnsupportedEncodingException {
+    @CEntryPoint(name = "xdmItemToString")
+    public static CCharPointer toString_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding, SaxonError errorStruct) {
         String itemStr = "";
         if(value == WordFactory.nullPointer()) {
             itemStr = XdmEmptySequence.getInstance().toString();
@@ -214,12 +221,15 @@ public class XdmUtils {
         if(encoding == null){
             stream.writeBytes(itemStr.getBytes());
         } else {
-            stream.writeBytes(itemStr.getBytes(encoding));
+            try {
+                stream.writeBytes(itemStr.getBytes(encoding));
+            } catch (UnsupportedEncodingException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, errorStruct, null);
+                return WordFactory.nullPointer();
+            }
         }
 
         CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
-
-        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, itemStr);
         return a;
     }
 
@@ -246,16 +256,21 @@ public class XdmUtils {
          * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
          * @throws SaxonApiException if failure to convert C string to Java string
          */
-        @CEntryPoint(name = "j_EQNameToClarkName", exceptionHandler = SaxonCExceptionCCharHandler.class)
-        public static CCharPointer j_EQNameToClarkName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_eqname) throws SaxonApiException {
+        @CEntryPoint(name = "j_EQNameToClarkName")
+        public static CCharPointer j_EQNameToClarkName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_eqname, SaxonError errorStruct) {
             if(c_eqname == WordFactory.nullPointer()) {
                 return WordFactory.nullPointer();
             }
-            String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
+            String eqname = null;
+            try {
+                eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
+            } catch (SaxonApiException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, errorStruct, null);
+                return WordFactory.nullPointer();
+            }
             QName qname = QName.fromEQName(eqname);
             String clarkname_result = qname.getClarkName();
-            CCharPointer a = SaxonCAPI.stringToNative2(alloc, clarkname_result);
-            return a;
+            return SaxonCAPI.stringToNative2(alloc, clarkname_result);
         }
 
     /**
@@ -263,19 +278,24 @@ public class XdmUtils {
          * @param thread - Graalvm runtime data structure for the thread
          * @param alloc - Allocator function to create C memory space passed from the C++ application
          * @param c_clarkname - the clarkname string to convert to EQName
+         * @param errorStruct - if failure to convert C string to Java string
          * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
-         * @throws SaxonApiException if failure to convert C string to Java string
          */
-        @CEntryPoint(name = "j_clarkNameToEQName", exceptionHandler = SaxonCExceptionCCharHandler.class)
-        public static CCharPointer j_clarkNameToEQName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_clarkname) throws SaxonApiException {
-            if(c_clarkname == WordFactory.nullPointer()) {
+        @CEntryPoint(name = "j_clarkNameToEQName")
+        public static CCharPointer j_clarkNameToEQName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, CCharPointer c_clarkname, SaxonError errorStruct) {
+            try {
+                if (c_clarkname == WordFactory.nullPointer()) {
+                    return WordFactory.nullPointer();
+                }
+                String clarkname = SaxonCAPI.toJavaString(c_clarkname, WordFactory.nullPointer());
+                QName qname = QName.fromClarkName(clarkname);
+                String eqname_result = qname.getEQName();
+                CCharPointer a = SaxonCAPI.stringToNative2(alloc, eqname_result);
+                return a;
+            } catch (SaxonApiException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, errorStruct, null);
                 return WordFactory.nullPointer();
             }
-            String clarkname = SaxonCAPI.toJavaString(c_clarkname, WordFactory.nullPointer());
-            QName qname = QName.fromClarkName(clarkname);
-            String eqname_result = qname.getEQName();
-            CCharPointer a = SaxonCAPI.stringToNative2(alloc, eqname_result);
-            return a;
         }
 
     /**
@@ -283,19 +303,25 @@ public class XdmUtils {
      * @param thread - Graalvm runtime data structure for the thread
      * @param alloc - Allocator function to create C memory space passed from the C++ application
      * @param value - the XdmNode object given as a reference into the ObjectHandles pool
+     * @param errorSaxon - if failure to convert C string to Java string
      * @return C Pointer to the string value in the C++ heap memory space. Exceptions are handled and returned to the C program as null pointer
-     * @throws SaxonApiException if failure to convert C string to Java string
      */
-    @CEntryPoint(name = "xdmNodeToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer toString_XdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws SaxonApiException, UnsupportedEncodingException {
+    @CEntryPoint(name = "xdmNodeToString")
+    public static CCharPointer toString_XdmNode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding, SaxonError errorSaxon) {
         if(value == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmNode object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(errorSaxon, "XdmNode object is null");
+            return WordFactory.nullPointer();
         }
         XdmNode node = SaxonCAPI.objectHandles.get(value);
 
         String encoding = null;
         if (!c_encoding.isNull()) {
-            encoding = CTypeConversion.toJavaString(c_encoding);
+            try {
+                encoding = SaxonCAPI.toJavaString(c_encoding, WordFactory.nullPointer());
+            } catch (SaxonApiException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, errorSaxon, null);
+                return WordFactory.nullPointer();
+            }
         }
 
         String result = node.toString();
@@ -304,11 +330,14 @@ public class XdmUtils {
         if(encoding == null){
             stream.writeBytes(result.getBytes());
         } else {
-            stream.writeBytes(result.getBytes(encoding));
+            try {
+                stream.writeBytes(result.getBytes(encoding));
+            } catch (UnsupportedEncodingException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, errorSaxon, null);
+                return WordFactory.nullPointer();
+            }
         }
-        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
-        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, node.toString());
-        return a;
+        return SaxonCAPI.stringToNative(alloc, stream);
     }
 
     /**
@@ -318,13 +347,18 @@ public class XdmUtils {
      * @param value - the XdmMap object given as a reference into the ObjectHandles pool
      * @return C Pointer to the string value in the C++ heap memory space.  Exceptions are handled and returned to the C program as null pointer
      */
-    @CEntryPoint(name = "xdmMapToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer toString_XdmMap(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding) throws UnsupportedEncodingException {
+    @CEntryPoint(name = "xdmMapToString")
+    public static CCharPointer toString_XdmMap(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value, CCharPointer c_encoding, SaxonError errorSaxon) {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
-        XdmMap map = SaxonCAPI.objectHandles.get(value);
-        return makeCString(alloc, map.toString(), c_encoding);
+        try {
+            XdmMap map = SaxonCAPI.objectHandles.get(value);
+            return makeCString(alloc, map.toString(), c_encoding);
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, errorSaxon, null);
+            return WordFactory.nullPointer();
+        }
     }
 
     public static CCharPointer makeCString(SaxonCAPI.AllocatorCCharFn alloc, String str, CCharPointer c_encoding) throws UnsupportedEncodingException {
@@ -347,7 +381,7 @@ public class XdmUtils {
 
 
     @CEntryPoint(name = "j_xdmNodeEquals")
-    public static byte xdmNodeEquals(IsolateThread thread, ObjectHandle node1, ObjectHandle node2) {
+    public static byte xdmNodeEquals(IsolateThread thread, ObjectHandle node1, ObjectHandle node2, SaxonError saxonError) {
         if (node1 == WordFactory.nullPointer()) {
             return CTypeConversion.toCBoolean(false);
         }
@@ -365,8 +399,8 @@ public class XdmUtils {
             return CTypeConversion.toCBoolean(j_node1.equals(j_node2));
 
         } catch (Exception ex) {
-            SaxonCCurrentException.getInstance().setThrowable(ex);
-            return -2;
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return (byte)SaxonCAPI.STATUS_EXCEPTION;
         }
     }
 
@@ -395,7 +429,7 @@ public class XdmUtils {
      *         A QName naming the primitive type of this atomic value. This will always be an atomic type.
      *          Exceptions are handled and returned to the C program as null pointer.
      */
-    @CEntryPoint(name = "j_getPrimitiveTypeName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    @CEntryPoint(name = "j_getPrimitiveTypeName")
     public static CCharPointer getPrimitiveTypeName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle valueRef) {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
 
@@ -416,11 +450,11 @@ public class XdmUtils {
      *          C Pointer to the primitive type name in the C memory space. Exceptions are handled and returned to the C program as null pointer
      * @throws SaxonApiException if function item is null
      */
-    @CEntryPoint(name = "j_getFunctionName", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer j_getFunctionName(IsolateThread thread,  SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle itemRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_getFunctionName")
+    public static CCharPointer j_getFunctionName(IsolateThread thread,  SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle itemRef) {
 
         if(itemRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmFunctionItem is null");
+            return WordFactory.nullPointer();
         }
         XdmFunctionItem item = SaxonCAPI.objectHandles.get(itemRef);
 
@@ -456,31 +490,38 @@ public class XdmUtils {
      *          Exceptions are handled and returned to the C program as -2 value
      * @throws SaxonApiException   if null found for the processor or function value.
      */
-    @CEntryPoint(name = "j_xdmFunctionItem_call", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmFunctionItem_call(IsolateThread thread, ObjectHandle procRef, ObjectHandle xdmFuncValueRef, ObjectHandle procDataRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmFunctionItem_call")
+    public static long j_xdmFunctionItem_call(IsolateThread thread, ObjectHandle procRef, ObjectHandle xdmFuncValueRef, ObjectHandle procDataRef,SaxonError saxonError) {
         if(procRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         if(xdmFuncValueRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmFunctionItem object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XdmFunctionItem object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         Processor proc = SaxonCAPI.objectHandles.get(procRef);
 
         XdmFunctionItem functionItem = SaxonCAPI.objectHandles.get(xdmFuncValueRef);
 
         ProcessorDataAccumulator processorDataAccumulator = null;
-        XdmValue arguments [];
-        if(procDataRef != WordFactory.nullPointer()){
-            processorDataAccumulator = SaxonCAPI.objectHandles.get(procDataRef);
+        XdmValue[] arguments;
+        try {
+            if (procDataRef != WordFactory.nullPointer()) {
+                processorDataAccumulator = SaxonCAPI.objectHandles.get(procDataRef);
 
-            arguments = Xslt30Processor.getArguments(processorDataAccumulator.getValues());
+                arguments = Xslt30Processor.getArguments(processorDataAccumulator.getValues());
 
-        } else {
-            arguments = new XdmValue[0];
+            } else {
+                arguments = new XdmValue[0];
+            }
+            XdmValue value = functionItem.call(proc, arguments);
+            ObjectHandle handle = SaxonCAPI.createHandle(value);
+            return handle.rawValue();
+        } catch (Exception ex) {
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        XdmValue value = functionItem.call(proc, arguments);
-        ObjectHandle handle = SaxonCAPI.createHandle(value);
-        return handle.rawValue();
     }
 
 
@@ -497,29 +538,37 @@ public class XdmUtils {
      * @throws SaxonApiException no longer thrown in the getSystemFunction call. But thrown if the eqname or procRef is null. Exception
      * is handled and returned as -2 to the call C program
      */
-    @CEntryPoint(name = "j_getSystemFunction", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_getSystemFunction(IsolateThread thread, ObjectHandle procRef, CCharPointer c_eqname, int arity) throws SaxonApiException {
+    @CEntryPoint(name = "j_getSystemFunction")
+    public static long j_getSystemFunction(IsolateThread thread, ObjectHandle procRef, CCharPointer c_eqname, int arity, SaxonError saxonError) {
 
         if(procRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         if(c_eqname == WordFactory.nullPointer()) {
-            throw new SaxonApiException("SystemFunction name is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "SystemFunction name is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        Processor proc = SaxonCAPI.objectHandles.get(procRef);
-        String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
-        QName qname = null;
-        if(eqname.startsWith("Q")){
-            qname =  QName.fromEQName(eqname);
-        } else {
-            qname = QName.fromClarkName(eqname);
-        }
-        XdmFunctionItem function = XdmFunctionItem.getSystemFunction(proc, qname, arity);
-        if(function == null) {
-            return -1;
-        } else {
-            ObjectHandle handle = SaxonCAPI.createHandle(function);
-            return handle.rawValue();
+        try {
+            Processor proc = SaxonCAPI.objectHandles.get(procRef);
+            String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
+            QName qname = null;
+            if (eqname.startsWith("Q")) {
+                qname = QName.fromEQName(eqname);
+            } else {
+                qname = QName.fromClarkName(eqname);
+            }
+            XdmFunctionItem function = XdmFunctionItem.getSystemFunction(proc, qname, arity);
+            if (function == null) {
+                return -1;
+            } else {
+                ObjectHandle handle = SaxonCAPI.createHandle(function);
+                return handle.rawValue();
+            }
+
+        } catch (Exception ex) {
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
     }
@@ -572,20 +621,20 @@ public class XdmUtils {
      * Exceptions are handled and returned as -2 indicating exception thrown
      * @throws SaxonApiException  if processor object is null.  If failure to get array value at position
      */
-    @CEntryPoint(name = "j_xdmArray_get", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmArray_get(IsolateThread thread, ObjectHandle arrayRef, int n) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmArray_get")
+    public static long j_xdmArray_get(IsolateThread thread, ObjectHandle arrayRef, int n, SaxonError saxonError) {
         if(arrayRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
         }
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
-        XdmValue result = null;
         try {
-            result = xdmArray.get(n);
+            XdmValue result = xdmArray.get(n);
+            ObjectHandle handle = SaxonCAPI.createHandle(result);
+            return handle.rawValue();
         }catch (IndexOutOfBoundsException e) {
-            throw new SaxonApiException(e);
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(result);
-        return handle.rawValue();
 
     }
 
@@ -601,24 +650,27 @@ public class XdmUtils {
      * Exceptions are handled and returned as -2 indicating exception thrown
      * @throws SaxonApiException if references to array or value are null. If failure to add to array at position
      */
-    @CEntryPoint(name = "j_xdmArray_put", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmArray_put(IsolateThread thread, ObjectHandle arrayRef, int n, ObjectHandle valueRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmArray_put")
+    public static long j_xdmArray_put(IsolateThread thread, ObjectHandle arrayRef, int n, ObjectHandle valueRef, SaxonError saxonError) {
         if(arrayRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Array object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Array object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         if(valueRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Value object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Value object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
         XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
         XdmArray result;
         try {
             result = xdmArray.put(n, value);
+            ObjectHandle handle = SaxonCAPI.createHandle(result);
+            return handle.rawValue();
         } catch(IndexOutOfBoundsException ex) {
-            throw new SaxonApiException(ex);
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(result);
-        return handle.rawValue();
 
     }
 
@@ -632,13 +684,15 @@ public class XdmUtils {
      * Exceptions are handled and returned as -2 indicating exception thrown
      * @throws SaxonApiException if reference to the map or key is null.
      */
-    @CEntryPoint(name = "j_xdmMap_remove", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmMap_put(IsolateThread thread, ObjectHandle mapRef, ObjectHandle keyRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmMap_remove")
+    public static long j_xdmMap_put(IsolateThread thread, ObjectHandle mapRef, ObjectHandle keyRef, SaxonError saxonError) {
         if(mapRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Array object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Map object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         if(keyRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Value object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Key object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         XdmMap map = SaxonCAPI.objectHandles.get(mapRef);
         XdmAtomicValue key = SaxonCAPI.objectHandles.get(keyRef);
@@ -657,13 +711,15 @@ public class XdmUtils {
      * Exceptions are handled and returned as -2 indicating exception thrown
      * @throws SaxonApiException if null found for array or value
      */
-    @CEntryPoint(name = "j_xdmArray_addMember", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmArray_addMember(IsolateThread thread, ObjectHandle arrayRef, ObjectHandle valueRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmArray_addMember")
+    public static long j_xdmArray_addMember(IsolateThread thread, ObjectHandle arrayRef, ObjectHandle valueRef, SaxonError saxonError) {
         if(arrayRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Array object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Array object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         if(valueRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Value object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Value object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
         XdmValue value = SaxonCAPI.objectHandles.get(valueRef);
@@ -682,13 +738,15 @@ public class XdmUtils {
      * Exceptions are handled and returned as -2 indicating exception thrown
      * @throws SaxonApiException  if null found for array or value
      */
-    @CEntryPoint(name = "j_xdmArray_concat", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmArray_concat(IsolateThread thread, ObjectHandle arrayRef, ObjectHandle valueRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmArray_concat")
+    public static long j_xdmArray_concat(IsolateThread thread, ObjectHandle arrayRef, ObjectHandle valueRef, SaxonError saxonError) {
         if(arrayRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Array object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Array object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         if(valueRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Value object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Value object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
         XdmArray value = SaxonCAPI.objectHandles.get(valueRef);
@@ -707,10 +765,10 @@ public class XdmUtils {
      * @return C Pointer to the string value in the C memory space. Exceptions are handled and returned to the C program as null pointer
      * @throws SaxonApiException  if array is null
      */
-    @CEntryPoint(name = "j_xdmArray_toString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer j_xdmArray_toString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle arrayRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmArray_toString")
+    public static CCharPointer j_xdmArray_toString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle arrayRef) {
         if(arrayRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Array object is null");
+            return WordFactory.nullPointer();
         }
         XdmArray xdmArray = SaxonCAPI.objectHandles.get(arrayRef);
         String result = xdmArray.toString();
@@ -782,25 +840,29 @@ public class XdmUtils {
      * Exceptions are handled and returned to the C program as null pointer
      * @throws IllegalArgumentException error with arguments
      */
-    @CEntryPoint(name = "j_makeXdmArray", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long makeXdmArray(IsolateThread thread, ObjectHandle processorDataAccumulatorRef)  throws IllegalArgumentException {
+    @CEntryPoint(name = "j_makeXdmArray")
+    public static long makeXdmArray(IsolateThread thread, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
         XdmArray array = null;
-        if(processorDataAccumulatorRef == WordFactory.nullPointer()) {
-            array = new XdmArray();
-        } else {
-            ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
-
-            if (processorDataAccumulator.size() == 0) {
+        try {
+            if (processorDataAccumulatorRef == WordFactory.nullPointer()) {
                 array = new XdmArray();
             } else {
-                Object[] objValues = processorDataAccumulator.getValues();
-                array = XdmArray.makeArray(objValues);
+                ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
+
+                if (processorDataAccumulator.size() == 0) {
+                    array = new XdmArray();
+                } else {
+                    Object[] objValues = processorDataAccumulator.getValues();
+                    array = XdmArray.makeArray(objValues);
+                }
             }
+
+            ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
+            return arrayHandle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-
-         ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
-
-         return arrayHandle.rawValue();
 
     }
 
@@ -813,7 +875,7 @@ public class XdmUtils {
      * Exceptions are handled and returned to the C program as null pointer
      * @throws IllegalArgumentException  error with arguments
      */
-    @CEntryPoint(name = "j_makeXdmArrayFromShort", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_makeXdmArrayFromShort")
     public static long makeXdmArrayFromShort(IsolateThread thread, CShortPointer shortPointer, int length) {
 
         XdmArray array = null;
@@ -842,8 +904,8 @@ public class XdmUtils {
      * Exceptions are handled and returned to the C program as null pointer
      * @throws IllegalArgumentException error with arguments
      */
-    @CEntryPoint(name = "j_makeXdmArrayFromStrings", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointerPointer ccharPointerPointer, int length) throws SaxonApiException {
+    @CEntryPoint(name = "j_makeXdmArrayFromStrings")
+    public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointerPointer ccharPointerPointer, int length, SaxonError saxonError) {
 
         XdmArray array = null;
         String [] values = new String[length];
@@ -851,11 +913,15 @@ public class XdmUtils {
          if(length == 0) {
              array = new XdmArray();
          }  else {
+             try {
 
-             for(int i =0; i< length; i++) {
-                 CCharPointer pointer = ccharPointerPointer.read(i);
-                 values[i] = SaxonCAPI.toJavaString(pointer, WordFactory.nullPointer());
-
+                 for (int i = 0; i < length; i++) {
+                     CCharPointer pointer = ccharPointerPointer.read(i);
+                     values[i] = SaxonCAPI.toJavaString(pointer, WordFactory.nullPointer());
+                 }
+             } catch (SaxonApiException e) {
+                 SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+                 return SaxonCAPI.STATUS_EXCEPTION;
              }
              array = XdmArray.makeArray(values);
          }
@@ -872,7 +938,7 @@ public class XdmUtils {
      * Exceptions are handled and returned to the C program as null pointer
      * @throws IllegalArgumentException  error with arguments
      */
-    @CEntryPoint(name = "j_makeXdmArrayFromInt", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_makeXdmArrayFromInt")
     public static long makeXdmArrayFromInt(IsolateThread thread, CIntPointer intPointer, int length) {
 
         XdmArray array = null;
@@ -901,7 +967,7 @@ public class XdmUtils {
      * @return long value as reference to the created XdmArray object held in the ObjectHandle's pool
      * Exceptions are handled and returned to the C program as null pointer
      */
-    @CEntryPoint(name = "j_makeXdmArrayFromLong", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_makeXdmArrayFromLong")
     public static long makeXdmArrayFromLong(IsolateThread thread, CLongPointer longPointer, int length) {
 
         XdmArray array = null;
@@ -931,7 +997,7 @@ public class XdmUtils {
      * Exceptions are handled and returned to the C program as null pointer
      * @throws IllegalArgumentException
      */
-    @CEntryPoint(name = "j_makeXdmArrayFromBool", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_makeXdmArrayFromBool")
     public static long makeXdmArrayFromBoolean(IsolateThread thread, CIntPointer boolPointer, int length) {
 
         XdmArray array = null;
@@ -1093,10 +1159,10 @@ public class XdmUtils {
      * @return   long value representing the status of the XdmMap put. Success=1, failure = -1 and exception=-2
      * @throws SaxonApiException  if the XdmMap is null
      */
-    @CEntryPoint(name = "j_xdmMap_put", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmMap_put(IsolateThread thread, ObjectHandle mapRef, ObjectHandle atomicKeyRef, ObjectHandle valueRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmMap_put")
+    public static long j_xdmMap_put(IsolateThread thread, ObjectHandle mapRef, ObjectHandle atomicKeyRef, ObjectHandle valueRef) {
         if(mapRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmMap object is null");
+            return SaxonCAPI.STATUS_FAIL;
         }
         XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
         XdmAtomicValue atomicKey = SaxonCAPI.objectHandles.get(atomicKeyRef);
@@ -1118,19 +1184,25 @@ public class XdmUtils {
      * @return   long value representing XdmValue in the ObjectHandles pool. If value not found return -1. Return -2 if an exception is thrown
      * @throws SaxonApiException  if the XdmMap object is null
      */
-    @CEntryPoint(name = "j_xdmMap_get", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmMap_get(IsolateThread thread, ObjectHandle mapRef, ObjectHandle atomicKeyRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmMap_get")
+    public static long j_xdmMap_get(IsolateThread thread, ObjectHandle mapRef, ObjectHandle atomicKeyRef, SaxonError saxonError) {
         if(mapRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmMap object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XdmMap object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        XdmAtomicValue atomicKey = SaxonCAPI.objectHandles.get(atomicKeyRef);
-        XdmValue result = xdmMap.get(atomicKey);
-        if(result == null) {
-            return SaxonCAPI.STATUS_FAIL;
+        try {
+            XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+            XdmAtomicValue atomicKey = SaxonCAPI.objectHandles.get(atomicKeyRef);
+            XdmValue result = xdmMap.get(atomicKey);
+            if (result == null) {
+                return SaxonCAPI.STATUS_FAIL;
+            }
+            ObjectHandle handle = SaxonCAPI.createHandle(result);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(result);
-        return handle.rawValue();
 
     }
 
@@ -1142,22 +1214,29 @@ public class XdmUtils {
      * @return  long value representing XdmValue in the ObjectHandles pool. If value not found return -1. Return -2 if an exception is thrown
      * @throws SaxonApiException if the XdmMap or the Atomic ky is null
      */
-    @CEntryPoint(name = "j_xdmMap_get_with_key_as_string", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmMap_get_with_key_as_string(IsolateThread thread, ObjectHandle mapRef, CCharPointer atomicKeyStr) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_string")
+    public static long j_xdmMap_get_with_key_as_string(IsolateThread thread, ObjectHandle mapRef, CCharPointer atomicKeyStr, SaxonError saxonError) {
         if(mapRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmMap object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XdmMap object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         if(atomicKeyStr == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Atomic key object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Atomic key object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        String atomicKey = SaxonCAPI.toJavaString(atomicKeyStr, WordFactory.nullPointer());
-        XdmValue result = xdmMap.get(atomicKey);
-        if(result == null) {
-            return SaxonCAPI.STATUS_FAIL;
+        try {
+            XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+            String atomicKey = SaxonCAPI.toJavaString(atomicKeyStr, WordFactory.nullPointer());
+            XdmValue result = xdmMap.get(atomicKey);
+            if (result == null) {
+                return SaxonCAPI.STATUS_FAIL;
+            }
+            ObjectHandle handle = SaxonCAPI.createHandle(result);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(result);
-        return handle.rawValue();
 
     }
 
@@ -1167,21 +1246,26 @@ public class XdmUtils {
      * @param mapRef   - long value referencing to the XdmMap object in the ObjectHandles pool.
      * @param key      - long value referencing the XdmAtomicValue in the ObjectHandles pool for the key.
      * @return  long value representing XdmValue in the ObjectHandles pool. If value not found return -1. Return -2 if an exception is thrown
-     * @throws SaxonApiException  if the Processor object is null
      */
-    @CEntryPoint(name = "j_xdmMap_get_with_key_as_int", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmMap_get_with_key_as_int(IsolateThread thread, ObjectHandle mapRef, int key) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_int")
+    public static long j_xdmMap_get_with_key_as_int(IsolateThread thread, ObjectHandle mapRef, int key, SaxonError saxonError) {
         if(mapRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmMap object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XdmMap object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        
-        XdmValue result = xdmMap.get(key);
-        if(result == null) {
-            return SaxonCAPI.STATUS_FAIL;
+        try {
+            XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+
+            XdmValue result = xdmMap.get(key);
+            if (result == null) {
+                return SaxonCAPI.STATUS_FAIL;
+            }
+            ObjectHandle handle = SaxonCAPI.createHandle(result);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(result);
-        return handle.rawValue();
 
     }
 
@@ -1194,19 +1278,25 @@ public class XdmUtils {
      * @return   long value representing XdmValue in the ObjectHandles pool. If value not found return -1. Return -2 if an exception is thrown
      * @throws SaxonApiException   if the XdmMap object is null
      */
-    @CEntryPoint(name = "j_xdmMap_get_with_key_as_double", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmMap_get_with_key_as_double(IsolateThread thread, ObjectHandle mapRef, double key) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_double")
+    public static long j_xdmMap_get_with_key_as_double(IsolateThread thread, ObjectHandle mapRef, double key, SaxonError saxonError) {
         if(mapRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmMap object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XdmMap object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        
-        XdmValue result = xdmMap.get(key);
-        if(result == null) {
-            return SaxonCAPI.STATUS_FAIL;
+        try {
+            XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+
+            XdmValue result = xdmMap.get(key);
+            if (result == null) {
+                return SaxonCAPI.STATUS_FAIL;
+            }
+            ObjectHandle handle = SaxonCAPI.createHandle(result);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(result);
-        return handle.rawValue();
 
     }
 
@@ -1218,19 +1308,25 @@ public class XdmUtils {
      * @return  long value representing the XdmValue in the ObjectHandles pool. If value not found return -1
      * @throws SaxonApiException if the XdmMap object is null
      */
-    @CEntryPoint(name = "j_xdmMap_get_with_key_as_long", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_xdmMap_get_with_key_as_long(IsolateThread thread, ObjectHandle mapRef, long key) throws SaxonApiException {
+    @CEntryPoint(name = "j_xdmMap_get_with_key_as_long")
+    public static long j_xdmMap_get_with_key_as_long(IsolateThread thread, ObjectHandle mapRef, long key, SaxonError saxonError) {
         if(mapRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmMap object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XdmMap object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        
-        XdmValue result = xdmMap.get(key);
-        if(result == null) {
-            return SaxonCAPI.STATUS_FAIL;
+        try {
+            XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
+
+            XdmValue result = xdmMap.get(key);
+            if (result == null) {
+                return SaxonCAPI.STATUS_FAIL;
+            }
+            ObjectHandle handle = SaxonCAPI.createHandle(result);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(result);
-        return handle.rawValue();
 
     }
 
@@ -1338,13 +1434,11 @@ public class XdmUtils {
      * @param nodeRef - reference to an XdmNode object in the ObjectHandles pool
      * @return C string array pointer
      */
-    @CEntryPoint(name = "j_getLocalName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    @CEntryPoint(name = "j_getLocalName")
     public static CCharPointer getLocalName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
-        /*if (qname == null) {
-            return null;
-        }  */
+
         return SaxonCAPI.stringToNative2(alloc, qname.getLocalName());
 
     }
@@ -1358,7 +1452,7 @@ public class XdmUtils {
      * @return C string pointer to the name of the node in the C memory space. In the case of unnamed nodes (for example, text and comment nodes)
      * return null.
      */
-    @CEntryPoint(name = "j_getNodeName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    @CEntryPoint(name = "j_getNodeName")
     public static CCharPointer getNodeName(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         QName qname = node.getNodeName();
@@ -1396,13 +1490,13 @@ public class XdmUtils {
      * @param processorDataAccumulatorRef - ObjectHandle to array of XdmValue held as ProcessorDataAccumulator
      * @return C string pointer to the string representation of the XdmValue array in the C memory space. Return null pointer if XdmValue is null
      */
-    @CEntryPoint(name = "xdmValueArrayToString", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer xdmValueArrayToString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataAccumulatorRef, CCharPointer c_encoding) throws UnsupportedEncodingException {
+    @CEntryPoint(name = "xdmValueArrayToString")
+    public static CCharPointer xdmValueArrayToString(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataAccumulatorRef, CCharPointer c_encoding, SaxonError saxonError) {
         if(processorDataAccumulatorRef == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
         ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
-        Object objs [] = processorDataAccumulator.getValues();
+        Object[] objs = processorDataAccumulator.getValues();
         XdmValue [] values = new XdmValue[objs.length];
         for(int i = 0; i< objs.length;i++) {
              values[i]  = (XdmValue) objs[i];
@@ -1419,13 +1513,15 @@ public class XdmUtils {
         if(encoding == null){
             stream.writeBytes(result.getBytes());
         } else {
-            stream.writeBytes(result.getBytes(encoding));
+            try {
+                stream.writeBytes(result.getBytes(encoding));
+            } catch (UnsupportedEncodingException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+                return WordFactory.nullPointer();
+            }
         }
 
-        CCharPointer a = SaxonCAPI.stringToNative(alloc, stream);
-
-        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, buildXdmValue(values).toString());
-        return a;
+        return SaxonCAPI.stringToNative(alloc, stream);
     }
 
 
@@ -1440,21 +1536,25 @@ public class XdmUtils {
      * attribute with the specified name. Otherwise return the string value of the
      * selected attribute node.
      */
-    @CEntryPoint(name = "j_getAttributeValue" , exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer getAttributeValue(IsolateThread thread, ObjectHandle nodeRef, CCharPointer c_eqname, SaxonCAPI.AllocatorCCharFn alloc) throws SaxonApiException {
-        XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
-        String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
-        QName name = QName.fromEQName(eqname);
-        if (SaxonCAPI.debug) {
-            System.err.println("EQName= " + eqname);
-            System.err.println("Java-Call Att-name=" + name.getClarkName() + " Value=" + node.getAttributeValue(name));
-        }
-        String attValue = node.getAttributeValue(name);
-        if(attValue == null) {
+    @CEntryPoint(name = "j_getAttributeValue")
+    public static CCharPointer getAttributeValue(IsolateThread thread, ObjectHandle nodeRef, CCharPointer c_eqname, SaxonCAPI.AllocatorCCharFn alloc, SaxonError saxonError) {
+        try {
+            XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
+            String eqname = SaxonCAPI.toJavaString(c_eqname, WordFactory.nullPointer());
+            QName name = QName.fromEQName(eqname);
+            if (SaxonCAPI.debug) {
+                System.err.println("EQName= " + eqname);
+                System.err.println("Java-Call Att-name=" + name.getClarkName() + " Value=" + node.getAttributeValue(name));
+            }
+            String attValue = node.getAttributeValue(name);
+            if (attValue == null) {
+                return WordFactory.nullPointer();
+            }
+            return SaxonCAPI.stringToNative2(alloc, attValue);
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
             return WordFactory.nullPointer();
         }
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, attValue);
-        return a;
     }
 
     /**
@@ -1515,7 +1615,7 @@ public class XdmUtils {
      * @param valueRef - reference to the XdmValue object in the ObjectHandles pool
      * @return  int value representing the XdmValue subclass
      */
-    @CEntryPoint(name = "j_getXdmObjectType", exceptionHandler = SaxonCExceptionIntHandler.class)
+    @CEntryPoint(name = "j_getXdmObjectType")
         public  static int getXdmObjectType(IsolateThread thread, ObjectHandle valueRef){
         Object value = SaxonCAPI.objectHandles.get(valueRef);
         if(SaxonCAPI.debug){
@@ -1666,13 +1766,18 @@ public class XdmUtils {
      * @param c_encoding - The charset to be used. If not specified then use the platform default
      * @return  the long value reference to the XdmAtomicValue object in the ObjectHandle's pool
      */
-    @CEntryPoint(name = "j_makeStringValue", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long makeStringValue(IsolateThread thread, CCharPointer str, CCharPointer c_encoding) throws SaxonApiException{
+    @CEntryPoint(name = "j_makeStringValue")
+    public static long makeStringValue(IsolateThread thread, CCharPointer str, CCharPointer c_encoding, SaxonError saxonError) {
         String valueStr;
         if (str == WordFactory.nullPointer()) {
             valueStr = "";
         } else {
-            valueStr = SaxonCAPI.toJavaString(str, c_encoding);
+            try {
+                valueStr = SaxonCAPI.toJavaString(str, c_encoding);
+            } catch (SaxonApiException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
         }
 
         XdmAtomicValue value = new XdmAtomicValue(valueStr);

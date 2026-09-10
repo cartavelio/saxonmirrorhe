@@ -19,7 +19,6 @@ import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
 import java.io.StringReader;
 import java.util.*;
 
@@ -54,18 +53,20 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
     /**
      * create SchemaValidatorForCpp with reference to object held in the Graalvm ObjectHandles pool.
-     * This methods calls the constructor class
+     * This method calls the constructor class
      *
      * @param thread - Graalvm runtime data structure for the thread
+     * @param saxonError   - if exception found then create SaxonError with exception details for callback
      * @return - long value to the created SchemaValidatorForCpp object in the ObjectHandles pool
-     * @throws SaxonApiException Processor is not licensed
      */
-    @CEntryPoint(name = "createSchemaValidator", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long createSchemaValidator(IsolateThread thread) throws SaxonApiException {
+    @CEntryPoint(name = "createSchemaValidator")
+    public static long createSchemaValidator(IsolateThread thread, SaxonError saxonError){
         SchemaValidatorForCpp validatorForCpp = new SchemaValidatorForCpp();
         Processor processor = validatorForCpp.processor;
         if (debug && !processor.isSchemaAware()) {
-            throw new SaxonApiException("Processor is not licensed for schema processing!");
+            //throw new SaxonApiException("Processor is not licensed for schema processing!");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor is not licensed for schema processing!");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
         ObjectHandle handle = SaxonCAPI.createHandle(validatorForCpp);
@@ -81,20 +82,29 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param procRef - Supplied reference to the processor object in the ObjectHandles pool. Assume that license feature is enabled
      * @throws SaxonApiException if processor is not licensed
      **/
-    @CEntryPoint(name = "createSchemaValidatorWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long createSchemaValidatorWithProcessor(IsolateThread thread, ObjectHandle procRef) throws SaxonApiException {
+    @CEntryPoint(name = "createSchemaValidatorWithProcessor")
+    public static long createSchemaValidatorWithProcessor(IsolateThread thread, ObjectHandle procRef, SaxonError saxonError) {
         if (procRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            //throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        Processor processor = SaxonCAPI.objectHandles.get(procRef);
+        try {
+            Processor processor = SaxonCAPI.objectHandles.get(procRef);
 
-        SchemaValidatorForCpp validatorForCpp = new SchemaValidatorForCpp(processor);
-        if (!processor.isSchemaAware()) {
-            throw new SaxonApiException("Processor is not licensed for schema processing!");
+            SchemaValidatorForCpp validatorForCpp = new SchemaValidatorForCpp(processor);
+            if (!processor.isSchemaAware()) {
+                //throw new SaxonApiException("Processor is not licensed for schema processing!");
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor is not licensed for schema processing!");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
+
+            ObjectHandle handle = SaxonCAPI.createHandle(validatorForCpp);
+            return handle.rawValue();
+        } catch (Exception ex) {
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-
-        ObjectHandle handle = SaxonCAPI.createHandle(validatorForCpp);
-        return handle.rawValue();
 
     }
 
@@ -160,7 +170,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param schemaValidatorForCpp - Reference to the SchemaValidatorForCpp object
      * @return long value to the Validator report object in the ObjectHandles pool.
      */
-    @CEntryPoint(name = "j_getValidationReport", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_getValidationReport")
     public static long j_getValidationReport(IsolateThread thread, ObjectHandle schemaValidatorForCpp) {
         SchemaValidatorForCpp schemaValidatorForCpp1 = SaxonCAPI.objectHandles.get(schemaValidatorForCpp);
         XdmNode node = schemaValidatorForCpp1.getValidationReport();
@@ -184,11 +194,12 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @return long value: Success= 0, Failure = -1 and Exception thrown = -2
      * @throws SaxonApiException if null found for the processor or schema document
      */
-    @CEntryPoint(name = "j_registerSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long registerSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_registerSchema")
+    public static long registerSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
 
         if (processorRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         Processor processor = SaxonCAPI.objectHandles.get(processorRef);
 
@@ -200,26 +211,31 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             params = processorDataAccumulator.getParameterNames();
             values = processorDataAccumulator.getValues();
         }
+        try {
 
-        SchemaValidatorForCpp.setProperties(processor, params, values);
-        String cwd = null;
-        if (ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            SchemaValidatorForCpp.setProperties(processor, params, values);
+            String cwd = null;
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            }
+
+            String xsd = null;
+            if (cxsd != WordFactory.nullPointer()) {
+                xsd = SaxonCAPI.toJavaString(cxsd, WordFactory.nullPointer());
+            }
+
+            if (xsd == null) {
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Schema document not found");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
+            Source source_xsd = resolveFileToSource(processor, cwd, xsd, ResourceRequest.XSD_NATURE);
+
+            //validator.setErrorListener(errorListener);
+            processor.getSchemaManager().load(source_xsd);
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-
-        String xsd = null;
-        if (cxsd != WordFactory.nullPointer()) {
-            xsd = SaxonCAPI.toJavaString(cxsd, WordFactory.nullPointer());
-        }
-
-        if (xsd == null) {
-            SaxonApiException ex = new SaxonApiException("Schema document not found");
-            throw ex;
-        }
-        Source source_xsd = resolveFileToSource(processor, cwd, xsd, ResourceRequest.XSD_NATURE);
-
-        //validator.setErrorListener(errorListener);
-        processor.getSchemaManager().load(source_xsd);
         return SaxonCAPI.STATUS_OK;
 
     }
@@ -232,14 +248,15 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param cxsd                        - File name of the schema relative to the cwd
      * @param csystemId                   - The system ID of the document
      * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
+     * @param saxonError   - if exception found then create SaxonError with exception details for callback
      * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
-     * @throws SaxonApiException if null found for the processor or schema document
      */
-    @CEntryPoint(name = "j_registerSchemaString", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer csystemId, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_registerSchemaString")
+    public static long registerSchemaString(IsolateThread thread, ObjectHandle processorRef, CCharPointer csystemId, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError)  {
         Processor processor = null;
         if (processorRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
         processor = SaxonCAPI.objectHandles.get(processorRef);
@@ -251,30 +268,35 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             params = processorDataAccumulator.getParameterNames();
             values = processorDataAccumulator.getValues();
         }
-        SchemaValidatorForCpp.setProperties(processor, params, values);
-        String xsd = null;
-        if (cxsd != WordFactory.nullPointer()) {
-            xsd = SaxonCAPI.toJavaString(cxsd, WordFactory.nullPointer());
-        }
-        String systemId = null;
-        if (csystemId != WordFactory.nullPointer()) {
-            systemId = SaxonCAPI.toJavaString(csystemId, WordFactory.nullPointer());
-        }
+        try {
+            SchemaValidatorForCpp.setProperties(processor, params, values);
+            String xsd = null;
+            if (cxsd != WordFactory.nullPointer()) {
+                xsd = SaxonCAPI.toJavaString(cxsd, WordFactory.nullPointer());
+            }
+            String systemId = null;
+            if (csystemId != WordFactory.nullPointer()) {
+                systemId = SaxonCAPI.toJavaString(csystemId, WordFactory.nullPointer());
+            }
 
-        if (xsd == null) {
-            SaxonApiException ex = new SaxonApiException("Schema document not found");
-            throw ex;
-        }
+            if (xsd == null) {
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Schema document not found");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
 
-        StreamSource source = null;
-        if (systemId != null) {
-            source = new StreamSource(new StringReader(xsd), systemId);
-        } else {
-            source = new StreamSource(new StringReader(xsd));
-        }
+            StreamSource source = null;
+            if (systemId != null) {
+                source = new StreamSource(new StringReader(xsd), systemId);
+            } else {
+                source = new StreamSource(new StringReader(xsd));
+            }
 
-        processor.getSchemaManager().load(source);
-        return SaxonCAPI.STATUS_OK;
+            processor.getSchemaManager().load(source);
+            return SaxonCAPI.STATUS_OK;
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
 
     }
 
@@ -285,18 +307,20 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param processorRef                - processor reference
      * @param xsdRef                      - File name of the schema relative to the cwd
      * @param processorDataAccumulatorRef - parameters and property names given as reference to the ProcessorData object.
+     * @param saxonError   - if exception found then create SaxonError with exception details for callback
      * @return long value: Success= 0, Failure = -1 or Exception thrown = -2
-     * @throws SaxonApiException if null found for the processor or schema document
      */
-    @CEntryPoint(name = "j_registerSchemaNode", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long registerSchemaFromXdmNode(IsolateThread thread, ObjectHandle processorRef, ObjectHandle xsdRef, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_registerSchemaNode")
+    public static long registerSchemaFromXdmNode(IsolateThread thread, ObjectHandle processorRef, ObjectHandle xsdRef, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
         Processor processor = null;
         if (processorRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
         if (xsdRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XdmNode object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XdmNode object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
         processor = SaxonCAPI.objectHandles.get(processorRef);
@@ -308,16 +332,22 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             params = processorDataAccumulator.getParameterNames();
             values = processorDataAccumulator.getValues();
         }
-        SchemaValidatorForCpp.setProperties(processor, params, values);
-        XdmNode xsd = objectHandles.get(xsdRef);
 
-        if (xsd == null) {
-            SaxonApiException ex = new SaxonApiException("Schema document not found");
-            throw ex;
+        try {
+            SchemaValidatorForCpp.setProperties(processor, params, values);
+            XdmNode xsd = objectHandles.get(xsdRef);
+
+            if (xsd == null) {
+                SaxonApiException ex = new SaxonApiException("Schema document not found");
+                throw ex;
+            }
+
+            processor.getSchemaManager().load(xsd.asSource());
+            return SaxonCAPI.STATUS_OK;
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-
-        processor.getSchemaManager().load(xsd.asSource());
-        return SaxonCAPI.STATUS_OK;
 
     }
 
@@ -329,29 +359,35 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param thread       - Graalvm runtime data structure for the thread
      * @param processorRef - processor reference
      * @param ccwd         - The current working directory
-     * @param coutputfile  The file name to which the SCM will be saved
+     * @param coutputfile   - The file name to which the SCM will be saved
+     * @param saxonError   - if exception found then create SaxonError with exception details for callback
      * @return long value: Success= 0 or Exception thrown = -2
-     * @throws SaxonApiException if null found for the processor object
      */
-    @CEntryPoint(name = "j_exportSchema", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long exportSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer coutputfile) throws SaxonApiException {
+    @CEntryPoint(name = "j_exportSchema")
+    public static long exportSchema(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer coutputfile, SaxonError saxonError){
         String cwd = null;
-        if (ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        try {
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            }
+            String outputfile = SaxonCAPI.toJavaString(coutputfile, WordFactory.nullPointer());
+
+
+            Processor processor = null;
+            if (processorRef == WordFactory.nullPointer()) {
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
+
+            processor = SaxonCAPI.objectHandles.get(processorRef);
+
+            Serializer serializer = resolveOutputFile(processor, cwd, outputfile, ResourceRequest.XSD_NATURE);
+            processor.getSchemaManager().exportComponents(serializer);
+            return SaxonCAPI.STATUS_OK;
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        String outputfile = SaxonCAPI.toJavaString(coutputfile, WordFactory.nullPointer());
-
-
-        Processor processor = null;
-        if (processorRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
-        }
-
-        processor = SaxonCAPI.objectHandles.get(processorRef);
-
-        Serializer serializer = resolveOutputFile(processor, cwd, outputfile, ResourceRequest.XSD_NATURE);
-        processor.getSchemaManager().exportComponents(serializer);
-        return SaxonCAPI.STATUS_OK;
 
     }
 
@@ -392,11 +428,11 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param c_outfilename    - The name of the file where output from the validator will be sent. Can be null.
      * @param processorDataRef - parameters and property names given as reference to the ProcessorData object.
      *                         Parameters and properties names required by the Validator. This could contain the source as a node , source as string or file name, validator options, etc
+     * @param saxonError   - if exception found then create SaxonError with exception details for callback
      * @return long value: Success= 0 or Exception thrown = -2
-     * @throws SaxonApiException if null found for the processor or schema document
      **/
-    @CEntryPoint(name = "j_validate", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long validate(IsolateThread thread, ObjectHandle processorRef, ObjectHandle schemaValidatorForCppRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer c_outfilename, ObjectHandle processorDataRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_validate")
+    public static long validate(IsolateThread thread, ObjectHandle processorRef, ObjectHandle schemaValidatorForCppRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer c_outfilename, ObjectHandle processorDataRef, SaxonError saxonError)  {
         Source source = null; //This is required to make sure the source object created from a previous call is not used
         SchemaValidatorForCpp schemaValidatorForCpp = null;
         Processor processor = null;
@@ -404,64 +440,71 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
         if (processorRef != WordFactory.nullPointer()) {
             processor = SaxonCAPI.objectHandles.get(processorRef);
         } else {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
         if (schemaValidatorForCppRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Schema Manager is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Schema Manager is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         } else {
             schemaValidatorForCpp = SaxonCAPI.objectHandles.get(schemaValidatorForCppRef);
         }
 
         if (!processor.isSchemaAware()) {
-            SaxonApiException ex = new SaxonApiException("Processor is not licensed for schema processing!");
-            throw ex;
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor is not licensed for schema processing");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
         Map<QName, XdmValue> parameters = new HashMap<>();
         Properties props = new Properties();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, null, false);
+        try {
+            Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, null, false);
 
 
-        SchemaValidator validator = null;
-        validator = schemaValidatorForCpp.getSchemaManager().newSchemaValidator();
-        String outfilename = null;
-        String cwd = null;
-        Serializer serializer = null;
-        if (c_outfilename != WordFactory.nullPointer()) {
-            outfilename = SaxonCAPI.toJavaString(c_outfilename, WordFactory.nullPointer());
+            SchemaValidator validator = null;
+            validator = schemaValidatorForCpp.getSchemaManager().newSchemaValidator();
+            String outfilename = null;
+            String cwd = null;
+            Serializer serializer = null;
+            if (c_outfilename != WordFactory.nullPointer()) {
+                outfilename = SaxonCAPI.toJavaString(c_outfilename, WordFactory.nullPointer());
+            }
+
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            }
+
+            if (outfilename != null) {
+                serializer = resolveOutputFile(processor, cwd, outfilename, null);
+
+                serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+                serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+                validator.setDestination(serializer);
+            }
+
+            applySchemaProperties(cwd, processor, schemaValidatorForCpp, validator, optionsMap, parameters, props);
+            source = schemaValidatorForCpp.getSource();
+            String sourceFilename = null;
+            if (csourceFilename != WordFactory.nullPointer()) {
+                sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
+            }
+
+            if (source == null && sourceFilename != null && !sourceFilename.isEmpty()) {
+                source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
+            }
+
+            if (source != null) {
+                validator.validate(source);
+            } else {
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Source document not found");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
+            return SaxonCAPI.STATUS_OK;
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-
-        if (ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
-        }
-
-        if (outfilename != null) {
-            serializer = resolveOutputFile(processor, cwd, outfilename, null);
-
-            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
-            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            validator.setDestination(serializer);
-        }
-
-        applySchemaProperties(cwd, processor, schemaValidatorForCpp, validator, optionsMap, parameters, props);
-        source = schemaValidatorForCpp.getSource();
-        String sourceFilename = null;
-        if (csourceFilename != WordFactory.nullPointer()) {
-            sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
-        }
-
-        if (source == null && sourceFilename != null && !sourceFilename.isEmpty()) {
-            source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
-        }
-
-        if (source != null) {
-            validator.validate(source);
-        } else {
-            SaxonApiException ex = new SaxonApiException("Source document not found");
-            throw ex;
-        }
-        return SaxonCAPI.STATUS_OK;
     }
 
 
@@ -474,63 +517,72 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param csourceFilename  - The name of the file to be validated
      * @param processorDataRef - parameters and property names given as reference to the ProcessorData object.
      *                         Parameters and properties names required by the Validator. This could contain the source as a node , source as string or file name, validator options, etc
+     * @param saxonError   - if exception found then create SaxonError with exception details for callback
      * @return reference to the XdmNode object
-     * @throws SaxonApiException if null found for the processor or schema document
      **/
-    @CEntryPoint(name = "j_validateToNode", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long validateToNode(IsolateThread thread, ObjectHandle processorRef, ObjectHandle schemaValidatorForCppRef, CCharPointer ccwd, CCharPointer csourceFilename, ObjectHandle processorDataRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_validateToNode")
+    public static long validateToNode(IsolateThread thread, ObjectHandle processorRef, ObjectHandle schemaValidatorForCppRef, CCharPointer ccwd, CCharPointer csourceFilename, ObjectHandle processorDataRef, SaxonError saxonError) {
 
 
         Processor processor = null;
         SchemaValidatorForCpp schemaValidatorForCpp = null;
         if (processorRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor object is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor object is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         } else {
             processor = SaxonCAPI.objectHandles.get(processorRef);
         }
 
         if (schemaValidatorForCppRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Schema Manager is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Schema Manager is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         } else {
             schemaValidatorForCpp = SaxonCAPI.objectHandles.get(schemaValidatorForCppRef);
         }
 
 
-        String cwd = null;
-        if (ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
-        }
+        try {
+            String cwd = null;
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            }
 
-        String sourceFilename = null;
-        SchemaValidator validator = null;
-        validator = schemaValidatorForCpp.getSchemaManager().newSchemaValidator();
+            String sourceFilename = null;
+            SchemaValidator validator = null;
+            validator = schemaValidatorForCpp.getSchemaManager().newSchemaValidator();
 
-        Map<QName, XdmValue> parameters = new HashMap<>();
-        Properties props = new Properties();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, null, false);
+            Map<QName, XdmValue> parameters = new HashMap<>();
+            Properties props = new Properties();
+            Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataRef, props, parameters, null, null, null, null, false);
 
-        applySchemaProperties(cwd, processor, schemaValidatorForCpp, validator, optionsMap, parameters, props);
+            applySchemaProperties(cwd, processor, schemaValidatorForCpp, validator, optionsMap, parameters, props);
 
-        Source source = schemaValidatorForCpp.getSource();
+            Source source = schemaValidatorForCpp.getSource();
 
-        if (csourceFilename != WordFactory.nullPointer()) {
-            sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
-        }
+            if (csourceFilename != WordFactory.nullPointer()) {
+                sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
+            }
 
-        if (source == null && sourceFilename != null && !sourceFilename.isEmpty()) {
-            source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
-        }
+            if (source == null && sourceFilename != null && !sourceFilename.isEmpty()) {
+                source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
+            }
 
 
-        if (source != null) {
+            if (source != null) {
 
-            XdmDestination destination = new XdmDestination();
-            validator.setDestination(destination);
-            validator.validate(source);
-            ObjectHandle handle = SaxonCAPI.createHandle(destination.getXdmNode());
-            return handle.rawValue();
-        } else {
-            throw new SaxonApiException("Source document is null");
+                XdmDestination destination = new XdmDestination();
+                validator.setDestination(destination);
+                validator.validate(source);
+                ObjectHandle handle = SaxonCAPI.createHandle(destination.getXdmNode());
+                return handle.rawValue();
+            } else {
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Source document is null");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
+
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
     }
@@ -676,102 +728,6 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
         }
 
-
-    }
-
-
-
-
-
-    
-
-
-    public static void main(String[] args) throws SaxonApiException {
-        SaxonCAPI.debug = true;
-        Processor processor = new Processor(true);
-        SchemaValidatorForCpp validatorForCpp = new SchemaValidatorForCpp(processor);
-       /*
-        XdmValue item = SaxonCAPI.createXdmAtomicItem("QName", "{http://myDomain.co.uk/namespaces/ns1}myElement");
-        validatorForCpp.getProcessor().setConfigurationProperty("http://saxon.sf.net/feature/validation-warnings", "true");
-        validatorForCpp.getProcessor().setConfigurationProperty("http://saxon.sf.net/feature/xsd-version", "1.1");
-        String cwd = "/Users/ond1/work/development/svn/saxon-dev/tests/junit/testdata/";
-        Serializer serializer = processor.newSerializer();
-        XdmNode resultNode = null;
-        String resultStr = null;
-        String[] paramsx = {"report-node", "verbose"};
-        Object[] valuesx = {"true", "false"};
-        validatorForCpp.registerSchema("/Users/ond1/work/development/files/millicom/LineNumber", "schema.xsd", null, null);
-        validatorForCpp.validate("/Users/ond1/work/development/files/millicom/LineNumber", "example1.xml", null, paramsx, valuesx);
-        resultNode = validatorForCpp.getValidationReport();
-
-        if (resultNode != null) {
-            resultStr = serializer.serializeNodeToString(resultNode);
-            System.err.println("Validation Report-Millicom:" + resultStr);
-        }
-
-
-        System.out.println("\n\n Testing family.xml\n");
-        validatorForCpp.registerSchema("/Users/ond1", "family-ext.xsd", null, null);
-        validatorForCpp.registerSchema("/Users/ond1", "family.xsd", null, null);
-        System.err.println("=============");
-        validatorForCpp.validate("/Users/ond1/", "family.xml", null, paramsx, valuesx);
-        XdmNode resultNode2 = validatorForCpp.getValidationReport();
-
-        if (resultNode2 != null) {
-            String resultStr2 = serializer.serializeNodeToString(resultNode2);
-            System.err.println("Validation Report2:" + resultStr2);
-        }
-        System.err.println("=============");
-        String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
-        String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\"" +
-                " attributeFormDefault=\"unqualified\">\n" +
-                "\t<xs:element name=\"request\">\n" +
-                "\t\t<xs:complexType>\n" +
-                "\t\t\t<xs:sequence>\n" +
-                "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
-                "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
-                "\t\t\t</xs:sequence>\n" +
-                "\t\t\t<xs:assert test='count(child::node()) = 3'/>\n" +
-                "\t\t</xs:complexType>\n" +
-                "\t</xs:element>\n" +
-                "</xs:schema>";
-
-
-        String doc1 = "<request xmlns=\"http://myexample/family\">\n" +
-                "  <Parent>John</Parent>\n" +
-                "  <Child>Alice</Child>\n" +
-                "</request>";
-        String[] paramsSch = {"xsdversion"};
-        Object[] valuesSch = {"1.1"};
-        XdmNode sourceNode = validatorForCpp.parseXmlString(invalid_xml);
-        String[] params = {"node", "xsdversion", "report-file"};
-        Object[] values = {sourceNode, "1.1", "validationReport3.xml"};
-        validatorForCpp.registerSchemaString(cwd, sch1, "file///o", paramsSch, valuesSch);
-
-        validatorForCpp.validate(cwd, null, null, params, values);
-
-        XdmNode sourceNode2 = validatorForCpp.parseXmlString(doc1);
-        String[] params1 = {"string", "xsd-string", "xsdversion"};
-        Object[] values1 = {doc1, sch1, "1.1"};
-
-        System.err.println("Test 3: ");
-        testValidator3(validatorForCpp);
-
-        System.err.println("Test 5: ");
-        validatorForCpp.registerSchemaString(cwd, sch1, "file///o1", paramsSch, valuesSch);
-        //XdmNode resultDoc = validatorForCpp.validateToNode(cwd, null, null, null, params1, values1);
-
-        validatorForCpp.validate(cwd, null, null, params1, values1);
-        XdmNode outputNode2 = validatorForCpp.getValidationReport();
-
-        XdmNode resultNode3 = validatorForCpp.getValidationReport();
-
-        if (resultNode3 != null) {
-            resultStr = serializer.serializeNodeToString(resultNode);
-            System.err.println("Validation Report3:" + resultStr);
-
-        }
-            */
 
     }
 

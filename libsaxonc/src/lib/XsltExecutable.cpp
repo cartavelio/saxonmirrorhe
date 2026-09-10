@@ -75,8 +75,8 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
   executableRef = j_copy_handles(thread, (void *)other.executableRef);
-  if(executableRef == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if(executableRef < SXN_UNSET) {
+    throw SaxonApiException("Failed to copy XsltExecutable");
   }
 
   procRef = j_copy_handles(thread, (void *)other.procRef);
@@ -247,9 +247,6 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
     saxonResultDocRef = createSaxonCResultDocumentHandler(
         thread, (int)rawResultsFlag);
 
-    if (saxonResultDocRef == SXN_EXCEPTION) {
-      throw SaxonApiException();
-    }
   } else {
     setProperty("rd", "off");
 
@@ -300,10 +297,7 @@ std::map<std::string, XdmValue *> &XsltExecutable::getResultDocuments() {
         j_handles_destroy(thread,
                           (void *)resultUrisRef);
       }
-    } /*else {
-      exceptionFound = true;
-      throw SaxonApiException();
-    } */
+    }
   }
 
   return resultDocumentMap;
@@ -424,12 +418,12 @@ const char * XsltExecutable::getcwd() {
 
 void XsltExecutable::exportStylesheet(const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   long status =
       j_save(thread, (char *)cwdXE.c_str(),
-             (void *)executableRef, (char *)filename);
-  if (status == SXN_EXCEPTION) {
-    exceptionFound = true;
-    throw SaxonApiException();
+             (void *)executableRef, (char *)filename, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 }
 
@@ -438,6 +432,7 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
   setProperty("resources", resources_dir.c_str());
 
   int additions = 0;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   /*if(saxonMessageListenerRef != SXN_UNSET ) {
       additions++;
   }
@@ -454,13 +449,13 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
   }
 
   long status = j_applyTemplatesReturningFile(
@@ -470,18 +465,17 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
                                          : (void *)selectionRef),
       (char *)output_filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)nullptr
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (status == SXN_EXCEPTION) {
-    exceptionFound = true;
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
-  return;
+
 }
 
 const char *XsltExecutable::applyTemplatesReturningString() {
@@ -493,7 +487,7 @@ const char *XsltExecutable::applyTemplatesReturningString() {
   if (getenv("SAXONC_DEBUG_FLAG")) {
   std::cerr << "C++: applyTemplateReturningString called "<< std::endl;
 }
-  
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
   std::string optionStr;
@@ -501,13 +495,17 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
   }
   allocFn fn = operator new;
 
@@ -516,21 +514,16 @@ const char *XsltExecutable::applyTemplatesReturningString() {
       (void *)executableRef,
       (selectionRef == SXN_UNSET ? (void *)NULL : (void *)selectionRef),
       (processorDataRef == SXN_UNSET ? (void *)NULL
-                                     : (void *)processorDataRef));
+                                     : (void *)processorDataRef), &r);
 
-
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "C++: applyTemplateReturningString after "<< std::endl;
-  }
   if (processorDataRef != SXN_UNSET) {
     
     j_handles_destroy(thread,
                       (void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (result == nullptr) {
-    exceptionFound = true;
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return result;
@@ -555,17 +548,27 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   std::string optionStr;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (saxonMessageListenerRef != SXN_UNSET) {
+
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+    if (r.status != SAXON_OK) {
+      exceptionFound = true;
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+    if (r.status != SAXON_OK) {
+      exceptionFound = true;
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t result = j_applyTemplatesReturningValue(
@@ -573,16 +576,17 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
       (void *)executableRef,
       (void *)(selectionRef == SXN_UNSET ? (void *)NULL : (void *)selectionRef),
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
     return SaxonProcessor::makeXdmValueFromRef(result);
-  } else if (result == SXN_EXCEPTION) {
-    exceptionFound = true;
-    throw SaxonApiException();
+  }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return nullptr;
 }
@@ -603,6 +607,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
       additions++;
   }*/
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
@@ -613,13 +618,20 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t argumentValuesRef = createProcessorDataWithCapacity(thread, argument_length);
@@ -636,7 +648,7 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
       (argumentValuesRef == SXN_UNSET ? (void *)NULL
                                       : (void *)argumentValuesRef),
       (processorDataRef == SXN_UNSET ? (void *)NULL
-                                     : (void *)processorDataRef));
+                                     : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
@@ -647,7 +659,9 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName,
   }
 
   if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
 }
 
@@ -659,13 +673,8 @@ const char *XsltExecutable::callFunctionReturningString(
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
-      additions++;
-  }
-  if(saxonResultDocRef > 0) {
-      additions++;
-  }*/
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
@@ -676,13 +685,20 @@ const char *XsltExecutable::callFunctionReturningString(
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef != SXN_UNSET) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t argumentValuesRef = createProcessorDataWithCapacity(thread, argument_length);
@@ -699,7 +715,7 @@ const char *XsltExecutable::callFunctionReturningString(
       (void *)(argumentValuesRef == SXN_UNSET ? (void *)nullptr
                                               : (void *)argumentValuesRef),
       (void *)(processorDataRef == SXN_UNSET ? (void *)nullptr
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
@@ -710,8 +726,8 @@ const char *XsltExecutable::callFunctionReturningString(
     argumentValuesRef = SXN_UNSET;
   }
 
-  if (result == nullptr) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return result;
@@ -733,6 +749,7 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
       additions++;
   }*/
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
@@ -743,13 +760,21 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t argumentValuesRef = createProcessorDataWithCapacity(
@@ -765,7 +790,7 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
       thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)functionName, (void *)argumentValuesRef,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
@@ -778,11 +803,12 @@ XdmValue *XsltExecutable::callFunctionReturningValue(const char *functionName,
 
   if (result > 0) {
     return SaxonProcessor::makeXdmValueFromRef(result);
-  } else if (result == SXN_EXCEPTION) {
-
-    exceptionFound = true;
-    throw SaxonApiException();
   }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+  }
+
   return nullptr;
 }
 
@@ -800,6 +826,7 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
   if (saxonResultDocRef > 0) {
     additions++;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
@@ -811,26 +838,34 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName,
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   long status = j_callTemplateReturningFile(
       thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)templateName, (char *)outfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 }
 
@@ -841,12 +876,8 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
 
   int additions = 0;
 
-  /*if(saxonMessageListenerRef != SXN_UNSET ) {
-      additions++;
-  }
-  if(saxonResultDocRef > 0) {
-      additions++;
-  } */
+
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   std::string optionStr;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
@@ -858,26 +889,26 @@ XsltExecutable::callTemplateReturningString(const char *templateName) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
   }
   allocFn fn = operator new;
   char *result = j_callTemplateReturningString(
       thread, (void *)fn, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)templateName,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (result == nullptr) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
   return result;
 }
@@ -898,6 +929,8 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
@@ -905,13 +938,20 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t result = j_callTemplateReturningValue(
@@ -925,8 +965,10 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
   }
   if (result > 0) {
     return SaxonProcessor::makeXdmValueFromRef(result);
-  } else if (result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return nullptr;
@@ -950,32 +992,43 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
   std::string optionStr;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   if (saxonMessageListenerRef != SXN_UNSET) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
     if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
         optionStr = "s";
         addProcessorDataPair(thread,
                              (char *)processorDataRef, (char *)optionStr.c_str(),
-                             (void *)selectionRef);
+                             (void *)selectionRef, &r);
+
+      if (r.status != SAXON_OK) {
+        throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+      }
     }
   char *cstylesheet = nullptr;
   int64_t result = j_transformToValue(
       thread, (char *)cwdXE.c_str(),
       (void *)nullptr, (void *)executableRef, (char *)sourcefile, cstylesheet,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
@@ -983,8 +1036,9 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
   }
   if (result > 0) {
     return SaxonProcessor::makeXdmValueFromRef(result);
-  } else if (result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  }
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return nullptr;
@@ -1006,7 +1060,7 @@ void XsltExecutable::transformFileToFile(const char *source,
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, additions);
-
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   std::string optionStr;
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
@@ -1014,39 +1068,53 @@ void XsltExecutable::transformFileToFile(const char *source,
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
     if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
         optionStr = "s";
         addProcessorDataPair(thread,
                              (char *)processorDataRef, (char *)optionStr.c_str(),
-                             (void *)selectionRef);
+                             (void *)selectionRef, &r);
+
+      if (r.status != SAXON_OK) {
+        throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+      }
     }
   char *cstylesheet = nullptr;
-  long status = j_transformToFile(
+  j_transformToFile(
       thread, (char *)cwdXE.c_str(),
       (void *)nullptr, (void *)executableRef, (char *)source, cstylesheet,
       (char *)outputfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
+                                             : (void *)processorDataRef),&r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
+  }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 }
 
 void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   if (create) {
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     if (filename == nullptr) {
       if (saxonMessageListenerRef != SXN_UNSET) {
         j_handles_destroy(thread,
@@ -1056,18 +1124,18 @@ void XsltExecutable::setSaveXslMessage(bool create, const char *filename) {
       std::string optionStr = "-:on";
       saxonMessageListenerRef = createSaxonCMessageListener(
           thread, (void *)procRef,
-          (char *)cwdXE.c_str(), (char *)optionStr.c_str());
+          (char *)cwdXE.c_str(), (char *)optionStr.c_str(), &r);
 
       setProperty("m", "on");
     } else {
       saxonMessageListenerRef = createSaxonCMessageListener(
           thread, (void *)procRef,
-          (char *)cwdXE.c_str(), (char *)filename);
+          (char *)cwdXE.c_str(), (char *)filename, &r);
     }
-    if (saxonMessageListenerRef == SXN_EXCEPTION) {
+    if (r.status != SAXON_OK) {
       exceptionFound = true;
       saxonMessageListenerRef = SXN_UNSET;
-      throw SaxonApiException();
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
     }
     /*if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "C++: setSaveXslMessage saxonMessageListenerRef = "
@@ -1139,23 +1207,34 @@ const char *XsltExecutable::transformFileToString(const char *source) {
   // TODO change map to set values as int64_t then we can add
   // saxonMessageListenerRef directly
   std::string optionStr;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (saxonMessageListenerRef > 0) {
     optionStr = "m";
     addProcessorDataPair(thread,
                          (void *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonMessageListenerRef);
+                         (void *)saxonMessageListenerRef, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if (saxonResultDocRef > 0) {
     optionStr = "rd";
     addProcessorDataPair(thread,
                          (char *)processorDataRef, (char *)optionStr.c_str(),
-                         (void *)saxonResultDocRef);
+                         (void *)saxonResultDocRef, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
   if(selectionStringFlag == true && selectionRef != SXN_UNSET) {
       optionStr = "s";
       addProcessorDataPair(thread,
                            (char *)processorDataRef, (char *)optionStr.c_str(),
-                           (void *)selectionRef);
+                           (void *)selectionRef, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   char *cstylesheet = nullptr;
@@ -1165,15 +1244,14 @@ const char *XsltExecutable::transformFileToString(const char *source) {
       thread, (void *)fn, (char *)cwdXE.c_str(),
       (void *)nullptr, (void *)executableRef, (char *)source, cstylesheet,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (result == nullptr) {
-    exceptionFound = true;
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return result;

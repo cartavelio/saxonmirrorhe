@@ -108,7 +108,7 @@ public:
    *
    * @return True if the streaming option has been set.
    */
-  bool isStreaming();
+  bool isStreaming() const;
 
   /**
    * Remove a parameter (name, value) pair

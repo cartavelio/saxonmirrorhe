@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 from os.path import abspath
 import pathlib
 import import_saxon
+import cProfile
 saxonc = import_saxon.import_mod()
 
 process = psutil.Process()
@@ -887,6 +888,7 @@ def main(argv):
             elif opt in ("-o", "--resultdir"):
                 results_path = arg
             elif opt in ("-jit", "--jit"):
+                print('jit option found')
                 if arg == 'off' or arg == 'false':
                     jit = False
                 else:
@@ -902,4 +904,10 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    if os.getenv("SAXONC_PRINT_TIMING") is not None:
+        pr = cProfile.Profile()
+        pr.enable()
     main(sys.argv[1:])
+    if os.getenv("SAXONC_PRINT_TIMING") is not None:
+        pr.disable()
+        pr.print_stats('time')

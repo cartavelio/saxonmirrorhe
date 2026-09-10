@@ -23,6 +23,9 @@ XdmFunctionItem::XdmFunctionItem(int64_t obj)
 
 const char *XdmFunctionItem::getName() {
   if (fname == nullptr) {
+    if (value == SXN_UNSET) {
+      throw SaxonApiException("XdmFunctionItem is null");
+    }
     allocFn fn = operator new;
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     fname = j_getFunctionName(thread, (void *)fn,
@@ -56,12 +59,17 @@ XdmFunctionItem *XdmFunctionItem::getSystemFunction(SaxonProcessor *processor,
         "name are not nullptr.");
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result =
       j_getSystemFunction(thread,
-                          (void *)processor->procRef, (char *)name, arity);
+                          (void *)processor->procRef, (char *)name, arity, &r);
   if (result >= 0) {
     XdmFunctionItem *functionItem = new XdmFunctionItem(result);
     return functionItem;
+  }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   return nullptr;
@@ -85,18 +93,19 @@ XdmValue *XdmFunctionItem::call(SaxonProcessor *processor, XdmValue **arguments,
     throw SaxonApiException("Error in XdmFunctionItem.call when converting "
                             "arguments -   nullptr arguments found.\"");
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t results = j_xdmFunctionItem_call(
       thread, (void *)processor->procRef,
       (void *)value,
       (argumentJArrayRef == SXN_UNSET ? (void *)nullptr
-                                      : (void *)argumentJArrayRef));
+                                      : (void *)argumentJArrayRef), &r);
   if (argumentJArrayRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)argumentJArrayRef);
     argumentJArrayRef = -1;
   }
-  if (results == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return SaxonProcessor::makeXdmValueFromRef(results);
 }

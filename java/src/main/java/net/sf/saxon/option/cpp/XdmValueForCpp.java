@@ -14,7 +14,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.IntegerValue;
@@ -83,54 +82,59 @@ public class XdmValueForCpp {
         type = null;
     }
 
-    @CEntryPoint(name = "j_makeAtomicValue", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_makeAtomicValue(IsolateThread thread, CCharPointer c_typeStr, CCharPointer c_valueStr) throws ValidationException, SaxonApiException {
+    @CEntryPoint(name = "j_makeAtomicValue")
+    public static long j_makeAtomicValue(IsolateThread thread, CCharPointer c_typeStr, CCharPointer c_valueStr, SaxonError saxonError) {
 
-        String typeStr = null;
-        if (c_typeStr != WordFactory.nullPointer()) {
-            typeStr = SaxonCAPI.toJavaString(c_typeStr, WordFactory.nullPointer());
-        }
-
-        String valueStr = null;
-        if (c_valueStr != WordFactory.nullPointer()) {
-            valueStr = SaxonCAPI.toJavaString(c_valueStr, WordFactory.nullPointer());
-        }
-
-        if (SaxonCAPI.debug) {
-            if (valueStr != null) {
-                System.err.println("DEBUG: j_makeAtomicValue value=" + valueStr);
-            } else if(typeStr != null) {
-                System.err.println("DEBUG:  j_makeAtomicValue type=" + typeStr);
+        try {
+            String typeStr = null;
+            if (c_typeStr != WordFactory.nullPointer()) {
+                typeStr = SaxonCAPI.toJavaString(c_typeStr, WordFactory.nullPointer());
             }
-        }
 
-        int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
+            String valueStr = null;
+            if (c_valueStr != WordFactory.nullPointer()) {
+                valueStr = SaxonCAPI.toJavaString(c_valueStr, WordFactory.nullPointer());
+            }
 
-        BuiltInAtomicType type = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
-
-        if(type == null) {
             if (SaxonCAPI.debug) {
-                System.err.println("DEBUG:  j_makeAtomicValue type is null");
+                if (valueStr != null) {
+                    System.err.println("DEBUG: j_makeAtomicValue value=" + valueStr);
+                } else if (typeStr != null) {
+                    System.err.println("DEBUG:  j_makeAtomicValue type=" + typeStr);
+                }
+            }
+
+            int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);
+
+            BuiltInAtomicType type = (BuiltInAtomicType) BuiltInType.getSchemaType(fp);
+
+            if (type == null) {
+                if (SaxonCAPI.debug) {
+                    System.err.println("DEBUG:  j_makeAtomicValue type is null");
+                }
+                return -1;
+            }
+
+            ConversionRules rules = new ConversionRules();
+            Converter converter = rules.getConverter(BuiltInAtomicType.STRING, type);
+
+            if (converter == null) {
+                return -1;
+            }
+
+            AtomicValue aValue = converter.convert(new StringValue(valueStr)).asAtomic();
+
+            if (aValue.getLength() == 1) {
+                XdmAtomicValue value = new XdmAtomicValue(aValue);
+
+                ObjectHandle objectHandle = SaxonCAPI.createHandle(value);
+                return objectHandle.rawValue();
             }
             return -1;
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-
-        ConversionRules rules = new ConversionRules();
-        Converter converter = rules.getConverter(BuiltInAtomicType.STRING, type);
-
-        if(converter == null) {
-            return -1;
-        }
-
-        AtomicValue aValue = converter.convert(new StringValue(valueStr)).asAtomic();
-
-        if(aValue.getLength() == 1 ) {
-            XdmAtomicValue value = new XdmAtomicValue(aValue);
-
-            ObjectHandle objectHandle = SaxonCAPI.createHandle(value);
-            return objectHandle.rawValue();
-        }
-        return -1;
     }
 
     /**
@@ -201,10 +205,9 @@ public class XdmValueForCpp {
      * @param thread - Graalvm runtime data structure for the thread
      * @param nodeRef - reference to XdmValue held in the ObjectHandle's pool
      * @return the line number of the node, or -1 if not available.
-     * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_getLineNumber1")
-    public static int getLineNumber1(IsolateThread thread, ObjectHandle nodeRef) throws SaxonApiException {
+    public static int getLineNumber1(IsolateThread thread, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         int linenumber = node.getLineNumber();
         return linenumber;
@@ -221,10 +224,9 @@ public class XdmValueForCpp {
      * @param thread - Graalvm runtime data structure for the thread
      * @param nodeRef - reference to XdmValue held in the ObjectHandle's pool
      * @return the column number of the node, or -1 if not available.
-     * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_getColumnNumber1")
-    public static int getColumnNumber1(IsolateThread thread, ObjectHandle nodeRef) throws SaxonApiException {
+    public static int getColumnNumber1(IsolateThread thread, ObjectHandle nodeRef) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         int columnNumber = node.getColumnNumber();
         return columnNumber;
@@ -250,18 +252,14 @@ public class XdmValueForCpp {
      * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_getBooleanValue")
-    public static byte getBooleanValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+    public static byte getBooleanValue(IsolateThread thread, ObjectHandle valueRef, SaxonError saxonError)  {
         try {
             XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
 
-            byte result = CTypeConversion.toCBoolean(value.getBooleanValue());
-            return result;
-        } catch(SaxonApiException ex) {
-            SaxonCCurrentException.getInstance().setThrowable(ex);
-            return -2;
+            return CTypeConversion.toCBoolean(value.getBooleanValue());
         } catch (Exception ex) {
-            SaxonCCurrentException.getInstance().setThrowable(ex);
-            return -2;
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return (byte)SaxonCAPI.STATUS_EXCEPTION;
         }
     }
 
@@ -272,17 +270,17 @@ public class XdmValueForCpp {
      *
      * @param thread - Graalvm runtime data structure for the thread
      * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
+     * @param saxonError - we catch the exception and We must check in C++ that the exception was thrown
      * @return  the result of converting to a double - reference to XdmAtomicValue given as long
-     * @throws SaxonApiException - we catch the exception and return a
-     * spurious value. We must check in C++ that the exception was thrown
+
      */
     @CEntryPoint(name = "j_getDoubleValue")
-    public static double getDoubleValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+    public static double getDoubleValue(IsolateThread thread, ObjectHandle valueRef, SaxonError saxonError)  {
             XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
             try {
                 return value.getDoubleValue();
             } catch (Exception ex) {
-                SaxonCCurrentException.getInstance().setThrowable(ex);
+                SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
                 return -0.9999999;
             }
     }
@@ -296,12 +294,12 @@ public class XdmValueForCpp {
      * spurious value. We must check in C++ that the exception was thrown
      */
     @CEntryPoint(name = "j_getLongValue")
-    public static long getLongValue(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+    public static long getLongValue(IsolateThread thread, ObjectHandle valueRef, SaxonError saxonError)  {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
         try {
             return value.getLongValue();
         } catch (Exception ex) {
-            SaxonCCurrentException.getInstance().setThrowable(ex);
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
             return -9999999;
         }
     }
@@ -311,10 +309,9 @@ public class XdmValueForCpp {
      * @param thread - Graalvm runtime data structure for the thread
      * @param valueRef - reference to XdmValue held in the ObjectHandle's pool
      * @return a suitable hash code
-     * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_getHashCode")
-    public static int getHashCode(IsolateThread thread, ObjectHandle valueRef) throws SaxonApiException {
+    public static int getHashCode(IsolateThread thread, ObjectHandle valueRef)  {
         XdmAtomicValue value = SaxonCAPI.objectHandles.get(valueRef);
         return value.hashCode();
     }

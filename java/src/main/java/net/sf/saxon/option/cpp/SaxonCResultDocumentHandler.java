@@ -49,7 +49,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
      * @param flagInt - option to return result sequence, after it has been constructed.
      * @return  - long value to the created SaxonCResultDocumentHandler object in the ObjectHandles pool
      */
-    @CEntryPoint(name = "createSaxonCResultDocumentHandler", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "createSaxonCResultDocumentHandler")
     public static long createSaxonCResultDocumentHandler(IsolateThread thread, int flagInt) {
         SaxonCResultDocumentHandler resultDocumentHandler = new SaxonCResultDocumentHandler(CTypeConversion.toBoolean(flagInt));
         ObjectHandle handle = SaxonCAPI.createHandle(resultDocumentHandler);
@@ -101,8 +101,8 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
      * @param rdRef - reference to the SaxonCResultDocumentHandler object in the ObjectHandles pool
      * @return pointer to the array of XdmNode objects in the C memory space or null if there are no result documents
      */
-    @CEntryPoint(name = "j_getResultDocuments", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
-    public static CLongPointer getResultDocuments(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle rdRef)  throws SaxonApiException {
+    @CEntryPoint(name = "j_getResultDocuments")
+    public static CLongPointer getResultDocuments(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle rdRef) {
         SaxonCResultDocumentHandler rdHandler = SaxonCAPI.objectHandles.get(rdRef);
         XdmValue[] results = null;
         if (rdHandler.rawResultsFlag) {
@@ -182,7 +182,7 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
      * @param rdRef - reference to the SaxonCResultDocumentHandler object in the ObjectHandles pool
      * @return  - long value of the URIs for result-document held as an ProcessorData object in the ObjectHandles pool
      */
-    @CEntryPoint(name = "j_getResultDocumentURIs", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    @CEntryPoint(name = "j_getResultDocumentURIs")
     public static long getResultDocumentURIs(IsolateThread thread, ObjectHandle rdRef) {
         SaxonCResultDocumentHandler rdHandler = SaxonCAPI.objectHandles.get(rdRef);
         Collection<? extends AbstractDestination> resultDocCollection;

@@ -9,7 +9,11 @@ from os.path import isfile
 
 @pytest.fixture
 def saxonproc2():
-    return PySaxonProcessor(license=True)
+    try :
+        return PySaxonProcessor(license=True)
+    except PySaxonApiError as e:
+        print(e)
+        assert False
 
 @pytest.fixture
 def data_dir(pytestconfig):
@@ -70,14 +74,18 @@ class TestSchemaExport:
 """
 
     def export_schema(self, schema_path):
-        processor = PySaxonProcessor(license=True)
-        processor.set_configuration_property("xsdversion", "1.1")
-        val = processor.new_schema_validator()
-        assert val is not None
-        print(type(val))
-        print(val.exception_occurred)
-        val.register_schema(xsd_text=self.schema)
-        val.export_schema(str(schema_path))
+        try:
+            processor = PySaxonProcessor(license=True)
+            processor.set_configuration_property("xsdversion", "1.1")
+            val = processor.new_schema_validator()
+            assert val is not None
+            print(type(val))
+            print(val.exception_occurred)
+            val.register_schema(xsd_text=self.schema)
+            val.export_schema(str(schema_path))
+        except PySaxonApiError as e:
+            print(e)
+            assert False
 
     def test_schema_export(self, tmp_path, saxonproc2):
         schema_path = tmp_path / "exportedSchema.scm"

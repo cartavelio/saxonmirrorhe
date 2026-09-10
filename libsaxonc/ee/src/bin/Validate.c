@@ -24,8 +24,9 @@ int validate(sxnc_environment *environi, int argc, const char *argv[]) {
 #ifdef DEBUG
     printf("\nArgument = %s", (char *)argv[i]);
 #endif
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     addProcessorProperty(environi->thread, (void *)processorDataRef,
-                         (char *)argv[i]);
+                         (char *)argv[i], &r);
   }
 #ifdef DEBUG
   printf("\nprocessorData = %i", (int)processorDataRef);

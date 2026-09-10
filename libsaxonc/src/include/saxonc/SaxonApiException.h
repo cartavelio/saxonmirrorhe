@@ -11,6 +11,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "saxonc_export.h"
+#include "saxonc/saxon_error.h"
 #include "saxonc/SaxonProcessor.h"
 #include <exception>
 #include <iostream>
@@ -67,6 +68,22 @@ public:
   SaxonApiException(const char *message, const char *errorCode,
                     const char *systemId, int linenumber);
 
+    /**
+     * A constructor. Create a SaxonApiException
+     * @param  status - The type of exception we are handling. STATIC, RUNTIME
+     * @param message - The detail message string of this throwable.
+     * @param errorCode - The error code of the underlying exception thrown, if
+     * known
+     * @param systemId - Get the URI of the module associated with the exception,
+     * if known.
+     * @param linenumber - The line number in the stylesheet related to cause of
+     * the exception
+     * @param numOfErrors - For static errors in the stylesheet relates to the
+     * number of errors reported
+     */
+    SaxonApiException(saxon_status_t status, const char *message, const char *errorCode,
+                      const char *systemId, int linenumber, int numOfErrors);
+
   /**
    * A destructor.
    */
@@ -112,7 +129,8 @@ public:
    * the error code as prefix if there is an error code associated with the
    * exception. Memory deallocation is handled internally.
    */
-  const char *getCombinedStaticErrorMessages();
+// TODO: deprecated. This will be removed
+  //  const char *getCombinedStaticErrorMessages();
 
 
   /**
@@ -128,10 +146,11 @@ public:
 private:
   bool cppException;
   bool isStaticError;
+  saxon_status_t exception_status;
   std::string message;
   std::string s_message;
   std::string ec_message;
-  int lineNumber;
+  int lineNumber, numOfErrors;
   std::string errorCode;
   std::string systemId;
 };

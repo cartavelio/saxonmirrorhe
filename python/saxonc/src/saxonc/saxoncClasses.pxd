@@ -66,7 +66,7 @@ cdef extern from "saxonc/SaxonProcessor.h":
         #Clear configuration properties specific to the processor in use. 
         void clearConfigurationProperties()
 
-        bool isSchemaAware()
+        bool isSchemaAware()  except +handle_saxonc_api_exceptions
 
         const char * EQNameToClarkName(const char * name)
 
@@ -142,7 +142,7 @@ cdef extern from "saxonc/SaxonProcessor.h":
 
         XdmValue * parseJsonFromFile(const char* source)  except +handle_saxonc_api_exceptions
 
-        bool isSchemaAwareProcessor()
+        bool isSchemaAwareProcessor() except +handle_saxonc_api_exceptions
 
         bool exceptionOccurred()
 

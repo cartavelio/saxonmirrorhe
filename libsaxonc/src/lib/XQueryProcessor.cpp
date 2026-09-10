@@ -47,14 +47,16 @@ SaxonProcessor* XQueryProcessor::getSaxonProcessor() {
 
 XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
   exception = nullptr;
+  if (p == nullptr) {
+    throw SaxonApiException("Processor object is null");
+  }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef = j_copy_handles(thread, (void *)p->procRef);
-  cppXQ = j_createXQueryEngineWithProcessor(thread,(void *)procRef);
-  if (cppXQ == SXN_UNSET) {
-    throw SaxonApiException(
-        "Error: Failed to create the XPathProcessor internal object");
-  } else if (cppXQ == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  cppXQ = j_createXQueryEngineWithProcessor(thread,(void *)procRef, &r);
+  if (r.status != SAXON_OK) {
+    j_handles_destroy(thread, (void *)procRef);
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   if (!(p->cwd.empty()) && curr.empty()) {
@@ -69,9 +71,7 @@ XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef = j_copy_handles(thread, (void *)other.procRef);
   cppXQ = j_copy_handles(thread, (void *)other.cppXQ);
-  if(cppXQ == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
+
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
   while (paramIter != other.parameters.end()) {
@@ -263,19 +263,20 @@ void XQueryProcessor::executeQueryToFile(const char *infilename,
     setProperty("s", infilename);
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   int64_t status = j_executeQueryToFile(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)ofilename, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef > 0) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
 }
@@ -286,21 +287,23 @@ XdmValue *XQueryProcessor::executeQueryToValue(const char *infilename,
   if (infilename != nullptr) {
     setProperty("s", infilename);
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   int64_t result = j_executeQueryToValue(thread, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
   if (result > 0) {
     return SaxonProcessor::makeXdmValueFromRef(result);
-  } else if (result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  }
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   return nullptr;
@@ -313,22 +316,23 @@ const char *XQueryProcessor::executeQueryToString(const char *infilename,
     setProperty("s", infilename);
   }
   allocFn fn = operator new;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   char *result = j_executeQueryToString(thread, (void *)fn, (void *)procRef,
       (char *)cwdXQ.c_str(), (char *)query, (char *)encoding,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef > 0) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (result == nullptr) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
-  return (const char *)result;
+  return result;
 }
 
 const char *XQueryProcessor::runQueryToString() {
@@ -357,7 +361,7 @@ void XQueryProcessor::setStreaming(bool option) {
   }
 }
 
-bool XQueryProcessor::isStreaming() { return streaming; }
+bool XQueryProcessor::isStreaming() const { return streaming; }
 
 void XQueryProcessor::setLanguageVersion(const char *version) {
   setProperty("-lang-version", version);

@@ -53,28 +53,28 @@ const char *XdmValue::toString(const char *encoding) {
   int count = size();
   allocFn fn = operator new;
   char *toStringValuei = nullptr;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
   if (count == 0) {
     toStringValuei =
-        xdmItemToString(thread, (void *)fn, nullptr, nullptr);
+        xdmItemToString(thread, (void *)fn, nullptr, nullptr, &r);
+
+
   } else if (count == 1) {
     toStringValuei =
-        xdmItemToString(thread, (void *)fn, (void *)(values[0]->getUnderlyingValue()), (char *) encoding);
+        xdmItemToString(thread, (void *)fn, (void *)(values[0]->getUnderlyingValue()), (char *) encoding, &r);
   } else {
     if (jValues == -1) {
       jValues = getUnderlyingValue();
     }
 
-    toStringValuei = xdmValueArrayToString(thread,(void *)fn, (void *)jValues, (char *) encoding);
+    toStringValuei = xdmValueArrayToString(thread,(void *)fn, (void *)jValues, (char *) encoding, &r);
   }
 
-  if(toStringValuei == nullptr && (bool)j_checkForException(thread)) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
-
-
-
   return toStringValuei;
 }
 
@@ -138,7 +138,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
     } else if (typeRef == XDM_FUNCTION_ITEM) {
       addXdmItemFromUnderlyingValue(new XdmFunctionItem(results[p]));
     } else {
-      std::cerr << "Error creating XdmValue from array" << std::endl;
+      throw SaxonApiException("Error creating XdmValue from array");
     }
   }
   operator delete(results);

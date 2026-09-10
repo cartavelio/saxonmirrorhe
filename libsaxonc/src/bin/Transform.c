@@ -27,6 +27,7 @@ int transform(sxnc_environment *environi, int argc, const char *argv[]) {
     printf("\nError: Not enough arguments in Transform");
     return 0;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       createProcessorDataWithCapacity(environi->thread, argc);
   int i = 1;
@@ -35,7 +36,7 @@ int transform(sxnc_environment *environi, int argc, const char *argv[]) {
     printf("\nArgument = %s", (char *)argv[i]);
 #endif
     addProcessorProperty(environi->thread, (void *)processorDataRef,
-                         (char *)argv[i]);
+                         (char *)argv[i], &r);
   }
 #ifdef DEBUG
   printf("\nprocessorData = %i", (int)processorDataRef);

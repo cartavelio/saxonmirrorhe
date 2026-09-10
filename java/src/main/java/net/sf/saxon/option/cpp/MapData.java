@@ -32,14 +32,14 @@ public class    MapData {
     }
 
 
-    @CEntryPoint(name = "j_create_mapData", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
-    public static long j_createMapData(IsolateThread thread) throws SaxonApiException {
+    @CEntryPoint(name = "j_create_mapData")
+    public static long j_createMapData(IsolateThread thread)  {
         ObjectHandle handle = SaxonCAPI.createHandle(new MapData());
         return handle.rawValue();
     }
 
-    @CEntryPoint(name = "j_create_mapDataWithCapacity", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
-    public static long j_createMapDataWithCapacity(IsolateThread thread, int cap) throws SaxonApiException {
+    @CEntryPoint(name = "j_create_mapDataWithCapacity")
+    public static long j_createMapDataWithCapacity(IsolateThread thread, int cap) {
         ObjectHandle handle = SaxonCAPI.createHandle(new MapData(cap));
         return handle.rawValue();
     }
@@ -61,7 +61,7 @@ public class    MapData {
      * @param mapDataRef - The ObjectHandle of the MapData. Accepts null
      * @return an XdmMap object as ObjectHandle reference
      */
-    @CEntryPoint(name = "j_makeXdmMap", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_makeXdmMap")
     public static long j_createXdmMap(IsolateThread thread, ObjectHandle mapDataRef) {
         MapData mapData = null;
         if(mapDataRef == WordFactory.nullPointer()) {

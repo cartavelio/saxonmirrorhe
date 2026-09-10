@@ -23,15 +23,16 @@ const char *XdmMap::toString(const char *encoding) {
 
   allocFn fn = operator new;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (value == SXN_UNSET) {
     value = XdmMap::createEmptyUnderlyingXdmMap(thread);
   }
 
   const char *str = xdmMapToString(thread,
-                                   (void *)fn, (void *)value, (char *)encoding);
+                                   (void *)fn, (void *)value, (char *)encoding, &r);
 
-  if(str == nullptr && (bool)j_checkForException(thread)) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return str;
@@ -49,12 +50,13 @@ XdmValue *XdmMap::get(XdmAtomicValue *key) {
   if (key == nullptr || value == SXN_UNSET) {
     return nullptr;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t result =
-      j_xdmMap_get(thread, (void *)value, (void *)key->getUnderlyingValue());
+      j_xdmMap_get(thread, (void *)value, (void *)key->getUnderlyingValue(), &r);
 
-  if(result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   return SaxonProcessor::makeXdmValueFromRef(result);
@@ -65,11 +67,13 @@ XdmValue *XdmMap::get(const char *key) {
     return nullptr;
   }
 
-  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t result = j_xdmMap_get_with_key_as_string(thread, (void *)value, (char *)key);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
 
-  if(result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  int64_t result = j_xdmMap_get_with_key_as_string(thread, (void *)value, (char *)key, &r);
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   return SaxonProcessor::makeXdmValueFromRef(result);
@@ -79,11 +83,12 @@ XdmValue *XdmMap::get(int key) {
   if (key < 0 || value == SXN_UNSET) {
     return nullptr;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t result = j_xdmMap_get_with_key_as_int(thread, (void *)value, key);
+  int64_t result = j_xdmMap_get_with_key_as_int(thread, (void *)value, key, &r);
 
-  if(result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return SaxonProcessor::makeXdmValueFromRef(result);
 }
@@ -92,11 +97,12 @@ XdmValue *XdmMap::get(double key) {
   if (key < 0 || value == SXN_UNSET) {
     return nullptr;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t result = j_xdmMap_get_with_key_as_double(thread, (void *)value, key);
+  int64_t result = j_xdmMap_get_with_key_as_double(thread, (void *)value, key, &r);
 
-  if(result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return SaxonProcessor::makeXdmValueFromRef(result);
 }
@@ -105,11 +111,12 @@ XdmValue *XdmMap::get(long key) {
   if (key < 0 || value == SXN_UNSET) {
     return nullptr;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t result = j_xdmMap_get_with_key_as_long(thread, (void *)value, key);
+  int64_t result = j_xdmMap_get_with_key_as_long(thread, (void *)value, key, &r);
 
-  if(result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return SaxonProcessor::makeXdmValueFromRef(result);
 }
@@ -142,12 +149,13 @@ XdmMap *XdmMap::remove(XdmAtomicValue *key) {
   if (value == SXN_UNSET) {
     value = XdmMap::createEmptyUnderlyingXdmMap(thread);
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result =
       j_xdmMap_remove(thread, (void *)value,
-                      (void *)key->getUnderlyingValue());
+                      (void *)key->getUnderlyingValue(), &r);
 
-  if(result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return new XdmMap(result);
 }

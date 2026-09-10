@@ -15,9 +15,7 @@ import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.word.WordFactory;
 
-import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,24 +69,29 @@ public class SaxonCMessageListener implements MessageListener2 {
      * @param procRef - reference to the Processor object in the ObjectHandles pool
      * @param ccwd  - Current working directory
      * @param c_mode - option for switching on/off/filename xsl:message
+     * @param saxonError - failure in the message listener
      * @return  - long value to the created SaxonCMessageListener object in the ObjectHandles pool
-     * @throws SaxonApiException failure in the Message listener
      */
-    @CEntryPoint(name = "createSaxonCMessageListener", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long createSaxonCMessageListener(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer c_mode) throws SaxonApiException {
+    @CEntryPoint(name = "createSaxonCMessageListener")
+    public static long createSaxonCMessageListener(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer c_mode, SaxonError saxonError) {
         Processor processor = SaxonCAPI.objectHandles.get(procRef);
 
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd =   SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        try {
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            }
+            String mode = SaxonCAPI.toJavaString(c_mode, WordFactory.nullPointer());
+
+            SaxonCMessageListener listener = new SaxonCMessageListener(processor, cwd, mode);
+
+            ObjectHandle handle = SaxonCAPI.createHandle(listener);
+
+            return handle.rawValue();
+        } catch (SaxonApiException e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        String mode = SaxonCAPI.toJavaString(c_mode, WordFactory.nullPointer());
-
-        SaxonCMessageListener listener = new SaxonCMessageListener(processor, cwd, mode);
-
-        ObjectHandle handle = SaxonCAPI.createHandle(listener);
-
-        return handle.rawValue();
     }
 
     /**

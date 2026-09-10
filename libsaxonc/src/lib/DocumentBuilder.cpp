@@ -57,9 +57,6 @@ void DocumentBuilder::setLineNumbering(bool option) {
   lineNumbering = option;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t status = j_db_setLineNumbering(thread,(void *)docBuilderObject, (int)option);
-  if (status == -2) {
-    throw SaxonApiException();
-  }
 }
 
 bool DocumentBuilder::isLineNumbering() { return lineNumbering; }
@@ -76,9 +73,6 @@ void DocumentBuilder::setDTDValidation(bool option) {
   dtdVal = option;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t status = j_db_setDTDValidation(thread, (void *)docBuilderObject, (int)option);
-  if (status == -2) {
-    throw SaxonApiException();
-  }
 }
 
 bool DocumentBuilder::isDTDValidation() { return dtdVal; }
@@ -88,10 +82,11 @@ void DocumentBuilder::setBaseUri(const char *uri) {
     baseURI.erase();
   }
   baseURI = std::string(uri);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  int64_t status = j_db_setBaseURI(thread, (void *)docBuilderObject, (char *)uri);
-  if (status == -2) {
-    throw SaxonApiException();
+  int64_t status = j_db_setBaseURI(thread, (void *)docBuilderObject, (char *)uri, &r);
+  if (r.status == SXN_EXCEPTION) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 }
 
@@ -100,18 +95,21 @@ const char *DocumentBuilder::getBaseUri() { return baseURI.c_str(); }
 XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
                                              const char *encoding) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result = j_main_parseXmlString(thread,
       (baseURI.empty() ? (char *)nullptr : (char *)baseURI.c_str()),
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValidator != nullptr
            ? (void *)schemaValidator->getUnderlyingValidator()
            : (void *)nullptr),
-      (char *)source, (char *)encoding);
+      (char *)source, (char *)encoding, &r);
   if (result > 0) {
     XdmNode *node = new XdmNode(result);
     return node;
-  } else if (result == -2) {
-    throw SaxonApiException();
+  }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return nullptr;
@@ -119,34 +117,39 @@ XdmNode *DocumentBuilder::parseXmlFromString(const char *source,
 
 XdmNode *DocumentBuilder::parseXmlFromFile(const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result = j_main_parseXmlFile(thread, (char *)cwdDB.c_str(),
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValidator != nullptr
            ? (void *)schemaValidator->getUnderlyingValidator()
            : (void *)nullptr),
-      (char *)filename);
+      (char *)filename, &r);
   if (result > 0) {
     XdmNode *node = new XdmNode(result);
     return node;
-  } else if (result == -2) {
-    throw SaxonApiException();
+  }
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
   return nullptr;
 }
 
 XdmNode *DocumentBuilder::parseXmlFromUri(const char *uri) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result = j_main_parseXmlFile(thread, (char *)cwdDB.c_str(),
       (void *)proc->procRef, (void *)docBuilderObject,
       (schemaValidator != nullptr
            ? (void *)schemaValidator->getUnderlyingValidator()
            : (void *)nullptr),
-      (char *)uri);
+      (char *)uri, &r);
   if (result > 0) {
     XdmNode *node = new XdmNode(result);
     return node;
-  } else if (result == -2) {
-    throw SaxonApiException();
+  }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return nullptr;

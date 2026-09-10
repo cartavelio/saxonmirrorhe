@@ -9,10 +9,16 @@ import java.io.StringWriter;
 
 public class SaxonCErrorReporter  extends StandardErrorReporter {
 
-    static StringWriter errors = new StringWriter();
+    StringWriter errors;
 
     public SaxonCErrorReporter(){
+        errors = new StringWriter();
         setLogger(StandardLogger.makeLogger(errors));
+        /*
+        TODO this won't work because its static
+        if(SaxonCAPI.standardErrorOutputStream != null){
+            setStandardErrorOutput(SaxonCAPI.standardErrorOutputStream);
+        } */
     }
 
     @Override

@@ -27,7 +27,7 @@ public class SaxonCException  {
 
     //public static Throwable throwable = null;
     public static String errorOutputFile = null;
-    public static SaxonCErrorReporter errorReporter = new SaxonCErrorReporter();
+    //public static SaxonCErrorReporter errorReporter = new SaxonCErrorReporter();
 
     //public static String ecwd = null;
 
@@ -45,139 +45,20 @@ public class SaxonCException  {
 
 
     public void setErrorOutput(PrintStream out){
-        errorReporter.setStandardErrorOutput(out);
+        //TODO remove this method
+        //errorReporter.setStandardErrorOutput(out);
     }
 
     
     @CEntryPoint(name = "j_getErrorMessage")
     public static CCharPointer j_getErrorMessage(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
-        Throwable throwable = SaxonCCurrentException.get();
-        SaxonApiException exception = null;
-        if(throwable == null) {
-            if(SaxonCAPI.debug) {
-                System.err.println("Java DEBUG: j_getErrorMessage throwable is null");
-            }
-            return WordFactory.nullPointer();
-        }
-        if(SaxonCAPI.debug) {
-            System.err.println("Java DEBUG: j_getErrorMessage = " + throwable.getClass().getName());
-        }
-        if(throwable instanceof SaxonApiException) {
-           exception = (SaxonApiException)throwable;
-        } else if(throwable instanceof NullPointerException) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-          exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
-        } else {
-            exception = new SaxonApiException(throwable);
-        }
-        if(exception.getMessage() == null) {
-            if(SaxonCAPI.debug) {
-                System.err.println("Exception thrown but getMessage() is null");
-                System.err.println(exception.getCause().toString());
-            }
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-            exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
-
-            //return WordFactory.nullPointer();
-        }
-
-        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
-        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(exception.getMessage())){
-
-            final CCharPointer result=holder.get();
-            return result;
-        }
-
-        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, exception.getMessage());
-        //return a;
+        return WordFactory.nullPointer();
     }
 
 
     @CEntryPoint(name = "j_getErrorMessageWithErrorCode")
     public static CCharPointer j_getErrorMessageWithErrorCode(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc){
-        Throwable throwable = SaxonCCurrentException.get();
-        SaxonApiException exception = null;
-        if(SaxonCAPI.debug) {
-            System.err.println("Java DEBUG: j_getErrorMessageWithErrorCode called");
-            System.err.println("Java DEBUG: j_getErrorMessageWithErroCode erroReporter message="+errorReporter.getErrors().toString());
-            if(throwable instanceof LicenseException) {
-                System.err.println("Java DEBUG: j_getErrorMessageWithErroCode LicenseException found="+((LicenseException)throwable).getMessage());
-            }
-        }
-
-        if(throwable == null) {
-            if(SaxonCAPI.debug) {
-                System.err.println("Java DEBUG: j_getErrorMessage throwable is null");
-            }
-            return WordFactory.nullPointer();
-        }
-        if(throwable instanceof SaxonApiException) {
-           exception = (SaxonApiException)throwable;
-        } else if(throwable instanceof NullPointerException) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-          exception = new SaxonApiException("NullPointer exception found: "+ sw.toString());
-        } else {
-            exception = new SaxonApiException(throwable);
-        }
-        if(exception.getMessage() == null) {
-            if(SaxonCAPI.debug) {
-                System.err.println("Java Debug: Exception found: " + throwable.getClass().getName());
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                throwable.printStackTrace(pw);
-                System.err.println(sw.toString());
-            }
-
-            return WordFactory.nullPointer();
-        }
-        if(SaxonCAPI.debug) {
-            String messageStr = exception.getMessage();
-            System.err.println("Java Debug: Exception found: " + messageStr);
-            if(messageStr.contains("Invalid handle")){
-                System.err.println("Found Invalid Handle error");
-            }
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            throwable.printStackTrace(pw);
-            System.err.println(sw.toString());
-
-            if(errorReporter.getErrors() != null) {}
-
-        }
-        CCharPointer a = null;
-        String errorMessage = null;
-
-        if(errorReporter.getErrors().toString() != null && !errorReporter.getErrors().toString().isEmpty()) {
-            errorMessage = errorReporter.getErrors().toString();
-
-        } else {
-            int lineNumber = exception.getLineNumber();
-            if(exception.getErrorCode() == null) {
-                errorMessage = exception.getMessage()+". Line number: "+lineNumber;
-            } else {
-               errorMessage = exception.getErrorCode().getLocalName() + ": " + exception.getMessage() + ". Line number: "+lineNumber;
-            }
-        }
-
-        if(SaxonCAPI.debug) {
-            System.err.println("Java Debug: Exception found cp0: " + errorMessage);
-        }
-
-        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
-        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(errorMessage)){
-
-            final CCharPointer result=holder.get();
-            return result;
-        }
-
-        //a = SaxonCAPI.stringToNative2(alloc, errorMessage);
-        //return a;
+        return WordFactory.nullPointer();
     }
 
 
@@ -213,44 +94,7 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_getCombinedStaticErrorMessages")
     public static CCharPointer j_getCombinedStaticErrorMessages(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc) {
-        Throwable throwable = SaxonCCurrentException.get();
-        if (errorOutputFile != null) {
-            CCharPointer a = SaxonCAPI.stringToNative2(alloc,throwable.getMessage());
-            return a;
-        }
-
-        String message = errorReporter.getErrors().toString();
-
-
-        /*for (Object item : staticErrorList) {
-            XmlProcessingError error = (XmlProcessingError) item;
-            if (error.getErrorCode() == null) {
-                message += (((XmlProcessingError) item).getMessage() + "\n");
-            } else {
-                message += (error.getErrorCode().getLocalName() + ": " + ((XmlProcessingError) item).getMessage() + "\n");
-            }
-
-        }*/
-
-        if (SaxonCAPI.debug) {
-            //System.err.println("Debug - j_getCombinedStaticErrorMessages errorList.length: " + staticErrorList.size());
-            System.err.println("Debug - j_getCombinedStaticErrorMessages: message length:" + message.length());
-        }
-
-        if (message.isEmpty()) {
-            return j_getErrorMessageWithErrorCode(thread, alloc);
-        }
-
-        //Convert Java String to C *char. Data held in Java memory. Caller has to copy string
-        try(final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(message)){
-
-            final CCharPointer result=holder.get();
-            return result;
-        }
-        //CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
-        //return a;
-
-
+        return WordFactory.nullPointer();
     }
 
 
@@ -331,8 +175,8 @@ public class SaxonCException  {
     @CEntryPoint(name = "j_clearException")
     public static void clearException(IsolateThread thread) {
         SaxonCCurrentException.clear();
-        errorReporter.reset();
-        errorOutputFile = null;
+        //errorReporter.reset(); // The resetting of the errorReporter is important because it accumulates errors for each query and stylesheet static error.
+        //errorOutputFile = null;
     }
 
     @CEntryPoint(name = "j_checkForException")
@@ -345,7 +189,9 @@ public class SaxonCException  {
 
     @CEntryPoint(name = "j_staticErrorCount")
     public static int staticErrorCount(IsolateThread thread) {
-        return errorReporter.getNumberOfErrors();
+        //TODO fix this up
+        //return errorReporter.getNumberOfErrors();
+        return 0;
     }
 
 

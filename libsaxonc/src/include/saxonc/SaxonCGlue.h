@@ -11,6 +11,7 @@
 #define SAXONCGLUE2_H
 
 #include "saxonc_export.h"
+#include <saxonc/saxon_error.h>
 #include <saxonc/saxonc-core.h>
 
 #include <stdint.h>
@@ -96,8 +97,9 @@ typedef struct {
   char *name; //!< The parameter name
   int64_t value; /*!< Internal use only. The value of the parameter points to
                     the Java object. */
-
 } sxnc_parameter;
+
+
 
 //===============================================================================================//
 

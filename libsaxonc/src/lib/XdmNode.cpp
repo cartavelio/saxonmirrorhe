@@ -30,17 +30,19 @@ XdmNode::XdmNode(const XdmNode &other): XdmItem(other) {
 
 bool XdmNode::operator==(const XdmNode& other) const
 {
-  char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value);
-  if((int)result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other.value, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return result != 0;
 }
 
 bool XdmNode::equals(XdmNode * other) {
-  char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other->value);
-  if((int)result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  char result = j_xdmNodeEquals(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)other->value, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return result != 0;
 }
@@ -209,11 +211,12 @@ const char *XdmNode::getStringValue(const char *encoding) { return XdmItem::getS
 const char *XdmNode::toString(const char *encoding) {
   const char *nodeToStringi = nullptr;
   // if (nodeToString == nullptr) {
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   allocFn fn = operator new;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  nodeToStringi = xdmNodeToString(thread,(void *)fn, (void *)value, (char *)encoding);
-  if (nodeToStringi == nullptr) {
-    throw SaxonApiException();
+  nodeToStringi = xdmNodeToString(thread,(void *)fn, (void *)value, (char *)encoding, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   //}
   return nodeToStringi;
@@ -243,12 +246,13 @@ const char *XdmNode::getAttributeValue(const char *str) {
     return nullptr;
   }
   allocFn fn = operator new;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   const char *stri =
-      j_getAttributeValue(thread, (void *)value, (char *)str, (void *)fn);
+      j_getAttributeValue(thread, (void *)value, (char *)str, (void *)fn, &r);
 
-  if((bool)j_checkForException(thread)) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   return stri;

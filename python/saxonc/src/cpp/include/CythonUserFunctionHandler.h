@@ -105,7 +105,14 @@ void * makeXdmValueFromPythonObject(PyObject * result){
             if (ss == NULL) {
                 return nullptr;
             }
-            int64_t stringValueRef = j_makeStringValue(thread1, (char *)ss, nullptr);
+            saxon_error_t r = SAXON_ERROR_DEFAULT;
+            int64_t stringValueRef = j_makeStringValue(thread1, (char *)ss, nullptr, &r);
+
+            if (r.status != SAXON_OK) {
+                //TODO maybe we should be throwing some exception
+                return (void *)nullptr;
+            }
+
 
             return (void *)stringValueRef;
 
@@ -135,8 +142,14 @@ void * makeXdmValueFromPythonObject(PyObject * result){
                 j_handles_destroy(SaxonProcessor::sxn_environ->thread, rawItemValue);
             }
 
-            void * arrayValue = (void *) j_makeXdmArray(thread1, (void *)accumulatorValue);
+            saxon_error_t r = SAXON_ERROR_DEFAULT;
+            void * arrayValue = (void *) j_makeXdmArray(thread1, (void *)accumulatorValue, &r);
             j_handles_destroy(thread1, (void *)accumulatorValue);
+
+            if (r.status != SAXON_OK) {
+                //TODO maybe we should be throwing some exception
+                return (void *)nullptr;
+            }
             return arrayValue;
 
         } else if(PyDict_Check(result)) {
@@ -165,7 +178,8 @@ void * makeXdmValueFromPythonObject(PyObject * result){
                 }*/
 
                 void * valueii = makeXdmValueFromPythonObject(value);
-                void * keyii = (void *)j_makeStringValue(thread1, (char *)k, nullptr);
+                saxon_error_t r = SAXON_ERROR_DEFAULT;
+                void * keyii = (void *)j_makeStringValue(thread1, (char *)k, nullptr, &r);
 
                 j_addMapPair(thread1, (void *)mapDataRef,
                                  (void *)keyii,
@@ -308,6 +322,8 @@ PyObject *makePythonValue(void * proc, void * value){
 
     XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
 
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
+
     if (xdm_type == XDM_ATOMIC_VALUE) {
 
         char * primType = j_getPrimitiveTypeName(thread,(void *)fn, value);
@@ -336,22 +352,36 @@ PyObject *makePythonValue(void * proc, void * value){
 
         switch (typeValue) {
             case saxonTypeEnum::enumBool:
-              bvalue = (long)j_getBooleanValue(thread, value);
+              bvalue = (long)j_getBooleanValue(thread, value, &r);
+              if (r.status != SAXON_OK) {
+                //TODO IF error found return false. Review this action
+                Py_RETURN_NONE;
+              }
               return PyBool_FromLong(bvalue);
               break;
             case saxonTypeEnum::enumInteger:
-              lnumber = j_getLongValue(thread, (void *)value);//aitem->getLongValue();
+              lnumber = j_getLongValue(thread, (void *)value, &r);
+              if (r.status != SAXON_OK) {
+                //TODO Maybe We should throw an exception if this fails
+                Py_RETURN_NONE;
+              }
               return PyLong_FromLong(lnumber);
               break;
             case saxonTypeEnum::enumString:
-              astri = getStringValueForXdmItem(thread,(void *)fn, value, NULL);
+              astri = getStringValueForXdmItem(thread,(void *)fn, value, NULL, &r);
+              if (r.status != SAXON_OK) {
+                Py_RETURN_NONE;
+              }
               unicodeStr = PyUnicode_FromString(astri);
               operator delete(astri);
               return unicodeStr;
               break;
             case saxonTypeEnum::enumDouble:
             case saxonTypeEnum::enumFloat:
-              dvalue = j_getDoubleValue(thread, value);
+              dvalue = j_getDoubleValue(thread, value, &r);
+              if(r.status != SAXON_OK) {
+                Py_RETURN_NONE;
+              }
               return PyFloat_FromDouble(dvalue);
               break;
 
@@ -359,7 +389,11 @@ PyObject *makePythonValue(void * proc, void * value){
                 if (getenv("SAXONC_DEBUG_FLAG")) {
                   std::cerr<<"Python internal: type not found"<< std::endl;
                 }
-                astri = getStringValueForXdmItem(thread,(void *)fn, value, NULL);//aitem->getStringValue();
+                astri = getStringValueForXdmItem(thread,(void *)fn, value, NULL, &r);
+                if (r.status != SAXON_OK) {
+                    //Error found
+                    Py_RETURN_NONE;
+                }
                 unicodeStr = PyUnicode_FromString(astri);
                 operator delete(astri);
                 return unicodeStr;
@@ -465,10 +499,16 @@ PyObject *makePythonValue(void * proc, void * value){
         PyObject *list = PyList_New(count);
         if (!list) return NULL;
 
+
         for (int j = 0; j < count; j++) {
 
           avaluej =
-              j_xdmArray_get(thread, (void *)value, j);
+              j_xdmArray_get(thread, (void *)value, j, &r);
+
+          if(r.status != SAXON_OK) {
+            j_handles_destroy(thread, (void *)avaluej);
+            Py_RETURN_NONE;
+          }
           //XdmValue * avaluej =aitem->get(j);
           //itemi->incrementRefCount();
 

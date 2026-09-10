@@ -159,7 +159,9 @@ void testXQueryError2(SaxonProcessor *processor, XQueryProcessor *queryProc,
 
   const char *result = nullptr;
   try {
+    cout << endl << "Test testXQueryError-test2 cp0:" << endl;
     result = queryProc->runQueryToString();
+    cout << endl << "Test testXQueryError-test2 cp1:" << endl;
     cout << "Result :" << result << endl;
     delete result;
     sresult->failure++;

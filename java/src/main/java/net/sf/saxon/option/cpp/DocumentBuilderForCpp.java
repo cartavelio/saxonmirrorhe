@@ -34,8 +34,8 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_db_setBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long setBaseURI(IsolateThread thread, ObjectHandle documentBuilderRef, CCharPointer c_baseUri) throws SaxonApiException {
+    @CEntryPoint(name = "j_db_setBaseURI")
+    public static long setBaseURI(IsolateThread thread, ObjectHandle documentBuilderRef, CCharPointer c_baseUri, SaxonError errorStruct){
 
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
             if(c_baseUri != WordFactory.nullPointer()) {
@@ -55,15 +55,16 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
                         System.err.println("setBaseURI="+cwdURI);
                     }
                 } catch (Exception e) {
-                    throw new SaxonApiException(e);
+                    SaxonCExceptionHandler.setErrorDetails(e, errorStruct, null);
+                    return SaxonCAPI.STATUS_EXCEPTION;
                 }
             }
             return SaxonCAPI.STATUS_OK;
 
     }
 
-    @CEntryPoint(name = "j_db_setLineNumbering", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long setLineNumbering(IsolateThread thread, ObjectHandle documentBuilderRef, int option) throws SaxonApiException {
+    @CEntryPoint(name = "j_db_setLineNumbering")
+    public static long setLineNumbering(IsolateThread thread, ObjectHandle documentBuilderRef, int option){
 
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
 
@@ -73,8 +74,8 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "j_db_setDTDValidation", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long setDTDValidation(IsolateThread thread, ObjectHandle documentBuilderRef, int dtdVal) throws SaxonApiException {
+    @CEntryPoint(name = "j_db_setDTDValidation")
+    public static long setDTDValidation(IsolateThread thread, ObjectHandle documentBuilderRef, int dtdVal) {
 
             DocumentBuilder builder = SaxonCAPI.objectHandles.get(documentBuilderRef);
             builder.setDTDValidation(CTypeConversion.toBoolean(dtdVal));

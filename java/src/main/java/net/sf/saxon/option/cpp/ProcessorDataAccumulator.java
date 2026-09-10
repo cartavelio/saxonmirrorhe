@@ -80,7 +80,7 @@ public class ProcessorDataAccumulator {
 
 
     @CEntryPoint(name = "addProcessorDataPair")
-    public static void addProcessorDataPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, ObjectHandle objectRef){
+    public static void addProcessorDataPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, ObjectHandle objectRef, SaxonError errorStruct){
 
         try {
             ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
@@ -91,6 +91,7 @@ public class ProcessorDataAccumulator {
                 if (SaxonCAPI.debug) {
                     System.err.println(ex.getMessage());
                 }
+                SaxonCExceptionHandler.setErrorDetails(ex, errorStruct, null);
                 return;
             }
             if (SaxonCAPI.debug && objectRef == WordFactory.nullPointer()) {
@@ -119,7 +120,7 @@ public class ProcessorDataAccumulator {
 
 
     @CEntryPoint(name = "addProcessorPropertyPair")
-    public static void addProcessorPropertyPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cpropName, CCharPointer cpropvalue){
+    public static void addProcessorPropertyPair(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cpropName, CCharPointer cpropvalue, SaxonError errorStruct){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
         String paramNamei = null;
@@ -132,6 +133,7 @@ public class ProcessorDataAccumulator {
             if(SaxonCAPI.debug) {
                 System.err.println(ex.getMessage());
             }
+            SaxonCExceptionHandler.setErrorDetails(ex, errorStruct, null);
             return;
         }
 
@@ -160,19 +162,18 @@ public class ProcessorDataAccumulator {
 
     }
 
-    @CEntryPoint(name = "j_getProcessorDataProperty", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    @CEntryPoint(name = "j_getProcessorDataProperty")
     public static CCharPointer j_getProcessorDataProperty(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle processorDataRef, int index){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
         String data = (String) processorData.paramNames.get(index);
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, data);
-        return a;
+        return SaxonCAPI.stringToNative2(alloc, data);
 
     }
 
 
     @CEntryPoint(name = "addProcessorProperty")
-    public static void addProcessorProperty(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName){
+    public static void addProcessorProperty(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, SaxonError errorStruct){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
         String paramNamei = null;
@@ -182,6 +183,7 @@ public class ProcessorDataAccumulator {
             if(SaxonCAPI.debug) {
                 System.err.println(ex.getMessage());
             }
+            SaxonCExceptionHandler.setErrorDetails(ex, errorStruct, null);
             return;
         }
 

@@ -298,12 +298,22 @@ public class XsltProcessor extends SaxonCAPI {
      * @return
      * @throws SaxonApiException if error occurs in the transformation or if the processor object is null
      */
-    @CEntryPoint(name = "c_xsltSaveResultToFile",exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
-        String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
-        String sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
-        String stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
-        String outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
+    @CEntryPoint(name = "c_xsltSaveResultToFile")
+    public static long transformToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFilename, CCharPointer cstylesheet, CCharPointer coutFilename, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
+
+        String stylesheet = null;
+        String cwd = null;
+        String sourceFilename = null;
+        String outFilename = null;
+        try {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            sourceFilename = SaxonCAPI.toJavaString(csourceFilename, WordFactory.nullPointer());
+            stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
+            outFilename = SaxonCAPI.toJavaString(coutFilename, WordFactory.nullPointer());
+        } catch (SaxonApiException e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
 
         Processor processor = objectHandles.get(processorRef);
 
@@ -316,18 +326,19 @@ public class XsltProcessor extends SaxonCAPI {
          }
 
         if(processor == null) {
-            throw new SaxonApiException("Processor object no found");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError,"Processor object no found");
         }
 
         XsltExecutable executable = null;
         Serializer serializer = null;
         Source source;
         XsltTransformer transformer = null;
-        if (stylesheet == null && executable != null) {
-            transformer = executable.load();
-        } else {
-            XsltCompiler compiler = processor.newXsltCompiler();
-            source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
+        try {
+            if (stylesheet == null && executable != null) {
+                transformer = executable.load();
+            } else {
+                XsltCompiler compiler = processor.newXsltCompiler();
+                source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
                 //compiler.setSchemaAware(schemaAware); TODO remove comment
 
 
@@ -336,7 +347,7 @@ public class XsltProcessor extends SaxonCAPI {
 
                         compilePackages(compiler);
                     }   */
-                    transformer = compiler.compile(source).load();
+                transformer = compiler.compile(source).load();
 
             }
             if (outFilename != null) {
@@ -345,7 +356,8 @@ public class XsltProcessor extends SaxonCAPI {
             applyXsltTransformerProperties(cwd, processor, transformer, params, values);
             /*if (sourceFilename == null && doc != null) {
                 transformer.setInitialContextNode(doc);
-            } else */ if (sourceFilename != null) {
+            } else */
+            if (sourceFilename != null) {
                 source = resolveFileToSource(processor, cwd, sourceFilename, ResourceRequest.XML_NATURE);
 
                 transformer.setSource(source);
@@ -357,6 +369,11 @@ public class XsltProcessor extends SaxonCAPI {
             transformer.transform();
             serializer = null;
             return SaxonCAPI.STATUS_OK;
+
+        } catch (SaxonApiException e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
 
     }
 

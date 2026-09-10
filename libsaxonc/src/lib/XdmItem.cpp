@@ -62,11 +62,12 @@ const char *XdmItem::getStringValue(const char *encoding) {
     return nullptr;
   }
   allocFn fn = operator new;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   stringValuei = getStringValueForXdmItem(thread,
-                                          (void *)fn, (void *)value, (char *)encoding);
-  if(stringValuei == nullptr && (bool)j_checkForException(thread)) {
-    throw SaxonApiException();
+                                          (void *)fn, (void *)value, (char *)encoding, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return stringValuei;
 }
@@ -74,13 +75,13 @@ const char *XdmItem::getStringValue(const char *encoding) {
 const char *XdmItem::toString(const char *encoding) {
   const char *itemToStringi = nullptr;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  // if (itemToString == nullptr) {
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   allocFn fn = operator new;
   itemToStringi = xdmItemToString(thread,
-                                  (void *)fn, (void *)value, (char *)encoding);
+                                  (void *)fn, (void *)value, (char *)encoding, &r);
 
-  if(itemToStringi == nullptr && (bool)j_checkForException(thread)) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return itemToStringi;
 }

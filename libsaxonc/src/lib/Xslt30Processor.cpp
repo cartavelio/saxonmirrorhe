@@ -31,8 +31,9 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *proc, std::string curr) {
   jitCompilation = false;
   importPackageValue = SXN_UNSET;
   exception = nullptr;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   cppXT = createXslt30WithProcessor(thread,
-                                    (void *)proc->procRef);
+                                    (void *)proc->procRef, &r);
 
 #ifdef DEBUG
   // jmethodID debugMID =
@@ -43,8 +44,9 @@ Xslt30Processor::Xslt30Processor(SaxonProcessor *proc, std::string curr) {
 
 #endif
 
-  if (cppXT < 0) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    j_handles_destroy(thread, (void *)procRef);
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   if (!(proc->cwd.empty()) && curr.empty()) {
@@ -80,9 +82,10 @@ Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   procRef = j_copy_handles(thread, (void *)other.procRef);
   cppXT = j_copy_handles(thread, (void *)other.cppXT);
-  if(cppXT == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (cppXT == SXN_UNSET) {
+    throw SaxonApiException("Failed to copy internal SaxonProcessor");
   }
+
   cwdXT = other.cwdXT;
   importPackageValue = other.importPackageValue;
   std::map<std::string, XdmValue *>::const_iterator paramIter =
@@ -248,20 +251,21 @@ void Xslt30Processor::createException(const char *message) {}
 void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode *node,
                                                 const char *filename) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   long status = j_compileFromXdmNodeAndSave(thread, (void *)cppXT,
       (void *)node->getUnderlyingValue(), (char *)cwdXT.c_str(),
       (char *)filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException(true);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 }
 
@@ -270,20 +274,22 @@ void Xslt30Processor::compileFromStringAndSave(const char *stylesheetStr,
                                                const char *encoding) {
   if (encoding != nullptr) {
     setProperty("!input-encoding", encoding);
-  }graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  }
+  graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   long status = j_compileFromStringAndSave(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheetStr, (char *)filename,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 }
 
@@ -298,7 +304,12 @@ void Xslt30Processor::importPackage(const char *packageFile) {
         createProcessorData(thread);
   }
 
-  addProcessorProperty(thread,(void *)importPackageValue, (char *)packageFile);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+
+  addProcessorProperty(thread,(void *)importPackageValue, (char *)packageFile, &r);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+  }
 }
 
 void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
@@ -309,20 +320,21 @@ void Xslt30Processor::compileFromFileAndSave(const char *xslFilename,
   if (filename == nullptr) {
     throw SaxonApiException("Output filename is null");
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);
   long status = j_compileFromFileAndSave(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)xslFilename, (char *)filename,
-      (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+      (processorDataRef == SXN_UNSET ? (void *)NULL
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException(true);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 }
 
@@ -338,6 +350,7 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
   if (importPackageValue != SXN_UNSET) {
     addition += 1;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
@@ -346,19 +359,22 @@ XsltExecutable *Xslt30Processor::compileFromString(const char *stylesheetStr,
 
     std::string packageOptionStr = "importPack:";
     addProcessorDataPair(thread, (void *)processorDataRef,
-        (char *)packageOptionStr.c_str(), (void *)importPackageValue);
+        (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
   int64_t objRef = j_compileFromString(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheetStr, (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (objRef == SXN_EXCEPTION) {
-    throw SaxonApiException(true);
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   XsltExecutable *executable =
       new XsltExecutable(procRef, objRef, cwdXT, "");
@@ -372,6 +388,7 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
   }
 
   int addition = 0;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (importPackageValue > SXN_UNSET) {
     addition += 1;
   }
@@ -383,20 +400,25 @@ XsltExecutable *Xslt30Processor::compileFromXdmNode(XdmNode *node) {
 
     std::string packageOptionStr = "importPack:";
     addProcessorDataPair(thread, (void *)processorDataRef,
-        (char *)packageOptionStr.c_str(), (void *)importPackageValue);
+        (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
+  }
+
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
 
   int64_t objRef = j_compileFromXdmNode(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (void *)node->getUnderlyingValue(), (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
-  if (objRef == SXN_EXCEPTION) {
-    throw SaxonApiException(true);
+  if (r.status != SAXON_OK) {
+    //This should be a static error
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   XsltExecutable *executable =
       new XsltExecutable(procRef, objRef, cwdXT, "");
@@ -411,6 +433,7 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
   }
 
   int addition = 0;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (importPackageValue > SXN_UNSET) {
     addition += 1;
   }
@@ -422,21 +445,26 @@ XsltExecutable *Xslt30Processor::compileFromAssociatedFile(const char *source) {
 
     std::string packageOptionStr = "importPack:";
     addProcessorDataPair(thread, (void *)processorDataRef,
-        (char *)packageOptionStr.c_str(), (void *)importPackageValue);
+        (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t objRef = j_compileFromAssociatedFile(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)source, (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
-  if (objRef == SXN_EXCEPTION) {
-    throw SaxonApiException(true);
+  if (r.status != SAXON_OK) {
+    //Static error will be thrown
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   XsltExecutable *executable =
       new XsltExecutable(procRef, objRef, cwdXT, "");
@@ -450,6 +478,7 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   int addition = 0;
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   if (importPackageValue > SXN_UNSET) {
     addition += 1;
   }
@@ -461,21 +490,26 @@ XsltExecutable *Xslt30Processor::compileFromFile(const char *stylesheet) {
 
     std::string packageOptionStr = "importPack:";
     addProcessorDataPair(thread, (void *)processorDataRef,
-        (char *)packageOptionStr.c_str(), (void *)importPackageValue);
+        (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t objRef = j_compileFromFile(thread, (void *)cppXT, (char *)cwdXT.c_str(),
       (char *)stylesheet, (int)jitCompilation,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
-  if (objRef == SXN_EXCEPTION) {
-    throw SaxonApiException(true);
+  if (r.status != SAXON_OK) {
+    //Static exception
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   XsltExecutable *executable =
       new XsltExecutable(procRef, objRef, cwdXT, "");
@@ -496,6 +530,8 @@ XdmValue *Xslt30Processor::transformFileToValue(const char *sourcefile,
     addition += 1;
   }
 
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
 
@@ -503,13 +539,17 @@ XdmValue *Xslt30Processor::transformFileToValue(const char *sourcefile,
 
     std::string packageOptionStr = "importPack:";
     addProcessorDataPair(thread, (void *)processorDataRef,
-        (char *)packageOptionStr.c_str(), (void *)importPackageValue);
+        (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   int64_t result = j_transformToValue(thread, (char *)cwdXT.c_str(), (void *)cppXT,
       (void *)nullptr, (char *)sourcefile, (char *)stylesheetfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
@@ -518,8 +558,8 @@ XdmValue *Xslt30Processor::transformFileToValue(const char *sourcefile,
     return SaxonProcessor::makeXdmValueFromRef(result);
   }
 
-  if (result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
   return nullptr;
 }
@@ -543,6 +583,8 @@ void Xslt30Processor::transformFileToFile(const char *source,
     addition += 1;
   }
 
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties, addition);
 
@@ -550,21 +592,25 @@ void Xslt30Processor::transformFileToFile(const char *source,
 
     std::string packageOptionStr = "importPack:";
     addProcessorDataPair(thread, (void *)processorDataRef,
-        (char *)packageOptionStr.c_str(), (void *)importPackageValue);
+        (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   long status = j_transformToFile(thread, (char *)cwdXT.c_str(), (void *)cppXT,
       (void *)nullptr, (char *)source, (char *)stylesheet, (char *)outputfile,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef > 0) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
-  if (status == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 }
 
@@ -583,6 +629,7 @@ const char *Xslt30Processor::transformFileToString(const char *source,
   }
   allocFn fn = operator new;
 
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int addition = 0;
   if (importPackageValue > SXN_UNSET) {
     addition += 1;
@@ -595,21 +642,25 @@ const char *Xslt30Processor::transformFileToString(const char *source,
 
     std::string packageOptionStr = "importPack:";
     addProcessorDataPair(thread, (void *)processorDataRef,
-        (char *)packageOptionStr.c_str(), (void *)importPackageValue);
+        (char *)packageOptionStr.c_str(), (void *)importPackageValue, &r);
+
+    if (r.status != SAXON_OK) {
+      throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
+    }
   }
 
   char *result = j_transformToString(thread, (void *)fn, (char *)cwdXT.c_str(),
       (void *)cppXT, (void *)nullptr, (char *)source, (char *)stylesheet,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
 
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
   }
 
-  if (result == nullptr) {
-    throw SaxonApiException();
+  if (r.status != SAXON_OK) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id,r.line_number,r.num_of_errors);
   }
 
   return result;

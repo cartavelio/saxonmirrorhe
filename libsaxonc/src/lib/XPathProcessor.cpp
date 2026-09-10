@@ -28,12 +28,10 @@ XPathProcessor::XPathProcessor(SaxonProcessor *p, std::string curr) {
 
     cppXP = createXPathProcessorWithProcessor(thread, (void *) p->procRef);
 
-    if (cppXP == SXN_UNSET) {
+    if (cppXP < SXN_UNSET) {
         throw SaxonApiException(
                 "Error: Failed to create the XPathProcessor internal object");
 
-    } else if (cppXP == SXN_EXCEPTION) {
-        throw SaxonApiException();
     }
 
 #ifdef DEBUG
@@ -56,9 +54,6 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
     cwdXP = other.cwdXP;
     procRef = j_copy_handles(thread, (void *) other.procRef);
     cppXP = j_copy_handles(thread, (void *)other.cppXP);
-    if(cppXP == SXN_EXCEPTION) {
-        throw SaxonApiException();
-    }
     xp_baseURI = other.xp_baseURI;
     unprefixedElementPolicy = other.unprefixedElementPolicy;
     std::map<std::string, XdmValue *>::const_iterator paramIter =
@@ -106,13 +101,13 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char *encoding) {
         throw SaxonApiException("Error:: XPath string cannot be empty or nullptr");
     }
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     int64_t processorDataRef =
             SaxonProcessor::createParameterJArray(parameters, properties, 0);
     int64_t results = j_evaluate(thread, (void *) cppXP, (char *) cwdXP.c_str(),
             (char *) xpathStr, (char *) encoding,
             (void *) (processorDataRef == SXN_UNSET ? (void *) NULL
-                                                    : (void *) processorDataRef));
+                                                    : (void *) processorDataRef), &r);
     if (processorDataRef > 0) {
         j_handles_destroy(thread,
                           (void *) processorDataRef);
@@ -120,8 +115,8 @@ XdmValue *XPathProcessor::evaluate(const char *xpathStr, const char *encoding) {
     }
     if (results > 0) {
         return SaxonProcessor::makeXdmValueFromRef(results);
-    } else if (results == SXN_EXCEPTION) {
-        throw SaxonApiException();
+    } else if (r.status != SAXON_OK) {
+        throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
     }
 
     return nullptr;
@@ -135,12 +130,14 @@ XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr,
     }
 
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     int64_t processorDataRef =
             SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t result = j_evaluateSingle(thread, (void *) cppXP, (char *) cwdXP.c_str(),
             (char *) xpathStr, (char *) encoding,
             (void *) (processorDataRef == SXN_UNSET ? (void *) NULL
-                                                    : (void *) processorDataRef));
+                                                    : (void *) processorDataRef), &r);
     if (processorDataRef > 0) {
         j_handles_destroy(thread,(void *) processorDataRef);
         processorDataRef = SXN_UNSET;
@@ -172,10 +169,11 @@ XdmItem *XPathProcessor::evaluateSingle(const char *xpathStr,
         }
         xdmItem = new XdmItem(result);
         return xdmItem;
-    } else if (result == SXN_EXCEPTION) {
+    } else
+        if (r.status != SAXON_OK) {
+            throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
+        }
 
-        throw SaxonApiException();
-    }
     return nullptr;
 }
 
@@ -283,14 +281,15 @@ void XPathProcessor::importSchemaNamespace(const char *uri) {
 
 void XPathProcessor::setBaseURI(const char *uriStr) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-    int64_t status = j_xp_setBaseURI(thread, (void *) cppXP,(char *) uriStr);
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
+    int64_t status = j_xp_setBaseURI(thread, (void *) cppXP,(char *) uriStr, &r);
     if (xp_baseURI != nullptr) {
         operator delete(xp_baseURI);
         xp_baseURI = nullptr;
     }
 
     if (status == SXN_EXCEPTION) {
-        throw SaxonApiException();
+        throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
     }
 }
 
@@ -306,18 +305,19 @@ const char *XPathProcessor::getBaseURI() {
 bool XPathProcessor::effectiveBooleanValue(const char *xpathStr,
                                            const char *encoding) {
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     int64_t processorDataRef =
             SaxonProcessor::createParameterJArray(parameters, properties);
     int resultsi = j_effectiveBooleanValue(thread, (void *) cppXP, (char *) cwdXP.c_str(),
             (char *) xpathStr, (char *) encoding,
             (void *) (processorDataRef == SXN_UNSET ? (void *) NULL
-                                                    : (void *) processorDataRef));
+                                                    : (void *) processorDataRef), &r);
     if (processorDataRef > 0) {
         j_handles_destroy(thread,(void *) processorDataRef);
         processorDataRef = SXN_UNSET;
     }
-    if (resultsi == SXN_EXCEPTION) {
-        throw SaxonApiException();
+    if (r.status != SAXON_OK) {
+        throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
     }
 
     return (bool) resultsi;

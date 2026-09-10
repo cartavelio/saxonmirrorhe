@@ -19,7 +19,6 @@ import org.graalvm.word.WordFactory;
 
 import javax.xml.transform.Source;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,11 +79,11 @@ public class XPathProcessor extends SaxonCAPI {
      * @param processorRef  - long value referencing the Processor object in the ObjectHandles pool.
      * @return  long value referencing the XPathProcessor object in the ObjectHandles pool
      */
-    @CEntryPoint(name = "createXPathProcessorWithProcessor", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "createXPathProcessorWithProcessor")
     public static long createXPathProcessor(IsolateThread thread, ObjectHandle processorRef) {
             Processor processor = objectHandles.get(processorRef);
             if(processor == null) {
-                return 0;
+                return SaxonCAPI.STATUS_FAIL;
             }
             ObjectHandle handle = SaxonCAPI.createHandle(XPathProcessor.newInstance(processor));
             return handle.rawValue();
@@ -231,22 +230,24 @@ public class XPathProcessor extends SaxonCAPI {
      * @return long value for the status of setting the base URI
      * @throws SaxonApiException
      */
-    @CEntryPoint(name = "j_xp_setBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long setBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_uriStr) throws SaxonApiException {
+    @CEntryPoint(name = "j_xp_setBaseURI")
+    public static long setBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_uriStr, SaxonError saxonError) {
         if(c_uriStr == WordFactory.nullPointer()) {
-            throw new SaxonApiException("URI string is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "URI string is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        String uriStr = SaxonCAPI.toJavaString(c_uriStr, WordFactory.nullPointer());
-        XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
-        XPathCompiler compiler = xPathProcessor.getCompiler();
-        URI uri = null;
         try {
+            String uriStr = SaxonCAPI.toJavaString(c_uriStr, WordFactory.nullPointer());
+            XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
+            XPathCompiler compiler = xPathProcessor.getCompiler();
+            URI uri = null;
+
             uri = new URI(uriStr);
             compiler.setBaseURI(uri);
             return SaxonCAPI.STATUS_OK;
-        } catch (URISyntaxException e) {
-            SaxonApiException ex = new SaxonApiException(e);
-            throw ex;
+        } catch (Exception ex) {
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, ex.getMessage());
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
     }
@@ -301,44 +302,51 @@ public class XPathProcessor extends SaxonCAPI {
      *                                      The values for the parameters and properties required by the XPath expression
      * @return long value reference to the XdmItem in the ObjectHandle's pool
      **/
-    @CEntryPoint(name = "j_evaluate", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_evaluate")
+    public static long evaluate(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
         if(xpathProcessorRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("XPathProcessor is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XPathProcessor is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
         XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
         String cwd = null;
-        if(ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
-        }
-        String xpathStr;
-        if(c_xpathStr != WordFactory.nullPointer()) {
-            xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
-        } else {
-            throw new SaxonApiException("XPath string is null");
-        }
-        XPathCompiler compiler = xPathProcessor.getCompiler();
-        if (SaxonCAPI.debug) {
-            if (xpathStr != null) {
-                System.err.println("xpathString: " + xpathStr);
+        try {
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
             }
-        }
-        Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null , false);
-        setupXPathCompiler(compiler, optionsMap);
+            String xpathStr = null;
+            if (c_xpathStr != WordFactory.nullPointer()) {
+                xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+            } else {
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XPath string is null");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
+            XPathCompiler compiler = xPathProcessor.getCompiler();
+            if (SaxonCAPI.debug) {
+                if (xpathStr != null) {
+                    System.err.println("xpathString: " + xpathStr);
+                }
+            }
+            Map<QName, XdmValue> parameters = new HashMap<>();
+            Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null, false);
+            setupXPathCompiler(compiler, optionsMap);
 
-        URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
-        compiler.setBaseURI(baseURI);
+            URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
+            compiler.setBaseURI(baseURI);
 
-        XPathSelector selector = compiler.compile(xpathStr).load();
-        selector.setErrorReporter(SaxonCException.errorReporter);
-        applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
+            XPathSelector selector = compiler.compile(xpathStr).load();
+            //selector.setErrorReporter(SaxonCException.errorReporter);
+            applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
         /*if (contextItem != null) {
             selector.setContextItem(contextItem);
         } */
-        XdmValue value = selector.evaluate();
-        ObjectHandle handle = SaxonCAPI.createHandle(value);
-        return handle.rawValue();
+            XdmValue value = selector.evaluate();
+            ObjectHandle handle = SaxonCAPI.createHandle(value);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
 
     }
 
@@ -412,11 +420,6 @@ public class XPathProcessor extends SaxonCAPI {
             }
         }
 
-        /*if(!variables.isEmpty()) {
-            for(QName name : variables) {
-                compiler.declareVariable(name);
-            }
-        } */
     }
 
 
@@ -435,20 +438,36 @@ public class XPathProcessor extends SaxonCAPI {
      *                                      The values for the parameters and properties required by the XPath expression
      * @return long value reference to the XdmItem in the ObjectHandle's pool
      **/
-    @CEntryPoint(name = "j_evaluateSingle", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_evaluateSingle")
+    public static long evaluateSingle(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer ccwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
 
         String cwd = null;
         if(ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            try {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            } catch (SaxonApiException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
         }
-        String xpathStr;
+        String xpathStr = null;
         if(c_xpathStr != WordFactory.nullPointer()) {
-            xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+            try {
+                xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+            } catch (SaxonApiException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
         } else {
-            throw new SaxonApiException("XPath string is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XPath string is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        try {
+            SaxonCAPI.toJavaString(c_xpathStr, WordFactory.nullPointer());
+        } catch (SaxonApiException e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
         XPathCompiler compiler = xPathProcessor.getCompiler();
         if (debug) {
@@ -457,25 +476,30 @@ public class XPathProcessor extends SaxonCAPI {
             }
         }
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null, false);
-        setupXPathCompiler(compiler, optionsMap);
-        URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
-        compiler.setBaseURI(baseURI);
-        XPathSelector selector = compiler.compile(xpathStr).load();
+        try {
+            Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null, false);
+            setupXPathCompiler(compiler, optionsMap);
+            URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
+            compiler.setBaseURI(baseURI);
+            XPathSelector selector = compiler.compile(xpathStr).load();
 
-        selector.setErrorReporter(SaxonCException.errorReporter);
-        applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
+            //selector.setErrorReporter(SaxonCException.errorReporter);
+            applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
 
 
-        XdmItem item = selector.evaluateSingle();
-        if(item == null) {
-            if (debug) {
-                System.err.println("Java DEBUG item in XPathProcessor is null " );
+            XdmItem item = selector.evaluateSingle();
+            if (item == null) {
+                if (debug) {
+                    System.err.println("Java DEBUG item in XPathProcessor is null ");
+                }
+                return SaxonCAPI.STATUS_FAIL;
             }
-            return SaxonCAPI.STATUS_FAIL;
+            ObjectHandle handle = SaxonCAPI.createHandle(item);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(item);
-        return handle.rawValue();
 
     }
 
@@ -492,38 +516,56 @@ public class XPathProcessor extends SaxonCAPI {
      * @return a <code>boolean</code> as int value representing the effective boolean value of the result of evaluating
      *         the expression, as defined by the rules for the fn:boolean() function.
      **/
-    @CEntryPoint(name = "j_effectiveBooleanValue", exceptionHandler = SaxonCExceptionIntHandler.class)
-    public static int effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_effectiveBooleanValue")
+    public static int effectiveBooleanValue(IsolateThread thread, ObjectHandle xpathProcessorRef, CCharPointer c_cwd, CCharPointer c_xpathStr, CCharPointer c_encoding, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
 
         Map<QName, XdmValue> parameters = new HashMap<>();
-        Map<String, Object> optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null, false);
-        XPathProcessor xPathProcessor = objectHandles.get(xpathProcessorRef);
-
-        XPathCompiler compiler = xPathProcessor.getCompiler();
         String cwd = null;
+        XPathCompiler compiler = null;
+        Map<String, Object> optionsMap;
+        XPathProcessor xPathProcessor = null;
 
-        if(c_cwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(c_cwd, WordFactory.nullPointer());
+        try {
+            optionsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, null, parameters, null, null, null, null, false);
+            xPathProcessor = objectHandles.get(xpathProcessorRef);
+
+            compiler = xPathProcessor.getCompiler();
+
+
+            if (c_cwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(c_cwd, WordFactory.nullPointer());
+            }
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return (int)SaxonCAPI.STATUS_EXCEPTION;
         }
         String xpathStr;
         if(c_xpathStr != WordFactory.nullPointer()) {
-            xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+            try {
+                xpathStr = SaxonCAPI.toJavaString(c_xpathStr, c_encoding);
+            } catch (SaxonApiException e) {
+                SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+                return (int)SaxonCAPI.STATUS_EXCEPTION;
+            }
         } else {
-            throw new SaxonApiException("XPath string is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "XPath string is null");
+            return (int) SaxonCAPI.STATUS_EXCEPTION;
         }
-        setupXPathCompiler(compiler, optionsMap);
-        URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
-        compiler.setBaseURI(baseURI);
-        XPathSelector selector = compiler.compile(xpathStr).load();
-        selector.setErrorReporter(SaxonCException.errorReporter);
+        try {
+            setupXPathCompiler(compiler, optionsMap);
+            URI baseURI = PathHelper.pathToURI(xPathProcessor.getProcessor().getUnderlyingConfiguration(), cwd);
+            compiler.setBaseURI(baseURI);
+            XPathSelector selector = compiler.compile(xpathStr).load();
+            //selector.setErrorReporter(SaxonCException.errorReporter);
 
-        applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
+            applyXPathProperties(xPathProcessor, cwd, xPathProcessor.getProcessor(), selector, optionsMap, parameters);
 
-        /*if (contextItem != null) {
-            selector.setContextItem(contextItem);
-        }     */
-        boolean result = selector.effectiveBooleanValue();
-        return (int)(result ? 1 : 0);
+            boolean result = selector.effectiveBooleanValue();
+            return (result ? 1 : 0);
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return (int)SaxonCAPI.STATUS_EXCEPTION;
+        }
 
 
     }

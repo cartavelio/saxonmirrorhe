@@ -630,7 +630,7 @@ void testTransformFromstring2Err(SaxonProcessor *processor,
   } catch (SaxonApiException &e) {
     sresult->success++;
 
-    const char *smessages = e.getCombinedStaticErrorMessages();
+    const char *smessages = e.getMessage();
     const char *ecmessage = e.getMessageWithErrorCode();
     cerr << endl << "Test: testTransfromFromstring2-Error:" << endl;
     cerr << "Static Error count: " << e.staticErrorCount() << endl;
@@ -704,7 +704,7 @@ void testTransformFromstring2Err2(sResultCount *sresult) {
       sresult->failureList.push_back("testTransformFromstring2Err2");
     }
 
-    const char *smessages = e.getCombinedStaticErrorMessages();
+    const char *smessages = e.getMessage();
     const char *ecmessage = e.getMessageWithErrorCode();
     cout << "Static Error count: " << e.staticErrorCount() << endl;
     if (smessages != nullptr) {
@@ -1482,24 +1482,39 @@ void exampleParam(SaxonProcessor *saxonProc, Xslt30Processor *proc,
 void exampleParam2(SaxonProcessor *saxonProc, Xslt30Processor *proc,
                    sResultCount *sresult) {
   cout << "\nExampleParam:</b><br/>" << endl;
-  XsltExecutable *executable = proc->compileFromFile("php/xsl/foo.xsl");
-  executable->setInitialMatchSelectionAsFile("php/xml/foo.xml");
-
-  XdmAtomicValue *xdmvalue = saxonProc->makeStringValue("Hello to you");
-  XdmAtomicValue *xdmvalue2i = saxonProc->makeStringValue("Hello from me");
-  if (xdmvalue != NULL) {
-
-    executable->setParameter("a-param", (XdmValue *)xdmvalue);
-    executable->setParameter("a-param", (XdmValue *)xdmvalue2i);
-
-  } else {
-    cout << "Xdmvalue is null - ====== FAIL =====" << endl;
-    sresult->failure++;
-    sresult->failureList.push_back("exampleParam-1");
-  }
   const char *result = nullptr;
-
+  XsltExecutable *executable = nullptr;
   try {
+    executable = proc->compileFromFile("php/xsl/foo.xsl");
+    executable->setInitialMatchSelectionAsFile("php/xml/foo.xml");
+
+  } catch (SaxonApiException &e) {
+    cout << "Result is NULL<br/>  ======= fail =====" << endl;
+    const char *emessage = e.getMessage();
+    if (emessage != nullptr) {
+      cerr << "Error: " << emessage << endl;
+    }
+    sresult->failure++;
+    sresult->failureList.push_back("exampleParam-2");
+    return;
+  }
+
+
+    XdmAtomicValue *xdmvalue = saxonProc->makeStringValue("Hello to you");
+    XdmAtomicValue *xdmvalue2i = saxonProc->makeStringValue("Hello from me");
+    if (xdmvalue != NULL) {
+
+      executable->setParameter("a-param", (XdmValue *)xdmvalue);
+      executable->setParameter("a-param", (XdmValue *)xdmvalue2i);
+
+    } else {
+      cout << "Xdmvalue is null - ====== FAIL =====" << endl;
+      sresult->failure++;
+      sresult->failureList.push_back("exampleParam-1");
+    }
+
+
+try{
     result = executable->applyTemplatesReturningString();
   } catch (SaxonApiException &e) {
     cout << "Result is NULL<br/>  ======= fail =====" << endl;
@@ -3380,17 +3395,18 @@ void testSharedExecutable(const std::string *const dataDir,
                  sResultCount *sresult) {
   cerr << endl << "testSharedExecutable test" << endl;
 
-  SaxonProcessor * saxon = new SaxonProcessor();
-
-  XsltExecutable * executable = getXsltExecutable(saxon, CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str());
-
-  delete saxon;
-
   try {
+    SaxonProcessor * saxon = new SaxonProcessor();
+    XsltExecutable * executable = getXsltExecutable(saxon, CppTestUtils::concat(2, dataDir->c_str(), "/q12_1.xsl").c_str());
+    delete saxon;
     for(int i=0; i<5000; i++) {
       const char * tmpFileWarning = CppTestUtils::concat(2, dataDir->c_str(), "/temp_remove/warnings").c_str();
+
       executable->setSaveXslMessage(true, tmpFileWarning);
+
       const char * xmlResult = executable->transformFileToString(CppTestUtils::concat(2, dataDir->c_str(), "/cat.xml").c_str());
+
+
 
       delete xmlResult;
 
@@ -3399,6 +3415,7 @@ void testSharedExecutable(const std::string *const dataDir,
   } catch (SaxonApiException &e) {
     const char *emessage = e.getMessage();
     if (emessage != nullptr) {
+      cerr << "exception number of errors =" << e.staticErrorCount() << endl;
       cerr << "exception=" << emessage << endl;
     } else {
       cerr << "exception is nullptr" << endl;
