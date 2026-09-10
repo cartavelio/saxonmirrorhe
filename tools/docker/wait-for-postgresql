@@ -3,6 +3,6 @@
 CID=$1
 
 until docker exec $CID pg_isready > /dev/null 2>&1; do
-    echo "Waiting for PostgreSQL..."
+    echo "PostgreSQL is unavailable - waiting for it... 😴"
     sleep 5
 done

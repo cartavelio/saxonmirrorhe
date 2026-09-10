@@ -1544,28 +1544,69 @@ task sqlServerStart(dependsOn: ["dockerdown"]) {
   doFirst {
     DockerContainer.assertDockerAvailable()
     DockerContainer.assertDockerComposeAvailable()
-    mkdir "${buildDir}/sql/data"
+    mkdir "${buildDir}/sql/${sqlServer}/data"
   }
 
   doLast {
     exec {
       workingDir "tools/docker"
-      commandLine DockerContainer.dockerCompose(), "up", "-d"
+      commandLine DockerContainer.dockerCompose(), "--file", "${sqlServer}-compose.yml", "up", "-d"
     }
     exec {
       def id = DockerContainer.containerid(c_sqlserver)
-      commandLine "${projectDir}/tools/docker/wait-for-postgresql", id
+      commandLine "${projectDir}/tools/docker/wait-for-${sqlServer}", id
     }
+  }
+
+  if (sqlServer == "mysql") {
+    doLast {
+      exec {
+        def id = DockerContainer.containerid(c_sqlserver)
+        commandLine DockerContainer.docker(), "exec", "-i",
+          id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
+      }
+    }
+  } else {
+    doLast {
+      exec {
+        def id = DockerContainer.containerid(c_sqlserver)
+        commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
+          id, "psql", "-f", "/app/sql/setup.sql"
+      }
+    }
+  }
+  
+  doLast {
     exec {
-      def id = DockerContainer.containerid(c_sqlserver)
-      commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
-        id, "psql", "-f", "/app/sql/setup.sql"
+      commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
-    exec {
-      def id = DockerContainer.containerid(c_sqlserver)
-      commandLine DockerContainer.docker(), "exec", "-i", id,
-        "psql", "-d", "sample", "-U", "testeditor", "-f", "/app/sql/fruits.sql"
+  }
+}
+
+task sqlServerSetup(dependsOn: ["dockerup"]) {
+  doFirst {
+    DockerContainer.assertDockerAvailable()
+    DockerContainer.assertDockerComposeAvailable()
+  }
+
+  if (sqlServer == "mysql") {
+    doLast {
+      exec {
+        def id = DockerContainer.containerid(c_sqlserver)
+        commandLine DockerContainer.docker(), "exec", "-i",
+          id, "sh", "-c", "mysql --user=root --password=admin < /app/sql/setup.sql"
+      }
     }
+  } else {
+    doLast {
+      exec {
+        def id = DockerContainer.containerid(c_sqlserver)
+        commandLine DockerContainer.docker(), "exec", "-i", "-u", "postgres",
+          id, "psql", "-f", "/app/sql/setup.sql"
+      }
+    }
+  }
+  doLast {
     exec {
       commandLine DockerContainer.docker(), "ps", "-a", "--format={{.ID}} {{.Names}} {{.Status}}"
     }
@@ -1599,26 +1640,13 @@ task sqlServerWatch(dependsOn: ["dockerup"]) {
 task sqlServerStop(dependsOn: ["dockerup"]) {
   doLast {
     exec {
-      workingDir "docker"
-      commandLine DockerContainer.dockerCompose(), "down"
+      workingDir "tools/docker"
+      commandLine DockerContainer.dockerCompose(), "--file", "${sqlServer}-compose.yml", "down"
     }
   }
 }
 
 // ============================================================
-
-/*
-testSuite.qt3 {
-  debug true
-  taskName "adHocTest"
-  release "ee"
-  language "XP31"
-  directory "${projectDir}/src/test/extra/qt3"
-  bytecode true
-  option "-s:saxon-doc"
-  option "-t:s-doc-001"
-}
-*/
 
 // Testing task for various Gradle debugging efforts
 task helloWorld() {
