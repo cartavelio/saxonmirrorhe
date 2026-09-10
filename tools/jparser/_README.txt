@@ -16,10 +16,11 @@ At present the conversion is mechanistic, but the idea is to add rules that conv
 C# equivalents.
 
 The simple Java program toXml.java converts one Java module to XML. The stylesheets xml-to-java.xsl and 
-xml-to-csharp.xsl also appear to process a single module. At some stage there must have been some script to convert
-the entire code base, but I can't find it.
+xml-to-csharp.xsl also appear to process a single module. 
 
 The file javaparservisited.pdf is a paid-for manual for the javaparser product (the code is open source, the manual is
 available for purchase.)
 
-MHK 2021-01-20 
+Further code for this project is on MHK's Mac laptop in IntelliJ project "javaparser".
+
+MHK 2021-01-23
