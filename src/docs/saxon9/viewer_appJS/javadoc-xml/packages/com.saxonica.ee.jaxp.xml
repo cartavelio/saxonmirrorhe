@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?><package id="com.saxonica.ee.jaxp"><class id="SchemaFactoryImpl" fulltype="com.saxonica.ee.jaxp.SchemaFactoryImpl" superclass="SchemaFactory" superclassfulltype="javax.xml.validation.SchemaFactory" visibility="public"><implements><interface fulltype="net.sf.saxon.Configuration.ApiProvider" type="Configuration.ApiProvider"/></implements><extends><interface fulltype="javax.xml.validation.SchemaFactory" type="SchemaFactory"/></extends><comment><sentence>This is the Saxon implementation of the JAXP 1.3 SchemaFactory interface.</sentence></comment><fields><field fulltype="boolean" id="ENABLED" static="true" type="boolean" visibility="public"><comment><body><div>A mutable static variable (horrible but useful) allowing the use of this SchemaFactory to
+ be disabled. If the value of this variable is set to false, then when the JAXP classpath
+ search calls <tag kind="see">#isSchemaLanguageSupported(String)</tag>, the response will be false,
+ meaning that Saxon does not get used as the Schema validation provider even though it
+ is present on the classpath.</div></body><sentence>A mutable static variable (horrible but useful) allowing the use of this SchemaFactory to
+ be disabled.</sentence></comment></field><field const="http://www.w3.org/XML/XMLSchema/v1.0" constexpr="&#34;http://www.w3.org/XML/XMLSchema/v1.0&#34;" final="true" fulltype="java.lang.String" id="XSD10_LANGUAGE_IDENTIFIER" static="true" type="String" visibility="public"/><field const="http://www.w3.org/XML/XMLSchema/v1.1" constexpr="&#34;http://www.w3.org/XML/XMLSchema/v1.1&#34;" final="true" fulltype="java.lang.String" id="XSD11_LANGUAGE_IDENTIFIER" static="true" type="String" visibility="public"/><field const="http://www.w3.org/XML/XMLSchema" constexpr="&#34;http://www.w3.org/XML/XMLSchema&#34;" final="true" fulltype="java.lang.String" id="XSD_LANGUAGE_IDENTIFIER" static="true" type="String" visibility="public"/></fields><methods><constructor id="SchemaFactoryImpl" visibility="public"><comment><body><div>Default constructor. This is designed to be invoked via the JAXP SchemaFactory.newInstance()
+ mechanism, but it can also be invoked directly if the application will always be using the Saxon
+ implementation. Instantiating a SchemaFactory directly in this way is likely to be a lot faster
+ than the JAXP mechanism, because it avoid the expensive search of all JARs on the classpath.
+ <p>This constructor creates an EnterpriseConfiguration: to do so it calls the registered
+ ConfigurationProvider. The ConfigurationProvider can be customized using the (static) method
+ <tag kind="see"/>.</p>
+ <p>The constructor does not at this stage check
+ that a license key is installed.</p></div></body><sentence>Default constructor.</sentence></comment></constructor><constructor id="SchemaFactoryImpl" visibility="public"><comment><sentence>Constructor supplying an EnterpriseConfiguration</sentence></comment><params><param fulltype="com.saxonica.config.EnterpriseConfiguration" name="config" type="EnterpriseConfiguration"><body><div>The EnterpriseConfiguration. The method verifies that this is usable by checking that
+               a license key is available.</div></body></param></params></constructor><method fulltype="com.saxonica.config.EnterpriseConfiguration" id="getConfiguration" type="EnterpriseConfiguration" visibility="public"><comment><sentence>Get the underlying Saxon Configuration object</sentence><return><body><div>the underlying Saxon Configuration object, which will always be an EnterpriseConfiguration</div></body></return></comment></method><method fulltype="org.xml.sax.ErrorHandler" id="getErrorHandler" type="ErrorHandler" visibility="public"><comment><sentence>Get the error handler in use</sentence><return><body><div>the error handler previously registered using <tag kind="see">#setErrorHandler</tag> if available; otherwise
+         null.</div></body></return></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="getErrorHandler()" type="SchemaFactory"/></method><method fulltype="boolean" id="getFeature" type="boolean" visibility="public"><comment><body><div>Look up the value of a feature flag.
+ <p>Saxon recognizes the feature name XMLConstants.FEATURE_SECURE_PROCESSING, and if this is requested,
+ it returns the value of the Configuration property named as the concatenation of
+ FeatureKeys.XML_PARSER_FEATURE + XMLConstants.FEATURE_SECURE_PROCESSING.</p>
+
+ <p>In all other cases Saxon delegates to the superclass, which will generally result in a
+ <tag kind="code">SAXNotRecognizedException</tag>.</p></div></body><sentence>Look up the value of a feature flag.</sentence><return><body><div>The current value of the feature (true or false).</div></body></return><attribute name="@see" see="java">#setFeature(String, boolean)</attribute></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="getFeature(java.lang.String)" type="SchemaFactory"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The feature name, which is a non-null fully-qualified URI.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>SAXNotRecognizedException If the feature
+                                   value can't be assigned or retrieved.</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>SAXNotSupportedException  When the
+                                   <tag kind="see">javax.xml.validation.SchemaFactory</tag> recognizes the feature name but
+                                   cannot determine its value at this time.</sentence></exception></exceptions></method><method fulltype="java.lang.Object" id="getProperty" type="Object" visibility="public"><comment><body><div>Look up the value of a property.
+ <p>The property name is any fully-qualified URI.  It is
+ possible for a <tag kind="see">javax.xml.validation.SchemaFactory</tag> to recognize a property name but
+ temporarily be unable to return its value.</p>
+ <p><tag kind="see">javax.xml.validation.SchemaFactory</tag>s are not required to recognize any specific
+ property names.</p>
+ <p>In the Saxon implementation, the property names that are recognized are the same as the
+ attribute names recognised by a <tag kind="see">javax.xml.transform.TransformerFactory</tag>.
+ These are listed as constant fields
+ in the class <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag></p></div></body><sentence>Look up the value of a property.</sentence><return><body><div>The current value of the property.</div></body></return><attribute name="@see" see="java">#setProperty(String, Object)</attribute></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="getProperty(java.lang.String)" type="SchemaFactory"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The property name, which is a non-null fully-qualified URI.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>org.xml.sax.SAXNotSupportedException
+                              When the
+                              XMLReader recognizes the property name but
+                              cannot determine its value at this time.</sentence></exception></exceptions></method><method fulltype="org.w3c.dom.ls.LSResourceResolver" id="getResourceResolver" type="LSResourceResolver" visibility="public"><comment><sentence>Get the resolver used for dereferencing URIs encountered during schema processing and validation.</sentence><return><body><div>the resolver in use. If no resolver has been registered, or if the resolver registered with
+         the Configuration is not a wrapped LSResourceResolver, return null.</div></body></return></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="getResourceResolver()" type="SchemaFactory"/></method><method fulltype="boolean" id="isSchemaLanguageSupported" type="boolean" visibility="public"><comment><sentence>Tests whether a particular schema language is supported.</sentence><return><body><div>true if the requested language is XML Schema (XMLConstants.W3C_XML_SCHEMA_NS_URI),
+ (or the language versions <tag kind="see">#XSD10_LANGUAGE_IDENTIFIER</tag> or
+ <tag kind="see">#XSD11_LANGUAGE_IDENTIFIER</tag>; otherwise false.
+ <p>Always returns false if the static variable {#ENABLED} is set to false.</p>
+ <p>Always returns false if no Saxon Enterprise license can be found.</p></div></body></return></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="isSchemaLanguageSupported(java.lang.String)" type="SchemaFactory"/><params><param fulltype="java.lang.String" name="language" type="String"><body><div>URI identifying the language (see JAXP specifications for details).</div></body></param></params></method><method fulltype="javax.xml.validation.Schema" id="newSchema" type="Schema" visibility="public"><comment><body><div>Returns the <tag kind="see">javax.xml.validation.Schema</tag> object containing all the schema components
+ that have been loaded using the <tag kind="see">#newSchema</tag> method. If no schema
+ components have been loaded, the schema can still be used to validate
+ source documents provided that they specify the location of the required
+ schema components using the xsi:schemaLocation attribute.
+ <p>The returned <tag kind="see">javax.xml.validation.Schema</tag> object assumes that if documents
+ refer to the same URL in the schema location hints,
+ they will always resolve to the same schema document. This
+ assumption allows implementations to reuse parsed results of
+ schema documents so that multiple validations against the same
+ schema will run faster.</p>
+ <p>Note that the use of schema location hints introduces a
+ vulnerability to denial-of-service attacks.</p></div></body><sentence>Returns the <tag kind="see">javax.xml.validation.Schema</tag> object containing all the schema components
+ that have been loaded using the <tag kind="see">#newSchema</tag> method.</sentence><return><body><div>Always return a non-null valid <tag kind="see">javax.xml.validation.Schema</tag> object.</div></body></return></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="newSchema()" type="SchemaFactory"/></method><method fulltype="javax.xml.validation.Schema" id="newSchema" type="Schema" visibility="public"><comment><body><div>Parses the specified source(s) as a schema and returns it as a schema.
+ <p>The callee will read all the <tag kind="see">javax.xml.transform.Source</tag>s and combine them into a
+ single schema. The exact semantics of the combination depends on the schema
+ language that this <tag kind="see">javax.xml.validation.SchemaFactory</tag> object is created for.</p>
+ <p>When an <tag kind="see">org.xml.sax.ErrorHandler</tag> is set, the callee will report all the errors
+ found in sources to the handler. If the handler throws an exception, it will
+ abort the schema compilation and the same exception will be thrown from
+ this method. Also, after an error is reported to a handler, the callee is allowed
+ to abort the further processing by throwing it. If an error handler is not set,
+ the callee will throw the first error it finds in the sources.</p>
+ <h2>W3C XML Schema 1.0</h2>
+ <p>The resulting schema contains components from the specified sources.
+ The same result would be achieved if all these sources were
+ imported, using appropriate values for schemaLocation and namespace,
+ into a single schema document with a different targetNamespace
+ and no components of its own, if the import elements were given
+ in the same order as the sources.  Section 4.2.3 of the XML Schema
+ recommendation describes the options processors have in this
+ regard.  While a processor should be consistent in its treatment of
+ JAXP schema sources and XML Schema imports, the behaviour between
+ JAXP-compliant parsers may vary; in particular, parsers may choose
+ to ignore all but the first &lt;import&gt; for a given namespace,
+ regardless of information provided in schemaLocation.</p>
+ <p>If the parsed set of schemas includes error(s) as
+ specified in the section 5.1 of the XML Schema spec, then
+ the error must be reported to the <tag kind="see">org.xml.sax.ErrorHandler</tag>.</p>
+ <h2>RELAX NG</h2>
+ <p>The Saxon implementation does not support RELAX NG.</p></div></body><sentence>Parses the specified source(s) as a schema and returns it as a schema.</sentence><return><body><div>Always return a non-null valid <tag kind="see">javax.xml.validation.Schema</tag> object.
+         Note that when an error has been reported, there is no
+         guarantee that the returned <tag kind="see">javax.xml.validation.Schema</tag> object is
+         meaningful.</div></body></return></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="newSchema(javax.xml.transform.Source[])" type="SchemaFactory"/><params><param fulltype="javax.xml.transform.Source[]" name="sources" type="Source[]"><body><div>inputs to be parsed as schema documents. The Saxon implementation recognizes not only
+                the standard <tag kind="see">javax.xml.transform.sax.SAXSource</tag>,
+                <tag kind="see">javax.xml.transform.stream.StreamSource</tag>, and <tag kind="see">javax.xml.transform.dom.DOMSource</tag>,
+                but also any implementation of <tag kind="see">net.sf.saxon.om.NodeInfo</tag></div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"><body><div>If an error is found during processing the specified inputs.
+                                  When an <tag kind="see">org.xml.sax.ErrorHandler</tag> is set, errors are reported to
+                                  there first. See <tag kind="see">#setErrorHandler(ErrorHandler)</tag>. In the Saxon
+                                  implementation, if a SAXException is thrown, it will always wrap
+                                  an instance of <tag kind="see">net.sf.saxon.type.SchemaException</tag></div></body><sentence>SAXException             If an error is found during processing the specified inputs.</sentence></exception></exceptions></method><method fulltype="void" id="setConfigurationFactory" static="true" type="void" visibility="public"><comment><body><div>Static customization method to register a factory method for instantiating the
+ <tag kind="see">com.saxonica.config.EnterpriseConfiguration</tag>. This callback can be used to initialize a configuration (for example,
+ by reading it from a configuration file, or by setting configuration options and/or a license
+ key)</div></body><sentence>Static customization method to register a factory method for instantiating the
+ <tag kind="see">com.saxonica.config.EnterpriseConfiguration</tag>.</sentence></comment><params><param fulltype="java.util.function.Supplier" name="factory" type="Supplier"><type fulltype="com.saxonica.config.EnterpriseConfiguration" type="EnterpriseConfiguration"/><body><div>the class that will be called to instantiate or initialize the configuration,
+                assuming the class is instantiated implicitly as a consequence of the JAXP search mechanism.
+                (Despite the name, the callback is not required to create a new <tag kind="see">com.saxonica.config.EnterpriseConfiguration</tag>.
+                It can equally well return an existing one.)</div></body></param></params></method><method fulltype="void" id="setErrorHandler" type="void" visibility="public"><comment><body><div>Set an error handler to which all schema processing
+ errors will be notified. May be null, in which case all schema processing errors are fatal.
+ The error handler is NOT inherited by instances of Validator or ValidatorHandler created
+ using this factory.</div></body><sentence>Set an error handler to which all schema processing
+ errors will be notified.</sentence></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="setErrorHandler(org.xml.sax.ErrorHandler)" type="SchemaFactory"/><params><param fulltype="org.xml.sax.ErrorHandler" name="errorHandler" type="ErrorHandler"><body><div>The requested error handler. Note: unlike releases prior to Saxon 9.6,
+ this does not change the error listener used by the Configuration.</div></body></param></params></method><method fulltype="void" id="setFeature" type="void" visibility="public"><comment><body><div><p>Set a feature for this <code>SchemaFactory</code>.</p>
+ <p>The call is delegated to the superclass except when the feature is <tag kind="see">javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING</tag> feature.
+ With this feature, the effect is to set the corresponding parser feature in the Configuration. (It thus affects all
+ operations under the control of that Configuration, not only schema processing). Setting a parser feature in the Configuration
+ affects all parsers created by that Configuration, but it does not affect the settings of a user-supplied parser, for example
+ an XMLReader supplied within a SAXSource object.</p>
+ <p>Note: in general, the way to set configuration options for Saxon is via the Configuration object, which can be obtained
+ using the <tag kind="see">#getConfiguration()</tag> method.</p></div></body><sentence>Set a feature for this SchemaFactory.</sentence><attribute name="@see" see="java">#getFeature(String)</attribute></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="setFeature(java.lang.String, boolean)" type="SchemaFactory"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The feature name, which is a non-null fully-qualified URI.</div></body></param><param fulltype="boolean" name="value" type="boolean"><body><div>The requested value of the feature (true or false).</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>SAXNotRecognizedException If the feature
+                                   value can't be assigned or retrieved.</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>SAXNotSupportedException  When the
+                                   <tag kind="see">javax.xml.validation.SchemaFactory</tag> recognizes the feature name but
+                                   cannot set the requested value.</sentence></exception></exceptions></method><method fulltype="void" id="setProperty" type="void" visibility="public"><comment><body><div>Set the value of a property.
+ <p>The property name is any fully-qualified URI.  It is
+ possible for a <tag kind="see">javax.xml.validation.SchemaFactory</tag> to recognize a property name but
+ to be unable to change the current value.</p>
+ <p>In the Saxon implementation, the property names that are recognized are the same as the
+ attribute names recognised by a <tag kind="see">javax.xml.transform.TransformerFactory</tag>.
+ These are listed as constant fields
+ in the class <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag></p></div></body><sentence>Set the value of a property.</sentence></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="setProperty(java.lang.String, java.lang.Object)" type="SchemaFactory"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The property name, which is a non-null fully-qualified URI.</div></body></param><param fulltype="java.lang.Object" name="object" type="Object"><body><div>The requested value for the property.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>org.xml.sax.SAXNotRecognizedException
+                              If the property
+                              value can't be assigned or retrieved.</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>org.xml.sax.SAXNotSupportedException
+                              When the
+                              <tag kind="see">javax.xml.validation.SchemaFactory</tag> recognizes the property name but
+                              cannot set the requested value.</sentence></exception></exceptions></method><method fulltype="void" id="setResourceResolver" type="void" visibility="public"><comment><sentence>Set a resolver to be used for dereferencing URIs encountered during schema processing and validation.</sentence></comment><override-of fulltype="javax.xml.validation.SchemaFactory" method="setResourceResolver(org.w3c.dom.ls.LSResourceResolver)" type="SchemaFactory"/><params><param fulltype="org.w3c.dom.ls.LSResourceResolver" name="lsResourceResolver" type="LSResourceResolver"><body><div>The resolver to be used. This is wrapped in a URIResolver and registered
+                           with the Configuration, overwriting any URIResolver or SchemaURIResolver that was previously
+                           registered with the Configuration. Equally, any subsequent call on setURIResolver() or
+                           setSchemaURIResolver() on the Configuration object will replace the resolver registered using
+                           this method.</div></body></param></params></method></methods><class id="SchemaFactoryImpl.ErrorListenerWrappingErrorHandler" fulltype="com.saxonica.ee.jaxp.SchemaFactoryImpl.ErrorListenerWrappingErrorHandler" static="true" superclass="Object" superclassfulltype="java.lang.Object" visibility="public"><implements><interface fulltype="javax.xml.transform.ErrorListener" type="ErrorListener"/></implements><comment><sentence>A JAXP ErrorListener that wraps a SAX ErrorHandler</sentence></comment><fields/><methods><constructor id="ErrorListenerWrappingErrorHandler" visibility="public"><comment><sentence>Create an ErrorListener that wraps a supplied SAX ErrorHandler</sentence></comment><params><param fulltype="org.xml.sax.ErrorHandler" name="handler" type="ErrorHandler"><body><div>the SAX error handler to be wrapped</div></body></param></params></constructor><method fulltype="void" id="error" type="void" visibility="public"><comment><sentence>Receive notification of a recoverable error.</sentence></comment><params><param fulltype="javax.xml.transform.TransformerException" name="exception" type="TransformerException"/></params><exceptions><exception fulltype="javax.xml.transform.TransformerException" id="TransformerException"/></exceptions></method><method fulltype="void" id="fatalError" type="void" visibility="public"><comment><sentence>Receive notification of a non-recoverable error.</sentence></comment><params><param fulltype="javax.xml.transform.TransformerException" name="exception" type="TransformerException"/></params><exceptions><exception fulltype="javax.xml.transform.TransformerException" id="TransformerException"/></exceptions></method><method fulltype="org.xml.sax.ErrorHandler" id="getErrorHandler" type="ErrorHandler" visibility="public"><comment><sentence>Get the wrapped SAX ErrorHandler</sentence><return><body><div>the wrapped SAX ErrorHandler</div></body></return></comment></method><method fulltype="void" id="warning" type="void" visibility="public"><comment><sentence>Receive notification of a warning.</sentence></comment><params><param fulltype="javax.xml.transform.TransformerException" name="exception" type="TransformerException"/></params><exceptions><exception fulltype="javax.xml.transform.TransformerException" id="TransformerException"/></exceptions></method></methods></class></class><class id="SchemaReference" fulltype="com.saxonica.ee.jaxp.SchemaReference" superclass="Schema" superclassfulltype="javax.xml.validation.Schema" visibility="public"><extends><interface fulltype="javax.xml.validation.Schema" type="Schema"/></extends><comment><body><div>A reference to a Saxon prepared schema. This is a wrapper around the Saxon PreparedSchema class; the wrapper
+ implements the JAXP Schema interface and thus allows a Saxon schema to be used via the JAXP validation API.</div></body><sentence>A reference to a Saxon prepared schema.</sentence></comment><fields/><methods><constructor id="SchemaReference" visibility="public"><comment><sentence>Create a SchemaReference to wrap a supplied PreparedSchema object</sentence></comment><params><param fulltype="com.saxonica.ee.schema.PreparedSchema" name="schema" type="PreparedSchema"><body><div>the PreparedSchema to be wrapped</div></body></param></params></constructor><method fulltype="com.saxonica.ee.schema.PreparedSchema" id="getPreparedSchema" type="PreparedSchema" visibility="public"><comment><sentence>Get the PreparedSchema object wrapped by this SchemaReference</sentence><return><body><div>the PreparedSchema object, which gives access to the schema components</div></body></return></comment></method><method fulltype="javax.xml.validation.Validator" id="newValidator" type="Validator" visibility="public"><comment><body><div>Create a new <tag kind="see">javax.xml.validation.Validator</tag> for this <tag kind="see">javax.xml.validation.Schema</tag>.
+ <p>A validator enforces/checks the set of constraints this object
+ represents.</p></div></body><sentence>Create a new <tag kind="see">javax.xml.validation.Validator</tag> for this <tag kind="see">javax.xml.validation.Schema</tag>.</sentence><return><body><div>Always return a non-null valid object.</div></body></return></comment><override-of fulltype="javax.xml.validation.Schema" method="newValidator()" type="Schema"/></method><method fulltype="javax.xml.validation.ValidatorHandler" id="newValidatorHandler" type="ValidatorHandler" visibility="public"><comment><sentence>Creates a new <tag kind="see">javax.xml.validation.ValidatorHandler</tag> for this <tag kind="see">javax.xml.validation.Schema</tag>.</sentence><return><body><div>Always return a non-null valid object.</div></body></return></comment><override-of fulltype="javax.xml.validation.Schema" method="newValidatorHandler()" type="Schema"/></method></methods></class><class id="TypedContentHandler" fulltype="com.saxonica.ee.jaxp.TypedContentHandler" superclass="ContentHandlerProxy" superclassfulltype="net.sf.saxon.event.ContentHandlerProxy" visibility="public"><extends><inherits><interface fulltype="net.sf.saxon.event.Receiver" type="Receiver"/></inherits><interface fulltype="net.sf.saxon.event.ContentHandlerProxy" type="ContentHandlerProxy"/></extends><comment><body><div>This class is an extension of ContentHandlerProxy that provides access to type
+ information, using the DOM Level 3 TypeInfo interfaces.
+ The ContentHandlerProxy also acts as a TypeInfoProvider, providing information
+ about the type of the current element or attribute.</div></body><sentence>This class is an extension of ContentHandlerProxy that provides access to type
+ information, using the DOM Level 3 TypeInfo interfaces.</sentence></comment><fields/><methods><constructor id="TypedContentHandler" visibility="public"/><method fulltype="javax.xml.validation.TypeInfoProvider" id="getTypeInfoProvider" type="TypeInfoProvider" visibility="public"><comment><sentence>Get a TypeInfoProvider to provide type information for the current element or attribute
+ event.</sentence></comment></method><method fulltype="void" id="startElement" type="void" visibility="public"><comment><sentence>Notify the start of an element</sentence></comment><override-of fulltype="net.sf.saxon.event.ContentHandlerProxy" method="startElement(net.sf.saxon.om.NodeName, net.sf.saxon.type.SchemaType, net.sf.saxon.expr.parser.Location, int)" type="ContentHandlerProxy"/><params><param fulltype="net.sf.saxon.om.NodeName" name="nameCode" type="NodeName"/><param fulltype="net.sf.saxon.type.SchemaType" name="typeCode" type="SchemaType"/><param fulltype="net.sf.saxon.expr.parser.Location" name="location" type="Location"/><param fulltype="int" name="properties" type="int"/></params><exceptions><exception fulltype="net.sf.saxon.trans.XPathException" id="XPathException"/></exceptions></method><method fulltype="boolean" id="usesTypeAnnotations" type="boolean" visibility="public"><comment><sentence>Ask whether this Receiver (or the downstream pipeline) makes any use of the type annotations
+ supplied on element and attribute events</sentence><return><body><div>true if the Receiver makes any use of this information. If false, the caller
+         may supply untyped nodes instead of supplying the type annotation</div></body></return></comment><override-of fulltype="net.sf.saxon.event.ContentHandlerProxy" method="usesTypeAnnotations()" type="ContentHandlerProxy"/></method></methods><class id="TypedContentHandler.TypeInfoProviderImpl" fulltype="com.saxonica.ee.jaxp.TypedContentHandler.TypeInfoProviderImpl" superclass="TypeInfoProvider" superclassfulltype="javax.xml.validation.TypeInfoProvider" visibility="public"><extends><interface fulltype="javax.xml.validation.TypeInfoProvider" type="TypeInfoProvider"/></extends><fields/><methods><constructor id="TypeInfoProviderImpl" visibility="public"/><method fulltype="org.w3c.dom.TypeInfo" id="getAttributeTypeInfo" type="TypeInfo" visibility="public"><comment><body><div>Returns the immutable <tag kind="see">org.w3c.dom.TypeInfo</tag> object for the specified
+ attribute of the current element.
+ <p>The method may only be called by the startElement event of
+ the <tag kind="see">org.xml.sax.ContentHandler</tag> that the application sets to the
+ <tag kind="see">javax.xml.validation.ValidatorHandler</tag>.</p></div></body><sentence>Returns the immutable <tag kind="see">org.w3c.dom.TypeInfo</tag> object for the specified
+ attribute of the current element.</sentence><return><body><div>An immutable <tag kind="see">org.w3c.dom.TypeInfo</tag> object that represents the
+         type of the specified attribute.
+         Note that the caller can keep references to the obtained
+         <tag kind="see">org.w3c.dom.TypeInfo</tag> longer than the callback scope.
+         <p>Otherwise, this method returns null if the validator is unable to
+         determine the type.</p></div></body></return></comment><override-of fulltype="javax.xml.validation.TypeInfoProvider" method="getAttributeTypeInfo(int)" type="TypeInfoProvider"/><params><param fulltype="int" name="index" type="int"><body><div>The index of the attribute. The same index for
+              the <tag kind="see">org.xml.sax.Attributes</tag> object passed to the
+              <tt>startElement</tt> callback.</div></body></param></params></method><method fulltype="org.w3c.dom.TypeInfo" id="getElementTypeInfo" type="TypeInfo" visibility="public"><comment><sentence>Returns the immutable <tag kind="see">org.w3c.dom.TypeInfo</tag> object for the current element.</sentence><return><body><div>An immutable <tag kind="see">org.w3c.dom.TypeInfo</tag> object that represents the
+         type of the current element.
+         Note that the caller can keep references to the obtained
+         <tag kind="see">org.w3c.dom.TypeInfo</tag> longer than the callback scope.
+         <p>Otherwise, this method returns null if the validator is unable to
+         determine the type of the current element for some reason</p></div></body></return></comment><override-of fulltype="javax.xml.validation.TypeInfoProvider" method="getElementTypeInfo()" type="TypeInfoProvider"/></method><method fulltype="boolean" id="isIdAttribute" type="boolean" visibility="public"><comment><sentence>Returns true if the specified attribute is determined
+ to be an ID.</sentence><return><body><div>true
+         if the type of the specified attribute is ID.</div></body></return></comment><override-of fulltype="javax.xml.validation.TypeInfoProvider" method="isIdAttribute(int)" type="TypeInfoProvider"/><params><param fulltype="int" name="index" type="int"><body><div>The index of the attribute. The same index for
+              the <tag kind="see">org.xml.sax.Attributes</tag> object passed to the
+              <tt>startElement</tt> callback.</div></body></param></params></method><method fulltype="boolean" id="isSpecified" type="boolean" visibility="public"><comment><sentence>Returns false if the attribute was added by the validator.</sentence><return><body><div><tt>true</tt> if the attribute was present before the validator
+         processes input. <tt>false</tt> if the attribute was added
+         by the validator.</div></body></return></comment><override-of fulltype="javax.xml.validation.TypeInfoProvider" method="isSpecified(int)" type="TypeInfoProvider"/><params><param fulltype="int" name="index" type="int"><body><div>The index of the attribute. The same index for
+              the <tag kind="see">org.xml.sax.Attributes</tag> object passed to the
+              <tt>startElement</tt> callback.</div></body></param></params></method></methods></class></class><class id="URIResourceResolver" fulltype="com.saxonica.ee.jaxp.URIResourceResolver" superclass="Object" superclassfulltype="java.lang.Object" visibility="public"><implements><interface fulltype="javax.xml.transform.URIResolver" type="URIResolver"/></implements><comment><body><div>This class implements the JAXP URIResourceResolver as a wrapper around
+ a DOM Level 3 LSResourceResolver. This serves two purposes: it allows the
+ same underlying object to be used in both roles, and it allows an LSResourceResolver
+ to be passed around the system in places where a URIResolver is expected, for
+ example in the PipelineConfiguration</div></body><sentence>This class implements the JAXP URIResourceResolver as a wrapper around
+ a DOM Level 3 LSResourceResolver.</sentence></comment><fields/><methods><constructor id="URIResourceResolver" visibility="public"><params><param fulltype="org.w3c.dom.ls.LSResourceResolver" name="resolver" type="LSResourceResolver"/></params></constructor><method fulltype="org.w3c.dom.ls.LSResourceResolver" id="getLSResourceResolver" type="LSResourceResolver" visibility="public"/><method fulltype="javax.xml.transform.Source" id="resolve" type="Source" visibility="public"><comment><sentence>Called by an XSLT processor when it encounters
+ an xsl:include, xsl:import, or document() function.</sentence><return><body><div>A Source object, or null if the href cannot be resolved,
+         and the processor should try to resolve the URI itself.</div></body></return></comment><params><param fulltype="java.lang.String" name="href" type="String"><body><div>An href attribute, which may be relative or absolute.</div></body></param><param fulltype="java.lang.String" name="base" type="String"><body><div>The base URI against which the first argument will be made
+             absolute if the absolute URI is required.</div></body></param></params><exceptions><exception fulltype="javax.xml.transform.TransformerException" id="TransformerException"><sentence>javax.xml.transform.TransformerException
+          if an error occurs when trying to
+          resolve the URI.</sentence></exception></exceptions></method></methods></class><class id="ValidatingReader" fulltype="com.saxonica.ee.jaxp.ValidatingReader" superclass="Object" superclassfulltype="java.lang.Object" visibility="public"><implements><interface fulltype="org.xml.sax.XMLReader" type="XMLReader"/></implements><comment><body><div>This class is a Saxon implementation of XMLReader that performs schema validation using
+ Saxon's schema processor.
+ <p>This class is supplied for the benefit of applications that expect to perform validation
+ by creating a validating SAX parser; it allows such applications to take advantage of the Saxon
+ validator with no change to the application.</p></div></body><sentence>This class is a Saxon implementation of XMLReader that performs schema validation using
+ Saxon's schema processor.</sentence></comment><fields/><methods><constructor id="ValidatingReader" visibility="public"><comment><body><div>Create a ValidatingReader. When this option is used, the only way to supply the
+ schema to be used for validation is through the xsi:schemaLocation attribute in the source
+ document.</div></body><sentence>Create a ValidatingReader.</sentence></comment></constructor><constructor id="ValidatingReader" visibility="public"><comment><sentence>Create a ValidatingReader that uses a specified Saxon Configuration.</sentence></comment><params><param fulltype="com.saxonica.config.EnterpriseConfiguration" name="config" type="EnterpriseConfiguration"><body><div>the Saxon Configuration. The Configuration
+               can be pre-initialized with configuration options; it can also contain a pre-loaded cache
+               of schema components to be used for validation</div></body></param></params></constructor><constructor id="ValidatingReader" visibility="public"><comment><sentence>Create a ValidatingReader based on a supplied Saxon Configuration and a supplied
+ (presumably non-validating) XMLReader to perform the underlying XML parsing.</sentence></comment><params><param fulltype="com.saxonica.config.EnterpriseConfiguration" name="config" type="EnterpriseConfiguration"><body><div>the Saxon Configuration. The Configuration
+               can be pre-initialized with configuration options; it can also contain a pre-loaded cache
+               of schema components to be used for validation</div></body></param><param fulltype="org.xml.sax.XMLReader" name="parser" type="XMLReader"><body><div>The XML parser to be used</div></body></param></params></constructor><method fulltype="org.xml.sax.ContentHandler" id="getContentHandler" type="ContentHandler" visibility="public"><comment><sentence>Return the current content handler.</sentence><return><body><div>The current content handler, or null if none
+         has been registered.</div></body></return><attribute name="@see" see="java">#setContentHandler</attribute></comment></method><method fulltype="org.xml.sax.DTDHandler" id="getDTDHandler" type="DTDHandler" visibility="public"><comment><sentence>Return the current DTD handler.</sentence><return><body><div>The current DTD handler, or null if none
+         has been registered.</div></body></return><attribute name="@see" see="java">#setDTDHandler</attribute></comment></method><method fulltype="org.xml.sax.EntityResolver" id="getEntityResolver" type="EntityResolver" visibility="public"><comment><sentence>Return the current entity resolver.</sentence><return><body><div>The current entity resolver, or null if none
+         has been registered.</div></body></return><attribute name="@see" see="java">#setEntityResolver</attribute></comment></method><method fulltype="org.xml.sax.ErrorHandler" id="getErrorHandler" type="ErrorHandler" visibility="public"><comment><sentence>Return the current error handler.</sentence><return><body><div>The current error handler, or null if none
+         has been registered.</div></body></return><attribute name="@see" see="java">#setErrorHandler</attribute></comment></method><method fulltype="boolean" id="getFeature" type="boolean" visibility="public"><comment><sentence>Look up the value of a feature flag.</sentence><return><body><div>the value of the feature if the name is recognized</div></body></return></comment><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The names that are recognized are the union of (a) the flags recognized by the underlying SAX XMLReader,
+             and (b) the properties of the Saxon Configuration that have boolean values. A feature name starting with
+             "http://saxon.sf.net" is assumed to be in the second category; these features are listed in
+             <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag>.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>SAXNotRecognizedException if the feature name is not recognized</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"/></exceptions></method><method fulltype="java.lang.Object" id="getProperty" type="Object" visibility="public"><comment><sentence>Look up the value of a property.</sentence><return><body><div>the value of the property if the name is recognized</div></body></return></comment><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The names that are recognized are the union of (a) the properties recognized by the underlying SAX XMLReader,
+             and (b) the properties of the Saxon Configuration. A feature name starting with
+             "http://saxon.sf.net" is assumed to be in the second category; these features are listed in
+             <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag>.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>SAXNotRecognizedException if the property name is not recognized</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"/></exceptions></method><method fulltype="void" id="parse" type="void" visibility="public"><comment><body><div>Parse an XML document.
+ <p>The application can use this method to instruct the XML
+ reader to begin parsing an XML document from any valid input
+ source (a character stream, a byte stream, or a URI).</p>
+ <p>Applications may not invoke this method while a parse is in
+ progress (they should create a new XMLReader instead for each
+ nested XML document).  Once a parse is complete, an
+ application may reuse the same XMLReader object, possibly with a
+ different input source.
+ Configuration of the XMLReader object (such as handler bindings and
+ values established for feature flags and properties) is unchanged
+ by completion of a parse, unless the definition of that aspect of
+ the configuration explicitly specifies other behavior.
+ (For example, feature flags or properties exposing
+ characteristics of the document being parsed.)</p>
+ <p>During the parse, the XMLReader will provide information
+ about the XML document through the registered event
+ handlers.</p>
+ <p>This method is synchronous: it will not return until parsing
+ has ended.  If a client application wants to terminate
+ parsing early, it should throw an exception.</p></div></body><sentence>Parse an XML document.</sentence><attribute name="@see" see="java">org.xml.sax.InputSource</attribute><attribute name="@see" see="java">#parse(String)</attribute><attribute name="@see" see="java">#setEntityResolver</attribute><attribute name="@see" see="java">#setDTDHandler</attribute><attribute name="@see" see="java">#setContentHandler</attribute><attribute name="@see" see="java">#setErrorHandler</attribute></comment><params><param fulltype="org.xml.sax.InputSource" name="input" type="InputSource"><body><div>The input source for the top-level of the
+              XML document.</div></body></param></params><exceptions><exception fulltype="java.io.IOException" id="IOException"><sentence>java.io.IOException      An IO exception from the parser,
+                                  possibly from a byte stream or character stream
+                                  supplied by the application.</sentence></exception><exception fulltype="org.xml.sax.SAXException" id="SAXException"><sentence>org.xml.sax.SAXException Any SAX exception, possibly
+                                  wrapping another exception.</sentence></exception></exceptions></method><method fulltype="void" id="parse" type="void" visibility="public"><comment><body><div>Parse an XML document from a system identifier (URI).
+ <p>This method is a shortcut for the common case of reading a
+ document from a system identifier.  It is the exact
+ equivalent of the following:</p>
+ <pre>
+ parse(new InputSource(systemId));
+ </pre>
+ <p>If the system identifier is a URL, it must be fully resolved
+ by the application before it is passed to the parser.</p></div></body><sentence>Parse an XML document from a system identifier (URI).</sentence><attribute name="@see" see="java">#parse(org.xml.sax.InputSource)</attribute></comment><params><param fulltype="java.lang.String" name="systemId" type="String"><body><div>The system identifier (URI).</div></body></param></params><exceptions><exception fulltype="java.io.IOException" id="IOException"><sentence>java.io.IOException      An IO exception from the parser,
+                                  possibly from a byte stream or character stream
+                                  supplied by the application.</sentence></exception><exception fulltype="org.xml.sax.SAXException" id="SAXException"><sentence>org.xml.sax.SAXException Any SAX exception, possibly
+                                  wrapping another exception.</sentence></exception></exceptions></method><method fulltype="void" id="setContentHandler" type="void" visibility="public"><comment><body><div>Allow an application to register a content event handler.
+ <p>If the application does not register a content handler, all
+ content events reported by the SAX parser will be silently
+ ignored.</p>
+ <p>Applications may register a new or different handler in the
+ middle of a parse, and the SAX parser must begin using the new
+ handler immediately.</p></div></body><sentence>Allow an application to register a content event handler.</sentence><attribute name="@see" see="java">#getContentHandler</attribute></comment><params><param fulltype="org.xml.sax.ContentHandler" name="handler" type="ContentHandler"><body><div>The content handler.</div></body></param></params></method><method fulltype="void" id="setDTDHandler" type="void" visibility="public"><comment><body><div>Allow an application to register a DTD event handler.
+ <p>If the application does not register a DTD handler, all DTD
+ events reported by the SAX parser will be silently ignored.</p>
+ <p>Applications may register a new or different handler in the
+ middle of a parse, and the SAX parser must begin using the new
+ handler immediately.</p></div></body><sentence>Allow an application to register a DTD event handler.</sentence><attribute name="@see" see="java">#getDTDHandler</attribute></comment><params><param fulltype="org.xml.sax.DTDHandler" name="handler" type="DTDHandler"><body><div>The DTD handler.</div></body></param></params></method><method fulltype="void" id="setEntityResolver" type="void" visibility="public"><comment><body><div>Allow an application to register an entity resolver.
+ <p>If the application does not register an entity resolver,
+ the XMLReader will perform its own default resolution.</p>
+ <p>Applications may register a new or different resolver in the
+ middle of a parse, and the SAX parser must begin using the new
+ resolver immediately.</p></div></body><sentence>Allow an application to register an entity resolver.</sentence><attribute name="@see" see="java">#getEntityResolver</attribute></comment><params><param fulltype="org.xml.sax.EntityResolver" name="resolver" type="EntityResolver"><body><div>The entity resolver.</div></body></param></params></method><method fulltype="void" id="setErrorHandler" type="void" visibility="public"><comment><body><div>Allow an application to register an error event handler.
+ <p>If the application does not register an error handler, all
+ error events reported by the SAX parser will be silently
+ ignored; however, normal processing may not continue.  It is
+ highly recommended that all SAX applications implement an
+ error handler to avoid unexpected bugs.</p>
+ <p>Applications may register a new or different handler in the
+ middle of a parse, and the SAX parser must begin using the new
+ handler immediately.</p></div></body><sentence>Allow an application to register an error event handler.</sentence><attribute name="@see" see="java">#getErrorHandler</attribute></comment><params><param fulltype="org.xml.sax.ErrorHandler" name="handler" type="ErrorHandler"><body><div>The error handler.</div></body></param></params></method><method fulltype="void" id="setFeature" type="void" visibility="public"><comment><sentence>Set the value of a feature flag.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The names that are recognized are the union of (a) the flags recognized by the underlying SAX XMLReader,
+              and (b) the properties of the Saxon Configuration that have boolean values. A feature name starting with
+              "http://saxon.sf.net" is assumed to be in the second category; these features are listed in
+              <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag>.</div></body></param><param fulltype="boolean" name="value" type="boolean"><body><div>true or false</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>SAXNotRecognizedException if the feature name is not recognized, or if it is the name of a
+                                   Saxon configuration property whose value is not boolean</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"/></exceptions></method><method fulltype="void" id="setProperty" type="void" visibility="public"><comment><sentence>Set the value of a property.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The names that are recognized are the union of
+              (a) the properties recognized by the underlying SAX XMLReader,
+              and (b) the properties of the Saxon Configuration. A feature name starting with
+              "http://saxon.sf.net" is assumed to be in the second category; these features are listed in
+              <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag>.
+              <p>Saxon accepts the Apache-defined properties
+              <code>http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation</code> and
+              <code>http://apache.org/xml/properties/schema/external-schemaLocation</code> to define the
+              location of schema documents. These properties may be set repeatedly to load more than one
+              schema document.</p>
+              <p><b>To enable schema validation using XSD 1.1, the property <tag kind="see">net.sf.saxon.lib.FeatureKeys#XSD_VERSION</tag>
+              must be set to the value "1.1".</b></p></div></body></param><param fulltype="java.lang.Object" name="value" type="Object"><body><div>the value of the property</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>SAXNotRecognizedException if the property name is not recognized, or if the value is inappropriate</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"/></exceptions></method></methods></class><class id="ValidatorHandlerImpl" fulltype="com.saxonica.ee.jaxp.ValidatorHandlerImpl" superclass="ValidatorHandler" superclassfulltype="javax.xml.validation.ValidatorHandler" visibility="public"><implements><interface fulltype="org.xml.sax.ContentHandler" type="ContentHandler"/><interface fulltype="org.xml.sax.ext.LexicalHandler" type="LexicalHandler"/><interface fulltype="org.xml.sax.DTDHandler" type="DTDHandler"/></implements><extends><inherits><interface fulltype="org.xml.sax.ContentHandler" type="ContentHandler"/></inherits><interface fulltype="javax.xml.validation.ValidatorHandler" type="ValidatorHandler"/></extends><comment><body><div>The is the Saxon implementation of the JAXP 1.3 ValidatorHandler interface. It is
+ a SAX ContentHandler that accepts events from an XML parser (or elsewhere), validates
+ them, reports any errors, and passes the events on to another ContentHandler. The events
+ that are passed on will be augmented with extra elements and attributes that expand
+ default values defined in the schema. In addition, the receiving ContentHandler has
+ access to a TypeInfoProvider that gives information about the type of the current
+ element or attribute event.
+ <p>
+ A ValidatorHandler is the front end to a rather complex pipeline. The ValidatorHandler
+ is the first stage in the pipeline: it receives events from a SAX parser or other source
+ of SAX events. The next stage is a ReceivingContentHandler, which translates SAX events
+ into Receiver events. This is followed by a number of Receivers to do the validation
+ (actually a stack of Receivers, since a new ComplexContentValidator is added each time
+ a new element starts). The last Receiver is the finalProxy: this translates Receiver
+ events back into SAX2 events, for delivery to the user's ContentHandler.
+ </p><p>
+ The user's ContentHandler has access to a TypeInfoProvider that gives information about
+ the types of elements and attributes. This information is passed down the Receiver pipeline
+ in the form of typeCodes associated with element and attribute events. The TypeInfoProvider
+ is part of the finalProxy, which saves the type information locally and returns it to the
+ user's ContentHandler on request. The TypeInfo objects supplied by the TypeInfoProvider are
+ in fact the schema components representing the type, as a SchemaType object.
+ </p></div></body><sentence>The is the Saxon implementation of the JAXP 1.3 ValidatorHandler interface.</sentence></comment><fields/><methods><constructor id="ValidatorHandlerImpl" visibility="public"/><method fulltype="void" id="characters" type="void" visibility="public"><comment><sentence>Receive notification of character data.</sentence></comment><params><param fulltype="char[]" name="ch" type="char[]"/><param fulltype="int" name="start" type="int"/><param fulltype="int" name="length" type="int"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="comment" type="void" visibility="public"><comment><sentence>Report an XML comment anywhere in the document.</sentence></comment><params><param fulltype="char[]" name="ch" type="char[]"/><param fulltype="int" name="start" type="int"/><param fulltype="int" name="length" type="int"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="endCDATA" type="void" visibility="public"><comment><sentence>Report the end of a CDATA section.</sentence></comment><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="endDocument" type="void" visibility="public"><comment><sentence>Receive notification of the end of a document.</sentence></comment><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"><sentence>org.xml.sax.SAXException any SAX exception, possibly
+                                  wrapping another exception</sentence></exception></exceptions></method><method fulltype="void" id="endDTD" type="void" visibility="public"><comment><sentence>Report the end of DTD declarations.</sentence></comment><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="endElement" type="void" visibility="public"><comment><sentence>Receive notification of the end of an element.</sentence></comment><params><param fulltype="java.lang.String" name="uri" type="String"/><param fulltype="java.lang.String" name="localName" type="String"/><param fulltype="java.lang.String" name="qName" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="endEntity" type="void" visibility="public"><comment><sentence>Report the end of an entity.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="endPrefixMapping" type="void" visibility="public"><comment><sentence>End the scope of a prefix-URI mapping.</sentence></comment><params><param fulltype="java.lang.String" name="prefix" type="String"><body><div>the prefix that was being mapped.
+               This is the empty string when a default mapping scope ends.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"><sentence>org.xml.sax.SAXException the client may throw
+                                  an exception during processing</sentence></exception></exceptions></method><method fulltype="com.saxonica.config.EnterpriseConfiguration" id="getConfiguration" type="EnterpriseConfiguration" visibility="public"><comment><sentence>Get the Configuration object</sentence><return><body><div>the Configuration, which will always be schema-aware</div></body></return></comment></method><method fulltype="org.xml.sax.ContentHandler" id="getContentHandler" type="ContentHandler" visibility="public"><comment><sentence>Gets the <tag kind="see">org.xml.sax.ContentHandler</tag> which receives the
+ augmented validation result.</sentence><return><body><div>This method returns the object that was last set through
+         the <tag kind="see">#setContentHandler(org.xml.sax.ContentHandler)</tag> method, or null
+         if that method has never been called since this <tag kind="see">javax.xml.validation.ValidatorHandler</tag>
+         has created.</div></body></return><attribute name="@see" see="java">#setContentHandler(org.xml.sax.ContentHandler)</attribute></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="getContentHandler()" type="ValidatorHandler"/></method><method fulltype="org.xml.sax.ErrorHandler" id="getErrorHandler" type="ErrorHandler" visibility="public"><comment><sentence>Gets the current <tag kind="see">org.xml.sax.ErrorHandler</tag></sentence><return><body><div>This method returns the object that was last set through
+         the <tag kind="see">#setErrorHandler(org.xml.sax.ErrorHandler)</tag> method, or null
+         if that method has never been called</div></body></return><attribute name="@see" see="java">#setErrorHandler(org.xml.sax.ErrorHandler)</attribute></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="getErrorHandler()" type="ValidatorHandler"/></method><method fulltype="java.lang.Object" id="getProperty" type="Object" visibility="public"><comment><body><div>Look up the value of a property.
+ <p>The property name is any fully-qualified URI.  It is
+ possible for a <tag kind="see">javax.xml.validation.ValidatorHandler</tag> to recognize a property name but
+ temporarily be unable to return its value.
+ Some property values may be available only in specific
+ contexts, such as before, during, or after a validation.</p>
+ <p><tag kind="see">javax.xml.validation.Validator</tag>s are not required to recognize any specific
+ property names.</p>
+ <p>In the Saxon implementation, the property names that are recognized are the same as the
+ attribute names recognised by a <tag kind="see">javax.xml.transform.TransformerFactory</tag>.
+ These are listed as constant fields
+ in the class <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag></p></div></body><sentence>Look up the value of a property.</sentence><return><body><div>The current value of the property.</div></body></return><attribute name="@see" see="java">#setProperty(String, Object)</attribute></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="getProperty(java.lang.String)" type="ValidatorHandler"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The property name, which is a non-null fully-qualified URI.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>org.xml.sax.SAXNotRecognizedException
+                              If the property
+                              value can't be assigned or retrieved.</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>org.xml.sax.SAXNotSupportedException
+                              When the
+                              XMLReader recognizes the property name but
+                              cannot determine its value at this time.</sentence></exception></exceptions></method><method fulltype="org.w3c.dom.ls.LSResourceResolver" id="getResourceResolver" type="LSResourceResolver" visibility="public"><comment><sentence>Gets the current <tag kind="see">org.w3c.dom.ls.LSResourceResolver</tag></sentence><return><body><div>This method returns the object that was last set through
+         the <tag kind="see">#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)</tag> method, or null
+         if that method has never been called</div></body></return></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="getResourceResolver()" type="ValidatorHandler"/></method><method fulltype="javax.xml.validation.TypeInfoProvider" id="getTypeInfoProvider" type="TypeInfoProvider" visibility="public"><comment><body><div>Obtains the <tag kind="see">javax.xml.validation.TypeInfoProvider</tag> implementation of this
+ <tag kind="see">javax.xml.validation.ValidatorHandler</tag>.
+ The obtained <tag kind="see">javax.xml.validation.TypeInfoProvider</tag> can be queried during a parse
+ to access the type information determined by the validator.</div></body><sentence>Obtains the <tag kind="see">javax.xml.validation.TypeInfoProvider</tag> implementation of this
+ <tag kind="see">javax.xml.validation.ValidatorHandler</tag>.</sentence><return><body><div>A non-null valid <tag kind="see">javax.xml.validation.TypeInfoProvider</tag>.</div></body></return></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="getTypeInfoProvider()" type="ValidatorHandler"/></method><method fulltype="void" id="ignorableWhitespace" type="void" visibility="public"><comment><sentence>Receive notification of ignorable whitespace in element content.</sentence></comment><params><param fulltype="char[]" name="ch" type="char[]"/><param fulltype="int" name="start" type="int"/><param fulltype="int" name="length" type="int"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="notationDecl" type="void" visibility="public"><comment><sentence>Receive notification of a notation declaration event.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"/><param fulltype="java.lang.String" name="publicId" type="String"/><param fulltype="java.lang.String" name="systemId" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="processingInstruction" type="void" visibility="public"><comment><sentence>Receive notification of a processing instruction.</sentence></comment><params><param fulltype="java.lang.String" name="target" type="String"/><param fulltype="java.lang.String" name="data" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="setContentHandler" type="void" visibility="public"><comment><body><div>Sets the <tag kind="see">org.xml.sax.ContentHandler</tag> which receives
+ the augmented validation result.
+ <p>A <tag kind="see">javax.xml.validation.ValidatorHandler</tag> may buffer events to certain
+ extent, but to allow <tag kind="see">javax.xml.validation.ValidatorHandler</tag> to be used
+ by a parser, the following requirement has to be met.</p>
+ <ol><li>When
+ <tag kind="see">org.xml.sax.ContentHandler#startElement(String, String, String, Attributes)</tag>,
+ <tag kind="see">org.xml.sax.ContentHandler#endElement(String, String, String)</tag>,
+ <tag kind="see">org.xml.sax.ContentHandler#startDocument()</tag>, or
+ <tag kind="see">org.xml.sax.ContentHandler#endDocument()</tag>
+ are invoked on a <tag kind="see">javax.xml.validation.ValidatorHandler</tag>,
+ the same method on the user-specified <tag kind="see">org.xml.sax.ContentHandler</tag>
+ must be invoked for the same event before the callback
+ returns.</li></ol>
+ <p><b>The Saxon implementation does not meet this requirement. StartElement events are
+ buffered until the first thing following the attributes is encountered.</b></p></div></body><sentence>Sets the <tag kind="see">org.xml.sax.ContentHandler</tag> which receives
+ the augmented validation result.</sentence></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="setContentHandler(org.xml.sax.ContentHandler)" type="ValidatorHandler"/><params><param fulltype="org.xml.sax.ContentHandler" name="receiver" type="ContentHandler"><body><div>A <tag kind="see">org.xml.sax.ContentHandler</tag> or a null value.</div></body></param></params></method><method fulltype="void" id="setDocumentLocator" type="void" visibility="public"><comment><sentence>Receive an object for locating the origin of SAX document events.</sentence><attribute name="@see" see="java">org.xml.sax.Locator</attribute></comment><params><param fulltype="org.xml.sax.Locator" name="locator" type="Locator"><body><div>an object that can return the location of
+                any SAX document event</div></body></param></params></method><method fulltype="void" id="setErrorHandler" type="void" visibility="public"><comment><sentence>Sets the <tag kind="see">org.xml.sax.ErrorHandler</tag> to receive errors encountered
+ during the validation.</sentence></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="setErrorHandler(org.xml.sax.ErrorHandler)" type="ValidatorHandler"/><params><param fulltype="org.xml.sax.ErrorHandler" name="errorHandler" type="ErrorHandler"><body><div>A new error handler to be set. This parameter can be null.</div></body></param></params></method><method fulltype="void" id="setFinalProxy" type="void" visibility="public"><comment><sentence>Set the TypedContentHandler that acts as the final stage in this pipeline, receiving
+ typed events from the validator stack</sentence></comment><params><param fulltype="com.saxonica.ee.jaxp.TypedContentHandler" name="proxy" type="TypedContentHandler"><body><div>the TypedContentHandler at the end of the pipeline</div></body></param></params></method><method fulltype="void" id="setPipelineConfiguration" type="void" visibility="public"><comment><sentence>Set the pipeline configuration used by this validator handler</sentence></comment><params><param fulltype="net.sf.saxon.event.PipelineConfiguration" name="pipe" type="PipelineConfiguration"><body><div>the pipeline configuration</div></body></param></params></method><method fulltype="void" id="setProperty" type="void" visibility="public"><comment><body><div>Set the value of a property.
+ <p>The property name is any fully-qualified URI.  It is
+ possible for a <tag kind="see">javax.xml.validation.ValidatorHandler</tag> to recognize a property name but
+ to be unable to change the current value.
+ Some property values may be immutable or mutable only
+ in specific contexts, such as before, during, or after
+ a validation.</p>
+ <p>In the Saxon implementation, the property names that are recognized are the same as the
+ attribute names recognised by a <tag kind="see">javax.xml.transform.TransformerFactory</tag>.
+ These are listed as constant fields
+ in the class <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag></p></div></body><sentence>Set the value of a property.</sentence></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="setProperty(java.lang.String, java.lang.Object)" type="ValidatorHandler"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The property name, which is a non-null fully-qualified URI.</div></body></param><param fulltype="java.lang.Object" name="object" type="Object"><body><div>The requested value for the property.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>org.xml.sax.SAXNotRecognizedException
+                              If the property
+                              value can't be assigned or retrieved.</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>org.xml.sax.SAXNotSupportedException
+                              When the
+                              <tag kind="see">javax.xml.validation.Validator</tag> recognizes the property name but
+                              cannot set the requested value.</sentence></exception></exceptions></method><method fulltype="void" id="setReceivingContentHandler" type="void" visibility="public"><comment><sentence>Get the ReceivingContentHandler that receives the SAX events at the start of this pipeline</sentence></comment><params><param fulltype="net.sf.saxon.event.ReceivingContentHandler" name="rch" type="ReceivingContentHandler"><body><div>the ReceivingContentHandler</div></body></param></params></method><method fulltype="void" id="setResourceResolver" type="void" visibility="public"><comment><sentence>Sets the <tag kind="see">org.w3c.dom.ls.LSResourceResolver</tag> to customize
+ resource resolution while in a validation episode.</sentence></comment><override-of fulltype="javax.xml.validation.ValidatorHandler" method="setResourceResolver(org.w3c.dom.ls.LSResourceResolver)" type="ValidatorHandler"/><params><param fulltype="org.w3c.dom.ls.LSResourceResolver" name="resourceResolver" type="LSResourceResolver"><body><div>A new resource resolver to be set. This parameter can be null.</div></body></param></params></method><method fulltype="void" id="skippedEntity" type="void" visibility="public"><comment><sentence>Receive notification of a skipped entity.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="startCDATA" type="void" visibility="public"><comment><sentence>Report the start of a CDATA section.</sentence></comment><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="startDocument" type="void" visibility="public"><comment><body><div>Receive notification of the beginning of a document.
+ <p>The SAX parser will invoke this method only once, before any
+ other event callbacks (except for <tag kind="see">#setDocumentLocator
+ setDocumentLocator</tag>).</p></div></body><sentence>Receive notification of the beginning of a document.</sentence><attribute name="@see" see="java">#endDocument</attribute></comment><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"><sentence>org.xml.sax.SAXException any SAX exception, possibly
+                                  wrapping another exception</sentence></exception></exceptions></method><method fulltype="void" id="startDTD" type="void" visibility="public"><comment><sentence>Report the start of DTD declarations, if any.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"/><param fulltype="java.lang.String" name="publicId" type="String"/><param fulltype="java.lang.String" name="systemId" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="startElement" type="void" visibility="public"><comment><sentence>Receive notification of the beginning of an element.</sentence></comment><params><param fulltype="java.lang.String" name="uri" type="String"><body><div>the Namespace URI, or the empty string if the
+                  element has no Namespace URI or if Namespace
+                  processing is not being performed</div></body></param><param fulltype="java.lang.String" name="localName" type="String"><body><div>the local name (without prefix), or the
+                  empty string if Namespace processing is not being
+                  performed</div></body></param><param fulltype="java.lang.String" name="qName" type="String"><body><div>the qualified name (with prefix), or the
+                  empty string if qualified names are not available</div></body></param><param fulltype="org.xml.sax.Attributes" name="atts" type="Attributes"><body><div>the attributes attached to the element.  If
+                  there are no attributes, it shall be an empty
+                  Attributes object.  The value of this object after
+                  startElement returns is undefined</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"><sentence>org.xml.sax.SAXException any SAX exception, possibly
+                                  wrapping another exception</sentence></exception></exceptions></method><method fulltype="void" id="startEntity" type="void" visibility="public"><comment><sentence>Report the beginning of some internal and external XML entities.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method><method fulltype="void" id="startPrefixMapping" type="void" visibility="public"><comment><body><div>Begin the scope of a prefix-URI Namespace mapping.
+ <p>There should never be start/endPrefixMapping events for the
+ "xml" prefix, since it is predeclared and immutable.</p></div></body><sentence>Begin the scope of a prefix-URI Namespace mapping.</sentence><attribute name="@see" see="java">#endPrefixMapping</attribute><attribute name="@see" see="java">#startElement</attribute></comment><params><param fulltype="java.lang.String" name="prefix" type="String"><body><div>the Namespace prefix being declared.
+               An empty string is used for the default element namespace,
+               which has no prefix.</div></body></param><param fulltype="java.lang.String" name="uri" type="String"><body><div>the Namespace URI the prefix is mapped to</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"><sentence>org.xml.sax.SAXException the client may throw
+                                  an exception during processing</sentence></exception></exceptions></method><method fulltype="void" id="unparsedEntityDecl" type="void" visibility="public"><comment><sentence>Receive notification of an unparsed entity declaration event.</sentence></comment><params><param fulltype="java.lang.String" name="name" type="String"/><param fulltype="java.lang.String" name="publicId" type="String"/><param fulltype="java.lang.String" name="systemId" type="String"/><param fulltype="java.lang.String" name="notationName" type="String"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/></exceptions></method></methods></class><class id="ValidatorImpl" fulltype="com.saxonica.ee.jaxp.ValidatorImpl" superclass="Validator" superclassfulltype="javax.xml.validation.Validator" visibility="public"><extends><interface fulltype="javax.xml.validation.Validator" type="Validator"/></extends><comment><body><div>This class in the Saxon implementation of the JAXP 1.3 Validator "interface" (which is actually
+ defined as an abstract class). It is used to validate a source document against a schema.</div></body><sentence>This class in the Saxon implementation of the JAXP 1.3 Validator "interface" (which is actually
+ defined as an abstract class).</sentence></comment><fields/><methods><constructor id="ValidatorImpl" visibility="public"><comment><sentence>Create the Validator</sentence></comment><params><param fulltype="net.sf.saxon.event.PipelineConfiguration" name="pipe" type="PipelineConfiguration"><body><div>the pipeline configuration</div></body></param><param fulltype="com.saxonica.ee.schema.PreparedSchema" name="schema" type="PreparedSchema"><body><div>the schema against which validation takes place</div></body></param></params></constructor><method fulltype="net.sf.saxon.Configuration" id="getConfiguration" type="Configuration" visibility="public"><comment><sentence>Get the underlying Saxon Configuration object</sentence><return><body><div>the Saxon Configuration</div></body></return></comment></method><method fulltype="org.xml.sax.ErrorHandler" id="getErrorHandler" type="ErrorHandler" visibility="public"><comment><sentence>Gets the current <tag kind="see">org.xml.sax.ErrorHandler</tag> set to this <tag kind="see">javax.xml.validation.Validator</tag>.</sentence><return><body><div>This method returns the object that was last set through
+      the <tag kind="see">#setErrorHandler(ErrorHandler)</tag> method, or null
+      if that method has never been called since this <tag kind="see">javax.xml.validation.Validator</tag>
+      has created.</div></body></return><attribute name="@see" see="java">#setErrorHandler(ErrorHandler)</attribute></comment><override-of fulltype="javax.xml.validation.Validator" method="getErrorHandler()" type="Validator"/></method><method fulltype="java.lang.Object" id="getProperty" type="Object" visibility="public"><comment><body><div>Look up the value of a property.
+ <p>The property name is any fully-qualified URI.  It is
+ possible for a <tag kind="see">javax.xml.validation.Validator</tag> to recognize a property name but
+ temporarily be unable to return its value.
+ Some property values may be available only in specific
+ contexts, such as before, during, or after a validation.</p>
+ <p><tag kind="see">javax.xml.validation.Validator</tag>s are not required to recognize any specific
+ property names.</p>
+ <p>In the Saxon implementation, the property names that are recognized are the same as the
+ attribute names recognised by a <tag kind="see">javax.xml.transform.TransformerFactory</tag>. These are listed as constant fields
+ in the class <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag>. In addition, the following properties
+ are recognized:</p>
+ <ul><li><tag kind="see">javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING</tag></li><li><tag kind="see">javax.xml.XMLConstants#ACCESS_EXTERNAL_DTD</tag></li><li><tag kind="see">javax.xml.XMLConstants#ACCESS_EXTERNAL_SCHEMA</tag></li></ul></div></body><sentence>Look up the value of a property.</sentence><return><body><div>The current value of the property.</div></body></return><attribute name="@see" see="java">#setProperty(String, Object)</attribute></comment><override-of fulltype="javax.xml.validation.Validator" method="getProperty(java.lang.String)" type="Validator"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The property name, which is a non-null fully-qualified URI.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>org.xml.sax.SAXNotRecognizedException If the property
+                                               value can't be assigned or retrieved.</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>org.xml.sax.SAXNotSupportedException  When the
+                                               XMLReader recognizes the property name but
+                                               cannot determine its value at this time.</sentence></exception></exceptions></method><method fulltype="org.w3c.dom.ls.LSResourceResolver" id="getResourceResolver" type="LSResourceResolver" visibility="public"><comment><sentence>Gets the current <tag kind="see">org.w3c.dom.ls.LSResourceResolver</tag></sentence><return><body><div>This method returns the object that was last set through
+         the <tag kind="see">#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)</tag> method, or null
+         if that method has never been called</div></body></return></comment><override-of fulltype="javax.xml.validation.Validator" method="getResourceResolver()" type="Validator"/></method><method fulltype="void" id="reset" type="void" visibility="public"><override-of fulltype="javax.xml.validation.Validator" method="reset()" type="Validator"/></method><method fulltype="void" id="setErrorHandler" type="void" visibility="public"><comment><body><div>Sets the <tag kind="see">org.xml.sax.ErrorHandler</tag> to receive errors encountered
+ during the <code>validate</code> method invocation.
+
+ <p>
+ Error handler can be used to customize the error handling process
+ during a validation. When an <tag kind="see">org.xml.sax.ErrorHandler</tag> is set,
+ errors found during the validation will be first sent
+ to the <tag kind="see">org.xml.sax.ErrorHandler</tag>.
+
+ </p><p>
+ The error handler can abort further validation immediately
+ by throwing <tag kind="see">org.xml.sax.SAXException</tag> from the handler. Or for example
+ it can print an error to the screen and try to continue the
+ validation by returning normally from the <tag kind="see">org.xml.sax.ErrorHandler</tag>
+
+ </p><p>
+ If any <tag kind="see">java.lang.Throwable</tag> is thrown from an <tag kind="see">org.xml.sax.ErrorHandler</tag>,
+ the caller of the <code>validate</code> method will be thrown
+ the same <tag kind="see">java.lang.Throwable</tag> object.
+
+ </p><p>
+ <tag kind="see">javax.xml.validation.Validator</tag> is not allowed to
+ throw <tag kind="see">org.xml.sax.SAXException</tag> without first reporting it to
+ <tag kind="see">org.xml.sax.ErrorHandler</tag>.
+
+ </p><p>
+ When the <tag kind="see">org.xml.sax.ErrorHandler</tag> is null, the implementation will
+ behave as if the following <tag kind="see">org.xml.sax.ErrorHandler</tag> is set:
+ </p><pre>
+ class DraconianErrorHandler implements <tag kind="see">org.xml.sax.ErrorHandler</tag> {
+     public void fatalError( <tag kind="see">org.xml.sax.SAXParseException</tag> e ) throws <tag kind="see">org.xml.sax.SAXException</tag> {
+         throw e;
+     }
+     public void error( <tag kind="see">org.xml.sax.SAXParseException</tag> e ) throws <tag kind="see">org.xml.sax.SAXException</tag> {
+         throw e;
+     }
+     public void warning( <tag kind="see">org.xml.sax.SAXParseException</tag> e ) throws <tag kind="see">org.xml.sax.SAXException</tag> {
+         // noop
+     }
+ }
+ </pre>
+
+ <p>
+ When a new <tag kind="see">javax.xml.validation.Validator</tag> object is created, initially
+ this field is set to null.</p></div></body><sentence>Sets the <tag kind="see">org.xml.sax.ErrorHandler</tag> to receive errors encountered
+ during the validate method invocation.</sentence></comment><override-of fulltype="javax.xml.validation.Validator" method="setErrorHandler(org.xml.sax.ErrorHandler)" type="Validator"/><params><param fulltype="org.xml.sax.ErrorHandler" name="errorHandler" type="ErrorHandler"><body><div>A new error handler to be set. This parameter can be null.</div></body></param></params></method><method fulltype="void" id="setProperty" type="void" visibility="public"><comment><body><div>Set the value of a property.
+ <p>The property name is any fully-qualified URI.  It is
+ possible for a <tag kind="see">javax.xml.validation.Validator</tag> to recognize a property name but
+ to be unable to change the current value.
+ Some property values may be immutable or mutable only
+ in specific contexts, such as before, during, or after
+ a validation.</p>
+ <p>In the Saxon implementation, the property names that are recognized are the same as the
+ attribute names recognised by a <tag kind="see">javax.xml.transform.TransformerFactory</tag>. These are listed as constant fields
+ in the class <tag kind="see">net.sf.saxon.lib.FeatureKeys</tag>. In addition, the following properties
+ are recognized, and passed directly to the underlying XML parser:</p>
+ <ul><li><tag kind="see">javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING</tag></li><li><tag kind="see">javax.xml.XMLConstants#ACCESS_EXTERNAL_DTD</tag></li><li><tag kind="see">javax.xml.XMLConstants#ACCESS_EXTERNAL_SCHEMA</tag></li></ul></div></body><sentence>Set the value of a property.</sentence></comment><override-of fulltype="javax.xml.validation.Validator" method="setProperty(java.lang.String, java.lang.Object)" type="Validator"/><params><param fulltype="java.lang.String" name="name" type="String"><body><div>The property name, which is a non-null fully-qualified URI.</div></body></param><param fulltype="java.lang.Object" name="object" type="Object"><body><div>The requested value for the property.</div></body></param></params><exceptions><exception fulltype="org.xml.sax.SAXNotRecognizedException" id="SAXNotRecognizedException"><sentence>org.xml.sax.SAXNotRecognizedException If the property
+                                               value can't be assigned or retrieved.</sentence></exception><exception fulltype="org.xml.sax.SAXNotSupportedException" id="SAXNotSupportedException"><sentence>org.xml.sax.SAXNotSupportedException  When the
+                                               <tag kind="see">javax.xml.validation.Validator</tag> recognizes the property name but
+                                               cannot set the requested value.</sentence></exception></exceptions></method><method fulltype="void" id="setResourceResolver" type="void" visibility="public"><comment><sentence>Sets the <tag kind="see">org.w3c.dom.ls.LSResourceResolver</tag> to customize
+ resource resolution while in a validation episode.</sentence></comment><override-of fulltype="javax.xml.validation.Validator" method="setResourceResolver(org.w3c.dom.ls.LSResourceResolver)" type="Validator"/><params><param fulltype="org.w3c.dom.ls.LSResourceResolver" name="resourceResolver" type="LSResourceResolver"><body><div>A new resource resolver to be set. This parameter can be null.</div></body></param></params></method><method fulltype="void" id="validate" type="void" visibility="public"><override-of fulltype="javax.xml.validation.Validator" method="validate(javax.xml.transform.Source, javax.xml.transform.Result)" type="Validator"/><params><param fulltype="javax.xml.transform.Source" name="source" type="Source"/><param fulltype="javax.xml.transform.Result" name="result" type="Result"/></params><exceptions><exception fulltype="org.xml.sax.SAXException" id="SAXException"/><exception fulltype="java.io.IOException" id="IOException"/></exceptions></method></methods><class id="ValidatorImpl.InvalidityHandlerWrappingErrorHandler" fulltype="com.saxonica.ee.jaxp.ValidatorImpl.InvalidityHandlerWrappingErrorHandler" superclass="Object" superclassfulltype="java.lang.Object" visibility="public"><implements><interface fulltype="net.sf.saxon.lib.InvalidityHandler" type="InvalidityHandler"/></implements><comment><sentence>Interface for reporting validation errors found during validation of an instance document
+ against a schema.</sentence></comment><fields/><methods><constructor id="InvalidityHandlerWrappingErrorHandler" visibility="public"><params><param fulltype="org.xml.sax.ErrorHandler" name="handler" type="ErrorHandler"/></params></constructor><method fulltype="net.sf.saxon.om.Sequence" id="endReporting" type="Sequence" visibility="public"><type fulltype="?" type="?"/><comment><body><div>Get the value to be associated with a validation exception. May return null.
+ In the case of the InvalidityReportGenerator, this returns the XML document
+ containing the validation report</div></body><sentence>Get the value to be associated with a validation exception.</sentence><return><body><div>a value (or null). This will be the value returned as the value of
+ the variable $err:value during try/catch processing</div></body></return></comment></method><method fulltype="org.xml.sax.ErrorHandler" id="getErrorHandler" type="ErrorHandler" visibility="public"/><method fulltype="void" id="reportInvalidity" type="void" visibility="public"><params><param fulltype="net.sf.saxon.lib.Invalidity" name="failure" type="Invalidity"/></params><exceptions><exception fulltype="net.sf.saxon.trans.XPathException" id="XPathException"/></exceptions></method><method fulltype="void" id="startReporting" type="void" visibility="public"><comment><sentence>At the start of a validation episode, initialize the handler</sentence></comment><params><param fulltype="java.lang.String" name="systemId" type="String"><body><div>optional; may be used to represent the destination of any report produced</div></body></param></params><exceptions><exception fulltype="net.sf.saxon.trans.XPathException" id="XPathException"><sentence>XPathException if initialization of the invalidity handler fails for any reason</sentence></exception></exceptions></method></methods></class></class></package>

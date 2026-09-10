@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Building Saxon</title>
+  <meta name="author" content="Norm Tovey-Walsh" />
+  <style type="text/css">
+html {
+  font-size: 14pt;
+  max-width: 50em;
+  line-height: 1.5;
+}
+figure {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  border: 2pt solid #aaaaaa;
+}
+figure img {
+  margin-top: 0.5em;
+}
+  </style>
+</head>
+<body>
+<main>
+<h1>Building Saxon</h1>
+
+<p>The Saxonica <code>build.gradle</code> file builds three products
+across three platforms. The Java products can be built on any
+platform. The .NET products can only be built on Windows. Saxon/C can
+be built for any platform, but only for the platform that you’re on.
+(In principle, the Linux version of Saxon/C can be built from any
+platform with a Docker container, but this technique doesn’t extend to
+the MacOS and Windows versions, so it hasn’t been pursued
+agressively.)</p>
+
+<section>
+<h2>Saxon/J</h2>
+
+<p>The default target for building a Java project in Gradle is
+<code>compileJava</code>. Unfortunately, the Java sources for Saxon
+need to be preprocessed in a variety of ways that the default task
+knows nothing about.</p>
+
+<div>
+<h3>Saxon HE/J</h3>
+
+<p>To compile Saxon, use the following tasks:
+<code>hejCompile</code>, <code>pejCompile</code>, or <code>eejCompile</code>.
+The targets
+<code>hejRelease</code>, <code>pejRelease</code>, and <code>eejRelease</code>
+build the </p>
+
+<figure>
+<figcaption>Build dependencies for <code>hejRelease</code></figcaption>
+<img src="img/hejRelease.png" width="100%"/>
+</figure>
+
+</div>
+
+
+
+
+
+</section>
+
+<section>
+<h2>Saxon/N</h2>
+
+</section>
+
+<section>
+<h2>Saxon/C</h2>
+
+</section>
+
+</main>
+<div id="targets" class="appendix">
+<h2>Gradle build targets</h2>
+<p>Build targets as of 14 November 2020.</p>
+
+<ul class="tasklist">
+<li><code>dockerBuilderContainer</code>: Build the Saxonica builder container</li>
+<li><code>dockerCoreContainer</code>: Build the CentOS 8 core container</li>
+<li><code>dotNetInstallers</code>: Builds all of the .NET installers</li>
+<li><code>dotNetProducts</code>: Builds all of the .NET products</li>
+<li><code>eecCompile</code>: Compile EE for Saxon/C</li>
+<li><code>eecJet</code>: Run JET on EE</li>
+<li><code>eejCompile</code>: Compile EE for Saxon/Java</li>
+<li><code>eejJar</code>: Build the EE jar file</li>
+<li><code>eejJarSql</code>: Build the SQL jar file for EE</li>
+<li><code>eejJarTests</code>: Create the tests jar file for EE</li>
+<li><code>eejRelease</code>: Build the EE release for Java</li>
+<li><code>eenCompile</code>: Compile EE for .NET</li>
+<li><code>eenDll</code>: Build EE .dll with IKVM</li>
+<li><code>eenInstaller</code>: Build the EE installer for .NET</li>
+<li><code>eenProduct</code>: Build Saxon EE for .NET</li>
+<li><code>hecCompile</code>: Compile HE for C</li>
+<li><code>hecJet</code>: Run JET on HE</li>
+<li><code>hejCompile</code>: Compile HE for Saxon/Java</li>
+<li><code>hejJar</code>: Build the HE jar file</li>
+<li><code>hejJarTests</code>: Create the tests jar file for HE</li>
+<li><code>hejJarXqj</code>: Build the XQJ jar file for HE</li>
+<li><code>hejRelease</code>: Build the HE release for Java</li>
+<li><code>henCompile</code>: Compile HE for .NET</li>
+<li><code>henDll</code>: Build HE .dll with IKVM</li>
+<li><code>henInstaller</code>: Build the HE installer for .NET</li>
+<li><code>henProduct</code>: Build Saxon HE for .NET</li>
+<li><code>javaRelease</code>: Build all of the Java releases</li>
+<li><code>pecCompile</code>: Compile PE for C</li>
+<li><code>pecJet</code>: Run JET on PE</li>
+<li><code>pejCompile</code>: Compile PE for Saxon/Java</li>
+<li><code>pejJar</code>: Build the PE jar file</li>
+<li><code>pejJarSql</code>: Build the SQL jar file for PE</li>
+<li><code>pejJarTests</code>: Create the tests jar file for PE</li>
+<li><code>pejRelease</code>: Build the PE release for Java</li>
+<li><code>penCompile</code>: Compile PE for .NET</li>
+<li><code>penDll</code>: Build PE .dll with IKVM</li>
+<li><code>penInstaller</code>: Build the PE installer for .NET</li>
+<li><code>penProduct</code>: Build Saxon PE for .NET</li>
+<li><code>processResources</code>: Processes main resources.</li>
+<li><code>processTestResources</code>: Processes test resources.</li>
+<li><code>productDlls</code>: Build all the product .dll files with IKVM</li>
+</ul>
+
+<p>As a general rule, target names that contain an underscore (“_”)
+are not expected to be used on their own. They’re build tasks that
+address dependencies for the “real” build tasks.</p>
+
+<ul class="tasklist">
+<li><code>asm_asm</code>: Run jarjar on asm-5.0.3 classes</li>
+<li><code>asm_asm-analysis</code>: Run jarjar on asm-analysis-5.0.3 classes</li>
+<li><code>asm_asm-commons</code>: Run jarjar on asm-commons-5.0.3 classes</li>
+<li><code>asm_asm-tree</code>: Run jarjar on asm-tree-5.0.3 classes</li>
+<li><code>asm_asm-util</code>: Run jarjar on asm-util-5.0.3 classes</li>
+<li><code>asm_createRules</code>: Create the jarjar rules file for the ASM libraries</li>
+<li><code>asm_jarjar</code>: Placeholder for the ASM jarjar dependencies</li>
+<li><code>asm_unzip</code>: Extract classes from the asm-xml-5.0.3 jar</li>
+<li><code>asm_unzipasm</code>: Extract the classes from the asm-{5.0.3} jar</li>
+<li><code>asm_unzipasm-analysis</code>: Extract the classes from the asm-analysis-{5.0.3} jar</li>
+<li><code>asm_unzipasm-commons</code>: Extract the classes from the asm-commons-{5.0.3} jar</li>
+<li><code>asm_unzipasm-tree</code>: Extract the classes from the asm-tree-{5.0.3} jar</li>
+<li><code>asm_unzipasm-util</code>: Extract the classes from the asm-util-{5.0.3} jar</li>
+<li><code>docker_setupBuilder</code>: Setup to build the builder container</li>
+<li><code>docker_setupJdk</code>: Setup the JDK for the builder container</li>
+<li><code>docker_setupJet</code>: Setup the Jet archive for the builder container</li>
+<li><code>docker_testJdk</code>: Test that the dockerJdk property has been specified</li>
+<li><code>docker_testJet</code>: Test that the dockerJet property has been specified</li>
+<li><code>eec_copyJet</code>: Copy the JET project file for EE</li>
+<li><code>eec_copyLibs</code>: Copy library jar files into JET build directory</li>
+<li><code>eec_jar</code>: Build the EE jar file for Saxon/C</li>
+<li><code>eec_preprocess</code>: Preprocess EE sources</li>
+<li><code>eec_setupJet</code>: Create JET libsaxoneec.jprof for EE</li>
+<li><code>eec_setupPreprocess</code>: Copy EE sources for preprocessing EE</li>
+<li><code>eec_sources</code>: Collect the preprocessed EE sources for compilation</li>
+<li><code>eej_compileTestDrivers</code>: Compile the test classes for EE</li>
+<li><code>eej_copyTestDriverResources</code>: Copy test drivers resources for EE</li>
+<li><code>eej_copyTestDrivers</code>: Copy test driver sources and resources for EE</li>
+<li><code>eej_copyTestDriverSources</code>: Copy test drivers sources for EE</li>
+<li><code>eej_icu4j</code>: Copy the ICU4J jar into the EE release directory</li>
+<li><code>eej_libs</code>: Dependency to make sure library files are copie for EE</li>
+<li><code>eej_MetaInf</code>: Create META-INF/services/javax.xml.transform.TransformerFactory for EE</li>
+<li><code>eej_notices</code>: Copy the notices into the EE release directory</li>
+<li><code>eej_preprocess</code>: Preprocess EE sources</li>
+<li><code>eej_schemaFactoryMetaInf</code>: Create META-INF/services/javax.xml.validation.SchemaFactory for EE</li>
+<li><code>eej_setupPreprocess</code>: Copy sources for preprocessing EE</li>
+<li><code>eej_setupPreprocessBytecode</code>: Copy bytecode sources and fix imports</li>
+<li><code>eej_setupPreprocessForPej</code>: Copy EE sources for preprocessing PE</li>
+<li><code>eej_sources</code>: Collect the preprocessed EE sources for compilation</li>
+<li><code>een_csharpApi</code>: Compile Saxon.Api for EE (Fails on this platform)</li>
+<li><code>een_csharpQuery</code>: Compile Query.exe for EE (Fails on this platform)</li>
+<li><code>een_csharpTransform</code>: Compile Tranform.exe for EE (Fails on this platform)</li>
+<li><code>een_iss</code>: Create the ee.iss file for the .net installer</li>
+<li><code>een_jar</code>: Build the EE jar file for Saxon .NET</li>
+<li><code>een_preprocess</code>: Preprocess EE sources</li>
+<li><code>een_setupDll</code>: Setup the IKVM environment for EE</li>
+<li><code>een_setupPreprocess</code>: Copy EE sources for preprocessing EE</li>
+<li><code>een_sources</code>: Collect the preprocessed EE sources for compilation</li>
+<li><code>hec_copyJet</code>: Copy the JET project file for HE</li>
+<li><code>hec_copyLibs</code>: Copy library jar files into JET build directory</li>
+<li><code>hec_jar</code>: Build the HE jar file for Saxon/C</li>
+<li><code>hec_preprocess</code>: Preprocess HE sources</li>
+<li><code>hec_setupJet</code>: Create JET libsaxonhec.jprof for HE</li>
+<li><code>hec_setupPreprocess</code>: Copy HE sources for preprocessing HE</li>
+<li><code>hec_sources</code>: Collect the preprocessed HE sources for compilation</li>
+<li><code>hej_compileTestDrivers</code>: Compile the test classes for HE</li>
+<li><code>hej_copyTestDriverResources</code>: Copy test drivers resources for HE</li>
+<li><code>hej_copyTestDrivers</code>: Copy test driver sources and resources for HE</li>
+<li><code>hej_copyTestDriverSources</code>: Copy test drivers sources for HE</li>
+<li><code>hej_MetaInf</code>: Create META-INF/services/javax.xml.transform.TransformerFactory for HE</li>
+<li><code>hej_notices</code>: Copy the notices into the HE release directory</li>
+<li><code>hej_preprocess</code>: Preprocess HE sources</li>
+<li><code>hej_setupPreprocess</code>: Copy HE sources for preprocessing HE</li>
+<li><code>hej_setupPreprocessForEej</code>: Copy HE sources for EE build</li>
+<li><code>hej_setupPreprocessForPej</code>: Copy HE sources for preprocessing PE</li>
+<li><code>hej_sources</code>: Collect the preprocessed HE sources for compilation</li>
+<li><code>hen_ApiAssemblyInfo</code>: Create the AssemblyInfo.cs file for the Saxon.Api</li>
+<li><code>hen_cmdAssemblyInfo</code>: Create the AssemblyInfo.cs file for the Saxon commands</li>
+<li><code>hen_copyDevelopmentSources</code>: Setup the C# build environment</li>
+<li><code>hen_copySamples</code>: Copy the HE sample C# files</li>
+<li><code>hen_copySaxonApi</code>: Copy the Saxon.API C# files</li>
+<li><code>hen_copySaxonCmd</code>: Copy the cmd C# files</li>
+<li><code>hen_csharpApi</code>: Compile Saxon.Api for HE (Fails on this platform)</li>
+<li><code>hen_csharpQuery</code>: Compile Query.exe for HE (Fails on this platform)</li>
+<li><code>hen_csharpTransform</code>: Compile Tranform.exe for HE (Fails on this platform)</li>
+<li><code>hen_iss</code>: Create the he.iss file for the .net installer</li>
+<li><code>hen_jar</code>: Build the HE jar file for Saxon .NET</li>
+<li><code>hen_preprocess</code>: Preprocess HE sources</li>
+<li><code>hen_setupDll</code>: Setup the IKVM environment for HE</li>
+<li><code>hen_setupPreprocess</code>: Copy HE sources for preprocessing HE</li>
+<li><code>hen_sources</code>: Collect the preprocessed HE sources for compilation</li>
+<li><code>ikvm_prepareJar</code>: Copy the ICU4J, TagSoup, Mail, and Xerces jars for IKVM</li>
+<li><code>ikvm_prepareJarAsm</code>: Copy the ASM jars for IKVM</li>
+<li><code>n_notices</code>: Copy the notices into the staging directory</li>
+<li><code>pec_copyJet</code>: Copy the JET project file for PE</li>
+<li><code>pec_copyLibs</code>: Copy library jar files into JET build directory</li>
+<li><code>pec_jar</code>: Build the PE jar file for Saxon/C</li>
+<li><code>pec_preprocess</code>: Preprocess PE sources</li>
+<li><code>pec_setupJet</code>: Create JET libsaxonpec.jprof for PE</li>
+<li><code>pec_setupPreprocess</code>: Copy PE sources for preprocessing PE</li>
+<li><code>pec_sources</code>: Collect the preprocessed PE sources for compilation</li>
+<li><code>pej_compileTestDrivers</code>: Compile the test classes for PE</li>
+<li><code>pej_copyTestDriverResources</code>: Copy test drivers resources for PE</li>
+<li><code>pej_copyTestDrivers</code>: Copy test driver sources and resources for PE</li>
+<li><code>pej_copyTestDriverSources</code>: Copy test drivers sources for PE</li>
+<li><code>pej_icu4j</code>: Copy the ICU4J jar into the PE release directory</li>
+<li><code>pej_libs</code>: Dependency to make sure library files are copie for PE</li>
+<li><code>pej_MetaInf</code>: Create META-INF/services/javax.xml.transform.TransformerFactory for PE</li>
+<li><code>pej_notices</code>: Copy the notices into the PE release directory</li>
+<li><code>pej_preprocess</code>: Preprocess HE sources</li>
+<li><code>pej_setupPreprocess</code>: Copy sources for preprocessing PE</li>
+<li><code>pej_sources</code>: Collect the preprocessed PE sources for compilation</li>
+<li><code>pen_csharpApi</code>: Compile Saxon.Api for PE (Fails on this platform)</li>
+<li><code>pen_csharpQuery</code>: Compile Query.exe for PE (Fails on this platform)</li>
+<li><code>pen_csharpTransform</code>: Compile Tranform.exe for PE (Fails on this platform)</li>
+<li><code>pen_iss</code>: Create the pe.iss file for the .net installer</li>
+<li><code>pen_jar</code>: Build the PE jar file for Saxon .NET</li>
+<li><code>pen_preprocess</code>: Preprocess PE sources</li>
+<li><code>pen_setupDll</code>: Setup the IKVM environment for PE</li>
+<li><code>pen_setupPreprocess</code>: Copy PE sources for preprocessing PE</li>
+<li><code>pen_sources</code>: Collect the preprocessed PE sources for compilation</li>
+<li><code>rejar_Xerces</code>: Unjar Xerces and Resolver for .NET build</li>
+<li><code>test_jetHome</code>: Test that excelsiorJetHome is configured</li>
+<li><code>unjar_Resolver</code>: Unjar Resolver for .NET build</li>
+<li><code>unjar_XercesImpl</code>: Unjar XercesImple for .NET build</li>
+</ul>
+
+</body>
+</html>

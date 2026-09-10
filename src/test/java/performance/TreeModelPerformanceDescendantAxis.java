@@ -1,0 +1,130 @@
+package performance;
+
+import com.saxonica.ee.domino.DominoTreeModel;
+import jaxptest.ConfigTest;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.dom.DOMObjectModel;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.option.axiom.AxiomObjectModel;
+import net.sf.saxon.option.dom4j.DOM4JObjectModel;
+import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
+import net.sf.saxon.option.xom.XOMObjectModel;
+import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
+
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+
+public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
+    
+    private static final String INPUT = ConfigTest.XMARK_DIR + "xmark10.xml";
+    //private static final String INPUT = "/Users/mike/Desktop/temp/testdata.xml";
+
+
+
+    private void searchXPathDescendants(final TreeModel model, final String fileName, final int expected) {
+        Processor proc = new Processor(true);
+        final Configuration config = proc.getUnderlyingConfiguration();
+        final ParseOptions options = new ParseOptions();
+        options.setModel(model);
+        StreamSource source = new StreamSource(new File(fileName));
+        PipelineConfiguration pipe = config.makePipelineConfiguration();
+        TreeInfo tree = null;
+        NodeInfo documentElement = null;
+        try {
+            tree = config.buildDocumentTree(source, options);
+            documentElement = tree.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+        } catch (XPathException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+        final TreeInfo finalTree = tree;
+        final NodeInfo finalDocumentElement = documentElement;
+
+        XPathExecutable exec = null;
+        try {
+            XPathCompiler compiler = proc.newXPathCompiler();
+            exec = compiler.compile("count(descendant::date)");
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+
+        final XPathExecutable finalExec = exec;
+
+        Measurable task = new Measurable() {
+            @Override
+            public void run() {
+                PipelineConfiguration pipe = config.makePipelineConfiguration();
+                try {
+                    XPathSelector xps = finalExec.load();
+                    xps.setContextItem((XdmNode) XdmNode.wrap(finalDocumentElement));
+                    XdmAtomicValue result = (XdmAtomicValue) xps.evaluateSingle();
+                    if (result.getLongValue() != 9296) {
+                        fail("Got " + result.getLongValue());
+                    }
+
+                } catch (SaxonApiException e) {
+                    e.printStackTrace();
+                    fail(e.getMessage());
+                }
+            }
+
+            @Override
+            public int expectedTimeMilliseconds() {
+                return expected;
+            }
+
+            @Override
+            public String name() {
+                return "Search named descendants " + model.getName();
+            }
+        };
+        measure(task);
+    }
+
+    public void testTinyTreeDescendants10Mb() {
+        searchXPathDescendants(TreeModel.TINY_TREE, INPUT, 1);
+    }
+
+    public void testTinyTreeCondensedDescendants10Mb() {
+        searchXPathDescendants(TreeModel.TINY_TREE_CONDENSED, INPUT, 2);
+    }
+
+    public void testLinkedDescendants10Mb() {
+        searchXPathDescendants(TreeModel.LINKED_TREE, INPUT, 25);
+    }
+
+    public void testDOMDescendants10Mb() {
+        searchXPathDescendants(DOMObjectModel.getInstance(), INPUT, 15);
+    }
+
+    public void testDominoDescendants10Mb() {
+        searchXPathDescendants(DominoTreeModel.getInstance(), INPUT, 2);
+    }
+
+    public void testXOMDescendants10Mb() {
+        searchXPathDescendants(XOMObjectModel.getInstance(), INPUT, 50);
+    }
+
+    public void testJDOM2Descendants10Mb() {
+        searchXPathDescendants(JDOM2ObjectModel.getInstance(), INPUT, 25);
+    }
+
+    public void testDOM4JDescendants10Mb() {
+        searchXPathDescendants(DOM4JObjectModel.getInstance(), INPUT, 150);
+    }
+
+    public void testAxiomDescendants10Mb() {
+        searchXPathDescendants(AxiomObjectModel.getInstance(), INPUT, 110);
+    }
+
+
+}
+

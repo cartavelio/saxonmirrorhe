@@ -1,0 +1,525 @@
+package s9apitest;
+
+import jaxptest.ConfigTest;
+import junit.framework.TestCase;
+import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.om.TreeModel;
+import net.sf.saxon.option.dom4j.DOM4JNodeWrapper;
+import net.sf.saxon.option.dom4j.DOM4JObjectModel;
+import net.sf.saxon.option.jdom.JDOMNodeWrapper;
+import net.sf.saxon.option.jdom.JDOMObjectModel;
+import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
+import net.sf.saxon.option.xom.XOMDocumentWrapper;
+import net.sf.saxon.option.xom.XOMObjectModel;
+import net.sf.saxon.s9api.*;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.function.Predicate;
+
+/**
+ * JUnit tests for the s9api DocumentBuilder
+ */
+public class TestDocumentBuilder extends TestCase {
+
+    public void testSaxSourceNoSystemId() {
+        try {
+            StringReader sr = new StringReader("<doc/>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = new Processor(false).newDocumentBuilder();
+            XdmNode d = builder.build(source);
+            assertNotNull(d);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSaxSourceDTDValidation() {
+        String validXML = "<!DOCTYPE a [<!ELEMENT a EMPTY>]><a/>";
+        String invalidXML = "<!DOCTYPE a [<!ELEMENT a (b+)>]><a/>";
+        DocumentBuilder builder = new Processor(false).newDocumentBuilder();
+        builder.setDTDValidation(true);
+
+        StringReader sr = new StringReader(validXML);
+        SAXSource source = new SAXSource(new InputSource(sr));
+        try {
+            XdmNode d = builder.build(source);
+            assertNotNull(d);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+        sr = new StringReader(invalidXML);
+        source = new SAXSource(new InputSource(sr));
+        try {
+            XdmNode d = builder.build(source);
+            fail("invalid document parsed without error");
+        } catch (SaxonApiException e) {
+            // expected failure;
+        }
+
+        builder.setDTDValidation(false);
+        sr = new StringReader(invalidXML);
+        source = new SAXSource(new InputSource(sr));
+        try {
+            XdmNode d = builder.build(source);
+            assertNotNull(d);
+        } catch (SaxonApiException e) {
+            fail("Parsing failed but validation was not requested: " + e.getMessage());
+        }
+
+    }
+
+    public void testNamespaceNodes() {
+        try {
+            StringReader sr = new StringReader("<doc xmlns='abc.uri'><e xmlns:a='one.uri' xmlns:b='two.uri'/></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            Processor processor = new Processor(false);
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode d = builder.build(source);
+            assertNotNull(d);
+            XPathSelector xp = processor.newXPathCompiler().compile("/*/*").load();
+            xp.setContextItem(d);
+            XdmNode e = (XdmNode)xp.evaluateSingle();
+            assertNotNull(e); XdmSequenceIterator nsIter = e.axisIterator(Axis.NAMESPACE);
+            HashMap<String, String> nsBindings = new HashMap<>();
+            while (nsIter.hasNext()) {
+                XdmNode ns = (XdmNode) nsIter.next();
+                System.err.println(ns);
+                nsBindings.put(ns.getNodeName()==null ? "" : ns.getNodeName().getLocalName(), ns.getStringValue());
+            }
+            assertEquals(4, nsBindings.size());
+
+            
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testDOMElementNode() {
+        try {
+
+            String in = "<?xml version='1.0'?> \n" +
+                    "<Document> <e> <f/><f/> </e> </Document>";
+
+            // Read an XML file to a DOM
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            javax.xml.parsers.DocumentBuilder db = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(in));
+            org.w3c.dom.Document doc = db.parse(is);
+
+            Processor proc = new Processor(false);
+            XsltCompiler comp = proc.newXsltCompiler();
+            XsltExecutable exec = comp.compile(new StreamSource(new
+                    File(ConfigTest.DATA_DIR + "identity.xsl")));
+            XsltTransformer xsl = exec.load();
+            xsl.setSource(new DOMSource(doc.getDocumentElement()));
+            StringWriter writer = new StringWriter();
+            Serializer out = proc.newSerializer();
+            out.setOutputWriter(writer);
+            xsl.setDestination(out);
+            xsl.transform();
+            assertTrue(writer.toString().contains("<f/>"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testXomBuilder() {
+        try {
+            String in = "<?xml version='1.0'?> \n" +
+                    "<Document> <e a='13' xml:lang='en'> <c:f xmlns:c='http://c/'/><f xmlns='http://c/'/> </e> </Document>";
+            Processor proc = new Processor(false);
+            DocumentBuilder db = proc.newDocumentBuilder();
+            db.setTreeModel(XOMObjectModel.getInstance());
+            XdmNode doc = db.build(new StreamSource(new StringReader(in)));
+            assertTrue("isXOM", doc.getUnderlyingNode() instanceof XOMDocumentWrapper);
+            System.err.println(doc.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testJdomBuilder() {
+        try {
+            String in = "<?xml version='1.0'?> \n" +
+                    "<Document> <e a='13' xml:lang='en'> <c:f xmlns:c='http://c/'/><f xmlns='http://c/'/> </e> </Document>";
+            Processor proc = new Processor(false);
+            DocumentBuilder db = proc.newDocumentBuilder();
+            db.setTreeModel(JDOMObjectModel.getInstance());
+            XdmNode doc = db.build(new StreamSource(new StringReader(in)));
+            assertTrue("isJDOM", doc.getUnderlyingNode() instanceof JDOMNodeWrapper);
+            System.err.println(doc.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testJdom2Builder() {
+        try {
+            String in = "<?xml version='1.0'?> \n" +
+                    "<Document> <e a='13' xml:lang='en'> <c:f xmlns:c='http://c/'/><f xmlns='http://c/'/> </e> </Document>";
+            Processor proc = new Processor(false);
+            DocumentBuilder db = proc.newDocumentBuilder();
+            db.setTreeModel(JDOM2ObjectModel.getInstance());
+            XdmNode doc = db.build(new StreamSource(new StringReader(in)));
+            assertTrue("isJDOM", doc.getUnderlyingNode() instanceof net.sf.saxon.option.jdom2.JDOM2NodeWrapper);
+            System.err.println(doc.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testDom4JBuilder() {
+        try {
+            String in = "<?xml version='1.0'?> \n" +
+                    "<Document> <e a='13' xml:lang='en'> <c:f xmlns:c='http://c/'/><f xmlns='http://c/'/> </e> </Document>";
+            Processor proc = new Processor(false);
+            DocumentBuilder db = proc.newDocumentBuilder();
+            db.setTreeModel(DOM4JObjectModel.getInstance());
+            XdmNode doc = db.build(new StreamSource(new StringReader(in)));
+            assertTrue("isDom4J", doc.getUnderlyingNode() instanceof DOM4JNodeWrapper);
+            System.err.println(doc.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test that when a document is loaded from multiple external entities, the base URIs of
+     * elements are preserved
+     */
+
+    public void testBaseUriFromEntities() {
+        try {
+            Processor processor = new Processor(false);
+            StreamSource source = new StreamSource(new File(ConfigTest.DATA_DIR + "book-wrapper.xml"));
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode d = builder.build(source);
+            XPathCompiler xpc = processor.newXPathCompiler();
+            XPathSelector s = xpc.compile("distinct-values(//*/base-uri())").load();
+            s.setContextItem(d);
+            XdmValue v = s.evaluate();
+            assertTrue("3 distinct base URIs", v.size() == 3);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test that when a document with multiple base URIs is copied, the base URIs of
+     * elements are preserved
+     */
+
+    public void testBaseUriFromCopy() {
+        try {
+            Processor processor = new Processor(false);
+            StreamSource source = new StreamSource(new File(ConfigTest.DATA_DIR + "book-wrapper.xml"));
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            builder.setTreeModel(TreeModel.TINY_TREE);
+            XdmNode d = builder.build(source);
+            builder.setTreeModel(TreeModel.LINKED_TREE);
+            XdmNode e = builder.build(d.asSource());
+            XPathCompiler xpc = processor.newXPathCompiler();
+            XPathSelector s = xpc.compile("distinct-values(//*/base-uri())").load();
+            s.setContextItem(e);
+            XdmValue v = s.evaluate();
+            assertTrue("3 distinct base URIs", v.size() == 3);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test that when a document is loaded from multiple external entities, the base URIs of
+     * elements are preserved
+     */
+
+    public void testBaseUriOfAttribute() {
+        try {
+            Processor processor = new Processor(false);
+            StreamSource source = new StreamSource(new File(ConfigTest.DATA_DIR + "book-wrapper.xml"));
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode d = builder.build(source);
+            XPathCompiler xpc = processor.newXPathCompiler();
+            XPathSelector s = xpc.compile("//@CODE").load();
+            s.setContextItem(d);
+            for (XdmItem i:s.evaluate()) {
+                assertTrue("baseURI", ((XdmNode)i).getBaseURI().toString().endsWith("categories.xml"));
+            }
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test document builder with document projection
+     */
+
+    public void testProjection001() {
+        try {
+
+            String fileName = ConfigTest.DATA_DIR + "books.xml";
+
+            Processor processor = new Processor(true);
+            XQueryCompiler xpc = processor.newXQueryCompiler();
+            XQueryExecutable exp = xpc.compile("<out>{//CATEGORY}</out>");
+
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            builder.setDocumentProjectionQuery(exp);
+            XdmNode doc = builder.build(new File(fileName));
+
+            // Test that the projected doc contains the CATEGORY elements
+
+            StringWriter sw = new StringWriter();
+            Serializer destination = processor.newSerializer();
+            destination.setOutputWriter(sw);
+            XQueryEvaluator eval = exp.load();
+            eval.setContextItem(doc);
+            eval.run(destination);
+
+            assertTrue("contains CAT", sw.toString().contains("CODE=\"P\" DESC=\"Paperback\""));
+
+            // Test that the projected doc omits the ITEM elements
+
+            exp = xpc.compile("count(//ITEM)");
+            StringWriter sw2 = new StringWriter();
+            Serializer destination2 = processor.newSerializer();
+            destination2.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            destination2.setOutputWriter(sw2);
+            XQueryEvaluator eval2 = exp.load();
+            eval2.setContextItem(doc);
+            eval2.run(destination2);
+            
+            assertTrue("omits ITEM", sw2.toString().equals("0"));
+
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            fail(ex.getMessage());
+        }
+    }
+
+    public void testSvg11Dtd() {
+        // Test that the SVG 1.1 DTD can be retrieved from the local cache
+        try {
+            Processor proc = new Processor(false);
+            proc.setConfigurationProperty(FeatureKeys.TIMING, true);
+            DocumentBuilder b = proc.newDocumentBuilder();
+            b.setDTDValidation(true);
+            StringReader sr = new StringReader(
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                            "<!-- Generated by graphviz version 2.28.0 (20110901.0847)\n" +
+                            " --><!-- Title: g Pages: 1 --><!DOCTYPE svg\n" +
+                            "  PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n" +
+                            "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+                            "     width=\"206pt\"\n" +
+                            "     height=\"98pt\"\n" +
+                            "     viewBox=\"0.00pt 0.00pt 206.00pt 98.00pt\"\n" +
+                            "     preserveAspectRatio=\"xMidYMid meet\"\n" +
+                            "     zoomAndPan=\"magnify\"\n" +
+                            "     version=\"1.1\"\n" +
+                            "     contentScriptType=\"application/ecmascript\"\n" +
+                            "     contentStyleType=\"text/css\">\n" +
+                            "   <g id=\"graph1\" class=\"graph\" transform=\"scale(1 1) rotate(0) translate(4 94)\">\n" +
+                            "      <title>g</title>\n" +
+                            "      <polygon fill=\"white\" stroke=\"white\" points=\"-4,5 -4,-94 203,-94 203,5 -4,5\"/>\n" +
+                            "      <!-- d7e7880 --><g id=\"node2\" class=\"node\">\n" +
+                            "         <title>d7e7880</title>\n" +
+                            "         <polygon fill=\"none\" stroke=\"black\" points=\"54,-63 0,-63 0,-27 54,-27 54,-63\"/>\n" +
+                            "         <text text-anchor=\"middle\" x=\"27\" y=\"-40.4\" font-family=\"Times,serif\"\n" +
+                            "               font-size=\"14.00\">A</text>\n" +
+                            "      </g>\n" +
+                            "   </g>\n" +
+                            "</svg>");
+            StreamSource ss = new StreamSource(sr, "http://www.saxonica.com/notthere");
+            b.build(ss);
+        } catch (SaxonApiException sae) {
+            sae.printStackTrace();
+            fail();
+        }
+    }
+
+    public void testSvg10Dtd() {
+        // Test that the SVG 1.0 DTD can be retrieved from the local cache
+        try {
+            Processor proc = new Processor(false);
+            proc.setConfigurationProperty(FeatureKeys.TIMING, true);
+            DocumentBuilder b = proc.newDocumentBuilder();
+            b.setDTDValidation(true);
+            StringReader sr = new StringReader(
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                            "<!-- Generated by graphviz version 2.28.0 (20110901.0847)\n" +
+                            " --><!-- Title: g Pages: 1 --><!DOCTYPE svg\n" +
+                            "  PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">\n" +
+                            "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+                            "     width=\"206pt\"\n" +
+                            "     height=\"98pt\"\n" +
+                            "     viewBox=\"0.00pt 0.00pt 206.00pt 98.00pt\"\n" +
+                            "     preserveAspectRatio=\"xMidYMid meet\"\n" +
+                            "     zoomAndPan=\"magnify\"\n" +
+                            "     version=\"1.0\"\n" +
+                            "     contentScriptType=\"application/ecmascript\"\n" +
+                            "     contentStyleType=\"text/css\">\n" +
+                            "   <g id=\"graph1\" class=\"graph\" transform=\"scale(1 1) rotate(0) translate(4 94)\">\n" +
+                            "      <title>g</title>\n" +
+                            "      <polygon fill=\"white\" stroke=\"white\" points=\"-4,5 -4,-94 203,-94 203,5 -4,5\"/>\n" +
+                            "      <!-- d7e7880 --><g id=\"node2\" class=\"node\">\n" +
+                            "         <title>d7e7880</title>\n" +
+                            "         <polygon fill=\"none\" stroke=\"black\" points=\"54,-63 0,-63 0,-27 54,-27 54,-63\"/>\n" +
+                            "         <text text-anchor=\"middle\" x=\"27\" y=\"-40.4\" font-family=\"Times,serif\"\n" +
+                            "               font-size=\"14.00\">A</text>\n" +
+                            "      </g>\n" +
+                            "   </g>\n" +
+                            "</svg>");
+            StreamSource ss = new StreamSource(sr, "http://www.saxonica.com/notthere");
+            b.build(ss);
+        } catch (SaxonApiException sae) {
+            sae.printStackTrace();
+            fail();
+        }
+    }
+
+    public void testWhitespacePolicyUntyped() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc> </doc>");
+            DocumentBuilder builder = proc.newDocumentBuilder();
+
+            SAXSource source = new SAXSource(new InputSource(sr));
+            builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.ALL);
+            String s = builder.build(source).toString();
+            assertTrue(s.contains("<doc/>"));
+
+            sr = new StringReader("<doc> </doc>");
+            source = new SAXSource(new InputSource(sr));
+            builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.NONE);
+            s = builder.build(source).toString();
+            assertTrue(s.contains("<doc> </doc"));
+
+            sr = new StringReader("<doc> </doc>");
+            source = new SAXSource(new InputSource(sr));
+            builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.IGNORABLE);
+            s = builder.build(source).toString();
+            assertTrue(s.contains("<doc> </doc"));
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testWhitespacePolicySchemaTyped() {
+        String s;
+        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.IGNORABLE);
+        assertTrue(s.contains("<BOOKS><ITEM"));
+        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.ALL);
+        assertTrue(s.startsWith("rejected"));
+        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.NONE);
+        assertTrue(s.startsWith("rejected"));
+    }
+
+    private String buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy policy) {
+        try {
+            Processor proc = new Processor(true);
+
+            SchemaManager mgr = proc.getSchemaManager();
+            mgr.load(new StreamSource(new File(ConfigTest.DATA_DIR + "books.xsd")));
+            SchemaValidator v = mgr.newSchemaValidator();
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            StringWriter sw = new StringWriter();
+
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setSchemaValidator(v);
+
+            builder.setWhitespaceStrippingPolicy(policy);
+            XdmNode doc = builder.build(new File(ConfigTest.DATA_DIR + "books.xml"));
+            serializer.setOutputWriter(sw);
+            serializer.serializeXdmValue(doc);
+            return sw.toString();
+
+        } catch (SaxonApiException e) {
+            return "rejected: " + e.getMessage();
+        }
+    }
+
+    public void testWhitespacePolicyWithDTDValidation() {
+        String s;
+        s = useDTDIgnorableWhitespace(WhitespaceStrippingPolicy.ALL);
+        assertTrue(s.startsWith("rejected"));
+        s = useDTDIgnorableWhitespace(WhitespaceStrippingPolicy.IGNORABLE);
+        assertTrue(s.contains("<a><b/><c> </c></a>"));
+        s = useDTDIgnorableWhitespace(WhitespaceStrippingPolicy.NONE);
+        assertTrue(s.startsWith("rejected"));
+    }
+
+    private String useDTDIgnorableWhitespace(WhitespaceStrippingPolicy policy) {
+        String validXML = "<!DOCTYPE a [<!ELEMENT a ((b|c)*)><!ELEMENT b EMPTY><!ELEMENT c (#PCDATA)>]><a> <b/> <c> </c> </a>";
+        Processor proc = new Processor(false);
+        DocumentBuilder builder = new Processor(false).newDocumentBuilder();
+        builder.setWhitespaceStrippingPolicy(policy);
+        builder.setDTDValidation(true);
+
+        StringReader sr = new StringReader(validXML);
+        SAXSource source = new SAXSource(new InputSource(sr));
+        try {
+            XdmNode d = builder.build(source);
+
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            StringWriter sw = new StringWriter();
+            serializer.setOutputWriter(sw);
+            serializer.serializeXdmValue(d);
+            return sw.toString();
+        } catch (SaxonApiException e) {
+            return "rejected: " + e.getMessage();
+        }
+
+
+    }
+
+    public void testCustomWhitespacePolicy() {
+        try {
+            Processor proc = new Processor(false);
+            StringReader sr = new StringReader("<doc><b> </b> <i> </i></doc>");
+            DocumentBuilder builder = proc.newDocumentBuilder();
+
+            SAXSource source = new SAXSource(new InputSource(sr));
+            builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.makeCustomPolicy(
+                new Predicate<QName>() {
+                    public boolean test(QName value) {
+                        return value.getLocalName().equals("doc") || value.getLocalName().equals("i");
+                    }
+                }
+            ));
+            XdmNode doc = builder.build(source);
+            Serializer serializer = proc.newSerializer();
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            StringWriter sw = new StringWriter();
+            serializer.setOutputWriter(sw);
+            serializer.serializeXdmValue(doc);
+            assertTrue(sw.toString().contains("<doc><b> </b><i/></doc>"));
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+
+}

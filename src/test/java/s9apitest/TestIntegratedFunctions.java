@@ -1,0 +1,749 @@
+package s9apitest;
+
+import jaxptest.ConfigTest;
+import junit.framework.TestCase;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.ExtensionFunctionCall;
+import net.sf.saxon.lib.ExtensionFunctionDefinition;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.DoubleValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.StringValue;
+
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * JUnit tests for integrated extension functions in XSLT, XQuery, and XPath
+ */
+public class TestIntegratedFunctions extends TestCase {
+
+    /**
+     * Test integrated extension function in XSLT
+     */
+
+    public void testIntegratedExtensionFunctionXslt() {
+        try {
+            Processor proc = new Processor(false);
+            proc.registerExtensionFunction(new ZeroArgFunction());
+            proc.registerExtensionFunction(new SqrtFunction());
+            proc.registerExtensionFunction(new InscopePrefixFunction());
+            XsltCompiler comp = proc.newXsltCompiler();
+            StringReader sr = new StringReader(
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:f='http://math.com/'>" +
+                            "<xsl:template name='go'><a sqrt2='{f:sqrt(2)}' insn=\"{f:insn('xsl')}\" zag=\"{f:zag()}\"/></xsl:template>" +
+                            "</xsl:stylesheet>");
+            XsltExecutable exec = comp.compile(new StreamSource(sr));
+            XsltTransformer xsl = exec.load();
+            xsl.setInitialTemplate(new QName("go"));
+            StringWriter sw = new StringWriter();
+            Serializer out = proc.newSerializer();
+            out.setOutputWriter(sw);
+            xsl.setDestination(out);
+            xsl.transform();
+            assertTrue("sqrt ", sw.toString().contains("1.414213"));
+            assertTrue("zag ", sw.toString().contains("123.4"));
+            assertTrue("inscope ", sw.toString().contains("1999/XSL/Transform"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test overriding of integrated extension function using stylesheet functions in XSLT
+     */
+
+    public void testOverrideFunctionXsltOverriding() {
+        testOverrideFunctionXslt(xslWithOverridingFunction1, true);
+        testOverrideFunctionXslt(xslWithOverridingFunction2, true);
+    }
+
+    public void testOverrideFunctionXsltUnderriding() {
+        testOverrideFunctionXslt(xslWithOverridingFunction1, false);
+        testOverrideFunctionXslt(xslWithOverridingFunction2, false);
+    }
+
+    private static String xslWithOverridingFunction1 =
+            "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:f='http://math.com/'>" +
+                    "<xsl:template name='go'><a sqrt2='{f:sqrt(2)}' />" +
+                    "</xsl:template>" +
+                    "<xsl:param name='O' as='xs:boolean' static='true'/>" +
+                    "<xsl:function name='f:sqrt' as='xs:string' _override-extension-function='{$O}'>" +
+                    "<xsl:param name='num'/>" +
+                    "<xsl:sequence select=\"'local'\" />" +
+                    "</xsl:function>" +
+                    "</xsl:stylesheet>";
+
+    private static String xslWithOverridingFunction2 =
+            "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:f='http://math.com/'>" +
+                    "<xsl:template name='go'><a sqrt2='{f:sqrt(2)}' />" +
+                    "</xsl:template>" +
+                    "<xsl:param name='O' as='xs:boolean' static='true'/>" +
+                    "<xsl:function name='f:sqrt' as='xs:string' _override='{$O}'>" +
+                    "<xsl:param name='num'/>" +
+                    "<xsl:sequence select=\"'local'\" />" +
+                    "</xsl:function>" +
+                    "</xsl:stylesheet>";
+
+    private static void testOverrideFunctionXslt(String xsl, boolean override) {
+        // Bug #4111
+        try {
+            Processor proc = new Processor(true);
+            proc.registerExtensionFunction(new SqrtFunction());
+            XsltCompiler comp = proc.newXsltCompiler();
+            comp.setJustInTimeCompilation(false);
+            StringReader sr = new StringReader(xsl);
+            comp.setParameter(new QName("O"), new XdmAtomicValue(override));
+            XsltExecutable exec1 = comp.compile(new StreamSource(sr));
+            List<XsltExecutable> execs = new ArrayList<>();
+            execs.add(exec1);
+            exec1.export(new FileOutputStream(ConfigTest.DATA_DIR + "sandpit/export.sef"));
+            XsltExecutable exec2 = comp.loadExecutablePackage(new File(ConfigTest.DATA_DIR + "sandpit/export.sef").toURI());
+            execs.add(exec2);
+            for (XsltExecutable exec : execs) {
+                XsltTransformer trans = exec.load();
+                trans.setInitialTemplate(new QName("go"));
+                StringWriter sw = new StringWriter();
+                Serializer out = proc.newSerializer();
+                out.setOutputWriter(sw);
+                trans.setDestination(out);
+                trans.transform();
+                assertTrue("sqrt ", override == sw.toString().contains("local"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
+    public void testIntegratedExtensionFunctionXQuery() {
+        try {
+            Processor proc = new Processor(false);
+            proc.registerExtensionFunction(new SqrtFunction());
+            proc.registerExtensionFunction(new InscopePrefixFunction());
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            XQueryExecutable exp = comp.compile("<a xmlns:f='http://math.com/' s='{f:sqrt(2.0)}' i=\"{f:insn('local')}\"/>");
+            XQueryEvaluator ev = exp.load();
+            XdmValue val = ev.evaluate();
+            String result = val.toString();
+            assertTrue("sqrt ", result.contains("1.414213"));
+            assertTrue("inscope ", result.contains("2005/xquery-local-functions"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testIntegratedExtensionFunctionXPath() {
+        try {
+            Processor proc = new Processor(false);
+            proc.registerExtensionFunction(new SqrtFunction());
+            proc.registerExtensionFunction(new InscopePrefixFunction());
+            XPathCompiler comp = proc.newXPathCompiler();
+            comp.declareNamespace("if", "http://math.com/");
+            comp.declareVariable(new QName("arg"));
+            XPathExecutable exp = comp.compile("if:sqrt($arg)");
+            XPathSelector ev = exp.load();
+            ev.setVariable(new QName("arg"), new XdmAtomicValue(2.0));
+            XdmValue val = ev.evaluate();
+            String result = val.toString();
+            assertTrue("sqrt ", result.contains("1.414213"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testIntegratedExtensionFunctionConfigFile() {
+        try {
+            String config =
+                    "<configuration xmlns='http://saxon.sf.net/ns/configuration'>\n" +
+                            "<resources>\n" +
+                            "<extensionFunction>s9apitest.TestIntegratedFunctions$SqrtFunction</extensionFunction>\n" +
+                            "</resources>\n" +
+                            "</configuration>";
+            Processor proc = new Processor(new StreamSource(new StringReader(config)));
+            XPathCompiler comp = proc.newXPathCompiler();
+            comp.declareNamespace("if", "http://math.com/");
+            comp.declareVariable(new QName("arg"));
+            XPathExecutable exp = comp.compile("if:sqrt($arg)");
+            XPathSelector ev = exp.load();
+            ev.setVariable(new QName("arg"), new XdmAtomicValue(2.0));
+            XdmValue val = ev.evaluate();
+            String result = val.toString();
+            assertTrue("sqrt ", result.contains("1.414213"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Test that nodes returned by an integrated extension function are checked. Bug 4185.
+     */
+
+    public void testIntegratedExtensionFunctionReturningNodesFromWrongConfiguration() {
+        try {
+            Processor proc = new Processor(false);
+            proc.registerExtensionFunction(new ExtensionFunction() {
+                @Override
+                public QName getName() {
+                    return new QName("my", "http://www.my.com/", "function");
+                }
+
+                @Override
+                public SequenceType getResultType() {
+                    return SequenceType.makeSequenceType(ItemType.ANY_NODE, OccurrenceIndicator.ONE);
+                }
+
+                @Override
+                public SequenceType[] getArgumentTypes() {
+                    return new SequenceType[0];
+                }
+
+                @Override
+                public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
+                    Processor processor = new Processor(false);
+                    DocumentBuilder builder = processor.newDocumentBuilder();
+                    return builder.build(new StreamSource(new StringReader("<a/>")));
+                }
+            });
+            XsltCompiler comp = proc.newXsltCompiler();
+            StringReader sr = new StringReader(
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:my='http://www.my.com/'>" +
+                            "<xsl:template name='go'><a name='{my:function()/a}'/></xsl:template>" +
+                            "</xsl:stylesheet>");
+            XsltExecutable exec = comp.compile(new StreamSource(sr));
+            XsltTransformer xsl = exec.load();
+            xsl.setInitialTemplate(new QName("go"));
+            StringWriter sw = new StringWriter();
+            Serializer out = proc.newSerializer();
+            out.setOutputWriter(sw);
+            xsl.setDestination(out);
+            xsl.transform();
+            fail("Unexpected success");
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains("incompatible"));
+        }
+    }
+
+
+    /**
+     * An IntegratedFunction whose task is to compute a square root
+     */
+
+
+    public static class SqrtFunction extends ExtensionFunctionDefinition {
+
+
+        private static final StructuredQName qName =
+                new StructuredQName("", "http://math.com/", "sqrt");
+
+        /**
+         * Get the function name, as a QName
+         *
+         * @return the QName of the function
+         */
+
+        public StructuredQName getFunctionQName() {
+            return qName;
+        }
+
+        /**
+         * Return the minimum number of arguments required by the function
+         *
+         * @return the minimum number of arguments that must be supplied in a call to this function
+         */
+
+        public int getMinimumNumberOfArguments() {
+            return 1;
+        }
+
+        /**
+         * Return the maximum number of arguments allowed by the function
+         *
+         * @return the maximum number of arguments that may be supplied in a call to this function
+         */
+
+        public int getMaximumNumberOfArguments() {
+            return 1;
+        }
+
+        /**
+         * Get the required types for the arguments of this function, counting from zero
+         *
+         * @return the required types of the argument, as defined by the function signature. Normally
+         * this should be an array of size {@link #getMaximumNumberOfArguments()}; however for functions
+         * that allow a variable number of arguments, the array can be smaller than this, with the last
+         * entry in the array providing the required type for all the remaining arguments.
+         */
+
+        public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
+            return new net.sf.saxon.value.SequenceType[]{net.sf.saxon.value.SequenceType.OPTIONAL_DOUBLE};
+        }
+
+        @Override
+        public net.sf.saxon.value.SequenceType getResultType(net.sf.saxon.value.SequenceType[] suppliedArgumentTypes) {
+            return net.sf.saxon.value.SequenceType.OPTIONAL_DOUBLE;
+        }
+
+        /**
+         * Get the type of the result of the function
+         *
+         * @param suppliedArgumentTypes the static types of the arguments to the function.
+         *                              This is provided so that a more precise result type can be returned in the common
+         *                              case where the type of the result depends on the type of the first argument. The value
+         *                              will be null if the function call has no arguments.
+         * @return the return type of the function, as defined by its function signature
+         */
+
+        public net.sf.saxon.value.SequenceType getResultType(SequenceType[] suppliedArgumentTypes) {
+            return net.sf.saxon.value.SequenceType.OPTIONAL_DOUBLE;
+        }
+
+        /**
+         * Ask whether the result actually returned by the function should be checked against
+         * the declared type.
+         *
+         * @return true if the function implementation warrants that the value it returns will
+         * be an instance of the declared result type. The default value is false, in which case
+         * the result will be checked at run-time to ensure that it conforms to the declared type.
+         * If the value true is returned, but the function returns a value of the wrong type, the
+         * consequences are unpredictable.
+         */
+
+        public boolean trustResultType() {
+            return true;
+        }
+
+        /**
+         * Create a call on this function. This method is called by the compiler when it identifies
+         * a function call that calls this function.
+         */
+
+        public ExtensionFunctionCall makeCallExpression() {
+            return new SqrtFunctionCall();
+        }
+    }
+
+    private static class SqrtFunctionCall extends ExtensionFunctionCall {
+
+        /**
+         * Optimize the function call. This method is called at compile time if expression optimization
+         * is enabled. It gives the implementation an opportunity to replace itself with an optimized implementation
+         * that returns the same result. It is the responsibility of this method to ensure that the returned
+         * expression is equivalent; part of this responsibility is to ensure that it always returns a value
+         * of the correct type. The system will not check this.
+         *
+         * @param context   The static context in which the function call appears. The method must not modify
+         *                  the static context.
+         * @param arguments The XPath expressions supplied in the call to this function. The method must not
+         *                  modify this array, or any of the expressions contained in the array.
+         * @return an expression to be evaluated at run-time in place of this function call. Return null
+         * if no optimization is possible and the function call should be used unchanged. Return a
+         * {@link net.sf.saxon.expr.Literal} representing the result of the function call if the function call
+         * can be precomputed at compile time
+         * @throws net.sf.saxon.trans.XPathException if the implementation is able to detect a static error in the way the
+         *                                           function is being called (for example it might require that the types of the arguments are
+         *                                           consistent with each other).
+         */
+
+        public Expression rewrite(StaticContext context, Expression[] arguments) throws XPathException {
+            if (arguments[0] instanceof Literal) {
+                DoubleValue val = (DoubleValue) ((Literal) arguments[0]).getValue();
+                if (val == null) {
+                    return Literal.makeEmptySequence();
+                }
+                double sqrt = Math.sqrt(val.getDoubleValue());
+                return Literal.makeLiteral(new DoubleValue(sqrt));
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * Evaluate this function call at run-time
+         *
+         * @param context   The XPath dynamic evaluation context
+         * @param arguments The values of the arguments to the function call. Each argument value (which is in general
+         *                  a sequence) is supplied in the form of an iterator over the items in the sequence. If required, the
+         *                  supplied sequence can be materialized by calling, for example, <code>new SequenceExtent(arguments[i])</code>.
+         *                  If the argument is always a singleton, then the single item may be obtained by calling
+         *                  <code>arguments[i].next()</code>.
+         * @return an iterator over the results of the function. If the result is a single item, it can be
+         * returned in the form of a {@link net.sf.saxon.tree.iter.SingletonIterator}.
+         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during evaluation of the function.
+         */
+
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            DoubleValue val = (DoubleValue) arguments[0].head();
+            if (val == null) {
+                return EmptySequence.getInstance();
+            }
+            double sqrt = Math.sqrt(val.getDoubleValue());
+            return new DoubleValue(sqrt);
+        }
+    }
+
+    /**
+     * An IntegratedFunction that takes zero arguments
+     */
+
+
+    public static class ZeroArgFunction extends ExtensionFunctionDefinition {
+
+
+        private static final StructuredQName qName =
+                new StructuredQName("", "http://math.com/", "zag");
+
+        /**
+         * Get the function name, as a QName
+         *
+         * @return the QName of the function
+         */
+
+        public StructuredQName getFunctionQName() {
+            return qName;
+        }
+
+        /**
+         * Return the minimum number of arguments required by the function
+         *
+         * @return the minimum number of arguments that must be supplied in a call to this function
+         */
+
+        public int getMinimumNumberOfArguments() {
+            return 0;
+        }
+
+        /**
+         * Return the maximum number of arguments allowed by the function
+         *
+         * @return the maximum number of arguments that may be supplied in a call to this function
+         */
+
+        public int getMaximumNumberOfArguments() {
+            return 0;
+        }
+
+        /**
+         * Get the required types for the arguments of this function, counting from zero
+         *
+         * @return the required types of the argument, as defined by the function signature. Normally
+         * this should be an array of size {@link #getMaximumNumberOfArguments()}; however for functions
+         * that allow a variable number of arguments, the array can be smaller than this, with the last
+         * entry in the array providing the required type for all the remaining arguments.
+         */
+
+        public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
+            return new net.sf.saxon.value.SequenceType[0];
+        }
+
+        /**
+         * Get the type of the result of the function
+         *
+         * @param suppliedArgumentTypes the static types of the arguments to the function.
+         *                              This is provided so that a more precise result type can be returned in the common
+         *                              case where the type of the result depends on the type of the first argument. The value
+         *                              will be null if the function call has no arguments.
+         * @return the return type of the function, as defined by its function signature
+         */
+
+        public net.sf.saxon.value.SequenceType getResultType(net.sf.saxon.value.SequenceType[] suppliedArgumentTypes) {
+            return net.sf.saxon.value.SequenceType.OPTIONAL_DOUBLE;
+        }
+
+        /**
+         * Ask whether the result actually returned by the function should be checked against
+         * the declared type.
+         *
+         * @return true if the function implementation warrants that the value it returns will
+         * be an instance of the declared result type. The default value is false, in which case
+         * the result will be checked at run-time to ensure that it conforms to the declared type.
+         * If the value true is returned, but the function returns a value of the wrong type, the
+         * consequences are unpredictable.
+         */
+
+        public boolean trustResultType() {
+            return true;
+        }
+
+        /**
+         * Create a call on this function. This method is called by the compiler when it identifies
+         * a function call that calls this function.
+         */
+
+        public ExtensionFunctionCall makeCallExpression() {
+            return new ZeroArgFunctionCall();
+        }
+    }
+
+    private static class ZeroArgFunctionCall extends ExtensionFunctionCall {
+
+        /**
+         * Evaluate this function call at run-time
+         *
+         * @param context   The XPath dynamic evaluation context
+         * @param arguments The values of the arguments to the function call. Each argument value (which is in general
+         *                  a sequence) is supplied in the form of an iterator over the items in the sequence. If required, the
+         *                  supplied sequence can be materialized by calling, for example, <code>new SequenceExtent(arguments[i])</code>.
+         *                  If the argument is always a singleton, then the single item may be obtained by calling
+         *                  <code>arguments[i].next()</code>.
+         * @return an iterator over the results of the function. If the result is a single item, it can be
+         * returned in the form of a {@link net.sf.saxon.tree.iter.SingletonIterator}.
+         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during evaluation of the function.
+         */
+
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            return new DoubleValue(123.4e0);
+        }
+    }
+
+
+    /**
+     * An integrated extension function whose task is to find the namespace URI corresponding to a given
+     * prefix in the static namespace context
+     */
+
+    public static class InscopePrefixFunction extends ExtensionFunctionDefinition {
+
+
+        private static final StructuredQName qName =
+                new StructuredQName("", "http://math.com/", "insn");
+
+        /**
+         * Get the function name, as a QName
+         *
+         * @return the QName of the function
+         */
+
+        public StructuredQName getFunctionQName() {
+            return qName;
+        }
+
+        /**
+         * Return the minimum number of arguments required by the function
+         *
+         * @return the minimum number of arguments that must be supplied in a call to this function
+         */
+
+        public int getMinimumNumberOfArguments() {
+            return 1;
+        }
+
+        /**
+         * Return the maximum number of arguments allowed by the function
+         *
+         * @return the maximum number of arguments that may be supplied in a call to this function
+         */
+
+        public int getMaximumNumberOfArguments() {
+            return 1;
+        }
+
+        /**
+         * Get the required types for the arguments of this function, counting from zero
+         *
+         * @return the required types of the argument, as defined by the function signature. Normally
+         * this should be an array of size {@link #getMaximumNumberOfArguments()}; however for functions
+         * that allow a variable number of arguments, the array can be smaller than this, with the last
+         * entry in the array providing the required type for all the remaining arguments.
+         */
+
+        public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
+            return new net.sf.saxon.value.SequenceType[]{net.sf.saxon.value.SequenceType.SINGLE_STRING};
+        }
+
+        /**
+         * Get the type of the result of the function
+         *
+         * @param suppliedArgumentTypes the static types of the arguments to the function.
+         *                              This is provided so that a more precise result type can be returned in the common
+         *                              case where the type of the result depends on the type of the first argument. The value
+         *                              will be null if the function call has no arguments.
+         * @return the return type of the function, as defined by its function signature
+         */
+
+        public net.sf.saxon.value.SequenceType getResultType(net.sf.saxon.value.SequenceType[] suppliedArgumentTypes) {
+            return net.sf.saxon.value.SequenceType.OPTIONAL_STRING;
+        }
+
+        /**
+         * Ask whether the result actually returned by the function should be checked against
+         * the declared type.
+         *
+         * @return true if the function implementation warrants that the value it returns will
+         * be an instance of the declared result type. The default value is false, in which case
+         * the result will be checked at run-time to ensure that it conforms to the declared type.
+         * If the value true is returned, but the function returns a value of the wrong type, the
+         * consequences are unpredictable.
+         */
+
+        public boolean trustResultType() {
+            return true;
+        }
+
+        /**
+         * Create a call on this function. This method is called by the compiler when it identifies
+         * a function call that calls this function.
+         */
+
+        public ExtensionFunctionCall makeCallExpression() {
+            return new InscopePrefixFunctionCall();
+        }
+    }
+
+    private static class InscopePrefixFunctionCall extends ExtensionFunctionCall {
+
+        private NamespaceResolver nsContext;
+
+        /**
+         * Supply static context information.
+         * <p>This method is called during compilation to provide information about the static context in which
+         * the function call appears. If the implementation of the function needs information from the static context,
+         * then it should save it now, as it will not be available later at run-time.</p>
+         * <p>The implementation also has the opportunity to examine the expressions that appear in the
+         * arguments to the function call at this stage. These might already have been modified from the original
+         * expressions as written by the user. The implementation should not modify any of these expressions.</p>
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param context    The static context in which the function call appears. The method must not modify
+         *                   the static context.
+         * @param locationId the location of the node in the source, or of the instruction that created it
+         * @param arguments  The XPath expressions supplied in the call to this function. The method must not
+         *                   modify this array, or any of the expressions contained in the array. @throws net.sf.saxon.trans.XPathException
+         *                   if the implementation is able to detect a static error in the way the
+         *                   function is being called (for example it might require that the types of the arguments are
+         *                   consistent with each other).
+         */
+
+        public void supplyStaticContext(StaticContext context, int locationId, Expression[] arguments) throws XPathException {
+            nsContext = context.getNamespaceResolver();
+        }
+
+
+        /**
+         * Copy local data from one copy of the function to another. This method must be implemented
+         * in any subclass that maintains local data retained from the static context; the job of the
+         * method is to copy this local data to the supplied destination function.
+         *
+         * @param destination the function to which the local data must be copied. This will always
+         *                    be an instance of the same function class as the source function.
+         */
+
+        public void copyLocalData(ExtensionFunctionCall destination) {
+            ((InscopePrefixFunctionCall) destination).nsContext = nsContext;
+        }
+
+        /**
+         * Evaluate this function call at run-time
+         *
+         * @param context   The XPath dynamic evaluation context
+         * @param arguments The values of the arguments to the function call. Each argument value (which is in general
+         *                  a sequence) is supplied in the form of an iterator over the items in the sequence. If required, the
+         *                  supplied sequence can be materialized by calling, for example, <code>new SequenceExtent(arguments[i])</code>.
+         *                  If the argument is always a singleton, then the single item may be obtained by calling
+         *                  <code>arguments[i].next()</code>.
+         * @return an iterator over the results of the function. If the result is a single item, it can be
+         * returned in the form of a {@link net.sf.saxon.tree.iter.SingletonIterator}.
+         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during evaluation of the function.
+         */
+
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            StringValue val = (StringValue) arguments[0].head();
+            if (val == null) {
+                return EmptySequence.getInstance();
+            }
+            String ns = nsContext.getURIForPrefix(val.getStringValue(), false);
+            if (ns == null) {
+                return EmptySequence.getInstance();
+            }
+            return new StringValue(ns);
+        }
+    }
+
+    public void testSimpleExternalFunctionXPath() {
+        try {
+            Processor proc = new Processor(false);
+            ExtensionFunction sqrt = new ExtensionFunction() {
+                public QName getName() {
+                    return new QName("http://math.com/", "sqrt");
+                }
+
+                public net.sf.saxon.s9api.SequenceType getResultType() {
+                    return net.sf.saxon.s9api.SequenceType.makeSequenceType(
+                            ItemType.DOUBLE, OccurrenceIndicator.ONE
+                    );
+                }
+
+                public net.sf.saxon.s9api.SequenceType[] getArgumentTypes() {
+                    return new net.sf.saxon.s9api.SequenceType[]{
+                            net.sf.saxon.s9api.SequenceType.makeSequenceType(
+                                    ItemType.DOUBLE, OccurrenceIndicator.ONE)};
+                }
+
+                public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
+                    double arg = ((XdmAtomicValue) arguments[0].itemAt(0)).getDoubleValue();
+                    double result = Math.sqrt(arg);
+                    return new XdmAtomicValue(result);
+                }
+            };
+
+            proc.registerExtensionFunction(sqrt);
+            XPathCompiler comp = proc.newXPathCompiler();
+            comp.declareNamespace("if", "http://math.com/");
+            comp.declareVariable(new QName("arg"));
+            XPathExecutable exp = comp.compile("if:sqrt($arg)");
+            XPathSelector ev = exp.load();
+            ev.setVariable(new QName("arg"), new XdmAtomicValue(2.0));
+            XdmValue val = ev.evaluate();
+            String result = val.toString();
+            assertTrue("sqrt ", result.contains("1.414213"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+
+}
+
+//
+// The contents of this file are subject to the Mozilla Public License Version
+// 1.0 (the "License");
+// you may not use this file except in compliance with the License. You may
+// obtain a copy of the
+// License at http://www.mozilla.org/MPL/
+//
+// Software distributed under the License is distributed on an "AS IS" basis,
+// WITHOUT WARRANTY OF ANY KIND, either express or implied.
+// See the License for the specific language governing rights and limitations
+// under the License.
+//
+// The Original Code is: all this file.
+//
+// The Initial Developer of the Original Code is Michael Kay,
+//
+// Portions created by (your name) are Copyright (C) (your legal entity). All
+// Rights Reserved.
+//
+// Contributor(s): none.
+//
+
+
+

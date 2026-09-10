@@ -1,0 +1,768 @@
+package s9apitest;
+
+import jaxptest.ConfigTest;
+import junit.framework.TestCase;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.expr.parser.OptimizerOptions;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
+
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * JUnit tests for the s9api XQueryCompiler
+ */
+public class TestXQueryCompiler extends TestCase {
+
+    public void testModuleUriResolverNoBaseUri() {
+        try {
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            c.setModuleURIResolver((moduleURI, baseURI, locations) -> {
+                String module = "";
+                if (moduleURI.equals("b.uri")) {
+                    module = "module namespace b='b.uri'; import module namespace c = 'c.uri' at 'c.xq'; " +
+                            "declare variable $b:b := $c:c;";
+                } else if (moduleURI.equals("c.uri")) {
+                    module = "module namespace c='c.uri';" +
+                            "declare variable $c:c := 42;";
+                }
+                StringReader sr = new StringReader(module);
+                StreamSource ss = new StreamSource();
+                ss.setReader(sr);   // don't set the base URI
+                return new StreamSource[]{ss};
+            });
+            XQueryExecutable exec = c.compile("import module namespace b = 'b.uri' at 'b.xq'; $b:b");
+            XdmValue val = exec.load().evaluate();
+            assertEquals(((XdmAtomicValue) val).getLongValue(), 42L);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testDefaultNamespace() {
+        try {
+            Processor p = new Processor(false);
+            DocumentBuilder b = p.newDocumentBuilder();
+            XdmNode foo = b.build(new StreamSource(new StringReader("<foo xmlns='http://one.uri/'><bar/></foo>")));
+            XQueryCompiler c = p.newXQueryCompiler();
+            c.declareNamespace("", "http://one.uri/");
+            XQueryEvaluator eval = c.compile("/foo").load();
+            eval.setContextItem(foo);
+            XdmValue val = eval.evaluate();
+            assertEquals(val.size(), 1);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+    public void testReusability() {
+        // Test that the XQuery compiler can compile two queries without interference
+        try {
+            Processor p = new Processor(false);
+            DocumentBuilder b = p.newDocumentBuilder();
+            XdmNode foo = b.build(new StreamSource(new StringReader(
+                    "<foo xmlns='http://one.uri/'><bar xmlns='http://two.uri'>12</bar></foo>")));
+            XQueryCompiler c = p.newXQueryCompiler();
+            c.declareNamespace("", "http://one.uri/");
+            XQueryExecutable q1 = c.compile("declare variable $p as xs:boolean external; exists(/foo) = $p");
+            c.declareNamespace("", "http://two.uri");
+            XQueryExecutable q2 = c.compile("declare variable $p as xs:integer external; /*/bar + $p");
+            XQueryEvaluator e1 = q1.load();
+            XQueryEvaluator e2 = q2.load();
+            e1.setContextItem(foo);
+            e1.setExternalVariable(new QName("p"), new XdmAtomicValue(true));
+            XdmValue val = e1.evaluate();
+            assertTrue(((XdmAtomicValue) val).getBooleanValue());
+            e2.setContextItem(foo);
+            e2.setExternalVariable(new QName("p"), new XdmAtomicValue(6));
+            val = e2.evaluate();
+            assertEquals(((XdmAtomicValue) val).getLongValue(), 18);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+    public void testMultithreading() {
+        // Test that the XQuery compiler can compile many queries concurrently without interference
+        try {
+            Processor p = new Processor(false);
+            DocumentBuilder b = p.newDocumentBuilder();
+            final XdmNode foo = b.build(new StreamSource(new StringReader(
+                    "<foo xmlns='http://one.uri/'><bar xmlns='http://two.uri/'>12</bar></foo>")));
+            final XQueryCompiler c = p.newXQueryCompiler();
+            c.declareNamespace("a", "http://one.uri/");
+            c.declareNamespace("b", "http://two.uri/");
+            Runnable task = () -> {
+                try {
+                    XQueryEvaluator q = c.compile("a:foo/b:bar + a:foo/b:bar + a:foo/b:bar + a:foo/b:bar").load();
+                    q.setContextItem(foo);
+                    XdmAtomicValue v = (XdmAtomicValue)q.evaluateSingle();
+                    assertEquals("ok", "48", v.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail();
+                }
+            };
+            for (int i = 0; i < 100; i++) {
+                task.run();
+            }
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+    public void testOptimizationOff() {
+        try {
+            Processor p = new Processor(false);
+            p.setConfigurationProperty(FeatureKeys.OPTIMIZATION_LEVEL, "0");
+            p.setConfigurationProperty(Feature.TRACE_OPTIMIZER_DECISIONS, true);
+            DocumentBuilder b = p.newDocumentBuilder();
+            XdmNode foo = b.build(new StreamSource(new StringReader("<foo><bar/></foo>")));
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryExecutable expr = c.compile("let $x := //bar return count($x)");
+            expr.explain(p.newSerializer(System.out));
+            XQueryEvaluator eval = expr.load();
+            eval.setContextItem(foo);
+            XdmValue val = eval.evaluate();
+            assertEquals(val.size(), 1);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+    public void testSeparateCompilation() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.compileLibrary("module namespace m='http://www.example.com/module-one'; " +
+                    "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
+                    "declare variable $m:ten as xs:integer := 10;");
+            String q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("2+2", "4", ev.evaluate().toString());
+            String q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
+            ev = comp.compile(q2).load();
+            assertEquals("10+5", "15", ev.evaluate().toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSeparateCompilationNested() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.compileLibrary(new StringReader("module namespace m1='http://www.example.com/module-one'; " +
+                    "declare function m1:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
+                    "declare variable $m1:ten as xs:integer := 10;"));
+            comp.compileLibrary("module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m2:add($a as xs:integer, $b as xs:integer) as xs:integer { m1:add($a, $b) };" +
+                    "declare variable $m2:ten as xs:integer := $m1:ten;");
+            String q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("10+2", "12", ev.evaluate().toString());
+            String q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
+            ev = comp.compile(q2).load();
+            assertEquals("10+5", "15", ev.evaluate().toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSeparateCompilationImportFromNonSeparatelyCompiledLibraryModule() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+//            try {
+//                comp.setBaseURI(new URI("http://www.example.com/module-one"));
+//            } catch (URISyntaxException e) {
+//                //
+//            }
+            comp.compileLibrary(new StringReader("module namespace m1='http://www.example.com/module-one'; " +
+                    "declare function m1:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
+                    "declare variable $m1:ten as xs:integer := 10;"));
+            final String m2 = "module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m2:add($a as xs:integer, $b as xs:integer) as xs:integer { m1:add($a, $b) };" +
+                    "declare variable $m2:ten as xs:integer := $m1:ten;";
+            String q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
+            comp.setModuleURIResolver((moduleURI, baseURI, locations) -> {
+                if (moduleURI.equals("http://www.example.com/module-two")) {
+                    return new StreamSource[]{new StreamSource(new StringReader(m2), "http://www.example.com/module-two")};
+                } else {
+                    return null;
+                }
+            });
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("10+2", "12", ev.evaluate().toString());
+            String q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
+            ev = comp.compile(q2).load();
+            assertEquals("10+5", "15", ev.evaluate().toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSeparateCompilationDiamond() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+
+            try {
+                comp.setBaseURI(new URI("http://www.example.com/module-one"));
+            } catch (URISyntaxException e) {
+                //
+            }
+            comp.compileLibrary(new StringReader("module namespace m1='http://www.example.com/module-one'; " +
+                    "declare function m1:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };"));
+            try {
+                comp.setBaseURI(new URI("http://www.example.com/module-two"));
+            } catch (URISyntaxException e) {
+                //
+            }
+            comp.compileLibrary("module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m2:subtract($a as xs:integer, $b as xs:integer) as xs:integer { m1:add($a, -$b) };");
+            try {
+                comp.setBaseURI(new URI("http://www.example.com/module-three"));
+            } catch (URISyntaxException e) {
+                //
+            }
+            comp.compileLibrary("module namespace m3='http://www.example.com/module-three'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m3:times($a as xs:integer, $b as xs:integer) as xs:integer { " +
+                    "   if ($b=1) then $a else m1:add($a, m3:times($a, $b - 1)) };");
+            String q1 = "import module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m3='http://www.example.com/module-three';" +
+                    "m2:subtract(m3:times(4,2),1)";
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("7", "7", ev.evaluate().toString());
+            String q2 = "import module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m3='http://www.example.com/module-three';" +
+                    "m2:subtract(m3:times(5,2),1)";
+            XQueryEvaluator ev2 = comp.compile(q2).load();
+            assertEquals("9", "9", ev2.evaluate().toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSeparateCompilationDiamondByteCode() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+
+            try {
+                comp.setBaseURI(new URI("http://www.example.com/module-one"));
+            } catch (URISyntaxException e) {
+                //
+            }
+            comp.compileLibrary(new StringReader("module namespace m1='http://www.example.com/module-one'; " +
+                    "declare function m1:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };"));
+            try {
+                comp.setBaseURI(new URI("http://www.example.com/module-two"));
+            } catch (URISyntaxException e) {
+                //
+            }
+            comp.compileLibrary("module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m2:subtract($a as xs:integer, $b as xs:integer) as xs:integer { m1:add($a, -$b) };");
+            try {
+                comp.setBaseURI(new URI("http://www.example.com/module-three"));
+            } catch (URISyntaxException e) {
+                //
+            }
+            comp.compileLibrary("module namespace m3='http://www.example.com/module-three'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m3:times($a as xs:integer, $b as xs:integer) as xs:integer { " +
+                    "   if ($b=1) then $a else m1:add($a, m3:times($a, $b - 1)) };");
+            String q1 = "import module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m3='http://www.example.com/module-three';" +
+                    "m2:subtract(m3:times(4,2),1)";
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("7", "7", ev.evaluate().toString());
+            String q2 = "import module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m3='http://www.example.com/module-three';" +
+                    "m2:subtract(m3:times(5,2),1)";
+            XQueryEvaluator ev2 = comp.compile(q2).load();
+            assertEquals("9", "9", ev2.evaluate().toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSeparateCompilationDiamondWithVariables() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+
+            comp.compileLibrary(new StringReader("module namespace m1='http://www.example.com/module-one'; " +
+                    "declare function m1:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
+                    "declare variable $m1:ten := 10;"
+            ));
+
+            comp.compileLibrary("module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m2:subtract($a as xs:integer, $b as xs:integer) as xs:integer { m1:add($a, -$b) };" +
+                    "declare variable $m2:eleven := $m1:ten + 1;");
+
+            comp.compileLibrary("module namespace m3='http://www.example.com/module-three'; " +
+                    "import module namespace m1='http://www.example.com/module-one';" +
+                    "declare function m3:times($a as xs:integer, $b as xs:integer) as xs:integer { " +
+                    "   if ($b=1) then $a else m1:add($a, m3:times($a, $b - 1)) };" +
+                    "declare variable $m3:twelve := $m1:ten + 2;");
+
+            String q1 = "import module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m3='http://www.example.com/module-three';" +
+                    "m2:subtract(m3:times(4,2),1) + $m3:twelve";
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("19", "19", ev.evaluate().toString());
+            String q2 = "import module namespace m2='http://www.example.com/module-two'; " +
+                    "import module namespace m3='http://www.example.com/module-three';" +
+                    "m2:subtract(m3:times(5,2),1) + $m2:eleven";
+            XQueryEvaluator ev2 = comp.compile(q2).load();
+            assertEquals("20", "20", ev2.evaluate().toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    public void testSeparateCompilationForwardsRef() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.compileLibrary(
+                    "module namespace lib = 'http://example.com/library';" +
+                            "declare function lib:foo($a) { lib:bar($a) };" +
+                            "declare function lib:bar($b) { concat($b, '!') };");
+
+            XQueryExecutable exp = comp.compile(
+                    "import module namespace lib = 'http://example.com/library';"
+                            + "\nlib:foo('a')"
+            );
+
+            XdmItem result = exp.load().evaluateSingle();
+            assertEquals(result.getStringValue(), "a!");
+
+        } catch (SaxonApiException err) {
+            fail(err.getMessage());
+        }
+    }
+
+
+    /**
+     * s9api query/transformation pipeline
+     */
+
+    public void testPipeline() {
+        try {
+            Processor proc = new Processor(false);
+            XsltCompiler tComp = proc.newXsltCompiler();
+            XQueryCompiler qComp = proc.newXQueryCompiler();
+            StringWriter sw = new StringWriter();
+            Serializer out = proc.newSerializer(sw);
+            String xsl = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:template match='/'><t><xsl:copy-of select='.'/></t></xsl:template>" +
+                    "</xsl:stylesheet>";
+            String q = "document { <q>{.}</q> }";
+            String xml = "<z/>";
+            XdmNode in = proc.newDocumentBuilder().build(new StreamSource(new StringReader(xml)));
+            XsltTransformer stage1 = tComp.compile(new StreamSource(new StringReader(xsl))).load();
+            XQueryEvaluator stage2 = qComp.compile(q).load();
+            XsltTransformer stage3 = tComp.compile(new StreamSource(new StringReader(xsl))).load();
+            XQueryEvaluator stage4 = qComp.compile(q).load();
+            XsltTransformer stage5 = tComp.compile(new StreamSource(new StringReader(xsl))).load();
+            stage1.setDestination(stage2);
+            stage2.setDestination(stage3);
+            stage3.setDestination(stage4);
+            stage4.setDestination(stage5);
+            stage5.setDestination(out);
+            stage1.setInitialContextNode(in);
+            stage1.transform();
+            assertTrue("output", sw.toString().contains("<t><q><t><q><t><z/></t></q></t></q></t>"));
+
+        } catch (SaxonApiException err) {
+            err.printStackTrace();
+            fail(err.getMessage());
+        }
+    }
+
+
+    public void testErrorListener() {
+        final List<TransformerException> errors = new ArrayList<>();
+        final List<TransformerException> fatalErrors = new ArrayList<>();
+        final List<TransformerException> warnings = new ArrayList<>();
+        try {
+            Processor p = new Processor(true);
+            XQueryCompiler c = p.newXQueryCompiler();
+
+            c.setErrorListener(new ErrorListener() {
+                public void error(TransformerException exception) {
+                    errors.add(exception);
+                }
+
+                public void warning(TransformerException exception) {
+                    warnings.add(exception);
+                }
+
+                public void fatalError(TransformerException exception) {
+                    fatalErrors.add(exception);
+                }
+            });
+            XQueryEvaluator eval = c.compile("$x + /undec:y = ").load();
+            StringWriter sw = new StringWriter();
+            Serializer out = p.newSerializer(sw);
+            out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            StreamSource in = new StreamSource(new File(ConfigTest.DATA_DIR + "books.xml"));
+            eval.runStreamed(in, out);
+            fail("unexpected success");
+        } catch (SaxonApiException e) {
+            assertEquals("errors", 0, errors.size());
+            assertEquals("fatalErrors", 1, fatalErrors.size());
+            assertEquals("warnings", 0, warnings.size());
+        }
+    }
+
+
+    public void testIssue2111() {
+        try {
+            final Configuration configuration = new Configuration();
+            configuration.setConfigurationProperty(Feature.XQUERY_VERSION, "1.0");
+            configuration.setModuleURIResolver((moduleURI, baseURI, locations) -> {
+                StringReader reader = new StringReader("module namespace x='x'; declare variable $x:x := 'x';");
+                StreamSource module = new StreamSource(reader);
+                module.setSystemId(moduleURI);
+                return new StreamSource[]{module};
+            });
+            Processor processor = new Processor(configuration);
+            XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
+            xqueryCompiler.setBaseURI(new File(".").toURI());
+            XQueryExecutable executable = xqueryCompiler.compile("import module namespace x='x'; $x:x\n");
+            executable.load().run(processor.newSerializer(System.out));
+
+        } catch (SaxonApiException err) {
+            fail();
+        }
+
+    }
+
+    public void testAbleToCompileWithCompileLibraryMethod() throws SaxonApiException {
+        // See bug 2429
+        XQueryCompiler compiler = new Processor(true).newXQueryCompiler();
+        final String main = "" +
+                "module namespace main = \"main_mod.xq\";\n" +
+                "import module namespace vi_imp = \"imported_mod.xq\";\n" +
+                "declare %private variable $main:variableThatIsInstantiatedTwice as xs:integer := 123;";
+
+        compiler.setModuleURIResolver((moduleURI, baseURI, locations) -> {
+            String module = "";
+            if (moduleURI.equals("imported_mod.xq")) {
+                module =
+                        "module namespace vi_imp = \"imported_mod.xq\";\n" +
+                                "import module namespace vi_main = \"main_mod.xq\" at \"file:///nowhere/variable_issue_main.xq\";";
+            } else if (moduleURI.equals("main_mod.xq")) {
+                module = main;
+            }
+            return new StreamSource[]{new StreamSource(new StringReader(module), moduleURI)};
+        });
+//        try {
+//            compiler.setBaseURI(new URI("file:///nowhere/variable_issue_main.xq"));
+//        } catch (URISyntaxException e) {
+//            fail(e.getMessage());
+//        }
+        compiler.compileLibrary(main);
+    }
+
+    public void testGlobalVariableLineNumber() {
+        try {
+            String query = "declare namespace c = 'c.uri';\n\n\ndeclare variable $foo := 3;\n$foo";
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            XQueryExecutable q = c.compile(query);
+            Iterator<GlobalVariable> vars = q.getUnderlyingCompiledQuery().getMainModule().getModuleVariables();
+            int count = 0;
+            while (vars.hasNext()) {
+                GlobalVariable v = vars.next();
+                assertEquals(v.getLineNumber(), 4);
+                count++;
+            }
+            assertEquals(count, 1);
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+
+    }
+
+
+    public void testPreEvaluateDocFunction() {
+        // Bug 2963
+        String badQuery = "doc('http://example.com/bad')";
+        String goodQuery = "doc('http://example.com/good')";
+        Processor p = new Processor(false);
+        XQueryCompiler c = p.newXQueryCompiler();
+        final List<String> counter = new ArrayList<>();
+        p.getUnderlyingConfiguration().setURIResolver(new StandardURIResolver() {
+            @Override
+            public Source resolve(String href, String base) throws XPathException {
+                switch (href) {
+                    case "http://example.com/bad":
+                        String badXml = "<bad>";
+                        counter.add(href);
+                        return new StreamSource(new StringReader(badXml));
+                    case "http://example.com/good":
+                        String goodXml = "<good/>";
+                        counter.add(href);
+                        return new StreamSource(new StringReader(goodXml));
+                    default:
+                        return super.resolve(href, base);
+                }
+            }
+
+        });
+        p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, false);
+        XQueryExecutable q = null;
+        try {
+            q = c.compile(badQuery);
+        } catch (Exception err) {
+            fail("Compilation should not fail");
+            err.printStackTrace();
+        }
+        assertEquals("URI not accessed", 0, counter.size());
+        p.setConfigurationProperty(Feature.PRE_EVALUATE_DOC_FUNCTION, true);
+        try {
+            q = c.compile(goodQuery);
+            assertTrue("URI accessed", counter.size() > 0);
+            assertTrue("Compiled to Literal", q.getUnderlyingCompiledQuery().getExpression() instanceof Literal);
+            assertTrue("Compiled to NodeInfo", ((Literal) q.getUnderlyingCompiledQuery().getExpression()).getValue().head() instanceof NodeInfo);
+        } catch (Exception err) {
+            fail("Compilation should not fail");
+        }
+        try {
+            XdmValue result = q.load().evaluateSingle();
+            assertTrue(result instanceof XdmNode);
+        } catch (Exception err) {
+            fail("Execution should not fail");
+            err.printStackTrace();
+        }
+
+    }
+
+    private static class MyErrorListener implements ErrorListener {
+        public final List<TransformerException> warnings = new ArrayList<>();
+        public final List<TransformerException> errors = new ArrayList<>();
+        public final List<TransformerException> fatalErrors = new ArrayList<>();
+
+        public void warning(TransformerException exception) {
+            warnings.add(exception);
+        }
+
+        public void error(TransformerException exception) {
+            errors.add(exception);
+        }
+
+        public void fatalError(TransformerException exception) {
+            fatalErrors.add(exception);
+        }
+    }
+
+    public void testXQueryValidationErrorReporting() {
+        // Bug 3123
+        MyErrorListener listener = new MyErrorListener();
+        try {
+            Processor p = new Processor(true);
+            DocumentBuilder b = p.newDocumentBuilder();
+            XdmNode foo = b.build(new StreamSource(new StringReader("<foo xmlns='http://one.uri/'><bar/></foo>")));
+            XQueryCompiler c = p.newXQueryCompiler();
+            c.declareNamespace("", "http://one.uri/");
+            XQueryEvaluator eval = c.compile("validate strict{.}").load();
+
+            eval.setErrorListener(listener);
+            eval.setContextItem(foo);
+            XdmValue val = eval.evaluate();
+            fail();
+        } catch (SaxonApiException e) {
+            assertEquals(1, listener.errors.size());
+            assertEquals(1, listener.fatalErrors.size());
+        }
+    }
+
+    public void testXQueryOptimizationWithTracing() {
+        // Bug 3497
+
+        String query = "declare variable $root := <root><text>AAA</text></root>;" +
+                "declare function local:foo($root) {$root/text};" +
+                "local:foo($root)";
+
+        try {
+            Processor p = new Processor(true);
+            XQueryCompiler c = p.newXQueryCompiler();
+            c.setCompileWithTracing(true);
+            XQueryEvaluator eval = c.compile(query).load();
+            XdmValue val = eval.evaluate();
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+//    public void testBug3843XP() {
+//        for (int i = 0; i < 10; i++) {
+//            long startRun = System.currentTimeMillis();
+//            try {
+//                Processor p = new Processor(true);
+//                //p.setConfigurationProperty(FeatureKeys.OPTIMIZATION_LEVEL, 0 );
+//                DocumentBuilder b = p.newDocumentBuilder();
+//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
+//                XPathCompiler c = p.newXPathCompiler();
+//                //c.setCaching(false);
+//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
+//                LineNumberReader lnr = new LineNumberReader(reader);
+//                String q;
+//                int k = 0;
+//                while ((q = lnr.readLine()) != null) {
+//                    //System.err.println("Processing query: " + (k++) + " : " + q);
+//                    long start = System.currentTimeMillis();
+//                    XPathExecutable exec = c.compile(q);
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
+//                    XPathSelector eval = exec.load();
+//                    eval.setContextItem(doc);
+//                    XdmValue result = eval.evaluate();
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
+//                }
+//
+//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
+//
+//            } catch (SaxonApiException | IOException e) {
+//                e.printStackTrace();
+//                fail();
+//            }
+//        }
+//    }
+//
+//    public void testBug3843XPfast() {
+//        for (int i = 0; i < 10; i++) {
+//            long startRun = System.currentTimeMillis();
+//            try {
+//                Processor p = new Processor(true);
+//                //p.setConfigurationProperty(FeatureKeys.OPTIMIZATION_LEVEL, 0 );
+//                DocumentBuilder b = p.newDocumentBuilder();
+//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
+//                XPathCompiler c = p.newXPathCompiler();
+//                c.setFastCompilation(true);
+//                //c.setCaching(false);
+//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
+//                LineNumberReader lnr = new LineNumberReader(reader);
+//                String q;
+//                int k = 0;
+//                while ((q = lnr.readLine()) != null) {
+//                    //System.err.println("Processing query: " + (k++) + " : " + q);
+//                    long start = System.currentTimeMillis();
+//                    XPathExecutable exec = c.compile(q);
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
+//                    XPathSelector eval = exec.load();
+//                    eval.setContextItem(doc);
+//                    XdmValue result = eval.evaluate();
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
+//                }
+//
+//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
+//
+//            } catch (SaxonApiException | IOException e) {
+//                e.printStackTrace();
+//                fail();
+//            }
+//        }
+//    }
+//
+//    public void testBug3843XQ() {
+//        for (int i = 0; i < 10; i++) {
+//            long startRun = System.currentTimeMillis();
+//            try {
+//                Processor p = new Processor(true);
+//                DocumentBuilder b = p.newDocumentBuilder();
+//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
+//                XQueryCompiler c = p.newXQueryCompiler();
+//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
+//                LineNumberReader lnr = new LineNumberReader(reader);
+//                String q;
+//                int k = 0;
+//                while ((q = lnr.readLine()) != null) {
+//                    //System.err.println("Processing query: " + (k++) + " : " + q);
+//                    long start = System.currentTimeMillis();
+//                    XQueryExecutable exec = c.compile(q);
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
+//                    XQueryEvaluator eval = exec.load();
+//                    eval.setContextItem(doc);
+//                    XdmValue result = eval.evaluate();
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
+//                }
+//
+//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
+//
+//            } catch (SaxonApiException | IOException e) {
+//                e.printStackTrace();
+//                fail();
+//            }
+//        }
+//    }
+//
+//    public void testBug3843XQfast() {
+//        for (int i = 0; i < 10; i++) {
+//            long startRun = System.currentTimeMillis();
+//            try {
+//                Processor p = new Processor(true);
+//                DocumentBuilder b = p.newDocumentBuilder();
+//                XdmNode doc = b.build(new File("/Users/mike/bugs/2018/thielen3843/queries/data_source.xml"));
+//                XQueryCompiler c = p.newXQueryCompiler();
+//                c.setFastCompilation(true);
+//                FileReader reader = new FileReader("/Users/mike/bugs/2018/thielen3843/queries/queries.txt");
+//                LineNumberReader lnr = new LineNumberReader(reader);
+//                String q;
+//                int k = 0;
+//                while ((q = lnr.readLine()) != null) {
+//                    //System.err.println("Processing query: " + (k++) + " : " + q);
+//                    long start = System.currentTimeMillis();
+//                    XQueryExecutable exec = c.compile(q);
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + q);
+//                    XQueryEvaluator eval = exec.load();
+//                    eval.setContextItem(doc);
+//                    XdmValue result = eval.evaluate();
+//                    //System.err.println((System.currentTimeMillis() - start) + " - " + result.size());
+//                }
+//
+//                System.err.println("Total time: " + (System.currentTimeMillis() - startRun) + "ms");
+//
+//            } catch (SaxonApiException | IOException e) {
+//                e.printStackTrace();
+//                fail();
+//            }
+//        }
+//    }
+
+
+}
