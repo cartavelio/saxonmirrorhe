@@ -239,7 +239,7 @@
          <xsl:apply-templates select="members/member[@isInterface='true']">
             <xsl:with-param name="include-nested-interfaces" select="true()" tunnel="yes"/>
          </xsl:apply-templates>
-      </xsl:if>
+      </xsl:if>    
    </xsl:template>
    
    <xsl:template match="*[@nodeType = 'RecordDeclaration']" priority="20">
@@ -1232,6 +1232,45 @@
       <xsl:apply-templates select="elseExpr"/>
       <xsl:text>)</xsl:text>
    </xsl:template>
+   
+   <!-- Convert `A == null ? B : A` to `A ?? B` -->
+   
+   <xsl:template match="*[@nodeType='ConditionalExpr']
+                         [condition[@nodeType='BinaryExpr']
+                                   [@operator='EQUALS']
+                                   [right/@nodeType='NullLiteralExpr']]
+                         [f:sameExpression(condition/left, elseExpr)]" priority="50">
+      <xsl:text>(</xsl:text>
+      <xsl:apply-templates select="condition/left"/>
+      <xsl:text> ?? </xsl:text>
+      <xsl:apply-templates select="thenExpr"/>
+      <xsl:text>)</xsl:text>
+   </xsl:template>
+   
+   <xsl:function name="f:sameExpression" as="xs:boolean">
+      <xsl:param name="left"/>
+      <xsl:param name="right"/>
+      <xsl:sequence select="$left/@nodeType = $right/@nodeType and deep-equal($left/*, $right/*)"/>
+   </xsl:function>
+   
+      <!--<argument nodeType="ConditionalExpr">
+         <condition nodeType="BinaryExpr" operator="EQUALS">
+            <left nodeType="NameExpr" RESOLVED_TYPE="net.sf.saxon.value.AtomicValue">
+               <name nodeType="SimpleName" identifier="r"/>
+            </left>
+            <right nodeType="NullLiteralExpr"/>
+         </condition>
+         <elseExpr nodeType="NameExpr" RESOLVED_TYPE="net.sf.saxon.value.AtomicValue">
+            <name nodeType="SimpleName" identifier="r"/>
+         </elseExpr>
+         <thenExpr nodeType="MethodCallExpr" RETURN="net.sf.saxon.value.EmptySequence"
+            RESOLVED_TYPE="net.sf.saxon.value.EmptySequence">
+            <name nodeType="SimpleName" identifier="getInstance"/>
+            <scope nodeType="NameExpr" UNRESOLVED="EmptySequence">
+               <name nodeType="SimpleName" identifier="EmptySequence"/>
+            </scope>
+         </thenExpr>
+      </argument>-->
    
    <xsl:template match="*[@nodeType='CastExpr']/*[@nodeType='LambdaExpr']" priority="20">
       <xsl:text>(</xsl:text>
