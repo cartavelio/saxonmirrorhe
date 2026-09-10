@@ -13,7 +13,7 @@ import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.io.Closeable;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -35,7 +35,7 @@ public class PushToPull {
     private final Pusher expression;
     private final XPathContext context;
     private final BlockingQueue<Outcome<Item>> queue = new ArrayBlockingQueue<>(50);
-    private final Item stopper = StringItem.bmp("finished");
+    private final Item stopper = StringValue.bmp("finished");
 
     public PushToPull(Pusher expression, XPathContext context) {
         this.expression = expression;

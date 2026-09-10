@@ -15,7 +15,7 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 import org.objectweb.asm.Type;
 
@@ -163,7 +163,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
         compiler.compileToItem(nameExpr);
         ga.dup();
-        ga.ifNotInstance(StringItem.class, notStrInstance);
+        ga.ifNotInstance(StringValue.class, notStrInstance);
         ga.invokeInstanceMethod(Item.class, "getStringValue");
         ga.invokeStaticMethod(Whitespace.class, "trimWhitespace", CharSequence.class);
         ga.invokeInstanceMethod(CharSequence.class, "toString");

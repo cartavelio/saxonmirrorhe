@@ -15,7 +15,7 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -331,9 +331,9 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                     case Token.FEQ:
                     case Token.FNE:
                         ga.loadLocal(op0Var);
-                        ga.checkClass(StringItem.class);
+                        ga.checkClass(StringValue.class);
                         ga.loadLocal(op1Var);
-                        ga.checkClass(StringItem.class);
+                        ga.checkClass(StringValue.class);
                         ga.invokeInstanceMethod(Object.class, "equals", Object.class);
                         if (op == Token.FNE) {
                             ga.not();
@@ -346,7 +346,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                     case Token.FLE:
                         ga.loadLocal(op0Var);
                         ga.loadLocal(op1Var);
-                        ga.invokeInstanceMethod(StringItem.class, "compareTo", StringItem.class);
+                        ga.invokeInstanceMethod(StringValue.class, "compareTo", StringValue.class);
                         ga.ifZCmp(translateOperator(op), returnTrue.label());
                         ga.goTo(returnFalse);
                         break;

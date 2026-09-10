@@ -3247,14 +3247,14 @@ public class UserComplexType extends UserDefinedType
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return StringItem.bmp("Complex Type Definition");
+                        return StringValue.bmp("Complex Type Definition");
                     case "implementation":
                         return new ObjectValue<>(type);
                     case "name":
                         if (type.isAnonymousType()) {
                             return EmptySequence.getInstance();
                         } else {
-                            return new StringItem(type.getName(), BuiltInAtomicType.NCNAME);
+                            return new StringValue(type.getName(), BuiltInAtomicType.NCNAME);
                         }
                     case "target namespace":
                         if (type.isAnonymousType()) {
@@ -3268,10 +3268,10 @@ public class UserComplexType extends UserDefinedType
                         List<AtomicValue> list = new ArrayList<>();
                         int f = type.getFinalProhibitions();
                         if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
-                            list.add(StringItem.bmp("restriction"));
+                            list.add(StringValue.bmp("restriction"));
                         }
                         if ((f & Derivation.DERIVATION_EXTENSION) != 0) {
-                            list.add(StringItem.bmp("extension"));
+                            list.add(StringValue.bmp("extension"));
                         }
                         return new AtomicArray(list);
                     }
@@ -3283,7 +3283,7 @@ public class UserComplexType extends UserDefinedType
                             return EmptySequence.getInstance();
                         }
                     case "derivation method":
-                        return new StringItem(
+                        return new StringValue(
                                 type.getDerivationMethod() == Derivation.DERIVATION_RESTRICTION ? "restriction" : "extension");
                     case "abstract":
                         return BooleanValue.get(type.isAbstract());
@@ -3312,7 +3312,7 @@ public class UserComplexType extends UserDefinedType
                                 String key = arguments[0].head().getStringValue();
                                 switch (key) {
                                     case "class":
-                                        return StringItem.bmp("Content Type");
+                                        return StringValue.bmp("Content Type");
                                     case "variety":
                                         String variety;
                                         switch (type.getVariety()) {
@@ -3330,7 +3330,7 @@ public class UserComplexType extends UserDefinedType
                                                 variety = "simple";
                                                 break;
                                         }
-                                        return StringItem.bmp(variety);
+                                        return StringValue.bmp(variety);
                                     case "particle":
                                         if (type.getVariety() == ComplexVariety.MIXED || type.getVariety() == ComplexVariety.ELEMENT_ONLY) {
                                             return ((UserComplexType) type).getParticle().getComponentAsFunction();
@@ -3350,9 +3350,9 @@ public class UserComplexType extends UserDefinedType
                                                         String key = arguments[0].head().getStringValue();
                                                         switch (key) {
                                                             case "class":
-                                                                return StringItem.bmp("Open Content");
+                                                                return StringValue.bmp("Open Content");
                                                             case "mode":
-                                                                return new StringItem(mode);
+                                                                return new StringValue(mode);
                                                             case "wildcard":
                                                                 return ctype.getOpenContentWildcard().getComponentAsFunction();
                                                             default:
@@ -3383,10 +3383,10 @@ public class UserComplexType extends UserDefinedType
                         List<AtomicValue> list = new ArrayList<>();
                         int s = type.getBlock();
                         if ((s & Derivation.DERIVATION_EXTENSION) != 0) {
-                            list.add(StringItem.bmp("extension"));
+                            list.add(StringValue.bmp("extension"));
                         }
                         if ((s & Derivation.DERIVATION_RESTRICTION) != 0) {
-                            list.add(StringItem.bmp("restriction"));
+                            list.add(StringValue.bmp("restriction"));
                         }
                         return new AtomicArray(list);
                     }

@@ -859,7 +859,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return StringItem.bmp("Wildcard");
+                        return StringValue.bmp("Wildcard");
                     case "implementation":
                         return new ObjectValue<>(Wildcard.this);
                     case "namespace constraint":
@@ -869,14 +869,14 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                 String key = arguments[0].head().getStringValue();
                                 switch (key) {
                                     case "class":
-                                        return StringItem.bmp("Namespace Constraint");
+                                        return StringValue.bmp("Namespace Constraint");
                                     case "variety":
                                         if (allowsAny()) {
-                                            return StringItem.bmp("any");
+                                            return StringValue.bmp("any");
                                         } else if (allowedNamespaces != null) {
-                                            return StringItem.bmp("enumeration");
+                                            return StringValue.bmp("enumeration");
                                         } else {
-                                            return StringItem.bmp("not");
+                                            return StringValue.bmp("not");
                                         }
                                     case "namespaces":
                                         if (allowsAny()) {
@@ -892,10 +892,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                     case "disallowed names":
                                         List<AtomicValue> list = new ArrayList<>();
                                         if (disallowsDefinedNames) {
-                                            list.add(StringItem.bmp("defined"));
+                                            list.add(StringValue.bmp("defined"));
                                         }
                                         if (disallowsDefinedSiblings) {
-                                            list.add(StringItem.bmp("definedSiblings"));
+                                            list.add(StringValue.bmp("definedSiblings"));
                                         }
                                         NamePool pool = getConfiguration().getNamePool();
                                         IntIterator iter = disallowedQNames.iterator();
@@ -914,7 +914,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                         };
                         return new CallableFunction(1, constraintFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                     case "process contents":
-                        return new StringItem(getProcessContents());
+                        return new StringValue(getProcessContents());
                     default:
                         return EmptySequence.getInstance();
                 }

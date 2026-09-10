@@ -14,7 +14,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
@@ -449,7 +449,7 @@ public final class AttributeUse extends SimpleComponentReference
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Attribute Use");
+                    return StringValue.bmp("Attribute Use");
                 case "implementation":
                     return new ObjectValue<>(AttributeUse.this);
                 case "required":

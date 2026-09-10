@@ -752,11 +752,11 @@ public final class AttributeGroupDecl extends SchemaStructure
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return StringItem.bmp("Attribute Group Definition");
+                        return StringValue.bmp("Attribute Group Definition");
                     case "implementation":
                         return new ObjectValue<>(AttributeGroupDecl.this);
                     case "name":
-                        return new StringItem(getName(), BuiltInAtomicType.NCNAME);
+                        return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
                         return new AnyURIValue(getTargetNamespace());
                     case "attribute uses":

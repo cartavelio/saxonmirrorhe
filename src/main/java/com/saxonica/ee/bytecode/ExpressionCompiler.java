@@ -149,11 +149,11 @@ public abstract class ExpressionCompiler {
                 handleEmptyStringResult(onEmpty, ga, methodInfo, exit);
                 methodInfo.placeLabel(notNull);
             }
-            ga.checkClass(StringItem.class);
+            ga.checkClass(StringValue.class);
             if (requiredClass == CharSequence.class) {
-                ga.invokeInstanceMethod(StringItem.class, "getStringValueCS"); // TODO: no longer exists
+                ga.invokeInstanceMethod(StringValue.class, "getStringValueCS"); // TODO: no longer exists
             } else {
-                ga.invokeInstanceMethod(StringItem.class, "getStringValue");
+                ga.invokeInstanceMethod(StringValue.class, "getStringValue");
             }
             if (exit != null) {
                 methodInfo.placeLabel(exit);
@@ -175,7 +175,7 @@ public abstract class ExpressionCompiler {
             ga.goTo(exit);
         } else if (onEmpty instanceof OnEmpty.UnwindAndJump) {
             OnEmpty.UnwindAndJump longJump = (OnEmpty.UnwindAndJump) onEmpty;
-            longJump.getUnwindStack().push(StringItem.class);
+            longJump.getUnwindStack().push(StringValue.class);
             longJump.generate(ga);
             longJump.getUnwindStack().pop();
         } else {

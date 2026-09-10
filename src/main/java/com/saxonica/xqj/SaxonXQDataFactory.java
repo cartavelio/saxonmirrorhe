@@ -404,7 +404,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         SaxonXQDataSource.checkNotNull(value, "value");
         SaxonXQDataSource.checkNotNull(type, "type");
         AtomicType at = testAtomic(type);
-        StringItem sv = new StringItem(value);
+        StringValue sv = new StringValue(value);
         Converter converter = getConfiguration().getConversionRules().getConverter(BuiltInAtomicType.STRING, at);
         ConversionResult result = converter.convert(sv);
         if (result instanceof ValidationFailure) {
@@ -703,13 +703,13 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
         if (type == null) {
-            return new SaxonXQItem(new StringItem(value), this);
+            return new SaxonXQItem(new StringValue(value), this);
         } else {
             AtomicType at = testAtomic(type);
             int prim = at.getPrimitiveType();
             if (prim == StandardNames.XS_STRING) {
                 try {
-                    ConversionResult result = Converter.convert(new StringItem(value), at, getConfiguration().getConversionRules());
+                    ConversionResult result = Converter.convert(new StringValue(value), at, getConfiguration().getConversionRules());
                     if (result instanceof ValidationFailure) {
                         throw new XQException(((ValidationFailure) result).getMessage());
                     }
@@ -782,10 +782,10 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
                 result = new UntypedAtomicValue(StringView.tidy((String) value));
             } else if (prim == StandardNames.XS_STRING) {
                 Converter converter = getConfiguration().getConversionRules().getConverter(BuiltInAtomicType.STRING, at);
-                result = converter.convert(new StringItem((String) value));
+                result = converter.convert(new StringValue((String) value));
             } else if (prim == StandardNames.XS_ANY_URI) {
                 Converter converter = getConfiguration().getConversionRules().getConverter(BuiltInAtomicType.ANY_URI, at);
-                result = converter.convert(new StringItem((String) value));
+                result = converter.convert(new StringValue((String) value));
             } else {
                 // Note: the spec also allow NOTATION, but string->notation conversion doesn't work
                 throw new XQException("Target type must be string, untypedAtomic, or anyURI");

@@ -6,7 +6,7 @@ import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Implementation of the saxon:in-scope-namespaces extension function. Introduced in 10.0.
@@ -27,7 +27,7 @@ public class InScopeNamespacesFn extends SystemFunction {
         }
         DictionaryMap dict = new DictionaryMap();
         for (NamespaceBinding binding : nsMap) {
-            dict.initialPut(binding.getPrefix(),new StringItem(binding.getURI()));
+            dict.initialPut(binding.getPrefix(),new StringValue(binding.getURI()));
         }
         return new ZeroOrOne<>(dict);
     }

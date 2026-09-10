@@ -31,7 +31,7 @@ public abstract class ValueRangeFacet extends Facet {
     }
 
     public void setValue(String value) throws SchemaException {
-        requiredValue = StringItem.makeStringValue(value);
+        requiredValue = StringValue.makeStringValue(value);
     }
 
     public void setRequiredValue(AtomicValue value) {
@@ -212,7 +212,7 @@ public abstract class ValueRangeFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp(getName());
+                    return StringValue.bmp(getName());
                 case "implementation":
                     return new ObjectValue<>(this);
                 case "value":

@@ -1351,11 +1351,11 @@ public class ElementDecl extends SchemaStructure
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Element Declaration");
+                    return StringValue.bmp("Element Declaration");
                 case "implementation":
                     return new ObjectValue<>(ElementDecl.this);
                 case "name":
-                    return new StringItem(getName(), BuiltInAtomicType.NCNAME);
+                    return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
                     return new AnyURIValue(getTargetNamespace());
                 case "type definition":
@@ -1366,7 +1366,7 @@ public class ElementDecl extends SchemaStructure
                             String key1 = arguments1[0].head().getStringValue();
                             switch (key1) {
                                 case "class":
-                                    return StringItem.bmp("Type Table");
+                                    return StringValue.bmp("Type Table");
                                 case "alternatives":
                                     List<Item> list = new ArrayList<>();
                                     for (TypeAlternative ta : getTypeAlternatives()) {
@@ -1385,12 +1385,12 @@ public class ElementDecl extends SchemaStructure
                     }
                 case "scope":
                     Callable scopeFunction = (context12, arguments12) -> {
-                        String key12 = ((StringItem) arguments12[0].head()).getStringValue();
+                        String key12 = ((StringValue) arguments12[0].head()).getStringValue();
                         switch (key12) {
                             case "class":
-                                return StringItem.bmp("Scope");
+                                return StringValue.bmp("Scope");
                             case "variety":
-                                return StringItem.bmp(isGlobal() ? "global" : "local");
+                                return StringValue.bmp(isGlobal() ? "global" : "local");
                             case "parent":
                                 if (isGlobal()) {
                                     return EmptySequence.getInstance();
@@ -1425,23 +1425,23 @@ public class ElementDecl extends SchemaStructure
                 case "substitution group exclusions": {
                     List<AtomicValue> exclusions = new ArrayList<>();
                     if ((getSubstitutionGroupExclusions() & Derivation.DERIVATION_EXTENSION) != 0) {
-                        exclusions.add(StringItem.bmp("extension"));
+                        exclusions.add(StringValue.bmp("extension"));
                     }
                     if ((getSubstitutionGroupExclusions() & Derivation.DERIVATION_RESTRICTION) != 0) {
-                        exclusions.add(StringItem.bmp("restriction"));
+                        exclusions.add(StringValue.bmp("restriction"));
                     }
                     return new AtomicArray(exclusions);
                 }
                 case "disallowed substitutions": {
                     List<AtomicValue> exclusions = new ArrayList<>();
                     if ((getBlock() & Derivation.DERIVATION_EXTENSION) != 0) {
-                        exclusions.add(StringItem.bmp("extension"));
+                        exclusions.add(StringValue.bmp("extension"));
                     }
                     if ((getBlock() & Derivation.DERIVATION_RESTRICTION) != 0) {
-                        exclusions.add(StringItem.bmp("restriction"));
+                        exclusions.add(StringValue.bmp("restriction"));
                     }
                     if ((getBlock() & Derivation.DERIVE_BY_SUBSTITUTION) != 0) {
-                        exclusions.add(StringItem.bmp("substitution"));
+                        exclusions.add(StringValue.bmp("substitution"));
                     }
                     return new AtomicArray(exclusions);
                 }

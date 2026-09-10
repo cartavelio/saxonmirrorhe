@@ -10,7 +10,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.objectweb.asm.Type;
 
 import java.lang.reflect.*;
@@ -68,7 +68,7 @@ public class JavaExtensionFunctionCallCompiler extends ToIteratorCompiler {
                 ga.invokeStaticMethod(Int64Value.class, "makeIntegerValue", Long.TYPE);
             } else if (jefc.getReturnClass() == Character.TYPE) {
                 ga.invokeStaticMethod(Character.class, "toString", Character.TYPE);
-                ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+                ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
             } else if (jefc.getReturnClass() == Float.TYPE) {
                 ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
             } else if (jefc.getReturnClass() == Double.TYPE) {

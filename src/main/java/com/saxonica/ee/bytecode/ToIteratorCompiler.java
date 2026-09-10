@@ -196,10 +196,10 @@ public abstract class ToIteratorCompiler extends ExpressionCompiler {
             visitAnnotation(compiler, "ToIteratorCompiler.compileToBoolean(): test string value");
             ga.loadLocal(itemVar);
             LabelInfo notString = methodInfo.newLabel("notString");
-            ga.ifNotInstance(StringItem.class, notString);
+            ga.ifNotInstance(StringValue.class, notString);
             ga.loadLocal(itemVar);
-            ga.checkClass(StringItem.class);
-            ga.invokeInstanceMethod(StringItem.class, "isEmpty");
+            ga.checkClass(StringValue.class);
+            ga.invokeInstanceMethod(StringValue.class, "isEmpty");
             ga.not();
             // assert stack - boolean
             if (Cardinality.allowsMany(expression.getCardinality())) {

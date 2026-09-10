@@ -57,7 +57,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
         }
         if (converter instanceof Converter.ToStringConverter) {
             ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
         } else {
             allocateStatic(compiler, converter);
             ga.swap();

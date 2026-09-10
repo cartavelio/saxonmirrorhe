@@ -13,7 +13,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -229,9 +229,9 @@ public class UserListType extends UserSimpleType implements ListType {
             }
             AtomicIterator iter = tokenizerFactory.apply(value);
             int count = 0;
-            StringItem val;
+            StringValue val;
             //try {
-                while ((val = (StringItem)iter.next()) != null) {
+                while ((val = (StringValue)iter.next()) != null) {
                     ValidationFailure err = itemType.validateContent(val.getUnicodeStringValue(), nsResolver, rules);
                     if (err != null) {
                         return err;
@@ -261,7 +261,7 @@ public class UserListType extends UserSimpleType implements ListType {
         for (Facet f : getExtendedFacetList()) {
             if (f instanceof PatternFacet) {
                 boolean match = f.testAtomicValue(
-                        new StringItem(Whitespace.collapseWhitespace(value)));
+                        new StringValue(Whitespace.collapseWhitespace(value)));
                 if (!match) {
                     ValidationFailure vf = new ValidationFailure(
                             "List " + Err.wrap(value) + " contravenes the pattern facet " +

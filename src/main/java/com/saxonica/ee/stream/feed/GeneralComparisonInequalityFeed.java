@@ -17,7 +17,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * This class is used when a streaming template requests a general comparison with one operand
@@ -31,9 +31,9 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
 
     private final StringCollator collator;
     private AtomicMatchKey firstStreamed = null;
-    private StringItem firstUntypedStreamed = null;
+    private StringValue firstUntypedStreamed = null;
     private AtomicMatchKey firstUnstreamed = null;
-    private StringItem firstUntypedUnstreamed = null;
+    private StringValue firstUntypedUnstreamed = null;
     private boolean done = false;
     private final Expression pullOperand;
     private final int implicitTimezone;
@@ -94,7 +94,7 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
             if (firstStreamed == null) {
                 firstStreamed = ks1;
                 if (next.isUntypedAtomic()) {
-                    firstUntypedStreamed = (StringItem)next;
+                    firstUntypedStreamed = (StringValue)next;
                 }
                 SequenceIterator comparand = pullOperand.iterate(context);
                 AtomicValue val;
@@ -105,7 +105,7 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
                         throw new XPathException("Cannot compare " + matchType + " to " + val.getPrimitiveType(), "FORG0001");
                     }
                     if (val.isUntypedAtomic()) {
-                        firstUntypedUnstreamed = (StringItem) val;
+                        firstUntypedUnstreamed = (StringValue) val;
                         AtomicValue cval = Converter.convert(firstUntypedStreamed, matchType, rules);
                         AtomicMatchKey ku1 = cval.getXPathMatchKey(collator, implicitTimezone);
                         if (!ku1.equals(ks1)) {

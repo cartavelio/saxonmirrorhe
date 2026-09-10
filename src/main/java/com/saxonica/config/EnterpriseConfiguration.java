@@ -69,7 +69,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -995,7 +995,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Schema");
+                    return StringValue.bmp("Schema");
                 case "type definitions": {
                     List<Item> list = new ArrayList<>();
                     for (SchemaType st : getSuperSchema().getAllTypes()) {

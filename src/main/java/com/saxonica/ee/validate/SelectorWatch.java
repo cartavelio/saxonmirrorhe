@@ -17,7 +17,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.HashMap;
 import java.util.Stack;
@@ -364,7 +364,7 @@ public abstract class SelectorWatch extends PatternWatch {
          */
 
         protected final AtomicSequence compact(AtomicSequence value) {
-            if (value instanceof StringItem) {
+            if (value instanceof StringValue) {
                 return new CompactStringValue(value.getUnicodeStringValue());
             } else {
                 return value;

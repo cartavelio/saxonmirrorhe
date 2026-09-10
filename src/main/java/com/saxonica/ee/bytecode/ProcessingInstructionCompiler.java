@@ -9,7 +9,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler {
@@ -50,7 +50,7 @@ public class ProcessingInstructionCompiler extends SimpleNodeConstructorCompiler
             LabelInfo isString = methodInfo.newLabel("isString");
             LabelInfo isNotString = methodInfo.newLabel("isNotString");
             ga.dup();
-            ga.ifNotInstance(StringItem.class, isNotString);
+            ga.ifNotInstance(StringValue.class, isNotString);
             ga.dup();
             ga.ifInstance(AnyURIValue.class, isNotString);
             ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");

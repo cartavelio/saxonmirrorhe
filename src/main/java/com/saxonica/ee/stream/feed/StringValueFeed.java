@@ -6,7 +6,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.str.UnicodeBuilder;
 
 /**
@@ -31,7 +31,7 @@ public class StringValueFeed extends AbsorptionFeed {
 
     @Override
     protected Sequence processGroundedItem(Item item) throws XPathException {
-        return new StringItem(item.getUnicodeStringValue());
+        return new StringValue(item.getUnicodeStringValue());
     }
 
     /**
@@ -72,7 +72,7 @@ public class StringValueFeed extends AbsorptionFeed {
 
         @Override
         public Sequence deliver() {
-            return new StringItem(buffer.toUnicodeString());
+            return new StringValue(buffer.toUnicodeString());
         }
 
         @Override

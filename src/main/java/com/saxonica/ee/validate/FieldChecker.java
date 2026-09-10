@@ -13,7 +13,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.UntypedAtomicValue;
 
@@ -199,7 +199,7 @@ public class FieldChecker extends AbstractReceiver {
                 assert contentType != null;
                 if (contentType.getFingerprint() == StandardNames.XS_STRING) {
                     // fast path for a commmon case
-                    val = StringItem.makeStringValue(buffer.toString()); // force to String because buffer is mutable
+                    val = StringValue.makeStringValue(buffer.toString()); // force to String because buffer is mutable
                 } else if (((SimpleType) contentType).isNamespaceSensitive()) {
                     val = ((SimpleType) contentType).getTypedValue(
                             fieldVal, namespaceResolver, getConfiguration().getConversionRules());

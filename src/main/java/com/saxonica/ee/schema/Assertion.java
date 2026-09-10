@@ -23,7 +23,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.ValidationParams;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.Source;
 import java.util.ArrayList;
@@ -352,7 +352,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Assertion");
+                    return StringValue.bmp("Assertion");
                 case "implementation":
                     return new ObjectValue<>(this);
                 case "test":

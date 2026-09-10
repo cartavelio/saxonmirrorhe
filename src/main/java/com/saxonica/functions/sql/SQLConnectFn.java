@@ -11,7 +11,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -46,12 +46,12 @@ public class SQLConnectFn extends SystemFunction {
 
         MapItem options = (MapItem) arguments[0].head();
 
-        String dataSource = str(options.get(new StringItem("dataSource")));
-        String dbString = str(options.get(new StringItem("database")));
-        String dbDriverString = str(options.get(new StringItem("driver")));
-        String userString = str(options.get(new StringItem("user")));
-        String pwdString = str(options.get(new StringItem("password")));
-        String autoCommitString = str(options.get(new StringItem("autoCommit")));
+        String dataSource = str(options.get(new StringValue("dataSource")));
+        String dbString = str(options.get(new StringValue("database")));
+        String dbDriverString = str(options.get(new StringValue("driver")));
+        String userString = str(options.get(new StringValue("user")));
+        String pwdString = str(options.get(new StringValue("password")));
+        String autoCommitString = str(options.get(new StringValue("autoCommit")));
 
 //        try {
 //            // the following hack is necessary to load JDBC drivers

@@ -144,7 +144,7 @@ public class NativeCall extends SystemFunction {
 
     public static Sequence convertValueObject(Object obj, String phpFuncName) throws XPathException {
         if (obj instanceof String) {
-            return new StringItem((String) obj);
+            return new StringValue((String) obj);
         } else if (obj instanceof Integer) {
             return new Int64Value(((Integer) obj).intValue());
         } else if (obj instanceof Double) {

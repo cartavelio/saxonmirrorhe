@@ -8,7 +8,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Implements the saxon:new-processing-instruction() function. Creates a new processing instruction node.
@@ -38,7 +38,7 @@ public class NewProcessingInstruction extends SystemFunction {
         if (name.equalsIgnoreCase("xml")) {
             throw new XPathException("Name of processing instruction must must not match [Xx][Mm][Ll]: " + name, "XTDE0890");
         }
-        StringItem first = (StringItem)arguments[1].head();
+        StringValue first = (StringValue)arguments[1].head();
         String value = first == null ? "" : first.getStringValue();
         value = value.replaceAll("\\?>", "? >");
         orphan.setNodeName(new FingerprintedQName("","",name));

@@ -25,7 +25,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.*;
 
@@ -731,7 +731,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
      * @param required      The .NET Class named in the method signature
      * @return an integer indicating the relative preference for converting this primitive type
      *         to this .NET class. A high number indicates a low preference. All values are in the range
-     *         50 to 100. For example, the conversion of an XPath String to {@link StringItem} is 50, while
+     *         50 to 100. For example, the conversion of an XPath String to {@link StringValue} is 50, while
      *         XPath String to {@link String} is 51. The value -1 indicates that the conversion is not allowed.
      */
 

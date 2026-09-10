@@ -8,7 +8,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
 
 public class CodepointsToStringStreamer extends StreamingAdjunct implements FeedMaker {
@@ -35,7 +35,7 @@ public class CodepointsToStringStreamer extends StreamingAdjunct implements Feed
             @Override
             public void close() throws XPathException {
                 if (!hasFailed()) {
-                    getNextOutputter().append(new StringItem(buffer.toString()));
+                    getNextOutputter().append(new StringValue(buffer.toString()));
                     super.close();
                 }
                 buffer.setLength(0);

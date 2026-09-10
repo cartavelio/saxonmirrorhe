@@ -5,7 +5,7 @@ import net.sf.saxon.expr.CompareToConstant;
 import net.sf.saxon.expr.CompareToStringConstant;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.sort.CodepointCollator;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -31,8 +31,8 @@ public class CompareToStringConstantCompiler extends ToBooleanCompiler {
         LabelInfo end = methodInfo.newLabel("endCmpToString");
 
         compiler.compileToItem(exp);
-        ga.checkClass(StringItem.class);
-        ga.invokeInstanceMethod(StringItem.class, "getStringValue");
+        ga.checkClass(StringValue.class);
+        ga.invokeInstanceMethod(StringValue.class, "getStringValue");
         ga.push(comparand);
         ga.invokeStaticMethod(CodepointCollator.class, "compareCS", CharSequence.class, CharSequence.class);
         ga.ifZCmp(ValueComparisonCompiler.translateOperator(operator), returnTrue.label());

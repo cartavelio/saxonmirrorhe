@@ -91,7 +91,7 @@ public class CompileXPath extends SystemFunction {
         MapItem options = (MapItem) arguments[1].head();
         MapItem locals = (MapItem) arguments[2].head();
 
-        StringItem type = (StringItem) options.get(StringItem.bmp("type"));
+        StringValue type = (StringValue) options.get(StringValue.bmp("type"));
         final String exprText = content.getStringValue();
 
         IndependentContext env = new IndependentContext(configuration) {
@@ -102,18 +102,18 @@ public class CompileXPath extends SystemFunction {
             }
         };
 
-        BooleanValue backwards = (BooleanValue) options.get(StringItem.bmp("backwardCompatibility"));
+        BooleanValue backwards = (BooleanValue) options.get(StringValue.bmp("backwardCompatibility"));
         env.setBackwardsCompatibilityMode(backwards != null && backwards.getBooleanValue());
 
         boolean inCatch;
 
-        BooleanValue inCatchVal = (BooleanValue) options.get(StringItem.bmp("inCatch"));
+        BooleanValue inCatchVal = (BooleanValue) options.get(StringValue.bmp("inCatch"));
         inCatch = inCatchVal != null && inCatchVal.getBooleanValue();
 
-        StringItem contextType = (StringItem) options.get(StringItem.bmp("context-type"));
+        StringValue contextType = (StringValue) options.get(StringValue.bmp("context-type"));
         ItemType contextItemType = AnyItemType.getInstance();
 
-        MapItem namespaces = (MapItem) options.get(StringItem.bmp("namespaces"));
+        MapItem namespaces = (MapItem) options.get(StringValue.bmp("namespaces"));
         if (namespaces != null) {
             AtomicIterator keys = namespaces.keys();
             AtomicValue key;
@@ -138,7 +138,7 @@ public class CompileXPath extends SystemFunction {
                 env.declareNamespace(prefix, uri);
             }
         }
-        MapItem globals = (MapItem) options.get(StringItem.bmp("globals"));
+        MapItem globals = (MapItem) options.get(StringValue.bmp("globals"));
         ArrayList<String> knownGlobals = new ArrayList<>();
         if (globals != null) {
             AtomicIterator keys = globals.keys();
@@ -160,7 +160,7 @@ public class CompileXPath extends SystemFunction {
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 SequenceExtent s = (SequenceExtent) locals.get(key);
-                String st = ((StringItem)s.itemAt(2)).getStringValue();
+                String st = ((StringValue)s.itemAt(2)).getStringValue();
                 int slot = (int) ((Int64Value)s.itemAt(1)).longValue();
                 if (slot > maxSlot){
                     maxSlot = slot;
@@ -227,7 +227,7 @@ public class CompileXPath extends SystemFunction {
             }
         }
 
-        MapItem globalFunctions = (MapItem) options.get(StringItem.bmp("globalFunctions"));
+        MapItem globalFunctions = (MapItem) options.get(StringValue.bmp("globalFunctions"));
 
         XPathParser parser = configuration.newExpressionParser("XP", false, 31);// Used for parsing sequence type
         /* This is a hack at present - really we should use parts of the retained static context,
@@ -315,10 +315,10 @@ public class CompileXPath extends SystemFunction {
         out.setDefaultNamespace(exportURI);
         expr.export(out);
         NodeInfo node = b.getCurrentRoot().iterateAxis(AxisInfo.CHILD).next();
-        StringItem st = new StringItem(expr.getStaticType().toAlphaCode());
+        StringValue st = new StringValue(expr.getStaticType().toAlphaCode());
         HashTrieMap result = new HashTrieMap();
-        result.initialPut(StringItem.bmp("expr"), node);
-        result.initialPut(StringItem.bmp("type"), st);
+        result.initialPut(StringValue.bmp("expr"), node);
+        result.initialPut(StringValue.bmp("type"), st);
 
         return result;
     }

@@ -16,7 +16,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -81,7 +81,7 @@ public class SendMail extends SystemFunction {
 
     private static GroundedValue checkMailProperty(XPathContext context, MapItem emailConfigMap, String keyStr, String errorMessage, SequenceType expectedType) throws XPathException {
         try {
-            Sequence sequence = emailConfigMap.get(new StringItem(keyStr));
+            Sequence sequence = emailConfigMap.get(new StringValue(keyStr));
             GroundedValue groundedValue = sequence.materialize();
             if (!expectedType.matches(groundedValue, context.getConfiguration().getTypeHierarchy())) {
                 throw new XPathException("saxon:send-mail error: Invalid type for email configuration option " + keyStr, SaxonErrorCode.SXJM0001, context);
@@ -155,12 +155,12 @@ public class SendMail extends SystemFunction {
         String otherStr;
 
         // throw new XPathException("Invalid number of arguments  for attachment map", SaxonErrorCode.SXJE0051, context);
-        if (mapItem.get(StringItem.bmp("setFilename")) != null) {
+        if (mapItem.get(StringValue.bmp("setFilename")) != null) {
             setFileName = ((Item) checkMailProperty(context, mapItem, "setFilename", null, SequenceType.SINGLE_STRING)).getStringValue();
             attachment.setFileName(setFileName);
         }
 
-        if (mapItem.get(StringItem.bmp("contentFromFile")) != null) {
+        if (mapItem.get(StringValue.bmp("contentFromFile")) != null) {
             otherStr = checkMailProperty(context, mapItem, "contentFromFile", null, SequenceType.SINGLE_STRING)
                     .getUnicodeStringValue().toString();
             if (otherStr != null) {
@@ -175,7 +175,7 @@ public class SendMail extends SystemFunction {
             }
         }
 
-        if (mapItem.get(StringItem.bmp("contentFromURI")) != null) {
+        if (mapItem.get(StringValue.bmp("contentFromURI")) != null) {
 
             otherStr = ((Item) checkMailProperty(context, mapItem, "contentFromURI", null, SequenceType.SINGLE_STRING)).getUnicodeStringValue().toString();
             if (otherStr != null) {
@@ -197,14 +197,14 @@ public class SendMail extends SystemFunction {
 
                 return attachment
             }*/
-        if (mapItem.get(StringItem.bmp("stringContent")) != null) {
+        if (mapItem.get(StringValue.bmp("stringContent")) != null) {
             otherStr = ((Item) checkMailProperty(context, mapItem, "stringContent", null, SequenceType.SINGLE_STRING)).getUnicodeStringValue().toString();
 
             if (otherStr != null) {
                 attachment.setText(otherStr);
                 return attachment;
             }
-        } else if (mapItem.get(StringItem.bmp("contentFromString")) != null) {
+        } else if (mapItem.get(StringValue.bmp("contentFromString")) != null) {
             otherStr = ((Item) checkMailProperty(context, mapItem, "contentFromString", null, SequenceType.SINGLE_STRING)).getUnicodeStringValue().toString();
 
             if (otherStr != null) {
@@ -338,7 +338,7 @@ public class SendMail extends SystemFunction {
 
         String content = "";
 
-        if (contentItem instanceof StringItem) {
+        if (contentItem instanceof StringValue) {
             content = contentItem.getStringValue();
         } else if (contentItem instanceof Item || htmlOption) {
 

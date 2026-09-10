@@ -59,7 +59,7 @@ public class LiteralCompiler extends ExpressionCompiler {
                 case StandardNames.XS_STRING:
                     String s = item.getUnicodeStringValue().toString();
                     if (s.isEmpty()) {
-                        ga.getStaticField(StringItem.class, "EMPTY_STRING", StringItem.class);
+                        ga.getStaticField(StringValue.class, "EMPTY_STRING", StringValue.class);
                     } else {
                         /*if(new StringValue(s).containsSurrogatePairs()){
                            allocateStatic(compiler, s);
@@ -67,7 +67,7 @@ public class LiteralCompiler extends ExpressionCompiler {
                            ga.push(s);
                        } */
                         // code changed because of ASM bug - pushing a UTF8 string handled incorrectly
-                        allocateStatic(compiler, new StringItem(s));
+                        allocateStatic(compiler, new StringValue(s));
                         //ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
                     }
                     return;
@@ -102,12 +102,12 @@ public class LiteralCompiler extends ExpressionCompiler {
             ga.push(((FloatValue) literal.getGroundedValue()).getFloatValue());
         } else if (requiredClass == String.class || requiredClass == CharSequence.class) {
             GroundedValue value = ((Literal) expression).getGroundedValue();
-            if (value instanceof StringItem) {
-                ga.push(((StringItem) value).getStringValue());
+            if (value instanceof StringValue) {
+                ga.push(((StringValue) value).getStringValue());
             } else {
                 compileToItem(compiler, expression);
-                ga.checkClass(StringItem.class);
-                ga.invokeInstanceMethod(StringItem.class, "getStringValue");
+                ga.checkClass(StringValue.class);
+                ga.invokeInstanceMethod(StringValue.class, "getStringValue");
             }
         } else if (requiredClass == Long.TYPE) {
             try {

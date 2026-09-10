@@ -186,8 +186,8 @@ public class OptimizerEE extends Optimizer {
                      p0 == StandardNames.XS_UNTYPED_ATOMIC) &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 rhs instanceof Literal &&
-                ((Literal) rhs).getGroundedValue() instanceof StringItem &&
-                ((StringItem) ((Literal) rhs).getGroundedValue()).isEmpty() &&
+                ((Literal) rhs).getGroundedValue() instanceof StringValue &&
+                ((StringValue) ((Literal) rhs).getGroundedValue()).isEmpty() &&
                 comparer instanceof CodepointCollatingComparer) {
 
             switch (vc.getOperator()) {
@@ -210,8 +210,8 @@ public class OptimizerEE extends Optimizer {
                      p1 == StandardNames.XS_UNTYPED_ATOMIC) &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 lhs instanceof Literal &&
-                ((Literal) lhs).getGroundedValue() instanceof StringItem &&
-                ((StringItem) ((Literal) lhs).getGroundedValue()).isEmpty() &&
+                ((Literal) lhs).getGroundedValue() instanceof StringValue &&
+                ((StringValue) ((Literal) lhs).getGroundedValue()).isEmpty() &&
                 comparer instanceof CodepointCollatingComparer) {
 
             switch (vc.getOperator()) {
@@ -228,20 +228,20 @@ public class OptimizerEE extends Optimizer {
 
         // optimize comparison against an integer or string constant
 
-        if (value1 instanceof StringItem &&
+        if (value1 instanceof StringValue &&
                 lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 comparer instanceof CodepointCollatingComparer &&
                 isStringLike(lhs.getItemType())) {
-            return new CompareToStringConstant(lhs, vc.getOperator(), ((StringItem) value1).getUnicodeStringValue());
+            return new CompareToStringConstant(lhs, vc.getOperator(), ((StringValue) value1).getUnicodeStringValue());
         }
 
-        if (value0 instanceof StringItem &&
+        if (value0 instanceof StringValue &&
                 rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 comparer instanceof CodepointCollatingComparer &&
                 isStringLike(rhs.getItemType())) {
-            return new CompareToStringConstant(rhs, Token.inverse(vc.getOperator()), ((StringItem) value0).getUnicodeStringValue());
+            return new CompareToStringConstant(rhs, Token.inverse(vc.getOperator()), ((StringValue) value0).getUnicodeStringValue());
         }
 
         // optimize comparison against an integer literal
@@ -497,7 +497,7 @@ public class OptimizerEE extends Optimizer {
             boolean allStrings = true;
             MapItem map;
             for (Item item : literal.getGroundedValue().asIterable()) {
-                if (!(item instanceof StringItem)) {
+                if (!(item instanceof StringValue)) {
                     allStrings = false;
                     break;
                 }

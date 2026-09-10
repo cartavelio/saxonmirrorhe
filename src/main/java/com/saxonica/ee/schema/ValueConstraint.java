@@ -134,14 +134,14 @@ public class ValueConstraint {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Value Constraint");
+                    return StringValue.bmp("Value Constraint");
                 case "variety":
-                    return StringItem.bmp(variety == FIXED ? "fixed" : "default");
+                    return StringValue.bmp(variety == FIXED ? "fixed" : "default");
                 case "value":
                     return getValue() == null ?
-                            new StringItem(getLexicalForm()) : getValue();
+                            new StringValue(getLexicalForm()) : getValue();
                 case "lexical form":
-                    return new StringItem(getLexicalForm());
+                    return new StringValue(getLexicalForm());
                 default:
                     return EmptySequence.getInstance();
             }
@@ -178,7 +178,7 @@ public class ValueConstraint {
             if (stype.isNamespaceSensitive()) {
                 setValue(stype.getTypedValue(lexicalForm, resolver, rules));
             } else if (stype.isAtomicType()) {
-                setValue(Converter.convert(new StringItem(lexicalForm), (AtomicType) stype, rules));
+                setValue(Converter.convert(new StringValue(lexicalForm), (AtomicType) stype, rules));
             } else if (stype instanceof AnySimpleType) {
                 setValue(new UntypedAtomicValue(lexicalForm));
             } else if (getValue().getLength() == 1) { // MHK 2018-11-14 - I don't understand this

@@ -251,7 +251,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     }
                 } else {
                     // base type must be xs:any (if this can happen at all???)
-                    val = new StringItem(e.getValue());
+                    val = new StringValue(e.getValue());
                 }
 //                // Check the value against all the other facets. It's not an error if it's invalid,
 //                // but it makes the enumeration value useless
@@ -670,7 +670,7 @@ public abstract class UserSimpleType extends UserDefinedType
 //                        }
                     }
                 }
-                if (!f.testAtomicValue(new StringItem(normalizedValue))) {
+                if (!f.testAtomicValue(new StringValue(normalizedValue))) {
                     return makeValidationFailure(primitiveValue, this, f);
                 }
             } else if (f instanceof AssertionFacet) {
@@ -818,14 +818,14 @@ public abstract class UserSimpleType extends UserDefinedType
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Simple Type Definition");
+                    return StringValue.bmp("Simple Type Definition");
                 case "implementation":
                     return new ObjectValue<>(type);
                 case "name":
                     if (type.isAnonymousType()) {
                         return EmptySequence.getInstance();
                     } else {
-                        return new StringItem(type.getName(), BuiltInAtomicType.NCNAME);
+                        return new StringValue(type.getName(), BuiltInAtomicType.NCNAME);
                     }
                 case "target namespace":
                     if (type.isAnonymousType()) {
@@ -837,16 +837,16 @@ public abstract class UserSimpleType extends UserDefinedType
                     List<AtomicValue> list = new ArrayList<>();
                     int f = type.getFinalProhibitions();
                     if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
-                        list.add(StringItem.bmp("restriction"));
+                        list.add(StringValue.bmp("restriction"));
                     }
                     if ((f & Derivation.DERIVATION_EXTENSION) != 0) {
-                        list.add(StringItem.bmp("extension"));
+                        list.add(StringValue.bmp("extension"));
                     }
                     if ((f & Derivation.DERIVATION_LIST) != 0) {
-                        list.add(StringItem.bmp("list"));
+                        list.add(StringValue.bmp("list"));
                     }
                     if ((f & Derivation.DERIVATION_UNION) != 0) {
-                        list.add(StringItem.bmp("union"));
+                        list.add(StringValue.bmp("union"));
                     }
                     return new AtomicArray(list);
                 }
@@ -893,7 +893,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     } else if (type.isUnionType()) {
                         variety = "union";
                     }
-                    return new StringItem(variety);
+                    return new StringValue(variety);
                 case "primitive type definition":
                     if (type == BuiltInAtomicType.ANY_ATOMIC || !type.isAtomicType()) {
                         return EmptySequence.getInstance();

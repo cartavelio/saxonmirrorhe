@@ -65,7 +65,7 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
             LabelInfo isString = methodInfo.newLabel("isString");
             LabelInfo isNotString = methodInfo.newLabel("isNotString");
             ga.dup();
-            ga.ifNotInstance(StringItem.class, isNotString);
+            ga.ifNotInstance(StringValue.class, isNotString);
             ga.dup();
             ga.ifInstance(AnyURIValue.class, isNotString);
             ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");

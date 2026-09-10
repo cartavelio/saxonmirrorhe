@@ -184,7 +184,7 @@ public class StandardObjectConverter implements ObjectConverter {
             } else if (value instanceof Short) {
                 return new Int64Value((Short) value, BuiltInAtomicType.SHORT, false);
             } else if (value instanceof String) {
-                return new StringItem((String) value);
+                return new StringValue((String) value);
             } else if (value instanceof BigDecimal) {
                 return new BigDecimalValue((BigDecimal) value);
             } else if (value instanceof BigInteger) {

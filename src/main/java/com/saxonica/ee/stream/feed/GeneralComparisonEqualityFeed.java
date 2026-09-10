@@ -16,7 +16,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 
@@ -37,7 +37,7 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
     // A set of lookup tables, one for each primitive atomic type that has been encountered
     private IntHashMap<Set<AtomicMatchKey>> lookupTable;
     // All untyped atomic values that have been encountered
-    private List<StringItem> untypedValues;
+    private List<StringValue> untypedValues;
     private boolean done = false;
     private final Expression pullOperand;
     private final int implicitTimezone;
@@ -94,8 +94,8 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
                 AtomicValue val;
                 while ((val = (AtomicValue) comparand.next()) != null) {
                     if (val.isUntypedAtomic()) {
-                        untypedValues.add((StringItem)val);
-                        strings.add(((StringItem)val).getXPathMatchKey(collator, implicitTimezone));
+                        untypedValues.add((StringValue)val);
+                        strings.add(((StringValue)val).getXPathMatchKey(collator, implicitTimezone));
                         if (typed != null) {
                             AtomicValue cval = Converter.convert(val, matchType, rules);
                             typed.add(cval.getXPathMatchKey(collator, implicitTimezone));
@@ -118,7 +118,7 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
                         keys.add(val.getXPathMatchKey(collator, implicitTimezone));
                     }
                 }
-                for (StringItem untypedVal : untypedValues) {
+                for (StringValue untypedVal : untypedValues) {
                     IntIterator types = lookupTable.keyIterator();
                     while (types.hasNext()) {
                         int type = types.next();
@@ -143,7 +143,7 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
                     // values from the other operand
                     typed = new HashSet<>(10);
                     lookupTable.put(matchType.getFingerprint(), typed);
-                    for (StringItem val : untypedValues) {
+                    for (StringValue val : untypedValues) {
                         AtomicValue cval = Converter.convert(val, matchType, rules);
                         typed.add(cval.getXPathMatchKey(collator, implicitTimezone));
                     }

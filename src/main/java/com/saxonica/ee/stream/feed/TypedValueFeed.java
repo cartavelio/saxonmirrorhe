@@ -15,7 +15,7 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.str.UnicodeBuilder;
 
 /**
@@ -71,7 +71,7 @@ public class TypedValueFeed extends AbsorptionFeed {
     public void endDocument() throws XPathException {
         depth--;
         if (depth == 0) {
-            append(new StringItem(buffer.toString()));
+            append(new StringValue(buffer.toString()));
         }
     }
 
@@ -111,14 +111,14 @@ public class TypedValueFeed extends AbsorptionFeed {
     public void endElement() throws XPathException {
         depth--;
         if (depth == 0) {
-            append(new StringItem(buffer.toString()));
+            append(new StringValue(buffer.toString()));
         }
     }
 
     @Override
     public void characters(CodePoints chars, Location location, int properties) throws XPathException {
         if (depth == 0) {
-            append(new StringItem(chars.tidy()));
+            append(new StringValue(chars.tidy()));
         } else {
             buffer.append(chars);
         }

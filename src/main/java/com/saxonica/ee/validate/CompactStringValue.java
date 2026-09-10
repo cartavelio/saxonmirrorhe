@@ -9,7 +9,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -34,8 +34,8 @@ public class CompactStringValue implements AtomicSequence {
     }
 
     @Override
-    public StringItem head() {
-        return new StringItem(new String(value));
+    public StringValue head() {
+        return new StringValue(new String(value));
     }
 
     @Override

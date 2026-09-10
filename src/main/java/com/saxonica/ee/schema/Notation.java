@@ -13,7 +13,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.SourceLocator;
 
@@ -215,11 +215,11 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return StringItem.bmp("Notation Declaration");
+                        return StringValue.bmp("Notation Declaration");
                     case "implementation":
                         return new ObjectValue<>(Notation.this);
                     case "name":
-                        return new StringItem(getName(), BuiltInAtomicType.NCNAME);
+                        return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
                         return new AnyURIValue(getTargetNamespace());
                     case "system identifier":

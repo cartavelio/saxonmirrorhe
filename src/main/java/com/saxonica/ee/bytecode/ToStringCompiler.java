@@ -39,14 +39,14 @@ public abstract class ToStringCompiler extends ToItemCompiler {
             LabelInfo returnNull = methodInfo.newLabel("returnNull");
             LabelInfo exit = methodInfo.newLabel("exit");
             compileToPrimitive(compiler, expression, CharSequence.class, new OnEmpty.UnwindAndJump(returnNull));
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
             ga.goTo(exit);
             methodInfo.placeLabel(returnNull);
             ga.pushNull();
             methodInfo.placeLabel(exit);
         } else {
             compileToPrimitive(compiler, expression, CharSequence.class, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
         }
 
     }

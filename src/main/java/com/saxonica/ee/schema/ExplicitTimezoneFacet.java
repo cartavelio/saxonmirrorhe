@@ -125,11 +125,11 @@ public class ExplicitTimezoneFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringItem(getName());
+                    return new StringValue(getName());
                 case "implementation":
                     return new ObjectValue<>(ExplicitTimezoneFacet.this);
                 case "value":
-                    return new StringItem(getValue());
+                    return new StringValue(getValue());
                 case "fixed":
                     return BooleanValue.get(isFixed());
                 default:

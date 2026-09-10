@@ -141,7 +141,7 @@ public abstract class DigitsFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringItem(getName());
+                        return new StringValue(getName());
                     case "implementation":
                         return new ObjectValue<>(DigitsFacet.this);
                     case "value":

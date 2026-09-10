@@ -6,7 +6,7 @@ import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Generate code for a AnyType to String CastExpression
@@ -23,10 +23,10 @@ public class AnyTypeToStringConverterCompiler extends ConverterCompiler {
             LabelInfo end = methodInfo.newLabel("endAnyTypeToItem");
             ga.dup();
             ga.ifNull(end.label());
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
             methodInfo.placeLabel(end);
         } else {
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
         }
     }
 

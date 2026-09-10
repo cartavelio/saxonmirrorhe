@@ -16,7 +16,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.NumericType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -148,7 +148,7 @@ public class ItemCheckerCompiler extends ToIteratorCompiler {
         } else if (requiredType.equals(BuiltInAtomicType.STRING)) {
             errorLab = methodInfo.newLabel("errorLab");
             ga.dup();
-            ga.instanceOf(Type.getType(StringItem.class));
+            ga.instanceOf(Type.getType(StringValue.class));
             ga.swap();
             ga.instanceOf(Type.getType(UntypedAtomicValue.class));
             ga.not();

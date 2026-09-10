@@ -11,7 +11,7 @@ import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -84,7 +84,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             return makeResult(getStaticBaseUriString());
         }
 
-        private static ZeroOrOne<StringItem> makeResult(String baseURI) throws XPathException {
+        private static ZeroOrOne<StringValue> makeResult(String baseURI) throws XPathException {
             if (baseURI == null) {
                 return ZeroOrOne.empty();
             }
@@ -92,7 +92,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             if (parent == null) {
                 return ZeroOrOne.empty();
             }
-            return new ZeroOrOne<>(StringItem.makeStringValue(parent));
+            return new ZeroOrOne<>(StringValue.makeStringValue(parent));
         }
 
     }

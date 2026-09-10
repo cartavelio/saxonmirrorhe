@@ -11,7 +11,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * A rename expression in XQuery Update
@@ -203,7 +203,7 @@ public class RenameExpression extends BasicUpdatingExpression {
         String prefix;
         String localName;
         String uri;
-        if (nameValue instanceof StringItem) {  // which includes UntypedAtomic
+        if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
             String rawName = nameValue.getStringValue();
             try {
                 String[] parts = NameChecker.getQNameParts(rawName);

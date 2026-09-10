@@ -11,7 +11,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashSet;
 
 /**
@@ -289,14 +289,14 @@ public abstract class Particle extends SimpleComponentReference implements UserS
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return StringItem.bmp("Particle");
+                        return StringValue.bmp("Particle");
                     case "implementation":
                         return new ObjectValue<>(Particle.this);
                     case "min occurs":
                         return new Int64Value(getMinOccurs(), BuiltInAtomicType.NON_NEGATIVE_INTEGER, false);
                     case "max occurs":
                         if (getMaxOccurs() < 0) {
-                            return StringItem.bmp("unbounded");
+                            return StringValue.bmp("unbounded");
                         } else {
                             return new Int64Value(getMaxOccurs(), BuiltInAtomicType.NON_NEGATIVE_INTEGER, false);
                         }

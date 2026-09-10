@@ -7,7 +7,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Matches;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Generate code for the fn:matches function
@@ -44,7 +44,7 @@ public class MatchesCompiler extends ToBooleanCompiler {
             ga.dup();
             ga.ifNonNull(notNull.label());
             ga.pop();
-            allocateStatic(compiler, StringItem.EMPTY_STRING);
+            allocateStatic(compiler, StringValue.EMPTY_STRING);
             methodInfo.placeLabel(notNull);
             compiler.compileToItem(arg1);
             ga.dup();

@@ -9,7 +9,7 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.FloatValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Generate code for a Float to String CastExpression
@@ -31,14 +31,14 @@ public class FloatToStringCompiler extends ConverterCompiler {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
             compileToPrimitive(compiler, expression, CharSequence.class, new OnEmpty.UnwindAndJump(empty));
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
             compileToPrimitive(compiler, expression, CharSequence.class, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
         }
     }
 

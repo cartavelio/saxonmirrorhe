@@ -20,7 +20,7 @@ import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -325,7 +325,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
 
         @Override
         public void append(Item item) throws XPathException {
-            if (item instanceof StringItem && ((StringItem) item).isEmpty()) {
+            if (item instanceof StringValue && ((StringValue) item).isEmpty()) {
                 if (isEmpty()) {
                     tentativeContent.add(new OutputterEvent.Append(item, Loc.NONE, ReceiverOption.NONE));
                 } else {

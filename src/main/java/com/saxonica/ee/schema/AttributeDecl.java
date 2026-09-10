@@ -533,11 +533,11 @@ public final class AttributeDecl extends SchemaStructure
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Attribute Declaration");
+                    return StringValue.bmp("Attribute Declaration");
                 case "implementation":
                     return new ObjectValue<>(AttributeDecl.this);
                 case "name":
-                    return new StringItem(getName(), BuiltInAtomicType.NCNAME);
+                    return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
                     return new AnyURIValue((getTargetNamespace()));
                 case "type definition":
@@ -547,9 +547,9 @@ public final class AttributeDecl extends SchemaStructure
                         String key1 = arguments1[0].head().getStringValue();
                         switch (key1) {
                             case "class":
-                                return StringItem.bmp("Scope");
+                                return StringValue.bmp("Scope");
                             case "variety":
-                                return StringItem.bmp(isGlobal() ? "global" : "local");
+                                return StringValue.bmp(isGlobal() ? "global" : "local");
                             case "parent":
                                 if (isGlobal()) {
                                     return EmptySequence.getInstance();

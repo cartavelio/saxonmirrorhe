@@ -12,7 +12,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
 
@@ -221,7 +221,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Type Alternative");
+                    return StringValue.bmp("Type Alternative");
                 case "implementation":
                     return new ObjectValue<>(this);
                 case "test":

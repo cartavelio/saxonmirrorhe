@@ -5,7 +5,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * Implements the saxon:characters() function. This splits a supplied string into a sequence of
@@ -27,7 +27,7 @@ public class CharactersFn extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringItem s = (StringItem)arguments[0].head();
+        StringValue s = (StringValue)arguments[0].head();
 //        SequenceIterator iter = new StringValue.CharacterIterator(s.getStringValueCS());
 //        ItemMappingIterator mapper = new ItemMappingIterator(iter, code -> {
 //            StringBuilder buff = new StringBuilder(2);

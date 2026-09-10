@@ -7,7 +7,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.testdriver.Environment;
 import net.sf.saxon.testdriver.TestOutcome;
 import net.sf.saxon.tree.linked.ProcInstImpl;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.script.ScriptException;
 import javax.xml.transform.Source;
@@ -303,7 +303,7 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
                 for (Map.Entry<String, String> sec : secondaryResults.entrySet()) {
                     URI uri = baseOutputURI.resolve(sec.getKey());
                     String result = sec.getValue();
-                    outcome.setSecondaryResult(uri, XdmAtomicValue.wrap(new StringItem(result)), null);
+                    outcome.setSecondaryResult(uri, XdmAtomicValue.wrap(new StringValue(result)), null);
                     if (result.startsWith("<")) {
                         try {
                             DocumentBuilder builder = env.processor.newDocumentBuilder();

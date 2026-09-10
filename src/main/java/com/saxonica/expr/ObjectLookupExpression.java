@@ -10,7 +10,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
 
@@ -144,7 +144,7 @@ public class ObjectLookupExpression extends LookupExpression {
             GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
             String key = rhs.getUnicodeStringValue().toString();
             return ItemMappingIterator.map(baseIterator,
-                    item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringItem) rhs));
+                    item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringValue) rhs));
         }
 
     }

@@ -50,7 +50,7 @@ public class EXPathFile {
     public static final String ERROR_INDEX_OUT_OF_BOUNDS = "out-of-range";  //FILE0006
     public static final String ERROR_IO = "io-error";   //FILE9999
 
-    private static final One<StringItem> UTF8 = new One<StringItem>(StringItem.bmp("UTF-8"));
+    private static final One<StringValue> UTF8 = new One<StringValue>(StringValue.bmp("UTF-8"));
 
     public static final String NEWLINE = System.getProperty("line.separator");
 
@@ -64,7 +64,7 @@ public class EXPathFile {
 //    3.1 file:exists($path as xs:string)
 //        as xs:boolean
 
-    public static One<BooleanValue> exists(One<StringItem> path) throws XPathException {
+    public static One<BooleanValue> exists(One<StringValue> path) throws XPathException {
         File file = toFile(path.head().getStringValue());
         return One.bool(file.exists());
     }
@@ -72,7 +72,7 @@ public class EXPathFile {
 //    3.2 file:is-dir($path as xs:string)
 //        as xs:boolean
 
-    public static One<BooleanValue> isDir(One<StringItem> path) throws XPathException {
+    public static One<BooleanValue> isDir(One<StringValue> path) throws XPathException {
         File file = toFile(path.head().getStringValue());
         return One.bool(file.exists() && file.isDirectory());
     }
@@ -80,7 +80,7 @@ public class EXPathFile {
 //    3.3 file:is-file($path as xs:string)
 //        as xs:boolean
 
-    public static One<BooleanValue> isFile(One<StringItem> path) throws XPathException {
+    public static One<BooleanValue> isFile(One<StringValue> path) throws XPathException {
         File file = toFile(path.head().getStringValue());
         return One.bool(file.exists() && file.isFile());
     }
@@ -88,7 +88,7 @@ public class EXPathFile {
 //    3.4 file:last-modified($path as xs:string)
 //        as xs:dateTime
 
-    public static One<DateTimeValue> lastModified(One<StringItem> path) throws XPathException {
+    public static One<DateTimeValue> lastModified(One<StringValue> path) throws XPathException {
         File file = toFile(path.head().getStringValue());
         if (!file.exists()) {
             error("File " + path + " does not exist", ERROR_PATH_NOT_EXIST);
@@ -100,7 +100,7 @@ public class EXPathFile {
 //    3.5 file:size($file as xs:string)
 //        as xs:integer
 
-    public static One<IntegerValue> size(One<StringItem> path) throws XPathException {
+    public static One<IntegerValue> size(One<StringValue> path) throws XPathException {
         File file = toExistingFile(path.head().getStringValue());
         return One.integer(file.isDirectory() ? 0 : file.length());
     }
@@ -110,7 +110,7 @@ public class EXPathFile {
 //        $items as item()*)
 //        as empty-sequence()
 
-    public static void append(XPathContext context, One<StringItem> file, ZeroOrMore<Item> contents) throws XPathException {
+    public static void append(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents) throws XPathException {
         Properties props = new Properties();
         props.setProperty("method", "xml");
         serialize(context, file.head().getStringValue(), true, contents, new SerializationProperties(props));
@@ -123,7 +123,7 @@ public class EXPathFile {
 //        $params element(output:serialization-parameters))
 //        as empty-sequence()
 
-    public static void append(XPathContext context, One<StringItem> file, ZeroOrMore<Item> contents, One<NodeInfo> params) throws XPathException {
+    public static void append(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents, One<NodeInfo> params) throws XPathException {
         SerializationParamsHandler sph = new SerializationParamsHandler();
         sph.setSerializationParams(params.head());
         SerializationProperties props = sph.getSerializationProperties();
@@ -166,7 +166,7 @@ public class EXPathFile {
 //        $contents as xs:string)
 //        as empty-sequence()
 
-    public static void appendText(One<StringItem> path, One<StringItem> contents) throws XPathException {
+    public static void appendText(One<StringValue> path, One<StringValue> contents) throws XPathException {
 
         appendText(path, contents, UTF8);
     }
@@ -176,7 +176,7 @@ public class EXPathFile {
 //        $encoding as xs:string)
 //        as empty-sequence()
 
-    public static void appendText(One<StringItem> path, One<StringItem> contents, One<StringItem> encoding) throws XPathException {
+    public static void appendText(One<StringValue> path, One<StringValue> contents, One<StringValue> encoding) throws XPathException {
         File file = null;
         Writer writer;
         try {
@@ -200,7 +200,7 @@ public class EXPathFile {
 //        $contents as xs:string*)
 //        as empty-sequence()
 
-    public static void appendTextLines(One<StringItem> path, ZeroOrMore<StringItem> contents) throws XPathException {
+    public static void appendTextLines(One<StringValue> path, ZeroOrMore<StringValue> contents) throws XPathException {
         appendTextLines(path, contents, UTF8);
     }
 //
@@ -209,7 +209,7 @@ public class EXPathFile {
 //        $encoding as xs:string)
 //        as empty-sequence()
 
-    public static void appendTextLines(One<StringItem> path, ZeroOrMore<StringItem> contents, One<StringItem> encoding) throws XPathException {
+    public static void appendTextLines(One<StringValue> path, ZeroOrMore<StringValue> contents, One<StringValue> encoding) throws XPathException {
         File file = null;
         try {
             file = toFile(path.head().getStringValue());
@@ -217,7 +217,7 @@ public class EXPathFile {
                 error("Path " + path + " is a directory", ERROR_PATH_IS_DIRECTORY);
             }
             Writer writer = new OutputStreamWriter(new FileOutputStream(file, true), encoding.head().getStringValue());
-            for (StringItem sv : contents) {
+            for (StringValue sv : contents) {
                 writer.write(sv.getStringValue());
                 writer.write(NEWLINE);
             }
@@ -234,7 +234,7 @@ public class EXPathFile {
 //          $contents as xs:base64Binary*)
 //          as empty-sequence()
 
-    public static void appendBinary(One<StringItem> path, ZeroOrMore<Base64BinaryValue> contents) throws XPathException {
+    public static void appendBinary(One<StringValue> path, ZeroOrMore<Base64BinaryValue> contents) throws XPathException {
         try {
             File file = toFile(path.head().getStringValue());
             if (file.isDirectory()) {
@@ -256,7 +256,7 @@ public class EXPathFile {
 //          $target as xs:string)
 //          as empty-sequence()
 
-    public static void copy(One<StringItem> source, One<StringItem> target) throws XPathException {
+    public static void copy(One<StringValue> source, One<StringValue> target) throws XPathException {
         File from = toFile(source.head().getStringValue());
         if (from.exists() && from.isDirectory()) {
             File to = toFile(target.head().getStringValue());
@@ -341,7 +341,7 @@ public class EXPathFile {
 //    4.6 file:create-dir($dir as xs:string)
 //          as empty-sequence()
 
-    public static void createDir(One<StringItem> dir) throws XPathException {
+    public static void createDir(One<StringValue> dir) throws XPathException {
         File file = toFile(dir.head().getStringValue());
         if (file.exists()) {
             if (!file.isDirectory()) {
@@ -366,7 +366,7 @@ public class EXPathFile {
 
     //    4.7 file:create-temp-dir($prefix as xs:string, $suffix as xs:string)
 //          as xs:string
-    public static One<StringItem> createTempDir(XPathContext context, One<StringItem> prefix, One<StringItem> suffix) throws XPathException, IOException {
+    public static One<StringValue> createTempDir(XPathContext context, One<StringValue> prefix, One<StringValue> suffix) throws XPathException, IOException {
         File test = File.createTempFile(prefix.head().getStringValue(), suffix.head().getStringValue());
         String path = test.getCanonicalPath();
         test.delete();
@@ -378,7 +378,7 @@ public class EXPathFile {
 
     //    4.7 file:create-temp-dir($prefix as xs:string, $suffix as xs:string, $dir as xs:string)
 //          as xs:string
-    public static One<StringItem> createTempDir(XPathContext context, One<StringItem> prefix, One<StringItem> suffix, One<StringItem> dir) throws XPathException, IOException {
+    public static One<StringValue> createTempDir(XPathContext context, One<StringValue> prefix, One<StringValue> suffix, One<StringValue> dir) throws XPathException, IOException {
         File file = toFile(dir.head().getStringValue());
         File test = File.createTempFile(prefix.head().getStringValue(), suffix.head().getStringValue(), file);
         String path = test.getCanonicalPath();
@@ -391,7 +391,7 @@ public class EXPathFile {
 
     //    4.8 file:create-temp-file($prefix as xs:string, $suffix as xs:string)
 //          as xs:string
-    public static One<StringItem> createTempFile(XPathContext context, One<StringItem> prefix, One<StringItem> suffix) throws XPathException, IOException {
+    public static One<StringValue> createTempFile(XPathContext context, One<StringValue> prefix, One<StringValue> suffix) throws XPathException, IOException {
         File temp = File.createTempFile(prefix.head().getStringValue(), suffix.head().getStringValue());
         deleteTempFile(context, temp);
         return One.string(temp.getCanonicalPath());
@@ -399,7 +399,7 @@ public class EXPathFile {
 
     //    4.8 file:create-temp-file($prefix as xs:string, $suffix as xs:string, $dir as xs:string)
 //          as xs:string
-    public static One<StringItem> createTempFile(XPathContext context, One<StringItem> prefix, One<StringItem> suffix, One<StringItem> dir) throws XPathException, IOException {
+    public static One<StringValue> createTempFile(XPathContext context, One<StringValue> prefix, One<StringValue> suffix, One<StringValue> dir) throws XPathException, IOException {
         File file = toFile(dir.head().getStringValue());
         File temp = File.createTempFile(prefix.head().getStringValue(), suffix.head().getStringValue(), file);
         deleteTempFile(context, temp);
@@ -409,7 +409,7 @@ public class EXPathFile {
 //    4.9 file:delete($path as xs:string)
 //          as empty-sequence()
 
-    public static void delete(One<StringItem> path) throws XPathException {
+    public static void delete(One<StringValue> path) throws XPathException {
         File file = toExistingFile(path.head().getStringValue());
 //        System.err.println("Can write parent:" + path + " = " + file.getParentFile().canWrite());
 //        System.err.println("Can write:" + path + " = " + file.canWrite());
@@ -426,7 +426,7 @@ public class EXPathFile {
 //          $recursive as xs:boolean)
 //          as empty-sequence()
 
-    public static void delete(One<StringItem> path, boolean recurse) throws XPathException {
+    public static void delete(One<StringValue> path, boolean recurse) throws XPathException {
         if (!recurse) {
             delete(path);
         } else {
@@ -453,7 +453,7 @@ public class EXPathFile {
 //    4.10 file:list($dir as xs:string)
 //        as xs:string*
 
-    public static ZeroOrMore<StringItem> list(One<StringItem> dir) throws XPathException {
+    public static ZeroOrMore<StringValue> list(One<StringValue> dir) throws XPathException {
         return list(dir, new One<BooleanValue>(BooleanValue.FALSE));
     }
 
@@ -462,7 +462,7 @@ public class EXPathFile {
 //        $recursive as xs:boolean)
 //        as xs:string*
 
-    public static ZeroOrMore<StringItem> list(One<StringItem> dir, One<BooleanValue> recursive) throws XPathException {
+    public static ZeroOrMore<StringValue> list(One<StringValue> dir, One<BooleanValue> recursive) throws XPathException {
         File file = toExistingDirectory(dir.head().getStringValue());
         if (!file.isDirectory()) {
             error("File " + dir + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
@@ -473,9 +473,9 @@ public class EXPathFile {
                 return true;
             }
         };
-        List<StringItem> result = new ArrayList<StringItem>();
+        List<StringValue> result = new ArrayList<StringValue>();
         gatherDirectoryContents(file, "", recursive.head().getBooleanValue(), all, result);
-        return new ZeroOrMore<StringItem>(result);
+        return new ZeroOrMore<StringValue>(result);
     }
 
 //
@@ -484,19 +484,19 @@ public class EXPathFile {
 //        $pattern as xs:string)
 //        as xs:string*
 
-    public static ZeroOrMore<StringItem> list(One<StringItem> dir, One<BooleanValue> recursive, One<StringItem> pattern) throws XPathException {
+    public static ZeroOrMore<StringValue> list(One<StringValue> dir, One<BooleanValue> recursive, One<StringValue> pattern) throws XPathException {
         //File file = toFile(dir);
         File file = toExistingDirectory(dir.head().getStringValue());
         if (!file.isDirectory()) {
             error("File " + dir + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
         }
-        List<StringItem> result = new ArrayList<StringItem>();
+        List<StringValue> result = new ArrayList<StringValue>();
         FilenameFilter filter = URIQueryParameters.makeGlobFilter(pattern.head().getStringValue());
         gatherDirectoryContents(file, "", recursive.head().getBooleanValue(), filter, result);
         return new ZeroOrMore(result);
     }
 
-    private static void gatherDirectoryContents(File dir, String prefix, boolean recurse, FilenameFilter filter, List<StringItem> result) {
+    private static void gatherDirectoryContents(File dir, String prefix, boolean recurse, FilenameFilter filter, List<StringValue> result) {
         URIQueryParameters.RegexFilter filter2 =
                 filter instanceof URIQueryParameters.RegexFilter ? (URIQueryParameters.RegexFilter) filter : null;
         for (File file : dir.listFiles(filter)) {
@@ -506,7 +506,7 @@ public class EXPathFile {
                 if (file.isDirectory()) {
                     name += File.separator;
                 }
-                result.add(new StringItem(name));
+                result.add(new StringValue(name));
             }
         }
         if (recurse) {
@@ -525,7 +525,7 @@ public class EXPathFile {
 //        as empty-sequence()
 
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
-    public static void move(One<StringItem> source, One<StringItem> target) throws XPathException {
+    public static void move(One<StringValue> source, One<StringValue> target) throws XPathException {
         File from = toExistingFile(source.head().getStringValue());
         File to = toFile(target.head().getStringValue());
         if (from.isDirectory()) {
@@ -581,7 +581,7 @@ public class EXPathFile {
 //    4.12 file:read-binary($file as xs:string)
 //        as xs:base64Binary
 
-    public static One<Base64BinaryValue> readBinary(One<StringItem> path) throws XPathException {
+    public static One<Base64BinaryValue> readBinary(One<StringValue> path) throws XPathException {
         File file = checkReadSource(path.head().getStringValue());
         return new One<Base64BinaryValue>(
                 readBinary(file, path.head().getStringValue(), 0, (int) file.length()));
@@ -590,7 +590,7 @@ public class EXPathFile {
 //    4.12 file:read-binary($file as xs:string, $offset as xs:integer)
 //        as xs:base64Binary
 
-    public static One<Base64BinaryValue> readBinary(One<StringItem> path, One<IntegerValue> offset) throws XPathException {
+    public static One<Base64BinaryValue> readBinary(One<StringValue> path, One<IntegerValue> offset) throws XPathException {
         File file = checkReadSource(path.head().getStringValue());
         return new One<Base64BinaryValue>(
                 readBinary(file, path.head().getStringValue(),
@@ -600,7 +600,7 @@ public class EXPathFile {
 //    4.12 file:read-binary($file as xs:string, $offset as xs:integer, $length as xs:integer)
 //        as xs:base64Binary
 
-    public static One<Base64BinaryValue> readBinary(One<StringItem> path, One<IntegerValue> offset, One<IntegerValue> length) throws XPathException {
+    public static One<Base64BinaryValue> readBinary(One<StringValue> path, One<IntegerValue> offset, One<IntegerValue> length) throws XPathException {
         File file = checkReadSource(path.head().getStringValue());
         return new One<Base64BinaryValue>(
                 readBinary(file, path.head().getStringValue(), offset.head().longValue(), length.head().longValue()));
@@ -609,7 +609,7 @@ public class EXPathFile {
     //    4.13 file:read-text($file as xs:string)
 //        as xs:string
 
-    public static One<StringItem> readText(XPathContext context, One<StringItem> file) throws XPathException {
+    public static One<StringValue> readText(XPathContext context, One<StringValue> file) throws XPathException {
         return readText(context, file, UTF8);
     }
 //
@@ -617,7 +617,7 @@ public class EXPathFile {
 //        $encoding as xs:string)
 //        as xs:string
 
-    public static One<StringItem> readText(XPathContext context, One<StringItem> path, One<StringItem> encoding) throws XPathException {
+    public static One<StringValue> readText(XPathContext context, One<StringValue> path, One<StringValue> encoding) throws XPathException {
         File file = checkReadSource(path.head().getStringValue());
         /*File file = toExistingFile(path);
         if (file.isDirectory()) {
@@ -696,7 +696,7 @@ public class EXPathFile {
 //    4.14 file:read-text-lines($file as xs:string)
 //        as xs:string*
 
-    public static ZeroOrMore<StringItem> readTextLines(One<StringItem> path) throws XPathException {
+    public static ZeroOrMore<StringValue> readTextLines(One<StringValue> path) throws XPathException {
         return readTextLines(path, UTF8);
     }
 //
@@ -705,7 +705,7 @@ public class EXPathFile {
 //        as xs:string*
 
 
-    public static ZeroOrMore<StringItem> readTextLines(One<StringItem> path, One<StringItem> encoding) throws XPathException {
+    public static ZeroOrMore<StringValue> readTextLines(One<StringValue> path, One<StringValue> encoding) throws XPathException {
         File file = checkReadSource(path.head().getStringValue());
         /*File file = toExistingFile(path);
         if (file.isDirectory()) {
@@ -765,8 +765,8 @@ public class EXPathFile {
         }
 
         @Override
-        public StringItem next() {
-            StringItem result = null;
+        public StringValue next() {
+            StringValue result = null;
             result = super.next();
             return result;
         }
@@ -777,7 +777,7 @@ public class EXPathFile {
 //        $contents as item()*)
 //        as empty-sequence()
 
-    public static void write(XPathContext context, One<StringItem> file, ZeroOrMore<Item> contents) throws XPathException {
+    public static void write(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents) throws XPathException {
         serialize(context, file.head().getStringValue(), false, contents, context.getConfiguration().obtainDefaultSerializationProperties());
     }
 //
@@ -786,7 +786,7 @@ public class EXPathFile {
 //        $params as element(output:serialization-parameters))
 //        as empty-sequence()
 
-    public static void write(XPathContext context, One<StringItem> file, ZeroOrMore<Item> contents, One<NodeInfo> params) throws XPathException {
+    public static void write(XPathContext context, One<StringValue> file, ZeroOrMore<Item> contents, One<NodeInfo> params) throws XPathException {
         SerializationParamsHandler sph = new SerializationParamsHandler();
         sph.setSerializationParams(params.head());
         SerializationProperties props = sph.getSerializationProperties();
@@ -815,7 +815,7 @@ public class EXPathFile {
 //        $contents as base64Binary)
 //        as empty-sequence()
 
-    public static void writeBinary(One<StringItem> path, One<Base64BinaryValue> contents) throws XPathException {
+    public static void writeBinary(One<StringValue> path, One<Base64BinaryValue> contents) throws XPathException {
         try {
             File file = checkWriteDestination(path.head().getStringValue());
             FileOutputStream stream = new FileOutputStream(file);
@@ -830,7 +830,7 @@ public class EXPathFile {
 //        $contents as base64Binary, $offset as xs:integer)
 //        as empty-sequence()
 
-    public static void writeBinary(One<StringItem> path, One<Base64BinaryValue> contents, One<IntegerValue> offset) throws XPathException {
+    public static void writeBinary(One<StringValue> path, One<Base64BinaryValue> contents, One<IntegerValue> offset) throws XPathException {
         try {
             File file = checkWriteDestination(path.head().getStringValue());
             long offset0 = offset.head().longValue();
@@ -869,7 +869,7 @@ public class EXPathFile {
 //        $contents as xs:string)
 //        as empty-sequence()
 
-    public static void writeText(One<StringItem> path, One<StringItem> contents) throws XPathException {
+    public static void writeText(One<StringValue> path, One<StringValue> contents) throws XPathException {
         writeText(path, contents, UTF8);
     }
 //
@@ -878,7 +878,7 @@ public class EXPathFile {
 //        $encoding as xs:string)
 //        as empty-sequence()
 
-    public static void writeText(One<StringItem> path, One<StringItem> contents, One<StringItem> encoding) throws XPathException {
+    public static void writeText(One<StringValue> path, One<StringValue> contents, One<StringValue> encoding) throws XPathException {
         File file = null;
         try {
             file = checkWriteDestination(path.head().getStringValue());
@@ -901,7 +901,7 @@ public class EXPathFile {
 //        $contents as xs:string*)
 //        as empty-sequence()
 
-    public static void writeTextLines(One<StringItem> path, ZeroOrMore<StringItem> contents) throws XPathException {
+    public static void writeTextLines(One<StringValue> path, ZeroOrMore<StringValue> contents) throws XPathException {
         writeTextLines(path, contents, UTF8);
     }
 
@@ -910,7 +910,7 @@ public class EXPathFile {
 //        $encoding as xs:string)
 //        as empty-sequence()
 
-    public static void writeTextLines(One<StringItem> path, ZeroOrMore<StringItem> contents, One<StringItem> encoding) throws XPathException {
+    public static void writeTextLines(One<StringValue> path, ZeroOrMore<StringValue> contents, One<StringValue> encoding) throws XPathException {
         File file = null;
         try {
             file = checkWriteDestination(path.head().getStringValue());
@@ -943,7 +943,7 @@ public class EXPathFile {
      is somewhat quirky.
      */
 
-    public static One<StringItem> name(String path) throws XPathException {
+    public static One<StringValue> name(String path) throws XPathException {
         if (path.equals("/") || path.equals("")) {  // || !path.contains(File.separator)
             return One.string("");
         }
@@ -954,9 +954,9 @@ public class EXPathFile {
 //    5.2 file:parent($path as xs:string)
 //        as xs:string?
 
-    public static ZeroOrOne<StringItem> parent(String path) throws XPathException {
+    public static ZeroOrOne<StringValue> parent(String path) throws XPathException {
         String p = _parent(path);
-        return new ZeroOrOne<StringItem>(p == null ? null : new StringItem(p));
+        return new ZeroOrOne<StringValue>(p == null ? null : new StringValue(p));
     }
 
     public static String _parent(String path) throws XPathException {
@@ -976,14 +976,14 @@ public class EXPathFile {
 //    5.3 file:children($dir as xs:string)
 //        as xs:string*
 
-    public static ZeroOrMore<StringItem> children(One<StringItem> dir) throws XPathException {
-        List<StringItem> result = new ArrayList<StringItem>();
+    public static ZeroOrMore<StringValue> children(One<StringValue> dir) throws XPathException {
+        List<StringValue> result = new ArrayList<StringValue>();
         File fd = toExistingDirectory(dir.head().getStringValue());
         if (!fd.isDirectory()) {
             error("File " + dir + " is not a directory", ERROR_PATH_NOT_DIRECTORY);
         }
         for (File file : fd.listFiles()){
-             result.add(new StringItem(file.getAbsolutePath()+(file.isDirectory()?File.separator:"")));
+             result.add(new StringValue(file.getAbsolutePath()+(file.isDirectory()?File.separator:"")));
         }
         return new ZeroOrMore(result);
     }
@@ -1046,7 +1046,7 @@ public class EXPathFile {
 //    4.3 file:path-to-native($path as xs:string)
 //        as xs:string
 
-    public static One<StringItem> pathToNative(One<StringItem> path) throws XPathException {
+    public static One<StringValue> pathToNative(One<StringValue> path) throws XPathException {
         File file = toFile(path.head().getStringValue());
 
         try {
@@ -1063,7 +1063,7 @@ public class EXPathFile {
 //    4.4 file:path-to-uri($path as xs:string)
 //        as xs:anyURI
 
-    public static One<AnyURIValue> pathToUri(One<StringItem> path) throws XPathException {
+    public static One<AnyURIValue> pathToUri(One<StringValue> path) throws XPathException {
         String filePath = path.head().getStringValue();
         URI uri = null;
         if (File.separator.equals("\\") && (filePath.startsWith("\\\\") || filePath.startsWith("//"))) {
@@ -1079,7 +1079,7 @@ public class EXPathFile {
 //    5.6 file:resolve-path($path as xs:string)
 //        as xs:string
 
-    public static One<StringItem> resolvePath(One<StringItem> path) throws XPathException {
+    public static One<StringValue> resolvePath(One<StringValue> path) throws XPathException {
         File file = toFile(path.head().getStringValue());
         return One.string(file.getAbsolutePath() + (file.isDirectory() ? File.separator : ""));
     }
@@ -1089,26 +1089,26 @@ public class EXPathFile {
 
 //  6.1 file:dir-separator() as xs:string
 
-    public static One<StringItem> dirSeparator() {
+    public static One<StringValue> dirSeparator() {
         return One.string(File.separator);
     }
 
 
 //  6.2 file:line-separator() as xs:string
 
-    public static One<StringItem> lineSeparator() {
+    public static One<StringValue> lineSeparator() {
         return One.string(NEWLINE);
     }
 
 //  6.3 file:path-separator() as xs:string
 
-    public static One<StringItem> pathSeparator() {
+    public static One<StringValue> pathSeparator() {
         return One.string(File.pathSeparator);
     }
 
     //   6.4 file:temp-dir()
 //          as xs:string
-    public static One<StringItem> tempDir() {
+    public static One<StringValue> tempDir() {
         return One.string(System.getProperty("java.io.tmpdir"));
     }
 
@@ -1133,7 +1133,7 @@ public class EXPathFile {
 //   6.6 file:current-dir()
 //        as xs:string
 
-    public static One<StringItem> currentDir() throws XPathException {
+    public static One<StringValue> currentDir() throws XPathException {
         File file = toFile(".");
         return One.string(file.getAbsolutePath() + (file.isDirectory() ? File.separator : ""));
     }

@@ -14,7 +14,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
@@ -48,15 +48,15 @@ public class Serialize extends SystemFunction {
      */
 
     @Override
-    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo) arguments[0].head();
         if (node == null) {
-            return StringItem.EMPTY_STRING;
+            return StringValue.EMPTY_STRING;
         }
         Properties props = null;
         SerializationProperties outputProps;
         Item secondArg = arguments[1].head();
-        if (secondArg instanceof StringItem) {
+        if (secondArg instanceof StringValue) {
             String lexicalName = secondArg.getStringValue();
             PackageData pack = getRetainedStaticContext().getPackageData();
             if (pack instanceof StylesheetPackage) {
@@ -98,7 +98,7 @@ public class Serialize extends SystemFunction {
         out.open();
         node.copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
         out.close();
-        return new StringItem(result.toString());
+        return new StringValue(result.toString());
     }
 
 

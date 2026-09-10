@@ -329,7 +329,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 ga.ifNotInstance(NumericValue.class, notNumeric0);
 
                 ga.loadArgOrLocal(item0Var);
-                ga.checkClass(StringItem.class);
+                ga.checkClass(StringValue.class);
                 ga.loadArgOrLocal(item1Var);
                 ga.checkClass(NumericValue.class);
                 ga.push(comparison.getSingletonOperator());
@@ -337,7 +337,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 //                quickCompare(
 //                        StringItem a0, NumericValue a1, int operator, ConversionRules rules)
                 ga.invokeStaticMethod(UntypedNumericComparer.class, "quickCompare",
-                                      StringItem.class, NumericValue.class, Integer.TYPE, ConversionRules.class);
+                                      StringValue.class, NumericValue.class, Integer.TYPE, ConversionRules.class);
                 ga.goTo(end);
 
 //                Converter untypedToDouble = rules.getConverter(BuiltInAtomicType.UNTYPED_ATOMIC, BuiltInAtomicType.DOUBLE);
@@ -517,10 +517,10 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                 case Token.FEQ:
                 case Token.FNE:
                     ga.loadLocal(item0Var);
-                    ga.checkClass(StringItem.class);
+                    ga.checkClass(StringValue.class);
                     ga.loadLocal(item1Var);
-                    ga.checkClass(StringItem.class);
-                    ga.invokeInstanceMethod(StringItem.class, "equals", Object.class);
+                    ga.checkClass(StringValue.class);
+                    ga.invokeInstanceMethod(StringValue.class, "equals", Object.class);
                     if (op == Token.FNE) {
                         ga.not();
                     }
@@ -549,16 +549,16 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                     LabelInfo comparisonDone = methodInfo.newLabel("comparisonDone");
                     if (!lhsIsBmp) {
                         ga.loadLocal(item0Var);
-                        ga.checkClass(StringItem.class);
-                        ga.invokeInstanceMethod(StringItem.class, "containsSurrogatePairs");
+                        ga.checkClass(StringValue.class);
+                        ga.invokeInstanceMethod(StringValue.class, "containsSurrogatePairs");
                         ga.ifZCmp(GeneratorAdapter.NE, hasSurrogates.label());
                     }
                     if (rhsIsBmp) {
                         ga.goTo(noSurrogates.label());
                     } else {
                         ga.loadLocal(item1Var);
-                        ga.checkClass(StringItem.class);
-                        ga.invokeInstanceMethod(StringItem.class, "containsSurrogatePairs");
+                        ga.checkClass(StringValue.class);
+                        ga.invokeInstanceMethod(StringValue.class, "containsSurrogatePairs");
                         ga.ifZCmp(GeneratorAdapter.EQ, noSurrogates.label());
                     }
                     methodInfo.placeLabel(hasSurrogates);

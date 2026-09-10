@@ -17,7 +17,7 @@ import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -384,7 +384,7 @@ public class RunJSTransform {
                 result.add(new QNameValue(StructuredQName.fromEQName((value)), BuiltInAtomicType.QNAME));
             } else {
                 BuiltInAtomicType bat = (BuiltInAtomicType) BuiltInType.getSchemaTypeByLocalName(type);
-                AtomicValue av = Converter.convert(new StringItem(value), bat, ConversionRules.DEFAULT);
+                AtomicValue av = Converter.convert(new StringValue(value), bat, ConversionRules.DEFAULT);
                 result.add(av);
             }
         }
@@ -416,7 +416,7 @@ public class RunJSTransform {
             String stringValue = (String)som.callMember("toString");
             BuiltInAtomicType bat = (BuiltInAtomicType) BuiltInType.getSchemaTypeByLocalName(type);
             try {
-                items.add(Converter.convert(new StringItem(stringValue), bat, ConversionRules.DEFAULT));
+                items.add(Converter.convert(new StringValue(stringValue), bat, ConversionRules.DEFAULT));
             } catch (ValidationException e) {
                 e.printStackTrace();
             }

@@ -16,7 +16,7 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -305,13 +305,13 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
         register("replace-with", 3, ReplaceWith.class, BuiltInAtomicType.STRING,
                  ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, stringReplacer, ONE, null);
 
         register("replace-with", 4, ReplaceWith.class, BuiltInAtomicType.STRING,
                  ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, stringReplacer, ONE, null)
                 .arg(3, BuiltInAtomicType.STRING, ONE, null);

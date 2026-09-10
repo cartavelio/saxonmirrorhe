@@ -178,7 +178,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             IntegerValue wait = (IntegerValue)arguments[0].head();
-            StringItem documents = (StringItem)arguments[1].head();
+            StringValue documents = (StringValue)arguments[1].head();
             ObjectValue<Expression> wrappedActionObject = (ObjectValue<Expression>) arguments[2].head();
             Expression action = wrappedActionObject.getObject();
             if (documents != null) {
@@ -243,7 +243,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     private static Sequence convertFromJavaScript(Object result) throws XPathException {
         //try {
             if (result instanceof String) {
-                return new StringItem((String)result);
+                return new StringValue((String)result);
             } else if (result instanceof Double) {
                 return new DoubleValue((Double)result);
             } else if (result instanceof Boolean) {

@@ -22,7 +22,7 @@ import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
                 // of JDBC-Specifications
                 String result = rs.getString(col);
                 String sqlName = metaData.getColumnName(col);
-                map.initialPut(sqlName, new StringItem(result));
+                map.initialPut(sqlName, new StringValue(result));
                 // TODO: use SQL data type
             }
             out.add(map);

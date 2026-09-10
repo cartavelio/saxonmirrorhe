@@ -75,8 +75,8 @@ public abstract class LengthRangeFacet extends Facet {
 
     @Override
     public boolean testAtomicValue(final AtomicValue value) {
-        if (value instanceof StringItem) { //includes AnyURIValue
-            return testLength(((StringItem) value).length32());
+        if (value instanceof StringValue) { //includes AnyURIValue
+            return testLength(((StringValue) value).length32());
         } else if (value instanceof HexBinaryValue) {
             return testLength(((HexBinaryValue) value).getLengthInOctets());
         } else if (value instanceof Base64BinaryValue) {
@@ -104,7 +104,7 @@ public abstract class LengthRangeFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringItem(getName());
+                        return new StringValue(getName());
                     case "implementation":
                         return new ObjectValue<>(LengthRangeFacet.this);
                     case "value":

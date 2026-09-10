@@ -11,7 +11,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -70,20 +70,20 @@ public class AtomicTypeValidatorCompiler {
             int unicodeLoc = -1;
             int lengthLoc = -1;
             if (needUnicode) {
-                unicodeLoc = ga.newLocal(StringItem.class);
+                unicodeLoc = ga.newLocal(StringValue.class);
                 ga.loadArg(0);
-                ga.invokeStaticMethod(StringItem.class, "makeUnicodeString", CharSequence.class);   // TODO: needs fixing
+                ga.invokeStaticMethod(StringValue.class, "makeUnicodeString", CharSequence.class);   // TODO: needs fixing
                 ga.storeLocal(unicodeLoc);
             }
             if (needLength) {
                 lengthLoc = ga.newLocal(Integer.TYPE);
                 if (needUnicode) {
                     ga.loadLocal(unicodeLoc);
-                    ga.invokeInstanceMethod(StringItem.class, "length");
+                    ga.invokeInstanceMethod(StringValue.class, "length");
                     ga.storeLocal(lengthLoc);
                 } else {
                     ga.loadArg(0);
-                    ga.invokeStaticMethod(StringItem.class, "getStringLength", CharSequence.class);
+                    ga.invokeStaticMethod(StringValue.class, "getStringLength", CharSequence.class);
                     ga.storeLocal(lengthLoc);
                 }
             }
@@ -143,7 +143,7 @@ public class AtomicTypeValidatorCompiler {
                     // TODO: compile the XPath assertion to bytecode
                     ExpressionCompiler.allocateStatic(compiler, f);
                     ga.loadArg(0);
-                    ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+                    ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
                     ExpressionCompiler.allocateStatic(compiler, rules);
                     ga.invokeInstanceMethod(AssertionFacet.class, "testAtomicValue", AtomicValue.class, ConversionRules.class);
                     LabelInfo ok = mi.newLabel("assertOK");
@@ -164,7 +164,7 @@ public class AtomicTypeValidatorCompiler {
 
             // Stack: facet
             ga.loadArg(0);
-            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
             // Stack: facet StringValue
             ga.swap();
             // Stack: StringValue facet

@@ -136,18 +136,18 @@ public class WhitespaceFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringItem(getName());
+                        return new StringValue(getName());
                     case "implementation":
                         return new ObjectValue<>(WhitespaceFacet.this);
                     case "value":
                         switch (action) {
                             case Whitespace.PRESERVE:
                             default:
-                                return StringItem.bmp("preserve");
+                                return StringValue.bmp("preserve");
                             case Whitespace.COLLAPSE:
-                                return StringItem.bmp("collapse");
+                                return StringValue.bmp("collapse");
                             case Whitespace.REPLACE:
-                                return StringItem.bmp("replace");
+                                return StringValue.bmp("replace");
                         }
                     case "fixed":
                         return BooleanValue.get(isFixed());

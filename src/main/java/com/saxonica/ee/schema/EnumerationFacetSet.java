@@ -193,7 +193,7 @@ public class EnumerationFacetSet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringItem(getName());
+                    return new StringValue(getName());
                 case "implementation":
                     return new ObjectValue<>(EnumerationFacetSet.this);
                 case "value":
@@ -201,7 +201,7 @@ public class EnumerationFacetSet extends Facet {
                     // We therefore return the string values (bug 4024)
                     List<AtomicValue> list = new ArrayList<>();
                     for (String s : stringValues) {
-                        list.add(new StringItem(s));
+                        list.add(new StringValue(s));
                     }
                     return new AtomicArray(list);
                 case "typed-value":

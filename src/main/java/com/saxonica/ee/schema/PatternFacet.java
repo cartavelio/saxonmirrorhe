@@ -15,7 +15,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.List;
 
@@ -150,11 +150,11 @@ public class PatternFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringItem(getName());
+                    return new StringValue(getName());
                 case "implementation":
                     return new ObjectValue<>(PatternFacet.this);
                 case "value":
-                    return new StringItem(requiredValue);
+                    return new StringValue(requiredValue);
                 default:
                     return EmptySequence.getInstance();
             }

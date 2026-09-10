@@ -9,7 +9,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public abstract class AbsorptionFeed extends GroundedItemFeed {
     public final Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
         PendingItem item = makePendingItem(valuesReadyToBeOutput.size(), node);
         valuesUnderConstructionStack.push(item);
-        valuesReadyToBeOutput.add(StringItem.EMPTY_STRING);     // to be replaced later
+        valuesReadyToBeOutput.add(StringValue.EMPTY_STRING);     // to be replaced later
         return item.getGatherer();
     }
 

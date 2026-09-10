@@ -15,7 +15,7 @@ import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BigDecimalValue;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
 import java.math.BigDecimal;
@@ -254,7 +254,7 @@ public class VersionControlFilter extends ProxyReceiver {
             throws XPathException {
         Set<StructuredQName> result = new HashSet<>(4);
         Whitespace.Tokenizer tokenizer = new Whitespace.Tokenizer(StringView.tidy(value));
-        StringItem tok;
+        StringValue tok;
         while ((tok = tokenizer.next()) != null) {
             StructuredQName val = StructuredQName.fromLexicalQName(tok.getStringValue(), true, false, resolver);
             result.add(val);

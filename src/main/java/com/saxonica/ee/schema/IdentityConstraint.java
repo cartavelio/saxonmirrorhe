@@ -327,16 +327,16 @@ public abstract class IdentityConstraint extends SchemaStructure
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return StringItem.bmp("Identity-Constraint Definition");
+                    return StringValue.bmp("Identity-Constraint Definition");
                 case "implementation":
                     return new ObjectValue<>(this);
                 case "name":
-                    return new StringItem(getName(), BuiltInAtomicType.NCNAME);
+                    return new StringValue(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
                     return new AnyURIValue((getTargetNamespace()));
                 case "identity-constraint category":
                     String kind = IdentityConstraint.this.getConstraintCategory();
-                    return new StringItem(kind);
+                    return new StringValue(kind);
                 case "selector":
                     IdentitySelector selector = getSelector();
                     return SchemaStructure.makeXPathExpressionPropertyRecord(

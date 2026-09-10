@@ -122,7 +122,7 @@ public class ExperimentalXPathCompiler {
     private static Optional<Map<String, String>> makeNamespaceMap(MapItem namespaceContext) {
         Map<String, String> bindings = new HashMap<>();
         for (KeyValuePair kvp : namespaceContext.keyValuePairs()) {
-            bindings.put(kvp.key.getStringValue(), ((StringItem) kvp.value).getStringValue());
+            bindings.put(kvp.key.getStringValue(), ((StringValue) kvp.value).getStringValue());
         }
         bindings.put("xml", NamespaceConstant.XML);
         return Optional.of(bindings);
@@ -255,7 +255,7 @@ public class ExperimentalXPathCompiler {
 
             // Return a tuple containing the SEF tree and the inferred static type
             NodeInfo node = b.getCurrentRoot().iterateAxis(AxisInfo.CHILD).next();
-            StringItem st = ExperimentalSequenceTypeMarshaller.unmarshal(makeMap(expr.getStaticType()));
+            StringValue st = ExperimentalSequenceTypeMarshaller.unmarshal(makeMap(expr.getStaticType()));
             DictionaryMap result = new DictionaryMap();
             result.initialPut("expr", node);
             result.initialPut("type", st);
@@ -377,13 +377,13 @@ public class ExperimentalXPathCompiler {
         @Override
         public Expression bindVariable(StructuredQName qName) throws XPathException {
             String eqName = qName.getEQName();
-            StringItem eqNameVal = new StringItem(eqName);
+            StringValue eqNameVal = new StringValue(eqName);
             GroundedValue localVariableDetails = localVariableMap.get(eqNameVal);
             if (localVariableDetails != null) {
                 NumericValue slotVal = (NumericValue) localVariableDetails.itemAt(1);
                 SEFLocalVariableReference var = new SEFLocalVariableReference(qName);
                 var.setSlotNumber((int) slotVal.longValue());
-                StringItem type = (StringItem) localVariableDetails.itemAt(2);
+                StringValue type = (StringValue) localVariableDetails.itemAt(2);
                 var.setDeclaredType(type.getStringValue());
                 NodeInfo decl = (NodeInfo) localVariableDetails.itemAt(0);
                 if (decl.getLocalPart().equals("accRule") &&
@@ -717,7 +717,7 @@ public class ExperimentalXPathCompiler {
 
         String occurrenceIndicator = Cardinality.getOccurrenceIndicator(st.getCardinality());
         if (!occurrenceIndicator.isEmpty()) {
-            result.initialPut("o", new StringItem(occurrenceIndicator));
+            result.initialPut("o", new StringValue(occurrenceIndicator));
         }
 
         if (st == SequenceType.EMPTY_SEQUENCE) {
@@ -725,10 +725,10 @@ public class ExperimentalXPathCompiler {
         }
 
         String alphaCode = primary.getBasicAlphaCode();
-        result.initialPut("p", new StringItem(alphaCode));
+        result.initialPut("p", new StringValue(alphaCode));
 
         if (primary instanceof UserAtomicType) {
-            result.initialPut("t", new StringItem(((UserAtomicType) primary).getEQName()));
+            result.initialPut("t", new StringValue(((UserAtomicType) primary).getEQName()));
         } else if (primary instanceof UnionType) {
             try {
                 List<GroundedValue> memberMaps = new ArrayList<>();
@@ -741,16 +741,16 @@ public class ExperimentalXPathCompiler {
             }
         } else if (primary instanceof NameTest) {
             String name = ((NameTest) primary).getMatchingNodeName().getEQName();
-            result.initialPut("n", new StringItem(name));
+            result.initialPut("n", new StringValue(name));
         } else if (primary instanceof LocalNameTest) {
-            result.initialPut("n", StringItem.bmp("*:" + ((LocalNameTest) primary).getLocalName()));
+            result.initialPut("n", StringValue.bmp("*:" + ((LocalNameTest) primary).getLocalName()));
         } else if (primary instanceof NamespaceTest) {
-            result.initialPut("n", StringItem.bmp("Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*"));
+            result.initialPut("n", StringValue.bmp("Q{" + ((NamespaceTest) primary).getNamespaceURI() + "}*"));
         } else if (primary instanceof CombinedNodeTest) {
             ((CombinedNodeTest) primary).addTypeDetails(result);
         } else if (primary instanceof ContentTypeTest) {
             String annotation = ((ContentTypeTest)primary).getContentType().getEQName();
-            result.initialPut("c", new StringItem(annotation));
+            result.initialPut("c", new StringValue(annotation));
         } else if (primary instanceof DocumentNodeTest) {
             ItemType content = ((DocumentNodeTest) primary).getElementTest();
             MapItem contentMap = makeMap(SequenceType.makeSequenceType(content, StaticProperty.EXACTLY_ONE));
@@ -796,9 +796,9 @@ public class ExperimentalXPathCompiler {
 
     public static SequenceType fromMap(MapItem typeAsMap) {
         // TODO: this is incomplete, for example it doesn't handle union types, array member types, etc
-        String occ = ((StringItem) typeAsMap.get(StringItem.bmp("o"))).getStringValue();
+        String occ = ((StringValue) typeAsMap.get(StringValue.bmp("o"))).getStringValue();
         int cardinality = Cardinality.fromOccurrenceIndicator(occ.substring(0, 1));
-        String primary = ((StringItem) typeAsMap.get(StringItem.bmp("p"))).getStringValue();
+        String primary = ((StringValue) typeAsMap.get(StringValue.bmp("p"))).getStringValue();
         if (primary.isEmpty()) {
             return SequenceType.makeSequenceType(AnyItemType.getInstance(), cardinality);
         }
@@ -811,8 +811,8 @@ public class ExperimentalXPathCompiler {
                 return SequenceType.makeSequenceType(nodeTestFromAlphaCode(primary), cardinality);
             case 'F':
                 if (primary.length() == 1) {
-                    MapItem resultType = (MapItem) typeAsMap.get(StringItem.bmp("r"));
-                    ArrayItem argTypes = (ArrayItem) typeAsMap.get(StringItem.bmp("a"));
+                    MapItem resultType = (MapItem) typeAsMap.get(StringValue.bmp("r"));
+                    ArrayItem argTypes = (ArrayItem) typeAsMap.get(StringValue.bmp("a"));
                     assert resultType != null;
                     assert argTypes != null;
                     SequenceType resultType1 = fromMap(resultType);

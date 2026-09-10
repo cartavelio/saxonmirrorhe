@@ -15,7 +15,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
@@ -356,7 +356,7 @@ public abstract class SchemaStructure implements Location {
                             String key1 = arguments1[0].head().getStringValue();
                             switch (key1) {
                                 case "prefix":
-                                    return new StringItem(prefix);
+                                    return new StringValue(prefix);
                                 case "namespace":
                                     return new AnyURIValue((nsResolver.getURIForPrefix(prefix, false)));
                                 default:
@@ -371,7 +371,7 @@ public abstract class SchemaStructure implements Location {
                 case "base URI":
                     return new AnyURIValue((baseURI));
                 case "expression":
-                    return new StringItem(conditionText);
+                    return new StringValue(conditionText);
                 default:
                     return EmptySequence.getInstance();
             }

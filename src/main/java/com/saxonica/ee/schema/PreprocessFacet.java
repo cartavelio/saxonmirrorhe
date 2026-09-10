@@ -125,7 +125,7 @@ public class PreprocessFacet extends Facet {
         try {
             XPathDynamicContext context = exp.createDynamicContext();
             if (action.getValueVariable() != null) {
-                context.setVariable(action.getValueVariable(), new StringItem(input));
+                context.setVariable(action.getValueVariable(), new StringValue(input));
             }
             return ((GroundedValue) exp.evaluateSingle(context)).getUnicodeStringValue();
         } catch (XPathException err) {
@@ -148,7 +148,7 @@ public class PreprocessFacet extends Facet {
         try {
             XPathDynamicContext context = exp.createDynamicContext();
             if (action.getValueVariable() != null) {
-                context.setVariable(reverseAction.getValueVariable(), new StringItem(input));
+                context.setVariable(reverseAction.getValueVariable(), new StringValue(input));
             }
             return ((GroundedValue) exp.evaluateSingle(context)).getUnicodeStringValue();
         } catch (XPathException err) {
@@ -191,7 +191,7 @@ public class PreprocessFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringItem(getName());
+                        return new StringValue(getName());
                     case "implementation":
                         return new ObjectValue<>(PreprocessFacet.this);
                     case "action":

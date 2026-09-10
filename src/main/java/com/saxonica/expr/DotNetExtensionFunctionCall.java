@@ -789,7 +789,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
                         }
                     } else if (first instanceof BooleanValue) {
                         return CIL.box_boolean(((BooleanValue) first).getBooleanValue());
-                    } else if (first instanceof StringItem) {
+                    } else if (first instanceof StringValue) {
                         return first.getUnicodeStringValue();
                     } else {
                         return value;
@@ -991,12 +991,12 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
 
     private static AtomicValue getAtomicValue(Sequence value, cli.System.Type targetType, XPathContext context) throws XPathException {
         if (value instanceof AtomicValue && ((AtomicValue)value).isUntypedAtomic()) {
-            StringItem uav = (StringItem) value;
+            StringValue uav = (StringValue) value;
             ConversionResult result;
             if (targetType == CLI_BOOLEAN) {
                 result = StringConverter.StringToBoolean.INSTANCE.convert(uav);
             } else if (targetType == CLI_STRING) {
-                result = new StringItem(uav.getUnicodeStringValue());
+                result = new StringValue(uav.getUnicodeStringValue());
             } else if (targetType == CLI_INT64 || targetType == CLI_INT32 || targetType == CLI_INT16) {
                 result = StringConverter.StringToInteger.INSTANCE.convert(uav);
             } else if (targetType == CLI_DOUBLE) {
@@ -1008,7 +1008,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
             } else if (targetType == CLI_DECIMAL) {
                 result = StringConverter.StringToDecimal.INSTANCE.convert(uav);
             } else {
-                result = new StringItem(uav.getUnicodeStringValue());
+                result = new StringValue(uav.getUnicodeStringValue());
             }
             return result.asAtomic();
         }
@@ -1116,7 +1116,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         }
 
         if (result instanceof String) {
-            return new StringItem((String) result);
+            return new StringValue((String) result);
         } else if (result instanceof Boolean) {
             return BooleanValue.get((Boolean) result);
         } else if (result instanceof Long) {

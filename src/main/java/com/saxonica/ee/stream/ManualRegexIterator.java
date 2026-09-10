@@ -3,7 +3,7 @@ package com.saxonica.ee.stream;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegexMatchHandler;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.StringValue;
 
 /**
  * The class ManualRegexIterator represents an iterator that is never repositioned, but can
@@ -26,8 +26,8 @@ public class ManualRegexIterator extends ManualIterator implements RegexIterator
     }
 
     @Override
-    public StringItem next() {
-        return (StringItem)super.next();
+    public StringValue next() {
+        return (StringValue)super.next();
     }
 
     /**
