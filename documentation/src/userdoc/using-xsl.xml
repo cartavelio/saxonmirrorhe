@@ -936,6 +936,18 @@
             </td>
          </tr>
          
+         <tr>
+            <td>
+               <p>-xsltversion:(3.0|4.0)</p>
+            </td>
+            <td>
+               <p>Sets the XSLT version. By default, Saxon acts as an XSLT 3.0 processor. Set the
+               value to "4.0" to enable extensions from the draft XSLT 4.0 specifications.</p>
+               <p>When using XSLT 4.0 it is also advisable (but neither necessary nor sufficient) to set the
+               attribute <code>version="4.0"</code> within the called stylesheet.</p>
+            </td>
+         </tr>
+         
          <tr class="javaonly">
             <td>
                <p>-y:classname</p>
@@ -2769,8 +2781,7 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
       some Saxon-specific extensions that have
       been found necessary to take full advantage of the new capabilities in XSLT 3.0, for example
       making it easier to transform JSON documents. Some of these extensions have found their way
-      into a Saxonica-led proposal for an XSLT 4.0 specification, which is still at an early stage
-      of development.</p>
+      into the draft XSLT 4.0 specification, which at the time of writing is still under development.</p>
 
       <p>XSLT 3.0 features are available in all Saxon editions. Saxon-HE includes basic conformance,
          serialization, XSLT 1.0 compatability mode, XPath 3.1 support, dynamic evaluation, 
