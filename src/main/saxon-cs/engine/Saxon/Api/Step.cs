@@ -29,7 +29,8 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>For example, <c>Child().Where(Predicates.IsText())</c>
         /// returns a <c>Step</c> whose effect is to select the text node children 
-        /// of a supplied element or document node.</para>
+        /// of a supplied element or document node. This example can be abbreviated to
+        /// <c>Child(Predicates.IsText())</c>.</para>
         /// <para>Similarly, <c>Child("*").Where(n => n.NodeName.LocalName.StartsWith("h"))</c> selects
         /// element children whose names begin with "h".</para>
         /// </remarks>
@@ -50,6 +51,9 @@ namespace Saxon.Api {
         /// in that there is no elimination of duplicates or sorting into document order.</para>
         /// <para>In function programming theory this operation is often referred to as "flatMap";
         /// in LINQ it corresponds to <c>SelectMany</c>.</para>
+        /// <para>For example, <code>var grandchildren = Child("*").Then(Child("*"))</code> constructs a step
+        /// that returns the children of the children of a node; this can be used in a statement such as
+        /// <c>foreach (XdmNode gc in origin.Select(grandchildren) ...</c>.</para>
         /// </remarks>
         /// <param name="next">The step which will be applied to the results of this step</param>
         /// <returns>A new <c>Step</c> (that is, a function from one <c>IEnumerable</c> of items to another) that
@@ -99,7 +103,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Invokes this function to the given argument.
+        /// Invokes this function on the given argument.
         /// </summary>
         /// <param name="item">The function argument</param>
         /// <returns>The function result.</returns>
