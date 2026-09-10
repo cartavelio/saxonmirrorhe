@@ -11,6 +11,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceiverWithOutputProperties;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.functions.FormatNumber;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.jnode.JNode;
@@ -62,6 +63,11 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         String sep = props.getProperty(SaxonOutputKeys.ITEM_SEPARATOR);
         if (sep != null && !"#absent".equals(sep)) {
             itemSeparator = sep;
+        }
+        String nl = props.getProperty(SaxonOutputKeys.LINE_ENDING);
+        if (nl != null) {
+            nl = nl.replace("\\r", "\r").replace("\\n", "\n");
+            itemSeparator = itemSeparator.replace("\n", nl);
         }
         indenting = "yes".equals(props.getProperty(OutputKeys.INDENT));
     }
@@ -207,12 +213,24 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             case StandardNames.XS_NOTATION:
                 StructuredQName sq = ((QualifiedNameValue) value).getStructuredQName();
                 if (hostLanguageVersion >= 40) {
-                    return StringView.of("#" + (sq.hasURI(NamespaceUri.NULL) ? sq.getLocalPart() : sq.getEQName()));
+                    return StringView.of(formatQName(sq));
                 } else {
                     return StringView.of(sq.getEQName());
                 }
             default:
                 return new Twine8("***");
+        }
+    }
+
+    private String formatQName(StructuredQName qname) {
+        if (qname.hasURI(NamespaceUri.NULL)) {
+            return "#" + qname.getLocalPart();
+        }
+        String prefix = NamespaceConstant.getConventionalPrefix(qname.getURI());
+        if (prefix != null) {
+            return "#" + prefix + ":" + qname.getLocalPart();
+        } else {
+            return "#" + qname.getEQName();
         }
     }
 

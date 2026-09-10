@@ -26,6 +26,9 @@ import java.util.function.IntPredicate;
 
 public class Twine8 extends UnicodeString {
 
+    public static final Twine8 NEWLINE = new Twine8("\n");
+    public static final Twine8 DOUBLE_NEWLINE = new Twine8("\n\n");
+
     // Array of bytes containing codepoints in the range 0-255
     protected byte[] bytes;
     // Cached hash code

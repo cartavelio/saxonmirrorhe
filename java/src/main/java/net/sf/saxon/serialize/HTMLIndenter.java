@@ -80,13 +80,10 @@ public class HTMLIndenter extends ProxyReceiver {
         Collections.addAll(formattedTable, formattedTags);
     }
 
-    protected char[] indentChars = {'\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
-
     private final static int IS_INLINE = 1;
     private final static int IS_FORMATTED = 2;
     private final static int IS_SUPPRESSED = 4;
 
-    private String method;
     private int level = 0;
     private boolean sameLine = false;
     private boolean inFormattedTag = false;
@@ -279,20 +276,37 @@ public class HTMLIndenter extends ProxyReceiver {
      */
 
     private void indent() throws XPathException {
-        int spaces = level * getIndentation();
-        nextReceiver.characters(IndentWhitespace.of(new Twine8("\n"), spaces, ' '),
+        int spaces = level * getIndentCharCount();
+        nextReceiver.characters(IndentWhitespace.of(getLineEnding(), spaces, getIndentChar()),
                                 Loc.NONE, ReceiverOption.NONE);
         sameLine = false;
     }
 
     /**
-     * Get the number of spaces to be used for indentation
+     * Get the line ending sequence (CR, LF, or CRLF)
      *
-     * @return the number of spaces to be added to the indentation for each level
+     * @return the line ending
+     */
+    protected Twine8 getLineEnding() {
+        return Twine8.NEWLINE;
+    }
+
+    /**
+     * Get the number of spaces or tabs to be used for indentation
+     *
+     * @return the number of spaces or tabs to be added to the indentation at each level
      */
 
-    protected int getIndentation() {
+    protected int getIndentCharCount() {
         return 3;
+    }
+
+    /**
+     * Get the character to be used for indentation: space or tab
+     */
+
+    protected char getIndentChar() {
+        return ' ';
     }
 
 }

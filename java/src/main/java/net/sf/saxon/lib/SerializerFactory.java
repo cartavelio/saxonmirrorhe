@@ -535,6 +535,10 @@ public class SerializerFactory {
         if (!"no".equals(props.getProperty(OutputKeys.INDENT))) {
             target = newHTMLIndenter(target, props);
         }
+        String endOfLine = props.getProperty(SaxonOutputKeys.LINE_ENDING);
+        if (endOfLine != null && !endOfLine.equals("\n")) {
+            target = newNewlineAdjuster(target, endOfLine);
+        }
         target = new NamespaceDifferencer(target, props);
         target = injectUnicodeNormalizer(params, target);
         target = injectCharacterMapExpander(params, target, true);
@@ -577,8 +581,12 @@ public class SerializerFactory {
     protected SequenceReceiver createTextSerializer(
             Emitter emitter, SerializationProperties params) throws XPathException {
         Properties props = params.getProperties();
-        Receiver target;
-        target = injectUnicodeNormalizer(params, emitter);
+        Receiver target = emitter;
+        String endOfLine = props.getProperty(SaxonOutputKeys.LINE_ENDING);
+        if (endOfLine != null && !endOfLine.equals("\n")) {
+            target = newNewlineAdjuster(target, endOfLine);
+        }
+        target = injectUnicodeNormalizer(params, target);
         target = injectCharacterMapExpander(params, target, false);
         target = addTextOutputFilter(target, props);
         FilterFactory validationFactory = params.getValidationFactory();
@@ -652,6 +660,10 @@ public class SerializerFactory {
         Properties props = params.getProperties();
         if (!"no".equals(props.getProperty(OutputKeys.INDENT))) {
             target = newXHTMLIndenter(target, props);
+        }
+        String endOfLine = props.getProperty(SaxonOutputKeys.LINE_ENDING);
+        if (endOfLine != null && !endOfLine.equals("\n")) {
+            target = newNewlineAdjuster(target, endOfLine);
         }
         target = new NamespaceDifferencer(target, props);
         target = injectUnicodeNormalizer(params, target);

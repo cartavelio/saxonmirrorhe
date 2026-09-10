@@ -393,7 +393,7 @@ public class XMLIndenter extends ProxyReceiver {
      * @return the line ending
      */
     protected Twine8 getLineEnding() {
-        return new Twine8("\n");
+        return Twine8.NEWLINE;
     }
 
     /**
@@ -402,7 +402,7 @@ public class XMLIndenter extends ProxyReceiver {
      * @return the line ending for double-spaced output
      */
     protected Twine8 getDoubleLineEnding() {
-        return new Twine8("\n\n");
+        return Twine8.DOUBLE_NEWLINE;
     }
 }
 

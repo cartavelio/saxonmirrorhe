@@ -50,7 +50,9 @@ public class JSONEmitter {
     private CharacterSet characterSet;
     private boolean isIndenting;
     private boolean isJsonLines;
-    private int indentSpaces = 2;
+    private Twine8 endOfLine = Twine8.NEWLINE;
+    private int indentCharCount = 2;
+    private char indentChar = 2;
     private int maxLineLength;
     private boolean first = true;
     private boolean afterKey = false;
@@ -97,6 +99,18 @@ public class JSONEmitter {
         if ("no".equals(details.getProperty(SaxonOutputKeys.ESCAPE_SOLIDUS)) || canonical) {
             escapeSolidus = false;
         }
+        String in = details.getProperty(SaxonOutputKeys.INDENT_UNIT);
+        if (in != null) {
+            in = in.replace("\\t", "\t");
+            indentCharCount = in.length();
+            if (indentCharCount > 0) {
+                indentChar = in.charAt(0);
+            }
+        }
+        String nl = details.getProperty(SaxonOutputKeys.LINE_ENDING);
+        if (nl != null) {
+            endOfLine = new Twine8(nl.replace("\\r", "\r").replace("\\n", "\n"));
+        }
         escapeOptions = new JsonReceiver.EscapeOptions(
                 false, !escapeSolidus, false, IntPredicateLambda.of(
                                                   c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c)));
@@ -114,7 +128,7 @@ public class JSONEmitter {
         String spaces = details.getProperty(SaxonOutputKeys.INDENT_SPACES);
         if (spaces != null) {
             try {
-                indentSpaces = Integer.parseInt(spaces);
+                indentCharCount = Integer.parseInt(spaces);
             } catch (NumberFormatException err) {
                 // ignore the error.
             }
@@ -354,23 +368,23 @@ public class JSONEmitter {
         if ((wasFirst && afterKey)) {
             emit(' ');
         } else if (actuallyIndenting && !afterKey) {
-            emit('\n');
-            for (int i = 0; i < indentSpaces * level; i++) {
-                emit(' ');
+            newLine();
+            for (int i = 0; i < indentCharCount * level; i++) {
+                emit(indentChar);
             }
         }
         afterKey = false;
     }
 
     private void indent(int level) throws XPathException {
-        emit('\n');
-        for (int i = 0; i < indentSpaces * level; i++) {
-            emit(' ');
+        newLine();
+        for (int i = 0; i < indentCharCount * level; i++) {
+            emit(indentChar);
         }
     }
 
     public void newLine() throws XPathException {
-        emit('\n');
+        emit(endOfLine);
     }
 
     private UnicodeString escape(UnicodeString cs) throws XPathException {
