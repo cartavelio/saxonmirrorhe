@@ -360,10 +360,6 @@ public class UserFunctionReference extends Expression
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         ExpressionPresenter.ExportOptions options = out.getOptions();
-        if ("JS".equals(options.target) && options.targetVersion == 1) {
-            throw new XPathException("Higher-order functions are not available in SaxonJS v1.*",
-                                     "XTSE3540", getLocation());
-        }
         if (nominalTarget.getDeclaringComponent() == null) {
             // This happens for an inline function declared within a static expression, e.g. one
             // that is bound to a static global variable. There is no separate component registered for

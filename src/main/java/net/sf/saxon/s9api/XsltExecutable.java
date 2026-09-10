@@ -164,7 +164,7 @@ public class XsltExecutable {
                         "Cannot export a stylesheet compiled with just-in-time compilation enabled");
             }
             ExpressionPresenter presenter = config.newExpressionExporter(target, destination, topLevelPackage);
-            presenter.setRelocatable(topLevelPackage.isRelocatable());
+            presenter.getOptions().relocatable = topLevelPackage.isRelocatable();
             topLevelPackage.export(presenter);
         } catch (XPathException e) {
             throw new SaxonApiException(e);

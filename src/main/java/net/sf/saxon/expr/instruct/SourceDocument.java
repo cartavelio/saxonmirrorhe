@@ -26,7 +26,6 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.QuitParsingException;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -223,9 +222,6 @@ public class SourceDocument extends Instruction {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         ExpressionPresenter.ExportOptions options = out.getOptions();
-        if ("JS".equals(options.target) && options.targetVersion == 1) {
-            throw new XPathException("xsl:source-document is not supported in SaxonJS 1.*", SaxonErrorCode.SXJS0001);
-        }
         out.startElement(getExportTag(), this);
         int validation = parseOptions.getSchemaValidationMode();
         if (validation != Validation.SKIP && validation != Validation.BY_TYPE) {

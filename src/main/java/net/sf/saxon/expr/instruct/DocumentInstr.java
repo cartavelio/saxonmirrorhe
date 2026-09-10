@@ -263,7 +263,7 @@ public class DocumentInstr extends ParentNodeConstructor {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("doc", this);
-        if (!out.isRelocatable()) {
+        if (!out.getOptions().relocatable) {
             out.emitAttribute("base", getStaticBaseURIString());
         }
         String flags = "";

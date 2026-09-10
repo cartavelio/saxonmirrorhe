@@ -158,7 +158,7 @@ public class XsltPackage {
             Query.createFileIfNecessary(file);
             ExpressionPresenter presenter = getProcessor().getUnderlyingConfiguration()
                     .newExpressionExporter(target, new FileOutputStream(file), stylesheetPackage);
-            presenter.setRelocatable(stylesheetPackage.isRelocatable());
+            presenter.getOptions().relocatable = stylesheetPackage.isRelocatable();
             stylesheetPackage.export(presenter);
         } catch (XPathException | IOException e) {
             throw new SaxonApiException(e);
