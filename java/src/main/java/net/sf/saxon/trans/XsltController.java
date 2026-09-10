@@ -818,7 +818,10 @@ public class XsltController extends Controller {
                 underSource = ((AugmentedSource) source).getContainedSource();
             }
             Configuration config = getConfiguration();
-            Source s2 = config.getSourceResolver().resolveSource(underSource, config.getParseOptions(), config);
+            ParseOptions options = config.getParseOptions()
+                    .withSchemaValidationMode(validationMode)
+                    .withSchema(getExecutable().getTopLevelPackage().getImportedSchema(""));
+            Source s2 = config.getSourceResolver().resolveSource(underSource, options, config);
             if (s2 != null) {
                 underSource = s2;
             }
@@ -856,7 +859,7 @@ public class XsltController extends Controller {
                 despatcher = makeStripper(despatcher);
             }
             PipelineConfiguration pipe = despatcher.getPipelineConfiguration();
-            pipe.setParseOptions(pipe.getParseOptions().withSchemaValidationMode(this.validationMode));
+            pipe.setParseOptions(options);
             boolean verbose = getConfiguration().isTiming();
             if (verbose) {
                 getConfiguration().getLogger().info("Streaming " + source.getSystemId());
