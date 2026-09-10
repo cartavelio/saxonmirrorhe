@@ -18,24 +18,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class NumberingTests {
 
     private void compareCardinal(long number, ICUNumbererPE icu, Numberer he) {
-        String heNumber = he.format(number, BMPString.of("w"), 0, "_", "a", "").replace('-', ' ').replace(",", "");
-        String icuNumber = icu.format(number, BMPString.of("w"), 0, "_", "a", "").replace('-', ' ').replace(",", "");
+        String heNumber = he.format(number, BMPString.of("w"), 0, "_", "a", "", "").replace('-', ' ').replace(",", "");
+        String icuNumber = icu.format(number, BMPString.of("w"), 0, "_", "a", "", "").replace('-', ' ').replace(",", "");
         assertEquals(icuNumber, heNumber, number+"");
     }
 
     private void compareOrdinal(long number, ICUNumbererPE icu, Numberer he, String scheme) {
-        String heNumber = he.format(number, BMPString.of("w"), 0, "_", "a", scheme).replace('-', ' ').replace(",", "");
-        String icuNumber = icu.format(number, BMPString.of("w"), 0, "_", "a", scheme).replace('-', ' ').replace(",", "");
+        String heNumber = he.format(number, BMPString.of("w"), 0, "_", "a", "", scheme).replace('-', ' ').replace(",", "");
+        String icuNumber = icu.format(number, BMPString.of("w"), 0, "_", "a", "", scheme).replace('-', ' ').replace(",", "");
         assertEquals(icuNumber, heNumber, number + "");
     }
 
-    private void testCardinal(String lang) {
-        Locale locale = new Locale(lang);
+    private void testCardinal(String lang, String country) {
+        Locale locale = new Locale(lang, country);
         Configuration icuConfig = new ProfessionalConfiguration();
         ICUNumbererPE icu = ICUNumbererPE.getNumberer(locale, "xxx", icuConfig);
-        ProfessionalConfiguration peConfig = new ProfessionalConfiguration();
-        peConfig.setLocalizerFactory(new JavaLocalizerFactory(peConfig));
-        Numberer he = peConfig.makeNumberer(lang, null);
+        Configuration heConfig = new Configuration();
+        JavaLocalizerFactory factory = new JavaLocalizerFactory(heConfig);
+        factory.setBuiltInLocalizationClasses();
+        heConfig.setLocalizerFactory(factory);
+        Numberer he = heConfig.makeNumberer(lang + "-" + country, null);
         for (long i=0; i<=100; i++) {
              compareCardinal(i, icu, he);
         }
@@ -57,12 +59,15 @@ public class NumberingTests {
         }
     }
 
-    private void testOrdinal(String lang, String scheme) {
-        Locale locale = new Locale(lang);
+    private void testOrdinal(String lang, String country, String scheme) {
+        Locale locale = new Locale(lang, country);
         Configuration icuConfig = new ProfessionalConfiguration();
         ICUNumbererPE icu = ICUNumbererPE.getNumberer(locale, "xxx", icuConfig);
         Configuration heConfig = new Configuration();
-        Numberer he = heConfig.makeNumberer(lang, null);
+        JavaLocalizerFactory factory = new JavaLocalizerFactory(heConfig);
+        factory.setBuiltInLocalizationClasses();
+        heConfig.setLocalizerFactory(factory);
+        Numberer he = heConfig.makeNumberer(lang + "-" + country, null);
         for (long i = 0; i <= 100; i++) {
             compareOrdinal(i, icu, he, scheme);
         }
@@ -87,68 +92,68 @@ public class NumberingTests {
 
     @Test
     public void testBritishEnglish() {
-        testCardinal("en-GB");
-        testOrdinal("en-GB", "%spellout-ordinal");
+        testCardinal("en", "GB");
+        testOrdinal("en", "GB", "%spellout-ordinal-verbose");
     }
 
     @Test
     public void testAmericanEnglish() {
-        testCardinal("en-US");
-        testOrdinal("en-US", "%spellout-ordinal");
+        testCardinal("en", "US");
+        testOrdinal("en", "US", "%spellout-ordinal-verbose");
     }
 
     @Test
     public void testGerman() {
-        testCardinal("de");
-        testOrdinal("de", "%spellout-ordinal");
+        testCardinal("de","DE");
+        testOrdinal("de","DE", "%spellout-ordinal");
     }
 
     @Test
     public void testMetropolitanFrench() {
-        testCardinal("fr-FR");
-        testOrdinal("fr-FR", "%spellout-ordinal");
+        testCardinal("fr","FR");
+        testOrdinal("fr","FR", "%spellout-ordinal");
     }
 
     @Test
     public void testBelgianFrench() {
-        testCardinal("fr-BE");
-        testOrdinal("fr-BE", "%spellout-ordinal");
+        testCardinal("fr","BE");
+        testOrdinal("fr","BE", "%spellout-ordinal");
     }
 
     @Test
     public void testBelgianFlemish() {
-        testCardinal("nl-BE");
-        testOrdinal("nl-BE", "%spellout-ordinal");
+        testCardinal("nl","BE");
+        testOrdinal("nl","BE", "%spellout-ordinal");
     }
 
     @Test
     public void testDutch() {
-        testCardinal("nl");
-        testOrdinal("nl", "%spellout-ordinal");
+        testCardinal("nl","NL");
+        testOrdinal("nl","NL", "%spellout-ordinal");
     }
 
     @Test
     public void testDanish() {
-        testCardinal("de");
-        testOrdinal("da", "%spellout-ordinal");
+        testCardinal("de","DE");
+        testOrdinal("da", "DE", "%spellout-ordinal");
     }
 
     @Test
     public void testItalian() {
-        testCardinal("it");
-        testOrdinal("it", "%spellout-ordinal");
+        testCardinal("it", "IT");
+        testOrdinal("it", "IT", "%spellout-ordinal");
     }
 
     @Test
     public void testHebrew() {
-        testCardinal("he");
-        testOrdinal("he", "%spellout-ordinal");
+        testCardinal("he", "IS");
+        testOrdinal("he", "IS", "%spellout-ordinal");
     }
 
     @Test
     public void testTurkish() {
-        testCardinal("tr");
-        testOrdinal("en-GB", "%spellout-ordinal");
+        testCardinal("tr", "TR");
+        testOrdinal("tr","TR", "%spellout-ordinal");
     }
 
 
