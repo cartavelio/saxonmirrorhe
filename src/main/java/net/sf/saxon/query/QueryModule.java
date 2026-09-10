@@ -30,7 +30,6 @@ import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 
 import java.net.URI;
@@ -141,15 +140,6 @@ public class QueryModule implements StaticContext {
         }
         optimizerOptions = sqc.getOptimizerOptions();
         unprefixedElementMatchingPolicy = sqc.getUnprefixedElementMatchingPolicy();
-
-        Schema preloadedSchema = sqc.getPreLoadedSchema();
-        if (preloadedSchema != null) {
-//            // TODO : HE build...
-//            for (Map.Entry<NamespaceUri, List<String>> entry : ((PreparedSchema)preloadedSchema).getTargetNamespaceMap().entrySet()) {
-//                addImportedSchema(entry.getKey(), null, entry.getValue());
-//            }
-            getPackageData().setImportedSchema(preloadedSchema);
-        }
     }
 
     /**
@@ -219,7 +209,7 @@ public class QueryModule implements StaticContext {
             codeInjector = sqc.getCodeInjector();
             optimizerOptions = sqc.getOptimizerOptions();
         }
-        initializeFunctionLibraries(sqc);
+        //initializeFunctionLibraries();
     }
 
     /**
@@ -281,11 +271,10 @@ public class QueryModule implements StaticContext {
 
     /**
      * Reset function libraries
-     *
-     * @param sqc The static query context set up by the caller
      */
 
-    private void initializeFunctionLibraries(/*@Nullable*/ StaticQueryContext sqc) {
+    public void initializeFunctionLibraries() {
+        StaticQueryContext sqc = userQueryContext;
         Configuration config = getConfiguration();
         if (isTopLevelModule()) {
             globalFunctionLibrary = new XQueryFunctionLibrary(config);
@@ -1050,9 +1039,8 @@ public class QueryModule implements StaticContext {
     public void declareFunction(/*@NotNull*/ XQueryFunction function) throws XPathException {
         Configuration config = getConfiguration();
         if (function.getMinimumArity() <= 1 && function.getNumberOfParameters() >= 1) {
-            Schema schema = getPackageData().getImportedSchema();
             StructuredQName name = function.getFunctionName();
-            SchemaType t = schema.getSchemaType(name);
+            SchemaType t = config.getSchemaType(name);
             if (t != null && t.isAtomicType()) {
                 String message = "Function name " + function.getDisplayName() +
                         " clashes with the name of the constructor function for an atomic type";
@@ -1214,6 +1202,36 @@ public class QueryModule implements StaticContext {
             } catch (URISyntaxException e) {
                 // ignore the URI if it's not valid
             }
+        }
+    }
+
+    /**
+     * Ask whether a given schema target namespace has been imported
+     *
+     * @param namespace The namespace of the required schema. Supply "" for
+     *                  a no-namespace schema.
+     * @return The schema if found, or null if not found.
+     * @since 8.4
+     */
+
+    @Override
+    public boolean isImportedSchema(NamespaceUri namespace) {
+        return importedSchemata != null && importedSchemata.contains(namespace);
+    }
+
+    /**
+     * Get the set of imported schemas
+     *
+     * @return a Set, the set of URIs representing the names of imported schemas
+     */
+
+    /*@Nullable*/
+    @Override
+    public Set<NamespaceUri> getImportedSchemaNamespaces() {
+        if (importedSchemata == null) {
+            return Collections.emptySet();
+        } else {
+            return importedSchemata;
         }
     }
 
@@ -1730,6 +1748,13 @@ public class QueryModule implements StaticContext {
         return getPackageData().obtainTypeAliasManager().getItemType(typeName);
     }
 
+    /**
+     * Inner class containing information about an active namespace entry
+     */
 
+    private static class ActiveNamespace {
+        /*@Nullable*/ public String prefix;
+        /*@Nullable*/ public String uri;
+    }
 }
 

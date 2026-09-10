@@ -367,6 +367,8 @@ public class XQueryParser extends XPathParser {
                                 || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)
                                 || languageVersion >= 40;
 
+        env.setXPathVersion(languageVersion);
+        env.initializeFunctionLibraries();
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
                 .withAcceptEQName(true)
                 .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
@@ -445,7 +447,8 @@ public class XQueryParser extends XPathParser {
                 t.allowSaxonExtensions =
                         allowXPath40Syntax || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS);
 
-        //t.setAllowExpandedQNameSyntax("3.0".equals(queryVersion));
+        env.setXPathVersion(languageVersion);
+        env.initializeFunctionLibraries();
         if (t.currentToken != Token.MODULE_NAMESPACE) {
             if (t.currentToken == Token.EOF) {
                 grumble("The file imported for module " + env.getModuleNamespace() +
@@ -492,31 +495,14 @@ public class XQueryParser extends XPathParser {
             String queryVersion = unescape(t.currentTokenValue).toString();
             String[] allowedVersions = new String[]{"1.0", "3.0", "3.1", "4.0"};
             if (Arrays.binarySearch(allowedVersions, queryVersion) < 0) {
-//            if (!queryVersion.trim().matches("[0-9]+\\.[0-9]+")) {
                 grumble("Invalid XQuery version " + queryVersion, "XQST0031");
             }
             if (queryVersion.equals("4.0")) {
+                languageVersion = 40;
                 allowXPath40Syntax = true;
                 t.languageLevel = 40;
+                env.getPackageData().setHostLanguage(HostLanguage.XQUERY, 40);
             }
-//            if (XQUERY10.equals(queryVersion)) {
-//                // no action
-//            } else if (XQUERY30.equals(queryVersion) || "1.1".equals(queryVersion)) {
-//                queryVersion = XQUERY30;
-//                if (((QueryModule) env).getLanguageVersion() != 30 && ((QueryModule) env).getLanguageVersion() != 31) {
-//                    grumble("XQuery 3.0 was not enabled when invoking Saxon", "XQST0031");
-//                    queryVersion = XQUERY10;
-//                }
-//            } else if(XQUERY31.equals(queryVersion)) {
-//                queryVersion = XQUERY31;
-//                if (((QueryModule) env).getLanguageVersion() != 31) {
-//                    grumble("XQuery 3.1 was not enabled when invoking Saxon", "XQST0031");
-//                    queryVersion = XQUERY30;
-//                }
-//            } else {
-//                grumble("Unsupported XQuery version " + queryVersion, "XQST0031");
-//                queryVersion = XQUERY10;
-//            }
             nextToken();
             if ("encoding".equals(t.currentTokenValue)) {
                 nextToken();
@@ -530,13 +516,6 @@ public class XQueryParser extends XPathParser {
             expect(Token.SEMICOLON);
             nextToken();
         } else {
-//            if (((QueryModule) env).getLanguageVersion()== 30) {
-//                queryVersion = XQUERY30;
-//            } else if (((QueryModule) env).getLanguageVersion() == 31) {
-//                queryVersion = XQUERY31;
-//            } else {
-//                queryVersion = XQUERY10;
-//            }
             if (t.currentToken == Token.XQUERY_ENCODING) {
                 nextToken();
                 expect(Token.STRING_LITERAL);
@@ -2477,14 +2456,25 @@ public class XQueryParser extends XPathParser {
     private void parseForClause(FLWORExpression flwor, List<Clause> clauseList) throws XPathException {
         boolean first = true;
         boolean forMember = t.currentToken == Token.FOR_MEMBER;
-        if (forMember && !allowXPath40Syntax) {
-            grumble("The 'for member' syntax requires XQuery 4.0 to be enabled");
-        }
+
         // "for member $x as T in $array"
         // compiles to
         // "for $temp in array:members($array) let $x as T := $temp?value"
         do {
+
             nextToken();
+            if (!first) {
+                if (isKeyword("member")) {
+                    forMember = true;
+                    nextToken();
+                } else {
+                    forMember = false;
+                }
+            }
+
+            if (forMember && !allowXPath40Syntax) {
+                grumble("The 'for member' syntax requires XQuery 4.0 to be enabled");
+            }
 
             int offset = t.currentTokenStartOffset;
             ForClause clause = new ForClause();

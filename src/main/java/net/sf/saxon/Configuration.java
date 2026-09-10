@@ -33,7 +33,9 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.resource.*;
-import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.CharacterSetFactory;
@@ -53,7 +55,6 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
@@ -121,7 +122,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 //                + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
 //                + "    }"
 //})
-public class Configuration implements SourceResolver {
+public class Configuration implements SourceResolver, NotationSet {
 
     protected static IntSet booleanFeatures = new IntHashSet(40);
     protected static IntSet stringFeatures = new IntHashSet(40);
@@ -411,7 +412,8 @@ public class Configuration implements SourceResolver {
         // that their override wins.
 
         commonResolver = new CatalogResourceResolver();
-        defaultXsltCompilerInfo = new CompilerInfo(this);
+        defaultXsltCompilerInfo = makeCompilerInfo();
+        //systemURIResolver = new StandardURIResolver(this);
         standardModuleURIResolver = Version.platform.makeStandardModuleURIResolver(this);
         serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
         sourceResolver = this;
@@ -888,20 +890,10 @@ public class Configuration implements SourceResolver {
         throw new XPathException("Class " + className + " is not a ResourceResolver");
     }
 
-    /**
-     * Register a factory for constructing instances of class {@link ErrorReporter}. The default factory
-     * creates an instance of class {@link StandardErrorReporter}, writing to the {@link Logger} registered
-     * with this {@link Configuration}.
-     * @param factory the factory class to be used when an {@link ErrorReporter} is required
-     */
     public void setErrorReporterFactory(java.util.function.Function<Configuration, ? extends ErrorReporter> factory) {
         errorReporterFactory = factory;
     }
-
-    /**
-     * Create an {@link ErrorReporter}, using the registered factory
-     * @return the result of invoking the registered {@link ErrorReporter} factory.
-     */
+    
     public ErrorReporter makeErrorReporter() {
         if (errorReporterFactory == null) {
             errorReporterFactory = config -> {
@@ -913,11 +905,6 @@ public class Configuration implements SourceResolver {
         return errorReporterFactory.apply(this);
     }
 
-    /**
-     * Get the {@link Logger} to which messages from this configuration will be sent. The default
-     * {@code Logger} writes messages to the standard error stream
-     * @return the {@code Logger} used by this configuration.
-     */
     public Logger getLogger() {
         return traceOutput;
     }
@@ -1082,7 +1069,7 @@ public class Configuration implements SourceResolver {
             synchronized(this) {
                 ConversionRules cv = new ConversionRules();
                 cv.setTypeHierarchy(getTypeHierarchy());
-                cv.setNotationSet(null);
+                cv.setNotationSet(this);
                 if (xsdVersion == XSD10) {
                     cv.setStringToDoubleConverter(StringToDouble.getInstance());
                     cv.setURIChecker(StandardURIChecker.getInstance());
@@ -1442,15 +1429,14 @@ public class Configuration implements SourceResolver {
     /**
      * Make a function in the "fn" namespace
      *
-     * @param localName       the local name of the function
-     * @param arity           the arity of the function
-     * @param languageVersion the XPath language version (times ten: 31 means 3.1)
+     * @param localName the local name of the function
+     * @param arity     the arity of the function
      * @return the function
      */
 
-    public SystemFunction makeSystemFunction(String localName, int arity, int languageVersion) {
+    public SystemFunction makeSystemFunction(String localName, int arity) {
         try {
-            return getXSLTFunctionSet(languageVersion <= 31 ? 30 : 40).makeFunction(localName, arity);
+            return getXSLTFunctionSet(30).makeFunction(localName, arity);
         } catch (XPathException e) {
             return null;
         }
@@ -3026,32 +3012,72 @@ public class Configuration implements SourceResolver {
     }
     //#endif
 
-    public Schema getSchemaForNamespace(NamespaceUri uri) {
-        return null;
+    /**
+     * Simple interface to load a schema document
+     *
+     * @param absoluteURI the absolute URI of the location of the schema document
+     * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be read or is invalid
+     */
+
+    public void loadSchema(String absoluteURI) throws SchemaException {
+        readSchema(makePipelineConfiguration(), "", absoluteURI, null);
     }
 
     /**
-     * Simple interface to load a schema document. This is a factory method that has no effect
-     * on the state of the {@link Configuration}. Requires a Saxon-EE licensed configuration.
+     * Read a schema from a given schema location
+     * <p>This method is intended for internal use.</p>
      *
-     * @param absoluteURI the absolute URI of the location of the schema document
-     * @return the compiled schema
-     * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be
-     * read or is invalid
+     * @param pipe           the PipelineConfiguration
+     * @param baseURI        the base URI of the instruction requesting the reading of the schema
+     * @param schemaLocation the location of the schema to be read
+     * @param expected       The expected targetNamespace of the schema being read, or null if there is no expectation
+     * @return the target namespace of the schema; null if no schema has been read
+     * @throws UnsupportedOperationException     when called in the non-schema-aware version of the product
+     * @throws net.sf.saxon.type.SchemaException if the schema cannot be read
      */
 
-    public Schema loadSchema(String absoluteURI) throws SchemaException {
+    /*@Nullable*/
+    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ NamespaceUri expected)
+            throws SchemaException {
         needEnterpriseEdition();
         return null;
     }
 
     /**
-     * Load an empty schema. This may be useful as a basis for validating a document using a schema loaded
-     * using xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes.
-     * @return an empty schema containing only the built-in components.
+     * Read schemas from a list of schema locations.
+     * <p>This method is intended for internal use.</p>
+     *
+     * @param pipe            the pipeline configuration
+     * @param baseURI         the base URI against which the schema locations are to be resolved
+     * @param schemaLocations the relative URIs specified as schema locations
+     * @param expected        the namespace URI which is expected as the target namespace of the loaded schema
+     * @throws net.sf.saxon.type.SchemaException if an error occurs
      */
-    public Schema emptySchema() {
-        return new MinimalSchema(this);
+
+    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
+            throws SchemaException {
+        needEnterpriseEdition();
+    }
+
+
+    /**
+     * Read an inline schema from a stylesheet.
+     * <p>This method is intended for internal use.</p>
+     *
+     * @param root          the xs:schema element in the stylesheet
+     * @param expected      the target namespace expected; null if there is no
+     *                      expectation.
+     * @param errorReporter The destination for error messages. May be null, in which case
+     *                      the errorListener registered with this Configuration is used.
+     * @return the actual target namespace of the schema
+     * @throws net.sf.saxon.type.SchemaException if the schema cannot be processed
+     */
+
+    /*@Nullable*/
+    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
+            throws SchemaException {
+        needEnterpriseEdition();
+        return null;
     }
 
     /**
@@ -3061,7 +3087,7 @@ public class Configuration implements SourceResolver {
 
     protected void needEnterpriseEdition() {
         throw new UnsupportedOperationException(
-                "This operation requires the Enterprise Edition of Saxon (with an EnterpriseConfiguration)");
+                "You need the Enterprise Edition of Saxon (with an EnterpriseConfiguration) for this operation");
     }
 
     /**
@@ -3073,11 +3099,10 @@ public class Configuration implements SourceResolver {
      * @throws SchemaException               if the schema cannot be read or parsed or if it is invalid
      * @throws UnsupportedOperationException if the configuration is not schema-aware
      * @since 8.4
-     * @deprecated since 13.0. The method now has no effect. Schemas should be built using
-     * an {@link XsdCompiler}.
      */
 
     public void addSchemaSource(Source schemaSource) throws SchemaException {
+        addSchemaSource(schemaSource, makeErrorReporter());
     }
 
     /**
@@ -3100,8 +3125,8 @@ public class Configuration implements SourceResolver {
      * @param namespace the namespace. Currently built-in schemas are available for the XML and FN namespaces
      */
 
-    public Schema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
-        return null;
+    public void addSchemaForBuiltInNamespace(NamespaceUri namespace) {
+        // no action
     }
 
     /**
@@ -3140,6 +3165,19 @@ public class Configuration implements SourceResolver {
     }
 
     /**
+     * Mark a schema namespace as being sealed. This is done when components from this namespace
+     * are first used for validating a source document or compiling a source document or query. Once
+     * a namespace has been sealed, it is not permitted to change the schema components in that namespace
+     * by redefining them, deriving new types by extension, or adding to their substitution groups.
+     *
+     * @param namespace the namespace URI of the components to be sealed
+     */
+
+    public void sealNamespace(NamespaceUri namespace) {
+        //
+    }
+
+    /**
      * Get the set of saxon:param schema parameters declared in the schema held by this Configuration.
      *
      * @return the set of parameters. May return null if none have been declared.
@@ -3149,33 +3187,115 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
-    //    /**
-//     * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
-//     * document are added to the cache of schema components maintained by this SchemaManager
-//     *
-//     * @param source the XML file containing the schema component model, as generated by a previous call on
-//     *               {@link #exportComponents}
-//     * @throws net.sf.saxon.trans.XPathException if an error occurs
-//     */
-//
-//    public void importComponents(Source source) throws XPathException {
-//        needEnterpriseEdition();
-//    }
+    /**
+     * Get the set of complex types that have been defined as extensions of a given type.
+     * Note that we do not seal the schema namespace, so this list is not necessarily final; we must
+     * assume that new extensions of built-in simple types can be added at any time
+     *
+     * @param type the type whose extensions are required
+     * @return an iterator over the types that are derived from the given type by extension
+     */
 
-//    /**
-//     * Export a precompiled Schema Component Model containing all the components (except built-in components)
-//     * that have been loaded into this Processor.
-//     *
-//     * @param out the destination to recieve the precompiled Schema Component Model in the form of an
-//     *            XML document
-//     * @throws net.sf.saxon.trans.XPathException if a failure occurs
-//     */
-//
-//    public void exportComponents(Receiver out) throws XPathException {
-//        needEnterpriseEdition();
-//    }
+    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type) {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
+     * document are added to the cache of schema components maintained by this SchemaManager
+     *
+     * @param source the XML file containing the schema component model, as generated by a previous call on
+     *               {@link #exportComponents}
+     * @throws net.sf.saxon.trans.XPathException if an error occurs
+     */
+
+    public void importComponents(Source source) throws XPathException {
+        needEnterpriseEdition();
+    }
+
+    /**
+     * Export a precompiled Schema Component Model containing all the components (except built-in components)
+     * that have been loaded into this Processor.
+     *
+     * @param out the destination to recieve the precompiled Schema Component Model in the form of an
+     *            XML document
+     * @throws net.sf.saxon.trans.XPathException if a failure occurs
+     */
+
+    public void exportComponents(Receiver out) throws XPathException {
+        needEnterpriseEdition();
+    }
+
+    /**
+     * Get a global element declaration by fingerprint
+     *
+     * @param fingerprint the NamePool fingerprint of the element name
+     * @return the element declaration whose name matches the given
+     * fingerprint, or null if no element declaration with this name has
+     * been registered.
+     */
+
+    public SchemaDeclaration getElementDeclaration(int fingerprint) {
+        return null;
+    }
+
+    /**
+     * Get a global element declaration by name.
+     *
+     * @param qName the name of the required
+     *              element declaration
+     * @return the element declaration whose name matches the given
+     * name, or null if no element declaration with this name has
+     * been registered.
+     */
+
+
+    public SchemaDeclaration getElementDeclaration(StructuredQName qName) {
+        return null;
+    }
+
+    /**
+     * Get a global attribute declaration by fingerprint
+     *
+     * @param fingerprint the NamePool fingerprint of the element name
+     * @return the attribute declaration whose name matches the given
+     * fingerprint, or null if no element declaration with this name has
+     * been registered.
+     */
+
+    public SchemaDeclaration getAttributeDeclaration(int fingerprint) {
+        return null;
+    }
+
+    /**
+     * Get a global attribute declaration by name
+     *
+     * @param attributeName the name of the required attribute declaration
+     * @return the attribute declaration whose name matches the given
+     * fingerprint, or null if no element declaration with this name has
+     * been registered.
+     */
+
+    public SchemaDeclaration getAttributeDeclaration(StructuredQName attributeName) {
+        return null;
+    }
+
+    /**
+     * Get the top-level schema type definition with a given QName.
+     *
+     * @param name the name of the required schema type
+     * @return the schema type , or null if there is none
+     * with this name.
+     * @since 9.7
+     */
 
     /*@Nullable*/
+    public SchemaType getSchemaType(StructuredQName name) {
+        if (name.hasURI(NamespaceUri.SCHEMA)) {
+             return BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
+        }
+        return null;
+    }
 
     /**
      * Make a union type with a given list of member types
@@ -3186,6 +3306,20 @@ public class Configuration implements SourceResolver {
 
     public ItemType makeUserUnionType(List<AtomicType> memberTypes) {
         return null;
+    }
+
+    /**
+     * Ask whether a given notation has been declared in the schema
+     *
+     * @param uri   the targetNamespace of the notation
+     * @param local the local part of the notation name
+     * @return true if the notation has been declared, false if not
+     * @since 9.3
+     */
+
+    @Override
+    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
+        return false;
     }
 
     /**
@@ -3214,6 +3348,62 @@ public class Configuration implements SourceResolver {
      */
 
     public void prepareValidationReporting(XPathContext context, ParseOptions options) {
+    }
+
+    /**
+     * Get a document-level validator to add to a Receiver pipeline.
+     * <p>This method is intended for internal use.</p>
+     *
+     * @param receiver           The receiver to which events should be sent after validation
+     * @param systemId           the base URI of the document being validated
+     * @param validationOptions  Supplies options relevant to XSD validation
+     * @param initiatingLocation The location of the expression that requested validation
+     * @return A Receiver to which events can be sent for validation
+     */
+
+    public Receiver getDocumentValidator(Receiver receiver,
+                                         String systemId,
+                                         ParseOptions validationOptions,
+                                         Location initiatingLocation) {
+        // non-schema-aware version
+        return receiver;
+    }
+
+    /**
+     * Get a Receiver that can be used to validate an element, and that passes the validated
+     * element on to a target receiver. If validation is not supported, the returned receiver
+     * will be the target receiver.
+     * <p>This method is intended for internal use.</p>
+     *
+     * @param receiver          the target receiver tp receive the validated element
+     * @param validationOptions options affecting the way XSD validation is done
+     * @param locationId        current location in the stylesheet or query
+     * @return The target receiver, indicating that with this configuration, no validation
+     * is performed.
+     * @throws net.sf.saxon.trans.XPathException if a validator for the element cannot be created
+     */
+
+    public Receiver getElementValidator(Receiver receiver,
+                                        ParseOptions validationOptions,
+                                        Location locationId)
+            throws XPathException {
+        return receiver;
+    }
+
+    /**
+     * Validate an attribute value.
+     * <p>This method is intended for internal use.</p>
+     *
+     * @param nodeName   the name of the attribute
+     * @param value      the value of the attribute as a string
+     * @param validation STRICT or LAX
+     * @return the type annotation to apply to the attribute node
+     * @throws ValidationException if the value is invalid
+     */
+
+    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
+            throws ValidationException, MissingComponentException {
+        return BuiltInAtomicType.UNTYPED_ATOMIC;
     }
 
     /**
@@ -3279,7 +3469,7 @@ public class Configuration implements SourceResolver {
      * @param language set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
      * @param updating indicates whether or not XQuery update syntax may be used. Note that XQuery Update
      *                 is supported only in Saxon-EE
-     * @param env the XPath or XQuery static context
+     * @param env
      * @return the XPath or Query parser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
@@ -3574,6 +3764,30 @@ public class Configuration implements SourceResolver {
         return new StyleNodeFactory(this, compilation);
     }
 
+    /**
+     * Make an instruction to implement xsl:evaluate
+     * @param source the xsl:evaluate element in the raw stylesheet tree
+     * @param decl the corresponding component declaration
+     * @return the compiled instruction
+     * @throws XPathException if static errors are found
+     */
+
+    public Expression makeEvaluateInstruction(XSLEvaluate source, ComponentDeclaration decl) throws XPathException {
+        Expression xpath = source.getTargetExpression();
+        SequenceType requiredType = source.getRequiredType();
+        Expression contextItem = source.getContextItemExpression();
+        Expression baseUri = source.getBaseUriExpression();
+        Expression namespaceContext = source.getNamespaceContextExpression();
+        Expression schemaAware = source.getSchemaAwareExpression();
+        Expression withParams = source.getWithParamsExpression();
+        EvaluateInstr inst = new EvaluateInstr(xpath, requiredType, contextItem, baseUri, namespaceContext, schemaAware);
+        WithParam[] params = source.getWithParamInstructions(inst, source.getCompilation(), decl, false);
+        inst.setActualParams(params);
+        inst.setDynamicParams(withParams);
+        inst.setDefaultXPathNamespace(source.getDefaultXPathNamespace());
+        inst.setOptionsExpression(source.getOptionsExpression());
+        return inst;
+    }
 
     /**
      * Factory method to make a StylesheetPackage
@@ -3844,7 +4058,7 @@ public class Configuration implements SourceResolver {
      * @throws UnsupportedOperationException if called when using Saxon-HE
      */
 
-    public PendingUpdateList newPendingUpdateList(Schema schema) {
+    public PendingUpdateList newPendingUpdateList() {
         throw new UnsupportedOperationException("XQuery update is supported only in Saxon-EE");
     }
 
@@ -4229,9 +4443,7 @@ public class Configuration implements SourceResolver {
             } else if (code == FeatureCode.ALLOW_SYNTAX_EXTENSIONS) {
                 boolean b = requireBoolean(name, value);
                 defaultXsltCompilerInfo.setXsltVersion(b ? 40 : 30);
-                if (defaultStaticQueryContext != null) {
-                    defaultStaticQueryContext.setLanguageVersion(b ? 40 : 30);
-                }
+                getDefaultStaticQueryContext().setLanguageVersion(b ? 40 : 30);
             }
             internalSetBooleanProperty(code, name, value);
         } else if (stringFeatures.contains(code)) {
@@ -5332,9 +5544,28 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
-    public XsdCompiler makeXsdCompiler(Processor proc) {
-        return new XsdCompiler();
+    /**
+     * Make an XSLT CompilerInfo object - can be overridden in a subclass to produce variants
+     * capable of optimization
+     *
+     * @return a new CompilerInfo object
+     */
+
+    public CompilerInfo makeCompilerInfo() {
+        return new CompilerInfo(this);
     }
+
+    /**
+     * Make a CompilerService object, to handle byte code generation, or null if byte code
+     * generation is not available
+     *
+     * @param hostLanguage eg Configuration.XSLT
+     * @return a CompilerService, or null
+     */
+    public ICompilerService makeCompilerService(HostLanguage hostLanguage) {
+        return null;
+    }
+
 
     /**
      * Set a label for this configuration

@@ -45,7 +45,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final Set<String> optionalFields = new HashSet<>();
-    private boolean _extensible;
+    private boolean extensible;
 
     /**
      * Class representing one field definition within a record type definition,
@@ -129,7 +129,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
             fieldTypes.put(names.get(i), types.get(i));
         }
         optionalFields.addAll(optionalFieldNames);
-        this._extensible = extensible;
+        this.extensible = extensible;
     }
 
     /**
@@ -204,7 +204,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      */
     @Override
     public boolean isExtensible() {
-        return _extensible;
+        return extensible;
     }
 
     /**
@@ -230,7 +230,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                 return false;
             }
         }
-        if (!_extensible) {
+        if (!extensible) {
             AtomicIterator keyIter = map.keys();
             AtomicValue key;
             while ((key = keyIter.next()) != null) {
@@ -272,7 +272,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
 
     @Override
     public SequenceType getResultType() {
-        if (_extensible) {
+        if (extensible) {
             return SequenceType.ANY_SEQUENCE;
         } else {
             ItemType resultType = null;
@@ -302,7 +302,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
         for (SequenceType st : fieldTypes.values()) {
             prio *= st.getPrimaryType().getNormalizedDefaultPriority();
         }
-        return _extensible ? 0.5 + prio/2 : prio;
+        return extensible ? 0.5 + prio/2 : prio;
     }
 
     /**
@@ -386,7 +386,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
     public boolean equals(Object other) {
         return this == other ||
                 other instanceof RecordTest
-                        && _extensible == ((RecordTest) other)._extensible
+                        && extensible == ((RecordTest) other).extensible
                         && fieldTypes.equals(((RecordTest) other).fieldTypes)
                         && optionalFields.equals(((RecordTest) other).optionalFields);
     }
@@ -557,7 +557,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
                     }
                 }
             }
-            if (!_extensible) {
+            if (!extensible) {
                 AtomicIterator keyIter = ((MapItem)item).keys();
                 AtomicValue key;
                 while ((key = keyIter.next()) != null) {

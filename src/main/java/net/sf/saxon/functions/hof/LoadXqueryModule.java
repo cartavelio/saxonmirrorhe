@@ -164,6 +164,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         // so use alternative constructor?
         main.setPackageData(lib.getPackageData());
         main.setExecutable(lib.getExecutable());
+        main.initializeFunctionLibraries();
         lib.link(main);
         XQueryExpression xqe = new XQueryExpression(new ContextItemExpression(), main, false);
         DynamicQueryContext dqc = new DynamicQueryContext(context.getConfiguration());

@@ -29,7 +29,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.ErrorListener;
@@ -91,8 +90,15 @@ public class StaticQueryContext {
     private int languageVersion = 31;
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
-    private Schema preLoadedSchema = null;
 
+
+
+    /**
+     * Private constructor used when copying a context
+     */
+
+    protected StaticQueryContext() {
+    }
 
     /**
      * Create a StaticQueryContext using a given Configuration. This creates a StaticQueryContext for a main module
@@ -124,6 +130,7 @@ public class StaticQueryContext {
         this.config = config;
         this.namePool = config.getNamePool();
         this.errorReporter = config.makeErrorReporter();
+        this.languageVersion = config.getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) ? 40 : 31;
         if (initialize) {
             copyFrom(config.getDefaultStaticQueryContext());
         } else {
@@ -1192,14 +1199,6 @@ public class StaticQueryContext {
 
     public boolean isUpdatingEnabled() {
         return updating;
-    }
-
-    public void preLoadSchema(Schema schema) {
-        preLoadedSchema = schema;
-    }
-
-    public Schema getPreLoadedSchema() {
-        return preLoadedSchema;
     }
 
 }
