@@ -87,9 +87,9 @@ PHP_METHOD(XQueryProcessor, runQueryToString) {
   if (xqueryProcessor != nullptr) {
     try {
       const char *result = xqueryProcessor->runQueryToString();
-      if (result != nullptr) {
-        _RETURN_STRING(result);
-        return;
+      RETVAL_STRING(result);
+      saxonProcessor->deleteString(result);
+      return;
       }
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
@@ -494,7 +494,7 @@ PHP_METHOD(XQueryProcessor, getErrorCode) {
     const char *errCode = xqueryProcessor->getErrorCode();
     if (errCode != nullptr) {
       // char *str = estrdup(errCode);
-      _RETURN_STRING(errCode);
+      RETURN_STRING(errCode);
     }
   }
   RETURN_NULL();
@@ -515,7 +515,7 @@ PHP_METHOD(XQueryProcessor, getErrorMessage) {
     const char *errStr = xqueryProcessor->getErrorMessage();
     if (errStr != nullptr) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(errStr);
+      RETURN_STRING(errStr);
     }
   }
   RETURN_NULL();

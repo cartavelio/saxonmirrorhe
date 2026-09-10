@@ -110,7 +110,9 @@ PHP_METHOD(Xslt30Processor, transformFileToString) {
       const char *result =
           xslt30Processor->transformFileToString(infilename, styleFileName);
       if (result != nullptr) {
-        _RETURN_STRING(result);
+      RETVAL_STRING(result);
+      saxonProcessor->deleteString(result);
+      return;
       }
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
@@ -607,7 +609,7 @@ PHP_METHOD(Xslt30Processor, getErrorCode) {
     const char *errCode = xslt30Processor->getErrorCode();
     if (errCode != NULL) {
       // char *str = estrdup(errCode);
-      _RETURN_STRING(errCode);
+      RETURN_STRING(errCode);
     }
   }
   RETURN_NULL();

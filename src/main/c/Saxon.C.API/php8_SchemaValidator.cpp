@@ -447,7 +447,7 @@ PHP_METHOD(SchemaValidator, getErrorCode) {
     const char *errCode = schemaValidator->getErrorCode();
     if (errCode != nullptr) {
       // char *str = estrdup(errCode);
-      _RETURN_STRING(errCode);
+      RETURN_STRING(errCode);
     }
   }
   RETURN_NULL();
@@ -468,7 +468,7 @@ PHP_METHOD(SchemaValidator, getErrorMessage) {
     const char *errStr = schemaValidator->getErrorMessage();
     if (errStr != nullptr) {
       // char *str = estrdup(errStr);
-      _RETURN_STRING(errStr);
+      RETURN_STRING(errStr);
     }
   }
   RETURN_NULL();

@@ -37,6 +37,7 @@ const char *XdmAtomicValue::getPrimitiveTypeName() {
 
   if (result != nullptr) {
     valType = std::string(result);
+    operator delete (result);
     return valType.c_str();
   }
 
