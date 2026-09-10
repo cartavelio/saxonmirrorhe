@@ -1059,6 +1059,12 @@
                 <code>parser=org.ccil.cowan.tagsoup.Parser</code> causes John Cowan's TagSoup parser
               for HTML to be used.</p>
           </li>
+          <li>
+            <p>
+              <code>xinclude=yes|no</code>: determines whether XInclude processing should be applied
+              to the input document. This overrides any setting in the <a class="javalink"
+                href="net.sf.saxon.Configuration">Configuration</a> (or any command line option).</p>
+          </li>
         </ul>
       </status>
       <saxon-edition>ALL</saxon-edition>
