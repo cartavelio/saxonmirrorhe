@@ -18,6 +18,10 @@ namespace Saxon.Impl.Helpers {
         public static Singulink.Numerics.BigDecimal ValueOf(double val) {
             return Singulink.Numerics.BigDecimal.FromDouble(val, Singulink.Numerics.FloatConversion.Roundtrip);
         }
+        
+        public static Singulink.Numerics.BigDecimal ExactValueOf(double val) {
+            return Singulink.Numerics.BigDecimal.FromDouble(val, Singulink.Numerics.FloatConversion.Exact);
+        }
 
         public static Singulink.Numerics.BigDecimal ValueOf(string s) {
             return Singulink.Numerics.BigDecimal.Parse(s);

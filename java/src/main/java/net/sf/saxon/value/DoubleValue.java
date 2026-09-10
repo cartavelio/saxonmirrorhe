@@ -474,7 +474,7 @@ public final class DoubleValue extends NumericValue {
         }
     }
 
-    @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(value);")
+    @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.BigDecimalUtils.ExactValueOf(value);")
     private static BigDecimal fromDouble(double value) {
         return new BigDecimal(value);
     }
