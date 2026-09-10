@@ -29,6 +29,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -312,7 +313,7 @@ public class LookupAllExpression extends UnaryExpression {
                     } else if (item instanceof MapItem) {
                         return new MapEntriesIterator((MapItem)item);
                     } else {
-                        return net.sf.saxon.tree.iter.EmptyIterator.getInstance();
+                        return EmptyIterator.getInstance();
                     }
                 });
                 if (req != SequenceType.ANY_SEQUENCE) {

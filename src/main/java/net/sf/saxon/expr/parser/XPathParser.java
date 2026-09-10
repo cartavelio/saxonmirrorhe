@@ -1303,7 +1303,6 @@ public class XPathParser {
         }
         parser.nextToken();
         Expression actionExpr = parser.parseExprSingle();
-
         return new DeepUpdate2(operation, rootExpr, selectExpr, actionExpr);
     }
 
@@ -3026,6 +3025,7 @@ public class XPathParser {
                             return parseInlineFunction(AnnotationList.EMPTY);
                         default:
                             grumble("'" + name + "' cannot be used as a function name");
+                            return null;
                     }
                 }
                 CSharp.emitCode("goto case Saxon.Hej.expr.parser.Token.PREFIX;");
@@ -3598,6 +3598,7 @@ public class XPathParser {
                     break;
                 default:
                     grumble("Unknown modifier after '?' operator: " + t.currentTokenValue);
+                    break;
             }
 
             //nextToken(); // swallow the '::'

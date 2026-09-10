@@ -1740,6 +1740,9 @@
          <method name="log10"/>
          <method name="exp"/>
          <method name="exp10"/>
+         <method name="sinh"/>
+         <method name="tanh"/>
+         <method name="cosh"/>
       </class>
    </xsl:variable>
    

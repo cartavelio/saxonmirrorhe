@@ -3491,9 +3491,9 @@ public class XQueryParser extends XPathParser {
      */
 
     /*@NotNull*/
-    protected Expression parseDeepUpdateExpression() throws XPathException {
-        return parserExtension.parseDeepUpdateExpression(this);
-    }
+//    protected Expression parseDeepUpdateExpression() throws XPathException {
+//        return parserExtension.parseDeepUpdateExpression(this);
+//    }
 
     /**
      * Parse an Extension Expression.

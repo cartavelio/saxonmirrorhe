@@ -91,7 +91,7 @@ public class OpChoice extends Operation {
     public int getMaxLoopingDepth() {
         int max = 0;
         for (Operation o : branches) {
-            max = Integer.max(max, o.getMaxLoopingDepth());
+            max = Math.max(max, o.getMaxLoopingDepth());
         }
         return max;
     }

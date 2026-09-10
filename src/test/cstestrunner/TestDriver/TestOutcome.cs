@@ -11,7 +11,7 @@ using Saxon.Hej.regex;
 using Saxon.Hej.str;
 using JWhitespace = Saxon.Hej.value.Whitespace;
 using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
-using JDeepEqual = Saxon.Eej.functions.extfn.SaxonDeepEqual;
+using JDeepEqual = Saxon.Hej.functions.SaxonDeepEqual;
 using JDeepEqual40 = Saxon.Hej.functions.DeepEqual;
 using JSequenceIterator = Saxon.Hej.om.SequenceIterator;
 using JAxisInfo = Saxon.Hej.om.AxisInfo;

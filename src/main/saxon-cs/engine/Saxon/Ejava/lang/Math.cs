@@ -26,7 +26,9 @@ namespace Saxon.Ejava.lang {
             return x < y ? x : y;
         }
 
-        public const double PI = SysMath.PI; 
+        public const double PI = SysMath.PI;
+        public const double E = SysMath.E;
+        
         public static long abs(long x) {
             return x >= 0 ? x : -x;
         }
@@ -72,6 +74,15 @@ namespace Saxon.Ejava.lang {
         }
         public static double atan(double x) {
             return SysMath.Atan(x);
+        }
+        public static double sinh(double x) {
+            return SysMath.Sinh(x);
+        }
+        public static double cosh(double x) {
+            return SysMath.Cosh(x);
+        }
+        public static double tanh(double x) {
+            return SysMath.Tanh(x);
         }
         public static double log(double x) {
             return SysMath.Log(x);

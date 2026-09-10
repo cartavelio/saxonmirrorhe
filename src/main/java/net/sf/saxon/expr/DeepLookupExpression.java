@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static net.sf.saxon.expr.DeepLookupAllExpression.modifiedIterator;
 
 
 /**
@@ -306,7 +305,7 @@ public class DeepLookupExpression extends BinaryExpression {
                                                item -> finalKeySet.get((AtomicValue)((ShapedMap) item).get("key")) != null);
                     }
                     SequenceIterator selectedEntries = new ListIterator.Of<>(content);
-                    return modifiedIterator(selectedEntries, expr.modifier);
+                    return DeepLookupAllExpression.modifiedIterator(selectedEntries, expr.modifier);
                 };
             } else {
                 PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
@@ -328,7 +327,7 @@ public class DeepLookupExpression extends BinaryExpression {
                                                item -> finalKeySet.get((AtomicValue)((ShapedMap) item).get("key")) != null);
                     }
                     SequenceIterator selectedEntries = new ListIterator.Of<>(content);
-                    return modifiedIterator(selectedEntries, expr.modifier);
+                    return DeepLookupAllExpression.modifiedIterator(selectedEntries, expr.modifier);
                 };
             }
         }
