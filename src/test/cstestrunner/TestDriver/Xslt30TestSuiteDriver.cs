@@ -1584,7 +1584,7 @@ namespace TestDriver {
 
     public class ModuleResolver : ModuleURIResolver {
         // To support XSLT stylesheets that use load-query-module(), we're setting a query module resolver
-        // in the Configuration. This isn't supported directly in the Saxon-CS API, we have to dive down into
+        // in the Configuration. This isn't supported directly in the SaxonCS API, we have to dive down into
         // internals to achieve the required effect
         XQueryCompiler catXQC;
         XdmNode testCase;
