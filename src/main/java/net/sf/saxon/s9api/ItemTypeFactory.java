@@ -9,7 +9,6 @@ package net.sf.saxon.s9api;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -425,45 +424,32 @@ public class ItemTypeFactory {
      *
      * @param name       the element name, or null if there is no constraint on the name (equivalent to
      *                   specifying <code>element(*, type)</code>)
-     * @param schemaType the name of the required schema type, or null of there is no constraint
+     * @param schemaTypeName the name of the required schema type, or null of there is no constraint
      *                   on the type (equivalent to specifying <code>element(name)</code>)
      * @return the constructed ItemType
      * @throws SaxonApiException if the schema does not contain a global element declaration
      *                           for the given name
      */
 
-    public ItemType getAttributeTest(QName name, QName schemaType) throws SaxonApiException {
-        NameTest nameTest = null;
+    public ItemType getAttributeTest(QName name, QName schemaTypeName) throws SaxonApiException {
+        NodeTest nameTest = AnyNodeTest.getInstance();
+        SchemaType schemaType = null;
         ContentTypeTest contentTest = null;
         if (name != null) {
             int attributeFP = config.getNamePool().allocateFingerprint(name.getNamespaceUri(), name.getLocalName());
             nameTest = new NameTest(Type.ATTRIBUTE, attributeFP, config.getNamePool());
         }
-        if (schemaType != null) {
-            SchemaType type = config.getSchemaType(
-                new StructuredQName("", schemaType.getNamespaceUri(), schemaType.getLocalName()));
-            if (type == null) {
-                throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
+        if (schemaTypeName != null) {
+            schemaType = config.getSchemaType(
+                new StructuredQName("", schemaTypeName.getNamespaceUri(), schemaTypeName.getLocalName()));
+            if (schemaType == null) {
+                throw new SaxonApiException("Unknown schema type " + schemaTypeName.getClarkName());
             }
-            contentTest = new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), type, false, config);
+            contentTest = new ContentTypeTest(
+                    Type.ATTRIBUTE, nameTest.getQNameTest(), schemaType, false, config);
+            return new ConstructedItemType(contentTest, config);
         }
-        if (contentTest == null) {
-            if (nameTest == null) {
-                return getNodeKindTest(XdmNodeKind.ATTRIBUTE);
-            } else {
-                return new ConstructedItemType(nameTest, config);
-            }
-        } else {
-            if (nameTest == null) {
-                return new ConstructedItemType(contentTest, config);
-            } else {
-                CombinedNodeTest combo = new CombinedNodeTest(
-                        nameTest,
-                        OperatorSymbol.INTERSECT,
-                        contentTest);
-                return new ConstructedItemType(combo, config);
-            }
-        }
+        return new ConstructedItemType(nameTest, config);
     }
 
     /**

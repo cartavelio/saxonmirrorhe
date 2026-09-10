@@ -750,16 +750,16 @@ public class AlphaCode {
 
             String contentName = tree.content;
             StructuredQName contentQName;
-            ContentTypeTest contentTest = null;
+            SchemaType contentType = null;
             boolean nillable = tree.nillable;
             if (contentName != null) {
                 contentQName = StructuredQName.fromEQName(contentName);
-                SchemaType contentType = config.getSchemaType(contentQName);
+                contentType = config.getSchemaType(contentQName);
                 if (contentType == null) {
                     throw new IllegalArgumentException("Unknown type " + contentName);
                 }
-                contentTest = new ContentTypeTest(principal.equals("NE") ? Type.ELEMENT : Type.ATTRIBUTE,
-                                                  AnyNodeTest.getInstance(), contentType, nillable, config);
+//                contentTest = new ContentTypeTest(principal.equals("NE") ? Type.ELEMENT : Type.ATTRIBUTE,
+//                                                  AnyNodeTest.getInstance(), contentType, nillable, config);
             }
             if (tree.vennOperands != null) {
                 if (tree.vennOperands.length == 2) {
@@ -853,31 +853,30 @@ public class AlphaCode {
                             }
                             break;
                         case "NE":
-                            if (qName == null) {
-                                if (contentTest == null) {
-                                    itemType = NodeKindTest.ELEMENT;
-                                } else {
-                                    itemType = contentTest;
-                                }
+                             if (contentType == null) {
+                                itemType = qName == null
+                                        ? NodeKindTest.ELEMENT
+                                        : new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());;
                             } else {
-                                itemType = new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
-                                if (contentTest != null) {
-                                    itemType = new CombinedNodeTest((NodeTest) itemType, OperatorSymbol.INTERSECT, contentTest);
-                                }
+                                 QNameTest nameTest = qName == null
+                                         ? AnyNodeTest.getInstance()
+                                         : new NameTest(Type.ELEMENT, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+
+                                 itemType = new ContentTypeTest(Type.ELEMENT, nameTest, contentType, nillable, config);
                             }
                             break;
                         case "NA":
-                            if (qName == null) {
-                                if (contentTest == null) {
-                                    itemType = NodeKindTest.ATTRIBUTE;
-                                } else {
-                                    itemType = contentTest;
-                                }
+                            if (contentType == null) {
+                                itemType = qName == null
+                                        ? NodeKindTest.ATTRIBUTE
+                                        : new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+                                ;
                             } else {
-                                itemType = new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
-                                if (contentTest != null) {
-                                    itemType = new CombinedNodeTest((NodeTest) itemType, OperatorSymbol.INTERSECT, contentTest);
-                                }
+                                QNameTest nameTest = qName == null
+                                        ? AnyNodeTest.getInstance()
+                                        : new NameTest(Type.ATTRIBUTE, qName.getNamespaceUri(), qName.getLocalPart(), config.getNamePool());
+
+                                itemType = new ContentTypeTest(Type.ATTRIBUTE, nameTest, contentType, false, config);
                             }
                             break;
                         case "NES": {
