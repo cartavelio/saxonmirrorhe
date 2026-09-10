@@ -253,7 +253,7 @@ namespace Saxon.Impl.Helpers {
             return null;
         }
 
-        public ActiveSource resolveSource(Source source, Configuration config) {
+        public ActiveSource resolveSource(Source source, ParseOptions options, Configuration config) {
             if (source is ActiveSource activeSource) {
                 return activeSource;
             }
@@ -267,6 +267,10 @@ namespace Saxon.Impl.Helpers {
                     MaxCharactersFromEntities = 100000,
                     XmlResolver = new XmlResolverWrappingResourceResolver(config.getResourceResolver())
                 };
+
+                if (options != null && options.getDTDValidationMode() == Validation.STRICT) {
+                    settings.ValidationType = ValidationType.DTD;
+                }
             
                 // if (source.getSystemId() != null) {
                 //     settings.XmlResolver =
