@@ -324,14 +324,33 @@ class.)</p>
       
       <p>>The <code>xsl:result-document</code> instruction is executed synchronously.</p>
       
-      <h2>Restrictions Relative to Saxon-EE 10 on .NET</h2>
+      <h2>Restrictions and Changes Relative to Saxon-EE 10 on .NET</h2>
       
       <p>The only supported parser is the Microsoft System.Xml parser. (Saxon 10 on .NET also worked with
       a port of Apache Xerces.) See <a href="xmlparsing"/>.</p>
       
-      <p>There have been some changes to the API for declaring collections.</p>
+      
       
       <p>JAR/ZIP file collections are not supported.</p>
+      
+      <p>The broad structure of the API remains unchanged from the existing .NET product, 
+         including some features retained for legacy reasons, but the detail has been modernized and made
+         more consistent.</p>
+      
+      <p>The interface <code>XmlDestination</code> is renamed as <code>IDestination</code>, firstly to use the
+         standard naming convention for interfaces, and secondly to reflect the fact that the content sent to
+         an <code>IDestination</code> is not always XML.
+      </p>
+      
+      <p>The class <code>TextWriterDestination</code> is renamed as <code>XmlWriterDestination</code> to
+      better reflect its purpose and usage.</p>
+      
+      <p>The value of property <code>XdmNode.NodeKind</code> is now an <code>XdmNodeKind</code>, and the
+      corresponding <code>XmlNodeType</code> is obtained using the new <code>XdmNode.NodeType</code> property
+      (the need for both arises because there isn't an exact correspondence between node types in DOM and node
+      kinds in XDM.)</p>
+      
+      <p>There have been some changes to the API for declaring collections.</p>
       
       <p>The classes <code>Saxon.Api.Predicate</code> and <code>Saxon.Api.IPredicate</code> have gone, 
          replaced by use of <code>System.Predicate</code>. All the predicates obtained using the <code>Saxon.Api.Predicates</code> 
@@ -348,11 +367,25 @@ class.)</p>
       is now a <code>Uri</code> rather than a <code>string</code>, bringing these classes into line with
       <code>Saxon.Api.XsltCompiler</code>.</p>
       
+      <p>A number of callbacks have been changed from interfaces to delegates, allowing them to be implemented
+      more conveniently as lambda expressions. These include the MessageListener, the ResultDocumentHandler,
+      the CollectionFinder, and the ErrorReporter. The class SimpleUriResolver is an implementation of the .NET-defined interface
+      <code>XmlResolver</code> that allows the actual resolution logic to be written as a lambda expression, for example
+      <code>XmlResolver resolver = new SimpleUriResolver(uri => new WebClient().OpenRead(uri))</code>.</p>
+      
+      <p>A number of getter and setter methods (such as <code>ValidationFailure.GetLineNumber()</code>) have been changed
+         to properties: <code>ValidationFailure.LineNumber</code>.</p>
+      
       <p>The <code>Xslt30Compiler</code> class (and others????) no longer has an <code>ErrorList</code> property.
-      Replace <code>compiler.ErrorList = errorList;</code> by <code>compiler.ErrorReporter = (err => errorList.Add);</code>.</p>
+      Replace <code>compiler.ErrorList = errorList;</code> by <code>compiler.ErrorReporter = errorList.Add;</code>.</p>
       
       <p>The <code>MessageListener</code> property of <code>XsltTransformer</code> and <code>Xslt30Transformer</code>
       is now a delegate in the form <code>Consumer&lt;Message&gt;</code></p>
+      
+      <p>The <code>ValidationFailure</code> object which provides information about errors detected during schema
+      validation now delivers information about the error in the form of C# properties rather than Java-like 
+      methods: for example <code>ValidationFailure.LineNumber</code> replaces <code>ValidationFailure.GetLineNumber()</code>.
+     </p>
       
       
    </section>
