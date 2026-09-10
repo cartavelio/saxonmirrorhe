@@ -77,7 +77,9 @@ public class UnparsedTextResource implements Resource {
         }
     }
 
-    public final static ResourceFactory FACTORY = UnparsedTextResource::new;
+    // IntelliJ wants to simplify this to ...  FACTORY = UnparsedTextResource::new;
+    // but the CS transpiler doesn't do the right thing with that, so I'm leaving the 'long' form.
+    public final static ResourceFactory FACTORY = (context, details) -> new UnparsedTextResource(context, details);
 
     @Override
     public String getResourceURI() {

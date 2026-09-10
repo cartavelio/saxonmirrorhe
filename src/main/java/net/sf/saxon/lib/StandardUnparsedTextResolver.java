@@ -100,6 +100,7 @@ public class StandardUnparsedTextResolver
         }
     }
 
+    @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"SAXSources are not supported on .NET\");")
     public static Reader getReaderFromSAXSource(SAXSource source, String encoding, Configuration config, boolean debug) throws XPathException {
         Logger err = config.getLogger();
         InputStream inputStream = null;
