@@ -29,7 +29,7 @@ exclude-result-prefixes="f fn xs math">
   </xsl:for-each>    
   </xsl:template>
   
-  <xsl:function name="f:square" as="xs:integer">
+  <xsl:function name="f:square" as="xs:integer" visibility="public">
     <xsl:param name="x" as="xs:integer"/>
     <xsl:sequence select="$x*$x"/>
   </xsl:function>
