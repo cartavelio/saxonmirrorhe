@@ -25,7 +25,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
-import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
@@ -819,15 +818,20 @@ public class TestXslt30TransformerDebug {
         try {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, Boolean.TRUE);
-            processor.getUnderlyingConfiguration().addSchemaSource(
-                    new StreamSource(configTest.getDataDir() + "books.xsd"));
             processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+
+            SchemaManager schemaManager = processor.getSchemaManager();
+            processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
+            XsdSchema schema = schemaManager.load(
+                    new StreamSource(configTest.getDataDir() + "books.xsd"));
+
 
             Serializer serializer = processor.newSerializer();
             serializer.setOutputFile(new File(configTest.getTempDir() + "validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
+            compiler.useSchema(schema);
 
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "\n" +
@@ -851,9 +855,6 @@ public class TestXslt30TransformerDebug {
             transformer.applyTemplates(new StreamSource(new StringReader(xsl)), serializer);
         } catch (SaxonApiException e) {
             e.printStackTrace();
-            fail();
-        } catch (SchemaException se) {
-            se.printStackTrace();
             fail();
         }
     }

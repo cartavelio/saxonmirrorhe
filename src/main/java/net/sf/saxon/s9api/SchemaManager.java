@@ -127,7 +127,7 @@ public abstract class SchemaManager {
      * @throws SaxonApiException if the schema document is not valid.
      * @since 9.1. From Saxon 12.3, the method can only be called once; to load from multiple schema documents,
      * either supply multiple sources in a single call to the {@link #load(Source...)} method, or use a separate
-     * {@code SchemaManager} for each one and combine the resulting schemas using
+     * {@code SchemaManager} for each one and combine the resulting schemas.
      */
 
     public abstract XsdSchema load(Source... source) throws SaxonApiException;
@@ -149,6 +149,8 @@ public abstract class SchemaManager {
     public XsdSchema load(File file) throws SaxonApiException {
         return load(new StreamSource(file));
     }
+
+    public abstract void clear();
 
     public abstract XsdSchema getXsdSchema();
 

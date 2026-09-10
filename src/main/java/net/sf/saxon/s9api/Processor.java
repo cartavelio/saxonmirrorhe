@@ -309,7 +309,8 @@ public class Processor implements Configuration.ApiProvider {
     /**
      * Get the SchemaManager for the global schema. The SchemaManager provides capabilities to load and cache
      * XML schema definitions. There is exactly one global SchemaManager in a schema-aware Processor, and none
-     * in a Processor that is not schema-aware. The global SchemaManager is created automatically by the system.
+     * in a Processor that is not schema-aware. The global SchemaManager is created automatically when first
+     * accessed.
      *
      * @return the global SchemaManager, or null if the Processor is not schema-aware.
      */

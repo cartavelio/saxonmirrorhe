@@ -25,7 +25,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Traceable;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
-import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
@@ -789,8 +788,9 @@ public class TestXslt30Transformer {
     public void testValidationWarnings() {
         try {
             Processor processor = new Processor(true);
+            SchemaManager schemaManager = processor.getSchemaManager();
             processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
-            processor.getUnderlyingConfiguration().addSchemaSource(
+            XsdSchema schema = schemaManager.load(
                     new StreamSource(configTest.getDataDir() + "books.xsd"));
 
             Serializer serializer = processor.newSerializer();
@@ -798,6 +798,7 @@ public class TestXslt30Transformer {
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
+            compiler.useSchema(schema);
 
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "\n" +
@@ -820,9 +821,6 @@ public class TestXslt30Transformer {
             transformer.applyTemplates(new StreamSource(new StringReader(xsl)), serializer);
         } catch (SaxonApiException e) {
             e.printStackTrace();
-            fail();
-        } catch (SchemaException se) {
-            se.printStackTrace();
             fail();
         }
     }

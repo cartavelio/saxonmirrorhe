@@ -32,6 +32,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.ElementImpl;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -94,6 +95,10 @@ public class XsltCompiler {
         compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
         compilerInfo.setTargetEdition(config.getEditionCode());
         compilerInfo.setJustInTimeCompilation(config.isJITEnabled());
+    }
+
+    public void useSchema(XsdSchema schema) {
+        throw new NotImplementedException();
     }
 
     /**

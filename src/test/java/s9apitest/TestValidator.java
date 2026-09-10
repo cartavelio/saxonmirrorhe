@@ -1,6 +1,5 @@
 package s9apitest;
 
-import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
@@ -8,15 +7,12 @@ import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trace.Instrumentation;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ValidationException;
@@ -1277,47 +1273,47 @@ public class TestValidator {
     private void loadMultiple(boolean multiple, boolean fromNode) {
 
         try {
-            EnterpriseConfiguration config = new EnterpriseConfiguration();
+            Processor proc = new Processor();
 
-            config.setBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, multiple);
+            proc.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, multiple);
 
             String dir = configTest.getDataDir() + "/petrk/AbstractType-2/";
 
             System.err.println("Loading from file:");
 
             if (fromNode) {
-                loadSchemaFromNode(config, new File(dir + "src/schema.xsd"));
-                loadSchemaFromNode(config, new File(dir + "src/schema1.xsd"));
-                loadSchemaFromNode(config, new File(dir + "src/schema2.xsd"));
+                loadSchemaFromNode(proc, new File(dir + "src/schema.xsd"));
+                loadSchemaFromNode(proc, new File(dir + "src/schema1.xsd"));
+                loadSchemaFromNode(proc, new File(dir + "src/schema2.xsd"));
             } else {
-                loadSchemaOK(config, new File(dir + "src/schema.xsd"));
-                loadSchemaOK(config, new File(dir + "src/schema1.xsd"));
-                loadSchemaOK(config, new File(dir + "src/schema2.xsd"));
+                loadSchemaOK(proc, new File(dir + "src/schema.xsd"));
+                loadSchemaOK(proc, new File(dir + "src/schema1.xsd"));
+                loadSchemaOK(proc, new File(dir + "src/schema2.xsd"));
             }
 
             System.err.println("Loading successful");
 
-        } catch (XPathException e) {
+        } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
-    private static void loadSchemaOK(EnterpriseConfiguration config, File urlStr) throws XPathException {
+    private static void loadSchemaOK(Processor proc, File urlStr) throws SaxonApiException {
         Source s = new StreamSource(urlStr);
-        config.addSchemaSource(s);
-
+        proc.getSchemaManager().load(s);
     }
 
-    private static void loadSchemaFromNode(EnterpriseConfiguration config, File urlStr) throws XPathException {
+    private static void loadSchemaFromNode(Processor proc, File urlStr) throws SaxonApiException {
         Source s = new StreamSource(urlStr);
-        ParseOptions options = new ParseOptions().withLineNumbering(true);
         // Note: At 9.8, the test fails if line numbering is switched off, because line numbers
-        // are used to determined identity of schema components.
-        NodeInfo ni = config.buildDocumentTree(s, options).getRootNode();
+        // are used to determine identity of schema components.
+        DocumentBuilder builder = proc.newDocumentBuilder();
+        builder.setLineNumbering(true);
+        XdmNode ni = builder.build(s);
         //System.out.println( QueryResult.serialize(ni) );
         //System.out.println( ni.getSystemId() );
-        config.addSchemaSource(ni);
+        proc.getSchemaManager().load(ni.asSource());
 
     }
 

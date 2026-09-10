@@ -724,8 +724,12 @@ public class TestXsltTransformer {
         try {
             Processor processor = new Processor(true);
             processor.setConfigurationProperty(FeatureKeys.VALIDATION_WARNINGS, Boolean.TRUE);
-            processor.getUnderlyingConfiguration().addSchemaSource(
+
+            SchemaManager schemaManager = processor.getSchemaManager();
+            processor.setConfigurationProperty(Feature.VALIDATION_WARNINGS, true);
+            XsdSchema schema = schemaManager.load(
                     new StreamSource(configTest.getDataDir() + "books.xsd"));
+
 
             Serializer serializer = processor.newSerializer();
             serializer.setOutputFile(new File(configTest.getTempDir() + "validationWarnings.xml"));

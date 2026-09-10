@@ -512,6 +512,7 @@ public class TestXPathCompiler {
         }
 
         Processor processor = new Processor(true);
+        SchemaManager schemaManager = processor.getSchemaManager();
         EnterpriseConfiguration conf = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
 
         conf.displayLicenseMessage();
@@ -521,12 +522,15 @@ public class TestXPathCompiler {
         try {
 
             // 1. load schema into EnterpriseConfiguration
-            conf.addSchemaSource(new StreamSource(configTest.getDataDir() + "malix/schema.xsd"));
+            XsdSchema schema = schemaManager.load(new StreamSource(configTest.getDataDir() + "malix/schema.xsd"));
+
             XQueryCompiler xqueryCompiler = processor.newXQueryCompiler();
             xqueryCompiler.setSchemaAware(true);
+            xqueryCompiler.useSchema(schema);
 
             xpathCompiler = processor.newXPathCompiler();
             xpathCompiler.setSchemaAware(true);
+            xpathCompiler.useSchema(schema);
 
             String xq =
                     "declare namespace xfi='http://www.xbrl.org/2008/function/instance'; \n" +

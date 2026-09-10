@@ -7,6 +7,7 @@
 
 package net.sf.saxon;
 
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.lib.*;
@@ -692,6 +693,7 @@ public class Transform {
 
             value = options.getOptionValue("scmin");
             if (value != null) {
+                PreparedSchema ps = new PreparedSchema();
                 config.importComponents(new StreamSource(value));
             }
 

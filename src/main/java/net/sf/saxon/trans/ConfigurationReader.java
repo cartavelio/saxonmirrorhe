@@ -30,6 +30,7 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import org.xmlresolver.ResolverFeature;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -797,12 +798,13 @@ public class ConfigurationReader implements Receiver {
                         errors.add(new XmlProcessingException(e));
                     }
                 } else if ("schemaComponentModel".equals(localName)) {
-                    try {
-                        Source source = getInputSource(content);
-                        targetConfig.importComponents(source);
-                    } catch (XPathException e) {
-                        errors.add(new XmlProcessingException(e));
-                    }
+                    throw new NotImplementedException();
+//                    try {
+//                        Source source = getInputSource(content);
+//                        targetConfig.importComponents(source);
+//                    } catch (XPathException e) {
+//                        errors.add(new XmlProcessingException(e));
+//                    }
                 } else if ("catalogFile".equals(localName)) {
                     URI baseURI = URI.create(systemId);
                     catalogFiles.add(baseURI.resolve(content).toString());
