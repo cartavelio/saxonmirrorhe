@@ -83,15 +83,15 @@
        
     <p>Saxon adopts a uniform approach to resolving and dereferencing these URIs.</p>
     
-    <aside><p>Technically, <emph>resolving</emph> a URI is the process of expanding a relative
+    <aside><p>Technically, <em>resolving</em> a URI is the process of expanding a relative
       to an absolute URI, for example resolving the relative reference <code>feature-matrix-11.xml</code>
       against a base URI such as <code>http://www.saxonica.com/products/</code> to give the 
       absolute URI <code>http://www.saxonica.com/products/feature-matrix-11.xml</code>.
       The process of fetching an XML document using this absolute URI is properly
-      refered to as <emph>dereferencing</emph>; however, it is often called <emph>resolving</emph>,
+      refered to as <em>dereferencing</em>; however, it is often called <em>resolving</em>,
       and since this term is used in many APIs, it is impossible to avoid it.</p>
-      <p>Where we need to avoid ambiguity, we call the first process <emph>absolutization</emph>
-      and the second <emph>dereferencing</emph>.</p>
+      <p>Where we need to avoid ambiguity, we call the first process <em>absolutization</em>
+      and the second <em>dereferencing</em>.</p>
     </aside>
     
     
@@ -116,7 +116,7 @@
           <code>setUnparsedTextResolver()</code>, <code>setModuleURIResolver()</code>.</p></li>
           <li><p>If the local resolver fails to resolve the URI, it is passed to a resolver registered centrally
           with the Saxon <code java="net.sf.saxon.Configuration">Configuration</code>. The default resolver at this level is designed
-          to invoke a third-party library called the <emph>catalog resolver</emph>, which looks
+          to invoke a third-party library called the <em>catalog resolver</em>, which looks
           up known URIs in an XML-based catalog. By default there is a single built-in catalog 
           containing local copies of popular W3C-defined resources such as the DTDs for XHTML and
           SVG. Additional catalog files can be registered using an API (<code
