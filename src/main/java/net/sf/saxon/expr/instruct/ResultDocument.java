@@ -34,7 +34,6 @@ import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
 
@@ -385,10 +384,9 @@ public class ResultDocument extends Instruction
     }
 
     /**
-     * Evaluation method designed for calling from compiled bytecode.
+     * Evaluation method
      *
-     * @param content The content expression. When called from bytecode, this will be the compiled version
-     *                of the interpreted content expression
+     * @param content The content expression.
      * @param context dynamic evaluation context
      * @throws XPathException if a dynamic error occurs
      */
@@ -443,13 +441,12 @@ public class ResultDocument extends Instruction
         // which can then be injected at an appropriate point into the output pipeline
 
         if (validationOptions != null && validationOptions.getSchemaValidationMode() != Validation.PRESERVE) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
             serParams.setValidationFactory(
                     output -> {
                         // Validation can add redundant namespace declarations so we
                         // need to follow it with a namespace reducer
                         NamespaceReducer reducer = new NamespaceReducer(output);
-                        return schema.getDocumentValidator(
+                        return config.getDocumentValidator(
                                 reducer, output.getSystemId(), validationOptions, getLocation());
                     }
             );
