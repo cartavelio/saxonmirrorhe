@@ -70,7 +70,7 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
     /*@Nullable*/
     @Override
     public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone, int specVersion) {
-        return asMapKey(40);
+        return asMapKey(specVersion);
     }
 
     @Override
@@ -90,17 +90,18 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
      *
      * @param collator         collation to be used for comparing strings
      * @param implicitTimezone to be used for comparing dates/times with no timezone
-     * @param specVersion
+     * @param specVersion      the semantics of binary comparison change in XPath 4.0
      * @return a key used for performing the comparison
      */
 
     @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone, int specVersion) {
-        return this;
+        return specVersion >= 40 ? this : new XPath31Comparable(this);
     }
 
     /**
-     * Test if the two hexBinary or Base64Binary values are equal.
+     * Test if the two hexBinary or Base64Binary values are equal. This implements the 4.0 semantics (hexBinary
+     * and base64Binary are comparable)
      */
 
     public boolean equals(/*@NotNull*/ Object other) {
@@ -131,6 +132,24 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
             return Integer.signum(len0 - len1);
         } else {
             throw new ClassCastException("Cannot compare " + getItemType() + " to " + o.toString());
+        }
+    }
+
+    private static class XPath31Comparable implements XPathComparable {
+        private final BinaryValue binaryValue;
+        public XPath31Comparable(BinaryValue binaryValue) {
+            this.binaryValue = binaryValue;
+        }
+
+        @Override
+        public int compareTo(XPathComparable o) {
+            if (o instanceof XPath31Comparable other) {
+                if (binaryValue.getPrimitiveType() != other.binaryValue.getPrimitiveType()) {
+                    throw new ClassCastException("Comparison of hexBinary to base64Binary requires 4.0 to be enabled");
+                }
+                return binaryValue.compareTo(other.binaryValue);
+            }
+            throw new ClassCastException("Cannot compare " + binaryValue.getPrimitiveType() + " to " + o.getClass().getSimpleName());
         }
     }
 }
