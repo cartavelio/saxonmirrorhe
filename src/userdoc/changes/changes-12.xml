@@ -525,8 +525,14 @@
         member $b in $B return ...</code>. Previously the second <code>member</code> was not needed, it was assumed to
         apply to subsequent clauses.</p>
         
+
         <p>From 12.4, the XQuery syntax for declaring a type alias is <code>declare item-type XX as record(a,b)</code>
             rather than <code>declare type XX = record(a,b)</code>.</p>
+        <p>From 12.4, the atomic types <code>xs:hexBinary</code> and <code>xs:base64Binary</code> are mutually
+        comparable; and promotion on function calls and variable binding now ensures that either type can be supplied
+        where the other is required.</p>
+        
+
         
         
         
