@@ -6656,7 +6656,9 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 10.</p>
+        <p>Available since Saxon 10. Changed in Saxon 12 to align with the proposed XPath 4.0 function
+        <code>fn:in-scope-namespaces()</code>: the returned map now always includes an entry for the
+        XML namespace.</p>
       </status>
       <saxon-edition>PE/EE 10</saxon-edition>
       <details>
@@ -6669,8 +6671,8 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};]]></samp>
           and <code>namespace-uri-for-prefix</code>.</p>
           
           <p>The map includes the default namespace, if there is a binding for the default namespace: the relevant
-          entry in the map will have a key that is the zero-length string. The map does not include the implicit binding
-          of the "xml" namespace.</p>
+          entry in the map will have a key that is the zero-length string. The map always (from Saxon 12) includes the implicit binding
+          of the "xml" namespace to the namespace URI <code>http://www.w3.org/XML/1998/namespace</code>.</p>
 
         </div>
       </details>
