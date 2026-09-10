@@ -7,8 +7,10 @@ import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.*
 import java.nio.file.Files
 import org.apache.tools.ant.filters.ReplaceTokens
-import packagedDir
 import java.io.IOException
+import java.nio.file.LinkOption
+import java.nio.file.StandardCopyOption
+import kotlin.io.path.isSymbolicLink
 
 plugins {
     base
@@ -416,12 +418,11 @@ val exportHeaderTask = tasks.register("combined_export_header") {
     }
 }
 
+val sourceCMakeDirName = extension.package_file_name.map { "${it}-cmake" }
 val sourceCMakeDistroFolderTask = tasks.register<CMakeCompatibleSourceFolder>("source_cmake_distro_folder") {
     dependsOn(generator, saxonCCoreReleaseCMakePackageDir)
 
-    packageDirName = extension.package_file_name.map {
-        "${it}-cmake"
-    }
+    packageDirName = sourceCMakeDirName
     packageTmpDir = packagedDir
     replaceTokens = mapOf(
         "edition" to extension.edition.get(),
@@ -438,13 +439,38 @@ val sourceCMakeDistroFolderTask = tasks.register<CMakeCompatibleSourceFolder>("s
         from(notices) {
             into("notices")
         }
-        from(saxonCCoreReleaseCMakePackageDir.elements.map { it.first() }) {
-            into(extension.edition.map { "SaxonCCore${it.uppercase()}" })
+        val saxonCCoreCMakePackageDir = saxonCCoreReleaseCMakePackageDir.elements.map { it.first() }
+        val saxonCCoreDestDirName = extension.edition.map { "SaxonCCore${it.uppercase()}" }
+        from(saxonCCoreCMakePackageDir) {
+            into(saxonCCoreDestDirName)
+            eachFile {
+                val p = this.file.toPath()
+                if (p.isSymbolicLink()) {
+                    this.exclude()
+                    val sourcePath = saxonCCoreCMakePackageDir.get().asFile.toPath().resolve(this.sourcePath)
+                    val targetPath = outputDir.get().asFile.toPath().resolve(this.path)
+                    Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
+                }
+            }
         }
     })
 }
 
-val sourceCMakeDistroZipTask = tasks.register<Zip>("source_cmake_distro_zip") {
+val packagedCMakeZip = packagedDir.map { it.file("${sourceCMakeDirName.get()}.zip")}
+val sourceCMakeDistroDir = sourceCMakeDistroFolderTask.map { it.outputDir.get() }
+val sourceCMakeDistroUnicesZipTask = tasks.register<Exec>("source_cmake_distro_zip") {
+    group = LifecycleTasks.RELEASE_GROUP
+    description = "generate the libsaxon download .zip package"
+
+    inputs.dir(sourceCMakeDistroDir)
+    outputs.file(packagedCMakeZip)
+
+    executable("zip")
+    args("--recurse-paths", "--symlinks", packagedCMakeZip.get(), sourceCMakeDirName.get())
+    workingDir = sourceCMakeDistroDir.map { it.asFile.toPath().parent.toFile() }.get()
+}
+
+val sourceCMakeDistroWindowsZipTask = tasks.register<Zip>("source_cmake_distro_zip_windows") {
     archiveBaseName = extension.package_name
     archiveAppendix = "cmake"
     archiveVersion = saxonBuild.hyphenatedVersion
