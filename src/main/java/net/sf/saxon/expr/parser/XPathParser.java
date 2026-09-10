@@ -206,6 +206,10 @@ public class XPathParser {
 
     }
 
+    public boolean isAllowXPath40Syntax() {
+        return allowXPath40Syntax;
+    }
+
     /**
      * Set a CodeInjector which can be used to modify or wrap expressions on the tree
      * as the expression is parsed and the tree is constructed. This is typically used
@@ -5393,7 +5397,7 @@ public class XPathParser {
      * @return true if they are the same
      */
 
-    protected boolean isKeyword(String s) {
+    public boolean isKeyword(String s) {
         return t.currentToken == Token.NAME && t.currentTokenValue.equals(s);
     }
 

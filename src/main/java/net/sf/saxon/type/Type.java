@@ -7,7 +7,7 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.ma.pin.LabeledItem;
+import com.saxonica.ee.pin.pin.LabeledItem;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -136,9 +136,7 @@ public abstract class Type {
         if (item == null) {
             return AnyItemType.getInstance();
         }
-        if (item instanceof LabeledItem) {
-            item = ((LabeledItem) item).getSubject();
-        }
+        item = unlabelItem(item);
         if (item instanceof AtomicValue) {
             return ((AtomicValue) item).getItemType();
         } else if (item instanceof NodeInfo) {
@@ -654,6 +652,16 @@ public abstract class Type {
     public static boolean isGuaranteedGenerallyComparable(/*@NotNull*/ BuiltInAtomicType t1, /*@NotNull*/ BuiltInAtomicType t2, boolean ordered) {
         return !(t1.equals(BuiltInAtomicType.ANY_ATOMIC) || t2.equals(BuiltInAtomicType.ANY_ATOMIC))
                 && isGenerallyComparable(t1, t2, ordered);
+    }
+
+
+    public static Item unlabelItem(Item item) {
+        //#if EE==true
+        if (item instanceof LabeledItem) {
+            return ((LabeledItem) item).getSubject();
+        }
+        //#endif
+        return item;
     }
 
 

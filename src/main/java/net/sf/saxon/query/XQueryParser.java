@@ -3500,25 +3500,7 @@ public class XQueryParser extends XPathParser {
 
     /*@NotNull*/
     protected Expression parseDeepUpdateExpression() throws XPathException {
-        if (!allowXPath40Syntax) {
-            grumble("update map/array syntax requires 4.0 to be enabled");
-        }
-
-        int operation = t.currentToken;
-        nextToken();
-        Expression rootExpr = parseExprSingle();
-        if (t.currentToken != Token.REPLACE && !isKeyword("replace")) {
-            grumble("expected keyword 'replace'");
-        }
-        nextToken();
-        Expression selectExpr = parseExprSingle();
-        if (t.currentToken != Token.WITH && !isKeyword("with")) {
-            grumble("expected keyword 'with");
-        }
-        nextToken();
-        Expression actionExpr = parseExprSingle();
-
-        return new DeepUpdate2(operation, rootExpr, selectExpr, actionExpr);
+        return parserExtension.parseDeepUpdateExpression(this);
     }
 
     /**
