@@ -996,6 +996,10 @@ public class JAXPExamples {
     public static void exampleUseAssociated(String sourceID)
             throws TransformerException {
 
+        // Make the source URI absolute so that there's no question
+        // about how to resolve it against the filesystem.
+        String absSourceID = (new File(sourceID)).getAbsolutePath();
+
         TransformerFactory tfactory = TransformerFactory.newInstance();
 
         // The DOM tfactory will have it's own way, based on DOM2,
@@ -1003,13 +1007,13 @@ public class JAXPExamples {
         if (tfactory instanceof SAXTransformerFactory) {
             SAXTransformerFactory stf = (SAXTransformerFactory) tfactory;
             Source sources =
-                    stf.getAssociatedStylesheet(new StreamSource(sourceID), null,
+                    stf.getAssociatedStylesheet(new StreamSource(absSourceID), null,
                             null, null);
 
             if (null != sources) {
                 Transformer transformer = tfactory.newTransformer(sources);
 
-                transformer.transform(new StreamSource(sourceID),
+                transformer.transform(new StreamSource(absSourceID),
                         new StreamResult(System.out));
             } else {
                 System.out.println("Can't find the associated stylesheet!");
