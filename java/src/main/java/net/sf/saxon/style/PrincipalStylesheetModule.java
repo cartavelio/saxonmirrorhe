@@ -531,9 +531,13 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                     // In 4.0, this can be due to an ignored redundant include
                     //throw new XPathException("Internal problem: the included stylesheet module '" + href + "' should be in the compiler's module store, but was not found");
                 } else {
+                	                	
                     StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
+                    if (incWrapper == null) { // Can happen when the URI Reference includes a fragment ID that hasn't been found in the target document
+                     	throw new XPathException("Included document " + href + " is not a stylesheet", "XTSE0165");
+                     }                    
                     gatherUsePackageDeclarations(compilation, incWrapper, declarations);
-                }
+                }                
             }
         }
     }
