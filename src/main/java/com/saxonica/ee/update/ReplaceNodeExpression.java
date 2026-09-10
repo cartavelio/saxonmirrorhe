@@ -4,6 +4,7 @@ import com.saxonica.ee.validate.SkipValidator;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -182,155 +183,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        List<Item> content = new ArrayList<>();
-        NodeInfo target = (NodeInfo) getTargetExp().evaluateItem(context);
-        if (target == null) {
-            XPathException err = new XPathException("Target of replace expression must not be empty", "XUDY0027");
-            err.setLocation(getLocation());
-            throw err;
-        }
-        if (!target.getTreeInfo().isMutable()) {
-            throw new XPathException("Attempting to update a non-updatable tree", SaxonErrorCode.SXUP0081);
-        }
-        int kind = target.getNodeKind();
-        if (kind == Type.NAMESPACE) {
-            XPathException err = new XPathException(
-                    "Target of replace expression must not be a namespace node", "XUTY0008");
-            err.setLocation(getLocation());
-            throw err;
-        }
-        if (kind == Type.DOCUMENT) {
-            XPathException err = new XPathException(
-                    "Target of replace expression must not be a document node", "XUTY0008");
-            err.setLocation(getLocation());
-            throw err;
-        }
-        NodeInfo parent = target.getParent();
-        if (parent == null) {
-            XPathException err = new XPathException("Target node of replace expression has no parent",
-                    "XUDY0009");
-            err.setLocation(getLocation());
-            throw err;
-        }
-        if (!(parent instanceof MutableNodeInfo)) {
-            XPathException err = new XPathException("Target node of replace expression is not updateable",
-                    SaxonErrorCode.SXUP0081);
-            err.setLocation(getLocation());
-            throw err;
-        }
-        if (kind == Type.ATTRIBUTE) {
-            SequenceIterator iter = getReplacementExp().iterate(context);
-            AttributeMap atts = EmptyAttributeMap.getInstance();
-            for (Item item; (item = iter.next()) != null; ) {
-                boolean isAttribute = item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE;
-                if (!isAttribute) {
-                    XPathException err = new XPathException(
-                            "The replacement nodes for an attribute must all be attributes",
-                            "XUTY0011");
-                    err.setLocation(getLocation());
-                    throw err;
-                }
-
-                NodeInfo att = (NodeInfo) item;
-                SimpleType attributeType;
-                int properties = ReceiverOption.NONE;
-                if (constructionMode == Validation.SKIP || Untyped.getInstance().equals(parent.getSchemaType())) {
-                    attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
-                } else {
-                    attributeType = (SimpleType) att.getSchemaType();
-                    if (att.isId() || (att.getLocalPart().equals("id") &&
-                                               att.getNamespaceUri().equals(NamespaceUri.XML)) ) {
-                        properties |= (ReceiverOption.IS_ID);
-                    }
-                    if (att.isIdref()) {
-                        properties |= (ReceiverOption.IS_IDREF);
-                    }
-                }
-
-                atts = atts.put(new AttributeInfo(NameOfNode.makeName(att), attributeType, att.getStringValue(),
-                                  Loc.NONE, properties));
-            }
-
-            ReplaceAttributeAction action = new ReplaceAttributeAction(parent, target, atts, inheritNamespaces);
-            action.setOriginator(this);
-            ((PendingUpdateListImpl) pul).add(action);
-
-        } else {
-
-            SequenceIterator iter = getReplacementExp().iterate(context);
-            for (Item item; (item = iter.next()) != null; ) {
-                if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
-                    XPathException err = new XPathException(
-                            "An attribute node cannot replace a node that is not itself an attribute",
-                            "XUTY0010");
-                    err.setLocation(getLocation());
-                    throw err;
-                } else {
-                    content.add(item);
-                }
-            }
-            if (content.isEmpty()) {
-                try {
-                    ReplaceNodeAction action = new ReplaceNodeAction(
-                            new NodeImpl[]{}, (MutableNodeInfo) target, inheritNamespaces);
-                    action.setOriginator(this);
-                    ((PendingUpdateListImpl) pul).add(action);
-                } catch (XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
-                }
-            } else {
-                // Make copies of the inserted nodes, and convert them to use the same object model implementation
-                // as the node into which they are being inserted
-                Builder builder = ((MutableNodeInfo) parent).newBuilder();
-                Controller controller = context.getController();
-                builder.setLineNumbering(controller.getConfiguration().isLineNumbering());
-
-                PipelineConfiguration pipe = controller.makePipelineConfiguration();
-                pipe.setXPathContext(context);
-                pipe.setHostLanguage(getPackageData().getHostLanguage());
-                builder.setPipelineConfiguration(pipe);
-
-                Receiver r = builder;
-
-                if (constructionMode == Validation.STRIP || Untyped.getInstance().equals(parent.getSchemaType())) {
-                    r = new SkipValidator(r);
-                }
-
-                TreeReceiver out = new TreeReceiver(r);
-                out.setPipelineConfiguration(pipe);
-
-                out.open();
-                out.startDocument(ReceiverOption.NONE);
-
-                for (Object aContent : content) {
-                    Item n = (Item) aContent;
-                    out.append(n, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
-                }
-
-                out.endDocument();
-                out.close();
-
-                NodeInfo root = builder.getCurrentRoot();
-                AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
-                GroundedValue extent = SequenceTool.toGroundedValue(top);
-                int len = extent.getLength();
-                NodeInfo[] array = new NodeInfo[len];
-                for (int i = 0; i < len; i++) {
-                    array[i] = (NodeInfo) extent.itemAt(i);
-                }
-                try {
-                    ReplaceNodeAction action = new ReplaceNodeAction(array, (MutableNodeInfo) target, inheritNamespaces);
-                    action.setOriginator(this);
-                    ((PendingUpdateListImpl) pul).add(action);
-                } catch (XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
-                }
-            }
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -345,8 +198,176 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
         return "replaceNode";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new ReplaceNodeExpressionElaborator();
+    }
 
+    private static class ReplaceNodeExpressionElaborator extends UpdateElaborator {
 
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            ReplaceNodeExpression expr = (ReplaceNodeExpression) getExpression();
+            ItemEvaluator targetEval = expr.getTargetExp().makeElaborator().elaborateForItem();
+            PullEvaluator replacementEval = expr.getReplacementExp().makeElaborator().elaborateForPull();
+            return (context, pul) -> {
+                List<Item> content = new ArrayList<>();
+                NodeInfo target = (NodeInfo) targetEval.eval(context);
+                if (target == null) {
+                    XPathException err = new XPathException("Target of replace expression must not be empty", "XUDY0027");
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                if (!target.getTreeInfo().isMutable()) {
+                    throw new XPathException("Attempting to update a non-updatable tree", SaxonErrorCode.SXUP0081);
+                }
+                int kind = target.getNodeKind();
+                if (kind == Type.NAMESPACE) {
+                    XPathException err = new XPathException(
+                            "Target of replace expression must not be a namespace node", "XUTY0008");
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                if (kind == Type.DOCUMENT) {
+                    XPathException err = new XPathException(
+                            "Target of replace expression must not be a document node", "XUTY0008");
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                NodeInfo parent = target.getParent();
+                if (parent == null) {
+                    XPathException err = new XPathException("Target node of replace expression has no parent",
+                                                            "XUDY0009");
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                if (!(parent instanceof MutableNodeInfo)) {
+                    XPathException err = new XPathException("Target node of replace expression is not updateable",
+                                                            SaxonErrorCode.SXUP0081);
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                if (kind == Type.ATTRIBUTE) {
+                    SequenceIterator iter = replacementEval.iterate(context);
+                    AttributeMap atts = EmptyAttributeMap.getInstance();
+                    for (Item item; (item = iter.next()) != null; ) {
+                        boolean isAttribute = item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE;
+                        if (!isAttribute) {
+                            XPathException err = new XPathException(
+                                    "The replacement nodes for an attribute must all be attributes",
+                                    "XUTY0011");
+                            err.setLocation(expr.getLocation());
+                            throw err;
+                        }
+
+                        NodeInfo att = (NodeInfo) item;
+                        SimpleType attributeType;
+                        int properties = ReceiverOption.NONE;
+                        if (expr.constructionMode == Validation.SKIP || Untyped.getInstance().equals(parent.getSchemaType())) {
+                            attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
+                        } else {
+                            attributeType = (SimpleType) att.getSchemaType();
+                            if (att.isId() || (att.getLocalPart().equals("id") &&
+                                                       att.getNamespaceUri().equals(NamespaceUri.XML))) {
+                                properties |= (ReceiverOption.IS_ID);
+                            }
+                            if (att.isIdref()) {
+                                properties |= (ReceiverOption.IS_IDREF);
+                            }
+                        }
+
+                        atts = atts.put(new AttributeInfo(NameOfNode.makeName(att), attributeType, att.getStringValue(),
+                                                          Loc.NONE, properties));
+                    }
+
+                    ReplaceAttributeAction action = new ReplaceAttributeAction(parent, target, atts, expr.inheritNamespaces);
+                    action.setOriginator(expr);
+                    ((PendingUpdateListImpl) pul).add(action);
+
+                } else {
+
+                    SequenceIterator iter = replacementEval.iterate(context);
+                    for (Item item; (item = iter.next()) != null; ) {
+                        if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
+                            XPathException err = new XPathException(
+                                    "An attribute node cannot replace a node that is not itself an attribute",
+                                    "XUTY0010");
+                            err.setLocation(expr.getLocation());
+                            throw err;
+                        } else {
+                            content.add(item);
+                        }
+                    }
+                    if (content.isEmpty()) {
+                        try {
+                            ReplaceNodeAction action = new ReplaceNodeAction(
+                                    new NodeImpl[]{}, (MutableNodeInfo) target, expr.inheritNamespaces);
+                            action.setOriginator(expr);
+                            ((PendingUpdateListImpl) pul).add(action);
+                        } catch (XPathException e) {
+                            e.maybeSetLocation(expr.getLocation());
+                            e.maybeSetContext(context);
+                            throw e;
+                        }
+                    } else {
+                        // Make copies of the inserted nodes, and convert them to use the same object model implementation
+                        // as the node into which they are being inserted
+                        Builder builder = ((MutableNodeInfo) parent).newBuilder();
+                        Controller controller = context.getController();
+                        builder.setLineNumbering(controller.getConfiguration().isLineNumbering());
+
+                        PipelineConfiguration pipe = controller.makePipelineConfiguration();
+                        pipe.setXPathContext(context);
+                        pipe.setHostLanguage(expr.getPackageData().getHostLanguage());
+                        builder.setPipelineConfiguration(pipe);
+
+                        Receiver r = builder;
+
+                        if (expr.constructionMode == Validation.STRIP || Untyped.getInstance().equals(parent.getSchemaType())) {
+                            r = new SkipValidator(r);
+                        }
+
+                        TreeReceiver out = new TreeReceiver(r);
+                        out.setPipelineConfiguration(pipe);
+
+                        out.open();
+                        out.startDocument(ReceiverOption.NONE);
+
+                        for (Object aContent : content) {
+                            Item n = (Item) aContent;
+                            out.append(n, Loc.NONE, ReceiverOption.ALL_NAMESPACES);
+                        }
+
+                        out.endDocument();
+                        out.close();
+
+                        NodeInfo root = builder.getCurrentRoot();
+                        AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
+                        GroundedValue extent = SequenceTool.toGroundedValue(top);
+                        int len = extent.getLength();
+                        NodeInfo[] array = new NodeInfo[len];
+                        for (int i = 0; i < len; i++) {
+                            array[i] = (NodeInfo) extent.itemAt(i);
+                        }
+                        try {
+                            ReplaceNodeAction action = new ReplaceNodeAction(array, (MutableNodeInfo) target, expr.inheritNamespaces);
+                            action.setOriginator(expr);
+                            ((PendingUpdateListImpl) pul).add(action);
+                        } catch (XPathException e) {
+                            e.maybeSetLocation(expr.getLocation());
+                            e.maybeSetContext(context);
+                            throw e;
+                        }
+                    }
+                }
+            };
+        }
+    }
 }
 
 // Copyright (c) 2008-2022 Saxonica Limited

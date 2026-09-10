@@ -3,12 +3,18 @@ package com.saxonica.ee.stream.adjunct;
 import com.saxonica.ee.stream.Inversion;
 import com.saxonica.ee.stream.Streamability;
 import com.saxonica.ee.stream.Sweep;
-import com.saxonica.ee.stream.feed.*;
+import com.saxonica.ee.stream.feed.FeedMaker;
+import com.saxonica.ee.stream.feed.FilteringFeed;
+import com.saxonica.ee.stream.feed.ItemFeed;
+import com.saxonica.ee.stream.feed.NoOpenFeed;
 import com.saxonica.ee.stream.watch.Terminator;
-import com.saxonica.ee.stream.watch.*;
+import com.saxonica.ee.stream.watch.Trigger;
+import com.saxonica.ee.stream.watch.WatchMaker;
+import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.ItemConsumer;
@@ -35,6 +41,8 @@ public class ChooseAdjunct extends TransmissionAdjunct {
         actionInversions = new Inversion[((Choose)getExpression()).size()];
     }
 
+
+
     private int getConsumingCondition() throws XPathException {
         if (consumingCondition == -2) {
             consumingCondition = -1;
@@ -58,13 +66,14 @@ public class ChooseAdjunct extends TransmissionAdjunct {
 
         if (getConsumingCondition() < 0) {
             return (watchManager, out, context) -> {
+                BooleanEvaluator[] booleanEvaluators = exp.getConditionEvaluators();
                 // first do the open() actions of the parent expression. This is needed in case the parent
                 // expression initializes variables used in the conditions of the xsl:choose
                 out.open(new Terminator());
                 // Now ensure that the open doesn't get executed a second time
                 out = new NoOpenFeed(out, context);
                 for (int i=0; i<exp.size(); i++) {
-                    if (exp.getCondition(i).effectiveBooleanValue(context)) {
+                    if (booleanEvaluators[i].eval(context)) {
                         Expression action = exp.getAction(i);
                         if (Streamability.getSweep(action) == Sweep.CONSUMING) {
                             Inversion actionInversion = actionInversions[i];
@@ -144,6 +153,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
 
         private final int consumingCondition;
         private boolean matched = false;
+        BooleanEvaluator[] booleanEvaluators;
 
         public ItemFeedForConsumingCondition(Expression expression, int consumingCondition,
                                              ItemFeed out, XPathContext context) {
@@ -159,11 +169,12 @@ public class ChooseAdjunct extends TransmissionAdjunct {
          */
         @Override
         public void open(Terminator terminator) throws XPathException {
-            super.open(terminator);
             Choose expression = (Choose)getExpression();
+            booleanEvaluators = expression.getConditionEvaluators();
+            super.open(terminator);
             // evaluate all conditions prior to the consuming condition
             for (int i = 0; i < consumingCondition; i++) {
-                boolean truth = expression.getCondition(i).effectiveBooleanValue(getContext());
+                boolean truth = booleanEvaluators[i].eval(getContext());
                 if (truth) {
                     SequenceIterator iter = expression.getAction(i).iterate(getContext());
                     processItems(iter, getNextOutputter());
@@ -183,7 +194,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                     selectedAction = expression.getAction(consumingCondition);
                 } else {
                     for (int i = 1; i < expression.size(); i++) {
-                        if (expression.getCondition(i).effectiveBooleanValue(getContext())) {
+                        if (booleanEvaluators[i].eval(getContext())) {
                             selectedAction = expression.getAction(i);
                             break;
                         }

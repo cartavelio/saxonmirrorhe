@@ -5,6 +5,7 @@ import com.saxonica.ee.xtupdate.SaxonInsert;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
@@ -205,167 +206,188 @@ public class InsertExpression extends BasicUpdatingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        List<Item> content = new ArrayList<>();
-        NodeInfo target = (NodeInfo) getTargetExpression().evaluateItem(context);
-        if (target == null) {
-            XPathException e = new XPathException("Target of insert expression must not be empty", "XUDY0027");
-            e.setLocation(getLocation());
-            e.setXPathContext(context);
-            throw e;
-        }
-        if (!target.getTreeInfo().isMutable()) {
-            throw new XPathException("Target of insert expression is not updatable", SaxonErrorCode.SXUP0081);
-        }
-        int kind = target.getNodeKind();
-        if (position == Token.AFTER || position == Token.BEFORE) {
-            if (!(kind == Type.ELEMENT || kind == Type.TEXT ||
-                    kind == Type.COMMENT || kind == Type.PROCESSING_INSTRUCTION)) {
-                XPathException e = new XPathException(
-                        "When inserting before or after a node, that node must " +
-                                "be an element, text, comment, or processing-instruction node", "XUTY0006");
-                e.setLocation(getLocation());
-                e.setXPathContext(context);
-                throw e;
-            }
-        } else {
-            if (!(kind == Type.ELEMENT || kind == Type.DOCUMENT)) {
-                XPathException e = new XPathException(
-                        "When inserting into a target node, that node must be an element or document node",
-                        "XUTY0005");
-                e.setLocation(getLocation());
-                e.setXPathContext(context);
-                throw e;
-            }
-        }
-        NodeInfo parent = position == Token.AFTER || position == Token.BEFORE ? target.getParent() : target;
-        if (parent == null) {
-            XPathException err = new XPathException(
-                    "When inserting before or after a node, that node must have a parent", "XUDY0029");
-            err.setLocation(getLocation());
-            err.setXPathContext(context);
-            throw err;
-        }
-        if (!(parent instanceof MutableNodeInfo)) {
-            XPathException err = new XPathException("Target node of insert expression is not updateable",
-                                                    SaxonErrorCode.SXUP0081);
-            err.setLocation(getLocation());
-            err.setXPathContext(context);
-            throw err;
-        }
-        boolean foundNonAttribute = false;
-        SequenceIterator iter = getSourceExpression().iterate(context);
-        for (Item item; (item = iter.next()) != null; ) {
-            if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
-                if (foundNonAttribute) {
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new InsertExpressionElaborator();
+    }
+
+    private static class InsertExpressionElaborator extends UpdateElaborator {
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            InsertExpression expr = (InsertExpression) getExpression();
+            ItemEvaluator targetEval = expr.getTargetExpression().makeElaborator().elaborateForItem();
+            PullEvaluator sourceEval = expr.getSourceExpression().makeElaborator().elaborateForPull();
+            return (context, pul) -> {
+                List<Item> content = new ArrayList<>();
+                NodeInfo target = (NodeInfo) targetEval.eval(context);
+                if (target == null) {
+                    XPathException e = new XPathException("Target of insert expression must not be empty", "XUDY0027");
+                    e.setLocation(expr.getLocation());
+                    e.setXPathContext(context);
+                    throw e;
+                }
+                if (!target.getTreeInfo().isMutable()) {
+                    throw new XPathException("Target of insert expression is not updatable", SaxonErrorCode.SXUP0081);
+                }
+                int kind = target.getNodeKind();
+                if (expr.position == Token.AFTER || expr.position == Token.BEFORE) {
+                    if (!(kind == Type.ELEMENT || kind == Type.TEXT ||
+                                  kind == Type.COMMENT || kind == Type.PROCESSING_INSTRUCTION)) {
+                        XPathException e = new XPathException(
+                                "When inserting before or after a node, that node must " +
+                                        "be an element, text, comment, or processing-instruction node", "XUTY0006");
+                        e.setLocation(expr.getLocation());
+                        e.setXPathContext(context);
+                        throw e;
+                    }
+                } else {
+                    if (!(kind == Type.ELEMENT || kind == Type.DOCUMENT)) {
+                        XPathException e = new XPathException(
+                                "When inserting into a target node, that node must be an element or document node",
+                                "XUTY0005");
+                        e.setLocation(expr.getLocation());
+                        e.setXPathContext(context);
+                        throw e;
+                    }
+                }
+                NodeInfo parent = expr.position == Token.AFTER || expr.position == Token.BEFORE ? target.getParent() : target;
+                if (parent == null) {
                     XPathException err = new XPathException(
-                            "Attributes must precede non-attributes in the list of nodes to be inserted",
-                            "XUTY0004");
-                    err.setLocation(getLocation());
+                            "When inserting before or after a node, that node must have a parent", "XUDY0029");
+                    err.setLocation(expr.getLocation());
                     err.setXPathContext(context);
                     throw err;
                 }
-                if (parent.getNodeKind() != Type.ELEMENT) {
-                    if (position == Token.AFTER || position == Token.BEFORE) {
-                        XPathException err = new XPathException(
-                                "When inserting an attribute before or after a node, that node must " +
-                                        "have a parent and the parent must be an element", "XUDY0030");
-                        err.setLocation(getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                if (!(parent instanceof MutableNodeInfo)) {
+                    XPathException err = new XPathException("Target node of insert expression is not updateable",
+                                                            SaxonErrorCode.SXUP0081);
+                    err.setLocation(expr.getLocation());
+                    err.setXPathContext(context);
+                    throw err;
+                }
+                boolean foundNonAttribute = false;
+                SequenceIterator iter = sourceEval.iterate(context);
+                for (Item item; (item = iter.next()) != null; ) {
+                    if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.ATTRIBUTE) {
+                        if (foundNonAttribute) {
+                            XPathException err = new XPathException(
+                                    "Attributes must precede non-attributes in the list of nodes to be inserted",
+                                    "XUTY0004");
+                            err.setLocation(expr.getLocation());
+                            err.setXPathContext(context);
+                            throw err;
+                        }
+                        if (parent.getNodeKind() != Type.ELEMENT) {
+                            if (expr.position == Token.AFTER || expr.position == Token.BEFORE) {
+                                XPathException err = new XPathException(
+                                        "When inserting an attribute before or after a node, that node must " +
+                                                "have a parent and the parent must be an element", "XUDY0030");
+                                err.setLocation(expr.getLocation());
+                                err.setXPathContext(context);
+                                throw err;
+                            } else {
+                                XPathException err = new XPathException(
+                                        "When inserting an attribute into a target node, the target node must be an element",
+                                        "XUTY0022");
+                                err.setLocation(expr.getLocation());
+                                err.setXPathContext(context);
+                                throw err;
+                            }
+                        }
+                        NodeInfo copiedNode = (NodeInfo) item;
+
+                        SimpleType attributeType;
+                        int properties = ReceiverOption.NONE;
+                        if (expr.constructionMode == Validation.SKIP || Untyped.getInstance().equals(parent.getSchemaType())) {
+                            attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
+                        } else {
+                            attributeType = (SimpleType) copiedNode.getSchemaType();
+                            if (copiedNode.isId() || ("id".equals(copiedNode.getLocalPart()) &&
+                                                              NamespaceUri.XML.equals(copiedNode.getNamespaceUri()))) {
+                                properties |= (ReceiverOption.IS_ID);
+                            }
+                            if (copiedNode.isIdref()) {
+                                properties |= (ReceiverOption.IS_IDREF);
+                            }
+                        }
+
+                        try {
+                            InsertAttributeAction action = new InsertAttributeAction(
+                                    (MutableNodeInfo) parent,
+                                    NameOfNode.makeName(copiedNode),
+                                    attributeType,
+                                    copiedNode.getStringValue(),
+                                    properties,
+                                    expr.inheritNamespaces);
+                            action.setOriginator(expr);
+                            ((PendingUpdateListImpl) pul).add(action);
+                        } catch (XPathException e) {
+                            e.maybeSetLocation(expr.getLocation());
+                            e.maybeSetContext(context);
+                            throw e;
+                        }
                     } else {
-                        XPathException err = new XPathException(
-                                "When inserting an attribute into a target node, the target node must be an element",
-                                "XUTY0022");
-                        err.setLocation(getLocation());
-                        err.setXPathContext(context);
-                        throw err;
+                        foundNonAttribute = true;
+                        content.add(item);
                     }
                 }
-                NodeInfo copiedNode = (NodeInfo) item;
+                if (!content.isEmpty()) {
+                    // Make copies of the inserted nodes, and convert them to use the same object model implementation
+                    // as the node into which they are being inserted
 
-                SimpleType attributeType;
-                int properties = ReceiverOption.NONE;
-                if (constructionMode == Validation.SKIP || Untyped.getInstance().equals(parent.getSchemaType())) {
-                    attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
-                } else {
-                    attributeType = (SimpleType) copiedNode.getSchemaType();
-                    if (copiedNode.isId() || ("id".equals(copiedNode.getLocalPart()) &&
-                                                      NamespaceUri.XML.equals(copiedNode.getNamespaceUri()))) {
-                        properties |= (ReceiverOption.IS_ID);
-                    }
-                    if (copiedNode.isIdref()) {
-                        properties |= (ReceiverOption.IS_IDREF);
-                    }
-                }
+                    Builder builder = ((MutableNodeInfo) parent).newBuilder();
+                    Controller controller = context.getController();
+                    builder.setLineNumbering(controller.getConfiguration().isLineNumbering());
 
-                try {
-                    InsertAttributeAction action = new InsertAttributeAction(
-                            (MutableNodeInfo) parent,
-                            NameOfNode.makeName(copiedNode),
-                            attributeType,
-                            copiedNode.getStringValue(),
-                            properties,
-                            inheritNamespaces);
-                    action.setOriginator(this);
+                    PipelineConfiguration pipe = controller.makePipelineConfiguration();
+                    pipe.setHostLanguage(expr.getPackageData().getHostLanguage());
+                    pipe.setXPathContext(context);
+                    builder.setPipelineConfiguration(pipe);
+
+                    Receiver r = builder;
+
+                    if (expr.constructionMode == Validation.STRIP || Untyped.getInstance().equals(parent.getSchemaType())) {
+                        r = new SkipValidator(r);
+                    }
+
+                    TreeReceiver out = new TreeReceiver(r);
+                    out.setPipelineConfiguration(pipe);
+
+                    out.open();
+                    out.startDocument(ReceiverOption.NONE);
+
+                    int copyNs = expr.preserveNamespaces ? ReceiverOption.ALL_NAMESPACES : ReceiverOption.NONE;
+                    for (Item n : content) {
+                        out.append(n, Loc.NONE, copyNs);
+                    }
+
+                    out.endDocument();
+                    out.close();
+
+                    NodeInfo root = builder.getCurrentRoot();
+                    AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
+                    SequenceExtent extent = SequenceExtent.from(top);
+                    int len = extent.getLength();
+                    NodeInfo[] array = new NodeInfo[len];
+                    for (int i = 0; i < len; i++) {
+                        array[i] = (NodeInfo) extent.itemAt(i);
+                    }
+                    InsertAction action = new InsertAction(array, (MutableNodeInfo) target, expr.position, expr.inheritNamespaces);
+                    action.setOriginator(expr);
                     ((PendingUpdateListImpl) pul).add(action);
-                } catch (XPathException e) {
-                    e.maybeSetLocation(getLocation());
-                    e.maybeSetContext(context);
-                    throw e;
                 }
-            } else {
-                foundNonAttribute = true;
-                content.add(item);
-            }
-        }
-        if (!content.isEmpty()) {
-            // Make copies of the inserted nodes, and convert them to use the same object model implementation
-            // as the node into which they are being inserted
-
-            Builder builder = ((MutableNodeInfo) parent).newBuilder();
-            Controller controller = context.getController();
-            builder.setLineNumbering(controller.getConfiguration().isLineNumbering());
-
-            PipelineConfiguration pipe = controller.makePipelineConfiguration();
-            pipe.setHostLanguage(getPackageData().getHostLanguage());
-            pipe.setXPathContext(context);
-            builder.setPipelineConfiguration(pipe);
-
-            Receiver r = builder;
-
-            if (constructionMode == Validation.STRIP || Untyped.getInstance().equals(parent.getSchemaType())) {
-                r = new SkipValidator(r);
-            }
-
-            TreeReceiver out = new TreeReceiver(r);
-            out.setPipelineConfiguration(pipe);
-
-            out.open();
-            out.startDocument(ReceiverOption.NONE);
-
-            int copyNs = preserveNamespaces ? ReceiverOption.ALL_NAMESPACES : ReceiverOption.NONE;
-            for (Item n : content) {
-                out.append(n, Loc.NONE, copyNs);
-            }
-
-            out.endDocument();
-            out.close();
-
-            NodeInfo root = builder.getCurrentRoot();
-            AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
-            SequenceExtent extent = SequenceExtent.from(top);
-            int len = extent.getLength();
-            NodeInfo[] array = new NodeInfo[len];
-            for (int i = 0; i < len; i++) {
-                array[i] = (NodeInfo)extent.itemAt(i);
-            }
-            InsertAction action = new InsertAction(array, (MutableNodeInfo) target, position, inheritNamespaces);
-            action.setOriginator(this);
-            ((PendingUpdateListImpl) pul).add(action);
+            };
         }
     }
-
-
 }
 
 // Copyright (c) 2008-2022 Saxonica Limited

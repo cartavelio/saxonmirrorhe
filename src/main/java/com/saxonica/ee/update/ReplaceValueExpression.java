@@ -1,6 +1,10 @@
 package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.UpdateElaborator;
+import net.sf.saxon.expr.elab.UpdateEvaluator;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
@@ -169,62 +173,7 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        Expression result = getReplacementExp();
-        Item newText = result.evaluateItem(context);
-        String newString = newText == null ? "" : newText.getStringValue();
-        NodeInfo targetNode = (NodeInfo) getTargetExp().evaluateItem(context);
-        if (!targetNode.getTreeInfo().isMutable()) {
-            throw new XPathException("Target of replace value expression is not updatable", SaxonErrorCode.SXUP0081);
-        }
-        XPathException err = null;
-        switch (targetNode.getNodeKind()) {
-            case Type.COMMENT:
-                if (newString.contains("--")) {
-                    err = new XPathException(
-                            "Replacement comment value cannot contain two adjacent hyphens", "XQDY0072");
-                } else if (newString.endsWith("-")) {
-                    err = new XPathException(
-                            "Replacement comment value cannot end with a hyphen", "XQDY0072");
-                }
-                break;
-            case Type.PROCESSING_INSTRUCTION:
-                if (newString.contains("?>")) {
-                    err = new XPathException(
-                            "Replacement processing instruction value cannot contain '?>'", "XQDY0026");
-                }
-                break;
-            case Type.DOCUMENT:
-                err = new XPathException(
-                        "Cannot replace the value of a document node", "XUTY0008");
-                break;
-            case Type.NAMESPACE:
-                err = new XPathException(
-                        "Cannot replace the value of a namespace node", "XUTY0008");
-                break;
-            default:
-                break;
-
-        }
-        if (err != null) {
-            err.setLocation(getLocation());
-            err.setXPathContext(context);
-            throw err;
-        }
-        if (!(targetNode instanceof MutableNodeInfo)) {
-            XPathException er = new XPathException("Target node of replace expression is not updateable",
-                    SaxonErrorCode.SXUP0081);
-            er.setLocation(getLocation());
-            throw er;
-        }
-        try {
-            ReplaceValueAction action = new ReplaceValueAction(StringView.tidy(newString), (MutableNodeInfo) targetNode);
-            action.setOriginator(this);
-            ((PendingUpdateListImpl) pul).add(action);
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -239,7 +188,82 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
         return "replaceValue";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new ReplaceValueExpressionElaborator();
+    }
 
+    private static class ReplaceValueExpressionElaborator extends UpdateElaborator {
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            ReplaceValueExpression expr = (ReplaceValueExpression) getExpression();
+            ItemEvaluator targetEval = expr.getTargetExp().makeElaborator().elaborateForItem();
+            ItemEvaluator replacementEval = expr.getReplacementExp().makeElaborator().elaborateForItem();
+            return (context, pul) -> {
+                Item newText = replacementEval.eval(context);
+                String newString = newText == null ? "" : newText.getStringValue();
+                NodeInfo targetNode = (NodeInfo) targetEval.eval(context);
+                if (!targetNode.getTreeInfo().isMutable()) {
+                    throw new XPathException("Target of replace value expression is not updatable", SaxonErrorCode.SXUP0081);
+                }
+                XPathException err = null;
+                switch (targetNode.getNodeKind()) {
+                    case Type.COMMENT:
+                        if (newString.contains("--")) {
+                            err = new XPathException(
+                                    "Replacement comment value cannot contain two adjacent hyphens", "XQDY0072");
+                        } else if (newString.endsWith("-")) {
+                            err = new XPathException(
+                                    "Replacement comment value cannot end with a hyphen", "XQDY0072");
+                        }
+                        break;
+                    case Type.PROCESSING_INSTRUCTION:
+                        if (newString.contains("?>")) {
+                            err = new XPathException(
+                                    "Replacement processing instruction value cannot contain '?>'", "XQDY0026");
+                        }
+                        break;
+                    case Type.DOCUMENT:
+                        err = new XPathException(
+                                "Cannot replace the value of a document node", "XUTY0008");
+                        break;
+                    case Type.NAMESPACE:
+                        err = new XPathException(
+                                "Cannot replace the value of a namespace node", "XUTY0008");
+                        break;
+                    default:
+                        break;
+
+                }
+                if (err != null) {
+                    err.setLocation(expr.getLocation());
+                    err.setXPathContext(context);
+                    throw err;
+                }
+                if (!(targetNode instanceof MutableNodeInfo)) {
+                    XPathException er = new XPathException("Target node of replace value expression is not updateable",
+                                                           SaxonErrorCode.SXUP0081);
+                    er.setLocation(expr.getLocation());
+                    throw er;
+                }
+                try {
+                    ReplaceValueAction action = new ReplaceValueAction(StringView.tidy(newString), (MutableNodeInfo) targetNode);
+                    action.setOriginator(expr);
+                    ((PendingUpdateListImpl) pul).add(action);
+                } catch (XPathException e) {
+                    e.maybeSetLocation(expr.getLocation());
+                    e.maybeSetContext(context);
+                    throw e;
+                }
+            };
+        }
+    }
 }
 
 // Copyright (c) 2008-2022 Saxonica Limited

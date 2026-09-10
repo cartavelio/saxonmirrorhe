@@ -1,6 +1,10 @@
 package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.UpdateElaborator;
+import net.sf.saxon.expr.elab.UpdateEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -191,115 +195,7 @@ public class RenameExpression extends BasicUpdatingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        NodeInfo node = (NodeInfo) getTargetExp().evaluateItem(context);
-        if (!node.getTreeInfo().isMutable()) {
-            XPathException err = new XPathException("Node to be renamed is not updatable",
-                    SaxonErrorCode.SXUP0081);
-            err.setLocation(getLocation());
-            throw err;
-        }
-        int nodeKind = node.getNodeKind();
-        if (!(nodeKind == Type.ELEMENT || nodeKind == Type.ATTRIBUTE || nodeKind == Type.PROCESSING_INSTRUCTION)) {
-            XPathException err = new XPathException(
-                    "Node to be renamed is not an element, attribute, or processing-instruction", "XUTY0012");
-            err.setLocation(getLocation());
-            throw err;
-        }
-
-        // name needs to be evaluated at run-time
-
-        AtomicValue nameValue = (AtomicValue) getNameExp().evaluateItem(context);
-        String prefix;
-        String localName;
-        NamespaceUri uri;
-        if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
-            String rawName = nameValue.getStringValue();
-            try {
-                String[] parts = NameChecker.getQNameParts(rawName);
-                prefix = parts[0];
-                localName = parts[1];
-            } catch (QNameException err11) {
-                XPathException err1 = new XPathException("Invalid node name. " + err11.getMessage(), "XQDY0074", this.getLocation());
-                err1.setXPathContext(context);
-                throw err1;
-            }
-            if (prefix.isEmpty()) {
-                uri = nodeKind == Type.ELEMENT ? defaultNamespace : NamespaceUri.NULL;
-            } else {
-                uri = nsContext.getURIForPrefix(prefix, true);
-                if (uri == null) {
-                    XPathException err1 = new XPathException("Undeclared prefix in new node name: " + prefix, "XQDY0074", this.getLocation());
-                    err1.setXPathContext(context);
-                    throw err1;
-                }
-            }
-        } else if (nameValue instanceof QNameValue) {
-            localName = ((QNameValue) nameValue).getLocalName();
-            uri = ((QNameValue) nameValue).getNamespaceURI();
-//            if (uri == null) {
-//                uri = "";
-//            }
-            prefix = ((QNameValue) nameValue).getPrefix();
-        } else {
-            XPathException err1 = new XPathException("Computed element name has incorrect type");
-            err1.setErrorCode("XPTY0004");
-            err1.setIsTypeError(true);
-            err1.setXPathContext(context);
-            err1.setLocation(getLocation());
-            throw err1;
-        }
-
-        if (uri.isEmpty()) {
-            // there is a special rule for this case in the specification;
-            // we force the element to go in the null namespace
-            prefix = "";
-        }
-        if (prefix.equals("xmlns")) {
-            // this isn't a legal prefix so we mustn't use it
-            prefix = "x-xmlns";
-        }
-        if (nodeKind == Type.PROCESSING_INSTRUCTION) {
-            if (prefix.length() > 0 || !uri.isEmpty()) {
-                XPathException err1 = new XPathException("Processing instruction cannot be in a namespace");
-                err1.setErrorCode("XUDY0025");
-                err1.setIsTypeError(true);
-                err1.setXPathContext(context);
-                err1.setLocation(getLocation());
-                throw err1;
-            }
-        }
-
-        //int nameCode = context.getConfiguration().getNamePool().allocate(prefix, uri, localName);
-        NodeName name = new FingerprintedQName(prefix, uri, localName);
-
-        NodeInfo targetNode = node;
-        if (nodeKind == Type.ATTRIBUTE) {
-            targetNode = node.getParent();
-        } else if (nodeKind == Type.PROCESSING_INSTRUCTION) {
-            targetNode = null;
-        }
-        if (targetNode != null && (nodeKind == Type.ELEMENT || prefix.length() != 0)) {
-            NamespaceResolver nr = targetNode.getAllNamespaces();
-            NamespaceUri existingURI = nr.getURIForPrefix(prefix, true);
-            if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
-                XPathException err1 = new XPathException("New name conflicts with existing namespace binding");
-                err1.setErrorCode("XUDY0023");
-                err1.setIsTypeError(true);
-                err1.setXPathContext(context);
-                err1.setLocation(getLocation());
-                throw err1;
-            }
-        }
-
-        try {
-            RenameAction action = new RenameAction(node, name, inheritNamespaces);
-            action.setOriginator(this);
-            ((PendingUpdateListImpl) pul).add(action);
-        } catch (XPathException e) {
-            e.maybeSetLocation(getLocation());
-            e.maybeSetContext(context);
-            throw e;
-        }
+        makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -314,9 +210,136 @@ public class RenameExpression extends BasicUpdatingExpression {
         return "rename";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new RenameExpressionElaborator();
+    }
 
+    private static class RenameExpressionElaborator extends UpdateElaborator {
 
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            RenameExpression expr = (RenameExpression) getExpression();
+            ItemEvaluator targetEval = expr.getTargetExp().makeElaborator().elaborateForItem();
+            ItemEvaluator nameEval = expr.getNameExp().makeElaborator().elaborateForItem();
+            return (context, pul) -> {
+                NodeInfo node = (NodeInfo) targetEval.eval(context);
+                if (!node.getTreeInfo().isMutable()) {
+                    XPathException err = new XPathException("Node to be renamed is not updatable",
+                                                            SaxonErrorCode.SXUP0081);
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
+                int nodeKind = node.getNodeKind();
+                if (!(nodeKind == Type.ELEMENT || nodeKind == Type.ATTRIBUTE || nodeKind == Type.PROCESSING_INSTRUCTION)) {
+                    XPathException err = new XPathException(
+                            "Node to be renamed is not an element, attribute, or processing-instruction", "XUTY0012");
+                    err.setLocation(expr.getLocation());
+                    throw err;
+                }
 
+                // name needs to be evaluated at run-time
+
+                AtomicValue nameValue = (AtomicValue) nameEval.eval(context);
+                String prefix;
+                String localName;
+                NamespaceUri uri;
+                if (nameValue instanceof StringValue) {  // which includes UntypedAtomic
+                    String rawName = nameValue.getStringValue();
+                    try {
+                        String[] parts = NameChecker.getQNameParts(rawName);
+                        prefix = parts[0];
+                        localName = parts[1];
+                    } catch (QNameException err11) {
+                        XPathException err1 = new XPathException("Invalid node name. " + err11.getMessage(), "XQDY0074", expr.getLocation());
+                        err1.setXPathContext(context);
+                        throw err1;
+                    }
+                    if (prefix.isEmpty()) {
+                        uri = nodeKind == Type.ELEMENT ? expr.defaultNamespace : NamespaceUri.NULL;
+                    } else {
+                        uri = expr.nsContext.getURIForPrefix(prefix, true);
+                        if (uri == null) {
+                            XPathException err1 = new XPathException("Undeclared prefix in new node name: " + prefix, "XQDY0074", expr.getLocation());
+                            err1.setXPathContext(context);
+                            throw err1;
+                        }
+                    }
+                } else if (nameValue instanceof QNameValue) {
+                    localName = ((QNameValue) nameValue).getLocalName();
+                    uri = ((QNameValue) nameValue).getNamespaceURI();
+//            if (uri == null) {
+//                uri = "";
+//            }
+                    prefix = ((QNameValue) nameValue).getPrefix();
+                } else {
+                    XPathException err1 = new XPathException("Computed element name has incorrect type");
+                    err1.setErrorCode("XPTY0004");
+                    err1.setIsTypeError(true);
+                    err1.setXPathContext(context);
+                    err1.setLocation(expr.getLocation());
+                    throw err1;
+                }
+
+                if (uri.isEmpty()) {
+                    // there is a special rule for this case in the specification;
+                    // we force the element to go in the null namespace
+                    prefix = "";
+                }
+                if (prefix.equals("xmlns")) {
+                    // this isn't a legal prefix so we mustn't use it
+                    prefix = "x-xmlns";
+                }
+                if (nodeKind == Type.PROCESSING_INSTRUCTION) {
+                    if (prefix.length() > 0 || !uri.isEmpty()) {
+                        XPathException err1 = new XPathException("Processing instruction cannot be in a namespace");
+                        err1.setErrorCode("XUDY0025");
+                        err1.setIsTypeError(true);
+                        err1.setXPathContext(context);
+                        err1.setLocation(expr.getLocation());
+                        throw err1;
+                    }
+                }
+
+                //int nameCode = context.getConfiguration().getNamePool().allocate(prefix, uri, localName);
+                NodeName name = new FingerprintedQName(prefix, uri, localName);
+
+                NodeInfo targetNode = node;
+                if (nodeKind == Type.ATTRIBUTE) {
+                    targetNode = node.getParent();
+                } else if (nodeKind == Type.PROCESSING_INSTRUCTION) {
+                    targetNode = null;
+                }
+                if (targetNode != null && (nodeKind == Type.ELEMENT || prefix.length() != 0)) {
+                    NamespaceResolver nr = targetNode.getAllNamespaces();
+                    NamespaceUri existingURI = nr.getURIForPrefix(prefix, true);
+                    if (existingURI != null && !existingURI.isEmpty() && !existingURI.equals(uri)) {
+                        XPathException err1 = new XPathException("New name conflicts with existing namespace binding");
+                        err1.setErrorCode("XUDY0023");
+                        err1.setIsTypeError(true);
+                        err1.setXPathContext(context);
+                        err1.setLocation(expr.getLocation());
+                        throw err1;
+                    }
+                }
+
+                try {
+                    RenameAction action = new RenameAction(node, name, expr.inheritNamespaces);
+                    action.setOriginator(expr);
+                    ((PendingUpdateListImpl) pul).add(action);
+                } catch (XPathException e) {
+                    e.maybeSetLocation(expr.getLocation());
+                    e.maybeSetContext(context);
+                    throw e;
+                }
+            };
+        }
+    }
 }
 
 // Copyright (c) 2008-2022 Saxonica Limited

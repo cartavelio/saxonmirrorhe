@@ -304,6 +304,7 @@ public class Inversion {
                     err.setLocator(exp.getLocation());
                     throw err;
                 }
+                exp.makeElaborator();
                 return watchMaker.makeWatch(watchManager, parentFeed, context);
             } else {
                 throw new IllegalStateException("unknown push method " + pushMethod);

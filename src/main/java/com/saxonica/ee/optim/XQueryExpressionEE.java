@@ -280,7 +280,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         try {
             PendingUpdateList pul = config.newPendingUpdateList();
             context.openStackFrame(stackFrameMap);
-            expression.evaluatePendingUpdates(context, pul);
+            expression.makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
             pul.apply(context, mainModule.getRevalidationMode());
             return pul.getAffectedTrees();
         } catch (XPathException e) {
@@ -325,7 +325,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         try {
             PendingUpdateList pul = config.newPendingUpdateList();
             context.openStackFrame(stackFrameMap);
-            expression.evaluatePendingUpdates(context, pul);
+            expression.makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
             pul.apply(context, mainModule.getRevalidationMode());
             for (MutableNodeInfo mutableNodeInfo : pul.getAffectedTrees()) {
                 agent.update(mutableNodeInfo, controller);

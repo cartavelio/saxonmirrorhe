@@ -1,6 +1,10 @@
 package com.saxonica.ee.update;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.UpdateElaborator;
+import net.sf.saxon.expr.elab.UpdateEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
@@ -125,37 +129,7 @@ public class DeleteExpression extends BasicUpdatingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        try {
-            SequenceIterator iter = getTargetExp().iterate(context);
-            NodeInfo node;
-            while ((node = (NodeInfo) iter.next()) != null) {
-                if (!(node.getTreeInfo().isMutable())) {
-                    XPathException err = new XPathException("Node to be deleted is not an updatable node",
-                            SaxonErrorCode.SXUP0081);
-                    err.setLocation(getLocation());
-                    throw err;
-                }
-                if (node.getParent() == null) {
-                    // now a no-op - see spec bug 5702
-    //                XPathException err = new XPathException("Node to be deleted has no parent node", "XUDY0020");
-    //                err.setLocation(getLocation());
-    //                throw err;
-                } else {
-                    try {
-                        DeleteAction action = new DeleteAction(node);
-                        action.setOriginator(this);
-                        ((PendingUpdateListImpl) pul).add(action);
-                    } catch (XPathException e) {
-                        e.maybeSetLocation(getLocation());
-                        e.maybeSetContext(context);
-                        throw e;
-                    }
-                }
-            }
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
-
+         makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
     }
 
     /**
@@ -170,7 +144,53 @@ public class DeleteExpression extends BasicUpdatingExpression {
         return "delete";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new DeleteExpressionElaborator();
+    }
 
+    private static class DeleteExpressionElaborator extends UpdateElaborator {
+
+        @Override
+        public UpdateEvaluator elaborateForUpdate() {
+            DeleteExpression expr = (DeleteExpression) getExpression();
+            PullEvaluator targetPull = expr.getTargetExp().makeElaborator().elaborateForPull();
+            return (context, pul) -> {
+                try {
+                    SequenceIterator iter = targetPull.iterate(context);
+                    NodeInfo node;
+                    while ((node = (NodeInfo) iter.next()) != null) {
+                        if (!(node.getTreeInfo().isMutable())) {
+                            XPathException err = new XPathException("Node to be deleted is not an updatable node",
+                                                                    SaxonErrorCode.SXUP0081);
+                            err.setLocation(expr.getLocation());
+                            throw err;
+                        }
+                        if (node.getParent() == null) {
+                            // now a no-op - see spec bug 5702
+                        } else {
+                            try {
+                                DeleteAction action = new DeleteAction(node);
+                                action.setOriginator(expr);
+                                ((PendingUpdateListImpl) pul).add(action);
+                            } catch (XPathException e) {
+                                e.maybeSetLocation(expr.getLocation());
+                                e.maybeSetContext(context);
+                                throw e;
+                            }
+                        }
+                    }
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
+            };
+        }
+    }
 }
 
 // Copyright (c) 2008-2022 Saxonica Limited
