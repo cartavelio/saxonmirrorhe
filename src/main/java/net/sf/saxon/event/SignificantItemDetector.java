@@ -22,6 +22,11 @@ import net.sf.saxon.value.AtomicValue;
  * This receiver is inserted into the output pipeline whenever on-empty or on-non-empty is used (XSLT 3.0).
  * It passes all events to the underlying receiver unchanged, but invokes a callback action when the
  * first item is written.
+ *
+ * <p>A "Significant Item" as detected by this class is an item that is not "vacuous" according to
+ * section 8.4.2 of the XSLT 3.0 specification. Note that this is not the same as being "deemed empty"
+ * as defined in section 8.4.1: notably, empty elements and empty maps are "deemed empty" but are
+ * not "vacuous".</p>
  */
 public class SignificantItemDetector extends ProxyOutputter {
 
