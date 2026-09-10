@@ -7,11 +7,18 @@ include("../cmake/common-vars.cmake")
 
 configure_file(${SAXONC_SRC_DIR}/lib/saxonc_version.c.in saxonc_version.c @ONLY)
 include("../cmake/libsaxonc.cmake")
-include("../cmake/export-header.cmake")
-
 if(PROJECT_IS_TOP_LEVEL)
-    add_subdirectory("../test" "test")
-    add_subdirectory("test" "test-edition")
-    add_subdirectory("../src/bin" "bin")
+#    add_subdirectory("../test" "test")
+    add_subdirectory("../bin" "bin")
     add_subdirectory("../packaging" "packaging")
 endif()
+
+#add_executable(tests test/test_processor.cpp)
+#target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+#target_link_libraries(tests PRIVATE ${saxonc})
+#catch_discover_tests(tests DL_PATHS "$<TARGET_RUNTIME_DLL_DIRS:${saxonc}>")
+
+#if(PROJECT_IS_TOP_LEVEL)
+#    # include(CPack) will happen inside the following call
+#    add_subdirectory(packaging)
+#endif()

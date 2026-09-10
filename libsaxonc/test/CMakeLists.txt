@@ -10,6 +10,8 @@ include(CTest)
 include(Catch)
 find_package(Threads REQUIRED)
 
+set(saxonc "saxonc-${SaxonC_EDITION}")
+
 # Tests
 add_executable(CTestXPath ../samples/cTests/testXPath.c)
 target_link_libraries(CTestXPath PRIVATE ${saxonc})
@@ -38,12 +40,9 @@ add_test(NAME cppXPath COMMAND CppTestXPath "${CMAKE_CURRENT_SOURCE_DIR}/../samp
 add_test(NAME cppXQuery COMMAND CppTestXQuery "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 add_test(NAME cppXslt COMMAND CppTestXslt "${CMAKE_CURRENT_SOURCE_DIR}/../samples/data" WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
-set(dll_dirs "$<TARGET_RUNTIME_DLL_DIRS:CTestXPath>")
-set(dll_dirs_is_empty "$<STREQUAL:${dll_dirs},>")
-set(env_op "PATH=path_list_append:")
 set_tests_properties(
     cXPath cXQuery cXslt cppXPath cppXQuery cppXslt
     PROPERTIES
     ENVIRONMENT_MODIFICATION
-        "$<$<NOT:${dll_dirs_is_empty}>:${env_op}$<JOIN:${dll_dirs},$<SEMICOLON>${env_op}>>"
+        "PATH=path_list_append:$<TARGET_RUNTIME_DLL_DIRS:${saxonc}>"
 )

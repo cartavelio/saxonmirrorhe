@@ -34,6 +34,8 @@ set_target_properties(${saxonc} PROPERTIES
 )
 target_link_libraries(${saxonc} PRIVATE Threads::Threads)
 
+include(GenerateExportHeader)
+generate_export_header(${saxonc} BASE_NAME saxonc)
 target_sources(${saxonc}
     PUBLIC
         FILE_SET common_headers
@@ -71,10 +73,17 @@ target_sources(${saxonc}
         FILES
             ${SAXONC_EDITION_SRC_DIR}/include/saxonc/saxonc-core.h
 )
+target_sources(${saxonc}
+    PUBLIC
+        FILE_SET export_header
+        TYPE HEADERS
+        BASE_DIRS
+            ${CMAKE_CURRENT_BINARY_DIR}
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/saxonc_export.h
+)
 
-if(NOT(DEFINED NO_BUNDLED_SAXONC_CORE AND NO_BUNDLED_SAXONC_CORE))
-    list(APPEND CMAKE_PREFIX_PATH ${BUNDLED_SAXONC_CORE_DIR})
-endif()
+list(APPEND CMAKE_PREFIX_PATH ${SAXONC_CORE_PACKAGE_DIR})
 find_package(SaxonCCore${SAXON_EDITION} ${SaxonC_VERSION} EXACT REQUIRED)
 
-target_link_libraries(${saxonc} PUBLIC SaxonCCore${SAXON_EDITION}::saxonc-core-${SaxonC_EDITION})
+target_link_libraries(${saxonc} PUBLIC SaxonC${SAXON_EDITION}::saxonc-core-${SaxonC_EDITION})
