@@ -3,7 +3,12 @@
   <xsl:output method="text"/>
   
   <!-- This stylesheet outputs the book list as a CSV file -->
+  <!-- Rewritten in 2025 to use xsl:key instead of id()
+       because the Microsoft parser doesn't report attribute
+       type information. -->
   
+  <xsl:key name="id" match="CATEGORY" use="@CODE"/>
+
   <xsl:template match="BOOKLIST">
     <xsl:apply-templates select="BOOKS"/>
   </xsl:template>
@@ -14,7 +19,7 @@
       "<xsl:value-of select="TITLE"/>","<xsl:text/>
       <xsl:value-of select="AUTHOR"/>","<xsl:text/>
       <xsl:value-of select="@CAT"/>(<xsl:text/>
-      <xsl:value-of select="if (id(@CAT)) then id(@CAT)/@DESC else 'Unclassified'"/>)","<xsl:text/>
+      <xsl:value-of select="if (key('id', @CAT)) then key('id', @CAT)/@DESC else 'Unclassified'"/>)","<xsl:text/>
       <xsl:value-of select="format-number(PRICE * QUANTITY,'######0.00')"/>"<xsl:text/>
     </xsl:for-each><xsl:text/>
   </xsl:template>

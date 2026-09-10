@@ -28,11 +28,17 @@ class Config:
                 self.build = os.path.join(self.root_path, "java/build")
             else:
                 self.build = os.path.join(self.root_path, f"java/{edition}/build")
-        else:
+        elif platform == "csharp":
             self.saxoncs = f"{self.root_path}/csharp/{edition}/{csexec}"
             self.build = os.path.join(self.root_path, f"csharp/{edition}/build")
+        elif platform == "saxonc":
+            self.build = os.path.join(self.root_path, f"libsaxonc/{edition}/build")
+        elif platform == "python":
+            self.build = os.path.join(self.root_path, f"python/{edition}/build")
+        else:
+            raise ValueError(f"Unexpected platform: {platform}")
 
-        self.output = os.path.join(self.build, "sample_xxx")
+        self.output = os.path.join(self.build, "sample_results")
         if not os.path.isdir(self.output):
             os.makedirs(self.output)
 
@@ -70,9 +76,31 @@ class Config:
 
 
 class TestRunner(ABC):
-    @abstractmethod
     def run(self):
-        pass
+        if self.skip:
+            print(f"Skipping {self.sample} for {self.config.edition}")
+            return
+
+        dispatch = {
+            "java": self.runJava,
+            "csharp": self.runCSharp,
+            "saxonc": self.runC
+        }
+
+        if self.config.platform in dispatch:
+            dispatch[self.config.platform]()
+        else:
+            print(f"Running {self.sample}")
+            raise ValueError(f"Unexpected platform: {self.config.platform}")
+
+        if self.checker and os.path.exists(self.output):
+            try:
+                with open(self.output, "r") as out:
+                    self.checker(out.read())
+                print(f"Running {self.sample} 👍")
+            except Exception as ex:
+                print(f"Running {self.sample} 👎")
+                raise ex
 
     def args(self, arglist):
         # Crude, but it'll probably do
@@ -91,6 +119,7 @@ class Transform(TestRunner):
         self.xsl = None
         self.arguments = []
         self.output = os.path.join(config.output, f"{sample_name}.html")
+        self.checker = None
 
     def source(self, filename):
         self.xml = filename
@@ -104,15 +133,9 @@ class Transform(TestRunner):
         self.output = os.path.join(self.config.output, path)
         return self
 
-    def run(self):
-        if self.skip:
-            print(f"Skipping {self.sample} for {self.config.edition}")
-            return
-
-        if self.config.platform == "java":
-            self.runJava()
-        else:
-            self.runCSharp()
+    def check_with(self, checkmethod):
+        self.checker = checkmethod
+        return self
 
     def runJava(self):
         command = ["java", "-cp", f"{self.config.classpath}", "net.sf.saxon.Transform"]
@@ -124,7 +147,6 @@ class Transform(TestRunner):
         if len(self.arguments) > 0:
             command = command + self.arguments
 
-        print(f"Running {self.sample}")
         cp = subprocess.run(command)
         if cp.returncode != 0:
             print(f"Failed: {cp.returncode}")
@@ -141,7 +163,22 @@ class Transform(TestRunner):
         if len(self.arguments) > 0:
             command = command + self.arguments
 
-        print(f"Running {self.sample}")
+        cp = subprocess.run(command)
+        if cp.returncode != 0:
+            print(f"Failed: {cp.returncode}")
+            print(" ".join(command))
+            sys.exit(1)
+
+    def runC(self):
+        command = [f"build/Release/Release/Transform"]
+        if self.xml:
+            command.append(f"-s:{self.xml}")
+        if self.xsl:
+            command.append(f"-xsl:{self.xsl}")
+        command.append(f"-o:{self.output}")
+        if len(self.arguments) > 0:
+            command = command + self.arguments
+
         cp = subprocess.run(command)
         if cp.returncode != 0:
             print(f"Failed: {cp.returncode}")
@@ -159,6 +196,7 @@ class Query(TestRunner):
         self.xqueryString = None
         self.arguments = []
         self.output = os.path.join(config.output, f"{sample_name}.html")
+        self.checker = None
 
     def source(self, filename):
         self.xml = filename
@@ -175,15 +213,9 @@ class Query(TestRunner):
     def output_path(self, path):
         self.output = os.path.join(self.config.output, path)
 
-    def run(self):
-        if self.skip:
-            print(f"Skipping {self.sample} for {self.config.edition}")
-            return
-
-        if self.config.platform == "java":
-            self.runJava()
-        else:
-            self.runCSharp()
+    def check_with(self, checkmethod):
+        self.checker = checkmethod
+        return self
 
     def runJava(self):
         command = ["java", "-cp", f"{self.config.classpath}", "net.sf.saxon.Query"]
@@ -192,12 +224,11 @@ class Query(TestRunner):
         if self.xquery:
             command.append(f"-q:{self.xquery}")
         if self.xqueryString:
-            command.append(f"-qs:\"{self.xqueryString}\"")
+            command.append(f"-qs:{self.xqueryString}")
         command.append(f"-o:{self.output}")
         if len(self.arguments) > 0:
             command = command + self.arguments
 
-        print(f"Running {self.sample}")
         cp = subprocess.run(command)
         if cp.returncode != 0:
             print(f"Failed: {cp.returncode}")
@@ -212,12 +243,29 @@ class Query(TestRunner):
         if self.xquery:
             command.append(f"-q:{self.xquery}")
         if self.xqueryString:
-            command.append(f"-qs:\"{self.xqueryString}\"")
+            command.append(f"-qs:{self.xqueryString}")
         command.append(f"-o:{self.output}")
         if len(self.arguments) > 0:
             command = command + self.arguments
 
-        print(f"Running {self.sample}")
+        cp = subprocess.run(command)
+        if cp.returncode != 0:
+            print(f"Failed: {cp.returncode}")
+            print(" ".join(command))
+            sys.exit(1)
+
+    def runC(self, args=None):
+        command = [f"build/Release/Release/Query"]
+        if self.xml:
+            command.append(f"-s:{self.xml}")
+        if self.xquery:
+            command.append(f"-q:{self.xquery}")
+        if self.xqueryString:
+            command.append(f"-qs:{self.xqueryString}")
+        command.append(f"-o:{self.output}")
+        if len(self.arguments) > 0:
+            command = command + self.arguments
+
         cp = subprocess.run(command)
         if cp.returncode != 0:
             print(f"Failed: {cp.returncode}")
@@ -247,10 +295,16 @@ class Validate(TestRunner):
             print(f"Skipping {self.sample} for {self.config.edition}")
             return
 
-        if self.config.platform == "java":
-            self.runJava()
+        dispatch = {
+            "java": self.runJava,
+            "csharp": self.runCSharp,
+            "saxonc": self.runC
+        }
+
+        if self.config.platform in dispatch:
+            dispatch[self.config.platform]()
         else:
-            self.runCSharp()
+            raise ValueError(f"Unexpected platform: {self.config.platform}")
 
     def runJava(self):
         command = ["java", "-cp", f"{self.config.classpath}", "com.saxonica.Validate"]
@@ -298,6 +352,34 @@ class Validate(TestRunner):
             sys.exit(1)
 
         command = [self.config.saxoncs, "validate" ]
+        command.append(f"-s:{self.output}")
+        command.append(f"-xsd:build/samples/resources/schemas/validation-reports.xsd")
+
+        print(f"Validating {self.sample} report")
+        cp = subprocess.run(command)
+        if cp.returncode != 0:
+            print(f"Failed: {cp.returncode}")
+            print(" ".join(command))
+            sys.exit(1)
+
+    def runC(self):
+        command = [f"build/Release/Release/Validate"]
+        if self.xml:
+            command.append(f"-s:{self.xml}")
+        if self.xsd:
+            command.append(f"-xsd:{self.xsd}")
+        command.append(f"-report:{self.output}")
+        if len(self.arguments) > 0:
+            command = command + self.arguments
+
+        print(f"Running {self.sample}")
+        cp = subprocess.run(command)
+        if cp.returncode != 0:
+            print(f"Failed: {cp.returncode}")
+            print(" ".join(command))
+            sys.exit(1)
+
+        command = [f"build/Release/Release/Validate"]
         command.append(f"-s:{self.output}")
         command.append(f"-xsd:build/samples/resources/schemas/validation-reports.xsd")
 
@@ -380,7 +462,7 @@ class JavaClass(TestRunner):
               type=click.Choice(["he", "pe", "ee"]),
               help="Saxon edition to run")
 @click.option("--platform", default="java",
-              type=click.Choice(["java", "csharp"]),
+              type=click.Choice(["java", "csharp", "python", "saxonc"]),
               help="Saxon platform to run")
 @click.option("--csexec",
               help="SaxonCS executable")
@@ -426,25 +508,30 @@ def run_samples(edition, platform, csexec):
 
         Query(config, "Books_Query_1")
         .source("build/samples/resources/data/books.xml")
-        .query("build/samples/resources/query/books.xq"),
+        .query("build/samples/resources/query/books.xq")
+        .check_with(checksamples.check_books_query_1),
 
         Query(config, "Books_Query_2", ["pe", "ee"])
         .source("build/samples/resources/data/books.xml")
         .queryString("saxon:line-number((//*)[last()])")
-        .args("-l:on"),
+        .args("-l:on")
+        .check_with(checksamples.check_books_query_2),
 
         Transform(config, "Books_Transform_1")
         .source("build/samples/resources/data/books.xml")
-        .stylesheet("build/samples/resources/styles/books.xsl"),
+        .stylesheet("build/samples/resources/styles/books.xsl")
+        .check_with(checksamples.check_books_transform_1),
 
         Transform(config, "Books_Transform_2")
         .source("build/samples/resources/data/books.xml")
         .stylesheet("build/samples/resources/styles/books.xsl")
-        .args("top-author='Thomas Hardy'"),
+        .args("top-author='Thomas Hardy'")
+        .check_with(checksamples.check_books_transform_2),
 
         Transform(config, "Books_Transform_3")
         .source("build/samples/resources/data/books.xml")
-        .stylesheet("build/samples/resources/styles/books-csv.xsl"),
+        .stylesheet("build/samples/resources/styles/books-csv.xsl")
+        .check_with(checksamples.check_books_transform_3),
 
         Validate(config, "Books_Validate_1")
         .source("build/samples/resources/data/books.xml")
@@ -458,11 +545,13 @@ def run_samples(edition, platform, csexec):
 
         Transform(config, "Tour_Transform_1")
         .stylesheet("build/samples/resources/styles/tour.xsl")
-        .args(["-it:main"]),
+        .args(["-it:main"])
+        .check_with(checksamples.check_tour_transform_1),
 
         Transform(config, "Tour_Transform_2")
         .stylesheet("build/samples/resources/styles/tour.xsl")
-        .args(["-it:main", "start=a6"]),
+        .args(["-it:main", "start=a6"])
+        .check_with(checksamples.check_tour_transform_2),
 
         Transform(config, "Tour_Transform_3")
         .stylesheet("build/samples/resources/styles/tour.xsl")
@@ -470,11 +559,13 @@ def run_samples(edition, platform, csexec):
 
         Query(config, "Tour_Query_1")
         .query("build/samples/resources/query/tour.xq")
-        .args(["start=e5"]),
+        .args(["start=e5"])
+        .check_with(checksamples.check_tour_query_1),
 
         Query(config, "Tour_Query_2")
         .query("build/samples/resources/query/tour.xq")
-        .args(["start=d2", "end=42"]),
+        .args(["start=d2", "end=42"])
+        .check_with(checksamples.check_tour_query_2),
 
         Query(config, "Tour_Query_3")
         .query("build/samples/resources/query/tour.xq")
