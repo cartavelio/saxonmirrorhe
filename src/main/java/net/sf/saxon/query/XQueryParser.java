@@ -3186,7 +3186,6 @@ public class XQueryParser extends XPathParser {
         readKeyword("validate");
         int offset = t.currentTokenStartOffset;
         int mode = Validation.STRICT;
-        boolean foundCurly = false;
         SchemaType requiredType = null;
         ensureSchemaAware("validate expression");
         if (isKeyword("strict")) {

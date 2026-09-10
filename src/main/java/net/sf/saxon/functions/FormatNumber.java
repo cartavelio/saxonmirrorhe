@@ -104,7 +104,6 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
         if (picture.length() == 0) {
             throw new XPathException("format-number() picture is zero-length", "FODF1310");
         }
-        int sep = -1;
         int patternSeparator = dfs.getMarker(DecimalSymbols.Property.PATTERN_SEPARATOR);
         long split = picture.indexOf(patternSeparator);
         if (split < 0) {
