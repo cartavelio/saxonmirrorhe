@@ -648,10 +648,10 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 Iterator<KeyValuePair> it1 = keyValuePairs().iterator();
                 Iterator<KeyValuePair> it2 = otherMap.keyValuePairs().iterator();
                 if (options.ignoreEmptyEntries) {
-                    java.util.function.Function<KeyValuePair, KeyValuePair> mapper =
+                    java.util.function.Function<KeyValuePair, KeyValuePair> filter =
                             kvp -> kvp.value().getLength() == 0 ? null : kvp;
-                    it1 = new MappingJavaIterator<>(it1, mapper);
-                    it2 = new MappingJavaIterator<>(it2, mapper);
+                    it1 = new MappingJavaIterator<KeyValuePair, KeyValuePair>(it1, filter);
+                    it2 = new MappingJavaIterator<KeyValuePair, KeyValuePair>(it2, filter);
                 }
                 while (it1.hasNext() && it2.hasNext()) {
                     KeyValuePair kvp1 = it1.next();
