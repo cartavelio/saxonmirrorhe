@@ -159,12 +159,12 @@
       <reason>Functionality not yet implemented: recursive record types</reason>
    </exception>
    
-   <exception test-set="prod-PathExpr.J" 
+   <!--<exception test-set="prod-PathExpr.J" 
       test-case="PathExpr-J-166 PathExpr-J-168" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-06"/>
       <reason>Spec unclear: see issue 2359</reason>
    </exception>
-
+-->
 
 </exceptions>
