@@ -52,6 +52,7 @@ public class CompilerInfo {
     private String defaultNamespaceForElementsAndTypes = "";
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
+    private int languageVersion = 30;
 
     /**
      * Create an empty CompilerInfo object with default settings. (Note, this does not
@@ -103,10 +104,20 @@ public class CompilerInfo {
         queryLibraries = info.queryLibraries;
         defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
         unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
+        languageVersion = info.languageVersion;
     }
 
     public Configuration getConfiguration() {
         return config;
+    }
+
+
+    public void setLanguageVersion(int version) {
+        this.languageVersion = version;
+    }
+
+    public int getLanguageVersion() {
+        return this.languageVersion;
     }
 
     /**

@@ -27,8 +27,8 @@ public class XSLOtherwise extends StyleElement {
             NodeName attName = att.getNodeName();
             String f = attName.getDisplayName();
             if (f.equals("select")) {
-                // Saxon extension
-                requireSyntaxExtensions("select");
+                // XSLT 4.0 proposed extension
+                requireXslt40("select");
                 select = makeExpression(att.getValue(), att);
             } else {
                 checkUnknownAttribute(attName);

@@ -62,12 +62,12 @@ public class XSLIf extends StyleElement {
                     break;
                 case "then":
                     // Saxon extension
-                    requireSyntaxExtensions("then");
+                    requireXslt40("then");
                     thenExp = makeExpression(att.getValue(), att);
                     break;
                 case "else":
                     // Saxon extension
-                    requireSyntaxExtensions("else");
+                    requireXslt40("else");
                     elseExp = makeExpression(att.getValue(), att);
                     break;
                 default:

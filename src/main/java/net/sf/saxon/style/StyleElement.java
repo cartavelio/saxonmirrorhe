@@ -2405,13 +2405,24 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     /**
-     * Ask whether XSLT syntax extensions are allowed, for example xsl:when/@select. Returns true if
-     * explicitly enabled in the configuration. Note, this is not affected by forwards-compatibility mode
+     * Report an error unless XSLT syntax extensions are allowed, for example xsl:when/@select.
+     * Note, this is not affected by forwards-compatibility mode
      * (because it's too error-prone to simply ignore the presence of these attributes).
      */
     protected void requireSyntaxExtensions(String attributeName) {
         if (!getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)) {
             compileErrorInAttribute("Attribute " + getDisplayName() + "/@" + attributeName + " is allowed only if syntax extensions are enabled",
+                                    "XTSE0020", attributeName);
+        }
+    }
+
+    /**
+     * Report an error unless XSLT 4.0 syntax is enabled. This currently requires the XSLT version to be set to "4.0"
+     * in the XSLT compiler, AND the effective version in the stylesheet to be 4.0 or greater.
+     */
+    protected void requireXslt40(String attributeName) {
+        if (compilation.getCompilerInfo().getLanguageVersion() != 40 || getEffectiveVersion() < 40) {
+            compileErrorInAttribute("Attribute " + getDisplayName() + "/@" + attributeName + " is allowed only if XSLT 4.0 is enabled",
                                     "XTSE0020", attributeName);
         }
     }

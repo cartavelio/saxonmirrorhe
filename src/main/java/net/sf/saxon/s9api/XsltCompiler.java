@@ -356,12 +356,21 @@ public class XsltCompiler {
      * requested.
      *
      * @param version the language level to be supported. The value is ignored.
-     * @throws IllegalArgumentException if the value is not equal to 0.0, 2.0, or 3.0
-     * @deprecated Has no effect from Saxon 9.8.
-     * @since 9.3. Has no effect from Saxon 9.8.
+     * @throws IllegalArgumentException if the value is not equal to 3.0 or 4.0
+     * @since 9.3. From 11.0, accepts the values "3.0" and "4.0"
      */
 
     public void setXsltLanguageVersion(String version) {
+        switch (version) {
+            case "3.0":
+                compilerInfo.setLanguageVersion(30);
+                break;
+            case "4.0":
+                compilerInfo.setLanguageVersion(40);
+                break;
+            default:
+                throw new IllegalArgumentException("Language version must be 3.0|4.0");
+        }
     }
 
     /**
