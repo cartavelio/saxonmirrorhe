@@ -1,22 +1,32 @@
 package com.saxonica.ee.update;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.CachedSchemaSource;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
+import com.saxonica.ee.schema.sdoc.SchemaReader;
 import com.saxonica.expr.XQueryParserExtensionPE;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
+import net.sf.saxon.lib.AugmentedSource;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryParser;
+import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.value.Whitespace;
 
+import javax.xml.transform.Source;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,24 +47,6 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
 
     }
 
-
-    /**
-     * Get the permitted set of standard functions in this environment
-     */
-
-//    public int getPermittedFunctions() {
-//        int allowed = BuiltInFunctionSet.CORE;
-//        if (allowXPath30Syntax) {
-//            allowed |= BuiltInFunctionSet.XPATH30;
-//        }
-//        if (allowXPath31Syntax) {
-//            allowed |= BuiltInFunctionSet.XPATH31;
-//        }
-//        if (acceptUpdateSyntax) {
-//            allowed |= BuiltInFunctionSet.XQUPDATE;
-//        }
-//        return allowed;
-//    }
 
     /**
      * Parse the "declare revalidation" declaration (XQuery Update).
@@ -137,40 +129,76 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         }
     }
 
-    @Override
-    public void processSchemaImports(NamespaceUri targetNamespace,
-                                     List<String> locationHints,
-                                     String baseUri,
-                                     QueryModule module) throws XPathException {
+
+    public void processSchemaImports(QueryModule module, List<XQueryParser.Import> schemaImports) throws XPathException {
         if (schemaCompiler == null) {
-            super.processSchemaImports(targetNamespace, locationHints, baseUri, module); // causes failure
+            schemaCompiler = new SchemaCompiler((EnterpriseConfiguration)module.getConfiguration());
         }
-        EnterpriseConfiguration config = schemaCompiler.getConfiguration();
-        if (!config.isSchemaAvailable(targetNamespace)) {
-            if (!locationHints.isEmpty()) {
-                try {
-                    PreparedSchema combined = schemaCompiler.readMultipleSchemas(targetNamespace, locationHints, baseUri);
-                    module.getPackageData().setImportedSchema(combined);
-                } catch (SchemaException err) {
-                    throw new XPathException("Error in schema " + targetNamespace + ": " + err.getMessage(), "XQST0059");
-                }
-            } else if (targetNamespace.equals(NamespaceUri.XML) ||
-                    targetNamespace.equals(NamespaceUri.FN) ||
-                    targetNamespace.equals(NamespaceUri.SCHEMA_INSTANCE)) {
-                PreparedSchema schema = (PreparedSchema)config.getSchemaForBuiltInNamespace(targetNamespace);
-                if (schemaCompiler.getPreparedSchema() == null) {
-                    schemaCompiler.setPreparedSchema(schema);
-                } else {
-                    schema.copyTo(schemaCompiler.getPreparedSchema(), schemaCompiler);
-                }
-                module.getPackageData().setImportedSchema(schemaCompiler.getPreparedSchema());
-            } else {
-                 schemaCompiler.readMultipleSchemas(targetNamespace, locationHints, baseUri);
+        List<Source> sources = new ArrayList<>();
+        for (XQueryParser.Import schemaImport : schemaImports) {
+            gatherSources(module, schemaImport, sources);
+        }
+        PreparedSchema schema = schemaCompiler.loadSources(sources);
+        module.getPackageData().setImportedSchema(schema);
+    }
+
+
+    private void gatherSources(QueryModule env, XQueryParser.Import schemaImport, List<Source> sources) throws XPathException {
+        try {
+            Configuration config = env.getConfiguration();
+            try {
+                config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
+                                            "xsl:import-schema",
+                                            env.getPackageData().getLocalLicenseId());
+            } catch (LicenseException err) {
+                throw new XPathException(err).withErrorCode("XTSE1650");
             }
-//            else {
-//                throw new XPathException("Unable to locate requested schema " + targetNamespace, "XQST0059");
-//            }
+
+            String namespace = Whitespace.trim(schemaImport.namespaceURI.toString());
+            if (namespace == null) {
+                namespace = "";
+            } else {
+                namespace = namespace.trim();
+            }
+            NamespaceUri targetNamespace = NamespaceUri.of(namespace);
+            Schema preLoaded = env.getUserQueryContext().getPreLoadedSchema();
+            if (preLoaded != null) {
+                if (preLoaded.includesTargetNamespace(targetNamespace)) {
+                    sources.add(new CachedSchemaSource(preLoaded));
+                    return;
+                }
+            }
+            if (namespace.equals(NamespaceConstant.XML) ||
+                    namespace.equals(NamespaceConstant.FN) ||
+                    namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+                targetNamespace = NamespaceUri.of(namespace);
+                Schema xmlSchema = config.getSchemaForBuiltInNamespace(targetNamespace);
+                sources.add(new CachedSchemaSource(xmlSchema));
+                return;
+            }
+
+            for (String hint : schemaImport.locationURIs) {
+                if (targetNamespace.equals(NamespaceUri.XML) ||
+                        targetNamespace.equals(NamespaceUri.FN) ||
+                        targetNamespace.equals(NamespaceUri.SCHEMA_INSTANCE)) {
+                    Schema xmlSchema = config.getSchemaForBuiltInNamespace(targetNamespace);
+                    sources.add(new CachedSchemaSource((PreparedSchema) xmlSchema));
+                    continue;
+                }
+
+                Source source = SchemaReader.getSource(hint, hint, schemaCompiler, targetNamespace);
+                if (source != null) {
+
+                    AugmentedSource as = AugmentedSource.makeAugmentedSource(source);
+                    as.setRequiredTargetNamespace(targetNamespace);
+                    sources.add(as);
+                }
+            }
+        } catch (SchemaException err) {
+            throw XPathException.makeXPathException(err);
         }
+
+
     }
 }
 

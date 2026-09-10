@@ -1,5 +1,7 @@
 package com.saxonica.ee.schema;
 
+import net.sf.saxon.type.Schema;
+
 import javax.xml.transform.Source;
 
 /**
@@ -12,8 +14,8 @@ import javax.xml.transform.Source;
 public class CachedSchemaSource implements Source {
 
     private final PreparedSchema schema;
-    public CachedSchemaSource(PreparedSchema schema) {
-        this.schema = schema;
+    public CachedSchemaSource(Schema schema) {
+        this.schema = (PreparedSchema)schema;
     }
 
     public PreparedSchema getSchema() {

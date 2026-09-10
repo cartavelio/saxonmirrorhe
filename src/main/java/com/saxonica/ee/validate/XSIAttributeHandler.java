@@ -261,17 +261,17 @@ public class XSIAttributeHandler extends ValidatingFilter {
             getValidationContext().setSchema(instanceSchema);
         }
         // do a second pass to seal the namespaces
-        tokenizer = new StringTokenizer(value, " \t\n\r", false);
-        targetNS = null;
-        while (tokenizer.hasMoreTokens()) {
-            String tok = tokenizer.nextToken();
-            if (targetNS == null) {
-                targetNS = NamespaceUri.of(tok);
-            } else {
-                getConfiguration().sealNamespace(targetNS);
-                targetNS = null;
-            }
-        }
+//        tokenizer = new StringTokenizer(value, " \t\n\r", false);
+//        targetNS = null;
+//        while (tokenizer.hasMoreTokens()) {
+//            String tok = tokenizer.nextToken();
+//            if (targetNS == null) {
+//                targetNS = NamespaceUri.of(tok);
+//            } else {
+//                getConfiguration().sealNamespace(targetNS);
+//                targetNS = null;
+//            }
+//        }
     }
 
     /**

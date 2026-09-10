@@ -321,7 +321,7 @@ public abstract class ContentValidator extends ValidatingFilter {
         } else {
             // We have a usable element declaration
             nillability = decl.isNillable() ? Nillability.ALLOWED : Nillability.DISALLOWED;
-            config.sealNamespace(decl.getTargetNamespace());
+            //config.sealNamespace(decl.getTargetNamespace());
             if (governingType != null && governingType.getFingerprint() == StandardNames.XS_UNTYPED_ATOMIC) {
                 ValidationFailure ve = new ValidationFailure("Cannot use xs:untypedAtomic as governing type for validation");
                 failures.add(ve);
