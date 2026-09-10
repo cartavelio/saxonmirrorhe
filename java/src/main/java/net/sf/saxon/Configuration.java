@@ -69,6 +69,7 @@ import net.sf.saxon.z.*;
 import org.xml.sax.*;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.LexicalHandler;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -4102,6 +4103,9 @@ public class Configuration implements SourceResolver {
      * retained mainly for compatibility, and also because there are a few cases where it cannot easily be replaced,
      * for example when using composite feature URIs to delegate configuration options to the XML parser.</p>
      *
+     * <p>From Saxon 13.1, this API also accepts XML Resolver feature names and passes them on to the
+     * underlying resolver, if that resolver is a {@link CatalogResourceResolver}.</p>
+     *
      * @param name  the URI identifying the property to be set. See the class {@link FeatureKeys} for
      *              constants representing the property names that can be set.
      * @param value the value of the property. Note that boolean values may be supplied either as a Boolean,
@@ -4110,10 +4114,10 @@ public class Configuration implements SourceResolver {
      *                                  a valid value for the named property
      */
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void setConfigurationProperty(String name, Object value) {
         if (FeatureIndex.exists(name)) {
             setFeature(FeatureIndex.getData(name), value);
-
         //#if CSHARP==false
         } else if (name.startsWith(FeatureKeys.XML_PARSER_FEATURE)) {
             String uri = name.substring(FeatureKeys.XML_PARSER_FEATURE.length());
@@ -4124,12 +4128,23 @@ public class Configuration implements SourceResolver {
             uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
             defaultParseOptions = defaultParseOptions.withParserProperty(uri, value);
         //#endif
-            
         } else {
-            throw new IllegalArgumentException("Unrecognized configuration feature: " + name);
+            // I'd like this to be a ResolverFeature, but that leads to an error:
+            // "ResolverFeature<capture of ?> where ResolverFeature<T> is expected."
+            // If there's a clever way to fix that, I can't think of it. This is ugly,
+            // but it works...
+            ResolverFeature feature = ResolverFeature.byName(name);
+            if (feature == null) {
+                throw new IllegalArgumentException("Unrecognized configuration feature: " + name);
+            }
+            if (getResourceResolver() instanceof CatalogResourceResolver resolver) {
+                resolver.setFeature(feature, value);
+            } else {
+                throw new IllegalArgumentException("Cannot set resolver features on the current resolver");
+            }
+
         }
     }
-
 
     /**
      * Set a property of the configuration.

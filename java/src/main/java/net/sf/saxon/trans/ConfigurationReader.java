@@ -283,6 +283,8 @@ public class ConfigurationReader implements Receiver {
                     // no action until later
                 } else if ("localizations".equals(localName)) {
                     readLocalizationsElement(atts);
+                } else if ("xmlResolver".equals(localName)) {
+                    // no action until later
                 } else {
                     error(localName, null, null, null);
                 }
@@ -319,6 +321,13 @@ public class ConfigurationReader implements Receiver {
                     case "xsltPackages":
                         if ("package".equals(localName)) {
                             readXsltPackage(atts);
+                        }
+                        break;
+                    case "xmlResolver":
+                        if ("feature".equals(localName)) {
+                            readXmlResolverFeature(atts);
+                        } else {
+                            error(localName, null, null, null);
                         }
                         break;
                 }
@@ -545,6 +554,65 @@ public class ConfigurationReader implements Receiver {
             if (factory != null) {
                 factory.setLanguageProperties(lang, properties);
             }
+        }
+    }
+
+    private void readXmlResolverFeature(AttributeMap atts) {
+        String name = atts.getValue("name");
+        String stringValue = atts.getValue("value");
+        if (name == null || stringValue == null) {
+            if (name == null) {
+                errors.add(new XmlProcessingIncident("xmlResolver/feature missing 'name' attribute"));
+            }
+            if (stringValue == null) {
+                errors.add(new XmlProcessingIncident("xmlResolver/feature missing 'value' attribute"));
+            }
+            return;
+        }
+
+        // Cheap and cheerful check for a URI.
+        if (!name.contains("://")) {
+            name = "http://xmlresolver.org/feature/" + name;
+        }
+
+        // N.B. The catalog resolver will already have been instantiated on the configuration
+        // so we can just use setConfigurationProperty to set the property.
+
+        // The XML Resolver's ResolverFeature<T> API is really a lot less useful than
+        // I imagined. At the moment, it isn't possible to ask what the required type of the
+        // value is. So I'm peeking at the default value.
+        if (ResolverFeature.byName(name) == null) {
+            errors.add(new XmlProcessingIncident("Unknown XML resolver feature: " + name));
+        } else {
+            handleXmlResolverFeature(targetConfig, name, stringValue);
+        }
+    }
+
+    @CSharpReplaceBody(code = "var error = Saxon.Impl.Helpers.ResolverFeatureHandler.Configure(targetConfig, name, value); if (error != null) errors.Add(error);")
+    private void handleXmlResolverFeature(Configuration targetConfig, String name, String value) {
+        ResolverFeature<?> feature = ResolverFeature.byName(name);
+        Object defaultValue = feature.getDefaultValue();
+        if (defaultValue == null) {
+            // The only features that have a null default value are ones that take
+            // an object of some sort. These can't be set from a configuration file.
+            // (e.g., the ResolverLogger or SAXParserFactory)
+            errors.add(new XmlProcessingIncident("XML resolver feature cannot be configured from configuration file: " + name));
+            return;
+        }
+        if (defaultValue instanceof String) {
+            targetConfig.setConfigurationProperty(name, value);
+        } else if (defaultValue instanceof Boolean) {
+            if ("true".equals(value) || "false".equals(value)
+                    || "yes".equals(value) || "no".equals(value)
+                    || "0".equals(value) || "1".equals(value)) {
+                Boolean bvalue = "true".equals(value) || "yes".equals(value) || "1".equals(value);
+                targetConfig.setConfigurationProperty(name, bvalue);
+            } else {
+                errors.add(new XmlProcessingIncident("Invalid XML resolver feature value for " + name + ". Supplied value: '" + value + "'; required: 'boolean'"));
+            }
+        } else if (defaultValue instanceof List) {
+            List<String> lvalue = new ArrayList<>(Arrays.asList(value.split(";")));
+            targetConfig.setConfigurationProperty(name, lvalue);
         }
     }
 
