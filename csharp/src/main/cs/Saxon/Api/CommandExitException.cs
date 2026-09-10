@@ -4,9 +4,9 @@ using Saxon.Hej.trans;
 
 namespace Saxon.Api {
     /// <summary>
-    /// The <c>SaxonApiException</c> class contains information about a static or dynamic error detected during
-    /// compilation or evaluation of a stylesheet, query, or XPath expression, or other errors that occur
-    /// when using the Saxon API.
+    /// The <c>CommandExitException</c> class is used to signal to the CLI runner that
+    /// something untoward has happened and the process should exit non-zero with the
+    /// status code from <c>getCode()</c>.
     /// </summary>
 
     [Serializable]
@@ -23,4 +23,4 @@ namespace Saxon.Api {
     }
 }
 
-// Copyright (c) 2021 - 2023 Saxonica Limited
+// Copyright (c) 2026 Saxonica Limited

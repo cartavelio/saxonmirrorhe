@@ -1099,8 +1099,12 @@ public class Transform {
     }
 
     /**
-     * Exit with a message
+     * Exit with a message, by throwing an unchecked exception.
+     * If this method throws a {@link CommandExitException} then the
+     * catching method will call {@link System#exit} using the value
+     * from {@link CommandExitException#getCode}.
      *
+     * @throws CommandExitException
      * @param message The message to be output
      * @param code    The result code to be returned to the operating
      *                system shell

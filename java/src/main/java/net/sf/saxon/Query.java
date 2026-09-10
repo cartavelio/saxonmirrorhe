@@ -115,8 +115,8 @@ public class Query {
      * static {@link #main} method.
      *
      * <p>This method runs the program, catches any {@link
-     * CommandExitException}s, and calling {@link System#exit} with the
-     * {@code CommandExitException}'s
+     * CommandExitException}s, and calling {@link System#exit} with
+     * {@link CommandExitException#getCode}.</p>
      * @param args List of arguments supplied on operating system command line
      * @since 12.10
      */
@@ -1217,8 +1217,12 @@ public class Query {
     }
 
     /**
-     * Exit with a message
+     * Exit with a message, by throwing an unchecked exception.
+     * If this method throws a {@link CommandExitException} then the
+     * catching method will call {@link System#exit} using the value
+     * from {@link CommandExitException#getCode}.
      *
+     * @throws CommandExitException
      * @param message The message to be output
      * @param code    The result code to be returned to the operating
      *                system shell
