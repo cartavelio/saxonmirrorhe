@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Saxon.Ejava.lang;
+using Saxon.Hej.functions;
 using Exception = System.Exception;
 using Math = System.Math;
 using SysArray = System.Array;
@@ -59,6 +60,12 @@ namespace Saxon.Ejava.util
         }
         public static int binarySearch<T>(T[] array, int start, int end, T value) {
             return SysArray.BinarySearch(array, start, end, value, StringComparer.Ordinal);
+        }
+
+        public static void setAll<T>(T[] array, Func<int, T> generator) {
+            for (int i = 0; i < array.Length; i++) {
+                array[i] = generator(i);
+            }
         }
 
         public static string ToString<T>(T[] array) {

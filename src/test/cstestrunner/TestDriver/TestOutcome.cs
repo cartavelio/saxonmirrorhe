@@ -12,6 +12,7 @@ using Saxon.Hej.str;
 using JWhitespace = Saxon.Hej.value.Whitespace;
 using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
 using JDeepEqual = Saxon.Hej.functions.DeepEqual;
+using JDeepEqual40 = Saxon.Hej.functions.DeepEqual;
 using JSequenceIterator = Saxon.Hej.om.SequenceIterator;
 using JAxisInfo = Saxon.Hej.om.AxisInfo;
 using JGenericAtomicComparer = Saxon.Hej.expr.sort.GenericAtomicComparer;
@@ -966,7 +967,7 @@ namespace TestDriver {
                     JGroundedValue val1 = SequenceTool.toGroundedValue(iter1);
                     bool success = JDeepEqual.deepEqual(
                         val0.iterate(), val1.iterate(),
-                        new JGenericAtomicComparer(JCodepointCollator.getInstance(), null),
+                        (a,b) => new JGenericAtomicComparer(JCodepointCollator.getInstance(), null).comparesEqual(a,b),
                         assertXpc.Processor.Implementation.getConversionContext(), flag);
                     // if necessary try again ignoring whitespace nodes
                     if (!success) {
@@ -978,7 +979,7 @@ namespace TestDriver {
                         iter1 = new JItemMappingIterator(iter1, new RemoveWhitespace());
                         success = JDeepEqual.deepEqual(
                             iter0, iter1,
-                            new JGenericAtomicComparer(JCodepointCollator.getInstance(), null),
+                            (a,b) => new JGenericAtomicComparer(JCodepointCollator.getInstance(), null).comparesEqual(a,b),
                             assertXpc.Processor.Implementation.getConversionContext(),
                             flag | JDeepEqual.EXCLUDE_WHITESPACE_TEXT_NODES);
                         if (success) {

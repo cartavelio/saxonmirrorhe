@@ -18,7 +18,6 @@ namespace Saxon.Impl.Helpers {
             var angleSharpContext = BrowsingContext.New(angleSharpConfig);
             
             IHtmlParser parser = angleSharpContext.GetService<IHtmlParser>();
-            var source = "<h1>Some example source</h1><p>This is a paragraph element";
             IDocument htmlDoc = parser.ParseDocument(content.getStringValue());
             return new HtmlDocumentWrapper(htmlDoc, getRetainedStaticContext().getStaticBaseUriString(), config);
 
