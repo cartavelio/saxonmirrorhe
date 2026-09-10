@@ -167,6 +167,8 @@ public class SaxonCAPI {
       return a;
     }
 
+    
+
 
     /**
      * Static method to create Processor object given a configuration file
@@ -264,15 +266,19 @@ public class SaxonCAPI {
     }
 
 
-    public static synchronized void applyToConfiguration(Processor processor, String[] names, String[] values) throws SaxonApiException {
+    @CEntryPoint(name = "j_applyToConfiguration")
+    public static synchronized void applyToConfiguration(IsolateThread thread, ObjectHandle processorRef, CCharPointer namesPointer, CCharPointer valuesPointer, int len) throws SaxonApiException {
 
+        Processor processor = objectHandles.get(processorRef);
         if (debug) {
             System.err.println("New processor created, Processor: " + System.identityHashCode(processor));
         }
+
+
         Configuration config = processor.getUnderlyingConfiguration();
-        for (int i = 0; i < names.length; i++) {
-            String name = names[i];
-            String value = values[i];
+        for (int i = 0; i < len; i++) {
+            String name = CTypeConversion.toJavaString(namesPointer.addressOf(i));//names[i];
+            String value = CTypeConversion.toJavaString(valuesPointer.addressOf(i));//values[i];
             if(debug) {
                 System.err.println("SaxonC DEBUG - applyConfiguration, name=" + name);
                 System.err.println("SaxonC DEBUG - applyConfiguration, value=" + value);
@@ -739,7 +745,7 @@ public class SaxonCAPI {
      * @param xdmvalueRef
      * @return  CCharPointer object
      */
-    @CEntryPoint(name = "getStringValue")
+    @CEntryPoint(name = "j_getStringValue")
     public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef) {
         XdmValue value = objectHandles.get(xdmvalueRef);
         final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(value.toString());

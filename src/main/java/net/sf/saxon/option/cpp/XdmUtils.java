@@ -17,9 +17,7 @@ import net.sf.saxon.type.Type;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
-import org.graalvm.nativeimage.c.type.CCharPointer;
-import org.graalvm.nativeimage.c.type.CLongPointer;
-import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.nativeimage.c.type.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -169,14 +167,122 @@ public class XdmUtils {
     @CEntryPoint(name = "j_makeXdmArray")
     public static long makeXdmArray(IsolateThread thread, ObjectHandle processorDataAccumulatorRef) {
          ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
-
-         XdmValue [] xdmValues = (XdmValue[]) processorDataAccumulator.getValues();
-         XdmArray array = new XdmArray(xdmValues);
+        XdmArray array = null;
+         if(processorDataAccumulator.size() == 0) {
+             array = new XdmArray();
+         }  else {
+             XdmValue[] xdmValues = (XdmValue[]) processorDataAccumulator.getValues();
+             array = new XdmArray(xdmValues);
+         }
 
          ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
 
          return arrayHandle.rawValue();
 
+    }
+
+
+    @CEntryPoint(name = "j_makeXdmArrayFromShort")
+    public static long makeXdmArrayFromShort(IsolateThread thread, CShortPointer shortPointer, int length) {
+
+        XdmArray array = null;
+        short [] shortValues = new short[length];
+
+         if(length == 0) {
+             array = new XdmArray();
+         }  else {
+
+             for(int i =0; i< length; i++) {
+                 shortValues[i] = shortPointer.read(i);
+
+             }
+             array = XdmArray.makeArray(shortValues);
+         }
+         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         return arrayHandle.rawValue();
+    }
+
+
+    @CEntryPoint(name = "j_makeXdmArrayFromStrings")
+    public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointer ccharPointer, int length) {
+
+        XdmArray array = null;
+        String [] values = new String[length];
+
+         if(length == 0) {
+             array = new XdmArray();
+         }  else {
+
+             for(int i =0; i< length; i++) {
+                 values[i] = CTypeConversion.toJavaString(ccharPointer.addressOf(i));
+
+             }
+             array = XdmArray.makeArray(values);      
+         }
+         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         return arrayHandle.rawValue();
+    }
+
+    @CEntryPoint(name = "j_makeXdmArrayFromInt")
+    public static long makeXdmArrayFromInt(IsolateThread thread, CIntPointer intPointer, int length) {
+
+        XdmArray array = null;
+        int [] intValues = new int[length];
+
+         if(length == 0) {
+             array = new XdmArray();
+         }  else {
+
+             for(int i =0; i< length; i++) {
+                 intValues[i] = intPointer.read(i);
+
+             }
+             array = XdmArray.makeArray(intValues);
+         }
+         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         return arrayHandle.rawValue();
+    }
+
+
+
+    @CEntryPoint(name = "j_makeXdmArrayFromLong")
+    public static long makeXdmArrayFromLong(IsolateThread thread, CLongPointer longPointer, int length) {
+
+        XdmArray array = null;
+        long [] values = new long[length];
+
+         if(length == 0) {
+             array = new XdmArray();
+         }  else {
+
+             for(int i =0; i< length; i++) {
+                 values[i] = longPointer.read(i);
+
+             }
+             array = XdmArray.makeArray(values);
+         }
+         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         return arrayHandle.rawValue();
+    }
+
+    @CEntryPoint(name = "j_makeXdmArrayFromBool")
+    public static long makeXdmArrayFromBoolean(IsolateThread thread, CIntPointer boolPointer, int length) {
+
+        XdmArray array = null;
+        boolean [] values = new boolean[length];
+
+         if(length == 0) {
+             array = new XdmArray();
+         }  else {
+
+             for(int i =0; i< length; i++) {
+                 values[i] = CTypeConversion.toBoolean(boolPointer.read(i));
+
+             }
+             array = XdmArray.makeArray(values);
+         }
+         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         return arrayHandle.rawValue();
     }
 
 

@@ -12,7 +12,9 @@ import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
+import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
 
 import javax.xml.transform.Source;
 import java.net.URI;
@@ -59,6 +61,26 @@ public class XPathProcessor extends SaxonCAPI {
             config.getBuiltInExtensionLibraryList().addFunctionLibrary(CPPFunctionSet.getInstance());
         }
 //#endif
+    }
+
+    @CEntryPoint(name = "createXPathProcessor")
+    public static long createXPathProcessor(IsolateThread thread) {
+            ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.XPathProcessor(false));
+            return handle.rawValue();
+    }
+
+    @CEntryPoint(name = "createXPathProcessor")
+    public static long createXPathProcessor(IsolateThread thread, ObjectHandle processorRef) {
+            Processor processor = objectHandles.get(processorRef);
+            if(processor == null) {
+                return 0;
+            }
+            ObjectHandle handle = objectHandles.create(XPathProcessor.newInstance(processor));
+            return handle.rawValue();
+    }
+
+    public static XPathProcessor newInstance(Processor proc) {
+        return new XPathProcessor(proc);
     }
 
     /**

@@ -12,6 +12,11 @@ import com.saxonica.functions.extfn.cpp.PHPFunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import javax.xml.transform.Source;
 import java.io.*;
@@ -28,7 +33,7 @@ import java.util.Properties;
  */
 public class XQueryEngine extends SaxonCAPI {
 
-    private XQueryExecutable executable = null;
+    //private XQueryExecutable executable = null;
 
     /**
      * Default Constructor to initialise XQueryEngine. s9api Processor is created with license flag as false
@@ -72,6 +77,28 @@ public class XQueryEngine extends SaxonCAPI {
 //#endif
     }
 
+
+
+    @CEntryPoint(name = "createXQueryEngine")
+    public static long createXQueryEngine(IsolateThread thread) {
+            ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.XQueryEngine(false));
+            return handle.rawValue();
+    }
+
+    @CEntryPoint(name = "createXQueryEngine")
+    public static long createXQueryEngine(IsolateThread thread, ObjectHandle processorRef) {
+            Processor processor = objectHandles.get(processorRef);
+            if(processor == null) {
+                return 0;
+            }
+            ObjectHandle handle = objectHandles.create(XQueryEngine.newInstance(processor));
+            return handle.rawValue();
+    }
+
+    public static XQueryEngine newInstance(Processor proc) {
+        return new XQueryEngine(proc);
+    }
+
     public XdmNode parseXMLString(String xml) throws SaxonApiException {
         try {
             return SaxonCAPI.parseXmlString(null, processor, null, null, xml);
@@ -84,7 +111,7 @@ public class XQueryEngine extends SaxonCAPI {
 
 
 
-    Map<String, Object> convertArraysToMap(XQueryCompiler compiler, String[] params, Object[] values, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
+    static Map<String, Object> convertArraysToMap(Processor processor, XQueryCompiler compiler, String[] params, Object[] values, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
             Map<String, Object> map = new HashMap();
 
             if (params == null || values == null) {
@@ -124,9 +151,9 @@ public class XQueryEngine extends SaxonCAPI {
                 }else if (params[i].equals("sa")) {
                     String value = ((String)values[i]).toLowerCase();
                     if(value.equals("true") || value.equals("on")) {
-                        schemaAware = true;
+                        compiler.setSchemaAware(true);
                     } else {
-                        schemaAware = false;
+                        compiler.setSchemaAware(false);
                     }
 
                 } else if (params[i].equals("base")) {
@@ -171,28 +198,26 @@ public class XQueryEngine extends SaxonCAPI {
                     map.put(params[i], values[i]);
                 }
             }
-            if(schemaAware) {
-                compiler.setSchemaAware(true);
-            }
+
             return map;
 
         }
 
 
-    public XQueryEvaluator xqueryEvaluator(String cwd, String[] params, Object[] values, Serializer serializer) throws SaxonApiException {
+    public static XQueryEvaluator xqueryEvaluator(Processor processor, String cwd, String[] params, Object[] values, Serializer serializer) throws SaxonApiException {
         File queryFile = null;
         XQueryCompiler compiler = processor.newXQueryCompiler();
         Map<QName, XdmValue> parameters = new HashMap<>();
         Properties props = new Properties();
 
-        Map<String, Object> optionsMap = convertArraysToMap(compiler, params, values, parameters, props);
+        Map<String, Object> optionsMap = convertArraysToMap(processor, compiler, params, values, parameters, props);
         //compiler.setErrorListener(errorListener);
         String query = null;
         if (params != null && params.length != values.length) {
             SaxonCException ex = new SaxonCException("Length of params array not equal to the length of values array");
             throw ex;
         }
-
+        XQueryExecutable executable = null;
 
         if (params != null && params.length != 0) {
                 if (optionsMap.containsKey("qs")) {
@@ -241,7 +266,7 @@ public class XQueryEngine extends SaxonCAPI {
         XQueryEvaluator eval = executable.load();
 
         try {
-            applyXQueryProperties(this, cwd, serializer, processor, eval, optionsMap, parameters, props);
+            applyXQueryProperties(cwd, serializer, processor, eval, optionsMap, parameters, props);
         } catch (SaxonApiException ex) {
             throw ex;
         }
@@ -249,27 +274,51 @@ public class XQueryEngine extends SaxonCAPI {
     }
 
 
-    public byte[] executeQueryToString(String cwd, String[] params, Object[] values) throws SaxonApiException {
+    @CEntryPoint(name = "j_executeQueryToString")
+    public static CCharPointer executeQueryToString(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
+
+        ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+        String[] params = processorDataAccumulator.getParameterNames();
+        Object[] values = processorDataAccumulator.getValues();
+        Processor processor = SaxonCAPI.objectHandles.get(processorRef);
+        String cwd = CTypeConversion.toJavaString(ccwd);
 
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
         Serializer serializer = processor.newSerializer(bStream);
-        XQueryEvaluator eval = xqueryEvaluator(cwd, params, values, serializer);
+        XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, serializer);
         eval.run(serializer);
-        return bStream.toByteArray();
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(bStream.toString());
+        return holder.get();
 
     }
 
-    public XdmValue executeQueryToValue(String cwd, String[] params, Object[] values) throws SaxonApiException {
-        XQueryEvaluator eval = xqueryEvaluator(cwd, params, values, null);
-        return eval.evaluate();
+    @CEntryPoint(name = "j_executeQueryToValue")
+    public static long executeQueryToValue(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, ObjectHandle processorDataRef) throws SaxonApiException {
+        ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+        String[] params = processorDataAccumulator.getParameterNames();
+        Object[] values = processorDataAccumulator.getValues();
+        Processor processor = SaxonCAPI.objectHandles.get(processorRef);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, null);
+        XdmValue value = eval.evaluate();
+        ObjectHandle handle = objectHandles.create(value);
+        return handle.rawValue();
     }
 
-    public void executeQueryToFile(String cwd, String outFilename, String[] params, Object[] values) throws SaxonApiException {
-            Serializer serializer = null;
+    @CEntryPoint(name = "j_executeQueryToFile")
+    public static void executeQueryToFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer c_outFilename, ObjectHandle processorDataRef) throws SaxonApiException {
+        ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+        String[] params = processorDataAccumulator.getParameterNames();
+        Object[] values = processorDataAccumulator.getValues();
+        Processor processor = SaxonCAPI.objectHandles.get(processorRef);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String outFilename = CTypeConversion.toJavaString(c_outFilename);
+
+        Serializer serializer = null;
             if(outFilename != null) {
                 serializer = resolveOutputFile(processor, cwd, outFilename, ResourceRequest.XML_NATURE);
             }
-            XQueryEvaluator eval = xqueryEvaluator(cwd, params, values,  serializer);
+            XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values,  serializer);
             if (serializer != null) {
 
                 eval.run(serializer);
@@ -280,7 +329,7 @@ public class XQueryEngine extends SaxonCAPI {
 
     }
 
-    public static void applyXQueryProperties(SaxonCAPI api, String cwd, Serializer serializer, Processor processor, XQueryEvaluator eval, Map<String, Object> optionsMap, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
+    public static void applyXQueryProperties(String cwd, Serializer serializer, Processor processor, XQueryEvaluator eval, Map<String, Object> optionsMap, Map<QName, XdmValue> parameters, Properties props) throws SaxonApiException {
 
         if (debug) {
             for (Object key : optionsMap.keySet()) {
@@ -296,7 +345,7 @@ public class XQueryEngine extends SaxonCAPI {
 
 
                 if (optionsMap.containsKey("o")) {
-                    serializer = api.resolveOutputFile(processor, cwd, (String) optionsMap.get("o"), ResourceRequest.XML_NATURE);
+                    serializer = SaxonCAPI.resolveOutputFile(processor, cwd, (String) optionsMap.get("o"), ResourceRequest.XML_NATURE);
                     eval.setDestination(serializer);
                 }
 
@@ -311,7 +360,7 @@ public class XQueryEngine extends SaxonCAPI {
                 }
 
                 if (optionsMap.containsKey("s")) {
-                    source = api.resolveFileToSource(processor, cwd, (String) optionsMap.get("s"), null);
+                    source = SaxonCAPI.resolveFileToSource(processor, cwd, (String) optionsMap.get("s"), null);
                     eval.setSource(source);
 
                 }
@@ -364,7 +413,7 @@ public class XQueryEngine extends SaxonCAPI {
         String[] paramcon = {"l"};
 
         String[] valuesCon = {"on"};
-        SaxonCAPI.applyToConfiguration(processor, paramcon, valuesCon);
+        //SaxonCAPI.applyToConfiguration(processor, paramcon, valuesCon);
         XQueryEngine xquery = new XQueryEngine(processor);
         /*XdmNode doc = xquery.parseXmlString(null, "<bookstore>\n" +
                 "\n" +
