@@ -317,8 +317,8 @@ task hecs_transpile_to_xml(
     "-xml:${buildDir}/he_xmlout",
     "-h:${projectDir}/src/main/java",
     "-src:${projectDir}/src/main/java",
-    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
-    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
+    "-vavr:${vavrJar}",
+    "-vavrMatch:${vavrMatchJar}",
     "-he:${saxonVersion}",
     "-icu4j:${icu4jJar}"
   doFirst {
@@ -376,8 +376,8 @@ task hecs_generateCSharp(
     "-xml:${buildDir}/he_xmlout",
     "-digest:${buildDir}/he_refined-digest.xml",
     "-he:${saxonVersion}",
-    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
-    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
+    "-vavr:${vavrJar}",
+    "-vavrMatch:${vavrMatchJar}",
     "-icu4j:${icu4jJar}"
     "-debug"
   doFirst {
