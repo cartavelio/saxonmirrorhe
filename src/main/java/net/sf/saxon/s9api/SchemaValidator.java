@@ -74,6 +74,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      * @deprecated since 10.0. Use {@link #setInvalidityHandler(InvalidityHandler)}
      */
 
+    @Deprecated
     public abstract void setErrorListener(ErrorListener listener);
 
     /**
@@ -83,7 +84,7 @@ public abstract class SchemaValidator extends AbstractDestination {
      *         validation episode. Returns null if no user-supplied ErrorListener has been set.
      * @deprecated since 10.0. Use {@link #getInvalidityHandler()}
      */
-
+    @Deprecated
     public abstract ErrorListener getErrorListener();
     //#endif
 

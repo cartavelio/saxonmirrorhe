@@ -268,6 +268,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @deprecated since 10.0: use {@link ParseOptions#setSpaceStrippingRule(SpaceStrippingRule)}
      */
 
+    @Deprecated
     public void setStripSpace(int stripAction) {
         switch (stripAction) {
             case Whitespace.ALL:
@@ -295,7 +296,7 @@ public class DocumentBuilderImpl extends DocumentBuilder {
      * @since 8.9
      * @deprecated since 10.0: use {@link ParseOptions#getSpaceStrippingRule()}
      */
-
+    @Deprecated
     public int getStripSpace() {
         SpaceStrippingRule rule = parseOptions.getSpaceStrippingRule();
         if (rule == AllElementsSpaceStrippingRule.getInstance()) {

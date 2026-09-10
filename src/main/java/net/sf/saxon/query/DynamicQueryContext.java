@@ -281,7 +281,7 @@ public class DynamicQueryContext {
      * @since 8.4
      * @deprecated since 10.0. Use {@link #setErrorReporter}
      */
-
+    @Deprecated
     public void setErrorListener(ErrorListener listener) {
         errorReporter = new ErrorReporterToListener(listener);
     }
@@ -293,7 +293,7 @@ public class DynamicQueryContext {
      * @since 8.4
      * @deprecated since 10.0. Use {@link #setErrorReporter}
      */
-
+    @Deprecated
     public ErrorListener getErrorListener() {
         ErrorReporter uel = getErrorReporter();
         if (uel instanceof ErrorReporterToListener) {

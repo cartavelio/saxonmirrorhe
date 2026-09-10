@@ -64,6 +64,7 @@ public class Put extends SystemFunction {
                     throw new XPathException("Base URI " + Err.wrap(staticBaseUri()) + " is invalid: " + err.getMessage(),
                                              "FOUP0002", context);
                 }
+                context.getConfiguration().getLogger().info("fn:put writing to " + abs);
                 pul.addPutAction(node, abs, this);
             }
 

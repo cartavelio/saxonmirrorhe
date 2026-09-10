@@ -178,6 +178,7 @@ public class XsltCompiler {
      * @deprecated since 10.0. Use {@link #setErrorReporter(ErrorReporter)}                
      */
 
+    @Deprecated
     public void setErrorListener(ErrorListener listener) {
         compilerInfo.setErrorListener(listener);
     }
@@ -189,7 +190,7 @@ public class XsltCompiler {
      * compilation. Returns null if no user-supplied ErrorListener has been set.
      * @deprecated since 10.0. Use {@link #getErrorReporter()}
      */
-
+    @Deprecated
     public ErrorListener getErrorListener() {
         return compilerInfo.getErrorListener();
     }

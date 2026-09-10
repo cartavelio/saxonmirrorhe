@@ -66,6 +66,7 @@ public abstract class SchemaManager {
      * @deprecated since 10.0. Use {@link #setErrorReporter(ErrorReporter)}.
      */
 
+    @Deprecated
     public abstract void setErrorListener(/*@Nullable*/ ErrorListener listener);
 
     /**
@@ -77,6 +78,7 @@ public abstract class SchemaManager {
      */
 
     /*@Nullable*/
+    @Deprecated
     public abstract ErrorListener getErrorListener();
     //#endif
 
