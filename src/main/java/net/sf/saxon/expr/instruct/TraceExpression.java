@@ -223,6 +223,23 @@ public class TraceExpression extends Instruction {
         return !getChild().hasSpecialProperty(StaticProperty.NO_NODES_NEWLY_CREATED);
     }
 
+
+    public boolean equals(Object other) {
+        return other instanceof TraceExpression &&
+                getChild().equals(((TraceExpression) other).getChild());
+    }
+
+    /**
+     * Compute a hash code, which will then be cached for later use
+     *
+     * @return a computed hash code
+     */
+    @Override
+    protected int computeHashCode() {
+        return 0x64646464 ^ getChild().hashCode();
+    }
+
+
     /**
      * Return the estimated cost of evaluating an expression. For a TraceExpression we return zero,
      * because ideally we don't want trace expressions to affect optimization decisions.

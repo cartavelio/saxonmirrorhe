@@ -616,6 +616,15 @@ public class SortKeyDefinition extends PseudoExpression {
         return finalComparator;
     }
 
+    /**
+     * Create a copy of the sort key definition in which all variable parts are replaced by their values.
+     * This is used when comparing that two sort key definitions used in xsl:merge are compatible. This
+     * means that the actual select expression in the sort key definition is irrelevant; it is the
+     * expressions determining collation, order direction, case-order, language etc that matter.
+     * @param context the context used for evaluation
+     * @return a sort key in which expressions are fully evaluated.
+     * @throws XPathException if evaluation fails
+     */
     public SortKeyDefinition fix(XPathContext context) throws XPathException {
         SortKeyDefinition newSKD = this.copy(new RebindingMap());
 
@@ -631,6 +640,11 @@ public class SortKeyDefinition extends PseudoExpression {
         if (dataTypeExpression != null) {
             newSKD.setDataTypeExpression(new StringLiteral(this.getDataTypeExpression().evaluateAsString(context)));
         }
+
+        if (getStable() != null) {
+            newSKD.setStable(new StringLiteral(this.getStable().evaluateAsString(context)));
+        }
+
         newSKD.setSortKey(new ContextItemExpression(), true);
 
         return newSKD;
