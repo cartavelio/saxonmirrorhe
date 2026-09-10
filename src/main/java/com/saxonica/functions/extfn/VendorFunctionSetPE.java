@@ -873,7 +873,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                     return new DateValue(year, month, day, tz, false);
                 }
             } else if (hasHour && hasMinute) {
-                return new TimeValue(hour, minute, second, nano, tz, "");
+                return new TimeValue(hour, minute, second, nano, tz, BuiltInAtomicType.TIME);
             } else if (hasYear && hasMonth) {
                 return new GYearMonthValue(year, month, tz, false);
             } else if (hasYear) {

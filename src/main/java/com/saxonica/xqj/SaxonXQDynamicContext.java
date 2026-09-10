@@ -238,7 +238,7 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         checkNotClosed();
         GregorianCalendar now = new GregorianCalendar(implicitTimeZone);
         try {
-            getDynamicContext().setCurrentDateTime(new DateTimeValue(now, true));
+            getDynamicContext().setCurrentDateTime(DateTimeValue.fromCalendar(now, true));
         } catch (XPathException e) {
             throw new XQException(e.getMessage());
         }
