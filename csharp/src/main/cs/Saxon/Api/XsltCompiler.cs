@@ -152,18 +152,6 @@ namespace Saxon.Api {
             }
         }
 
-        public void UseSchema(XsdSchema schema) {
-            SchemaAware = true;
-            jXsltCompiler.getUnderlyingCompilerInfo().preLoadSchema("", schema.UnderlyingSchema);
-            _usedSchema = schema;
-        }
-
-        public XsdSchema GetUsedSchema() {
-            return _usedSchema;
-        }
-
-
-
         /// <summary>
         /// Indicates whether or not assertions (<c>xsl:assert</c> instructions) are enabled at compile time. 
         /// </summary>
