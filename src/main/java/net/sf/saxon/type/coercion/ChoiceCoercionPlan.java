@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Coercion plan for use with 4.0 when the required item type is an enumeration type
+ * Coercion plan for use with 4.0 when the required item type is a choice item type or a union type
  */
 public class ChoiceCoercionPlan extends AtomicCoercionPlan {
 
-    private int version;
+    private final int version;
 
     public final static ChoiceCoercionPlan INSTANCE31 = new ChoiceCoercionPlan(31);
     public final static ChoiceCoercionPlan INSTANCE40 = new ChoiceCoercionPlan(40);
@@ -41,7 +41,8 @@ public class ChoiceCoercionPlan extends AtomicCoercionPlan {
         ChoiceType reqType = (ChoiceType)requiredType;
         TypeHierarchy th = request.config.getTypeHierarchy();
         if (requiredType.matches(item, th)) {
-            // Function coercion is needed even if the supplied item matches the required type
+            // Generally we can return the item as is if it matches the required type. But
+            // function coercion is needed even if the supplied item matches the required type
             for (ItemType it : reqType.getAlternatives()) {
                 if (it.matches(item, th)) {
                     if (it instanceof SpecificFunctionType) {
@@ -56,7 +57,7 @@ public class ChoiceCoercionPlan extends AtomicCoercionPlan {
         }
         List<XPathException> errors = null;
         for (ItemType it : reqType.getAlternatives()) {
-            CoercionPlan plan = it.getCoercionPlan(40);
+            CoercionPlan plan = it.getCoercionPlan(version);
             try {
                 return plan.coerceItem(item, it, request);
             } catch (XPathException error) {

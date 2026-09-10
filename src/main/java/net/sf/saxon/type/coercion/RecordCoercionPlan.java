@@ -25,8 +25,8 @@ public final class RecordCoercionPlan extends CoercionPlan {
     /**
      * Apply the coercion rules (function conversion rules) to a value, given a required type.
      *
-     * @param item
-     * @param requiredType
+     * @param item the map to be converted
+     * @param requiredType the required record type
      * @param request      the input to the coercion
      * @return the converted value (possibly as a lazily-evaluated sequence)
      */

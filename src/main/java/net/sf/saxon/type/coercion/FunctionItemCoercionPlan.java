@@ -11,7 +11,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 
 /**
- * Coercion plan for use when the required item type is a function type
+ * Coercion plan for use when the required item type is a specific function type
  */
 public class FunctionItemCoercionPlan extends CoercionPlan {
 

@@ -28,7 +28,7 @@ public class AtomicCoercionPlan extends CoercionPlan {
      * Apply the coercion rules (function conversion rules) to a value, given a required type.
      *
      * @param item         the value to be converted
-     * @param requiredType
+     * @param requiredType the required type (always atomic)
      * @param request      the input to the coercion
      * @return the converted value (possibly as a lazily-evaluated sequence)
      * @throws XPathException if the value cannot be converted to the required type
@@ -61,6 +61,17 @@ public class AtomicCoercionPlan extends CoercionPlan {
         }
     }
 
+    /**
+     * Coerce an atomic value to the required atomic type. This method essentially handles
+     * conversion of untypedAtomic values to the target type, followed by type promotion
+     * (for example decimal to double).
+     * @param atom the atomic value to be converted
+     * @param requiredType the required atomic type
+     * @param request details of the coercion request for diagnostics
+     * @return the converted atomic value
+     * @throws XPathException if conversion fails
+     */
+
     protected AtomicValue coerceAtomicValue(AtomicValue atom, ItemType requiredType, CoercionRequest request) throws XPathException {
         if (atom.isUntypedAtomic()) {
             atom = convertUntyped(atom, requiredType, request);
@@ -70,6 +81,16 @@ public class AtomicCoercionPlan extends CoercionPlan {
         return atom;
     }
 
+    /**
+     * Coerce an untyped atomic value to the required atomic type.
+     *
+     * @param atom         the untyped atomic value to be converted
+     * @param requiredType the required atomic type
+     * @param request      details of the coercion request for diagnostics
+     * @return the converted atomic value
+     * @throws XPathException if conversion fails
+     */
+
     protected AtomicValue convertUntyped(AtomicValue atom, ItemType requiredType, CoercionRequest request) throws XPathException {
         if (requiredType.getUType().subsumes(UType.UNTYPED_ATOMIC)) {
             return atom;
@@ -77,6 +98,20 @@ public class AtomicCoercionPlan extends CoercionPlan {
         return Converter.convert(
                 atom, (AtomicType) requiredType, request.config.getConversionRules());
     }
+
+    /**
+     * Promote an atomic value to the required atomic type. This handles, for example,
+     * decimal to string conversion or base64Binary to hexBinary. It also handles
+     * down-casting to derived atomic types. The default implementation returns
+     * the supplied value unchanged.
+     *
+     * @param atom         the untyped atomic value to be converted
+     * @param requiredType the required atomic type
+     * @param request      details of the coercion request for diagnostics
+     * @return the converted atomic value
+     * @throws XPathException if conversion fails
+     */
+
 
     protected AtomicValue promote(AtomicValue atom, ItemType requiredType, CoercionRequest request) throws XPathException {
         return atom;

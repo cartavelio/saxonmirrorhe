@@ -9,15 +9,12 @@ package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -91,6 +88,24 @@ public class TypeChecker {
                 th.isSubType(supplied.getItemType(), reqItemType) &&
                 !(reqItemType instanceof SpecificFunctionType)) {
             return supplied;
+        }
+
+        // Produce a static error if coercion cannot succeed or (in 4.0) is implausible
+       
+        if (reqCardinality != StaticProperty.ALLOWS_ZERO && supplied.getCardinality() != StaticProperty.ALLOWS_ZERO
+                && !isCoercible(supplied.getItemType(), reqItemType)) {
+            boolean isWarning = false;
+            if (Cardinality.allowsZero(reqCardinality) && Cardinality.allowsZero(supplied.getCardinality())) {
+                isWarning = visitor.getStaticContext().getXPathVersion() < 40;
+            }
+            String message = roleSupplier.get().composeErrorMessage(reqItemType, supplied, th);
+            if (isWarning) {
+                visitor.issueWarning(message, "XPTY0004", supplied.getLocation());
+            } else {
+                throw new XPathException(message, "XPTY0004")
+                        .asTypeError()
+                        .withLocation(supplied.getLocation());
+            }
         }
 
         return new SequenceCoercer(supplied, req, roleSupplier, visitor.getStaticContext().getPackageData().getHostLanguageVersion() >= 40);
@@ -526,6 +541,40 @@ public class TypeChecker {
 //        return exp;
     }
 
+    private boolean isCoercible(ItemType supplied, ItemType required) {
+        UType uSupplied = supplied.getUType();
+        UType uRequired = required.getUType();
+        if (uSupplied.overlaps(uRequired)) {
+            return true;
+        }
+        if (uRequired.overlaps(UType.ANY_ATOMIC)) {
+            switch (supplied.getGenre()) {
+                case NODE: return true;
+                case ARRAY: return true;
+                case ATOMIC: return possiblePromotions(uSupplied).overlaps(uRequired);
+                case EXTERNAL: return true;
+                default: return false;
+            }
+        }
+        return false;
+    }
+
+    private UType possiblePromotions(UType input) {
+        if (input.equals(UType.UNTYPED_ATOMIC)) {
+            return UType.ANY_ATOMIC;
+        } else if (input.equals(UType.STRING)) {
+            return UType.ANY_URI;
+        } else if (input.equals(UType.ANY_URI)) {
+            return UType.STRING;
+        } else if (input.overlaps(UType.NUMERIC)) {
+            return UType.NUMERIC;
+        } else if (input.overlaps(UType.BINARY)) {
+            return UType.BINARY;
+        } else {
+            return input;
+        }
+    }
+
 
     /**
      * Make an expression that performs type promotion on a supplied sequence
@@ -577,19 +626,6 @@ public class TypeChecker {
 
     public Expression processValueOf(Expression select, Configuration config) {
         return select;
-    }
-
-    private static Expression makeFunctionSequenceCoercer(
-            Expression exp,
-            FunctionItemType reqItemType,
-            Supplier<RoleDiagnostic> role,
-            boolean allow40) throws XPathException {
-        // Apply function coercion as defined in XPath 3.0 or 4.0
-        return reqItemType.makeFunctionSequenceCoercer(exp, role, allow40);
-    }
-
-    private Expression makeDownCaster(Expression exp, AtomicType reqItemType, Configuration config) {
-        return AtomicSequenceConverter.makeDownCaster(exp, reqItemType, config);
     }
 
     /**

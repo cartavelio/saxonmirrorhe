@@ -49,10 +49,12 @@ public abstract class CoercionPlan {
                 singleton = true;
             }
         }
+        // If the required type is empty-sequence(), check that the sequence is actually empty
         if (cardinality == StaticProperty.ALLOWS_ZERO) {
             return new CardinalityCheckingIterator(
                     value, StaticProperty.ALLOWS_ZERO, request.roleSupplier, request.locator);
         }
+        // Convert the items in the sequence (lazily)
         SequenceIterator uncheckedResult;
         if (singleton) {
             Item input = value.next();
@@ -60,6 +62,7 @@ public abstract class CoercionPlan {
         } else {
             uncheckedResult = makeMappingIterator(value, requiredType.getPrimaryType(), request);
         }
+        // If necessary, check the cardinality of the result (lazily)
         if (cardinality != StaticProperty.ALLOWS_ZERO_OR_MORE) {
             return new CardinalityCheckingIterator(
                     uncheckedResult, cardinality, request.roleSupplier, request.locator);
@@ -68,7 +71,7 @@ public abstract class CoercionPlan {
         }
     }
 
-    protected SequenceIterator makeMappingIterator(SequenceIterator value, ItemType requiredType, CoercionRequest request) {
+    private SequenceIterator makeMappingIterator(SequenceIterator value, ItemType requiredType, CoercionRequest request) {
         return new MappingIterator(value, item -> coerceItem(item, requiredType, request).iterate());
     }
 
@@ -89,13 +92,26 @@ public abstract class CoercionPlan {
 
     public abstract GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException;
 
+    /**
+     * Check that the item is actually an instance of the required type, throwing an error if not
+     * @param item the item to be checked
+     * @param requiredType the required type
+     * @param request diagnostic data
+     * @throws XPathException if the item is not an instance of the required type
+     */
     protected final void check(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         if (!requiredType.matches(item, request.config.getTypeHierarchy())) {
             throw coercionError(item, requiredType, request);
         }
     }
 
-
+    /**
+     * Create an exception object representing a coercion error
+     * @param value the input value to the coercion
+     * @param requiredType the required item type
+     * @param request the coercion request details
+     * @return an exception for the caller to throw
+     */
 
     protected XPathException coercionError(Sequence value, ItemType requiredType, CoercionRequest request) {
         RoleDiagnostic role = request.roleSupplier.get();

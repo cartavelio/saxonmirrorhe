@@ -7,9 +7,7 @@ import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.AtomicValue;
 
 /**
- * A coercion plan represents a process for implementing the coercion rules for converting
- * a supplied value to a given required type. The {@code NoCoercionPlan} is used for types
- * such as item(), node(), or map(*) where no coercions take place.
+ * A coercion plan for use when the target type is QName or NOTATION
  */
 public final class QNameCoercionPlan extends AtomicCoercionPlan {
 

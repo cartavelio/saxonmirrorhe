@@ -17,8 +17,8 @@ public final class NoCoercionPlan extends CoercionPlan {
     /**
      * Apply the coercion rules (function conversion rules) to a value, given a required type.
      *
-     * @param item
-     * @param requiredType
+     * @param item the item to be (not) coerced
+     * @param requiredType the required type
      * @param request      the input to the coercion
      * @return the converted value (possibly as a lazily-evaluated sequence)
      */

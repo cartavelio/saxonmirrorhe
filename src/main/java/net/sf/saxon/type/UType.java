@@ -63,7 +63,7 @@ public class UType {
 
     public static final UType NUMERIC = DOUBLE.union(FLOAT).union(DECIMAL);
     public static final UType STRING_LIKE = STRING.union(ANY_URI).union(UNTYPED_ATOMIC);
-
+    public static final UType BINARY = HEX_BINARY.union(BASE64_BINARY);
 
 
     public static final UType CHILD_NODE_KINDS = ELEMENT.union(TEXT).union(COMMENT).union(PI);

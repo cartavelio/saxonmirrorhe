@@ -28,7 +28,7 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
         if (prim.matches(atom, th)
                 && !req.matches(atom, th)
                 && req.validate(atom, null, rules) == null) {
-            return ((AtomicValue) atom).withMetadata(req);
+            return atom.withMetadata(req);
             // TODO: else error?
         } else {
             return atom;
