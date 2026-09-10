@@ -15,8 +15,13 @@ XdmValue::XdmValue(const XdmValue &other) {
   valueType = other.valueType;
   refCount = 0;
   xdmSize = other.xdmSize;
-  jValues = other.jValues;
-  toStringValue = other.toStringValue;
+  if(other.jValues != SXN_UNSET) {
+    jValues = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.jValues);
+    if(jValues == SXN_EXCEPTION) {
+      throw SaxonApiException();
+    }
+  }
+  toStringValue = nullptr; // No longer used
   // values.resize(0);
   values_cap = other.values_cap;
   relinquished_values = new char[values_cap];

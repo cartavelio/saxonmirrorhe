@@ -21,28 +21,13 @@ XQueryProcessor::~XQueryProcessor() {
     std::cerr << "~XQueryProcessor destructor called: ob ref=" << (this)  << std::endl;
   }
   clearProperties();
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    std::cerr << "~XQueryProcessor properties cleared"  << std::endl;
-  }
   clearParameters();
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "~XQueryProcessor parameters cleared"  << std::endl;
-  }
   if (cppXQ != SXN_UNSET) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)cppXQ);
     cppXQ = SXN_UNSET;
   }
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "~XQueryProcessor j_handles_destroy finished"  << std::endl;
-  }
   cwdXQ.erase();
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "~XQueryProcessor cwdXQ erased"  << std::endl;
-  }
   exceptionClear();
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-      std::cerr << "~XQueryProcessor exceptions cleared"  << std::endl;
-  }
 }
 
 XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
@@ -57,14 +42,6 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
     throw SaxonApiException();
   }
 
-#ifdef DEBUG
-  // jmethodID debugMID =
-  // SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
-  // "setDebugMode", "(Z)V");
-  // SaxonProcessor::sxn_environ->env->CallStaticVoidMethod(cppClass, debugMID,
-  // (jboolean)true);
-#endif
-
   if (!(proc->cwd.empty()) && curr.empty()) {
     cwdXQ = proc->cwd;
   } else {
@@ -75,8 +52,10 @@ XQueryProcessor::XQueryProcessor(SaxonProcessor *p, std::string curr) {
 XQueryProcessor::XQueryProcessor(const XQueryProcessor &other) {
   cwdXQ = other.cwdXQ;
   proc = other.proc;
-
-  cppXQ = other.cppXQ;
+  cppXQ = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppXQ);
+  if(cppXQ == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
   std::map<std::string, XdmValue *>::const_iterator paramIter =
       other.parameters.begin();
   while (paramIter != other.parameters.end()) {

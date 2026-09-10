@@ -83,7 +83,6 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
   delete input;
 }
 
-
 // Test case of a user defined extension function in XPathProcessor.
 
 void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
@@ -104,19 +103,19 @@ void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
 
   xpath->setContextItem((XdmItem *)input);
   try {
-          xpath->declareNamespace("dy", "http://www.example.com");
+    xpath->declareNamespace("dy", "http://www.example.com");
     XdmItem *result = xpath->evaluateSingle("dy:myFunc(3)");
 
     if(result != nullptr) {
 
-        const char *resultStr = result->getStringValue();
-        fprintf(stdout, "Value of result from function= %s\n", resultStr);
-        fflush(stdout);
+      const char *resultStr = result->getStringValue();
+      fprintf(stdout, "Value of result from function= %s\n", resultStr);
+      fflush(stdout);
 
     }
 
-      fprintf(stdout, "Ran user defined function\n");
-      fflush(stdout);
+    fprintf(stdout, "Ran user defined function\n");
+    fflush(stdout);
     sresult->success++;
     delete result;
   } catch (SaxonApiException &e) {
@@ -128,6 +127,95 @@ void testUserExtensionFunction(SaxonProcessor *processor, XPathProcessor *xpath,
   xpath->clearParameters();
   xpath->clearProperties();
   delete input;
+}
+
+XdmNode *getRoot(XdmNode *document)
+{
+  XdmNode *root = nullptr;
+
+  XdmNode **children = document->getChildren();
+
+  if (children != nullptr)
+  {
+    int childCount = document->getChildCount();
+    bool found = false;
+    for (int i=0; i<childCount; i++)
+    {
+      XdmNode *child = children[i];
+      if (child != nullptr)
+      {
+        if (found)
+        {
+          delete child;
+        }
+        else if (child->getNodeKind() == XDM_NODE_KIND::ELEMENT)
+        {
+          //#if 0
+          /**
+           * ISSUE #4:
+           * If you make a copy of the node, calls to it return nullptrs
+           * or throw java NullPointerExceptions.
+           */
+          // Make a copy so we can pass it around
+          root = new XdmNode(*child);
+          delete child;
+          /*#else
+                              root = child;
+          #endif*/
+          found = true;
+        }
+      }
+    }
+    delete [] children;
+  }
+
+
+  return root;
+}
+
+void testCopyConstructorForXdmNode(SaxonProcessor *processor,
+                                         XPathProcessor *xpath,
+                                         sResultCount *sresult) {
+
+  cout << endl << "Test testCopyConstructorForXdmNode:" << endl;
+
+  std::string xml =
+    "<root root-attribute=\"root-attribute-data\">\n"
+    "  <first-child first-child-attribute=\"first-child-attribute-data\">\n"
+    "    first-child-data\n"
+    "  </first-child>\n"
+    "  <second-child second-child-attribute=\"second-child-attribute-data\">\n"
+    "    second-child-data\n"
+    "  </second-child>\n"
+    "  <third-child third-child-attribute=\"third-child-attribute-data\">\n"
+    "    third-child-data\n"
+    "  </third-child>\n"
+    "</root>\n";
+
+  // parser the XML
+  XdmNode *document = processor->parseXmlFromString(xml.c_str());
+
+  if(document == nullptr) {
+    delete document;
+    sresult->failure++;
+    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+    return;
+
+  }
+
+  XdmNode *root = getRoot(document);
+
+  if(root != nullptr) {
+    sresult->success++;
+    delete root;
+
+
+  } else {
+
+    sresult->failure++;
+    sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+  }
+  delete document;
 }
 
 void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
@@ -843,6 +931,13 @@ int main() {
      << "============================================================="
      << endl
      << endl;
+
+  testCopyConstructorForXdmNode(processor, xpathProc, sresult);
+
+  cout << endl
+   << "============================================================="
+   << endl
+   << endl;
 
   testUnprefixedElementMatchingPolicy(processor, xpathProc, sresult);
   cout << endl

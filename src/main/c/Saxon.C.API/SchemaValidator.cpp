@@ -38,7 +38,11 @@ SchemaValidator::SchemaValidator(const SchemaValidator &other) {
   exception = nullptr;
   lax = other.lax;
   cwdV = other.cwdV;
-  cppV = other.cppV;
+  cppV = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)other.cppV);
+  if(cppV == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
+
   outputFile = other.outputFile;
 
   std::map<std::string, XdmValue *>::const_iterator paramIter =

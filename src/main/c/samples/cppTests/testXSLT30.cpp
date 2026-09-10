@@ -249,6 +249,37 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor,
   delete input;
 }
 
+void testCopyProcessor(sResultCount *sresult) {
+
+  cout << "Test: testCopyProcessor:" << endl;
+  try {
+    SaxonProcessor *processor = new SaxonProcessor();
+    Xslt30Processor *xc = processor->newXslt30Processor();
+    SaxonProcessor *copyProcessor = new SaxonProcessor(* processor);
+    delete processor;
+    Xslt30Processor *xc2 = copyProcessor->newXslt30Processor();
+    XdmNode *input = nullptr;
+
+
+      input = copyProcessor->parseXmlFromFile("../data/cat.xml");
+
+      if(input != nullptr && xc2 != nullptr && xc != nullptr) {
+        sresult->success++;
+        delete input;
+      } else {
+
+        sresult->failure++;
+        sresult->failureList.push_back("testCopyProcessor");
+      }
+
+    } catch (SaxonApiException &e) {
+      sresult->failure++;
+      sresult->failureList.push_back("testCopyProcessor1");
+      cerr << "Error =" << e.what();
+      return;
+    }
+}
+
 void testPackageExport(SaxonProcessor *processor, Xslt30Processor *trans,
                        sResultCount *sresult) {
   try {

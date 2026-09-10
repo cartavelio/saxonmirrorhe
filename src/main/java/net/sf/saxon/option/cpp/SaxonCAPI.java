@@ -471,6 +471,24 @@ public class SaxonCAPI {
         return handle;
     }
 
+    /**
+     *  Create new copy of the Graalvm ObjectHandle for the Java object
+     * @param thread - IsolateThread
+     * @param handle - Java Object
+     * @return  ObjectHandle
+     */
+    @CEntryPoint(name = "j_copy_handles", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long copyHandle(IsolateThread thread, ObjectHandle handle) throws SaxonApiException {
+        if (handle != WordFactory.nullPointer()) {
+            if (debug) {
+                System.err.println("copyHandle method Class= " + (objectHandles.get(handle)).getClass().getName());
+            }
+            Object obj = objectHandles.get(handle);
+            return createHandle(obj).rawValue();
+        }
+        throw new SaxonApiException("Failed to copy Object");
+    }
+
 
     /**
      *  Get the length of the C char array
