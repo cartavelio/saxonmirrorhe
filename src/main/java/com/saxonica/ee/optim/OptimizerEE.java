@@ -96,11 +96,11 @@ public class OptimizerEE extends Optimizer {
         Sequence value1 = null;
 
         if (lhs instanceof Literal) {
-            value0 = ((Literal) lhs).getValue();
+            value0 = ((Literal) lhs).getGroundedValue();
         }
 
         if (rhs instanceof Literal) {
-            value1 = ((Literal) rhs).getValue();
+            value1 = ((Literal) rhs).getGroundedValue();
         }
 
         if (isOptionSet(OptimizerOptions.CONSTANT_FOLDING)) {
@@ -186,8 +186,8 @@ public class OptimizerEE extends Optimizer {
                      p0 == StandardNames.XS_UNTYPED_ATOMIC) &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 rhs instanceof Literal &&
-                ((Literal) rhs).getValue() instanceof StringValue &&
-                ((StringValue) ((Literal) rhs).getValue()).isZeroLength() &&
+                ((Literal) rhs).getGroundedValue() instanceof StringItem &&
+                ((StringItem) ((Literal) rhs).getGroundedValue()).isEmpty() &&
                 comparer instanceof CodepointCollatingComparer) {
 
             switch (vc.getOperator()) {
@@ -210,8 +210,8 @@ public class OptimizerEE extends Optimizer {
                      p1 == StandardNames.XS_UNTYPED_ATOMIC) &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 lhs instanceof Literal &&
-                ((Literal) lhs).getValue() instanceof StringValue &&
-                ((StringValue) ((Literal) lhs).getValue()).isZeroLength() &&
+                ((Literal) lhs).getGroundedValue() instanceof StringItem &&
+                ((StringItem) ((Literal) lhs).getGroundedValue()).isEmpty() &&
                 comparer instanceof CodepointCollatingComparer) {
 
             switch (vc.getOperator()) {
@@ -228,20 +228,20 @@ public class OptimizerEE extends Optimizer {
 
         // optimize comparison against an integer or string constant
 
-        if (value1 instanceof StringValue &&
+        if (value1 instanceof StringItem &&
                 lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 comparer instanceof CodepointCollatingComparer &&
                 isStringLike(lhs.getItemType())) {
-            return new CompareToStringConstant(lhs, vc.getOperator(), ((StringValue) value1).getStringValue());
+            return new CompareToStringConstant(lhs, vc.getOperator(), ((StringItem) value1).getUnicodeStringValue());
         }
 
-        if (value0 instanceof StringValue &&
+        if (value0 instanceof StringItem &&
                 rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
                 comparer instanceof CodepointCollatingComparer &&
                 isStringLike(rhs.getItemType())) {
-            return new CompareToStringConstant(rhs, Token.inverse(vc.getOperator()), ((StringValue) value0).getStringValue());
+            return new CompareToStringConstant(rhs, Token.inverse(vc.getOperator()), ((StringItem) value0).getUnicodeStringValue());
         }
 
         // optimize comparison against an integer literal
@@ -268,7 +268,7 @@ public class OptimizerEE extends Optimizer {
                 (lhs instanceof Literal || rhs instanceof Literal)) {
             Literal literal = (Literal) (lhs instanceof Literal ? lhs : rhs);
             Expression other = lhs instanceof Literal ? rhs : lhs;
-            boolean negate = (operator == Token.FEQ) != ((BooleanValue) literal.getValue()).getBooleanValue();
+            boolean negate = (operator == Token.FEQ) != ((BooleanValue) literal.getGroundedValue()).getBooleanValue();
             if (negate) {
                 Expression fn = SystemFunction.makeCall("not", vc.getRetainedStaticContext(), other);
                 assert fn != null;
@@ -334,7 +334,7 @@ public class OptimizerEE extends Optimizer {
         Expression sequence = countFn.getArg(0);
         sequence = sequence.unordered(true, false);
 
-        AtomicValue literalOperand = (AtomicValue) ((Literal) (inverted ? vc.getLhsExpression() : vc.getRhsExpression())).getValue();
+        AtomicValue literalOperand = (AtomicValue) ((Literal) (inverted ? vc.getLhsExpression() : vc.getRhsExpression())).getGroundedValue();
         int op = inverted ? Token.inverse(vc.getOperator()) : vc.getOperator();
 
         if (isZero(literalOperand)) {
@@ -458,12 +458,12 @@ public class OptimizerEE extends Optimizer {
                 if (gc.getAtomicComparer().getCollator() == null ||
                         gc.getAtomicComparer().getCollator() == CodepointCollator.getInstance()) {
                     // Optimize a test of the form ($X = (1, 7, 9, 10, 16, ....)) where the RHS is a constant list
-                    if (p1 instanceof Literal && ((Literal) p1).getValue().getLength() > 8) {
+                    if (p1 instanceof Literal && ((Literal) p1).getGroundedValue().getLength() > 8) {
                         Expression mapTest = makeMapTest(visitor, p0, (Literal) p1, contextItemType);
                         if (mapTest != null) {
                             return mapTest;
                         }
-                    } else if (p0 instanceof Literal && ((Literal) p0).getValue().getLength() > 8) {
+                    } else if (p0 instanceof Literal && ((Literal) p0).getGroundedValue().getLength() > 8) {
                         Expression mapTest = makeMapTest(visitor, p1, (Literal) p0, contextItemType);
                         if (mapTest != null) {
                             return mapTest;
@@ -496,21 +496,21 @@ public class OptimizerEE extends Optimizer {
         try {
             boolean allStrings = true;
             MapItem map;
-            for (Item item : literal.getValue().asIterable()) {
-                if (!(item instanceof StringValue)) {
+            for (Item item : literal.getGroundedValue().asIterable()) {
+                if (!(item instanceof StringItem)) {
                     allStrings = false;
                     break;
                 }
             }
             if (allStrings) {
                 DictionaryMap dict = new DictionaryMap();
-                for (Item item : literal.getValue().asIterable()) {
+                for (Item item : literal.getGroundedValue().asIterable()) {
                     dict.initialPut(item.getStringValue(), BooleanValue.TRUE);
                 }
                 map = dict;
             } else {
                 HashTrieMap trie = new HashTrieMap();
-                for (Item item : literal.getValue().asIterable()) {
+                for (Item item : literal.getGroundedValue().asIterable()) {
                     if (item instanceof AtomicValue) {
                         // if the values have complex comparison semantics, give up
                         if (item instanceof CalendarValue && !((CalendarValue) item).hasTimezone()) {
@@ -519,7 +519,7 @@ public class OptimizerEE extends Optimizer {
                         if (((AtomicValue) item).isNaN()) {
                             return null;
                         }
-                        if (item instanceof UntypedAtomicValue) {
+                        if (((AtomicValue)item).isUntypedAtomic()) {
                             return null;
                         }
                         trie.initialPut((AtomicValue) item, BooleanValue.TRUE);
@@ -1685,7 +1685,7 @@ public class OptimizerEE extends Optimizer {
                 return false;
             }
         }
-        AtomicValue value = (AtomicValue) ((Literal) rhs).getValue();
+        AtomicValue value = (AtomicValue) ((Literal) rhs).getGroundedValue();
         if (value instanceof CalendarValue) {
             // don't handle this case because of the problem of implicit timezones, especially if we want to export an XSLT package
             return false;

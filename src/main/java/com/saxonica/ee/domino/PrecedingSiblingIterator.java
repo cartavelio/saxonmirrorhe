@@ -14,11 +14,11 @@ import java.util.function.IntPredicate;
 
 final class PrecedingSiblingIterator implements AxisIterator {
 
-    private DominoTree document;
-    private DominoNode startNode;
+    private final DominoTree document;
+    private final DominoNode startNode;
     private int nextNodeNr;
-    private NodeTest test;
-    private DominoNode parentNode;
+    private final NodeTest test;
+    private final DominoNode parentNode;
     private final IntPredicate matcher;
 
     PrecedingSiblingIterator(DominoTree doc, /*@NotNull*/ DominoNode node, NodeTest nodeTest) {

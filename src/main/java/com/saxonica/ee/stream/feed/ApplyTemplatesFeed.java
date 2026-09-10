@@ -26,9 +26,9 @@ import net.sf.saxon.tree.iter.ManualIterator;
 
 public class ApplyTemplatesFeed extends ItemFeed {
 
-    private XPathContext localContext;
-    private ManualIterator manual;
-    private Component.M targetMode;
+    private final XPathContext localContext;
+    private final ManualIterator manual;
+    private final Component.M targetMode;
 
     public ApplyTemplatesFeed(ApplyTemplates expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);

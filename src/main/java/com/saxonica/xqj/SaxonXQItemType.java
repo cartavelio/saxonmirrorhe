@@ -29,8 +29,8 @@ import java.net.URISyntaxException;
  */
 public class SaxonXQItemType implements XQItemType {
 
-    /*@NotNull*/ private ItemType itemType;
-    /*@NotNull*/ private Configuration config;
+    /*@NotNull*/ private final ItemType itemType;
+    /*@NotNull*/ private final Configuration config;
 
     protected SaxonXQItemType(/*@NotNull*/ ItemType itemType, /*@NotNull*/ Configuration config) {
         this.itemType = itemType;

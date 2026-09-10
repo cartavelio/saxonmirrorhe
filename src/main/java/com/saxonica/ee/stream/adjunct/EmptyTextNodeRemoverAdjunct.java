@@ -51,16 +51,7 @@ public class EmptyTextNodeRemoverAdjunct extends StreamingAdjunct implements Fee
     public ItemFeed makeItemFeed(WatchManager watchManager, ItemFeed out, XPathContext context) throws XPathException {
           return new FilteringFeed(out, context,
                                    (item, position) ->
-                                           (!AdjacentTextNodeMerger.isTextNode(item) || item.getStringValueCS().length() != 0) ? FilteringFeed.Filter.MATCHES : FilteringFeed.Filter.SKIP);
-//        return new ItemFeed(getExpression(), out, context) {
-//
-//            @Override
-//            public void append(Item item) throws XPathException {
-//                if (!AdjacentTextNodeMerger.isTextNode(item) || item.getStringValueCS().length() != 0) {
-//                    getNextOutputter().append(item);
-//                }
-//            }
-//        };
+                                           (!AdjacentTextNodeMerger.isTextNode(item) || !item.getUnicodeStringValue().isEmpty()) ? FilteringFeed.Filter.MATCHES : FilteringFeed.Filter.SKIP);
     }
 }
 

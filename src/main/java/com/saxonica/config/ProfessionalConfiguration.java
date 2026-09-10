@@ -113,7 +113,7 @@ public class ProfessionalConfiguration extends Configuration {
     private transient HashMap<String, ExtensionElementFactory> xsltExtensionElementNamespaceMap;
     protected BuiltInFunctionSet vendorFunctionSet;
     // Static cache of JavaExternalObjectType objects representing Java classes
-    private HashMap<Class, JavaExternalObjectType> externalObjectTypeCache = new HashMap<>();
+    private final HashMap<Class, JavaExternalObjectType> externalObjectTypeCache = new HashMap<>();
 
 
     /**
@@ -547,7 +547,7 @@ public class ProfessionalConfiguration extends Configuration {
     public void displayLicenseMessage() {
         if (licenseNotFound) {
             if (isTiming()) {
-                getLogger().warning(
+                getLogger().info(
                         "No license file found - running with licensable features disabled");
             }
         } else {
@@ -559,7 +559,7 @@ public class ProfessionalConfiguration extends Configuration {
                 licenseFound = false;
                 licenseNotFound = true;
                 if (err.getReason() == LicenseException.NOT_FOUND) {
-                    getLogger().warning(
+                    getLogger().info(
                             "No license file found - running with licensable features disabled");
                     //new NullPointerException().printStackTrace();
                 } else {

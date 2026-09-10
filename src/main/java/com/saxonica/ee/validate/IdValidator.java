@@ -7,12 +7,15 @@ import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.number.AbstractNumberer;
 import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
@@ -37,14 +40,14 @@ public class IdValidator extends ValidatingFilter {
     // the set of ID values associated with the element, and we check this list to ensure that two
     // IDs associated with the same element are not considered to conflict.
 
-    private Stack<Set<String>> stack = new Stack<>();
+    private final Stack<Set<String>> stack = new Stack<>();
     private int level = 0;
-    private HashSet<String> idValues = new HashSet<>(100);
-    private HashSet<String> unresolvedRefs = new HashSet<>(100);
+    private final HashSet<String> idValues = new HashSet<>(100);
+    private final HashSet<String> unresolvedRefs = new HashSet<>(100);
     /*@Nullable*/ private IdValueChecker currentElementChecker = null;
-    private FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C64);
+    private final UnicodeBuilder buffer = new UnicodeBuilder();
     private Location textLocationId = Loc.NONE;
-    private Map<SchemaType, IdValueChecker> checkerMap = new HashMap<>(10);
+    private final Map<SchemaType, IdValueChecker> checkerMap = new HashMap<>(10);
 
     /**
      * Create a validator for ID/IDREF constraints
@@ -83,7 +86,7 @@ public class IdValidator extends ValidatingFilter {
                 checker = allocateChecker(type);
                 checkerMap.put(type, checker);
             }
-            checker.checkValue(att.getValue(), att.getLocation());
+            checker.checkValue(StringView.of(att.getValue()).tidy(), att.getLocation());
         }
 
         nextReceiver.startElement(elemName, typeCode, attributes, namespaces, location, properties);
@@ -94,9 +97,9 @@ public class IdValidator extends ValidatingFilter {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (currentElementChecker != null) {
-            buffer.cat(chars);
+            buffer.append(chars);
         }
         nextReceiver.characters(chars, locationId, properties);
         textLocationId = locationId;
@@ -111,9 +114,9 @@ public class IdValidator extends ValidatingFilter {
         level--;
         stack.pop();
         if (currentElementChecker != null) {
-            currentElementChecker.checkValue(buffer, textLocationId);
+            currentElementChecker.checkValue(buffer.toUnicodeString(), textLocationId);
         }
-        buffer.setLength(0);
+        buffer.clear();
         currentElementChecker = null;
         nextReceiver.endElement();
     }
@@ -339,7 +342,7 @@ public class IdValidator extends ValidatingFilter {
          * @throws XPathException if the value is invalid
          */
 
-        void checkValue(CharSequence value, Location locationId) throws XPathException;
+        void checkValue(UnicodeString value, Location locationId) throws XPathException;
     }
 
     /**
@@ -348,8 +351,8 @@ public class IdValidator extends ValidatingFilter {
 
     private class SimpleIdChecker implements IdValueChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) throws XPathException {
-            String id = Whitespace.trimWhitespace(value).toString();
+        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
+            String id = Whitespace.trim(value).toString();
             processId(id, locationId);
         }
     }
@@ -360,8 +363,8 @@ public class IdValidator extends ValidatingFilter {
 
     private class SimpleIdrefChecker implements IdValueChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) {
-            String id = Whitespace.trimWhitespace(value).toString();
+        public void checkValue(UnicodeString value, Location locationId) {
+            String id = Whitespace.trim(value).toString();
             // If the value is empty, it must be nilled: see bug #2301
             if (!id.isEmpty() && !idValues.contains(id)) {
                 unresolvedRefs.add(id);
@@ -376,7 +379,7 @@ public class IdValidator extends ValidatingFilter {
 
     private class IdListChecker implements IdValueChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) throws XPathException {
+        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
             while (tok.hasMoreTokens()) {
@@ -393,7 +396,7 @@ public class IdValidator extends ValidatingFilter {
 
     private class IdrefListChecker implements IdValueChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) {
+        public void checkValue(UnicodeString value, Location locationId) {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
             while (tok.hasMoreTokens()) {
@@ -411,14 +414,14 @@ public class IdValidator extends ValidatingFilter {
      */
 
     private class UnionChecker implements IdValueChecker {
-        private SimpleType type;
+        private final SimpleType type;
 
         UnionChecker(SimpleType type) {
             this.type = type;
         }
 
         @Override
-        public void checkValue(CharSequence value, Location locationId) throws XPathException {
+        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
             Configuration config = getConfiguration();
             TypeHierarchy th = config.getTypeHierarchy();
             AtomicSequence typedValue = type.getTypedValue(
@@ -443,12 +446,12 @@ public class IdValidator extends ValidatingFilter {
 
     private static class NonIdChecker implements IdValueChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) {
+        public void checkValue(UnicodeString value, Location locationId) {
             // do nothing
         }
     }
 
-    private static NonIdChecker SINGLETON_NON_ID_CHECKER = new NonIdChecker();
+    private static final NonIdChecker SINGLETON_NON_ID_CHECKER = new NonIdChecker();
 
 }
 

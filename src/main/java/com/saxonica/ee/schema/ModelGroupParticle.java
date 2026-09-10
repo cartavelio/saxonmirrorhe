@@ -291,7 +291,7 @@ public class ModelGroupParticle extends Particle {
     /**
      * Compile a particle
      *
-     * @param compiler the schema compiler
+     * @param compiler the schema compmiler
      */
 
     @Override

@@ -6,7 +6,7 @@ import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.TypeAliasManager;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 
 import java.util.*;
@@ -19,10 +19,10 @@ import java.util.*;
 public class TypeAliasManagerPE extends TypeAliasManager {
 
     // map of type aliases (Saxon extension)
-    private Map<StructuredQName, ComponentDeclaration> unresolvedDeclarations =
+    private final Map<StructuredQName, ComponentDeclaration> unresolvedDeclarations =
             new HashMap<>();
 
-    private Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
+    private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
 
     @Override
     public void registerTypeAlias(StructuredQName name, ItemType type) {
@@ -55,11 +55,11 @@ public class TypeAliasManagerPE extends TypeAliasManager {
                 processDeclaration(decl);
             }
             if (unresolvedDeclarations.size() >= unresolved) {
-                FastStringBuffer fsb = new FastStringBuffer(256);
+                StringBuilder fsb = new StringBuilder(256);
                 fsb.append("Cannot resolve all type aliases, because of missing or circular definitions. Unresolved names: ");
                 for (StructuredQName name : unresolvedDeclarations.keySet()) {
                     fsb.append(name.getDisplayName());
-                    fsb.cat(' ');
+                    fsb.append(' ');
                 }
                 throw new XPathException(fsb.toString(), SaxonErrorCode.SXTA0001);
             }

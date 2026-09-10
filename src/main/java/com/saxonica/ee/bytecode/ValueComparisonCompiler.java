@@ -7,7 +7,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollatingComparer;
-import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.ComparableAtomicValueComparer;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -16,7 +15,7 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -102,7 +101,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
         LabelInfo returnTrue = methodInfo.newLabel("returnTrueValueComp");
         //LabelInfo returnNullItem = methodInfo.newLabel("returnNullItem");
         LabelInfo returnEmpty = null;
-        Stack<Class> stack = new Stack<Class>();
+        Stack<Class> stack = new Stack<>();
 
 
         boolean finished = false;
@@ -160,36 +159,36 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                 ga.ifCmp(Type.FLOAT_TYPE, translateOperator(op), returnTrue.label());
                 ga.goTo(returnFalse);
                 finished = true;
-            } else if (type0 == BuiltInAtomicType.STRING && comparer instanceof CodepointCollatingComparer) {
-                switch (op) {
-                    case Token.FEQ:
-                    case Token.FNE:
-                        compiler.compileToPrimitive(lhs, String.class, toItem ? onEmptyItem : onEmptyBoolean);
-                        stack.push(String.class);
-                        compiler.compileToPrimitive(rhs, String.class, toItem ? onEmptyItem : onEmptyBoolean);
-                        ga.invokeInstanceMethod(String.class, "equals", Object.class);
-                        if (op == Token.FNE) {
-                            ga.not();
-                        }
-                        ga.goTo(done);
-                        break;
-                    case Token.FGT:
-                    case Token.FLT:
-                    case Token.FGE:
-                    case Token.FLE:
-                        compiler.compileToPrimitive(lhs, CharSequence.class, toItem ? onEmptyItem : onEmptyBoolean);
-                        stack.push(CharSequence.class);
-                        compiler.compileToPrimitive(rhs, CharSequence.class, toItem ? onEmptyItem : onEmptyBoolean);
-                        ga.invokeStaticMethod(CodepointCollator.class, "compareCS", CharSequence.class, CharSequence.class);
-                        ga.ifZCmp(translateOperator(op), returnTrue.label());
-                        ga.goTo(returnFalse);
-
-                        break;
-                    default:
-                        throw new IllegalStateException("unknown operator");
-
-                }
-                finished = true;
+//            } else if (type0 == BuiltInAtomicType.STRING && comparer instanceof CodepointCollatingComparer) {
+//                switch (op) {
+//                    case Token.FEQ:
+//                    case Token.FNE:
+//                        compiler.compileToPrimitive(lhs, String.class, toItem ? onEmptyItem : onEmptyBoolean);
+//                        stack.push(String.class);
+//                        compiler.compileToPrimitive(rhs, String.class, toItem ? onEmptyItem : onEmptyBoolean);
+//                        ga.invokeInstanceMethod(String.class, "equals", Object.class);
+//                        if (op == Token.FNE) {
+//                            ga.not();
+//                        }
+//                        ga.goTo(done);
+//                        break;
+//                    case Token.FGT:
+//                    case Token.FLT:
+//                    case Token.FGE:
+//                    case Token.FLE:
+//                        compiler.compileToPrimitive(lhs, CharSequence.class, toItem ? onEmptyItem : onEmptyBoolean);
+//                        stack.push(CharSequence.class);
+//                        compiler.compileToPrimitive(rhs, CharSequence.class, toItem ? onEmptyItem : onEmptyBoolean);
+//                        ga.invokeStaticMethod(CodepointCollator.class, "compareCS", CharSequence.class, CharSequence.class);
+//                        ga.ifZCmp(translateOperator(op), returnTrue.label());
+//                        ga.goTo(returnFalse);
+//
+//                        break;
+//                    default:
+//                        throw new IllegalStateException("unknown operator");
+//
+//                }
+//                finished = true;
 
             }
 /*            if (toItem && finished) {
@@ -332,10 +331,10 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                     case Token.FEQ:
                     case Token.FNE:
                         ga.loadLocal(op0Var);
-                        ga.checkClass(StringValue.class);
+                        ga.checkClass(StringItem.class);
                         ga.loadLocal(op1Var);
-                        ga.checkClass(StringValue.class);
-                        ga.invokeInstanceMethod(StringValue.class, "codepointEquals", StringValue.class);
+                        ga.checkClass(StringItem.class);
+                        ga.invokeInstanceMethod(Object.class, "equals", Object.class);
                         if (op == Token.FNE) {
                             ga.not();
                         }
@@ -345,18 +344,11 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                     case Token.FLT:
                     case Token.FGE:
                     case Token.FLE:
-                        // We previously tested both strings for containsSurrogatePairs()
-                        // but performance improved substantially when this test was removed (2011-06-12)
-
                         ga.loadLocal(op0Var);
-                        ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
                         ga.loadLocal(op1Var);
-                        ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
-                        ga.invokeStaticMethod(CodepointCollator.class, "compareCS", CharSequence.class, CharSequence.class);
-
+                        ga.invokeInstanceMethod(StringItem.class, "compareTo", StringItem.class);
                         ga.ifZCmp(translateOperator(op), returnTrue.label());
                         ga.goTo(returnFalse);
-
                         break;
                     default:
                         throw new IllegalStateException("unknown operator");

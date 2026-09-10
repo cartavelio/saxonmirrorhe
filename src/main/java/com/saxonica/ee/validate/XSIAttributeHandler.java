@@ -12,10 +12,11 @@ import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XmlProcessingIncident;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Whitespace;
@@ -37,10 +38,10 @@ import java.util.*;
 
 public class XSIAttributeHandler extends ValidatingFilter {
 
-    private HashSet<String> namespacesEncountered;
-    private HashMap<String, URI> schemaDocumentsRead;
+    private final HashSet<String> namespacesEncountered;
+    private final HashMap<String, URI> schemaDocumentsRead;
     private boolean useXsiSchemaLocation = true;
-    private List<ValidationFailure> xsiValidationErrors = new ArrayList<ValidationFailure>(4);
+    private final List<ValidationFailure> xsiValidationErrors = new ArrayList<ValidationFailure>(4);
 
     /**
      * Create a handler for xsi: attributes
@@ -239,7 +240,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
     private boolean processXsiNil(String value) {
         // check that it is a valid boolean
-        ConversionResult v = StringConverter.StringToBoolean.INSTANCE.convertString(value);
+        ConversionResult v = StringConverter.StringToBoolean.INSTANCE.convertString(StringView.of(value).tidy());
         if (v instanceof ValidationFailure) {
             String message = "The value of xsi:nil must be a boolean";
             ValidationFailure ve = new ValidationFailure(message);
@@ -261,7 +262,7 @@ public class XSIAttributeHandler extends ValidatingFilter {
     private SchemaType processXsiType(String value, NamespaceResolver nsResolver) {
         final Configuration config = getConfiguration();
         try {
-            StructuredQName qName = StructuredQName.fromLexicalQName(value, true, false, nsResolver);
+            StructuredQName qName = StructuredQName.fromLexicalQName((value), true, false, nsResolver);
             SchemaType type = config.getSchemaType(qName);
 
             if (type == null) {

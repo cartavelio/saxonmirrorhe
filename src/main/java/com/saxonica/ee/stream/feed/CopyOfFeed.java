@@ -23,6 +23,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -45,7 +46,7 @@ import java.util.Map;
 
 public class CopyOfFeed extends AbsorptionFeed {
 
-    private WatchManager watchManager;
+    private final WatchManager watchManager;
     private boolean copyNamespaces = true;
     private boolean copyAccumulators = true;
     private int validation = Validation.PRESERVE;
@@ -150,7 +151,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                 Orphan orphan = new Orphan(config);
                 orphan.setNodeKind((short) node.getNodeKind());
                 orphan.setNodeName(NameOfNode.makeName(node));
-                orphan.setStringValue(item.getStringValue());
+                orphan.setStringValue(item.getUnicodeStringValue());
                 orphan.setTypeAnnotation(node.getSchemaType());
                 if (validation != Validation.PRESERVE || type != null) {
                     if (type != null && !type.isSimpleType()) {
@@ -232,7 +233,7 @@ public class CopyOfFeed extends AbsorptionFeed {
     }
 
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         getNextOutputter().attribute(attName, typeCode, value, location, properties);
     }
 
@@ -247,17 +248,17 @@ public class CopyOfFeed extends AbsorptionFeed {
     }
 
     @Override
-    public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
         getNextOutputter().characters(chars, location, properties);
     }
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
         getNextOutputter().processingInstruction(name, data, location, properties);
     }
 
     @Override
-    public void comment(CharSequence content, Location location, int properties) throws XPathException {
+    public void comment(CodePoints content, Location location, int properties) throws XPathException {
         getNextOutputter().comment(content, location, properties);
     }
 
@@ -275,7 +276,7 @@ public class CopyOfFeed extends AbsorptionFeed {
     private class PendingCopyAction extends PendingItem {
         private TinyBuilder builder;
         private Receiver destination;
-        private FleetingParentNode rootOfCopy;
+        private final FleetingParentNode rootOfCopy;
 
         public PendingCopyAction(int sequence, FleetingParentNode node) {
             super(sequence);
@@ -409,9 +410,9 @@ public class CopyOfFeed extends AbsorptionFeed {
 
     public static class AccumulatorCopier extends ProxyReceiver {
 
-        private WatchManager watchManager;
-        private TinyBuilder builder;
-        private Map<Accumulator, CopiedAccumulatorData> dataMap = new HashMap<>();
+        private final WatchManager watchManager;
+        private final TinyBuilder builder;
+        private final Map<Accumulator, CopiedAccumulatorData> dataMap = new HashMap<>();
 
         public AccumulatorCopier(WatchManager watchManager, Receiver next, TinyBuilder builder) {
             super(next);
@@ -478,9 +479,9 @@ public class CopyOfFeed extends AbsorptionFeed {
 
     private static class CopiedAccumulatorData implements IAccumulatorData {
 
-        private Accumulator accumulator;
-        private IntHashMap<Sequence> preDescentValues = new IntHashMap<>();
-        private IntHashMap<Sequence> postDescentValues = new IntHashMap<>();
+        private final Accumulator accumulator;
+        private final IntHashMap<Sequence> preDescentValues = new IntHashMap<>();
+        private final IntHashMap<Sequence> postDescentValues = new IntHashMap<>();
 
         public CopiedAccumulatorData(Accumulator acc) {
             this.accumulator = acc;

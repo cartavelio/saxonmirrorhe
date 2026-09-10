@@ -2,11 +2,14 @@ package com.saxonica.ee.validate;
 
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SingleAtomicIterator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Iterator;
 
@@ -25,17 +28,17 @@ public class CompactStringValue implements AtomicSequence {
     // using this class, but is problematic in the more general case. For the moment, getting the storage down to a
     // single char[] is a big win over 9.5 and earlier releases.
 
-    public CompactStringValue(String content) {
-        this.value = content.toCharArray();
+    public CompactStringValue(CodePoints content) {
+        this.value = content.toString().toCharArray();
     }
 
     @Override
-    public StringValue head() {
-        return new StringValue(new String(value));
+    public StringItem head() {
+        return new StringItem(new String(value));
     }
 
     @Override
-    public AtomicIterator<StringValue> iterate() {
+    public AtomicIterator<StringItem> iterate() {
         return new SingleAtomicIterator<>(head());
     }
 
@@ -50,8 +53,8 @@ public class CompactStringValue implements AtomicSequence {
     }
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        return head().getStringValueCS();
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        return getUnicodeStringValue();
     }
 
     @Override
@@ -60,13 +63,13 @@ public class CompactStringValue implements AtomicSequence {
     }
 
     @Override
-    public CharSequence getStringValueCS() {
-        return head().getStringValueCS();
+    public UnicodeString getUnicodeStringValue() {
+        return StringView.of(new String(value)).tidy();
     }
 
     @Override
-    public String getStringValue() {
-        return head().getStringValue();
+    public String getStringValue() throws XPathException {
+        return new String(value);
     }
 
     @Override
@@ -91,7 +94,7 @@ public class CompactStringValue implements AtomicSequence {
 
     /*@NotNull*/
     public String toString() {
-        return "\"" + new String(value) + '\"';
+        return new String(value);
     }
 
 }

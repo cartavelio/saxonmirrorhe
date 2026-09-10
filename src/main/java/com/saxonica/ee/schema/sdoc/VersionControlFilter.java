@@ -3,18 +3,24 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.Facet;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.*;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.event.ProxyReceiver;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.BuiltInType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BigDecimalValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.Whitespace;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
  * This is a filter inserted into the input pipeline for processing schema documents, whose
@@ -25,12 +31,12 @@ import java.util.StringTokenizer;
 
 public class VersionControlFilter extends ProxyReceiver {
 
-    private SchemaCompiler compiler;
+    private final SchemaCompiler compiler;
     private int depthOfHole = 0;
     private boolean emptySchemaElement = false;
 
-    private BigDecimalValue thisVersion;
-    private boolean isXSD11;
+    private final BigDecimalValue thisVersion;
+    private final boolean isXSD11;
     private boolean foundErrors;
 
 
@@ -165,7 +171,7 @@ public class VersionControlFilter extends ProxyReceiver {
         }
     }
 
-    private static FingerprintedQName XS_SCHEMA =
+    private static final FingerprintedQName XS_SCHEMA =
             new FingerprintedQName("xs", NamespaceConstant.SCHEMA, "schema", StandardNames.XS_SCHEMA & NamePool.FP_MASK);
 
 
@@ -187,7 +193,7 @@ public class VersionControlFilter extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (depthOfHole == 0) {
             nextReceiver.characters(chars, locationId, properties);
         }
@@ -198,7 +204,7 @@ public class VersionControlFilter extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) {
         // these are ignored in a schema document
     }
 
@@ -207,7 +213,7 @@ public class VersionControlFilter extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         // these are ignored in a schema document
     }
 
@@ -247,10 +253,10 @@ public class VersionControlFilter extends ProxyReceiver {
     private Set<StructuredQName> parseListOfQNames(String value, NamespaceResolver resolver)
             throws XPathException {
         Set<StructuredQName> result = new HashSet<>(4);
-        StringTokenizer tokenizer = new StringTokenizer(value, " \t\n\r", false);
-        while (tokenizer.hasMoreTokens()) {
-            String tok = tokenizer.nextToken();
-            StructuredQName val = StructuredQName.fromLexicalQName(tok, true, false, resolver);
+        Whitespace.Tokenizer tokenizer = new Whitespace.Tokenizer(StringView.tidy(value));
+        StringItem tok;
+        while ((tok = tokenizer.next()) != null) {
+            StructuredQName val = StructuredQName.fromLexicalQName(tok.getStringValue(), true, false, resolver);
             result.add(val);
         }
         return result;

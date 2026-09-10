@@ -10,7 +10,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
 
@@ -31,7 +31,7 @@ public class ObjectLookupExpression extends LookupExpression {
     public final ItemType getItemType() {
         ItemType objectType = getLhsExpression().getItemType();
         if (objectType instanceof JavaExternalObjectType && getRhsExpression() instanceof StringLiteral) {
-            String fieldName = ((StringLiteral) getRhsExpression()).getStringValue();
+            String fieldName = ((StringLiteral) getRhsExpression()).stringify();
             Map<String, Function> methodMap =
                     getConfiguration().makeMethodMap(((JavaExternalObjectType) objectType).getJavaClass(), fieldName);
             Function f = methodMap.get(fieldName);
@@ -68,7 +68,7 @@ public class ObjectLookupExpression extends LookupExpression {
             ItemType containerType = getLhsExpression().getItemType();
             JavaExternalObjectType target = (JavaExternalObjectType) containerType;
             Class<?> theClass = target.getJavaClass();
-            String methodName = ((StringLiteral) getRhsExpression()).getStringValue();
+            String methodName = ((StringLiteral) getRhsExpression()).stringify();
             if (methodName.equals("this")) {
                 // test case QT3extra reflex-055; we should optimize this
                 return this;
@@ -142,9 +142,9 @@ public class ObjectLookupExpression extends LookupExpression {
             });
         } else {
             GroundedValue rhs = getRhsExpression().iterate(context).materialize();
-            String key = rhs.getStringValue();
+            String key = rhs.getUnicodeStringValue().toString();
             return new ItemMappingIterator(baseIterator,
-                                             item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringValue) rhs));
+                                             item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringItem) rhs));
         }
 
     }

@@ -51,14 +51,14 @@ import java.util.*;
 
 public class ForEachGroupParallelAction extends ForEachAction {
 
-    private HashMap<List<AtomicMatchKey>, GroupInfo> groups = new HashMap<List<AtomicMatchKey>, GroupInfo>();
-    private List<GroupInfo> groupList = new ArrayList<GroupInfo>(); // retains groups in order of first appearance
+    private final HashMap<List<AtomicMatchKey>, GroupInfo> groups = new HashMap<List<AtomicMatchKey>, GroupInfo>();
+    private final List<GroupInfo> groupList = new ArrayList<GroupInfo>(); // retains groups in order of first appearance
     private int groupSequence = 1;
-    private XPathContext populationContext;
-    private StringCollator collator;
-    private int implicitTimezone;
+    private final XPathContext populationContext;
+    private final StringCollator collator;
+    private final int implicitTimezone;
     private ItemFeed currentItemFeed;
-    private boolean compositeKeys;
+    private final boolean compositeKeys;
     private NodeInfo anchorNode;
 
     // Information held for each group being processed
@@ -120,7 +120,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
      * any attributes selected by the last step in the selection are ignored
      *
      * @throws XPathException if a dynamic error occurs while processing the start-element event
-     * @return a receiver that collects the contents of the selected node, or null
+     * @return
      */
 
     /*@Nullable*/
@@ -352,7 +352,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
 
     private static class ForkingFeed extends ItemFeed {
 
-        private List<ItemFeed> prongs;
+        private final List<ItemFeed> prongs;
 
         public ForkingFeed(List<ItemFeed> prongs, ItemFeed result, XPathContext context) {
             super(result, context);
@@ -386,7 +386,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
                 if (r != null) {
                     result = result == null ? r : new TeeOutputter(result, r);
                 }
-            };
+            }
             return result;
         }
 

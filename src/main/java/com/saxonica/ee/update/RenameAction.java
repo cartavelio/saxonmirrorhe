@@ -13,8 +13,8 @@ import java.util.Set;
  */
 public class RenameAction extends PendingUpdateAction {
 
-    private NodeInfo node;
-    private NodeName newName;
+    private final NodeInfo node;
+    private final NodeName newName;
 
     /**
      * Create a RenameAction

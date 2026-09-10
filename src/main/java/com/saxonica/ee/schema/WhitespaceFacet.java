@@ -1,15 +1,14 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringValue;
 
 /**
  * Represents a whitespace facet on a schema-defined simple type
@@ -58,14 +57,14 @@ public class WhitespaceFacet extends Facet {
 
     /*@Nullable*/
     @Override
-    public String getValue() {
+    public UnicodeString getValue() {
         switch (action) {
             case Whitespace.PRESERVE:
-                return "preserve";
+                return BMPString.of("preserve");
             case Whitespace.REPLACE:
-                return "replace";
+                return BMPString.of("replace");
             case Whitespace.COLLAPSE:
-                return "collapse";
+                return BMPString.of("collapse");
         }
         return null;
     }
@@ -137,18 +136,18 @@ public class WhitespaceFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue(getName());
+                        return new StringItem(getName());
                     case "implementation":
                         return new ObjectValue<>(WhitespaceFacet.this);
                     case "value":
                         switch (action) {
                             case Whitespace.PRESERVE:
                             default:
-                                return new StringValue("preserve");
+                                return StringItem.bmp("preserve");
                             case Whitespace.COLLAPSE:
-                                return new StringValue("collapse");
+                                return StringItem.bmp("collapse");
                             case Whitespace.REPLACE:
-                                return new StringValue("replace");
+                                return StringItem.bmp("replace");
                         }
                     case "fixed":
                         return BooleanValue.get(isFixed());

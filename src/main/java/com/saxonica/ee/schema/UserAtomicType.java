@@ -11,6 +11,7 @@ import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -230,7 +231,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
 
     @Override
     public boolean isOrdered(boolean optimistic) {
-        return ((AtomicType) getPrimitiveItemType()).isOrdered(false);
+        return getPrimitiveItemType().isOrdered(false);
     }
 
 
@@ -268,7 +269,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
                 }
             } else {
                 // converter to user-defined types derived from types other than xs:string
-                StringConverter first = ((AtomicType) getPrimitiveItemType()).getStringConverter(rules);
+                StringConverter first = getPrimitiveItemType().getStringConverter(rules);
                 Converter.DownCastingConverter second = new Converter.DownCastingConverter(this, rules);
                 sc = new StringConverter.StringToNonStringDerivedType(first, second);
             }
@@ -397,7 +398,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     /*@Nullable*/
     @Override
     public ValidationFailure validateContent(
-            /*@NotNull*/ CharSequence value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+            /*@NotNull*/ UnicodeString value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
 //#if BYTECODE == true
         if (compiledValidator != null) {
             if (rules == compiledConversionRules) {
@@ -450,7 +451,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      */
 
     @Override
-    public AtomicValue getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
+    public AtomicValue getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         StringConverter converter = getStringConverter(rules);
         assert converter != null;
@@ -486,7 +487,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
             if (Type.isPrimitiveAtomicType(getFingerprint())) {
                 return this;
             }
-            getConfiguration().getLogger().warning("Internal failure on type " + getDescription());
+            getConfiguration().getLogger().info("Internal failure on type " + getDescription());
             throw err;
         }
     }
@@ -634,7 +635,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      */
 
     @Override
-    public ValidationFailure validate(AtomicValue primValue, CharSequence lexicalValue, ConversionRules rules) {
+    public ValidationFailure validate(AtomicValue primValue, UnicodeString lexicalValue, ConversionRules rules) {
         BuiltInAtomicType base = (BuiltInAtomicType) getBuiltInBaseType();
         if (!base.isPrimitiveType()) {
             ValidationFailure vf = base.validate(primValue, lexicalValue, rules);
@@ -652,7 +653,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     @Override
     public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
         serializer.emitAttribute("variety", "atomic");
-        serializer.emitAttribute("primitiveType", "#" + ((AtomicType) getPrimitiveItemType()).getName());
+        serializer.emitAttribute("primitiveType", "#" + getPrimitiveItemType().getName());
     }
 
     /**

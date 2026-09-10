@@ -600,11 +600,11 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue("Model Group");
+                        return StringItem.bmp("Model Group");
                     case "implementation":
                         return new ObjectValue<>(ModelGroup.this);
                     case "compositor":
-                        return new StringValue(getCompositorName());
+                        return new StringItem(getCompositorName());
                     case "particles":
                         List<Function> particles = new ArrayList<>();
                         for (Particle p : getParticles()) {

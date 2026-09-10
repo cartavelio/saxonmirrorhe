@@ -4,6 +4,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -12,7 +13,7 @@ import net.sf.saxon.type.SimpleType;
  * An AtomicItemFeed is an ItemFeed in which the only allowed event is {@link #append(Item)}
  * passing an atomic value. All other events result in an {@link IllegalStateException}. This
  * is appropriate for feeds implementing expressions that atomize their operands, since the
- * compiler should ensure that only atomic values are delivered to such expressions.
+ * compiler should ensure that only atomic values are delivered to such expressions.</p>
  */
 
 public abstract class AtomicItemFeed extends ItemFeed {
@@ -55,7 +56,7 @@ public abstract class AtomicItemFeed extends ItemFeed {
     }
 
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         notAllowed();
     }
 
@@ -70,17 +71,17 @@ public abstract class AtomicItemFeed extends ItemFeed {
     }
 
     @Override
-    public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
         notAllowed();
     }
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
         notAllowed();
     }
 
     @Override
-    public void comment(CharSequence content, Location location, int properties) throws XPathException {
+    public void comment(CodePoints content, Location location, int properties) throws XPathException {
         notAllowed();
     }
 

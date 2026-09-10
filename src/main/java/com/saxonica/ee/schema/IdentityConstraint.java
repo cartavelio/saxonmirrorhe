@@ -4,13 +4,12 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -182,7 +181,7 @@ public abstract class IdentityConstraint extends SchemaStructure
         String err = null;
 
         //-- name must be a NCName
-        if (!NameChecker.isValidNCName(getName())) {
+        if (!NameChecker.isValidNCName(StringTool.codePoints(getName()))) {
             err = "The name of an IdentityConstraint must be an NCName.";
         }
         //-- selector must exist
@@ -328,16 +327,16 @@ public abstract class IdentityConstraint extends SchemaStructure
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Identity-Constraint Definition");
+                    return StringItem.bmp("Identity-Constraint Definition");
                 case "implementation":
                     return new ObjectValue<>(this);
                 case "name":
-                    return new StringValue(getName(), BuiltInAtomicType.NCNAME);
+                    return new StringItem(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
-                    return new AnyURIValue(getTargetNamespace());
+                    return new AnyURIValue((getTargetNamespace()));
                 case "identity-constraint category":
                     String kind = IdentityConstraint.this.getConstraintCategory();
-                    return new StringValue(kind);
+                    return new StringItem(kind);
                 case "selector":
                     IdentitySelector selector = getSelector();
                     return SchemaStructure.makeXPathExpressionPropertyRecord(

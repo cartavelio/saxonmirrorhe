@@ -173,7 +173,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
                                                                   "case", loader.getConfiguration().getNamePool());
             for (NodeInfo aCase : element.children(condition)) {
                 Expression val = loader.getFirstChildExpression(aCase);
-                AtomicValue av = (AtomicValue) ((Literal) val).getValue();
+                AtomicValue av = (AtomicValue) ((Literal) val).getGroundedValue();
                 info.values.add(av);
                 info.actions.add(loader.getSecondChildExpression(aCase));
             }

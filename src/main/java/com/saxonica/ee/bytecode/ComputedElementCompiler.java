@@ -12,7 +12,7 @@ import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 import org.objectweb.asm.Type;
 
@@ -67,7 +67,8 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         ga.goTo(end);
         methodInfo.placeLabel(notNull);
         ga.dup();
-        ga.ifNotInstance(StringValue.class, notStrInstance);
+        ga.ifNotInstance(StringItem.class, notStrInstance);
+
         ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
         ga.invokeStaticMethod(Whitespace.class, "trimWhitespace", CharSequence.class);
         ga.invokeInstanceMethod(CharSequence.class, "toString");
@@ -181,7 +182,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
             ga.loadLocal(uriVar);
             ga.ifNonNull(uriNotNull.label());
             if (namespace instanceof StringLiteral) {
-                ga.push(((StringLiteral) namespace).getStringValue());
+                ga.push(((StringLiteral) namespace).stringify());
                 ga.storeLocal(uriVar);
 
             } else {

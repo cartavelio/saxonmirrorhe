@@ -120,7 +120,7 @@ public class XMarkBenchmark {
      *             <dt>-size:N</dt><dd>Run only on size=N Mb files</dd>
      *             </dl>
      */
-    public static void main(String argv[]) throws Exception {
+    public static void main(String[] argv) throws Exception {
         XMarkBenchmark xmark = new XMarkBenchmark();
         xmark.go(argv);
 

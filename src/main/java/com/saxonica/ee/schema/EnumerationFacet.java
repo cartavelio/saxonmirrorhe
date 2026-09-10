@@ -4,11 +4,13 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.AtomicValue;
 
@@ -20,7 +22,7 @@ import net.sf.saxon.value.AtomicValue;
  */
 public class EnumerationFacet extends Facet {
 
-    private String value;
+    private UnicodeString value;
     private AtomicSequence typedValue;
 
     /**
@@ -47,7 +49,7 @@ public class EnumerationFacet extends Facet {
      */
 
     @Override
-    public String getValue() {
+    public UnicodeString getValue() {
         return value;
     }
 
@@ -69,7 +71,7 @@ public class EnumerationFacet extends Facet {
      */
 
     public void setValue(String value) {
-        this.value = value;
+        this.value = StringView.of(value).tidy();
     }
 
     /**
@@ -121,7 +123,7 @@ public class EnumerationFacet extends Facet {
             if (namespaceContext == null && base.isNamespaceSensitive()) {
                 throw new SchemaException("No namespace context available for checking enumeration QName");
             }
-            ValidationFailure err = base.validateContent(getValue(), namespaceContext, rules);
+            ValidationFailure err = base.validateContent((getValue()), namespaceContext, rules);
             if (err != null) {
                 throw new SchemaException("Enumeration value " + Err.wrap(value) +
                         " is not permitted by the base type " + base.getDescription() + ": " + err.getMessage());

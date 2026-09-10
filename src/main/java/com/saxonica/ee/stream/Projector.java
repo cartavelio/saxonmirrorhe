@@ -7,6 +7,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -21,16 +22,16 @@ import java.util.Stack;
  */
 public class Projector extends ProxyReceiver {
 
-    private Stack pathPositionStack;    // entries on this stack are instances of PathMap.PathMapNodeSet
-    private Stack isCopiedStack;        // entries are booleans to indicate whether the start tag was copied
+    private final Stack pathPositionStack;    // entries on this stack are instances of PathMap.PathMapNodeSet
+    private final Stack isCopiedStack;        // entries are booleans to indicate whether the start tag was copied
     private int level = 0;
     private int copyAllLevel = Integer.MAX_VALUE;
     private int inputNodes = 0;
     private int outputNodes = 0;
     private boolean displayStatistics = false;
-    private NamespaceBinding[] nsStack = new NamespaceBinding[20];
+    private final NamespaceBinding[] nsStack = new NamespaceBinding[20];
     private int nsStackTop = 0;
-    private int[] nsCountStack = new int[20];
+    private final int[] nsCountStack = new int[20];
 
     /**
      * Create a document projector
@@ -122,7 +123,7 @@ public class Projector extends ProxyReceiver {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level >= copyAllLevel) {
             super.characters(chars, locationId, properties);
@@ -144,7 +145,7 @@ public class Projector extends ProxyReceiver {
     }
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level > copyAllLevel) {
             super.comment(chars, locationId, properties);
@@ -166,7 +167,7 @@ public class Projector extends ProxyReceiver {
     }
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         inputNodes++;
         if (level > copyAllLevel) {
             super.processingInstruction(target, data, locationId, properties);

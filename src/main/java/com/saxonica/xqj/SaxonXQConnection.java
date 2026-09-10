@@ -29,7 +29,7 @@ import java.io.StringReader;
  */
 public class SaxonXQConnection extends SaxonXQDataFactory implements XQConnection {
 
-    private Configuration config;
+    private final Configuration config;
     private SaxonXQStaticContext staticContext;
 
     /**

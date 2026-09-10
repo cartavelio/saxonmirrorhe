@@ -37,7 +37,7 @@ import java.util.List;
 
 public class IXSLFunctionSet extends BuiltInFunctionSet {
 
-    private static IXSLFunctionSet THE_INSTANCE = new IXSLFunctionSet();
+    private static final IXSLFunctionSet THE_INSTANCE = new IXSLFunctionSet();
 
     public static IXSLFunctionSet getInstance() {
         return THE_INSTANCE;
@@ -178,11 +178,11 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             IntegerValue wait = (IntegerValue)arguments[0].head();
-            StringValue documents = (StringValue)arguments[1].head();
+            StringItem documents = (StringItem)arguments[1].head();
             ObjectValue<Expression> wrappedActionObject = (ObjectValue<Expression>) arguments[2].head();
             Expression action = wrappedActionObject.getObject();
             if (documents != null) {
-                AtomicIterator<StringValue> tokenIter = new Whitespace.Tokenizer(documents.getStringValueCS());
+                AtomicIterator<StringItem> tokenIter = new Whitespace.Tokenizer(documents.getUnicodeStringValue());
                 String baseURI = getRetainedStaticContext().getStaticBaseUriString();
                 PackageData pd = getRetainedStaticContext().getPackageData();
                 ParseOptions options = context.getConfiguration().getParseOptions();
@@ -205,11 +205,11 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
-            Object target = convertToJavaScript((Sequence)arguments[0]);
-            String method = convertToJavaScript((Sequence)arguments[1]).toString();
+            Object target = convertToJavaScript(arguments[0]);
+            String method = convertToJavaScript(arguments[1]).toString();
             Object[] args = new Object[arguments.length - 2];
             for (int i=2; i<arguments.length; i++) {
-                args[i-2] = convertToJavaScript((Sequence)arguments[i]);
+                args[i-2] = convertToJavaScript(arguments[i]);
             }
             try {
                 Object result = ((Invocable)engine).invokeMethod(target, method, args);
@@ -229,7 +229,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
             try {
-                Object result = engine.eval(arguments[0].head().getStringValue());
+                Object result = engine.eval(arguments[0].head().getUnicodeStringValue().toString());
                 return JPConverter.allocate(result.getClass(), null, context.getConfiguration())
                         .convert(result, context);
             } catch (ScriptException e) {
@@ -242,7 +242,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     private static Sequence convertFromJavaScript(Object result) throws XPathException {
         //try {
             if (result instanceof String) {
-                return new StringValue((String)result);
+                return new StringItem((String)result);
             } else if (result instanceof Double) {
                 return new DoubleValue((Double)result);
             } else if (result instanceof Boolean) {
@@ -267,7 +267,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         } else if (supplied instanceof BooleanValue) {
             return ((BooleanValue)supplied).getBooleanValue();
         } else if (supplied instanceof AtomicValue) {
-            return ((AtomicValue)supplied).getStringValue();
+            return ((AtomicValue)supplied).getUnicodeStringValue();
         } else {
             List<Object> list = new ArrayList<>();
             SequenceIterator iter = supplied.iterate();

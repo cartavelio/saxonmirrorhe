@@ -64,7 +64,7 @@ public class LiteralAdjunct extends StreamingAdjunct implements FeedMaker {
             super.open(terminator);
             Outputter out = getNextOutputter();
             if (!Literal.isEmptySequence(getExpression())) {
-                GroundedValue value = ((Literal) getExpression()).getValue();
+                GroundedValue value = ((Literal) getExpression()).getGroundedValue();
                 if (value instanceof Item) {
                     out.append((Item) value);
                 } else {

@@ -51,7 +51,7 @@ public interface ConnectionPoolXQDataSource {
      * @return the datasource login time limit
      * @throws XQException if a datasource access error occurs
      */
-    public int getLoginTimeout() throws XQException;
+    int getLoginTimeout() throws XQException;
 
     /**
      * Retrieves the log writer for this datasource object.
@@ -67,7 +67,7 @@ public interface ConnectionPoolXQDataSource {
      *         <code>null</code> if logging is disabled
      * @throws XQException if a datasource access error occurs
      */
-    public java.io.PrintWriter getLogWriter() throws XQException;
+    java.io.PrintWriter getLogWriter() throws XQException;
 
     /**
      * Returns an array containing the property names supported by this
@@ -76,7 +76,7 @@ public interface ConnectionPoolXQDataSource {
      * @return <code>String[]</code> an array of property names
      *         supported by this implementation
      */
-    public String[] getSupportedPropertyNames();
+    String[] getSupportedPropertyNames();
 
     /**
      * Sets the named property to the specified value.
@@ -93,7 +93,7 @@ public interface ConnectionPoolXQDataSource {
      *                     or (2) the value for the given property is
      *                     determined to be invalid
      */
-    public void setProperty(String name, String value) throws XQException;
+    void setProperty(String name, String value) throws XQException;
 
     /**
      * Returns the current value of the named property if set, else
@@ -107,7 +107,7 @@ public interface ConnectionPoolXQDataSource {
      *         <code>null</code>
      * @throws XQException if a given property is not supported
      */
-    public String getProperty(String name) throws XQException;
+    String getProperty(String name) throws XQException;
 
     /**
      * Sets the data source properties from the specified <code>Properties</code>
@@ -126,7 +126,7 @@ public interface ConnectionPoolXQDataSource {
      *                     or (2) the value for a given property is
      *                     determined to be invalid
      */
-    public void setProperties(Properties props) throws XQException;
+    void setProperties(Properties props) throws XQException;
 
     /**
      * Sets the maximum time in seconds that this datasource will wait while
@@ -140,7 +140,7 @@ public interface ConnectionPoolXQDataSource {
      * @param seconds the datasource login time limit
      * @throws XQException if a datasource access error occurs
      */
-    public void setLoginTimeout(int seconds) throws XQException;
+    void setLoginTimeout(int seconds) throws XQException;
 
     /**
      * Sets the log writer for this datasource object to the given
@@ -156,6 +156,6 @@ public interface ConnectionPoolXQDataSource {
      *            <code>null</code>
      * @throws XQException if a datasource access error occurs
      */
-    public void setLogWriter(java.io.PrintWriter out) throws XQException;
+    void setLogWriter(java.io.PrintWriter out) throws XQException;
 
 }

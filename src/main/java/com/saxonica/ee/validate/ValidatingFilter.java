@@ -8,6 +8,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.InvalidityHandler;
 import net.sf.saxon.lib.InvalidityHandlerWrappingErrorReporter;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.util.Navigator;
@@ -186,7 +187,7 @@ public class ValidatingFilter extends ProxyReceiver {
             throw new XPathException("Validation terminated - too many errors");
         }
         if (issueComment && pipe.getParseOptions().isAddCommentsAfterValidationErrors()) {
-            comment("\nVALIDATION ERROR: " + err.getMessage() + '\n', locationId, ReceiverOption.NONE);
+            comment(StringView.of("\nVALIDATION ERROR: " + err.getMessage() + '\n'), locationId, ReceiverOption.NONE);
         }
     }
 

@@ -61,10 +61,10 @@ public abstract class Ending extends SystemFunction {
 
     private static class EndingIterator implements SequenceIterator {
 
-        private SequenceIterator baseIterator;
-        private Function end;
-        private boolean inclusive;
-        private XPathContext context;
+        private final SequenceIterator baseIterator;
+        private final Function end;
+        private final boolean inclusive;
+        private final XPathContext context;
         private boolean finished;
 
         EndingIterator(SequenceIterator in, Function end, boolean inclusive, XPathContext context) {

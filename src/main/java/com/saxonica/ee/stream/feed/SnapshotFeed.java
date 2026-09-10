@@ -23,7 +23,7 @@ import java.util.List;
 
 public class SnapshotFeed extends AbsorptionFeed {
 
-    private WatchManager watchManager;
+    private final WatchManager watchManager;
     private boolean copyAccumulators;
 
     /**

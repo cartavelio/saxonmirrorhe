@@ -24,7 +24,7 @@ import net.sf.saxon.type.Type;
  */
 public class ShallowCopyEventFeed extends ItemFeed {
 
-    private Mode mode;
+    private final Mode mode;
 
     public ShallowCopyEventFeed(Mode mode, ItemFeed parentExpressionFeed, XPathContext context) {
         super(null, parentExpressionFeed, context);

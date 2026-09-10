@@ -4,10 +4,10 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.TypeReference;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 
@@ -83,8 +83,8 @@ public class XSDList extends SchemaElement {
             List<String> warnings = new ArrayList<>();
             try {
                 RegularExpression regex = getConfiguration().compileRegularExpression(
-                        separator, "", "XSD11", warnings);
-                if (regex.matches("")) {
+                        StringView.tidy(separator), "", "XSD11", warnings);
+                if (regex.matches(EmptyUniString.getInstance())) {
                     error("The regular expression in saxon:separator must not be one that matches a zero-length string");
                 }
                 for (String message : warnings) {
@@ -155,7 +155,7 @@ public class XSDList extends SchemaElement {
                 SimpleTypeDefinition itemType = ((XSDSimpleType) child).getSimpleTypeDefinition();
                 TypeReference typeRef = new TypeReference(itemType.getFingerprint(),
                         (EnterpriseConfiguration) getConfiguration(),
-                        (XSDSimpleType) child);
+                                                          child);
                 typeRef.setTarget(itemType);
                 typeDefinition.setItemTypeReference(typeRef);
             }

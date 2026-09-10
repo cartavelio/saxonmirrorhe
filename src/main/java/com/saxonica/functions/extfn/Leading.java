@@ -45,11 +45,11 @@ public class Leading extends SystemFunction {
 
     private static class LeadingIterator implements SequenceIterator {
 
-        private SequenceIterator base;
-        private Function function;
-        private XPathContext context;
+        private final SequenceIterator base;
+        private final Function function;
+        private final XPathContext context;
         private boolean exhausted = false;
-        private Sequence[] args = new Sequence[1];
+        private final Sequence[] args = new Sequence[1];
 
         public LeadingIterator(SequenceIterator base, Function function, XPathContext context) {
             this.base = base;

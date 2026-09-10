@@ -13,7 +13,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 
 public class CPPFunctionSet extends BuiltInFunctionSet {
 
-    private static CPPFunctionSet THE_INSTANCE = new CPPFunctionSet();
+    private static final CPPFunctionSet THE_INSTANCE = new CPPFunctionSet();
 
       public static CPPFunctionSet getInstance() {
               return THE_INSTANCE;

@@ -81,7 +81,7 @@ public class Archive {
     }
 
     @SuppressWarnings("serial")
-    private static HashMap<ArchiveType, String> archiveTypes = new HashMap<ArchiveType, String>() {
+    private static final HashMap<ArchiveType, String> archiveTypes = new HashMap<ArchiveType, String>() {
         {
             put(ArchiveType.ZIP, "zip");
             put(ArchiveType.GZIP, "gzip");
@@ -94,7 +94,7 @@ public class Archive {
     }
 
     @SuppressWarnings("serial")
-    private static HashMap<CompressionType, String> compressionTypes = new HashMap<CompressionType, String>() {
+    private static final HashMap<CompressionType, String> compressionTypes = new HashMap<CompressionType, String>() {
         {
             put(CompressionType.STORED, "stored");
             put(CompressionType.DEFLATE, "deflate");
@@ -111,8 +111,6 @@ public class Archive {
         }
         return null;
     }
-
-    ;
 
     private static CompressionType zipCompressions(int c) {
         if (c == ZipEntry.DEFLATED) {
@@ -157,7 +155,7 @@ public class Archive {
         return new QName(PREFIX, NAMESPACE, s);
     }
 
-    private static HashMap<String, CharsetDecoder> decoders = new HashMap<String, CharsetDecoder>();
+    private static final HashMap<String, CharsetDecoder> decoders = new HashMap<String, CharsetDecoder>();
 
     static {
         CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
@@ -257,13 +255,13 @@ public class Archive {
         return requested;
     }
 
-    private static ArrayList<Entry> toInsertionEntries(ZeroOrMore<StringValue> entries, ZeroOrMore<Base64BinaryValue> values)
+    private static ArrayList<Entry> toInsertionEntries(ZeroOrMore<StringItem> entries, ZeroOrMore<Base64BinaryValue> values)
             throws XPathException {
         ArrayList<Entry> m = new ArrayList<Entry>();
         SequenceIterator entryIter = entries.iterate();
         SequenceIterator valueIter = values.iterate();
         while (true) {
-            StringValue entry = (StringValue) entryIter.next();
+            StringItem entry = (StringItem) entryIter.next();
             Base64BinaryValue value = (Base64BinaryValue) valueIter.next();
             if ((entry == null) != (value == null)) {
                 error("Entry name and value sequences have different lengths", ERROR_ENTRY_DATA_MISMATCH);
@@ -282,16 +280,16 @@ public class Archive {
         Entry first = null;
         Sequence s;
         AtomicValue av;
-        StringValue content = new StringValue("content");
-        StringValue compressionKey = new StringValue("compression");
-        StringValue positionKey = new StringValue("position");
+        StringItem content = StringItem.bmp("content");
+        StringItem compressionKey = StringItem.bmp("compression");
+        StringItem positionKey = StringItem.bmp("position");
         while ((av = ui.next()) != null) {
             MapItem entry = (MapItem) entries.get(av).iterate().next();
             Entry e = new Entry(av.getStringValue(),
                     (Base64BinaryValue) entry.get(content).iterate().next());
             e.setCompression(defaultEntry.compression);
             if ((s = entry.get(compressionKey)) != null) {
-                String compressionValue = ((StringValue) s.iterate().next()).getStringValue();
+                String compressionValue = ((StringItem) s.iterate().next()).getStringValue();
                 e.setCompression(stringToCompressionType(compressionValue));
             }
             if ((s = entry.get(positionKey)) != null) {
@@ -335,16 +333,16 @@ public class Archive {
 
     /* Helper functions to add to immutable maps */
     private static HashTrieMap add(HashTrieMap map, String key, HashTrieMap val) throws XPathException {
-        return map.addEntry(new StringValue(key), val);
+        return map.addEntry(new StringItem(key), val);
     }
 
     /* the following can be used externally */
     public static HashTrieMap add(HashTrieMap map, String key, AtomicValue val) throws XPathException {
-        return map.addEntry(new StringValue(key), val);
+        return map.addEntry(new StringItem(key), val);
     }
 
     public static HashTrieMap add(HashTrieMap map, String key, String val) throws XPathException {
-        return add(map, key, new StringValue(val));
+        return add(map, key, new StringItem(val));
     }
 
     public static HashTrieMap add(HashTrieMap map, String key, long val) throws XPathException {
@@ -380,14 +378,14 @@ public class Archive {
     }
 
     // arch:entry-names($in as xs:base64Binary) as xs:string*
-    public static ZeroOrMore<? extends StringValue> entryNames(Base64BinaryValue in)
+    public static ZeroOrMore<? extends StringItem> entryNames(Base64BinaryValue in)
             throws IOException, XPathException, URISyntaxException {
-        List<StringValue> names = new ArrayList<StringValue>();
+        List<StringItem> names = new ArrayList<StringItem>();
         final ZipInputStream stream = new ZipInputStream(new ByteArrayInputStream(in.getBinaryValue()));
         for (ZipEntry ze : getEntries(stream)) {
-            names.add(new StringValue(ze.getName()));
+            names.add(new StringItem(ze.getName()));
         }
-        return new ZeroOrMore<StringValue>(names);
+        return new ZeroOrMore<StringItem>(names);
     }
 
     // arch:entries($in as xs:base64Binary) as element(arch:entry)*
@@ -549,7 +547,7 @@ public class Archive {
     }
 
     // arch:extract-binary($in as xs:base64Binary, $entries as xs:string*) as xs:base64Binary*
-    public static ZeroOrMore<Base64BinaryValue> extractBinary(One<Base64BinaryValue> in, ZeroOrMore<StringValue> entries) throws IOException,
+    public static ZeroOrMore<Base64BinaryValue> extractBinary(One<Base64BinaryValue> in, ZeroOrMore<StringItem> entries) throws IOException,
             XPathException, URISyntaxException {
         List<Base64BinaryValue> result = new ArrayList<Base64BinaryValue>();
         for (Entry e : extractEntries(in.head(), toExtractionEntries(entries))) {
@@ -569,25 +567,25 @@ public class Archive {
     }
 
     // arch:extract-text($in as xs:base64Binary, $entries as xs:string*) as xs:string*
-    public static ZeroOrMore<? extends StringValue> extractText(One<Base64BinaryValue> in, ZeroOrMore<StringValue> entries) throws IOException,
+    public static ZeroOrMore<? extends StringItem> extractText(One<Base64BinaryValue> in, ZeroOrMore<StringItem> entries) throws IOException,
             XPathException, URISyntaxException {
-        return extractText(in, entries, new One<StringValue>(new StringValue("UTF-8")));
+        return extractText(in, entries, new One<StringItem>(StringItem.bmp("UTF-8")));
     }
 
     // arch:extract-text($in as xs:base64Binary, $entries as xs:string*, $encoding as xs:string) as xs:string*
-    public static ZeroOrMore<? extends StringValue> extractText(
-            One<Base64BinaryValue> in, ZeroOrMore<StringValue> entries, One<StringValue> encoding)
+    public static ZeroOrMore<? extends StringItem> extractText(
+            One<Base64BinaryValue> in, ZeroOrMore<StringItem> entries, One<StringItem> encoding)
             throws IOException, XPathException, URISyntaxException {
         Entry def = new Entry();
         def.setEncoding(encoding.head().getStringValue().toUpperCase());
         return extractText(in.head(), toExtractionEntries(entries, def));
     }
 
-    private static ZeroOrMore<? extends StringValue> extractText(Base64BinaryValue in, ArrayList<Entry> entries)
+    private static ZeroOrMore<? extends StringItem> extractText(Base64BinaryValue in, ArrayList<Entry> entries)
             throws IOException, XPathException, URISyntaxException {
         CharsetDecoder decoder;
 
-        List<StringValue> result = new ArrayList<StringValue>();
+        List<StringItem> result = new ArrayList<StringItem>();
         for (Entry b : extractEntries(in, entries)) {
             decoder = decoders.get(b.encoding);
             if (decoder == null) {
@@ -611,9 +609,9 @@ public class Archive {
             }
             char[] resChars = new char[out.position()];
             System.arraycopy(outChars, 0, resChars, 0, out.position());
-            result.add(new StringValue(new String(resChars)));
+            result.add(new StringItem(new String(resChars)));
         }
-        return new ZeroOrMore<StringValue>(result);
+        return new ZeroOrMore<StringItem>(result);
     }
 
     // arch:extract-map($in as xs:base64Binary, map(xs:string,map(xs:string,item()))) as xs:anyAtomicType*
@@ -653,7 +651,7 @@ public class Archive {
                 }
                 char[] resChars = new char[out.position()];
                 System.arraycopy(outChars, 0, resChars, 0, out.position());
-                result.add(new StringValue(new String(resChars)));
+                result.add(new StringItem(new String(resChars)));
             } else {
                 result.add(b.content);
             }
@@ -662,13 +660,13 @@ public class Archive {
     }
 
     // arch:extract-text-map($in as xs:base64Binary, map(xs:string,item())) as xs:string*
-    public static ZeroOrMore<? extends StringValue> extractTextMap(One<Base64BinaryValue> in, One<MapItem> entries) throws IOException,
+    public static ZeroOrMore<? extends StringItem> extractTextMap(One<Base64BinaryValue> in, One<MapItem> entries) throws IOException,
             XPathException, URISyntaxException {
         return extractTextMap(in, entries, One.string("UTF-8"));
     }
 
     // arch:extract-text-map($in as xs:base64Binary, map(xs:string,item()), $encoding as xs:string) as xs:string*
-    public static ZeroOrMore<? extends StringValue> extractTextMap(One<Base64BinaryValue> in, One<MapItem> entries, One<StringValue> encoding)
+    public static ZeroOrMore<? extends StringItem> extractTextMap(One<Base64BinaryValue> in, One<MapItem> entries, One<StringItem> encoding)
             throws IOException, XPathException, URISyntaxException {
         Entry def = new Entry();
         def.setEncoding(encoding.head().getStringValue().toUpperCase());
@@ -677,7 +675,7 @@ public class Archive {
 
     // arch:delete($in as xs:base64Binary, $entries as xs:string*)
     // as xs:base64Binary
-    public static One<Base64BinaryValue> delete(One<Base64BinaryValue> in, ZeroOrMore<StringValue> entries) throws IOException,
+    public static One<Base64BinaryValue> delete(One<Base64BinaryValue> in, ZeroOrMore<StringItem> entries) throws IOException,
             XPathException {
         if (entries.head() == null) {
             return in;
@@ -740,7 +738,7 @@ public class Archive {
     }
 
     // arch:update($in as xs:base64Binary, $entries as xs:string*, $new as xs:base64Binary*) as xs:base64Binary
-    public static Base64BinaryValue update(One<Base64BinaryValue> in, ZeroOrMore<StringValue> entries, ZeroOrMore<Base64BinaryValue> values)
+    public static Base64BinaryValue update(One<Base64BinaryValue> in, ZeroOrMore<StringItem> entries, ZeroOrMore<Base64BinaryValue> values)
             throws IOException, XPathException {
         return updateFromEntries(in.head(), toInsertionEntries(entries, values));
     }
@@ -809,7 +807,7 @@ public class Archive {
     }
 
     // arch:create($entries as xs:string*, $new as xs:base64Binary*) as xs:base64Binary
-    public static Base64BinaryValue create(ZeroOrMore<StringValue> entries, ZeroOrMore<Base64BinaryValue> values)
+    public static Base64BinaryValue create(ZeroOrMore<StringItem> entries, ZeroOrMore<Base64BinaryValue> values)
             throws IOException, XPathException {
         return createFromEntries(toInsertionEntries(entries, values));
     }
@@ -824,9 +822,9 @@ public class Archive {
     // as xs:base64Binary
     public static Base64BinaryValue createMap(One<MapItem> entries, One<MapItem> options) throws IOException, XPathException {
         Entry defaultEntry = new Entry();
-        Sequence s = options.head().get(new StringValue("compression"));
+        Sequence s = options.head().get(StringItem.bmp("compression"));
         if (s != null) {
-            defaultEntry.setCompression(stringToCompressionType(((StringValue) s.iterate().next()).getStringValue()));
+            defaultEntry.setCompression(stringToCompressionType(((StringItem) s.iterate().next()).getStringValue()));
         }
         return createFromEntries(toInsertionEntries(entries.head(), defaultEntry));
     }

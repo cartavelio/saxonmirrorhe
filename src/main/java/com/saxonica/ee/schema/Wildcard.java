@@ -6,7 +6,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
@@ -398,7 +398,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
      */
 
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         if (disallowedNamespaces != null) {
             fsb.append("not{");
             appendNamespaces(disallowedNamespaces, fsb);
@@ -427,7 +427,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         return fsb.toString();
     }
 
-    private void appendNamespaces(/*@Nullable*/ Set<String> namespaces, FastStringBuffer sb) {
+    private void appendNamespaces(/*@Nullable*/ Set<String> namespaces, StringBuilder sb) {
         if (namespaces == null) {
             return;
         }
@@ -437,7 +437,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
             if (first) {
                 first = false;
             } else {
-                sb.cat(' ');
+                sb.append(' ');
             }
             String s = (String) iter.next();
             sb.append(s.isEmpty() ? "##local" : s);
@@ -448,7 +448,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
         if (namespaces == null) {
             return "";
         }
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder sb = new StringBuilder(64);
         appendNamespaces(namespaces, sb);
         return sb.toString();
     }
@@ -827,7 +827,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
             serializer.emitAttribute("constraint", "enumeration");
             serializer.emitAttribute("namespaces", listOfNamespaces(allowedNamespaces));
         }
-        FastStringBuffer disallowedNames = new FastStringBuffer(100);
+        StringBuilder disallowedNames = new StringBuilder(100);
         if (disallowsDefinedNames) {
             disallowedNames.append("##defined ");
         }
@@ -840,7 +840,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 int nc = intit.next();
                 String name = pool.getClarkName(nc);
                 disallowedNames.append(name);
-                disallowedNames.cat(' ');
+                disallowedNames.append(' ');
             }
         }
         if (disallowedNames.length() > 0) {
@@ -858,7 +858,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue("Wildcard");
+                        return StringItem.bmp("Wildcard");
                     case "implementation":
                         return new ObjectValue<>(Wildcard.this);
                     case "namespace constraint":
@@ -868,21 +868,21 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                 String key = arguments[0].head().getStringValue();
                                 switch (key) {
                                     case "class":
-                                        return new StringValue("Namespace Constraint");
+                                        return StringItem.bmp("Namespace Constraint");
                                     case "variety":
                                         if (allowsAny()) {
-                                            return new StringValue("any");
+                                            return StringItem.bmp("any");
                                         } else if (allowedNamespaces != null) {
-                                            return new StringValue("enumeration");
+                                            return StringItem.bmp("enumeration");
                                         } else {
-                                            return new StringValue("not");
+                                            return StringItem.bmp("not");
                                         }
                                     case "namespaces":
                                         if (allowsAny()) {
                                             return EmptySequence.getInstance();
                                         } else {
                                             Set<String> namespaces = allowedNamespaces != null ? allowedNamespaces : disallowedNamespaces;
-                                            List<StringValue> list = new ArrayList<StringValue>(namespaces.size());
+                                            List<StringItem> list = new ArrayList<StringItem>(namespaces.size());
                                             for (String ns : namespaces) {
                                                 list.add(new AnyURIValue(ns));
                                             }
@@ -891,10 +891,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                     case "disallowed names":
                                         List<AtomicValue> list = new ArrayList<>();
                                         if (disallowsDefinedNames) {
-                                            list.add(new StringValue("defined"));
+                                            list.add(StringItem.bmp("defined"));
                                         }
                                         if (disallowsDefinedSiblings) {
-                                            list.add(new StringValue("definedSiblings"));
+                                            list.add(StringItem.bmp("definedSiblings"));
                                         }
                                         NamePool pool = getConfiguration().getNamePool();
                                         IntIterator iter = disallowedQNames.iterator();
@@ -913,7 +913,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                         };
                         return new CallableFunction(1, constraintFunction, COMPONENT_FUNCTION_TYPE);
                     case "process contents":
-                        return new StringValue(getProcessContents());
+                        return new StringItem(getProcessContents());
                     default:
                         return EmptySequence.getInstance();
                 }

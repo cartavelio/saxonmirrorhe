@@ -31,8 +31,8 @@ import java.util.Stack;
 
 public class MultiAccumulatorWatch extends PatternWatch {
 
-    private Stack<FleetingNode> nodeStack = new Stack<>();
-    private Map<Accumulator, AccumulatorWatch> accumulatorMap;
+    private final Stack<FleetingNode> nodeStack = new Stack<>();
+    private final Map<Accumulator, AccumulatorWatch> accumulatorMap;
 
 
     public MultiAccumulatorWatch(Map<Accumulator, AccumulatorWatch> accumulatorMap) {

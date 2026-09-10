@@ -4,7 +4,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntIterator;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -132,8 +132,8 @@ public class EXPathBinary {
      * @return true for 'most-significant-first', false for 'least-significant-first'
      * @throws XPathException
      */
-    private static boolean endianness(One<StringValue> value) throws XPathException {
-        String s = value.getStringValue();
+    private static boolean endianness(One<StringItem> value) throws XPathException {
+        String s = value.getUnicodeStringValue().toString();
         if (s.equalsIgnoreCase("BE")
                 || s.equalsIgnoreCase("most-significant-first")
                 || s.equalsIgnoreCase("big-endian"))
@@ -185,7 +185,7 @@ public class EXPathBinary {
 
     // bin:hex($s as xs:string?)
     // as xs:base64Binary?
-    public static ZeroOrOne<Base64BinaryValue> hex(ZeroOrOne<StringValue> s) throws XPathException {
+    public static ZeroOrOne<Base64BinaryValue> hex(ZeroOrOne<StringItem> s) throws XPathException {
         if (s.head() == null)
             return ZeroOrOne.empty();
         return inputNumber(s.getStringValue(), 16, 4);
@@ -193,7 +193,7 @@ public class EXPathBinary {
 
     // bin:bin($s as xs:string?)
     // as xs:base64Binary?
-    public static ZeroOrOne<Base64BinaryValue> bin(ZeroOrOne<StringValue> s) throws XPathException {
+    public static ZeroOrOne<Base64BinaryValue> bin(ZeroOrOne<StringItem> s) throws XPathException {
         if (s.head() == null)
             return ZeroOrOne.empty();
         return inputNumber(s.getStringValue(), 2, 1);
@@ -201,20 +201,22 @@ public class EXPathBinary {
 
     // bin:octal($s as xs:string?)
     // as xs:base64Binary?
-    public static ZeroOrOne<Base64BinaryValue> octal(ZeroOrOne<StringValue> s) throws XPathException {
+    public static ZeroOrOne<Base64BinaryValue> octal(ZeroOrOne<StringItem> s) throws XPathException {
         if (s.head() == null)
             return ZeroOrOne.empty();
-        String binary = "";
-        for (char c : s.getStringValue().toCharArray()) {
+        StringBuilder binary = new StringBuilder();
+        IntIterator iter = s.getUnicodeStringValue().codePoints();
+        while (iter.hasNext()) {
+            int c = iter.next();
             if (c < '0' || c > '7')
                 error("Wrong character in base 8 binary constructor string:"
                         + c, ERROR_NON_NUMERIC_CHAR);
-            binary += (c & 4) == 0 ? "0" : "1";
-            binary += (c & 2) == 0 ? "0" : "1";
-            binary += (c & 1) == 0 ? "0" : "1";
+            binary.append((c & 4) == 0 ? "0" : "1");
+            binary.append((c & 2) == 0 ? "0" : "1");
+            binary.append((c & 1) == 0 ? "0" : "1");
         }
         // System.err.println("binary:" + binary);
-        return inputNumber(binary, 2, 1);
+        return inputNumber(binary.toString(), 2, 1);
     }
 
     // bin:length($contents as xs:base64Binary)
@@ -403,27 +405,25 @@ public class EXPathBinary {
 
 	/* String encoding and decoding */
 
-    private static void checkEncoding(One<StringValue> encoding) throws XPathException {
+    private static void checkEncoding(One<StringItem> encoding) throws XPathException {
         String se = encoding.getStringValue().toUpperCase();
-        if (se.equals("UTF-8") || se.equals("UTF-16")
-                || se.equals("US-ASCII") || se.equals("ASCII") || se.equals("ISO-8859-1")
-                )
-            return;
-        else
-            error("Unsupported encoding in binary encode/decode:" + encoding.getStringValue(),
+        if (!se.equals("UTF-8") && !se.equals("UTF-16")
+                && !se.equals("US-ASCII") && !se.equals("ASCII") && !se.equals("ISO-8859-1")) {
+            error("Unsupported encoding in binary encode/decode:" + encoding.getUnicodeStringValue(),
                     ERROR_UNKNOWN_ENCODING);
+        }
     }
 
     // bin:decode-string($value as xs:base64Binary?)
     // as xs:string?
-    public static ZeroOrOne<StringValue> decodeString(ZeroOrOne<Base64BinaryValue> value)
+    public static ZeroOrOne<StringItem> decodeString(ZeroOrOne<Base64BinaryValue> value)
             throws XPathException, UnsupportedEncodingException {
         return decodeString(value, One.string("UTF-8"), One.integer(0));
     }
 
     // bin:decode-string($value as xs:base64Binary?, $encoding as xs:string)
     // as xs:string?
-    public static ZeroOrOne<StringValue> decodeString(ZeroOrOne<Base64BinaryValue> value, One<StringValue> encoding)
+    public static ZeroOrOne<StringItem> decodeString(ZeroOrOne<Base64BinaryValue> value, One<StringItem> encoding)
             throws XPathException, UnsupportedEncodingException {
         return decodeString(value, encoding, One.integer(0));
     }
@@ -431,8 +431,8 @@ public class EXPathBinary {
     // bin:decode-string($value as xs:base64Binary?, $encoding as xs:string,
     // $offset as xs:integer)
     // as xs:string?
-    public static ZeroOrOne<StringValue> decodeString(ZeroOrOne<Base64BinaryValue> value, One<StringValue> encoding,
-                                                      One<IntegerValue> offset) throws UnsupportedEncodingException,
+    public static ZeroOrOne<StringItem> decodeString(ZeroOrOne<Base64BinaryValue> value, One<StringItem> encoding,
+                                                     One<IntegerValue> offset) throws UnsupportedEncodingException,
             XPathException {
         if (value.head() == null)
             return ZeroOrOne.empty();
@@ -443,8 +443,8 @@ public class EXPathBinary {
     // bin:decode-string($value as xs:base64Binary?, $encoding as xs:string,
     // $offset as xs:integer, $size as xs:size)
     // as xs:string?
-    public static ZeroOrOne<StringValue> decodeString(ZeroOrOne<Base64BinaryValue> value, One<StringValue> encoding,
-                                                      One<IntegerValue> offset, One<IntegerValue> size)
+    public static ZeroOrOne<StringItem> decodeString(ZeroOrOne<Base64BinaryValue> value, One<StringItem> encoding,
+                                                     One<IntegerValue> offset, One<IntegerValue> size)
             throws UnsupportedEncodingException, XPathException {
         if (value.head() == null)
             return ZeroOrOne.empty();
@@ -475,14 +475,14 @@ public class EXPathBinary {
 
     // bin:encode-string($value as xs:string?)
     // as xs:base64Binary?
-    public static ZeroOrOne<Base64BinaryValue> encodeString(ZeroOrOne<StringValue> value)
+    public static ZeroOrOne<Base64BinaryValue> encodeString(ZeroOrOne<StringItem> value)
             throws XPathException, UnsupportedEncodingException {
         return encodeString(value, One.string("UTF-8"));
     }
 
     // bin:encode-string($value as xs:string?, $encoding as xs:string)
     // as xs:base64Binary?
-    public static ZeroOrOne<Base64BinaryValue> encodeString(ZeroOrOne<StringValue> value, One<StringValue> encoding)
+    public static ZeroOrOne<Base64BinaryValue> encodeString(ZeroOrOne<StringItem> value, One<StringItem> encoding)
             throws XPathException, UnsupportedEncodingException {
         if (value.head() == null)
             return ZeroOrOne.empty();
@@ -502,7 +502,7 @@ public class EXPathBinary {
         } catch (CharacterCodingException e) {
             error("Character code problem in encoding:" + e, ERROR_CONVERSION);
         }
-        byte data[] = new byte[out.limit()];
+        byte[] data = new byte[out.limit()];
         System.arraycopy(out.array(), 0, data, 0, out.limit());
         return one(data);
         //return one(value.getStringValue().getBytes(encoding.getStringValue()));
@@ -599,7 +599,7 @@ public class EXPathBinary {
     // xs:integer, $endian as xs:string)
     // as xs:double
     public static One<DoubleValue> unpackDouble(One<Base64BinaryValue> value,
-                                                One<IntegerValue> offset, One<StringValue> endian) throws XPathException {
+                                                One<IntegerValue> offset, One<StringItem> endian) throws XPathException {
         int off = (int) offset.head().longValue();
         byte[] in = value.head().getBinaryValue();
         int len = 8;
@@ -621,7 +621,7 @@ public class EXPathBinary {
     // $endian as xs:string)
     // as xs:float
     public static One<FloatValue> unpackFloat(One<Base64BinaryValue> value,
-                                              One<IntegerValue> offset, One<StringValue> endian) throws XPathException {
+                                              One<IntegerValue> offset, One<StringItem> endian) throws XPathException {
         int off = (int) offset.head().longValue();
         byte[] in = value.head().getBinaryValue();
         int len = 4;
@@ -643,7 +643,7 @@ public class EXPathBinary {
     // xs:integer, $length as xs:integer, $endian as xs:string)
     // as xs:integer
     public static One<IntegerValue> unpackUnsignedInteger(One<Base64BinaryValue> value,
-                                                          One<IntegerValue> offset, One<IntegerValue> length, One<StringValue> endian)
+                                                          One<IntegerValue> offset, One<IntegerValue> length, One<StringItem> endian)
             throws XPathException {
         boolean bigEnd = endianness(endian);
         int off = (int) offset.head().longValue();
@@ -674,7 +674,7 @@ public class EXPathBinary {
     // xs:integer, $length as xs:integer)
     // as xs:integer
     public static One<IntegerValue> unpackInteger(One<Base64BinaryValue> value,
-                                                  One<IntegerValue> offset, One<IntegerValue> length, One<StringValue> endian)
+                                                  One<IntegerValue> offset, One<IntegerValue> length, One<StringItem> endian)
             throws XPathException {
         boolean bigEnd = endianness(endian);
         // Check here to use Big Integer
@@ -705,7 +705,7 @@ public class EXPathBinary {
 
     // bin:pack-double($value as xs:double, $endian as xs:string)
     // as xs:base64Binary
-    public static One<Base64BinaryValue> packDouble(One<DoubleValue> value, One<StringValue> endian)
+    public static One<Base64BinaryValue> packDouble(One<DoubleValue> value, One<StringItem> endian)
             throws XPathException {
         return pack(Double.doubleToRawLongBits(value.head().getDoubleValue()), 8,
                 endianness(endian));
@@ -720,7 +720,7 @@ public class EXPathBinary {
 
     // bin:pack-float($value as xs:float, $endian as xs:string)
     // as xs:base64Binary
-    public static One<Base64BinaryValue> packFloat(One<FloatValue> value, One<StringValue> endian)
+    public static One<Base64BinaryValue> packFloat(One<FloatValue> value, One<StringItem> endian)
             throws XPathException {
         return pack(Float.floatToRawIntBits(value.head().getFloatValue()), 4,
                 endianness(endian));
@@ -737,7 +737,7 @@ public class EXPathBinary {
     // as xs:string)
     // as xs:base64Binary
     public static One<Base64BinaryValue> packInteger(One<IntegerValue> value,
-                                                     One<IntegerValue> length, One<StringValue> endian) throws XPathException {
+                                                     One<IntegerValue> length, One<StringItem> endian) throws XPathException {
         if (length.head().signum() == -1)
             error("Requested length of integer packing is negative", ERROR_NEGATIVE_SIZE);
 

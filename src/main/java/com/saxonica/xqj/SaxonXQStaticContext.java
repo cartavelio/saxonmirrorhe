@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class SaxonXQStaticContext implements XQStaticContext {
 
-    private Configuration config;
+    private final Configuration config;
     private int bindingMode = XQConstants.BINDING_MODE_IMMEDIATE;
     private int holdability = XQConstants.HOLDTYPE_HOLD_CURSORS_OVER_COMMIT;
     private int scrollability = XQConstants.SCROLLTYPE_FORWARD_ONLY;

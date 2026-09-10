@@ -2,6 +2,8 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -31,7 +33,7 @@ public class NewText extends SystemFunction {
         Orphan orphan = new Orphan(context.getConfiguration());
         orphan.setNodeKind(Type.TEXT);
         Item first = arguments[0].head();
-        orphan.setStringValue(first == null ? "" : first.getStringValueCS());
+        orphan.setStringValue(first == null ? (UnicodeString) EmptyUniString.getInstance() : first.getUnicodeStringValue());
         return orphan;
     }
 

@@ -16,9 +16,9 @@ import net.sf.saxon.type.UType;
 
 public class StreamWatch extends AbstractWatch {
 
-    private Inversion action;
-    private WatchManager watchManager;
-    private XPathContext context;
+    private final Inversion action;
+    private final WatchManager watchManager;
+    private final XPathContext context;
 
     public StreamWatch(Inversion action, WatchManager watchManager, XPathContext context) {
         this.action = action;

@@ -11,7 +11,7 @@ public interface MessageBuilder {
      * Generate code to construct the error message and leave it on the run-time stack
      */
 
-    public void generateErrorMessage();
+    void generateErrorMessage();
 
 }
 

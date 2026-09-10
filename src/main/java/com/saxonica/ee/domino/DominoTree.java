@@ -68,7 +68,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
     private NamespaceMap[] namespaces;
 
     // when a parent has a large number of children, we keep occasional links from children to parents to reduce searching
-    private IntToIntHashMap extraParentPointers = new IntToIntHashMap();
+    private final IntToIntHashMap extraParentPointers = new IntToIntHashMap();
 
     // index of elements by name, populated lazily as the result of a search
     private IntHashMap<List<NodeInfo>> elementsByFingerprint;

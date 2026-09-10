@@ -11,6 +11,8 @@ import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.pattern.BasePatternWithPredicate;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.pattern.PatternWithPredicate;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.Whitespace;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,7 @@ import java.util.Map;
  */
 public class ContainsTokenPatternOptimizer extends PatternOptimizer {
 
-    private static ContainsTokenPatternOptimizer THE_INSTANCE = new ContainsTokenPatternOptimizer();
+    private static final ContainsTokenPatternOptimizer THE_INSTANCE = new ContainsTokenPatternOptimizer();
 
     public static ContainsTokenPatternOptimizer getInstance() {
         return THE_INSTANCE;
@@ -38,7 +40,7 @@ public class ContainsTokenPatternOptimizer extends PatternOptimizer {
                 SystemFunctionCall call = (SystemFunctionCall) exp;
                 if (call.getArity() == 2 && call.getArg(1) instanceof StringLiteral &&
                         exp.getRetainedStaticContext().getDefaultCollationName().equals(NamespaceConstant.CODEPOINT_COLLATION_URI)) {
-                    String contained = ((StringLiteral) call.getArg(1)).getStringValue();
+                    String contained = ((StringLiteral) call.getArg(1)).stringify();
                     return contained.matches(" [^ ]+ ");
                 }
             }
@@ -50,8 +52,8 @@ public class ContainsTokenPatternOptimizer extends PatternOptimizer {
     public void process(RuleEE rule, Pattern pattern, Map<Precondition, List<RuleEE>> preconditions, Map<Characteristic, Characteristic> characteristics) {
         Expression exp = ((BasePatternWithPredicate) pattern).getPredicate();
         SystemFunctionCall call = (SystemFunctionCall) exp;
-        String contained = ((StringLiteral) call.getArg(1)).getStringValue();
-        String token = contained.trim();
+        UnicodeString contained = ((StringLiteral) call.getArg(1)).getString();
+        UnicodeString token = Whitespace.trim(contained);
         TokenMatchOperand chic = new TokenMatchOperand(call.getArg(0));
         chic = (TokenMatchOperand) allocateCharacteristic(characteristics, chic);
         StringCollator collator = CodepointCollator.getInstance();

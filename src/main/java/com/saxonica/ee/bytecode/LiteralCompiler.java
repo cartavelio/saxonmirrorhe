@@ -27,7 +27,7 @@ public class LiteralCompiler extends ExpressionCompiler {
         visitLineNumber(compiler, ga, expression);
         Item item;
         try {
-            item = SequenceTool.asItem(((Literal) expression).getValue());
+            item = SequenceTool.asItem(((Literal) expression).getGroundedValue());
         } catch (XPathException err) {
             throw new CannotCompileException(expression, "compileItem on non-singleton");
         }
@@ -57,9 +57,9 @@ public class LiteralCompiler extends ExpressionCompiler {
                     allocateStatic(compiler, item);
                     return;
                 case StandardNames.XS_STRING:
-                    String s = item.getStringValue();
+                    String s = item.getUnicodeStringValue().toString();
                     if (s.isEmpty()) {
-                        ga.getStaticField(StringValue.class, "EMPTY_STRING", StringValue.class);
+                        ga.getStaticField(StringItem.class, "EMPTY_STRING", StringItem.class);
                     } else {
                         /*if(new StringValue(s).containsSurrogatePairs()){
                            allocateStatic(compiler, s);
@@ -67,7 +67,7 @@ public class LiteralCompiler extends ExpressionCompiler {
                            ga.push(s);
                        } */
                         // code changed because of ASM bug - pushing a UTF8 string handled incorrectly
-                        allocateStatic(compiler, new StringValue(s));
+                        allocateStatic(compiler, new StringItem(s));
                         //ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
                     }
                     return;
@@ -97,28 +97,28 @@ public class LiteralCompiler extends ExpressionCompiler {
         if (Literal.isEmptySequence(expression)) {
             onEmpty.generate(ga);
         } else if (requiredClass == Double.TYPE) {
-            ga.push(((DoubleValue) literal.getValue()).getDoubleValue());
+            ga.push(((DoubleValue) literal.getGroundedValue()).getDoubleValue());
         } else if (requiredClass == Float.TYPE) {
-            ga.push(((FloatValue) literal.getValue()).getFloatValue());
+            ga.push(((FloatValue) literal.getGroundedValue()).getFloatValue());
         } else if (requiredClass == String.class || requiredClass == CharSequence.class) {
-            GroundedValue value = ((Literal) expression).getValue();
-            if (value instanceof StringValue) {
-                ga.push(((StringValue) value).getStringValue());
+            GroundedValue value = ((Literal) expression).getGroundedValue();
+            if (value instanceof StringItem) {
+                ga.push(((StringItem) value).getStringValue());
             } else {
                 compileToItem(compiler, expression);
-                ga.checkClass(StringValue.class);
-                ga.invokeInstanceMethod(StringValue.class, "getStringValue");
+                ga.checkClass(StringItem.class);
+                ga.invokeInstanceMethod(StringItem.class, "getStringValue");
             }
         } else if (requiredClass == Long.TYPE) {
             try {
-                GroundedValue value = ((Literal) expression).getValue();
+                GroundedValue value = ((Literal) expression).getGroundedValue();
                 ga.push(((IntegerValue) value).longValue());
             } catch (XPathException e) {
                 throw new CannotCompileException();
             }
         } else if (requiredClass == Integer.TYPE) {
             try {
-                GroundedValue value = ((Literal) expression).getValue();
+                GroundedValue value = ((Literal) expression).getGroundedValue();
                 ga.push(((IntegerValue) value).longValue());
                 ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
             } catch (XPathException e) {
@@ -134,7 +134,7 @@ public class LiteralCompiler extends ExpressionCompiler {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "LiteralCompiler-itr");
         visitLineNumber(compiler, ga, expression);
-        GroundedValue value = ((Literal) expression).getValue();
+        GroundedValue value = ((Literal) expression).getGroundedValue();
         if (value.getLength() == 0) {
             ga.invokeStaticMethod(EmptyIterator.class, "getInstance");
         } else if (value instanceof Item) {
@@ -152,7 +152,7 @@ public class LiteralCompiler extends ExpressionCompiler {
     public void compileToBoolean(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         visitLineNumber(compiler, ga, expression);
-        GroundedValue value = ((Literal) expression).getValue();
+        GroundedValue value = ((Literal) expression).getGroundedValue();
         try {
             boolean b = ExpressionTool.effectiveBooleanValue(value.iterate());
             ga.push(b);
@@ -172,7 +172,7 @@ public class LiteralCompiler extends ExpressionCompiler {
         ga.storeLocal(outVar);
 //		compileToItem(compiler, expression);
 //		ga.invokeInstanceMethod(SequenceReceiver.class , "append", Item.class);
-        GroundedValue value = ((Literal) expression).getValue();
+        GroundedValue value = ((Literal) expression).getGroundedValue();
         ExpressionCompiler.allocateStatic(compiler, value);
         ga.invokeInstanceMethod(Sequence.class, "iterate");
         int seqVar = methodInfo.allocateLocal(SequenceIterator.class);

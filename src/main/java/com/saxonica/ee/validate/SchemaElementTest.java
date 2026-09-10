@@ -29,10 +29,10 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
     // a ContentTypeTest. This was changed as a consequence of the change to the specification introduced
     // by the resolution of specification bug 10065
 
-    private ElementDecl head;
-    private IntHashMap<ElementDecl> groupByFingerprint;
-    private HashMap<NodeName, ElementDecl> groupByName;
-    private SchemaType requiredType;
+    private final ElementDecl head;
+    private final IntHashMap<ElementDecl> groupByFingerprint;
+    private final HashMap<NodeName, ElementDecl> groupByName;
+    private final SchemaType requiredType;
 
     /**
      * Constructor

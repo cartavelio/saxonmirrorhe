@@ -57,6 +57,7 @@ import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.JSONEmitter;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StyleNodeFactory;
 import net.sf.saxon.style.StylesheetPackage;
@@ -64,12 +65,11 @@ import net.sf.saxon.style.XSLTemplate;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -108,7 +108,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     private int thresholdForInliningFunctions = 100;
     private int maxCompiledClasses = 10000;
     private Boolean streamabilityEnabled = null;
-    private ConcurrentHashMap<String, RegularExpression> regexCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, RegularExpression> regexCache = new ConcurrentHashMap<>();
     private long regexAttempts = 0;
     private MultithreadingFactory multithreadingFactory = new MultithreadingFactory(this);
     //#if BYTECODE == true
@@ -999,7 +999,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Schema");
+                    return StringItem.bmp("Schema");
                 case "type definitions": {
                     List<Function> list = new ArrayList<>();
                     Iterator<SchemaType> iter = getSuperSchema().iterateTypes();
@@ -1223,7 +1223,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             memberRefs.add(ref);
         }
         UserUnionType uut = new UserUnionType(this);
-        FastStringBuffer fsb = new FastStringBuffer(256);
+        StringBuilder fsb = new StringBuilder(256);
         String sep = "";
         for (AtomicType at : memberTypes) {
             fsb.append(sep);
@@ -1574,7 +1574,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public SimpleType validateAttribute(StructuredQName nodeName, CharSequence value, int validation)
+    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
             throws ValidationException, MissingComponentException {
         if (isLicenseNotFound()) {
             return BuiltInAtomicType.UNTYPED_ATOMIC;
@@ -2055,11 +2055,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     @Override
-    public RegularExpression compileRegularExpression(CharSequence regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
+    public RegularExpression compileRegularExpression(UnicodeString regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
         if (optimizerOptions.isSet(OptimizerOptions.REGEX_CACHE)) {
             regexAttempts++;
-            FastStringBuffer buff = new FastStringBuffer(regex.length()+flags.length()+hostLanguage.length()+1);
-            buff.cat(hostLanguage).cat(flags).cat('=').cat(regex);
+            StringBuilder buff = new StringBuilder((int)Long.min(regex.estimatedLength()+flags.length()+hostLanguage.length()+1, Integer.MAX_VALUE));
+            buff.append(hostLanguage).append(flags).append('=').append(regex.toString());
             String key = buff.toString();
             RegularExpression re = regexCache.get(key);
             if (re == null) {
@@ -2401,7 +2401,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             }
             w.close();
         } catch (FileNotFoundException e) {
-            getLogger().warning("Unable to produce bytecode monitoring report: " + e.getMessage());
+            System.err.println("Unable to produce bytecode monitoring report: " + e.getMessage());
         }
     }
 //#endif

@@ -20,7 +20,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
 
     private Configuration config;
     private String systemId;
-    private long documentNumber;
+    private final long documentNumber;
     private int lastNodeNumber = 1;
     private HashMap<String, Object> userData;
     //private Map<Accumulator, AccumulatorWatch> accumulatorWatchMap;
@@ -111,10 +111,10 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
             for (NodeInfo node : initialCommentsAndProcessingInstructions) {
                 switch (node.getNodeKind()) {
                     case Type.COMMENT:
-                        out.comment(node.getStringValue(), Loc.NONE, ReceiverOption.NONE);
+                        out.comment(node.getUnicodeStringValue(), Loc.NONE, ReceiverOption.NONE);
                         break;
                     case Type.PROCESSING_INSTRUCTION:
-                        out.processingInstruction(node.getLocalPart(), node.getStringValue(),
+                        out.processingInstruction(node.getLocalPart(), node.getUnicodeStringValue(),
                                                   Loc.NONE, ReceiverOption.NONE);
                         break;
                     default:
@@ -148,7 +148,7 @@ public class FleetingDocumentNode extends FleetingParentNode implements TreeInfo
      */
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getStringValueCS());
+        return new UntypedAtomicValue(getUnicodeStringValue());
     }
 
     /**

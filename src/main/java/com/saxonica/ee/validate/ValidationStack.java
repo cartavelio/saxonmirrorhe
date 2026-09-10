@@ -19,6 +19,9 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -44,18 +47,18 @@ import java.util.*;
 
 public class ValidationStack extends ValidatingFilter {
 
-    private Stack<ContentValidator> stack = new Stack<>();
-    private Stack<Location> locationStack = new Stack<>();
+    private final Stack<ContentValidator> stack = new Stack<>();
+    private final Stack<Location> locationStack = new Stack<>();
 //    private boolean contentStarted = false;
-    private Receiver outputReceiver;
+    private final Receiver outputReceiver;
     private ContentValidator initialValidator;
     private List<ValidationFailure> xsiValidationErrors;
-    private int initialValidationMode;
-    private SchemaType initialType;
+    private final int initialValidationMode;
+    private final SchemaType initialType;
     private boolean isNilled = false;
     private NodeName topLevelElement = null;
-    private AssertionTreeBuilder assertionBuilder;
-    private WatchManager watchManager;
+    private final AssertionTreeBuilder assertionBuilder;
+    private final WatchManager watchManager;
     private TinyBuilder builder;
     private int builderDepth;
     private Map<SchemaComponent, Integer> statistics;
@@ -396,7 +399,7 @@ public class ValidationStack extends ValidatingFilter {
                     if (a.getMessage() != null) {
                         message += ". " + a.getMessage();
                     } else {
-                        message += " " + Whitespace.collapseWhitespace(a.getConditionText());
+                        message += " " + Whitespace.collapseWhitespace(StringView.of(a.getConditionText()).tidy());
                     }
 
                     ValidationFailure error = new ValidationFailure(message);
@@ -424,7 +427,7 @@ public class ValidationStack extends ValidatingFilter {
                             if (a.getMessage() != null) {
                                 message += ". " + a.getMessage();
                             } else {
-                                message += " " + Whitespace.collapseWhitespace(a.getConditionText());
+                                message += " " + Whitespace.collapseWhitespace(StringView.of(a.getConditionText()).tidy());
                             }
 
                             ValidationFailure error = new ValidationFailure(message);
@@ -472,7 +475,7 @@ public class ValidationStack extends ValidatingFilter {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
 //        if (!contentStarted) {
 //            startContent();
 //        }
@@ -559,7 +562,7 @@ public class ValidationStack extends ValidatingFilter {
         Set<Assertion> assertions = type.getAssertions();
         AtomicSequence value = null;
         if (type.isSimpleContent()) {
-            CharSequence s = root.getStringValueCS();
+            UnicodeString s = root.getUnicodeStringValue();
             SimpleType st = type.getSimpleContentType();
             NamespaceResolver ns = st.isNamespaceSensitive() ? root.getAllNamespaces() : null;
             value = st.getTypedValue(s, ns, getConfiguration().getConversionRules());
@@ -578,7 +581,7 @@ public class ValidationStack extends ValidatingFilter {
             if (assertion.getMessage() != null) {
                 message += ". " + assertion.getMessage();
             } else {
-                message += " " + Whitespace.collapseWhitespace(assertion.getConditionText());
+                message += " " + Whitespace.collapseWhitespace(StringView.tidy(assertion.getConditionText()));
             }
 
             ValidationFailure error = new ValidationFailure(message);

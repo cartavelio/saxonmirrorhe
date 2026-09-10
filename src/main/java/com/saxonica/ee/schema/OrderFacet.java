@@ -4,6 +4,8 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
@@ -29,8 +31,9 @@ public class OrderFacet extends Facet {
     }
 
     @Override
-    public String getValue() {
-        return ascending ? "ascending" : "descending";
+    public UnicodeString getValue() {
+        String base = ascending ? "ascending" : "descending";
+        return BMPString.of(base);
     }
 
     public void setValue(String value) throws SchemaException {
@@ -123,11 +126,11 @@ public class OrderFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue(getName());
+                    return new StringItem(getName());
                 case "implementation":
                     return new ObjectValue<>(OrderFacet.this);
                 case "value":
-                    return new StringValue(getValue());
+                    return new StringItem(getValue());
                 case "fixed":
                     return BooleanValue.get(isFixed());
                 default:

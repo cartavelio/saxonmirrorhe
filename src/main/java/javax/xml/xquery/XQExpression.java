@@ -84,7 +84,7 @@ public interface XQExpression extends XQDynamicContext {
      *
      * @throws XQException if the expression is in a closed state
      */
-    public void cancel() throws XQException;
+    void cancel() throws XQException;
 
     /**
      * Checks if the expression is in a closed state.
@@ -92,7 +92,7 @@ public interface XQExpression extends XQDynamicContext {
      * @return <code>true</code> if the expression is in
      *         a closed state, <code>false</code> otherwise
      */
-    public boolean isClosed();
+    boolean isClosed();
 
     /**
      * Closes the expression object and release associated resources.
@@ -105,7 +105,7 @@ public interface XQExpression extends XQDynamicContext {
      *
      * @throws XQException if there are errors when closing the expression
      */
-    public void close() throws XQException;
+    void close() throws XQException;
 
     /**
      * Executes an implementation-defined command.
@@ -116,7 +116,7 @@ public interface XQExpression extends XQDynamicContext {
      * @throws XQException if (1) there are errors when executing the command,
      *                     or (2) the expression is in a closed state
      */
-    public void executeCommand(String cmd) throws XQException;
+    void executeCommand(String cmd) throws XQException;
 
     /**
      * Executes an implementation-defined command.
@@ -128,7 +128,7 @@ public interface XQExpression extends XQDynamicContext {
      *                     (2) the expression is in a closed state,
      *                     or (3) the execution is cancelled
      */
-    public void executeCommand(java.io.Reader cmd) throws XQException;
+    void executeCommand(java.io.Reader cmd) throws XQException;
 
     /**
      * Executes a query expression. This implicitly closes any previous
@@ -143,7 +143,7 @@ public interface XQExpression extends XQDynamicContext {
      *                     (3) the execution is cancelled,
      *                     (4) the query parameter is <code>null</code>
      */
-    public XQResultSequence executeQuery(String query) throws XQException;
+    XQResultSequence executeQuery(String query) throws XQException;
 
     /**
      * Executes a query expression. This implicitly closes any previous
@@ -158,7 +158,7 @@ public interface XQExpression extends XQDynamicContext {
      *                     (3) the execution is cancelled, or
      *                     (4) the query parameter is <code>null</code>
      */
-    public XQResultSequence executeQuery(java.io.Reader query) throws XQException;
+    XQResultSequence executeQuery(java.io.Reader query) throws XQException;
 
     /**
      * Executes a query expression. This implicitly closes any previous
@@ -178,7 +178,7 @@ public interface XQExpression extends XQDynamicContext {
      *                     (3) the execution is cancelled, or
      *                     (4) the xquery parameter is <code>null</code>
      */
-    public XQResultSequence executeQuery(java.io.InputStream query) throws XQException;
+    XQResultSequence executeQuery(java.io.InputStream query) throws XQException;
 
     /**
      * Gets an <code>XQStaticContext</code> representing the values for all
@@ -189,6 +189,6 @@ public interface XQExpression extends XQDynamicContext {
      *         the values for all expression properties
      * @throws XQException if the expression is in a closed state
      */
-    public XQStaticContext getStaticContext() throws XQException;
+    XQStaticContext getStaticContext() throws XQException;
 
 }

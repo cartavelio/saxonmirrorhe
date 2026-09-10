@@ -10,6 +10,9 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
@@ -166,7 +169,7 @@ public abstract class AttributeValidator extends ContentValidator {
                     notationIsAbstract(location);
                 }
                 ValidationFailure err = declaredType.validateContent(
-                        value, getNamespaceResolver(), getConfiguration().getConversionRules());
+                        StringView.of(value).tidy(), getNamespaceResolver(), getConfiguration().getConversionRules());
                 if (err != null) {
                     err.setConstraintReference(2, "cvc-complex-type", "3");
                     //                String elName = getContainingElement() != null ? getContainingElement() + "/" : "";
@@ -190,11 +193,11 @@ public abstract class AttributeValidator extends ContentValidator {
                     boolean matchesFixed = true;
                     if (use != null && use.getFixedValueConstraint() != null) {
                         matchesFixed = use.getFixedValueConstraint().testFixedValue(
-                                getConfiguration(), value, declaredType, getNamespaceResolver());
+                                getConfiguration(), StringView.of(value).tidy(), declaredType, getNamespaceResolver());
                     }
                     if (decl.getFixedValueConstraint() != null) {
                         matchesFixed = matchesFixed && decl.getFixedValueConstraint().testFixedValue(
-                                getConfiguration(), value, declaredType, getNamespaceResolver());
+                                getConfiguration(), StringView.of(value).tidy(), declaredType, getNamespaceResolver());
                     }
 
                     if (!matchesFixed) {
@@ -228,10 +231,10 @@ public abstract class AttributeValidator extends ContentValidator {
                         reportValidationError(ve, true, getContainingElementLocationId());
                     } else if (pipe.getParseOptions().isExpandAttributeDefaults()) {
                         // see if there is a default or fixed value
-                        String value = use.getUnderlyingDefaultValue();
+                        UnicodeString value = use.getUnderlyingDefaultValue();
                         if (value == null) {
                             AtomicSequence fixed = use.getUnderlyingFixedValue();
-                            value = fixed == null ? null : fixed.getStringValue();
+                            value = fixed == null ? null : fixed.getUnicodeStringValue();
                         }
                         if (value != null) {
                             if (use.getAttributeDeclaration().getSimpleType().isNamespaceSensitive()) {
@@ -276,7 +279,7 @@ public abstract class AttributeValidator extends ContentValidator {
                             }
                             result = result.put(new AttributeInfo(new CodedName(key, prefix, getNamePool()),
                                                 use.getAttributeDeclaration().getSimpleType(),
-                                                value,
+                                                value.toString(),
                                                 Loc.NONE,
                                                 ReceiverOption.DEFAULTED_VALUE));
                         }
@@ -288,7 +291,7 @@ public abstract class AttributeValidator extends ContentValidator {
         return result;
     }
 
-    private void checkNamespaceSensitiveDefaultValue(AttributeUse use, String value) throws XPathException {
+    private void checkNamespaceSensitiveDefaultValue(AttributeUse use, UnicodeString value) throws XPathException {
         ValidationFailure err =
                 use.getAttributeDeclaration().getSimpleType().validateContent(
                         value,
@@ -317,7 +320,7 @@ public abstract class AttributeValidator extends ContentValidator {
         String message = "The actual value " + Err.wrap(value, Err.VALUE) +
                 " of attribute " + Err.wrap(attName.getDisplayName(), Err.ATTRIBUTE) +
                 " does not match the required fixed value " +
-                (fixed instanceof AtomicValue ? Err.wrap(fixed.getStringValue(), Err.VALUE) : "");
+                (fixed instanceof AtomicValue ? Err.wrap(fixed.getUnicodeStringValue(), Err.VALUE) : "");
         ValidationFailure ve = new ValidationFailure(message);
         ve.setConstraintReference(1, "cvc-au", "0");
         ve.setSchemaType(getSchemaType());
@@ -428,13 +431,11 @@ public abstract class AttributeValidator extends ContentValidator {
 
         final PipelineConfiguration pipe = getPipelineConfiguration();
 
-        NamespaceMap nsMap = namespaces;
-
         super.startElement(elemName, type, attributes, namespaces, location, properties);
 
         if (locallyInvalid && pendingMessages != null) {
             for (String pendingMessage : pendingMessages) {
-                nextReceiver.comment(pendingMessage, Loc.NONE, ReceiverOption.NONE);
+                nextReceiver.comment(StringView.of(pendingMessage), Loc.NONE, ReceiverOption.NONE);
             }
         }
     }
@@ -442,14 +443,13 @@ public abstract class AttributeValidator extends ContentValidator {
 
     /**
      * Handle character data appearing as a child of the element being validated
-     *
-     * @param chars      The character content
+     *  @param chars      The character content
      * @param locationId the location of the node in the source, or of the instruction that created it
      * @param properties Additional properties  @throws net.sf.saxon.trans.XPathException
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         nextReceiver.characters(chars, locationId, properties);
     }

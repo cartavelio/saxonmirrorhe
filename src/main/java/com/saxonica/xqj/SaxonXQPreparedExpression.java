@@ -35,10 +35,10 @@ import java.util.List;
  */
 public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements XQPreparedExpression {
 
-    private XQueryExpression expression;
-    private SaxonXQStaticContext staticContext;
-    private DynamicQueryContext context;
-    private boolean scrollable;
+    private final XQueryExpression expression;
+    private final SaxonXQStaticContext staticContext;
+    private final DynamicQueryContext context;
+    private final boolean scrollable;
 
     protected SaxonXQPreparedExpression(SaxonXQConnection connection,
                                         XQueryExpression expression,
@@ -126,7 +126,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         }
     }
 
-    /*@NotNull*/ private static QName[] EMPTY_QNAME_ARRAY = new QName[0];
+    /*@NotNull*/ private static final QName[] EMPTY_QNAME_ARRAY = new QName[0];
 
     /*@NotNull*/
     @Override

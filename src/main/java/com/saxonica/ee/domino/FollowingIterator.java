@@ -13,11 +13,11 @@ import java.util.function.IntPredicate;
 
 final class FollowingIterator implements AxisIterator {
 
-    private DominoTree tree;
-    private DominoNode startNode;
+    private final DominoTree tree;
+    private final DominoNode startNode;
     private NodeInfo current;
-    private NodeTest test;
-    private boolean includeDescendants;
+    private final NodeTest test;
+    private final boolean includeDescendants;
     int position = 0;
     private final IntPredicate matcher;
 

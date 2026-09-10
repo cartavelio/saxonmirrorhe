@@ -5,9 +5,8 @@ import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -26,12 +25,12 @@ public abstract class ValueRangeFacet extends Facet {
 
 
     @Override
-    public String getValue() {
-        return requiredValue.getStringValue();
+    public UnicodeString getValue() {
+        return requiredValue.getUnicodeStringValue();
     }
 
     public void setValue(String value) throws SchemaException {
-        requiredValue = StringValue.makeStringValue(value);
+        requiredValue = StringItem.makeStringValue(value);
     }
 
     public void setRequiredValue(AtomicValue value) {
@@ -166,9 +165,9 @@ public abstract class ValueRangeFacet extends Facet {
     protected void convertToTargetType(SimpleType base, Configuration config) throws SchemaException {
         if (!isConverted) {
             StringConverter converter = ((AtomicType) base).getStringConverter(config.getConversionRules());
-            ConversionResult v = converter.convertString(requiredValue.getStringValueCS());
+            ConversionResult v = converter.convertString(requiredValue.getUnicodeStringValue());
             if (v instanceof ValidationFailure) {
-                String s = Err.wrap(requiredValue.getStringValue(), Err.VALUE);
+                String s = Err.wrap(requiredValue.getUnicodeStringValue(), Err.VALUE);
                 throw new SchemaException("The value " + s + " of the " + getName() +
                         " facet is not valid for the type " +
                         base.getDescription() + ". " +
@@ -219,7 +218,7 @@ public abstract class ValueRangeFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue(getName());
+                    return StringItem.bmp(getName());
                 case "implementation":
                     return new ObjectValue<>(this);
                 case "value":

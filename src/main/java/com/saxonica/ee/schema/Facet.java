@@ -5,6 +5,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
@@ -106,7 +107,7 @@ public abstract class Facet {
      * @return the value of this facet, as a string
      */
 
-    public abstract String getValue();
+    public abstract UnicodeString getValue();
 
     /**
      * Returns the numeric value of this facet, for facets where this is appropriate
@@ -116,7 +117,7 @@ public abstract class Facet {
      */
 
     public long toLong() throws NumberFormatException {
-        return Long.parseLong(getValue());
+        return Long.parseLong(getValue().toString());
     }
 
     /**
@@ -210,7 +211,7 @@ public abstract class Facet {
         if (getValue() == null) {
             throw new NullPointerException("*** Facet " + getName() + " has no value");
         }
-        serializer.emitAttribute("value", getValue());
+        serializer.emitAttribute("value", getValue().toString());
         if (isFixed()) {
             serializer.emitAttribute("fixed", "true");
         }

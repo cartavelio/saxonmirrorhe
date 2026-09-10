@@ -76,7 +76,7 @@ public class XSDAlternative extends AnnotationParent {
             // Declare any variables defined in saxon:param elements
             for (GlobalParam param : getXSDSchema().getGlobalParams()) {
                 XPathVariable var = env.declareVariable(param.getVariableQName());
-                GroundedValue defaultVal = ((Literal) param.getBody()).getValue();
+                GroundedValue defaultVal = ((Literal) param.getBody()).getGroundedValue();
                 var.setDefaultValue(defaultVal);
                 parameters.put(param.getVariableQName(), var);
             }

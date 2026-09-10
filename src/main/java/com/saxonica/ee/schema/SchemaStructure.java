@@ -2,18 +2,18 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.Callable;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
@@ -354,9 +354,9 @@ public abstract class SchemaStructure implements Location {
                             String key1 = arguments1[0].head().getStringValue();
                             switch (key1) {
                                 case "prefix":
-                                    return new StringValue(prefix);
+                                    return new StringItem(prefix);
                                 case "namespace":
-                                    return new AnyURIValue(nsResolver.getURIForPrefix(prefix, false));
+                                    return new AnyURIValue((nsResolver.getURIForPrefix(prefix, false)));
                                 default:
                                     return EmptySequence.getInstance();
                             }
@@ -365,11 +365,11 @@ public abstract class SchemaStructure implements Location {
                     }
                     return SequenceExtent.makeSequenceExtent(bindings);
                 case "default namespace":
-                    return new AnyURIValue(nsResolver.getURIForPrefix("", true));
+                    return new AnyURIValue((nsResolver.getURIForPrefix("", true)));
                 case "base URI":
-                    return new AnyURIValue(baseURI);
+                    return new AnyURIValue((baseURI));
                 case "expression":
-                    return new StringValue(conditionText);
+                    return new StringItem(conditionText);
                 default:
                     return EmptySequence.getInstance();
             }

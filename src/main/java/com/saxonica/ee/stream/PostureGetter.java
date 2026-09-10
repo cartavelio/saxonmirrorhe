@@ -6,7 +6,7 @@ package com.saxonica.ee.stream;
  */
 public interface PostureGetter {
 
-    public Posture getPosture();
+    Posture getPosture();
 
 }
 

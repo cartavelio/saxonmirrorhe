@@ -16,7 +16,7 @@ import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleChain;
 import net.sf.saxon.trans.rules.RuleSearchState;
 import net.sf.saxon.trans.rules.RuleTarget;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 
@@ -43,10 +43,10 @@ public class ModeEE extends ModePE {
     protected void exportUseAccumulators(ExpressionPresenter presenter) {
         Set<? extends Accumulator> accumulators = getAccumulators();
         if (accumulators != null && !accumulators.isEmpty()) {
-            FastStringBuffer fsb = new FastStringBuffer(256);
+            StringBuilder fsb = new StringBuilder(256);
             for (Accumulator acc : accumulators) {
                 String name = acc.getAccumulatorName().getEQName();
-                if (!fsb.isEmpty()) {
+                if (fsb.length() != 0) {
                     fsb.append(" ");
                 }
                 fsb.append(name);

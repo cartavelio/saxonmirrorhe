@@ -98,12 +98,20 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
             ga.pushNull();
         }
         ga.loadLocal(tunnelsVar);
-        ga.pushNull(); // TODO: add separator text node
+        ga.pushNull();
         ga.loadArgOrLocal(methodInfo.getOutputterPosition());
         ga.loadLocal(context2Var);
         allocateStatic(compiler, apply.getLocation());
+//        applyTemplates(
+//                ParameterSet parameters,
+//                ParameterSet tunnelParameters,
+//                NodeInfo separator,
+//                Outputter output,
+//                XPathContextMajor context,
+//                Location locationId)
         ga.invokeInstanceMethod(Mode.class, "applyTemplates", ParameterSet.class, ParameterSet.class,
-                                NodeInfo.class, Outputter.class, XPathContextMajor.class, Location.class);
+                                NodeInfo.class,
+                                Outputter.class, XPathContextMajor.class, Location.class);
 
         LabelInfo applyEnd = methodInfo.newLabel("applyEnd");
         LabelInfo tailCallLoop = methodInfo.placeNewLabel("loop");

@@ -40,7 +40,8 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
         visitAnnotation(compiler, "SlashExpressionCompiler-Iterator");
         visitLineNumber(compiler, ga, expression);
 
-        if (expression instanceof SlashExpression && ((SlashExpression)expression).isContextFree()
+        if (expression instanceof SlashExpression
+                && ((SlashExpression)expression).isContextFree()
                 && step instanceof AxisExpression) {
 //            return new MappingIterator<>((SequenceIterator<? extends NodeInfo>) getStart().iterate(context),
 //                                         ((AxisExpression) getRhsExpression())::iterate);
@@ -106,7 +107,7 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
         compiler.checkMaxClassesLimit();
         ClassWriter cw = new ClassWriter(compiler.getFlags());
         ClassVisitor cv = cw;
-        String className = "gen_SlashContextMappingFunction_" + compiler.getUniqueNumber();
+        String className = "gen_SlashContextMappingFunction_" + CompilerService.getUniqueNumber();
         cv = compiler.makeAnnotatedTraceClassVisitor(cv, className);
 
         cv.visitSource(step.getLocation().getSystemId(), null);
@@ -156,7 +157,7 @@ public class SlashExpressionCompiler extends ToIteratorCompiler {
         compiler.checkMaxClassesLimit();
         ClassWriter cw = new ClassWriter(compiler.getFlags());
         ClassVisitor cv = cw;
-        String className = "gen_AxisMappingFunction_" + compiler.getUniqueNumber();
+        String className = "gen_AxisMappingFunction_" + CompilerService.getUniqueNumber();
         cv = compiler.makeAnnotatedTraceClassVisitor(cv, className);
 
         cv.visitSource(step.getLocation().getSystemId(), null);

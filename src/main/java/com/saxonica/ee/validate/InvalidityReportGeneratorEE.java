@@ -34,7 +34,7 @@ import java.util.List;
 public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
 
     private Destination destination = null;
-    private int warningCount = 0;
+    private final int warningCount = 0;
     private int errorCount = 0;
     private String xsdversion = "1.0";
     private String systemId = null;
@@ -186,7 +186,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
                             .attribute("type",
                                        Type.displayTypeName(node))
                             .attribute("content",
-                                       node.getNodeKind() == Type.TEXT && node.getStringValue().length() < 200 ? node.getStringValue() : null)
+                                       node.getNodeKind() == Type.TEXT && node.getUnicodeStringValue().estimatedLength() < 200 ? node.getStringValue() : null)
                             .attribute("line",
                                        ifPositive(node.getLineNumber()))
                             .attribute("column",

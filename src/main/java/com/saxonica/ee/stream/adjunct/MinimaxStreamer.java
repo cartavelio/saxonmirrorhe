@@ -23,7 +23,6 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.FloatValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 
 /**
@@ -91,13 +90,13 @@ public class MinimaxStreamer extends StreamingAdjunct implements FeedMaker {
 
                 // Get the first value in the sequence, ignoring any NaN values if we are ignoring NaN values
 
-                if (value instanceof UntypedAtomicValue) {
+                if (value.isUntypedAtomic()) {
                     try {
                         StringToDouble converter = getContext().getConfiguration().getConversionRules().getStringToDoubleConverter();
-                        value = new DoubleValue(converter.stringToNumber(value.getStringValueCS()));
+                        value = new DoubleValue(converter.stringToNumber(value.getUnicodeStringValue()));
                         foundDouble = true;
                     } catch (NumberFormatException e) {
-                        XPathException de = new XPathException("Failure converting " + Err.wrap(value.getStringValueCS()) + " to a number");
+                        XPathException de = new XPathException("Failure converting " + Err.wrap(value.getUnicodeStringValue()) + " to a number");
                         de.setErrorCode("FORG0001");
                         de.setXPathContext(getContext());
                         dynamicError(de);

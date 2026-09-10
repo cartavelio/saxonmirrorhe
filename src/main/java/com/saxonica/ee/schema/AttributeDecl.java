@@ -7,10 +7,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -53,7 +50,7 @@ public final class AttributeDecl extends SchemaStructure
     /**
      * Flag to indicate whether the attribute declaration is global
      */
-    private boolean global;
+    private final boolean global;
 
     /**
      * The name of the attribute
@@ -522,7 +519,7 @@ public final class AttributeDecl extends SchemaStructure
             serializer.emitAttribute("containingComplexType", serializer.getId(getContainingComplexType(), false));
         }
         if (getDefaultValueLexicalForm() != null) { // for backwards compatibility
-            serializer.emitAttribute("default", getDefaultValueLexicalForm());
+            serializer.emitAttribute("default", getDefaultValueLexicalForm().toString());
         }
         if (getValueConstraint() != null) {
             getValueConstraint().serialize(serializer);
@@ -536,13 +533,13 @@ public final class AttributeDecl extends SchemaStructure
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Attribute Declaration");
+                    return StringItem.bmp("Attribute Declaration");
                 case "implementation":
                     return new ObjectValue<>(AttributeDecl.this);
                 case "name":
-                    return new StringValue(getName(), BuiltInAtomicType.NCNAME);
+                    return new StringItem(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
-                    return new AnyURIValue(getTargetNamespace());
+                    return new AnyURIValue((getTargetNamespace()));
                 case "type definition":
                     return getType().getComponentAsFunction();
                 case "scope":
@@ -550,9 +547,9 @@ public final class AttributeDecl extends SchemaStructure
                         String key1 = arguments1[0].head().getStringValue();
                         switch (key1) {
                             case "class":
-                                return new StringValue("Scope");
+                                return StringItem.bmp("Scope");
                             case "variety":
-                                return new StringValue(isGlobal() ? "global" : "local");
+                                return StringItem.bmp(isGlobal() ? "global" : "local");
                             case "parent":
                                 if (isGlobal()) {
                                     return EmptySequence.getInstance();

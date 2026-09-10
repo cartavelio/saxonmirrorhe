@@ -10,7 +10,7 @@ import net.sf.saxon.trans.QuitParsingException;
  */
 public class Terminator {
 
-    private static Terminator THE_INSTANCE = new Terminator();
+    private static final Terminator THE_INSTANCE = new Terminator();
 
     public static Terminator getInstance() {
         return THE_INSTANCE;

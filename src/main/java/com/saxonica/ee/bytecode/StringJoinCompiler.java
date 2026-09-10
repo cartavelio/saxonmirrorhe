@@ -10,8 +10,8 @@ import net.sf.saxon.functions.StringJoin;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.value.StringValue;
+
+import net.sf.saxon.value.StringItem;
 
 public class StringJoinCompiler extends ToStringCompiler {
 
@@ -30,7 +30,7 @@ public class StringJoinCompiler extends ToStringCompiler {
         compiler.generateGetOutputter();
         ga.ifNotInstance(ComplexContentOutputter.class, notInstanceOf);
         compiler.generateGetOutputter();
-        ga.getStaticField(StringValue.class, "EMPTY_STRING", StringValue.class);
+        ga.getStaticField(StringItem.class, "EMPTY_STRING", StringItem.class);
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
         ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
@@ -67,7 +67,7 @@ public class StringJoinCompiler extends ToStringCompiler {
         ga.ifNonNull(notNull.label());
         visitAnnotation(compiler, "StringJoin-second-item-is-null");
         compiler.generateGetOutputter();
-        ga.getStaticField(StringValue.class, "EMPTY_STRING", StringValue.class);
+        ga.getStaticField(StringItem.class, "EMPTY_STRING", StringItem.class);
         allocateStatic(compiler, expression.getLocation());
         ga.push(ReceiverOption.NONE);
         ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
@@ -157,6 +157,7 @@ public class StringJoinCompiler extends ToStringCompiler {
     @Override
     public void compileToPrimitive(CompilerService compiler, Expression expression, Class requiredClass, OnEmpty onEmpty)
             throws CannotCompileException {
+        assert requiredClass == String.class;
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         Expression expr0 = fnc.getArg(0);
         Generator ga = compiler.getCurrentGenerator();
@@ -185,8 +186,8 @@ public class StringJoinCompiler extends ToStringCompiler {
         ga.goTo(end);
 
         methodInfo.placeLabel(notNull);
-        ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-        int firstVar = methodInfo.allocateLocal(CharSequence.class);
+        ga.invokeInstanceMethod(Item.class, "getStringValue");
+        int firstVar = methodInfo.allocateLocal(String.class);
         ga.storeLocal(firstVar);
 
         ga.loadLocal(iterVar);
@@ -199,15 +200,15 @@ public class StringJoinCompiler extends ToStringCompiler {
         ga.goTo(end);
 
         methodInfo.placeLabel(notNull2);
-        ga.newInstance(FastStringBuffer.class);
+        ga.newInstance(StringBuilder.class);
         ga.dup();
-        ga.push(FastStringBuffer.C64);
-        ga.invokeConstructor(FastStringBuffer.class, Integer.TYPE);
-        int sbVar = methodInfo.allocateLocal(FastStringBuffer.class);
+        ga.push(64);
+        ga.invokeConstructor(StringBuilder.class, Integer.TYPE);
+        int sbVar = methodInfo.allocateLocal(StringBuilder.class);
         ga.storeLocal(sbVar);
         ga.loadLocal(sbVar);
         ga.loadLocal(firstVar);
-        ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+        ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
 
         LabelInfo done = methodInfo.newLabel("doneSJ");
         int sepVar = -1;
@@ -215,18 +216,18 @@ public class StringJoinCompiler extends ToStringCompiler {
             ga.loadLocal(sbVar);
             ga.swap();
             ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
         } else {
-            compiler.compileToPrimitive(((SystemFunctionCall) expression).getArg(1), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-            sepVar = methodInfo.allocateLocal(CharSequence.class);
+            compiler.compileToPrimitive(((SystemFunctionCall) expression).getArg(1), String.class, OnEmpty.RETURN_EMPTY_STRING);
+            sepVar = methodInfo.allocateLocal(String.class);
             ga.storeLocal(sepVar);
             ga.loadLocal(sbVar);
             ga.loadLocal(sepVar);
-            ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
             ga.loadLocal(sbVar);
             ga.swap();
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+            ga.invokeInstanceMethod(Item.class, "getStringValue");
+            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
         }
         //int itVar = methodInfo.allocateLocal(Item.class);
         LabelInfo loop = methodInfo.placeNewLabel("loop");
@@ -243,22 +244,22 @@ public class StringJoinCompiler extends ToStringCompiler {
         if (sepVar >= 0) {
             ga.loadLocal(sepVar);
             // assert stack : item buffer separator
-            ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+            ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
             ga.loadLocal(sbVar);
             // assert stack : item buffer
         }
         ga.swap();
         // assert stack : buffer item
-        ga.invokeInstanceMethod(Item.class, "getStringValueCS");
+        ga.invokeInstanceMethod(Item.class, "getStringValue");
         // assert stack : buffer string
-        ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+        ga.invokeInstanceMethod(StringBuilder.class, "append", String.class);
         // assert stack : (empty)
         ga.goTo(loop);
 
         methodInfo.placeLabel(done);
         ga.pop();
         ga.loadLocal(sbVar);
-        ga.invokeInstanceMethod(FastStringBuffer.class, "condense");
+        ga.invokeInstanceMethod(StringBuilder.class, "toString");
         //ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
 
         methodInfo.placeLabel(end);
@@ -268,9 +269,6 @@ public class StringJoinCompiler extends ToStringCompiler {
         methodInfo.releaseLocal(sbVar);
         methodInfo.releaseLocal(sepVar);
 
-        if (requiredClass == String.class) {
-            ga.invokeInstanceMethod(Object.class, "toString");
-        }
     }
 
 }

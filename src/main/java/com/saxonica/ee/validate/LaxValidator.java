@@ -8,6 +8,8 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -82,7 +84,7 @@ public class LaxValidator extends ContentValidator {
         if (decl != null) {
             SimpleType type = decl.getSimpleType();
             ValidationFailure err = type.validateContent(
-                    att.getValue(), getNamespaceResolver(), getConfiguration().getConversionRules());
+                    StringView.of(att.getValue()).tidy(), getNamespaceResolver(), getConfiguration().getConversionRules());
             if (err != null) {
                 err.setConstraintReference(1, "cvc-complex-type", "3");
                 err.setSchemaType(type);
@@ -100,12 +102,12 @@ public class LaxValidator extends ContentValidator {
 
                 ValueConstraint constraint = decl.getFixedValueConstraint();
                 if (constraint != null && !constraint.testFixedValue(
-                        getConfiguration(), value, type, getNamespaceResolver())) {
+                        getConfiguration(), StringView.of(value).tidy(), type, getNamespaceResolver())) {
                     AtomicSequence fixed = decl.getFixedValue();
                     String message = "The actual value " + Err.wrap(value, Err.VALUE) +
                             " of attribute " + Err.wrap(att.getNodeName().getDisplayName(), Err.ATTRIBUTE) +
                             " does not match the required fixed value " +
-                            (fixed instanceof AtomicValue ? Err.wrap(fixed.getStringValue(), Err.VALUE) : "");
+                            (fixed instanceof AtomicValue ? Err.wrap(fixed.getUnicodeStringValue(), Err.VALUE) : "");
                     ValidationFailure ve = new ValidationFailure(message);
                     ve.setConstraintReference(1, "cvc-au", "0");
                     ve.setSchemaType(type);
@@ -121,7 +123,7 @@ public class LaxValidator extends ContentValidator {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         super.characters(chars, locationId, properties);
     }

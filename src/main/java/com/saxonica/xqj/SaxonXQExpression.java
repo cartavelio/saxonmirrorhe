@@ -26,8 +26,8 @@ import java.io.Reader;
  */
 public class SaxonXQExpression extends SaxonXQDynamicContext implements XQExpression {
 
-    private SaxonXQStaticContext sqc;
-    private DynamicQueryContext context;
+    private final SaxonXQStaticContext sqc;
+    private final DynamicQueryContext context;
 
     SaxonXQExpression(SaxonXQConnection connection) throws XQException {
         this.connection = connection;

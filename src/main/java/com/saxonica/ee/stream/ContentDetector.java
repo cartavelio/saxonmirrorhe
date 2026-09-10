@@ -5,6 +5,7 @@ import net.sf.saxon.event.Event;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
@@ -52,7 +53,7 @@ public class ContentDetector extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         flush(true);
         nextReceiver.characters(chars, locationId, properties);
     }
@@ -63,7 +64,7 @@ public class ContentDetector extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         flush(true);
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
@@ -73,7 +74,7 @@ public class ContentDetector extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         flush(true);
         nextReceiver.comment(chars, locationId, properties);
     }

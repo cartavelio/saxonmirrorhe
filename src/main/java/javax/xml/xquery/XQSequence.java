@@ -96,7 +96,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only, or
      *                     (2) the sequence is in a closed state
      */
-    public boolean absolute(int itempos) throws XQException;
+    boolean absolute(int itempos) throws XQException;
 
     /**
      * Move to the position after the last item.
@@ -104,7 +104,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public void afterLast() throws XQException;
+    void afterLast() throws XQException;
 
     /**
      * Moves to the position before the first item.
@@ -112,7 +112,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public void beforeFirst() throws XQException;
+    void beforeFirst() throws XQException;
 
     /**
      * Closes the sequence and frees all resources associated with this
@@ -130,7 +130,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if there are errors during closing of
      *                     the sequence
      */
-    public void close() throws XQException;      // release resources
+    void close() throws XQException;      // release resources
 
     /**
      * Checks if the sequence is closed.
@@ -138,7 +138,7 @@ public interface XQSequence extends XQItemAccessor {
      * @return <code>true</code> if the sequence is in
      *         a closed state, <code>false</code> otherwise
      */
-    public boolean isClosed();
+    boolean isClosed();
 
     /**
      * Returns a number indicating the number of items in the sequence.
@@ -147,7 +147,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward-only, or (2)
      *                     the sequence is closed
      */
-    public int count() throws XQException;
+    int count() throws XQException;
 
     /**
      * Gets the current cursor position. <p>
@@ -163,7 +163,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward-only, or (2)
      *                     the sequence is closed
      */
-    public int getPosition() throws XQException;
+    int getPosition() throws XQException;
 
     /**
      * Check if the sequence is positioned on an item or not.
@@ -176,7 +176,7 @@ public interface XQSequence extends XQItemAccessor {
      *         item
      * @throws XQException if the sequence is in a closed state
      */
-    public boolean isOnItem() throws XQException;
+    boolean isOnItem() throws XQException;
 
     /**
      * Checks if the sequence is scrollable.
@@ -185,7 +185,7 @@ public interface XQSequence extends XQItemAccessor {
      *         backward or forward, <code>false</code> otherwise
      * @throws XQException if the sequence is in a closed state
      */
-    public boolean isScrollable() throws XQException;
+    boolean isScrollable() throws XQException;
 
     /**
      * Moves to the first item in the sequence. The method returns
@@ -198,7 +198,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public boolean first() throws XQException;
+    boolean first() throws XQException;
 
     /**
      * Get the current item as an immutable <code>XQItem</code> object.
@@ -218,7 +218,7 @@ public interface XQSequence extends XQItemAccessor {
      *                     a get or write method has already been invoked
      *                     on the current item.
      */
-    public XQItem getItem() throws XQException;
+    XQItem getItem() throws XQException;
 
     /**
      * Read the entire sequence starting from the current position as an
@@ -251,7 +251,7 @@ public interface XQSequence extends XQItemAccessor {
      *                     Serializing an XDM instance into a StAX event stream
      *                     (XMLStreamReader), XQuery API for Java (XQJ) 1.0</i>
      */
-    public javax.xml.stream.XMLStreamReader getSequenceAsStream()
+    javax.xml.stream.XMLStreamReader getSequenceAsStream()
             throws XQException;
 
     /**
@@ -286,7 +286,7 @@ public interface XQSequence extends XQItemAccessor {
      *                     or (4) in the case of a forward only sequence, a get or
      *                     write method has already been invoked on the current item
      */
-    public java.lang.String getSequenceAsString(java.util.Properties props)
+    java.lang.String getSequenceAsString(java.util.Properties props)
             throws XQException;
 
     /**
@@ -299,7 +299,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public boolean isAfterLast() throws XQException;
+    boolean isAfterLast() throws XQException;
 
     /**
      * Checks if the current position before the first item in the sequence.
@@ -311,7 +311,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public boolean isBeforeFirst() throws XQException;
+    boolean isBeforeFirst() throws XQException;
 
     /**
      * Checks if the current position at the first item in the sequence.
@@ -323,7 +323,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public boolean isFirst() throws XQException;
+    boolean isFirst() throws XQException;
 
     /**
      * Checks if the current position at the last item in the sequence.
@@ -335,7 +335,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public boolean isLast() throws XQException;
+    boolean isLast() throws XQException;
 
     /**
      * Moves to the last item in the sequence. This method returns
@@ -348,7 +348,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only,
      *                     or (2) the sequence is in a closed state
      */
-    public boolean last() throws XQException;
+    boolean last() throws XQException;
 
     /**
      * Moves to the next item in the sequence.  Calling this method on an empty sequence
@@ -358,7 +358,7 @@ public interface XQSequence extends XQItemAccessor {
      *         <code>false</code> if there are no more items
      * @throws XQException if the sequence is in a closed state
      */
-    public boolean next() throws XQException;
+    boolean next() throws XQException;
 
     /**
      * Moves to the previous item in the sequence.  Calling this method on an empty sequence
@@ -370,7 +370,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only, or
      *                     (2) the sequence is in a closed state.
      */
-    public boolean previous() throws XQException;   // only if scrollable
+    boolean previous() throws XQException;   // only if scrollable
 
     /**
      * Moves the cursor a relative number of items, either positive or negative.
@@ -390,7 +390,7 @@ public interface XQSequence extends XQItemAccessor {
      * @throws XQException if (1) the sequence is forward only, or
      *                     (2) the sequence is in a closed state.
      */
-    public boolean relative(int itempos) throws XQException;
+    boolean relative(int itempos) throws XQException;
 
     /**
      * Serializes the sequence starting from the current position to an
@@ -426,7 +426,7 @@ public interface XQSequence extends XQItemAccessor {
      *                     write method has already been invoked on the current item,
      *                     or (5) the <code>os</code> parameter is <code>null</code>
      */
-    public void writeSequence(java.io.OutputStream os, java.util.Properties props)
+    void writeSequence(java.io.OutputStream os, java.util.Properties props)
             throws XQException;
 
     /**
@@ -469,7 +469,7 @@ public interface XQSequence extends XQItemAccessor {
      *                     write method has already been invoked on the current item,
      *                     or (5) the <code>ow</code> parameter is <code>null</code>
      */
-    public void writeSequence(java.io.Writer ow, java.util.Properties props)
+    void writeSequence(java.io.Writer ow, java.util.Properties props)
             throws XQException;
 
     /**
@@ -502,7 +502,7 @@ public interface XQSequence extends XQItemAccessor {
      *                     into a SAX event stream, or (5) the <code>saxhdlr</code>
      *                     parameter is <code>null</code>
      */
-    public void writeSequenceToSAX(org.xml.sax.ContentHandler saxhdlr)
+    void writeSequenceToSAX(org.xml.sax.ContentHandler saxhdlr)
             throws XQException;
 
     /**
@@ -535,7 +535,7 @@ public interface XQSequence extends XQItemAccessor {
      *                     into the <code>Result</code> object, or (5) the
      *                     <code>result</code> parameter is <code>null</code>
      */
-    public void writeSequenceToResult(javax.xml.transform.Result result) throws XQException;
+    void writeSequenceToResult(javax.xml.transform.Result result) throws XQException;
 
-};
+}
 

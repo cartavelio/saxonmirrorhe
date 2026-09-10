@@ -20,7 +20,7 @@ import java.util.Stack;
  */
 public class DecomposingFeed extends ItemFeed {
 
-    private Stack<Boolean> nodeKindStack = new Stack<>();
+    private final Stack<Boolean> nodeKindStack = new Stack<>();
 
     public DecomposingFeed(Outputter receiver, XPathContext context) {
         // There is no next ItemFeed in the pipeline; all output goes to the supplied Outputter instead

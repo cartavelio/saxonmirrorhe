@@ -33,7 +33,7 @@ public class FoldStreamer extends StreamingAdjunct implements FeedMaker {
 
     private static class FoldFeed extends AtomicItemFeed {
 
-        private Fold fold;
+        private final Fold fold;
 
         public FoldFeed(SystemFunctionCall expression, ItemFeed result, XPathContext context) throws XPathException {
             super(expression, result, context);

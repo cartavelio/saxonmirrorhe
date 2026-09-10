@@ -57,7 +57,7 @@ public class StartsWithCompiler extends ToBooleanCompiler {
             ga.ifNull(returnTrue1.label());
         }
 
-        if (!(arg1 instanceof StringLiteral && !((StringLiteral) arg1).getStringValue().isEmpty())) {
+        if (!(arg1 instanceof StringLiteral && !((StringLiteral) arg1).getString().isEmpty())) {
             ga.dup();
             //Stack: SubstringMatcher? String String
             ga.invokeInstanceMethod(String.class, "length");
@@ -71,7 +71,7 @@ public class StartsWithCompiler extends ToBooleanCompiler {
             //Stack: SubstringMatcher? String String String
             ga.ifNull(returnFalse1.label());
         }
-        if (!(arg1 instanceof StringLiteral && !((StringLiteral) arg1).getStringValue().isEmpty())) {
+        if (!(arg1 instanceof StringLiteral && !((StringLiteral) arg1).getString().isEmpty())) {
             ga.dup();
             //Stack: SubstringMatcher? String String String
             ga.invokeInstanceMethod(String.class, "length");

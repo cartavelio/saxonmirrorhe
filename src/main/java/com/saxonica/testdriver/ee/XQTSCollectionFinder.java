@@ -27,9 +27,9 @@ import java.util.List;
  */
 public class XQTSCollectionFinder implements CollectionFinder {
 
-    private TreeInfo catalog;
-    private NodeInfo collectionElement;
-    private boolean isDefault;
+    private final TreeInfo catalog;
+    private final NodeInfo collectionElement;
+    private final boolean isDefault;
 
 
     public XQTSCollectionFinder(TreeInfo catalog, NodeInfo collectionElement, boolean isDefault) {

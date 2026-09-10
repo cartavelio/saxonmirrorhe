@@ -13,7 +13,7 @@ public class FunctionLiteralCompiler extends ToItemCompiler {
     @Override
     public void compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
-        allocateStatic(compiler, ((FunctionLiteral) expression).getValue());
+        allocateStatic(compiler, ((FunctionLiteral) expression).getGroundedValue());
     }
 }
 

@@ -6,6 +6,7 @@ import net.sf.saxon.Version;
 import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.lib.LocalizerFactory;
 import net.sf.saxon.lib.Numberer;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.StringConverter;
@@ -21,7 +22,7 @@ import java.util.Properties;
  */
 public class JavaLocalizerFactory extends LocalizerFactory {
 
-    private Configuration config;
+    private final Configuration config;
 
     private HashMap<String, String> numbererClassNames = new HashMap<>(10);
     private HashMap<String, Numberer> numberers = new HashMap<>(10);
@@ -80,7 +81,7 @@ public class JavaLocalizerFactory extends LocalizerFactory {
 
         String key;
         if (language != null) {
-            ConversionResult cr = StringConverter.StringToLanguage.INSTANCE.convertString(language);
+            ConversionResult cr = StringConverter.StringToLanguage.INSTANCE.convertString(StringView.of(language).tidy());
             if (cr instanceof ValidationFailure) {
                 // See W3C bug 20663
                 language = null;

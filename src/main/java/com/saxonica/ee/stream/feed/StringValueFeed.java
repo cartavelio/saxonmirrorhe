@@ -6,8 +6,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * This class is used when a streamed template requests evaluation of the string value
@@ -31,7 +31,7 @@ public class StringValueFeed extends AbsorptionFeed {
 
     @Override
     protected Sequence processGroundedItem(Item item) throws XPathException {
-        return StringValue.makeStringValue(item.getStringValueCS());
+        return new StringItem(item.getUnicodeStringValue());
     }
 
     /**
@@ -55,13 +55,13 @@ public class StringValueFeed extends AbsorptionFeed {
      * The builder is the builder being used to construct the tree.
      */
 
-    private class PendingStringValue extends PendingItem {
-        public FastStringBuffer buffer;
+    private static class PendingStringValue extends PendingItem {
+        public UnicodeBuilder buffer;
         public FleetingParentNode node;
 
         public PendingStringValue(int sequence, FleetingParentNode node) {
             super(sequence);
-            buffer = new FastStringBuffer(100);
+            buffer = new UnicodeBuilder();
             this.node = node;
         }
 
@@ -71,13 +71,13 @@ public class StringValueFeed extends AbsorptionFeed {
         }
 
         @Override
-        public Sequence deliver() throws XPathException {
-            return StringValue.makeStringValue(buffer);
+        public Sequence deliver() {
+            return new StringItem(buffer.toUnicodeString());
         }
 
         @Override
         public void rollback() {
-            buffer.setLength(0);
+            buffer.clear();
         }
     }
 }

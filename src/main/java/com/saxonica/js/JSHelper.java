@@ -1,8 +1,9 @@
 package com.saxonica.js;
 
 import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.resource.Loader;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.io.*;
 import java.net.*;
@@ -23,7 +24,7 @@ public class JSHelper {
         try {
             String uri = resolveUri(href, jsBase);
             InputStream stream = new URL(uri).openStream();
-            Reader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));
+            Reader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             return consume(reader);
         } catch (Exception err) {
             String message = err.getMessage();
@@ -94,18 +95,16 @@ public class JSHelper {
             throw e;
         }
         try {
-            InputStream is;
-            URLConnection connection = absoluteURL.openConnection();
-            connection.setRequestProperty("Accept-Encoding", "gzip");
+            URLConnection connection;
             try {
-                connection.connect();
+                connection = Loader.urlConnection(absoluteURL);
             } catch (IOException ioe) {
                 XPathException xpe = new XPathException("Failed to read input file", ioe);
                 xpe.setErrorCode("FOUT1170");
                 throw xpe;
             }
 
-            is = connection.getInputStream();
+            InputStream is = connection.getInputStream();
             String contentEncoding = connection.getContentEncoding();
 
             if ("gzip".equals(contentEncoding)) {
@@ -219,9 +218,9 @@ public class JSHelper {
         if (read >= 4) {
             if (ch(start[0]) == '<' && ch(start[1]) == '?' &&
                     ch(start[2]) == 'x' && ch(start[3]) == 'm' && ch(start[4]) == 'l') {
-                FastStringBuffer sb = new FastStringBuffer(read);
+                StringBuilder sb = new StringBuilder(read);
                 for (int b = 0; b < read; b++) {
-                    sb.cat((char) start[b]);
+                    sb.append((char) start[b]);
                 }
                 String p = sb.toString();
                 int v = p.indexOf("encoding");
@@ -232,7 +231,7 @@ public class JSHelper {
                     }
                     sb.setLength(0);
                     while (v < p.length() && p.charAt(v) != '"' && p.charAt(v) != '\'') {
-                        sb.cat(p.charAt(v++));
+                        sb.append(p.charAt(v++));
                     }
                     return sb.toString();
                 }

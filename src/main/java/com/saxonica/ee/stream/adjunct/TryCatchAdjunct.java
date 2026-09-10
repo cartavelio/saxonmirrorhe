@@ -28,7 +28,7 @@ public class TryCatchAdjunct extends TransmissionAdjunct implements FeedMaker {
 
     public static class TryCatchFeed extends ItemFeed {
 
-        private ItemFeed originalResult;
+        private final ItemFeed originalResult;
         private boolean done = false;
         private boolean open = false;
 

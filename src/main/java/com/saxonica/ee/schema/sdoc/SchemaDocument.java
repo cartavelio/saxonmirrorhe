@@ -15,7 +15,7 @@ import net.sf.saxon.type.Type;
  */
 public class SchemaDocument {
 
-    private TreeInfo document;
+    private final TreeInfo document;
 
     /**
      * Create a SchemaDocument from a given document. This document must have been built using

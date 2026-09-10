@@ -18,7 +18,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -43,7 +43,7 @@ import java.util.*;
 
 public class JavaExtensionLibrary implements FunctionLibrary {
 
-    private ProfessionalConfiguration config;
+    private final ProfessionalConfiguration config;
 
     private JavaExtensionFunctionFactory functionFactory;
 
@@ -496,8 +496,8 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                     if (pref_i == null) {
                         diag.info("Arguments cannot be converted to required types");
                     } else {
-                        FastStringBuffer fsb = new FastStringBuffer(100);
-                        fsb.cat('[');
+                        StringBuilder fsb = new StringBuilder(100);
+                        fsb.append('[');
                         for (int p = 0; p < pref_i.length; p++) {
                             if (p != 0) {
                                 fsb.append(", ");
@@ -627,7 +627,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         }
 
         int noOfArgs = argTypes.length;
-        int preferences[] = new int[noOfArgs];
+        int[] preferences = new int[noOfArgs];
         int firstParam = 0;
 
         if (params.length > 0 && params[0] == XPathContext.class) {
@@ -718,7 +718,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
      * @param required      The Java Class named in the method signature
      * @return an integer indicating the relative preference for converting this primitive type
      * to this Java class. A high number indicates a low preference. All values are in the range
-     * 50 to 100. For example, the conversion of an XPath String to {@link net.sf.saxon.value.StringValue} is 50, while
+     * 50 to 100. For example, the conversion of an XPath String to {@link StringItem} is 50, while
      * XPath String to {@link java.lang.String} is 51. The value -1 indicates that the conversion is not allowed.
      */
 
@@ -728,7 +728,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         }
         switch (primitiveType) {
             case StandardNames.XS_STRING:
-                if (required.isAssignableFrom(StringValue.class)) {
+                if (required.isAssignableFrom(StringItem.class)) {
                     return 50;
                 }
                 if (required == String.class) {
@@ -1068,12 +1068,12 @@ public class JavaExtensionLibrary implements FunctionLibrary {
 
     public class UnresolvedExtensionFunctionCall extends FunctionCall implements Callable {
 
-        private StructuredQName name;
-        private transient List<AccessibleObject> candidateMethods;
-        private Class theClass;
-        private boolean debug;
+        private final StructuredQName name;
+        private final transient List<AccessibleObject> candidateMethods;
+        private final Class theClass;
+        private final boolean debug;
 
-        private BuiltInFunctionSet.Entry details = new BuiltInFunctionSet.Entry();
+        private final BuiltInFunctionSet.Entry details = new BuiltInFunctionSet.Entry();
 
 
         public UnresolvedExtensionFunctionCall(StructuredQName functionName, Class theClass,

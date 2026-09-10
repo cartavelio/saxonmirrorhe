@@ -30,7 +30,7 @@ import java.io.IOException;
 
 public class ValidatorImpl extends Validator {
 
-    private PipelineConfiguration pipe;
+    private final PipelineConfiguration pipe;
 
     /**
      * Create the Validator
@@ -152,7 +152,7 @@ public class ValidatorImpl extends Validator {
      */
     public class InvalidityHandlerWrappingErrorHandler implements InvalidityHandler {
 
-        private ErrorHandler errorHandler;
+        private final ErrorHandler errorHandler;
 
         public InvalidityHandlerWrappingErrorHandler(ErrorHandler handler) {
             this.errorHandler = handler;

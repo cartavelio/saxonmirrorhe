@@ -56,7 +56,7 @@ public class SquareArrayConstructorCompiler extends ToItemCompiler {
                 Expression child = o.getChildExpression();
                 ga.loadLocal(listVar);
                 if (child instanceof Literal) {
-                    allocateStatic(compiler, ((Literal)child).getValue());
+                    allocateStatic(compiler, ((Literal)child).getGroundedValue());
                 } else if (child.getCardinality() == StaticProperty.EXACTLY_ONE) {
                     compiler.compileToItem(child);
                 } else {

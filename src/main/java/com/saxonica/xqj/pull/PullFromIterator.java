@@ -5,6 +5,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.UnfailingPullProvider;
 import net.sf.saxon.pull.UnparsedEntity;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -61,7 +62,7 @@ public class PullFromIterator implements UnfailingPullProvider {
      * Get the next event
      *
      * @return an event code indicating the type of event. The code
-     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link Event#END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
@@ -203,7 +204,7 @@ public class PullFromIterator implements UnfailingPullProvider {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link Event#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
@@ -218,9 +219,9 @@ public class PullFromIterator implements UnfailingPullProvider {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
-     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}, but this is not guaranteed: a client who
+     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
+     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link Event#END_ELEMENT}, but this is not guaranteed: a client who
      * requires the information at that point (for example, to do serialization) should insert an
      * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
@@ -248,9 +249,9 @@ public class PullFromIterator implements UnfailingPullProvider {
      * Get the string value of the current element, text node, processing-instruction,
      * or top-level attribute or namespace node, or atomic value.
      * <p>In other situations the result is undefined and may result in an IllegalStateException.</p>
-     * <p>If the most recent event was a {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, this method causes the content
+     * <p>If the most recent event was a {@link Event#START_ELEMENT}, this method causes the content
      * of the element to be read. The current event on completion of this method will be the
-     * corresponding {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}. The next call of next() will return the event following
+     * corresponding {@link Event#END_ELEMENT}. The next call of next() will return the event following
      * the END_ELEMENT event.</p>
      *
      * @return the String Value of the node in question, defined according to the rules in the
@@ -258,12 +259,12 @@ public class PullFromIterator implements UnfailingPullProvider {
      */
 
     @Override
-    public CharSequence getStringValue() throws XPathException {
+    public CodePoints getStringValue() throws XPathException {
         if (treeWalker != null) {
             return treeWalker.getStringValue();
         } else {
             Item item = base.current();
-            return item.getStringValueCS();
+            return item.getUnicodeStringValue();
         }
     }
 

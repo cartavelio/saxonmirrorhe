@@ -18,6 +18,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -58,8 +59,8 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
 
     // Two-way mapping between XQJ integer codes for built-in types and the Saxon equivalents
 
-    /*@NotNull*/ private static IntToIntMap XQJtoSaxonTypeTranslation = new IntToIntHashMap(80);
-    /*@NotNull*/ private static IntToIntMap saxonToXQJTypeTranslation = new IntToIntHashMap(80);
+    /*@NotNull*/ private static final IntToIntMap XQJtoSaxonTypeTranslation = new IntToIntHashMap(80);
+    /*@NotNull*/ private static final IntToIntMap saxonToXQJTypeTranslation = new IntToIntHashMap(80);
 
     private static void map(int x, int y) {
         XQJtoSaxonTypeTranslation.put(x, y);
@@ -402,7 +403,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         SaxonXQDataSource.checkNotNull(value, "value");
         SaxonXQDataSource.checkNotNull(type, "type");
         AtomicType at = testAtomic(type);
-        StringValue sv = new StringValue(value);
+        StringItem sv = new StringItem(value);
         Converter converter = getConfiguration().getConversionRules().getConverter(BuiltInAtomicType.STRING, at);
         ConversionResult result = converter.convert(sv);
         if (result instanceof ValidationFailure) {
@@ -706,13 +707,13 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         checkNotClosed();
         SaxonXQDataSource.checkNotNull(value, "value");
         if (type == null) {
-            return new SaxonXQItem(new StringValue(value), this);
+            return new SaxonXQItem(new StringItem(value), this);
         } else {
             AtomicType at = testAtomic(type);
             int prim = at.getPrimitiveType();
             if (prim == StandardNames.XS_STRING) {
                 try {
-                    ConversionResult result = Converter.convert(new net.sf.saxon.value.StringValue(value), at, getConfiguration().getConversionRules());
+                    ConversionResult result = Converter.convert(new StringItem(value), at, getConfiguration().getConversionRules());
                     if (result instanceof ValidationFailure) {
                         throw new XQException(((ValidationFailure) result).getMessage());
                     }
@@ -782,13 +783,13 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             int prim = at.getPrimitiveType();
             ConversionResult result;
             if (prim == StandardNames.XS_UNTYPED_ATOMIC) {
-                result = new UntypedAtomicValue((String) value);
+                result = new UntypedAtomicValue(StringView.tidy((String) value));
             } else if (prim == StandardNames.XS_STRING) {
                 Converter converter = getConfiguration().getConversionRules().getConverter(BuiltInAtomicType.STRING, at);
-                result = converter.convert(new StringValue((String) value));
+                result = converter.convert(new StringItem((String) value));
             } else if (prim == StandardNames.XS_ANY_URI) {
                 Converter converter = getConfiguration().getConversionRules().getConverter(BuiltInAtomicType.ANY_URI, at);
-                result = converter.convert(new StringValue((String) value));
+                result = converter.convert(new StringItem((String) value));
             } else {
                 // Note: the spec also allow NOTATION, but string->notation conversion doesn't work
                 throw new XQException("Target type must be string, untypedAtomic, or anyURI");

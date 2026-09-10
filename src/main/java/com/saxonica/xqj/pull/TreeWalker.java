@@ -6,6 +6,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pull.UnfailingPullProvider;
 import net.sf.saxon.pull.UnparsedEntity;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -77,7 +78,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * Get the next event
      *
      * @return an Event object indicating the type of event. The code
-     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned if there are no more events to return.
+     *         {@link Event#END_OF_INPUT} is returned if there are no more events to return.
      */
 
     @Override
@@ -248,6 +249,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      */
 
     @Override
+    @SuppressWarnings("deprecation")
     public NamespaceBinding[] getNamespaceDeclarations() {
         if (currentNode == null) {
             throw new IllegalStateException("No current node");
@@ -293,7 +295,7 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
     /**
      * Close the event reader. This indicates that no further events are required.
-     * It is not necessary to close an event reader after {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} has
+     * It is not necessary to close an event reader after {@link Event#END_OF_INPUT} has
      * been reported, but it is recommended to close it if reading terminates
      * prematurely. Once an event reader has been closed, the effect of further
      * calls on next() is undefined.
@@ -316,9 +318,9 @@ public class TreeWalker implements UnfailingPullProvider, Location {
 
     /**
      * Get the NodeName identifying the name of the current node. This method
-     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
-     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
-     * it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}, but this is not guaranteed: a client who
+     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
+     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
+     * it can also be used after {@link Event#END_ELEMENT}, but this is not guaranteed: a client who
      * requires the information at that point (for example, to do serialization) should insert an
      * {@link com.saxonica.xqj.pull.ElementNameTracker} into the pipeline.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
@@ -340,19 +342,20 @@ public class TreeWalker implements UnfailingPullProvider, Location {
      * Get the string value of the current attribute, text node, processing-instruction,
      * or atomic value.
      * This method cannot be used to obtain the string value of an element, or of a namespace
-     * node. If the most recent event was anything other than {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#TEXT},
-     * {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION}, or {@link net.sf.saxon.pull.PullProvider.Event#ATOMIC_VALUE}, the result is undefined.
+     * node. If the most recent event was anything other than {@link Event#START_ELEMENT}, {@link Event#TEXT},
+     * {@link Event#PROCESSING_INSTRUCTION}, or {@link Event#ATOMIC_VALUE}, the result is undefined.
+     * @return
      */
 
     @Override
-    public CharSequence getStringValue() {
+    public CodePoints getStringValue() {
         if (currentNode == null) {
             throw new IllegalStateException("No current node");
         }
         if (currentNode.getNodeKind() == Type.ELEMENT) {
             skipToMatchingEnd();
         }
-        return currentNode.getStringValueCS();
+        return currentNode.getUnicodeStringValue();
     }
 
     /**

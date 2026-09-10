@@ -3,6 +3,7 @@ package com.saxonica.ee.update;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.Type;
 
 import java.util.Set;
@@ -15,8 +16,8 @@ import java.util.Set;
  */
 public class ReplaceValueAction extends PendingUpdateAction {
 
-    private String content;
-    private MutableNodeInfo targetNode;
+    private final UnicodeString content;
+    private final MutableNodeInfo targetNode;
 
     /**
      * Create an InsertAction
@@ -28,7 +29,7 @@ public class ReplaceValueAction extends PendingUpdateAction {
      * @param targetNode the node that defines where the new nodes will be inserted
      */
 
-    ReplaceValueAction(String content, MutableNodeInfo targetNode) {
+    ReplaceValueAction(UnicodeString content, MutableNodeInfo targetNode) {
         this.content = content;
         this.targetNode = targetNode;
     }

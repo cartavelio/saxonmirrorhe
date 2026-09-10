@@ -29,7 +29,7 @@ public class RemoveStreamer extends FilteringAdjunct implements FeedMaker {
 
     private static class RemoveFilter implements FilteringFeed.Filter {
 
-        private int removeIndex;
+        private final int removeIndex;
 
         public RemoveFilter(int removeIndex) {
             this.removeIndex = removeIndex;

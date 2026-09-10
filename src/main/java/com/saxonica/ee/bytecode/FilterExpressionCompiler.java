@@ -50,11 +50,11 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
         if (filterExpr.isIndependentFilter()) {
 
             if (filter instanceof Literal) {
-                literalValue = ((Literal) filter).getValue();
+                literalValue = ((Literal) filter).getGroundedValue();
                 if (literalValue.getLength() == 1) {
                     int literalIntValue = 0;
                     try {
-                        literalIntValue = Integer.parseInt(literalValue.getStringValue());
+                        literalIntValue = Integer.parseInt(literalValue.getUnicodeStringValue().toString());
                     } catch (XPathException e) {
                         ga.invokeStaticMethod(EmptyIterator.class, "emptyIterator");
                         return;
@@ -310,7 +310,7 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
                     ga.pop();
                     ga.goTo(emptyIterLab);
                 } else if (start instanceof Literal) {
-                    allocateStatic(compiler, ((Literal) start).getValue());
+                    allocateStatic(compiler, ((Literal) start).getGroundedValue());
                     ga.loadLocal(posVar);
                     ga.push(1);
                     ga.math(GeneratorAdapter.SUB, Type.INT_TYPE);
@@ -719,12 +719,12 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
             if (!(relToString == Affinity.SAME_TYPE || relToString == Affinity.SUBSUMED_BY)) {
                 notString = new Label();
                 ga.loadLocal(itemVar);
-                ga.instanceOf(Type.getType(StringValue.class));
+                ga.instanceOf(Type.getType(StringItem.class));
                 ga.ifZCmp(Generator.EQ, notString);
             }
             ga.loadLocal(itemVar);
-            ga.checkClass(StringValue.class);
-            ga.invokeInstanceMethod(StringValue.class, "isZeroLength");
+            ga.checkClass(StringItem.class);
+            ga.invokeInstanceMethod(StringItem.class, "isZeroLength");
             ga.not();
             ga.storeLocal(resultVar);
             ga.goTo(checkNoMoreItems);
@@ -799,12 +799,12 @@ public class FilterExpressionCompiler extends ToIteratorCompiler {
             if (!(relToString == Affinity.SAME_TYPE || relToString == Affinity.SUBSUMED_BY)) {
                 notString = methodInfo.newLabel("notString_compileStringCheck2");
                 ga.loadLocal(firstVar);
-                ga.instanceOf(Type.getType(StringValue.class));
+                ga.instanceOf(Type.getType(StringItem.class));
                 ga.ifZCmp(Generator.EQ, notString.label());
             }
             ga.loadLocal(firstVar);
-            ga.checkClass(StringValue.class);
-            ga.invokeInstanceMethod(StringValue.class, "isZeroLength");
+            ga.checkClass(StringItem.class);
+            ga.invokeInstanceMethod(StringItem.class, "isZeroLength");
             ga.not();
             ga.storeLocal(resultVar);
             if (oneOrMoreCheck) {

@@ -32,13 +32,13 @@ public class GeneratedMethodInfo {
 
     /*@Nullable*/ private LabelInfo tailCallLabel = null;
 
-    private Stack<ContextVariableInfo> contextVariableStack = new Stack<>();
-    private Stack<OutputterInfo> outputterStack = new Stack<>();
+    private final Stack<ContextVariableInfo> contextVariableStack = new Stack<>();
+    private final Stack<OutputterInfo> outputterStack = new Stack<>();
     public Set<LabelInfo> labelMap = new HashSet<>();
     public List<LocalSlotInfo> slotList = new ArrayList<>(20);
 
-    private Stack<LabelInfo> xslIterateLoopLabelStack = new Stack<>();
-    private Stack<LabelInfo> xslIterateBreakLabelStack = new Stack<>();
+    private final Stack<LabelInfo> xslIterateLoopLabelStack = new Stack<>();
+    private final Stack<LabelInfo> xslIterateBreakLabelStack = new Stack<>();
 
     public void pushContextVariableInfo(int position, boolean isArgument) {
         ContextVariableInfo info = new ContextVariableInfo();

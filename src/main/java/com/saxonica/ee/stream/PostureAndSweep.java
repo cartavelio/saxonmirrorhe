@@ -6,8 +6,8 @@ package com.saxonica.ee.stream;
  */
 public class PostureAndSweep {
 
-    private Posture posture;
-    private Sweep sweep;
+    private final Posture posture;
+    private final Sweep sweep;
 
     /**
      * Create a PostureAndSweep with a given posture and sweep

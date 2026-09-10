@@ -5,8 +5,9 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeFactory;
@@ -25,11 +26,11 @@ import java.util.HashMap;
 
 public class SchemaNodeFactory implements NodeFactory {
 
-    private PipelineConfiguration pipe;
-    private SchemaCompiler compiler;
-    private EnterpriseConfiguration config;
-    private HashMap<String, SchemaElement> idTable = new HashMap<String, SchemaElement>(32);
-    private SchemaElement referrer;
+    private final PipelineConfiguration pipe;
+    private final SchemaCompiler compiler;
+    private final EnterpriseConfiguration config;
+    private final HashMap<String, SchemaElement> idTable = new HashMap<String, SchemaElement>(32);
+    private final SchemaElement referrer;
 
     /**
      * Create a SchemaNodeFactory, used for building the tree representation of a schema document
@@ -233,8 +234,8 @@ public class SchemaNodeFactory implements NodeFactory {
      * @return the constructed text node
      */
     @Override
-    public TextImpl makeTextNode(NodeInfo parent, CharSequence content) {
-        return new TextImpl(content.toString());
+    public TextImpl makeTextNode(NodeInfo parent, UnicodeString content) {
+        return new TextImpl(content);
     }
 
     /**

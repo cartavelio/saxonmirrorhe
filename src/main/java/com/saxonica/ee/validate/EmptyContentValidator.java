@@ -6,16 +6,18 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * This class is a filter that is used to validate that an element has empty content.
@@ -26,10 +28,10 @@ import net.sf.saxon.type.ValidationFailure;
 
 public class EmptyContentValidator extends AttributeValidator {
 
-    private boolean allowTextNodes;
+    private final boolean allowTextNodes;
     private Location locationId;
-    /*@Nullable*/ private FastStringBuffer buffer;
-    private SchemaType schemaType;
+    /*@Nullable*/ private UnicodeBuilder buffer;
+    private final SchemaType schemaType;
 
     /**
      * Create a validator for an empty content model
@@ -89,15 +91,15 @@ public class EmptyContentValidator extends AttributeValidator {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         if (allowTextNodes) {
             ElementDecl decl = getElementDeclaration();
             if (decl != null && (decl.getFixedValue() != null || decl.getDefaultValueLexicalForm() != null)) {
                 if (buffer == null) {
-                    buffer = new FastStringBuffer(chars.length());
+                    buffer = new UnicodeBuilder();
                 }
-                buffer.cat(chars);
+                buffer.append(chars);
             }
         } else {
             String message = "Character data is not allowed: " + getContainingElementName() +
@@ -129,17 +131,17 @@ public class EmptyContentValidator extends AttributeValidator {
         if (allowTextNodes) {
             ElementDecl decl = getElementDeclaration();
             if (decl != null) {
-                String defaultValue = decl.getDefaultValueLexicalForm();
-                CharSequence fixedValue = decl.getFixedValueLexicalForm();
+                UnicodeString defaultValue = decl.getDefaultValueLexicalForm();
+                UnicodeString fixedValue = decl.getFixedValueLexicalForm();
                 if (defaultValue != null && (buffer == null || buffer.isEmpty())) {
                     characters(defaultValue, Loc.NONE, ReceiverOption.NONE);
                 } else if (fixedValue != null) {
-                    FastStringBuffer fsb = buffer;
+                    UnicodeBuilder fsb = buffer;
                     if (fsb == null || fsb.isEmpty()) {
                         // if no value was supplied, "fixed" is treated as "default"
                         characters(fixedValue, Loc.NONE, ReceiverOption.NONE);
-                    } else if (!fsb.toString().equals(fixedValue)) {
-                        String message = "The content " + Err.wrap(buffer, Err.VALUE) + " of " +
+                    } else if (!fsb.toUnicodeString().equals(fixedValue)) {
+                        String message = "The content " + Err.wrap(buffer.toString(), Err.VALUE) + " of " +
                                 getContainingElementName() +
                                 " does not match the fixed value " +
                                 Err.wrap(fixedValue, Err.VALUE);

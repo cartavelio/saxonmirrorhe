@@ -42,6 +42,7 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
     /**
      * Overridable method that decides how many threads to use. The default implementation
      * returns the value of <code>Runtime.getRuntime().availableProcessors()</code>, or 1 if greater.
+     *
      * @return the maximum number of threads to use.
      */
 
@@ -71,15 +72,15 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
                 }
             } catch (InterruptedException e) {
                 throw new XPathException(e);
-            } catch (ExecutionException|RejectedExecutionException e) {
+            } catch (ExecutionException | RejectedExecutionException e) {
                 if (e.getCause() instanceof XPathException) {
-                    throw (XPathException)e.getCause();
+                    throw (XPathException) e.getCause();
                 }
                 if (!e.getMessage().contains("Shutting down")) {
                     throw new XPathException(e);
                 } // else {
-                  // No action, error reported elsewhere
-                  //}
+                // No action, error reported elsewhere
+                //}
             }
         }
     }
@@ -106,10 +107,12 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
     private class CallableAction<F extends Item, T extends Item> implements Callable<Item> {
         private ItemMappingFunction action;
         private F input;
+
         public CallableAction(ItemMappingFunction action, F input) {
             this.action = action;
             this.input = input;
         }
+
         @Override
         public Item call() throws XPathException {
             try {

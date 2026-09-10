@@ -140,7 +140,7 @@ public class NumberFnCompiler extends ToItemCompiler {
                 th.relationship(type, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT) {
             LabelInfo nonString = methodInfo.newLabel("nonString");
             ga.loadLocal(valueVar);
-            ga.ifNotInstance(net.sf.saxon.value.StringValue.class, nonString);
+            ga.ifNotInstance(StringItem.class, nonString);
             ga.loadLocal(valueVar);
             ga.ifInstance(AnyURIValue.class, nonString);
 //            StringConverter sc = StringConverter.getStringConverter(BuiltInAtomicType.DOUBLE, rules);

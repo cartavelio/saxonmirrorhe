@@ -204,7 +204,7 @@ public class HTMLEntityReferenceGenerator implements CharacterReferenceGenerator
     public final static HTMLEntityReferenceGenerator DECIMAL =
             new HTMLEntityReferenceGenerator(DecimalCharacterReferenceGenerator.THE_INSTANCE);
 
-    private CharacterReferenceGenerator fallback;
+    private final CharacterReferenceGenerator fallback;
 
     /**
      * Create an instance of this class with a defined fallback for use when no named entity

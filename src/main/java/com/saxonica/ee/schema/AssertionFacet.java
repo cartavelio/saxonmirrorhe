@@ -5,13 +5,15 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Represents an assertion facet on a schema-defined simple type.
@@ -41,8 +43,8 @@ public class AssertionFacet extends Facet {
     }
 
     @Override
-    public String getValue() {
-        return assertion.getConditionText();
+    public UnicodeString getValue() {
+        return StringView.tidy(assertion.getConditionText());
     }
 
     /**
@@ -135,7 +137,7 @@ public class AssertionFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue(getName());
+                    return new StringItem(getName());
                 case "implementation":
                     return new ObjectValue<>(AssertionFacet.this);
                 case "value":

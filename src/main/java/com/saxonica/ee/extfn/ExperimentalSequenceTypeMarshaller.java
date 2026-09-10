@@ -9,15 +9,15 @@ import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 public class ExperimentalSequenceTypeMarshaller {
 
-    public static StringValue unmarshal(MapItem type) {
-        return new StringValue(AlphaCode.fromXdmMap(type));
+    public static StringItem unmarshal(MapItem type) {
+        return new StringItem(AlphaCode.fromXdmMap(type));
     }
 
-    public static MapItem marshal(StringValue type) {
+    public static MapItem marshal(StringItem type) {
         String input = type.getStringValue();
         return AlphaCode.toXdmMap(input);
     }
@@ -55,7 +55,7 @@ public class ExperimentalSequenceTypeMarshaller {
             MapItem map = ExperimentalXPathCompiler.makeMap(t);
             String json = Err.depict(map).toString();
             String lex = unmarshal(map).getStringValue();
-            MapItem map2 = marshal(new StringValue(lex));
+            MapItem map2 = marshal(new StringItem(lex));
             String json2 = Err.depict(map2).toString();
             String lex2 = unmarshal(map2).getStringValue();
             System.out.println(s + " => " + json + " => " + lex + " => " + json2 + " => " + lex2);

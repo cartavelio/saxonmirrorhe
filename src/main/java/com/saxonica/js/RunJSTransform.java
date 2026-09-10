@@ -4,7 +4,6 @@ import jdk.nashorn.api.scripting.JSObject;
 import jdk.nashorn.api.scripting.NashornException;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.Item;
@@ -18,7 +17,7 @@ import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -44,9 +43,9 @@ public class RunJSTransform {
     private String initialTemplateName; /* as an EQName */
     private String initialModeName; /* as an EQName */
     private String initialFunctionName; /* as an EQName */
-    private Map<String, File> resources = new HashMap<String, File>();
+    private final Map<String, File> resources = new HashMap<String, File>();
     private Map<String, String> resultDocumentLocation = new HashMap<String, String>();
-    private Map<String, XdmValue> globalParams = new HashMap<String, XdmValue>();
+    private final Map<String, XdmValue> globalParams = new HashMap<String, XdmValue>();
 
     private List<XdmValue> initialFunctionArgs;
     private Map<String, List<String>> collections;
@@ -322,7 +321,7 @@ public class RunJSTransform {
                     } else {
                         XPathException err = new XPathException(message, code, loc);
                         if (code.charAt(0) == 'Q' && code.charAt(1) == '{') {
-                            StructuredQName sqcode = StructuredQName.fromEQName(code);
+                            StructuredQName sqcode = StructuredQName.fromEQName((code));
                             err.setErrorCodeQName(sqcode);
                         }
                         new StandardErrorListener().fatalError(err);
@@ -333,7 +332,7 @@ public class RunJSTransform {
                         scrEx.printStackTrace();
                     } else {
                         throw (SaxonApiException)e;
-                    };
+                    }
                 }
             } else {
                 scrEx.printStackTrace();
@@ -382,10 +381,10 @@ public class RunJSTransform {
             String type = types.get(i);
             String value = values.get(i);
             if (type.equals("QName")) {
-                result.add(new QNameValue(StructuredQName.fromEQName(value), BuiltInAtomicType.QNAME));
+                result.add(new QNameValue(StructuredQName.fromEQName((value)), BuiltInAtomicType.QNAME));
             } else {
                 BuiltInAtomicType bat = (BuiltInAtomicType) BuiltInType.getSchemaTypeByLocalName(type);
-                AtomicValue av = Converter.convert(new StringValue(value), bat, ConversionRules.DEFAULT);
+                AtomicValue av = Converter.convert(new StringItem(value), bat, ConversionRules.DEFAULT);
                 result.add(av);
             }
         }
@@ -417,7 +416,7 @@ public class RunJSTransform {
             String stringValue = (String)som.callMember("toString");
             BuiltInAtomicType bat = (BuiltInAtomicType) BuiltInType.getSchemaTypeByLocalName(type);
             try {
-                items.add(Converter.convert(new StringValue(stringValue), bat, ConversionRules.DEFAULT));
+                items.add(Converter.convert(new StringItem(stringValue), bat, ConversionRules.DEFAULT));
             } catch (ValidationException e) {
                 e.printStackTrace();
             }

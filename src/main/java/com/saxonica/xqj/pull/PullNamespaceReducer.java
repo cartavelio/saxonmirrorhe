@@ -54,7 +54,7 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
     // TODO: disinheriting namespaces is not yet supported by the pull pipeline
     //private boolean[] disinheritStack = new boolean[50];
 
-    private NamespaceBinding[] pendingUndeclarations = null;  // never assigned
+    private final NamespaceBinding[] pendingUndeclarations = null;  // never assigned
 
     /**
      * Create a namespace reducer for a pull pipeline

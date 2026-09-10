@@ -13,11 +13,13 @@ import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.resource.Loader;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.tiny.CharSlice;
 import net.sf.saxon.tree.tiny.TinyAttributeImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
@@ -81,7 +83,7 @@ public class Extensions {
      * @return the system ID
      */
 
-    public static One<StringValue> systemId(XPathContext c) throws XPathException {
+    public static One<StringItem> systemId(XPathContext c) throws XPathException {
         Item item = c.getContextItem();
         if (item == null) {
             XPathException e = new XPathException("The context item for saxon:systemId() is absent");
@@ -235,7 +237,7 @@ public class Extensions {
      * @return a path expression giving a path from the root of the tree to the specified node
      */
 
-    public static One<StringValue> path(XPathContext context, One<NodeInfo> node)  {
+    public static One<StringItem> path(XPathContext context, One<NodeInfo> node)  {
         return One.string(Navigator.getPath(node.head(), context));
     }
 
@@ -247,7 +249,7 @@ public class Extensions {
      * @return a path expression giving a path from the root of the tree to the context node
      */
 
-    public static One<StringValue> path(XPathContext c) throws XPathException {
+    public static One<StringItem> path(XPathContext c) throws XPathException {
         Item item = c.getContextItem();
         if (item == null) {
             XPathException e = new XPathException("The context item for saxon:path() is not set");
@@ -370,7 +372,7 @@ public class Extensions {
      * @return a diagnostic stack print
      */
 
-    public static One<StringValue> printStack(XPathContext c) {
+    public static One<StringItem> printStack(XPathContext c) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
         StandardLogger logger = new StandardLogger();
         logger.setPrintStream(new PrintStream(baos));
@@ -403,7 +405,7 @@ public class Extensions {
      * @return the value of the pseudo-attribute if it is present
      */
 
-    public static ZeroOrOne<StringValue> getPseudoAttribute(XPathContext c, One<StringValue> name)
+    public static ZeroOrOne<StringItem> getPseudoAttribute(XPathContext c, One<StringItem> name)
             throws XPathException {
         Item pi = c.getContextItem();
         if (pi == null) {
@@ -413,7 +415,7 @@ public class Extensions {
         }
         // we'll assume it's a PI, it doesn't matter if it isn't...
         final String value = ProcInstParser.getPseudoAttribute(pi.getStringValue(), name.head().getStringValue());
-        return new ZeroOrOne<>(value==null ? null : new StringValue(value));
+        return new ZeroOrOne<>(value==null ? null : new StringItem(value));
     }
 
     /**
@@ -424,7 +426,7 @@ public class Extensions {
      *         encoding of the given string
      */
 
-    public static ZeroOrMore<IntegerValue> stringToUtf8(One<StringValue> in) {
+    public static ZeroOrMore<IntegerValue> stringToUtf8(One<StringItem> in) {
         String s = in.head().getStringValue();
         ArrayList<IntegerValue> list = new ArrayList<>(s.length() * 2);
         byte[] octets = new byte[4];
@@ -514,7 +516,7 @@ public class Extensions {
      * encoding.
      */
 
-    public static ZeroOrOne<StringValue> base64BinaryToString(XPathContext context, ZeroOrOne<Base64BinaryValue> in, One<StringValue> encoding)
+    public static ZeroOrOne<StringItem> base64BinaryToString(XPathContext context, ZeroOrOne<Base64BinaryValue> in, One<StringItem> encoding)
     throws XPathException {
         try {
             if (in.head() == null) {
@@ -526,7 +528,7 @@ public class Extensions {
             char[] array = new char[bytes.length];
             int used = reader.read(array, 0, array.length);
             checkBytes(array, 0, used, context.getConfiguration().getValidCharacterChecker());
-            return new ZeroOrOne<>(new StringValue(new String(array, 0, used)));
+            return new ZeroOrOne<>(new StringItem(new String(array, 0, used)));
         } catch (IOException e) {
             throw new XPathException(e);
         }
@@ -541,12 +543,12 @@ public class Extensions {
      *         given encoding.
      */
 
-    public static ZeroOrOne<Base64BinaryValue> stringToBase64Binary(ZeroOrOne<StringValue> in, One<StringValue> encoding)
+    public static ZeroOrOne<Base64BinaryValue> stringToBase64Binary(ZeroOrOne<StringItem> in, One<StringItem> encoding)
             throws IOException {
         if (in.head() == null) {
             return ZeroOrOne.empty();
         }
-        ByteArrayOutputStream stream = new ByteArrayOutputStream(in.head().getStringLength());
+        ByteArrayOutputStream stream = new ByteArrayOutputStream(in.head().length32());
         OutputStreamWriter writer = new OutputStreamWriter(stream, encoding.head().getStringValue());
         writer.write(in.head().getStringValue());
         writer.close();
@@ -565,7 +567,7 @@ public class Extensions {
      * @throws XPathException if the encoding is not recognized or if the binary value is not valid in this encoding.
      */
 
-    public static ZeroOrOne<StringValue> hexBinaryToString(XPathContext context, ZeroOrOne<HexBinaryValue> in, One<StringValue> encoding) throws XPathException {
+    public static ZeroOrOne<StringItem> hexBinaryToString(XPathContext context, ZeroOrOne<HexBinaryValue> in, One<StringItem> encoding) throws XPathException {
         try {
             if (in.head() == null) {
                 return ZeroOrOne.empty();
@@ -576,7 +578,7 @@ public class Extensions {
             char[] array = new char[bytes.length];
             int used = reader.read(array, 0, array.length);
             checkBytes(array, 0, used, context.getConfiguration().getValidCharacterChecker());
-            return new ZeroOrOne<>(new StringValue(new String(array, 0, used)));
+            return new ZeroOrOne<>(new StringItem(new String(array, 0, used)));
         } catch (IOException e) {
             throw new XPathException(e);
         }
@@ -589,13 +591,13 @@ public class Extensions {
      * @throws XPathException if an I/O error occurs, for example if the resource cannot be read
      */
 
-    public static One<Base64BinaryValue> readBinaryResource(One<StringValue> uri) throws XPathException {
+    public static One<Base64BinaryValue> readBinaryResource(One<StringItem> uri) throws XPathException {
         try {
             String arg = uri.head().getStringValue();
             URL url = new URL(arg);
             InputStream stream;
             try {
-                stream = url.openStream();
+                stream = Loader.urlStream(url);
             } catch (IllegalArgumentException e) {
                 // Not well documented, but this happens when given an invalid URL
                 throw new XPathException("saxon:read-binary-resource - invalid URL " + arg, SaxonErrorCode.SXJE0053);
@@ -637,7 +639,8 @@ public class Extensions {
      */
 
     private static void checkBytes(char[] array, int start, int end, IntPredicate checker) throws XPathException {
-        int ch32 = UTF16CharacterSet.firstInvalidChar(new CharSlice(array, start, end - start), checker);
+        int ch32 = UTF16CharacterSet.firstInvalidChar(
+                StringTool.codePoints(new String(array, start, end - start)), checker);
         if (ch32 != -1) {
             XPathException err = new XPathException("The byte sequence contains a character not allowed by XML (hex " +
                     Integer.toHexString(ch32) + ')');
@@ -657,12 +660,12 @@ public class Extensions {
      * binary value is not valid in this encoding.
      */
 
-    public static ZeroOrOne<HexBinaryValue> stringToHexBinary(ZeroOrOne<StringValue> in, One<StringValue> encoding) throws XPathException {
+    public static ZeroOrOne<HexBinaryValue> stringToHexBinary(ZeroOrOne<StringItem> in, One<StringItem> encoding) throws XPathException {
         try {
             if (in.head() == null) {
                 return ZeroOrOne.empty();
             }
-            ByteArrayOutputStream stream = new ByteArrayOutputStream(in.head().getStringLength());
+            ByteArrayOutputStream stream = new ByteArrayOutputStream(in.head().length32());
             OutputStreamWriter writer = new OutputStreamWriter(stream, encoding.head().getStringValue());
             writer.write(in.head().getStringValue());
             writer.close();
@@ -696,10 +699,10 @@ public class Extensions {
      * @throws XPathException for example if the prefix is not a valid NCName, or if the URI is empty.
      */
 
-    public static One<NodeInfo> namespaceNode(XPathContext context, One<StringValue> prefix, One<StringValue> uri) throws XPathException {
+    public static One<NodeInfo> namespaceNode(XPathContext context, One<StringItem> prefix, One<StringItem> uri) throws XPathException {
         String prefix0 = prefix.head().getStringValue();
-        String uri0 = uri.head().getStringValue();
-        if (!(prefix0.isEmpty() || NameChecker.isValidNCName(prefix0))) {
+        UnicodeString uri0 = uri.head().getUnicodeStringValue();
+        if (!(prefix0.isEmpty() || NameChecker.isValidNCName(StringTool.codePoints(prefix0)))) {
             throw new XPathException("Namespace prefix " + Err.wrap(prefix0) + " is not a valid NCName");
         }
         if (uri0.isEmpty()) {
@@ -719,11 +722,11 @@ public class Extensions {
      * @return a sequence of strings containing the names of the unparsed entities
      */
 
-    public static ZeroOrMore<StringValue> unparsedEntities(One<NodeInfo> doc) {
+    public static ZeroOrMore<StringItem> unparsedEntities(One<NodeInfo> doc) {
         Iterator<String> names = doc.head().getTreeInfo().getUnparsedEntityNames();
-        List<StringValue> result = new ArrayList<>();
+        List<StringItem> result = new ArrayList<>();
         while (names.hasNext()) {
-            result.add(new StringValue(names.next()));
+            result.add(new StringItem(names.next()));
         }
         return new ZeroOrMore<>(result);
     }
@@ -746,7 +749,7 @@ public class Extensions {
      *         for the dateTime argument, or if no information is available.
      */
 
-    public static ZeroOrOne<BooleanValue> inSummerTime(XPathContext context, One<DateTimeValue> date, One<StringValue> region) {
+    public static ZeroOrOne<BooleanValue> inSummerTime(XPathContext context, One<DateTimeValue> date, One<StringItem> region) {
         DateTimeValue dt = date.head();
         if (!dt.hasTimezone()) {
             dt = dt.adjustTimezone(context.getImplicitTimezone());
@@ -767,7 +770,7 @@ public class Extensions {
      * @throws XPathException if parsing fails
      */
 
-    public static ZeroOrOne<CalendarValue> parseDateTime(ZeroOrOne<StringValue> input, One<StringValue> format) throws XPathException {
+    public static ZeroOrOne<CalendarValue> parseDateTime(ZeroOrOne<StringItem> input, One<StringItem> format) throws XPathException {
         DateTimeFormatter formatter;
         try {
             formatter = new DateTimeFormatterBuilder()
@@ -776,17 +779,17 @@ public class Extensions {
                     .toFormatter()
                     .withResolverStyle(ResolverStyle.SMART);
         } catch (IllegalArgumentException e) {
-            throw new XPathException("Invalid date/time pattern " + format.getStringValue() + ": " + e.getMessage());
+            throw new XPathException("Invalid date/time pattern " + format.getUnicodeStringValue() + ": " + e.getMessage());
         }
-        StringValue in = input.head();
+        StringItem in = input.head();
         if (in == null) {
             return ZeroOrOne.empty();
         } else {
             TemporalAccessor ta;
             try {
-                ta = formatter.parse(in.getStringValueCS());
+                ta = formatter.parse(in.getStringValue());
             } catch (DateTimeParseException e) {
-                throw new XPathException("Supplied date/time value " + in.getStringValue() + " cannot be parsed using pattern " + format.getStringValue() + ": " + e.getMessage());
+                throw new XPathException("Supplied date/time value " + in.getUnicodeStringValue() + " cannot be parsed using pattern " + format.getUnicodeStringValue() + ": " + e.getMessage());
 
             }
             boolean hasYear = ta.isSupported(ChronoField.YEAR);
@@ -850,7 +853,7 @@ public class Extensions {
      *         returns <code>2008-07-10T08:00:00-04:00</code></p>
      */
 
-    public static ZeroOrOne<DateTimeValue> adjustToCivilTime(XPathContext context, ZeroOrOne<DateTimeValue> date, One<StringValue> region) {
+    public static ZeroOrOne<DateTimeValue> adjustToCivilTime(XPathContext context, ZeroOrOne<DateTimeValue> date, One<StringItem> region) {
         DateTimeValue dt = date.head();
         if (dt == null) {
             return ZeroOrOne.empty();

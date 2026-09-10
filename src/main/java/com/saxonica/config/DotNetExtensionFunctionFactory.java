@@ -23,7 +23,7 @@ public class DotNetExtensionFunctionFactory implements ExtensionFunctionFactory 
     }
 
     private Class extensionFunctionCallClass = DotNetExtensionFunctionCall.class;
-    private Configuration config;
+    private final Configuration config;
 
     /**
      * Set the class to be used to represent extension function calls. This must be a subclass

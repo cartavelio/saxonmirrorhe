@@ -11,7 +11,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
@@ -243,11 +243,11 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue("Model Group Definition");
+                        return StringItem.bmp("Model Group Definition");
                     case "implementation":
                         return new ObjectValue<>(ModelGroupDefinition.this);
                     case "name":
-                        return new StringValue(getName(), BuiltInAtomicType.NCNAME);
+                        return new StringItem(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
                         return new AnyURIValue(getTargetNamespace());
                     case "model group":

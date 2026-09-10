@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class DeleteAction extends PendingUpdateAction {
 
-    private NodeInfo targetNode;
+    private final NodeInfo targetNode;
 
     /**
      * Create a DeleteAction

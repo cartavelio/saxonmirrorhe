@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class ThreadManagerEE extends XPathContextMajor.ThreadManager {
-    private EnterpriseConfiguration config;
+    private final EnterpriseConfiguration config;
     private ExecutorService executorService = null;
     private CountingCompletionService<Outcome<Boolean>> completionService = null;
 

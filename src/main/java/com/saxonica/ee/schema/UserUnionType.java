@@ -5,9 +5,10 @@ import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
@@ -473,7 +474,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
 
     /*@Nullable*/
     @Override
-    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+    public ValidationFailure validateContent(/*@NotNull*/ UnicodeString value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         ValidationFailure result = null;
         SimpleType matchingType = null;
         for (TypeReference ref : getMemberTypeReferences()) {
@@ -537,7 +538,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
         return checkAgainstFacets(value, value.getCanonicalLexicalRepresentation(), getExtendedFacetList(), rules);
     }
 
-    private SimpleType getMatchingMemberType(CharSequence value, NamespaceResolver resolver, ConversionRules rules) {
+    private SimpleType getMatchingMemberType(UnicodeString value, NamespaceResolver resolver, ConversionRules rules) {
         for (TypeReference ref : getMemberTypeReferences()) {
             try {
                 // This method actually attempts conversion to each member type in turn; when validation
@@ -557,7 +558,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
 
 
     @Override
-    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
+    public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         AtomicSequence result = null;
         for (TypeReference ref : getMemberTypeReferences()) {
@@ -616,10 +617,10 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
     @Override
     public void serializeVariety(SchemaModelSerializer serializer) throws XPathException {
         serializer.emitAttribute("variety", "union");
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder sb = new StringBuilder(64);
         for (TypeReference ref : getMemberTypeReferences()) {
             SimpleType type = (SimpleType) ref.getTarget();
-            if (!sb.isEmpty()) {
+            if (sb.length() != 0) {
                 sb.append(" ");
             }
             sb.append(serializer.getTypeLink(type));
@@ -743,7 +744,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
 
     public String toString() {
         if (isAnonymousType()) {
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+            StringBuilder fsb = new StringBuilder(256);
             fsb.append("union(");
             for (TypeReference ref : getMemberTypeReferences()) {
                 String member = ref.getTargetComponentName().getDisplayName();
@@ -761,7 +762,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
     @Override
     public String toExportString() {
         if (isAnonymousType()) {
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+            StringBuilder fsb = new StringBuilder(256);
             fsb.append("union(");
             for (TypeReference ref : getMemberTypeReferences()) {
                 try {

@@ -14,8 +14,8 @@ import java.util.List;
 
 public class CountingState implements State {
 
-    private AutomatonState automatonState;
-    private int counter;
+    private final AutomatonState automatonState;
+    private final int counter;
 
     public CountingState(AutomatonState as, int startFrom) {
         automatonState = as;

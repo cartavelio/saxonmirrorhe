@@ -28,7 +28,7 @@ public class ElementNameTracker extends PullFilter {
      * currentEvent to the event returned by any call on next().</p>
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@link #END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
@@ -48,9 +48,9 @@ public class ElementNameTracker extends PullFilter {
 
     /**
      * Get the node name identifying the name of the current node. This method
-     * can be used after the {@link net.sf.saxon.pull.PullProvider.Event#START_ELEMENT}, {@link net.sf.saxon.pull.PullProvider.Event#PROCESSING_INSTRUCTION},
-     * {@link net.sf.saxon.pull.PullProvider.Event#ATTRIBUTE}, or {@link net.sf.saxon.pull.PullProvider.Event#NAMESPACE} events. With some PullProvider implementations,
-     * including this one, it can also be used after {@link net.sf.saxon.pull.PullProvider.Event#END_ELEMENT}: in fact, that is the
+     * can be used after the {@link Event#START_ELEMENT}, {@link Event#PROCESSING_INSTRUCTION},
+     * {@link Event#ATTRIBUTE}, or {@link Event#NAMESPACE} events. With some PullProvider implementations,
+     * including this one, it can also be used after {@link Event#END_ELEMENT}: in fact, that is the
      * main purpose of this class.
      * If called at other times, the result is undefined and may result in an IllegalStateException.
      * If called when the current node is an unnamed namespace node (a node representing the default namespace)

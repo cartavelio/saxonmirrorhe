@@ -124,7 +124,7 @@ public class XSDAssert extends AnnotationParent {
         Map<StructuredQName, XPathVariable> parameters = new HashMap<>();
         for (GlobalParam param : getXSDSchema().getGlobalParams()) {
             XPathVariable var = env.declareVariable(param.getVariableQName());
-            GroundedValue defaultVal = ((Literal) param.getBody()).getValue();
+            GroundedValue defaultVal = ((Literal) param.getBody()).getGroundedValue();
             var.setDefaultValue(defaultVal);
             parameters.put(param.getVariableQName(), var);
         }

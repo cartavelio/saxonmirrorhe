@@ -7,11 +7,12 @@ import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * This class is used when a streaming template requests evaluation of a simple content constructor
@@ -27,8 +28,8 @@ import net.sf.saxon.type.Type;
 
 public class SimpleNodeConstructorFeed extends ItemFeed {
 
-    private FastStringBuffer buffer = new FastStringBuffer(100);
-    private boolean disableOutputEscaping;
+    private UnicodeBuilder buffer = new UnicodeBuilder();
+    private final boolean disableOutputEscaping;
     private boolean isSimpleText;
 
     public SimpleNodeConstructorFeed(Expression expr, ItemFeed result, XPathContext context) {
@@ -54,22 +55,22 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
         if (!hasFailed()) {
             if (isSimpleText) {
                 try {
-                    getNextOutputter().characters(item.getStringValueCS(), Loc.NONE, ReceiverOption.NONE);
+                    getNextOutputter().characters(item.getUnicodeStringValue(), Loc.NONE, ReceiverOption.NONE);
                 } catch (XPathException e) {
                     dynamicError(e);
                 }
             } else {
-                buffer.cat(item.getStringValueCS());
+                buffer.append(item.getUnicodeStringValue());
             }
         }
     }
 
     @Override
-    public CharSequenceConsumer getStringReceiver(boolean asTextNode) {
+    public UniStringConsumer getStringReceiver(boolean asTextNode) {
         if (isSimpleText) {
-            return new CharSequenceConsumer() {
+            return new UniStringConsumer() {
                 @Override
-                public CharSequenceConsumer cat(CharSequence chars) throws XPathException {
+                public UniStringConsumer append(CodePoints chars) throws XPathException {
                     try {
                         getNextOutputter().characters(chars, Loc.NONE, ReceiverOption.NONE);
                     } catch (XPathException e) {
@@ -105,7 +106,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
                     if (!isSimpleText) {
                         try {
                             int options = disableOutputEscaping? ReceiverOption.DISABLE_ESCAPING : ReceiverOption.NONE;
-                            getNextOutputter().characters(buffer, Loc.NONE, options);
+                            getNextOutputter().characters(buffer.toUnicodeString(), Loc.NONE, options);
                         } catch (XPathException e) {
                             dynamicError(e);
                         }
@@ -114,7 +115,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
                 case Type.COMMENT:
                     try {
                         getNextOutputter().comment(
-                                buffer.toString(),
+                                buffer.toUnicodeString(),
                                 Loc.NONE,
                                 ReceiverOption.NONE);
                     } catch (XPathException e) {
@@ -125,7 +126,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
                     try {
                         getNextOutputter().processingInstruction(
                                 constructor.evaluateNodeName(getContext()).getLocalPart(),
-                                buffer.toString(),
+                                buffer.toUnicodeString(),
                                 Loc.NONE,
                                 ReceiverOption.NONE);
                     } catch (XPathException e) {
@@ -135,7 +136,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
                 default:
                     throw new IllegalArgumentException("Unknown node kind " + kind);
             }
-            buffer = new FastStringBuffer(100);
+            buffer.clear();
             super.close();
         }
     }

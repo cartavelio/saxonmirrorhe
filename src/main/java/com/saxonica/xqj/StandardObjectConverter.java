@@ -18,6 +18,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -78,7 +80,7 @@ public class StandardObjectConverter implements ObjectConverter {
             int t = p.getItemType().getPrimitiveType();
             switch (t) {
                 case StandardNames.XS_ANY_URI:
-                    return p.getStringValue();
+                    return p.getUnicodeStringValue();
                 case StandardNames.XS_BASE64_BINARY:
                     return ((Base64BinaryValue) p).getBinaryValue();
                 case StandardNames.XS_BOOLEAN:
@@ -135,7 +137,7 @@ public class StandardObjectConverter implements ObjectConverter {
                     return ((QualifiedNameValue) p).toJaxpQName();
                 case StandardNames.XS_STRING:
                 case StandardNames.XS_UNTYPED_ATOMIC:
-                    return p.getStringValue();
+                    return p.getUnicodeStringValue();
                 case StandardNames.XS_TIME:
                     return new SaxonXMLGregorianCalendar((CalendarValue) p);
                 case StandardNames.XS_DAY_TIME_DURATION:
@@ -182,7 +184,7 @@ public class StandardObjectConverter implements ObjectConverter {
             } else if (value instanceof Short) {
                 return new Int64Value((Short) value, BuiltInAtomicType.SHORT, false);
             } else if (value instanceof String) {
-                return new StringValue((String) value);
+                return new StringItem((String) value);
             } else if (value instanceof BigDecimal) {
                 return new BigDecimalValue((BigDecimal) value);
             } else if (value instanceof BigInteger) {
@@ -191,28 +193,29 @@ public class StandardObjectConverter implements ObjectConverter {
                 return ((SaxonDuration) value).getDurationValue();
             } else if (value instanceof Duration) {
                 // this is simpler and safer (but perhaps slower) than extracting all the components
-                return DurationValue.makeDuration(value.toString()).asAtomic();
+                return DurationValue.makeDuration(StringView.of(value.toString()).tidy()).asAtomic();
             } else if (value instanceof SaxonXMLGregorianCalendar) {
                 return ((SaxonXMLGregorianCalendar) value).toCalendarValue();
             } else if (value instanceof XMLGregorianCalendar) {
                 XMLGregorianCalendar g = (XMLGregorianCalendar) value;
                 QName gtype = g.getXMLSchemaType();
+                UnicodeString gregVal = StringView.of(value.toString()).tidy();
                 if (gtype.equals(DatatypeConstants.DATETIME)) {
-                    return DateTimeValue.makeDateTimeValue(value.toString(), config.getConversionRules()).asAtomic();
+                    return DateTimeValue.makeDateTimeValue(gregVal, config.getConversionRules()).asAtomic();
                 } else if (gtype.equals(DatatypeConstants.DATE)) {
-                    return DateValue.makeDateValue(value.toString(), config.getConversionRules()).asAtomic();
+                    return DateValue.makeDateValue(gregVal, config.getConversionRules()).asAtomic();
                 } else if (gtype.equals(DatatypeConstants.TIME)) {
-                    return TimeValue.makeTimeValue(value.toString()).asAtomic();
+                    return TimeValue.makeTimeValue(gregVal).asAtomic();
                 } else if (gtype.equals(DatatypeConstants.GYEAR)) {
-                    return GYearValue.makeGYearValue(value.toString(), config.getConversionRules()).asAtomic();
+                    return GYearValue.makeGYearValue(gregVal, config.getConversionRules()).asAtomic();
                 } else if (gtype.equals(DatatypeConstants.GYEARMONTH)) {
-                    return GYearMonthValue.makeGYearMonthValue(value.toString(), config.getConversionRules()).asAtomic();
+                    return GYearMonthValue.makeGYearMonthValue(gregVal, config.getConversionRules()).asAtomic();
                 } else if (gtype.equals(DatatypeConstants.GMONTH)) {
-                    return GMonthValue.makeGMonthValue(value.toString()).asAtomic();
+                    return GMonthValue.makeGMonthValue(gregVal).asAtomic();
                 } else if (gtype.equals(DatatypeConstants.GMONTHDAY)) {
-                    return GMonthDayValue.makeGMonthDayValue(value.toString()).asAtomic();
+                    return GMonthDayValue.makeGMonthDayValue(gregVal).asAtomic();
                 } else if (gtype.equals(DatatypeConstants.GDAY)) {
-                    return GDayValue.makeGDayValue(value.toString()).asAtomic();
+                    return GDayValue.makeGDayValue(gregVal).asAtomic();
                 } else {
                     throw new AssertionError("Unknown Gregorian date type");
                 }
@@ -270,7 +273,7 @@ public class StandardObjectConverter implements ObjectConverter {
             return null;
         }
         if (((SaxonXQItemType) type).getSaxonItemType() instanceof JavaExternalObjectType) {
-            Item result = (ExternalObject<Object>) new ObjectValue<>(value);
+            Item result = new ObjectValue<>(value);
             try {
                 if (((SaxonXQItemType) type).getSaxonItemType().matches(result, config.getTypeHierarchy())) {
                     return result;

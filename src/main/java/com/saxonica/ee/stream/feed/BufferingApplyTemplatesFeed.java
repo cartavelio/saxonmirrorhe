@@ -30,8 +30,8 @@ import java.util.List;
 
 public class BufferingApplyTemplatesFeed extends ItemFeed {
 
-    private List<Item> inputValue = new ArrayList<>(4);
-    private Component.M targetMode;
+    private final List<Item> inputValue = new ArrayList<>(4);
+    private final Component.M targetMode;
 
     public BufferingApplyTemplatesFeed(ApplyTemplates expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);

@@ -1,11 +1,11 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -37,8 +37,8 @@ public abstract class DigitsFacet extends Facet {
      */
 
     @Override
-    public String getValue() {
-        return requiredValue + "";
+    public UnicodeString getValue() {
+        return BMPString.of(requiredValue + "");
     }
 
     /**
@@ -141,7 +141,7 @@ public abstract class DigitsFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue(getName());
+                        return new StringItem(getName());
                     case "implementation":
                         return new ObjectValue<>(DigitsFacet.this);
                     case "value":

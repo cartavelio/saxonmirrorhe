@@ -23,11 +23,11 @@ public class BufferingForEachExpressionFeed extends ItemFeed {
 
     Expression action;
     XPathContext localContext;
-    private List<Item> inputValue = new ArrayList<>(4);
+    private final List<Item> inputValue = new ArrayList<>(4);
 
     public BufferingForEachExpressionFeed(ForEach expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);
-        action = ((ForEach) expr).getActionExpression();
+        action = expr.getActionExpression();
         localContext = context;
     }
 

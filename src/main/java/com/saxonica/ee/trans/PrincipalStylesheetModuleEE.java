@@ -31,7 +31,7 @@ import java.util.Map;
 
 public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
 
-    private Map<Expression, GlobalVariable> indexOfVariablesByInitializer = new HashMap<Expression, GlobalVariable>();
+    private final Map<Expression, GlobalVariable> indexOfVariablesByInitializer = new HashMap<Expression, GlobalVariable>();
 
     public PrincipalStylesheetModuleEE(XSLPackage node) throws XPathException {
         super(node);

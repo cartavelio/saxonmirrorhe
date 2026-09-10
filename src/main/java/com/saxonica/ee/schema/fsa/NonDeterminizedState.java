@@ -1,6 +1,6 @@
 package com.saxonica.ee.schema.fsa;
 
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,7 @@ public class NonDeterminizedState extends AutomatonState {
     @Override
     public void displayLambdaTransitions() {
         if (lambdaTransitions != null) {
-            FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder sb = new StringBuilder(64);
             sb.append("   lambda transitions -> ");
             for (int i = 0; i < lambdaTransitions.size(); i++) {
                 sb.append(lambdaTransitions.get(i).stateNumber +

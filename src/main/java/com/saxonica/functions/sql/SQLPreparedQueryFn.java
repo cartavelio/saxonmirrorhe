@@ -17,7 +17,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -152,12 +152,12 @@ public class SQLPreparedQueryFn extends SystemFunction {
 
     private static boolean makeComparisonOperand(Expression exp, StringBuilder sb, List<Expression> params) {
         if (exp instanceof Literal) {
-            GroundedValue val = ((Literal) exp).getValue();
-            if (val instanceof StringValue) {
-                sb.append("'").append(((StringValue) val).getStringValue().replace("'", "\\'")).append("'");
+            GroundedValue val = ((Literal) exp).getGroundedValue();
+            if (val instanceof StringItem) {
+                sb.append("'").append(((StringItem) val).getStringValue().replace("'", "\\'")).append("'");
                 return true;
             } else if (val instanceof NumericValue) {
-                sb.append(((NumericValue) val).getStringValue());
+                sb.append(((NumericValue) val).getUnicodeStringValue());
                 return true;
             }
         }
@@ -165,7 +165,7 @@ public class SQLPreparedQueryFn extends SystemFunction {
             LookupExpression lookup = (LookupExpression) exp;
             if ((lookup.getLhsExpression() instanceof ContextItemExpression) &&
                     lookup.getRhsExpression() instanceof StringLiteral) {
-                sb.append((((StringLiteral) lookup.getRhsExpression()).getStringValue()));
+                sb.append((((StringLiteral) lookup.getRhsExpression()).getString()));
                 return true;
             }
         }

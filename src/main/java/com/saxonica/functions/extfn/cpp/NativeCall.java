@@ -89,7 +89,7 @@ public class NativeCall extends SystemFunction {
                     boolean isInteger = th.isSubType(operandType, BuiltInAtomicType.INTEGER);
                     if (th.isSubType(operandType, BuiltInAtomicType.STRING)) {
                         funcArgTypes[i] = "string";
-                        funcArgs[i] = value.getStringValue();
+                        funcArgs[i] = value.getUnicodeStringValue();
                     } else if (isInteger) {
                         funcArgTypes[i] = "integer";
                         funcArgs[i] = new Integer((int) ((IntegerValue) value).longValue());
@@ -144,7 +144,7 @@ public class NativeCall extends SystemFunction {
 
     public static Sequence convertValueObject(Object obj, String phpFuncName) throws XPathException {
         if (obj instanceof String) {
-            return new StringValue((String) obj);
+            return new StringItem((String) obj);
         } else if (obj instanceof Integer) {
             return new Int64Value(((Integer) obj).intValue());
         } else if (obj instanceof Double) {

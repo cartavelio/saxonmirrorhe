@@ -2,11 +2,12 @@ package com.saxonica.js;
 
 import com.saxonica.testdriver.Xslt30TestSuiteDriverEE;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.testdriver.Environment;
 import net.sf.saxon.testdriver.TestOutcome;
 import net.sf.saxon.tree.linked.ProcInstImpl;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.script.ScriptException;
 import javax.xml.transform.Source;
@@ -25,9 +26,9 @@ import java.util.Map;
 public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
 
     File exportFile;
-    private Map<String, XdmValue> globalParams = new HashMap<String, XdmValue>();
-    private List<XdmValue> initialFunctionArgs = new ArrayList<XdmValue>();
-    private String targetVersion = "JS";
+    private final Map<String, XdmValue> globalParams = new HashMap<String, XdmValue>();
+    private final List<XdmValue> initialFunctionArgs = new ArrayList<XdmValue>();
+    private final String targetVersion = "JS";
     private boolean nodeJS = false;
 
     public static void main(String[] args) throws Exception {
@@ -302,7 +303,7 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
                 for (Map.Entry<String, String> sec : secondaryResults.entrySet()) {
                     URI uri = baseOutputURI.resolve(sec.getKey());
                     String result = sec.getValue();
-                    outcome.setSecondaryResult(uri, XdmAtomicValue.wrap(new StringValue(result)), null);
+                    outcome.setSecondaryResult(uri, XdmAtomicValue.wrap(new StringItem(result)), null);
                     if (result.startsWith("<")) {
                         try {
                             DocumentBuilder builder = env.processor.newDocumentBuilder();
@@ -316,7 +317,7 @@ public class XsltTestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
                     }
 
                 }
-                outcome.addXslMessage(new XdmNode(new ProcInstImpl("trust", "me")));
+                outcome.addXslMessage(new XdmNode(new ProcInstImpl("trust", BMPString.of("me"))));
             } catch (SaxonApiException e) {
                 outcome.setException(e.getErrorCode());
                 if (e.getErrorCode() != null) {

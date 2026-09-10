@@ -11,8 +11,10 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
 
 import java.util.*;
 
@@ -30,7 +32,7 @@ public class XSDSchema extends SchemaElement {
     /**
      * Map of global parameters declared using the saxon:param extension, indexed by the parameter name
      */
-    private HashMap<StructuredQName, GlobalParam> params = new HashMap<>();
+    private final HashMap<StructuredQName, GlobalParam> params = new HashMap<>();
 
     /**
      * If this schema is loaded via include/import/redefine, the referring element
@@ -119,7 +121,7 @@ public class XSDSchema extends SchemaElement {
      * Saxon extensions enabled
      */
 
-    private Set<String> saxonExtensionEnabled = new HashSet<>();
+    private final Set<String> saxonExtensionEnabled = new HashSet<>();
 
     /**
      * Create an XSDSchema object, representing the xs:schema element in a schema document

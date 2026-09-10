@@ -8,6 +8,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -25,12 +26,12 @@ import java.util.LinkedList;
 
 public class SchemaModelSerializer {
 
-    private EnterpriseConfiguration config;
-    private Receiver receiver;
-    private ComplexContentOutputter cco;
-    private LinkedList<SchemaComponent> pendingComponents = new LinkedList<>();
-    private IdentityHashMap<SchemaComponent, String> componentToIdMap = new IdentityHashMap<>(200);
-    private IdentityHashMap<SerializableSchemaComponent, String> serializedComponents = new IdentityHashMap<>(200);
+    private final EnterpriseConfiguration config;
+    private final Receiver receiver;
+    private final ComplexContentOutputter cco;
+    private final LinkedList<SchemaComponent> pendingComponents = new LinkedList<>();
+    private final IdentityHashMap<SchemaComponent, String> componentToIdMap = new IdentityHashMap<>(200);
+    private final IdentityHashMap<SerializableSchemaComponent, String> serializedComponents = new IdentityHashMap<>(200);
     private int nextComponent = 0;
     private NamespaceMap namespaceMap = NamespaceMap.emptyMap();
 
@@ -120,7 +121,7 @@ public class SchemaModelSerializer {
         endElement();
         if (receiver instanceof CheckSumFilter) {
             int c = ((CheckSumFilter) receiver).getChecksum();
-            cco.processingInstruction(CheckSumFilter.SIGMA, Integer.toHexString(c),
+            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
                                       Loc.NONE, ReceiverOption.NONE);
         }
         cco.endDocument();
@@ -172,7 +173,7 @@ public class SchemaModelSerializer {
         cco.attribute(nc, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, ReceiverOption.NONE);
     }
 
-    private static FingerprintedQName XML_BASE =
+    private static final FingerprintedQName XML_BASE =
             new FingerprintedQName("xml", NamespaceConstant.XML, "base", StandardNames.XML_BASE);
 
     public void setIsSerialized(SerializableSchemaComponent component) {
@@ -219,7 +220,7 @@ public class SchemaModelSerializer {
             startElement("item");
             AtomicType type = atom.getPrimitiveType();
             emitAttribute("type", "#" + type.getName());
-            emitAttribute("value", atom.getStringValue());
+            emitAttribute("value", atom.getUnicodeStringValue().toString());
             if (atom instanceof QualifiedNameValue) {
                 emitAttribute("namespace", ((QualifiedNameValue) atom).getNamespaceURI());
             }

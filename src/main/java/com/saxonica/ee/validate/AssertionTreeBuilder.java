@@ -18,8 +18,8 @@ import net.sf.saxon.type.SchemaType;
  */
 public class AssertionTreeBuilder extends TeeOutputter {
 
-    private Sink sink;
-    private boolean retainComments;
+    private final Sink sink;
+    private final boolean retainComments;
     private TinyBuilder builder;
 
     public AssertionTreeBuilder(Receiver next, boolean retainComments) {

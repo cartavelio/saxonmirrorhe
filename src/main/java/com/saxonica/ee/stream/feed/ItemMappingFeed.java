@@ -16,7 +16,7 @@ import net.sf.saxon.trans.XPathException;
  */
 
 public class ItemMappingFeed extends GroundedItemFeed {
-    private ItemMappingFunction function;
+    private final ItemMappingFunction function;
 
     public ItemMappingFeed(Expression expr, ItemFeed result, XPathContext context,
                            ItemMappingFunction function) {

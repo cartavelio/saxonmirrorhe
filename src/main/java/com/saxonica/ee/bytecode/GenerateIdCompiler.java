@@ -4,7 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import org.objectweb.asm.Type;
 
 /**
@@ -22,16 +22,16 @@ public class GenerateIdCompiler extends ToStringCompiler {
         compiler.compileToItem(fnc.getArg(0));
         returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, generateIdReturn, 0);
         ga.checkClass(NodeInfo.class);
-        ga.newInstance(Type.getType(FastStringBuffer.class));
+        ga.newInstance(Type.getType(StringBuilder.class));
         ga.dup();
-        ga.push(FastStringBuffer.C16);
-        ga.invokeConstructor(FastStringBuffer.class, Integer.TYPE);
-        int bufferVar = methodInfo.allocateLocal(FastStringBuffer.class);
+        ga.push(16);
+        ga.invokeConstructor(StringBuilder.class, Integer.TYPE);
+        int bufferVar = methodInfo.allocateLocal(StringBuilder.class);
         ga.dup();
         ga.storeLocal(bufferVar);
-        ga.invokeInstanceMethod(NodeInfo.class, "generateId", FastStringBuffer.class);
+        ga.invokeInstanceMethod(NodeInfo.class, "generateId", StringBuilder.class);
         ga.loadLocal(bufferVar);
-        ga.invokeInstanceMethod(FastStringBuffer.class, "condense");
+        ga.invokeInstanceMethod(StringBuilder.class, "condense");
         methodInfo.placeLabel(generateIdReturn);
         methodInfo.releaseLocal(bufferVar);
         if (requiredClass == String.class) {

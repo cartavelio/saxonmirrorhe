@@ -2,9 +2,11 @@ package com.saxonica.config;
 
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.z.IntIterator;
 
 /**
  * This filter sometimes gets inserted into a serialization pipeline when running under an evaluation
@@ -17,15 +19,17 @@ public class EvaluationNuisance extends ProxyReceiver {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        FastStringBuffer fsb = new FastStringBuffer(chars.length());
-        for (int i = 0; i < chars.length(); i++) {
-            fsb.cat(chars.charAt(i));
-            if (i % 10 == 9) {
-                fsb.cat('*');
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        UnicodeBuilder fsb = new UnicodeBuilder();
+        IntIterator iter = chars.codePoints();
+        int i = 0;
+        while (iter.hasNext()) {
+            fsb.append(iter.next());
+            if (i++ % 10 == 9) {
+                fsb.append('*');
             }
         }
-        super.characters(fsb, locationId, properties);
+        super.characters(fsb.toUnicodeString(), locationId, properties);
     }
 }
 

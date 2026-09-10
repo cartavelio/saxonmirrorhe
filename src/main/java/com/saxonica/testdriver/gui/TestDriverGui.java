@@ -78,11 +78,11 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
     private JComboBox treeModelCombo;
     private JLabel c;
     private Thread thread = null;
-    private Processor driverProc = new Processor(true);
-    private TreeModel treeModel = TreeModel.LINKED_TREE;
+    private final Processor driverProc = new Processor(true);
+    private final TreeModel treeModel = TreeModel.LINKED_TREE;
     private Document cacheNode = null;
     private XPathCompiler xpc = null;
-    private Writer resultWriter = null;
+    private final Writer resultWriter = null;
     private File cacheFile = null;
     //#if EE==true || PE==true
     private XMarkBenchmark xmark = null;
@@ -90,7 +90,7 @@ public class TestDriverGui extends TestDriverShell implements ActionListener, Mo
     private String prevSource = "xsltTestDriver";
     private String resultFileStr = null;
     private String resultsDir = "";
-    private String testDriverVersion = "4.1";
+    private final String testDriverVersion = "4.1";
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {

@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class IntEqualityPatternOptimizer extends PatternOptimizer {
 
-    private static IntEqualityPatternOptimizer THE_INSTANCE = new IntEqualityPatternOptimizer();
+    private static final IntEqualityPatternOptimizer THE_INSTANCE = new IntEqualityPatternOptimizer();
 
     public static IntEqualityPatternOptimizer getInstance() {
         return THE_INSTANCE;

@@ -156,7 +156,7 @@ public interface XQDynamicContext {
      *         or provided by the implementation
      * @throws XQException if the expression is in a closed state
      */
-    public java.util.TimeZone getImplicitTimeZone() throws XQException;
+    java.util.TimeZone getImplicitTimeZone() throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item.
@@ -182,7 +182,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (6) the expression is in a closed state
      */
-    public void bindAtomicValue(QName varName, String value, XQItemType type)
+    void bindAtomicValue(QName varName, String value, XQItemType type)
             throws XQException;
 
 
@@ -219,7 +219,7 @@ public interface XQDynamicContext {
      *                     is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindString(QName varName, String value, XQItemType type)
+    void bindString(QName varName, String value, XQItemType type)
             throws XQException;
 
     /**
@@ -275,7 +275,7 @@ public interface XQDynamicContext {
      *                     defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindDocument(QName varName, String value, String baseURI, XQItemType type) throws XQException;
+    void bindDocument(QName varName, String value, String baseURI, XQItemType type) throws XQException;
 
 
     /**
@@ -331,7 +331,7 @@ public interface XQDynamicContext {
      *                     defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindDocument(QName varName, Reader value, String baseURI, XQItemType type) throws XQException;
+    void bindDocument(QName varName, Reader value, String baseURI, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item.
@@ -386,7 +386,7 @@ public interface XQDynamicContext {
      *                     defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindDocument(QName varName, InputStream value, String baseURI, XQItemType type) throws XQException;
+    void bindDocument(QName varName, InputStream value, String baseURI, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item.
@@ -436,7 +436,7 @@ public interface XQDynamicContext {
      *                     defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindDocument(QName varName, javax.xml.stream.XMLStreamReader value, XQItemType type)
+    void bindDocument(QName varName, javax.xml.stream.XMLStreamReader value, XQItemType type)
             throws XQException;
 
     /**
@@ -494,7 +494,7 @@ public interface XQDynamicContext {
      *                     defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindDocument(javax.xml.namespace.QName varName, javax.xml.transform.Source value, XQItemType type)
+    void bindDocument(javax.xml.namespace.QName varName, javax.xml.transform.Source value, XQItemType type)
             throws XQException;
 
     /**
@@ -503,7 +503,7 @@ public interface XQDynamicContext {
      * @param implicitTimeZone time zone to be set
      * @throws XQException if the expression is in a closed state
      */
-    public void setImplicitTimeZone(java.util.TimeZone implicitTimeZone)
+    void setImplicitTimeZone(java.util.TimeZone implicitTimeZone)
             throws XQException;
 
     /**
@@ -524,7 +524,7 @@ public interface XQDynamicContext {
      *                     expression, (4) the expression is in a closed state,
      *                     or (5) the specified item is closed
      */
-    public void bindItem(QName varName, XQItem value) throws XQException;
+    void bindItem(QName varName, XQItem value) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The input sequence
@@ -546,7 +546,7 @@ public interface XQDynamicContext {
      *                     the expression, (4) the expression is in a closed
      *                     state, or (5) the specified sequence is closed
      */
-    public void bindSequence(QName varName, XQSequence value) throws XQException;
+    void bindSequence(QName varName, XQSequence value) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -572,7 +572,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindObject(QName varName, Object value, XQItemType type) throws XQException;
+    void bindObject(QName varName, Object value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -598,7 +598,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindBoolean(QName varName, boolean value, XQItemType type) throws XQException;
+    void bindBoolean(QName varName, boolean value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -624,7 +624,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindByte(QName varName, byte value, XQItemType type) throws XQException;
+    void bindByte(QName varName, byte value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -650,7 +650,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindDouble(QName varName, double value, XQItemType type) throws XQException;
+    void bindDouble(QName varName, double value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -676,7 +676,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindFloat(QName varName, float value, XQItemType type) throws XQException;
+    void bindFloat(QName varName, float value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -702,7 +702,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindInt(QName varName, int value, XQItemType type) throws XQException;
+    void bindInt(QName varName, int value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -728,7 +728,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindLong(QName varName, long value, XQItemType type) throws XQException;
+    void bindLong(QName varName, long value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -754,7 +754,7 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindNode(QName varName, Node value, XQItemType type) throws XQException;
+    void bindNode(QName varName, Node value, XQItemType type) throws XQException;
 
     /**
      * Binds a value to the given external variable or the context item. The value is
@@ -780,6 +780,6 @@ public interface XQDynamicContext {
      *                     the variable is not defined in the prolog of the expression,
      *                     or (5) if the expression is in a closed state
      */
-    public void bindShort(QName varName, short value, XQItemType type) throws XQException;
+    void bindShort(QName varName, short value, XQItemType type) throws XQException;
 
-};
+}

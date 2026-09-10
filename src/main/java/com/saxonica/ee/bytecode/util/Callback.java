@@ -7,6 +7,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.JavaExternalObjectType;
@@ -161,7 +162,7 @@ public class Callback {
 
     public static double stringToNumberOrNaN(StringToDouble s2d, CharSequence string) {
         try {
-            return s2d.stringToNumber(string);
+            return s2d.stringToNumber(StringView.tidy(string.toString()));
         } catch (NumberFormatException err) {
             return Double.NaN;
         }
@@ -197,7 +198,7 @@ public class Callback {
 
     public static int booleanFromString(CharSequence s) {
         // implementation designed to avoid creating new objects
-        s = Whitespace.trimWhitespace(s);
+        s = Whitespace.trim(s.toString());
         int len = s.length();
         if (len == 1) {
             char c = s.charAt(0);

@@ -25,8 +25,8 @@ public class IndexedValue extends SearchableValue {
     // one. So rather than a full HashMap, we keep two parallel lists: a list of use expressions,
     // and a list of corresponding indexes.
 
-    private List<Expression> indexedExpressions = new ArrayList<>(3);
-    private List<MultiIndex> indexes = new ArrayList<>(3);
+    private final List<Expression> indexedExpressions = new ArrayList<>(3);
+    private final List<MultiIndex> indexes = new ArrayList<>(3);
     private Set<NodeInfo> distinctNodes;
 
     IndexedValue(Item[] array, int end) {

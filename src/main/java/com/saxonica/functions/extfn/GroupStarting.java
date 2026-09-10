@@ -50,9 +50,9 @@ public class GroupStarting extends SystemFunction {
 
     private static class GroupStartingFunctionIterator implements SequenceIterator {
 
-        private SequenceIterator baseIterator;
-        private Function function;
-        private XPathContext context;
+        private final SequenceIterator baseIterator;
+        private final Function function;
+        private final XPathContext context;
         private Item pending = null;
         private boolean finished = false;
 

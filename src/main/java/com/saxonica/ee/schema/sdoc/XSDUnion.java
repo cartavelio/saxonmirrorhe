@@ -106,7 +106,7 @@ public class XSDUnion extends SchemaElement {
             if (child.getFingerprint() == StandardNames.XS_SIMPLE_TYPE) {
                 SimpleTypeDefinition memberType = ((XSDSimpleType) child).getSimpleTypeDefinition();
                 int fp = ((XSDSimpleType) child).getSimpleTypeDefinition().getFingerprint();
-                TypeReference ref = new TypeReference(fp, compiler.getConfiguration(), (SchemaElement) child);
+                TypeReference ref = new TypeReference(fp, compiler.getConfiguration(), child);
                 ref.setTarget(memberType);
                 typeDefinition.addMemberType(ref);
             }

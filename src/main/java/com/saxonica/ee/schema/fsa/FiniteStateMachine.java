@@ -27,11 +27,11 @@ public class FiniteStateMachine {
     private int statesUsed = 0;
     private AutomatonState initialState;
     private AutomatonState[] states = new AutomatonState[20];
-    private Set<TermParticlePair> alphabet = new HashSet<>(20);
+    private final Set<TermParticlePair> alphabet = new HashSet<>(20);
     // the set of elementDecl and elementWildcard terms used in this machine
     private Wildcard openContentWildcard = null;
     private boolean openContentInterleaved = false;
-    private UserComplexType complexType; // the complex type implemented by this finite state machine
+    private final UserComplexType complexType; // the complex type implemented by this finite state machine
 
     /**
      * Create a finite state machine

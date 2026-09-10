@@ -15,10 +15,12 @@ import net.sf.saxon.expr.instruct.OnNonEmptyExpr;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,14 +53,14 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
 
     public static class ConditionalBlockFeed extends ItemFeed {
 
-        private int consumingArg;
+        private final int consumingArg;
         private boolean empty = true;
         private int level = 0;
         private boolean watchForDocumentChildren;
 
-        private boolean consumingArgIsOnEmpty;
-        private List<OnNonEmptyExpr> nonEmptyPendingList = new ArrayList<>();
-        private List<OutputterEvent> tentativeContent = new ArrayList<>();
+        private final boolean consumingArgIsOnEmpty;
+        private final List<OnNonEmptyExpr> nonEmptyPendingList = new ArrayList<>();
+        private final List<OutputterEvent> tentativeContent = new ArrayList<>();
 
         ConditionalBlockFeed(ConditionalBlock exp, int arg, ItemFeed result, XPathContext context) {
             super(exp, result, context);
@@ -296,12 +298,12 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
         }
 
         @Override
-        public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+        public void characters(CodePoints chars, Location location, int properties) throws XPathException {
             if (ReceiverOption.contains(properties,ReceiverOption.SEPARATOR) && isEmpty() && chars.toString().equals(" ")) {
                 // A whitespace separator between atomic values does not constitute significant
                 // content for assessing xsl:on-empty and xsl:on-non-empty. Treat it as if generated
                 // using xsl:on-non-empty. Test case si-on-non-empty-044
-                tentativeContent.add(new OutputterEvent.Text(" ", location, properties));
+                tentativeContent.add(new OutputterEvent.Text(UnicodeString.SINGLE_SPACE, location, properties));
             } else {
                 action();
                 getNextOutputter().characters(chars, location, properties);
@@ -309,20 +311,20 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
         }
 
         @Override
-        public void comment(CharSequence content, Location location, int properties) throws XPathException {
+        public void comment(CodePoints content, Location location, int properties) throws XPathException {
             action();
             getNextOutputter().comment(content, location, properties);
         }
 
         @Override
-        public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+        public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
             action();
             getNextOutputter().attribute(attName, typeCode, value, location, properties);
         }
 
         @Override
         public void append(Item item) throws XPathException {
-            if (item instanceof StringValue && ((StringValue) item).isZeroLength()) {
+            if (item instanceof StringItem && ((StringItem) item).isEmpty()) {
                 if (isEmpty()) {
                     tentativeContent.add(new OutputterEvent.Append(item, Loc.NONE, ReceiverOption.NONE));
                 } else {

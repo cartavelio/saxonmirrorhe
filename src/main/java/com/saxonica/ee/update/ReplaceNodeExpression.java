@@ -28,9 +28,9 @@ import java.util.List;
  */
 public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
-    private Operand targetOp;
-    private Operand replacementOp;
-    private int constructionMode;
+    private final Operand targetOp;
+    private final Operand replacementOp;
+    private final int constructionMode;
 
     /**
      * Create a ReplaceNodeExpression

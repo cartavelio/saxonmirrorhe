@@ -8,6 +8,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -65,12 +66,12 @@ public class ElementDecl extends SchemaStructure
     /**
      * The Comparable used to compare the fixed value with other values, if there is a fixed value
      */
-    private Comparable fixedValueComparable = null;
+    private final Comparable fixedValueComparable = null;
 
     /**
      * Flag indicating whether this element declaration is global
      */
-    private boolean global;
+    private final boolean global;
 
     /**
      * Flag indicating whether or not this element declaration is
@@ -325,7 +326,7 @@ public class ElementDecl extends SchemaStructure
      */
 
     @Override
-    public String getFixedValueLexicalForm() {
+    public UnicodeString getFixedValueLexicalForm() {
         ValueConstraint vc = getFixedValueConstraint();
         return vc == null ? null : vc.getLexicalForm();
     }
@@ -1304,7 +1305,7 @@ public class ElementDecl extends SchemaStructure
             serializer.emitAttribute("containingComplexType", serializer.getId(getContainingComplexType(), false));
         }
         if (getDefaultValueLexicalForm() != null) { // for backwards compatibility
-            serializer.emitAttribute("default", getDefaultValueLexicalForm());
+            serializer.emitAttribute("default", getDefaultValueLexicalForm().toString());
         }
         serializer.emitAttribute("nillable", isNillable() ? "true" : "false");
 
@@ -1365,11 +1366,11 @@ public class ElementDecl extends SchemaStructure
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Element Declaration");
+                    return StringItem.bmp("Element Declaration");
                 case "implementation":
                     return new ObjectValue<>(ElementDecl.this);
                 case "name":
-                    return new StringValue(getName(), BuiltInAtomicType.NCNAME);
+                    return new StringItem(getName(), BuiltInAtomicType.NCNAME);
                 case "target namespace":
                     return new AnyURIValue(getTargetNamespace());
                 case "type definition":
@@ -1380,7 +1381,7 @@ public class ElementDecl extends SchemaStructure
                             String key1 = arguments1[0].head().getStringValue();
                             switch (key1) {
                                 case "class":
-                                    return new StringValue("Type Table");
+                                    return StringItem.bmp("Type Table");
                                 case "alternatives":
                                     List<Function> list = new ArrayList<>();
                                     for (TypeAlternative ta : getTypeAlternatives()) {
@@ -1399,12 +1400,12 @@ public class ElementDecl extends SchemaStructure
                     }
                 case "scope":
                     Callable scopeFunction = (context12, arguments12) -> {
-                        String key12 = ((StringValue) arguments12[0].head()).getStringValue();
+                        String key12 = ((StringItem) arguments12[0].head()).getStringValue();
                         switch (key12) {
                             case "class":
-                                return new StringValue("Scope");
+                                return StringItem.bmp("Scope");
                             case "variety":
-                                return new StringValue(isGlobal() ? "global" : "local");
+                                return StringItem.bmp(isGlobal() ? "global" : "local");
                             case "parent":
                                 if (isGlobal()) {
                                     return EmptySequence.getInstance();
@@ -1437,25 +1438,25 @@ public class ElementDecl extends SchemaStructure
                     }
                     return SequenceExtent.makeSequenceExtent(groups);
                 case "substitution group exclusions": {
-                    List<StringValue> exclusions = new ArrayList<>();
+                    List<StringItem> exclusions = new ArrayList<>();
                     if ((getSubstitutionGroupExclusions() & SchemaType.DERIVATION_EXTENSION) != 0) {
-                        exclusions.add(new StringValue("extension"));
+                        exclusions.add(StringItem.bmp("extension"));
                     }
                     if ((getSubstitutionGroupExclusions() & SchemaType.DERIVATION_RESTRICTION) != 0) {
-                        exclusions.add(new StringValue("restriction"));
+                        exclusions.add(StringItem.bmp("restriction"));
                     }
                     return SequenceExtent.makeSequenceExtent(exclusions);
                 }
                 case "disallowed substitutions": {
-                    List<StringValue> exclusions = new ArrayList<>();
+                    List<StringItem> exclusions = new ArrayList<>();
                     if ((getBlock() & SchemaType.DERIVATION_EXTENSION) != 0) {
-                        exclusions.add(new StringValue("extension"));
+                        exclusions.add(StringItem.bmp("extension"));
                     }
                     if ((getBlock() & SchemaType.DERIVATION_RESTRICTION) != 0) {
-                        exclusions.add(new StringValue("restriction"));
+                        exclusions.add(StringItem.bmp("restriction"));
                     }
                     if ((getBlock() & SchemaType.DERIVE_BY_SUBSTITUTION) != 0) {
-                        exclusions.add(new StringValue("substitution"));
+                        exclusions.add(StringItem.bmp("substitution"));
                     }
                     return SequenceExtent.makeSequenceExtent(exclusions);
                 }

@@ -5,7 +5,6 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
@@ -13,7 +12,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.xml.transform.SourceLocator;
 
@@ -215,11 +214,11 @@ public class Notation extends SchemaStructure implements UserSchemaComponent, Se
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue("Notation Declaration");
+                        return StringItem.bmp("Notation Declaration");
                     case "implementation":
                         return new ObjectValue<>(Notation.this);
                     case "name":
-                        return new StringValue(getName(), BuiltInAtomicType.NCNAME);
+                        return new StringItem(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
                         return new AnyURIValue(getTargetNamespace());
                     case "system identifier":

@@ -6,13 +6,16 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.str.UnicodeBuilder;
 
 
 /**
@@ -22,16 +25,16 @@ import net.sf.saxon.value.AtomicValue;
 public class AnyTypeValidator extends LaxValidator {
 
     // The fixed value, if any, converted to a string
-    String fixedValue = null;
+    UnicodeString fixedValue = null;
 
     // The default value, if any
-    String defaultValue = null;
+    UnicodeString defaultValue = null;
 
     // Flag to indicate that child elements have been found
     boolean foundChildren = false;
 
     // Buffer for accumulating character content (only used when there is a fixed value)
-    FastStringBuffer buffer;
+    UnicodeBuilder buffer;
 
     /**
      * Create an AnyTypeValidator
@@ -56,7 +59,7 @@ public class AnyTypeValidator extends LaxValidator {
             AtomicSequence fixed = elementDecl.getFixedValue();
             if (fixed != null) {
                 //noinspection RedundantCast
-                fixedValue = ((AtomicValue) fixed).getStringValue();
+                fixedValue = ((AtomicValue) fixed).getUnicodeStringValue();
                 // cast needed to show there's no exception thrown
             }
             defaultValue = elementDecl.getDefaultValueLexicalForm();
@@ -101,12 +104,12 @@ public class AnyTypeValidator extends LaxValidator {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (fixedValue != null || defaultValue != null) {
             if (buffer == null) {
-                buffer = new FastStringBuffer(chars.length());
+                buffer = new UnicodeBuilder();
             }
-            buffer.cat(chars);
+            buffer.append(chars);
         }
         super.characters(chars, locationId, properties);
     }
@@ -123,13 +126,13 @@ public class AnyTypeValidator extends LaxValidator {
         if (fixedValue != null) {
             if (buffer == null || buffer.isEmpty()) {
                 characters(fixedValue, Loc.NONE, ReceiverOption.NONE);
-            } else if (!buffer.toString().equals(fixedValue)) {
+            } else if (!buffer.toUnicodeString().equals(fixedValue)) {
                 String message = "The content of " +
                         getContainingElementName() +
                         " differs from the fixed value defined in the schema. Fixed value is " +
                         Err.wrap(fixedValue, Err.VALUE) +
                         ", actual value is " +
-                        Err.wrap(buffer, Err.VALUE);
+                        Err.wrap(buffer.toString(), Err.VALUE);
                 ValidationFailure ve = new ValidationFailure(message);
                 ve.setConstraintReference(1, "cvc-elt", "5.2.2.2");
                 ve.setSchemaType(getSchemaType());

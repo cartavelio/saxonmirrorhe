@@ -40,10 +40,10 @@ import java.util.Properties;
  */
 public class SaxonXQSequence extends Closable implements XQResultSequence, SaxonXQItemAccessor {
 
-    private GroundedValue value;
+    private final GroundedValue value;
     private int position;
     private SaxonXQPreparedExpression expression;
-    private SaxonXQDataFactory factory;
+    private final SaxonXQDataFactory factory;
 
     SaxonXQSequence(GroundedValue value, SaxonXQDataFactory factory) {
         this.value = value;

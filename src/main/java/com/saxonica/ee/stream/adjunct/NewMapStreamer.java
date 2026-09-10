@@ -121,7 +121,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
 
     private class NewMapForkingFeed extends ItemFeed {
 
-        private WatchManager watchManager;
+        private final WatchManager watchManager;
         private HashTrieMap resultMap;
 
         NewMapForkingFeed(Expression exp, ItemFeed result, XPathContext context, WatchManager watchManager) {

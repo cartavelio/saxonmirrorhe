@@ -166,7 +166,8 @@ public class SaxonSyntaxExtension extends ParserExtension {
 
         while (true) {
             p.expect(Token.NAME);
-            StructuredQName member = p.getQNameParser().parse(t.currentTokenValue, p.getStaticContext().getDefaultElementNamespace());
+            StructuredQName member = p.getQNameParser().parse(
+                    t.currentTokenValue, p.getStaticContext().getDefaultElementNamespace());
             ItemType type = p.getPlainType(member);
             if (type instanceof AtomicType) {
                 memberTypes.add((AtomicType) type);

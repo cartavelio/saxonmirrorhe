@@ -14,12 +14,13 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeImpl;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.Whitespace;
@@ -473,7 +474,7 @@ public abstract class SchemaElement extends ElementImpl {
         throws SchemaException {
         try {
             XSDSchema root = getXSDSchema();
-            String[] parts = NameChecker.getQNameParts(Whitespace.trimWhitespace(name));
+            String[] parts = NameChecker.getQNameParts(Whitespace.trim(name));
             String uri = null;
             if (parts[0].isEmpty()) {
                 if (option == USE_DEFAULT_NS || option == USE_DEFAULT_NS_WITHOUT_IMPORT) {
@@ -853,7 +854,7 @@ public abstract class SchemaElement extends ElementImpl {
                 moduleName = moduleName.substring(slash + 1);
             }
         }
-        if (!NameChecker.isValidNmtoken(moduleName)) {
+        if (!NameChecker.isValidNmtoken(StringView.of(moduleName))) {
             moduleName = "module" + moduleName.hashCode();
         }
         int count = 0;
@@ -990,7 +991,7 @@ public abstract class SchemaElement extends ElementImpl {
                 }
             }
 
-            FastStringBuffer msg = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder msg = new StringBuilder(64);
             if (child.getNodeKind() == Type.ELEMENT) {
                 msg.append("Element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) + " cannot appear here: expected ");
                 if (terms.length == 0) {
@@ -1009,7 +1010,7 @@ public abstract class SchemaElement extends ElementImpl {
                     msg.append(" or nothing");
                 }
             } else {
-                msg.append("Text node '" + Err.wrap(child.getStringValueCS()) + "' cannot appear here");
+                msg.append("Text node '" + Err.wrap(child.getUnicodeStringValue()) + "' cannot appear here");
             }
 
             if (child instanceof SchemaElement) {

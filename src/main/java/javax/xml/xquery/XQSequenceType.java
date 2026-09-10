@@ -12,11 +12,11 @@ package javax.xml.xquery;
  * <code>XQItemType</code> interface and contains an occurence indicator.
  */
 public interface XQSequenceType {
-    public static final int OCC_ZERO_OR_ONE = 1;  // same as ?
-    public static final int OCC_EXACTLY_ONE = 2;
-    public static final int OCC_ZERO_OR_MORE = 3;  // same as *
-    public static final int OCC_ONE_OR_MORE = 4;  // same as +
-    public static final int OCC_EMPTY = 5;         // empty sequence
+    int OCC_ZERO_OR_ONE = 1;  // same as ?
+    int OCC_EXACTLY_ONE = 2;
+    int OCC_ZERO_OR_MORE = 3;  // same as *
+    int OCC_ONE_OR_MORE = 4;  // same as +
+    int OCC_EMPTY = 5;         // empty sequence
 
     /**
      * Returns the type of the item in the sequence type.
@@ -25,7 +25,7 @@ public interface XQSequenceType {
      *         item type in the sequence. <code>null</code>
      *         is returned in case of an empty sequence.
      */
-    public XQItemType getItemType();
+    XQItemType getItemType();
 
     /**
      * Returns the occurrence indicator for the sequence type.
@@ -50,7 +50,7 @@ public interface XQSequenceType {
      *
      * @return <code>int</code> indicating the occurrence indicator
      */
-    public int getItemOccurrence();
+    int getItemOccurrence();
 
     /**
      * Returns a human-readable implementation-defined string representation of
@@ -58,7 +58,7 @@ public interface XQSequenceType {
      *
      * @return a <code>String</code> representation of the sequence type
      */
-    public String toString();
+    String toString();
 
 
     /**
@@ -85,7 +85,7 @@ public interface XQSequenceType {
      * @return <code>true</code> if the input item type object represents
      *         the same XQuery sequence type, <code>false</code> otherwise
      */
-    public boolean equals(Object o);
+    boolean equals(Object o);
 
     /**
      * Returns a hash code consistent with the definition of the equals method.
@@ -110,5 +110,5 @@ public interface XQSequenceType {
      *
      * @return hash code for this item type
      */
-    public int hashCode();
+    int hashCode();
 }

@@ -25,24 +25,24 @@ import java.util.*;
  */
 public class PendingUpdateListImpl implements PendingUpdateList {
 
-    private Configuration config;
+    private final Configuration config;
 
-    private IntHashMap<List<PendingUpdateAction>> lists = new IntHashMap<>(PutAction.PHASE + 1);  // one list per phase of the apply process
-    private Set<MutableNodeInfo> affectedTrees = new HashSet<>();
+    private final IntHashMap<List<PendingUpdateAction>> lists = new IntHashMap<>(PutAction.PHASE + 1);  // one list per phase of the apply process
+    private final Set<MutableNodeInfo> affectedTrees = new HashSet<>();
 
-    private Set<NodeInfo> renamedNodes = new HashSet<>();
-    private Set<NodeInfo> replacedNodes = new HashSet<>();
-    private Set<NodeInfo> replacedValueNodes = new HashSet<>();
+    private final Set<NodeInfo> renamedNodes = new HashSet<>();
+    private final Set<NodeInfo> replacedNodes = new HashSet<>();
+    private final Set<NodeInfo> replacedValueNodes = new HashSet<>();
 
-    private Map<NodeInfo, NamespaceMap> newNamespaceBindings = new HashMap<>();
+    private final Map<NodeInfo, NamespaceMap> newNamespaceBindings = new HashMap<>();
 
-    private Set<String> putURIs = new HashSet<>();
+    private final Set<String> putURIs = new HashSet<>();
 
     // Actions to insert, delete, rename, or replace attributes are sorted according to the element that they affect.
     // These actions are processed after all other actions.
-    private Map<NodeInfo, List<PendingUpdateAction>> attributeActions = new HashMap<>();
+    private final Map<NodeInfo, List<PendingUpdateAction>> attributeActions = new HashMap<>();
 
-    private Set<PackageData> packages = new HashSet<>();
+    private final Set<PackageData> packages = new HashSet<>();
 
     /**
      * Create a Pending Update List

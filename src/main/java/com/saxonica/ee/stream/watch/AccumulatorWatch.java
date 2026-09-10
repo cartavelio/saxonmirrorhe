@@ -51,12 +51,12 @@ import java.util.Stack;
 
 public class AccumulatorWatch extends PatternWatch {
 
-    private Accumulator accumulator;
-    private SimpleMode preDescentMode;
-    private SimpleMode postDescentMode;
+    private final Accumulator accumulator;
+    private final SimpleMode preDescentMode;
+    private final SimpleMode postDescentMode;
 
-    private Stack<Sequence> preDescentStack = new Stack<>();
-    private Stack<ComplexContentOutputter> captureStack = new Stack<>();
+    private final Stack<Sequence> preDescentStack = new Stack<>();
+    private final Stack<ComplexContentOutputter> captureStack = new Stack<>();
 
     private Sequence currentValue;
 

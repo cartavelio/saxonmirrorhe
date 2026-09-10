@@ -17,7 +17,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.xml.transform.TransformerException;
 
@@ -88,7 +88,7 @@ public class TransformFn extends SystemFunction {
                         for (KeyValuePair pair : ((MapItem) param).keyValuePairs()) {
                             AtomicValue key = pair.key;
                             GroundedValue val = ((Sequence) pair.value).materialize();
-                            if (key instanceof StringValue) {
+                            if (key instanceof StringItem) {
                                 params.put(new StructuredQName("", "", key.getStringValue()), val);
                             } else if (key instanceof QNameValue) {
                                 params.put(((QNameValue) key).getStructuredQName(), val);

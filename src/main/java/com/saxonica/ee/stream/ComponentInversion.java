@@ -15,7 +15,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class ComponentInversion {
 
-    private Expression body;
+    private final Expression body;
     private Inversion inversion;
     private SlotManager stackFrame = null;
 

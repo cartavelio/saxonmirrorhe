@@ -15,7 +15,7 @@ import net.sf.saxon.value.SequenceType;
  */
 public class DeleteExpression extends BasicUpdatingExpression {
 
-    private Operand operand;
+    private final Operand operand;
 
     /**
      * Create a DeleteExpression

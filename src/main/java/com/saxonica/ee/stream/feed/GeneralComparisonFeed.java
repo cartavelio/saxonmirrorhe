@@ -14,10 +14,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 
@@ -34,13 +31,13 @@ import java.util.Set;
 
 public class GeneralComparisonFeed extends AtomicItemFeed {
 
-    private StringCollator collator;
+    private final StringCollator collator;
     /*@Nullable*/ private IntHashMap<Set<AtomicMatchKey>> lookupTable;
-    private List<UntypedAtomicValue> untypedValues;
+    private List<StringItem> untypedValues;
     private int operator;
     private boolean done = false;
-    private Expression pullOperand;
-    private int implicitTimezone;
+    private final Expression pullOperand;
+    private final int implicitTimezone;
 
     public GeneralComparisonFeed(Expression expr, int pushedArg, ItemFeed result, XPathContext context) {
         super(expr, result, context);
@@ -88,21 +85,21 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                 matchType = ((AtomicValue) item).getPrimitiveType();
             }
             if (lookupTable == null) {
-                lookupTable = new IntHashMap<Set<AtomicMatchKey>>(4);
-                untypedValues = new ArrayList<UntypedAtomicValue>(4);
-                Set<AtomicMatchKey> strings = new HashSet<AtomicMatchKey>(10);
+                lookupTable = new IntHashMap<>(4);
+                untypedValues = new ArrayList<>(4);
+                Set<AtomicMatchKey> strings = new HashSet<>(10);
                 lookupTable.put(StandardNames.XS_UNTYPED_ATOMIC, strings);
                 Set<AtomicMatchKey> typed = null;
-                if (!(next instanceof UntypedAtomicValue)) {
+                if (!(next.isUntypedAtomic())) {
                     typed = new HashSet<>(10);
                     lookupTable.put(matchType.getFingerprint(), typed);
                 }
                 SequenceIterator comparand = pullOperand.iterate(context);
                 AtomicValue val;
                 while ((val = (AtomicValue) comparand.next()) != null) {
-                    if (val instanceof UntypedAtomicValue) {
-                        untypedValues.add((UntypedAtomicValue)val);
-                        strings.add(((UntypedAtomicValue)val).getXPathComparable(ordered, collator, implicitTimezone));
+                    if (val.isUntypedAtomic()) {
+                        untypedValues.add((StringItem)val);
+                        strings.add(((StringItem)val).getXPathComparable(ordered, collator, implicitTimezone));
                         if (typed != null) {
                             AtomicValue cval = Converter.convert(val, matchType, rules);
                             typed.add(cval.getXPathComparable(ordered, collator, implicitTimezone));
@@ -125,7 +122,7 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                         keys.add(val.getXPathComparable(ordered, collator, implicitTimezone));
                     }
                 }
-                for (UntypedAtomicValue untypedVal : untypedValues) {
+                for (StringItem untypedVal : untypedValues) {
                     IntIterator types = lookupTable.keyIterator();
                     while (types.hasNext()) {
                         int type = types.next();
@@ -142,14 +139,14 @@ public class GeneralComparisonFeed extends AtomicItemFeed {
                     // values from the other operand
                     typed = new HashSet<AtomicMatchKey>(10);
                     lookupTable.put(matchType.getFingerprint(), typed);
-                    for (UntypedAtomicValue val : untypedValues) {
+                    for (StringItem val : untypedValues) {
                         AtomicValue cval = Converter.convert(val, matchType, rules);
                         typed.add(cval.getXPathComparable(ordered, collator, implicitTimezone));
                     }
                 }
             }
             Set<AtomicMatchKey> lookup = lookupTable.get(matchType.getFingerprint());
-            if (next instanceof UntypedAtomicValue) {
+            if (next.isUntypedAtomic()) {
                 IntIterator types = lookupTable.keyIterator();
                 while (types.hasNext() && !done) {
                     int t = types.next();

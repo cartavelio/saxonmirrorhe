@@ -3,7 +3,6 @@ package com.saxonica.ee.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;

@@ -6,11 +6,9 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.functions.TreatFn;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -32,8 +30,8 @@ public class CardinalityCheckingFeed extends ItemFeed {
 
     private int level = 0;
     private int count = 0;
-    private int requiredCardinality;
-    private RoleDiagnostic role;
+    private final int requiredCardinality;
+    private final RoleDiagnostic role;
 
     public CardinalityCheckingFeed(Expression checker, ItemFeed result, XPathContext context) {
         super(checker, result, context);
@@ -162,7 +160,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
     }
 
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             if (level++ == 0) {
                 checkCount();
@@ -186,7 +184,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             checkCount();
         }
@@ -194,7 +192,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
     }
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             checkCount();
         }
@@ -202,7 +200,7 @@ public class CardinalityCheckingFeed extends ItemFeed {
     }
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (level == 0) {
             checkCount();
         }

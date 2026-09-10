@@ -6,12 +6,16 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.DummyNamespaceResolver;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
@@ -28,12 +32,12 @@ import java.util.*;
 
 public class EntityValidator extends ValidatingFilter {
 
-    private Set<String> declaredEntities = new HashSet<String>(10);
+    private final Set<String> declaredEntities = new HashSet<String>(10);
 
     /*@Nullable*/ private EntityChecker currentElementChecker = null;
-    private FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C64);
+    private final UnicodeBuilder buffer = new UnicodeBuilder();
     private Location textLocationId = Loc.NONE;
-    private Map<SchemaType, EntityChecker> checkerMap = new HashMap<>(10);
+    private final Map<SchemaType, EntityChecker> checkerMap = new HashMap<>(10);
 
     /**
      * Create a validator for attributes of type ENTITY or ENTITIES
@@ -78,7 +82,7 @@ public class EntityValidator extends ValidatingFilter {
                 checker = allocateChecker(typeCode);
                 checkerMap.put(typeCode, checker);
             }
-            checker.checkValue(att.getValue(), att.getLocation());
+            checker.checkValue(StringView.of(att.getValue()).tidy(), att.getLocation());
         }
         nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
     }
@@ -88,9 +92,9 @@ public class EntityValidator extends ValidatingFilter {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (currentElementChecker != null) {
-            buffer.cat(chars);
+            buffer.append(chars);
         }
         nextReceiver.characters(chars, locationId, properties);
         textLocationId = locationId.saveLocation();
@@ -103,9 +107,9 @@ public class EntityValidator extends ValidatingFilter {
     @Override
     public void endElement() throws XPathException {
         if (currentElementChecker != null) {
-            currentElementChecker.checkValue(buffer, textLocationId);
+            currentElementChecker.checkValue(buffer.toUnicodeString(), textLocationId);
         }
-        buffer.setLength(0);
+        buffer.clear();
         currentElementChecker = null;
         nextReceiver.endElement();
     }
@@ -232,7 +236,7 @@ public class EntityValidator extends ValidatingFilter {
          *          if the value is invalid
          */
 
-        void checkValue(CharSequence value, Location locationId) throws XPathException;
+        void checkValue(UnicodeString value, Location locationId) throws XPathException;
     }
 
     /**
@@ -241,8 +245,8 @@ public class EntityValidator extends ValidatingFilter {
 
     private class SimpleEntityChecker implements EntityChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) throws XPathException {
-            String id = Whitespace.trimWhitespace(value).toString();
+        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
+            String id = Whitespace.trim(value).toString();
             processEntityRef(id, locationId);
         }
     }
@@ -254,7 +258,7 @@ public class EntityValidator extends ValidatingFilter {
 
     private class EntityListChecker implements EntityChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) throws XPathException {
+        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
             String ids = value.toString();
             StringTokenizer tok = new StringTokenizer(ids, " \t\n\r", false);
             while (tok.hasMoreTokens()) {
@@ -271,14 +275,14 @@ public class EntityValidator extends ValidatingFilter {
      */
 
     private class UnionChecker implements EntityChecker {
-        private SimpleType type;
+        private final SimpleType type;
 
         public UnionChecker(SimpleType type) {
             this.type = type;
         }
 
         @Override
-        public void checkValue(CharSequence value, Location locationId) throws XPathException {
+        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
             Configuration config = getConfiguration();
             TypeHierarchy th = config.getTypeHierarchy();
             SequenceIterator iter = type.getTypedValue(
@@ -299,12 +303,12 @@ public class EntityValidator extends ValidatingFilter {
 
     private static class NonIdChecker implements EntityChecker {
         @Override
-        public void checkValue(CharSequence value, Location locationId) throws XPathException {
+        public void checkValue(UnicodeString value, Location locationId) throws XPathException {
             // do nothing
         }
     }
 
-    private static NonIdChecker SINGLETON_NON_ENTITY_CHECKER = new NonIdChecker();
+    private static final NonIdChecker SINGLETON_NON_ENTITY_CHECKER = new NonIdChecker();
 
 }
 

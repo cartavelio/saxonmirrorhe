@@ -3,6 +3,7 @@ package com.saxonica.ee.schema;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.EmptySequence;
 
 /**
@@ -57,7 +58,7 @@ public interface ComponentWithValueConstraint {
      * in the schema document with whitespace normalization applied as defined by the whiteSpace facet.
      */
 
-    default String getFixedValueLexicalForm() {
+    default UnicodeString getFixedValueLexicalForm() {
         ValueConstraint vc = getFixedValueConstraint();
         return vc == null ? null : vc.getLexicalForm();
     }
@@ -87,7 +88,7 @@ public interface ComponentWithValueConstraint {
      * written in the source schema.
      */
 
-    default String getDefaultValueLexicalForm() {
+    default UnicodeString getDefaultValueLexicalForm() {
         ValueConstraint vc = getDefaultValueConstraint();
         return vc == null ? null : vc.getLexicalForm();
     }

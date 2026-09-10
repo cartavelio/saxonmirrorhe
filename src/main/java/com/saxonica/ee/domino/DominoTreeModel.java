@@ -25,7 +25,7 @@ import javax.xml.transform.dom.DOMSource;
  */
 public class DominoTreeModel extends TreeModel implements ExternalObjectModel {
 
-    private static DominoTreeModel THE_INSTANCE = new DominoTreeModel();
+    private static final DominoTreeModel THE_INSTANCE = new DominoTreeModel();
 
     public static DominoTreeModel getInstance() {
         return THE_INSTANCE;

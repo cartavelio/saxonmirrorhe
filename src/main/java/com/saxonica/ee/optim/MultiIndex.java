@@ -13,7 +13,6 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.*;
 
 import java.util.ArrayList;
@@ -44,9 +43,9 @@ import java.util.List;
  */
 public class MultiIndex {
 
-    private GroundedValue indexedValue;
+    private final GroundedValue indexedValue;
 
-    private List<ValueIndex> indexList = new ArrayList<>(4);
+    private final List<ValueIndex> indexList = new ArrayList<>(4);
     // An list of sub-indexes: the entries are ValueIndex objects. Each sub-index handles one primitive
     // type. Usually there is only one sub-index, because all the values are the same type. In principle
     // there can be one for each primitive type returned by the use expression (for example xs:boolean,
@@ -103,8 +102,8 @@ public class MultiIndex {
             while ((val = (AtomicValue) vals.next()) != null) {
                 // if the "use" value is untyped, convert it to the target type
                 AtomicValue val2 = val;
-                if (val instanceof UntypedAtomicValue) {
-                    ConversionResult result = untypedConverter.convert((UntypedAtomicValue)val);
+                if (val.isUntypedAtomic()) {
+                    ConversionResult result = untypedConverter.convert(val);
                     if (result instanceof ValidationFailure) {
                         String msg = "Failure converting untypedAtomic value to " +
                                 untypedType.getDisplayName() +
@@ -376,7 +375,7 @@ public class MultiIndex {
          * next(). It is used only when there is an explicit need to tell if we
          * are at the last element.
          * <p>This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}</p>
+         * includes the bit setting {@link Property#LOOKAHEAD}</p>
          *
          * @return true if there are more items in the sequence
          */
@@ -415,7 +414,7 @@ public class MultiIndex {
          * non-destructive: it does not change the state of the iterator.
          * The result is undefined if the next() method of the iterator has already returned null.
          * This method must not be called unless the result of getProperties() on the iterator
-         * includes the bit setting {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER}
+         * includes the bit setting {@link Property#LAST_POSITION_FINDER}
          */
 
         @Override
@@ -427,8 +426,8 @@ public class MultiIndex {
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+         *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+         *         and {@link Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          * @since 8.6

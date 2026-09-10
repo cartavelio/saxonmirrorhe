@@ -149,12 +149,11 @@ public abstract class ExpressionCompiler {
                 handleEmptyStringResult(onEmpty, ga, methodInfo, exit);
                 methodInfo.placeLabel(notNull);
             }
-            ga.checkClass(StringValue.class);
+            ga.checkClass(StringItem.class);
             if (requiredClass == CharSequence.class) {
-                ga.invokeInstanceMethod(StringValue.class, "getStringValueCS");
+                ga.invokeInstanceMethod(StringItem.class, "getStringValueCS"); // TODO: no longer exists
             } else {
-                ga.invokeInstanceMethod(StringValue.class, "getStringValueCS");
-                ga.invokeInstanceMethod(Object.class, "toString");
+                ga.invokeInstanceMethod(StringItem.class, "getStringValue");
             }
             if (exit != null) {
                 methodInfo.placeLabel(exit);
@@ -176,7 +175,7 @@ public abstract class ExpressionCompiler {
             ga.goTo(exit);
         } else if (onEmpty instanceof OnEmpty.UnwindAndJump) {
             OnEmpty.UnwindAndJump longJump = (OnEmpty.UnwindAndJump) onEmpty;
-            longJump.getUnwindStack().push(StringValue.class);
+            longJump.getUnwindStack().push(StringItem.class);
             longJump.generate(ga);
             longJump.getUnwindStack().pop();
         } else {
@@ -238,7 +237,6 @@ public abstract class ExpressionCompiler {
      *
      * @param compiler the compiler service
      * @param message  the message to be inserted in the bytecode
-     * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
 
     public static void visitAnnotation(CompilerService compiler, String message) {

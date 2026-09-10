@@ -20,8 +20,8 @@ import net.sf.saxon.type.ItemType;
 
 public class While extends Instruction {
 
-    private Operand conditionOp;
-    private Operand actionOp;
+    private final Operand conditionOp;
+    private final Operand actionOp;
 
 
     public While(Expression test, Expression action) {

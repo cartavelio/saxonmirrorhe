@@ -130,9 +130,9 @@ public class FilterExpressionAdjunct extends FilteringAdjunct {
 
     private static class PredicateFilter implements FilteringFeed.Filter {
 
-        private Expression predicate;
-        private XPathContext context;
-        private ManualIterator iter;
+        private final Expression predicate;
+        private final XPathContext context;
+        private final ManualIterator iter;
 
         public PredicateFilter(Expression predicate, XPathContext context) {
             this.predicate = predicate;

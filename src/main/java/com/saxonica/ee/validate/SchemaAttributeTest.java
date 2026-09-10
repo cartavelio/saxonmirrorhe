@@ -29,9 +29,9 @@ public class SchemaAttributeTest extends NodeTest implements SchemaNodeTest {
     // a ContentTypeTest. This was changed as a consequence of the change to the specification introduced
     // by the resolution of specification bug 10065
 
-    private Configuration config;
-    private AttributeDecl declaration;
-    private SimpleType requiredType;
+    private final Configuration config;
+    private final AttributeDecl declaration;
+    private final SimpleType requiredType;
 
     /**
      * Constructor

@@ -33,7 +33,7 @@ public interface XQMetaData {
      * @return a integer indicating the major version of this product
      * @throws XQException if the connection is no longer valid
      */
-    public int getProductMajorVersion() throws XQException;
+    int getProductMajorVersion() throws XQException;
 
     /**
      * Gets the minor version of this product.
@@ -41,7 +41,7 @@ public interface XQMetaData {
      * @return a integer indicating the minor version of this product
      * @throws XQException if the connection is no longer valid
      */
-    public int getProductMinorVersion() throws XQException;
+    int getProductMinorVersion() throws XQException;
 
     /**
      * Gets the name of this product.
@@ -50,7 +50,7 @@ public interface XQMetaData {
      * @return a string indicating the product name
      * @throws XQException if the connection is no longer valid
      */
-    public String getProductName() throws XQException;
+    String getProductName() throws XQException;
 
     /**
      * Gets the full version of this product.
@@ -60,7 +60,7 @@ public interface XQMetaData {
      * @return a string indicating the product version
      * @throws XQException if the connection is no longer valid
      */
-    public String getProductVersion() throws XQException;
+    String getProductVersion() throws XQException;
 
     // (2) XQJ Specification identification
 
@@ -71,7 +71,7 @@ public interface XQMetaData {
      * @return an integer indicating the XQJ major version
      * @throws XQException if the connection is no longer valid
      */
-    public int getXQJMajorVersion() throws XQException;
+    int getXQJMajorVersion() throws XQException;
 
     /**
      * Gets the minor version number of XQJ specification supported by
@@ -80,7 +80,7 @@ public interface XQMetaData {
      * @return an integer indicating the XQJ minor version
      * @throws XQException if the connection is no longer valid
      */
-    public int getXQJMinorVersion() throws XQException;
+    int getXQJMinorVersion() throws XQException;
 
     /**
      * Gets the full version of XQJ specification supported by this implementation.
@@ -88,7 +88,7 @@ public interface XQMetaData {
      * @return a string indicating the version of XQJ specification
      * @throws XQException if the connection is no longer valid
      */
-    public String getXQJVersion() throws XQException;
+    String getXQJVersion() throws XQException;
 
     // (3) Connection Information
 
@@ -99,7 +99,7 @@ public interface XQMetaData {
      *         for read-only; <code>false</code> otherwise
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isReadOnly() throws XQException;
+    boolean isReadOnly() throws XQException;
 
     // (5) Supported features (Capability)
 
@@ -109,7 +109,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isXQueryXSupported() throws XQException;
+    boolean isXQueryXSupported() throws XQException;
 
     /**
      * Query if transaction is supported in this data source.
@@ -117,7 +117,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isTransactionSupported() throws XQException;
+    boolean isTransactionSupported() throws XQException;
 
     /**
      * Query if XQuery static typing feature is supported in this data source.
@@ -125,7 +125,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isStaticTypingFeatureSupported() throws XQException;
+    boolean isStaticTypingFeatureSupported() throws XQException;
 
     /**
      * Query if XQuery schema import feature is supported in this connection.
@@ -133,7 +133,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isSchemaImportFeatureSupported() throws XQException;
+    boolean isSchemaImportFeatureSupported() throws XQException;
 
     /**
      * Query if XQuery schema validation feature is supported in this connection.
@@ -141,7 +141,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isSchemaValidationFeatureSupported() throws XQException;
+    boolean isSchemaValidationFeatureSupported() throws XQException;
 
     /**
      * Query if XQuery full axis feature is supported in this connection.
@@ -149,7 +149,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isFullAxisFeatureSupported() throws XQException;
+    boolean isFullAxisFeatureSupported() throws XQException;
 
     /**
      * Query if XQuery module feature is supported in this connection.
@@ -157,7 +157,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isModuleFeatureSupported() throws XQException;
+    boolean isModuleFeatureSupported() throws XQException;
 
     /**
      * Query if XQuery serialization feature is supported in this connection.
@@ -165,7 +165,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isSerializationFeatureSupported() throws XQException;
+    boolean isSerializationFeatureSupported() throws XQException;
 
     /**
      * Query if XQuery static typing extensions are supported in
@@ -174,7 +174,7 @@ public interface XQMetaData {
      * @return <code>true</code> if so; otherwise <code>false</code>
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isStaticTypingExtensionsSupported() throws XQException;
+    boolean isStaticTypingExtensionsSupported() throws XQException;
 
     // (9) User Information
 
@@ -184,7 +184,7 @@ public interface XQMetaData {
      * @return the user's name
      * @throws XQException if the connection is no longer valid
      */
-    public String getUserName() throws XQException;
+    String getUserName() throws XQException;
 
     // (10) Product limits
     // Define few, minimal number of methods;add more when requirements
@@ -199,7 +199,7 @@ public interface XQMetaData {
      *         limit is unknown
      * @throws XQException if the connection is no longer valid
      */
-    public int getMaxExpressionLength() throws XQException;
+    int getMaxExpressionLength() throws XQException;
 
     /**
      * Gets the maximum number of characters allowed in a user name.
@@ -209,7 +209,7 @@ public interface XQMetaData {
      *         limit is unknown
      * @throws XQException if the connection is no longer valid
      */
-    public int getMaxUserNameLength() throws XQException;
+    int getMaxUserNameLength() throws XQException;
 
     /**
      * Query if this connection was created from a JDBC connection.
@@ -218,7 +218,7 @@ public interface XQMetaData {
      *         from a JDBC connection, <code>false</code> otherwise.
      * @throws XQException if the connection is no longer valid
      */
-    public boolean wasCreatedFromJDBCConnection() throws XQException;
+    boolean wasCreatedFromJDBCConnection() throws XQException;
 
     /**
      * Query if the XQuery encoding declaration is supported by the XQJ implementation.
@@ -227,7 +227,7 @@ public interface XQMetaData {
      *         is supported; <code>false</code> otherwise
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isXQueryEncodingDeclSupported() throws XQException;
+    boolean isXQueryEncodingDeclSupported() throws XQException;
 
     /**
      * Returns a set of <code>java.lang.String</code>, each of which
@@ -250,7 +250,7 @@ public interface XQMetaData {
      *         is an XQuery query text encoding method
      * @throws XQException if the connection is no longer valid
      */
-    public java.util.Set getSupportedXQueryEncodings() throws XQException;
+    java.util.Set getSupportedXQueryEncodings() throws XQException;
 
     /**
      * Query if a character encoding method of the XQuery query text
@@ -264,7 +264,7 @@ public interface XQMetaData {
      *                     or (2) the specified <code>encoding</code>
      *                     parameter is <code>null</code>
      */
-    public boolean isXQueryEncodingSupported(String encoding) throws XQException;
+    boolean isXQueryEncodingSupported(String encoding) throws XQException;
 
     /**
      * Check if the user defined XML schema type is supported in this connection.
@@ -281,5 +281,5 @@ public interface XQMetaData {
      *         otherwise.
      * @throws XQException if the connection is no longer valid
      */
-    public boolean isUserDefinedXMLSchemaTypeSupported() throws XQException;
+    boolean isUserDefinedXMLSchemaTypeSupported() throws XQException;
 }

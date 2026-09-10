@@ -6,12 +6,13 @@ import net.sf.saxon.expr.MappingIterator;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -100,8 +101,7 @@ public class UserListType extends UserSimpleType implements ListType {
         return true;
     }
 
-    private Function<CharSequence, AtomicIterator<StringValue>> tokenizerFactory =
-            Whitespace.Tokenizer::new;
+    private Function<UnicodeString, AtomicIterator<StringItem>> tokenizerFactory = Whitespace.Tokenizer::new;
 
     /**
      * Get the extended facet list, creating it if necessary. The extended facet
@@ -215,8 +215,8 @@ public class UserListType extends UserSimpleType implements ListType {
 
     /*@Nullable*/
     @Override
-    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
-        if (value.length() == 0) {
+    public ValidationFailure validateContent(/*@NotNull*/ UnicodeString value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+        if (value.isEmpty()) {
             return checkAgainstListFacets(value, nsResolver, rules, 0);
         } else {
             SimpleType itemType = null;
@@ -225,12 +225,12 @@ public class UserListType extends UserSimpleType implements ListType {
             } catch (MissingComponentException e) {
                 return new ValidationFailure(e.getMessage());
             }
-            AtomicIterator<StringValue> iter = tokenizerFactory.apply(value);
+            AtomicIterator<StringItem> iter = tokenizerFactory.apply(value);
             int count = 0;
-            StringValue val;
+            StringItem val;
             //try {
                 while ((val = iter.next()) != null) {
-                    ValidationFailure err = itemType.validateContent(val.getStringValueCS(), nsResolver, rules);
+                    ValidationFailure err = itemType.validateContent(val.getUnicodeStringValue(), nsResolver, rules);
                     if (err != null) {
                         return err;
                     }
@@ -254,13 +254,12 @@ public class UserListType extends UserSimpleType implements ListType {
      * @return either null if the value is valid, or a ValidationFailure giving diagnostics
      */
 
-    public ValidationFailure checkAgainstListFacets(CharSequence value, NamespaceResolver nsResolver, ConversionRules rules, int count) {
+    public ValidationFailure checkAgainstListFacets(UnicodeString value, NamespaceResolver nsResolver, ConversionRules rules, int count) {
         AtomicSequence typedValue = null;
         for (Facet f : getExtendedFacetList()) {
             if (f instanceof PatternFacet) {
                 boolean match = f.testAtomicValue(
-                        StringValue.makeStringValue(
-                                Whitespace.collapseWhitespace(value)));
+                        new StringItem(Whitespace.collapseWhitespace(value)));
                 if (!match) {
                     ValidationFailure vf = new ValidationFailure(
                             "List " + Err.wrap(value) + " contravenes the pattern facet " +
@@ -356,12 +355,12 @@ public class UserListType extends UserSimpleType implements ListType {
      */
 
     @Override
-    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
+    public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
-        if (value.length() == 0) {
+        if (value.isEmpty()) {
             return EmptyAtomicSequence.getInstance();
         }
-        AtomicIterator<StringValue> iter = tokenizerFactory.apply(value);
+        AtomicIterator<StringItem> iter = tokenizerFactory.apply(value);
         UserListMappingFunction map = new UserListMappingFunction();
         map.resolver = resolver;
         try {
@@ -411,7 +410,7 @@ public class UserListType extends UserSimpleType implements ListType {
         @Override
         public AtomicIterator<AtomicValue> map(Item item) throws XPathException {
             try {
-                return itemType.getTypedValue(item.getStringValueCS(), resolver, rules).iterate();
+                return itemType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate();
             } catch (ValidationException err) {
                 throw new XPathException(err);
             }

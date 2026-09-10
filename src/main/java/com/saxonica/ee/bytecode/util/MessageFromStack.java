@@ -5,7 +5,7 @@ package com.saxonica.ee.bytecode.util;
  */
 public class MessageFromStack implements MessageBuilder {
 
-    private static MessageFromStack THE_INSTANCE = new MessageFromStack();
+    private static final MessageFromStack THE_INSTANCE = new MessageFromStack();
 
     public static MessageFromStack getInstance() {
         return THE_INSTANCE;

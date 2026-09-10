@@ -18,7 +18,7 @@ public interface XQItem extends XQItemAccessor {
      *
      * @throws XQException if there is an error during closing the item
      */
-    public void close() throws XQException;
+    void close() throws XQException;
 
     /**
      * Checks if the item is closed.
@@ -26,5 +26,5 @@ public interface XQItem extends XQItemAccessor {
      * @return <code>boolean</code> <code>true</code> if the item
      *         is in a closed state, <code>false</code> otherwise
      */
-    public boolean isClosed();
+    boolean isClosed();
 }

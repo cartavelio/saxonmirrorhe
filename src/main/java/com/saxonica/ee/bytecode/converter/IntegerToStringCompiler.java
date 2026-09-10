@@ -9,7 +9,7 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Generate code for a Integer to String CastExpression
@@ -32,14 +32,14 @@ public class IntegerToStringCompiler extends ConverterCompiler {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
             compileToPrimitive(compiler, expression, CharSequence.class, new OnEmpty.UnwindAndJump(empty));
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
             compileToPrimitive(compiler, expression, CharSequence.class, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
         }
     }
 

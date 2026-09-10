@@ -68,7 +68,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
         }
     };
 
-    private EnterpriseConfiguration config;
+    private final EnterpriseConfiguration config;
     private ErrorReporter errorReporter;
 
     /**
@@ -482,7 +482,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
 
     public static class ErrorReporterWrappingErrorHandler implements ErrorReporter {
 
-        private ErrorHandler handler;
+        private final ErrorHandler handler;
 
         /**
          * Create an ErrorListener that wraps a supplied SAX ErrorHandler

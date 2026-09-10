@@ -37,7 +37,7 @@ import java.util.Properties;
  */
 public class SaxonXQForwardSequence extends Closable implements XQResultSequence {
 
-    private FocusTrackingIterator iterator;
+    private final FocusTrackingIterator iterator;
     SaxonXQPreparedExpression expression;
     int position = 0;   // set to -count when positioned after the end
     int lastReadPosition = Integer.MIN_VALUE;   // used to prevent reading the same item twice, which XQJ doesn't allow

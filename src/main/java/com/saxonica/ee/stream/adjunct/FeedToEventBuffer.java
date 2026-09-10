@@ -8,6 +8,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -22,7 +23,7 @@ import java.util.List;
 public class FeedToEventBuffer extends ItemFeed {
 
     private List<OutputterEvent> buffer = new ArrayList<>();
-    private ItemFeed agglomerator;
+    private final ItemFeed agglomerator;
 
     public FeedToEventBuffer(Outputter next, ItemFeed agglomerator, XPathContext context) {
         super(next, context, true);
@@ -62,7 +63,7 @@ public class FeedToEventBuffer extends ItemFeed {
     }
 
     @Override
-    public void attribute(NodeName name, SimpleType type, CharSequence value,
+    public void attribute(NodeName name, SimpleType type, String value,
                           Location location, int properties) {
         buffer.add(new OutputterEvent.Attribute(name, type, value.toString(), location, properties));
     }
@@ -83,17 +84,17 @@ public class FeedToEventBuffer extends ItemFeed {
     }
 
     @Override
-    public void characters(CharSequence chars, Location location, int properties) {
+    public void characters(CodePoints chars, Location location, int properties) {
         buffer.add(new OutputterEvent.Text(chars, location, properties));
     }
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location location, int properties) {
+    public void processingInstruction(String name, CodePoints data, Location location, int properties) {
         buffer.add(new OutputterEvent.ProcessingInstruction(name, data, location, properties));
     }
 
     @Override
-    public void comment(CharSequence content, Location location, int properties) {
+    public void comment(CodePoints content, Location location, int properties) {
         buffer.add(new OutputterEvent.Comment(content, location, properties));
     }
 

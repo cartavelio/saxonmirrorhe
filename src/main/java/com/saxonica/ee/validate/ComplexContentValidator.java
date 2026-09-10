@@ -6,14 +6,17 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.*;
@@ -34,10 +37,10 @@ public class ComplexContentValidator extends AttributeValidator {
     private boolean mixed;
 
     // The fixed value, if any, converted to a string
-    private String fixedValue = null;
+    private UnicodeString fixedValue = null;
 
     // The default value, if any
-    private String defaultValue = null;
+    private UnicodeString defaultValue = null;
 
     // The current state in the finite state machine
     private State state;
@@ -49,7 +52,7 @@ public class ComplexContentValidator extends AttributeValidator {
     private boolean ignoreIgnorable;
 
     // Buffer for accumulating character content
-    private FastStringBuffer buffer;
+    private UnicodeBuilder buffer;
 
     // Boolean to indicate whether any child elements have been found
     private boolean foundChildren = false;
@@ -71,7 +74,7 @@ public class ComplexContentValidator extends AttributeValidator {
             defaultValue = declaration.getDefaultValueLexicalForm();
             AtomicSequence fixed = declaration.getFixedValue();
             if (fixed != null) {
-                fixedValue = fixed.getStringValue();
+                fixedValue = fixed.getUnicodeStringValue();
             }
         }
     }
@@ -214,7 +217,7 @@ public class ComplexContentValidator extends AttributeValidator {
 
     private String supplyReasonForNonMatch(NodeName nodeName) {
         int fingerprint = nodeName == null ? -1 : nodeName.obtainFingerprint(getNamePool());
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
 
         if (getContainingElement() != null) {
             fsb.append("In content of " + getContainingElementName() + ": ");
@@ -273,12 +276,12 @@ public class ComplexContentValidator extends AttributeValidator {
         } else {
             if (state instanceof SuffixState) {
                 fsb.append("The content model does not allow element " +
-                        Err.wrap(nodeName.getStructuredQName().getEQName(), Err.ELEMENT) +
+                        Err.wrap(nodeName.getStructuredQName().getDisplayName(), Err.ELEMENT) +
                         " to appear after an element that matches the suffix open content wildcard. ");
                 explained = true;
             } else {
                 fsb.append("The content model does not allow element ");
-                fsb.append(Err.wrap(nodeName.getStructuredQName().getEQName(), Err.ELEMENT));
+                fsb.append(Err.wrap(nodeName.getStructuredQName().getDisplayName(), Err.ELEMENT));
                 if (previousElement == -1) {
                     fsb.append(" to appear as the first child. ");
                 } else if (previousElement == fingerprint) {
@@ -294,7 +297,7 @@ public class ComplexContentValidator extends AttributeValidator {
                     explained = true;
                 } else {
                     fsb.append(" to appear immediately after element ");
-                    fsb.append(Err.wrap(getNamePool().getClarkName(previousElement), Err.ELEMENT));
+                    fsb.append(Err.wrap(getNamePool().getDisplayName(previousElement), Err.ELEMENT));
                     fsb.append(". ");
                 }
 
@@ -517,18 +520,18 @@ public class ComplexContentValidator extends AttributeValidator {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         if (mixed) {
             if (fixedValue != null || defaultValue != null) {
                 if (buffer == null) {
-                    buffer = new FastStringBuffer(chars.length());
+                    buffer = new UnicodeBuilder();
                 }
-                buffer.cat(chars);
+                buffer.append(chars);
             }
             nextReceiver.characters(chars, locationId, properties);
         } else {
-            if (Whitespace.isWhite(chars)) {
+            if (Whitespace.isAllWhite(chars)) {
                 if (ignoreIgnorable) {
                     // strip the whitespace
                 } else {
@@ -568,11 +571,11 @@ public class ComplexContentValidator extends AttributeValidator {
             }
             if (buffer == null || buffer.isEmpty()) {
                 characters(fixedValue, Loc.NONE, ReceiverOption.NONE);
-            } else if (!buffer.toString().equals(fixedValue)) {
+            } else if (!buffer.toUnicodeString().equals(fixedValue)) {
                 String message = "The content of " + getContainingElementName() +
                         " differs from the fixed value defined in the schema. Fixed value is " +
                         Err.wrap(fixedValue, Err.VALUE) +
-                        ", actual value is " + Err.wrap(buffer, Err.VALUE);
+                        ", actual value is " + Err.wrap(buffer.toString(), Err.VALUE);
                 ValidationFailure ve = new ValidationFailure(message);
                 ve.setSchemaType(type);
                 ve.setConstraintReference(1, "cvc-elt", "5.2.2.2");

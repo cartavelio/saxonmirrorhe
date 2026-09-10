@@ -138,8 +138,7 @@ public class SaxonParam extends AnnotationParent {
 
         StructuredQName qName;
         try {
-            qName = StructuredQName.fromLexicalQName(lexicalQName, false,
-                    true, this);
+            qName = StructuredQName.fromLexicalQName(lexicalQName, false, true, this);
         } catch (XPathException e) {
             e.setIsStaticError(true);
             String code = e.getErrorCodeLocalPart();

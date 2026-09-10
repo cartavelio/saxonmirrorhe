@@ -4,11 +4,9 @@ package com.saxonica.ee.validate;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -22,7 +20,7 @@ import net.sf.saxon.type.SchemaType;
 
 public class CatchingReceiver extends ProxyReceiver {
 
-    private ErrorReporter listener;
+    private final ErrorReporter listener;
     private boolean failed = false;
 
     public CatchingReceiver(Receiver next, ErrorReporter listener) {
@@ -105,7 +103,7 @@ public class CatchingReceiver extends ProxyReceiver {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) {
+    public void characters(CodePoints chars, Location locationId, int properties) {
         if (!failed) {
             try {
                 super.characters(chars, locationId, properties);
@@ -117,7 +115,7 @@ public class CatchingReceiver extends ProxyReceiver {
     }
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) {
         if (!failed) {
             try {
                 super.processingInstruction(target, data, locationId, properties);
@@ -129,7 +127,7 @@ public class CatchingReceiver extends ProxyReceiver {
     }
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) {
+    public void comment(CodePoints chars, Location locationId, int properties) {
         if (!failed) {
             try {
                 super.comment(chars, locationId, properties);

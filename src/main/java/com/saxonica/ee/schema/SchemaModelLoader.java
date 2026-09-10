@@ -16,6 +16,8 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathEvaluator;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -182,8 +184,8 @@ public class SchemaModelLoader extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (!Whitespace.isWhite(chars)) {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (!Whitespace.isAllWhite(chars)) {
             throw new XPathException("Character content not allowed in SCM document");
         }
     }
@@ -342,7 +344,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             elementDecl.setBlock(blockSet);
             elementDecl.setFinalProhibitions(finalSet);
             if (defaultValue != null) {
-                ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, defaultValue);
+                ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(defaultValue));
                 elementDecl.setValueConstraint(vc);
             }
             if (type != null) {
@@ -656,7 +658,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             attributeDecl.setInheritable(isInheritable);
 
             if (defaultValue != null) {
-                ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, defaultValue);
+                ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(defaultValue));
                 attributeDecl.setValueConstraint(vc);
             }
 
@@ -1042,7 +1044,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             attributeUse.setUse(required ? Optionality.REQUIRED : Optionality.OPTIONAL);
 
             if (defaultValue != null) {
-                ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, defaultValue);
+                ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(defaultValue));
                 attributeUse.setValueConstraint(vc);
             }
             fixups.add(new Fixup(attributeUse, ref, FIXUP_ATTRIBUTE_USE_DECLARATION));
@@ -1452,7 +1454,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         private final SchemaComponent container;
         private final ArrayList<AtomicValue> atomicValues = new ArrayList<>(4);
         private String lexicalForm;
-        private String variety;
+        private final String variety;
 
         public ValueConstraintHandler(SchemaComponent container, String variety) {
             this.container = container;
@@ -1483,7 +1485,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
             if (container instanceof ComponentWithValueConstraint) {
                 ValueConstraint.Variety var = variety.equals("fixed") ? ValueConstraint.Variety.FIXED : ValueConstraint.Variety.DEFAULT;
-                ValueConstraint vc = new ValueConstraint(var, lexicalForm);
+                ValueConstraint vc = new ValueConstraint(var, lexicalForm==null ? null : StringView.tidy(lexicalForm));
                 vc.setValue(v);
                 ((ComponentWithValueConstraint) container).setValueConstraint(vc);
             }
@@ -1521,7 +1523,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             AtomicValue typedValue;
             try {
                 if (namespace == null) {
-                    typedValue = t.getTypedValue(value, null, config.getConversionRules()).head();
+                    typedValue = t.getTypedValue(StringView.tidy(value), null, config.getConversionRules()).head();
                 } else {
                     String[] parts = NameChecker.getQNameParts(value);
                     if (t.equals(BuiltInAtomicType.QNAME)) {

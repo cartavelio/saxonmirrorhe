@@ -39,7 +39,6 @@ public class StandardSchemaResolver implements SchemaURIResolver {
 
     public StandardSchemaResolver(EnterpriseConfiguration config) {
         setConfiguration(config);
-        //setURIResolver(config.getURIResolver());
     }
 
     /**

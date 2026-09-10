@@ -39,310 +39,310 @@ public interface XQItemType extends XQSequenceType {
     /**
      * Some atomic type.
      */
-    public static final int XQITEMKIND_ATOMIC = 1;
+    int XQITEMKIND_ATOMIC = 1;
 
     /**
      * Attribute node
      */
-    public static final int XQITEMKIND_ATTRIBUTE = 2;
+    int XQITEMKIND_ATTRIBUTE = 2;
 
     /**
      * Comment node
      */
-    public static final int XQITEMKIND_COMMENT = 3;
+    int XQITEMKIND_COMMENT = 3;
 
     /**
      * Document type (the type information represents the type of the document element)
      */
-    public static final int XQITEMKIND_DOCUMENT = 4;
+    int XQITEMKIND_DOCUMENT = 4;
 
     /**
      * Document node containing a single element node as its child
      * (type information represents type of the element child)
      */
-    public static final int XQITEMKIND_DOCUMENT_ELEMENT = 5;
+    int XQITEMKIND_DOCUMENT_ELEMENT = 5;
 
     /**
      * Document node containing a single schema element node as its child
      * (type information represents type of the schema element child)
      */
-    public static final int XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT = 6;
+    int XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT = 6;
 
     /**
      * Element node
      */
-    public static final int XQITEMKIND_ELEMENT = 7;
+    int XQITEMKIND_ELEMENT = 7;
 
     /**
      * Any kind of item
      */
-    public static final int XQITEMKIND_ITEM = 8;
+    int XQITEMKIND_ITEM = 8;
 
     /**
      * Some node type
      */
-    public static final int XQITEMKIND_NODE = 9;
+    int XQITEMKIND_NODE = 9;
 
     /**
      * Processing instruction node
      */
-    public static final int XQITEMKIND_PI = 10;
+    int XQITEMKIND_PI = 10;
 
     /**
      * Text node
      */
-    public static final int XQITEMKIND_TEXT = 11;    // node type
+    int XQITEMKIND_TEXT = 11;    // node type
 
     /**
      * Schema element node
      */
-    public static final int XQITEMKIND_SCHEMA_ELEMENT = 12;
+    int XQITEMKIND_SCHEMA_ELEMENT = 12;
 
     /**
      * Schema attribute node
      */
-    public static final int XQITEMKIND_SCHEMA_ATTRIBUTE = 13;
+    int XQITEMKIND_SCHEMA_ATTRIBUTE = 13;
 
 
     /**
      * Represents the schema type xs:untyped
      */
-    public static final int XQBASETYPE_UNTYPED = 1;
+    int XQBASETYPE_UNTYPED = 1;
 
     /**
      * Represents the schema type xs:anyType
      */
-    public static final int XQBASETYPE_ANYTYPE = 2;
+    int XQBASETYPE_ANYTYPE = 2;
 
     /**
      * Represents the schema type <code>xs:anySimpleType</code>
      */
-    public static final int XQBASETYPE_ANYSIMPLETYPE = 3;
+    int XQBASETYPE_ANYSIMPLETYPE = 3;
 
     /**
      * Represents the schema type <code>xs:anyAtomicType</code>
      */
-    public static final int XQBASETYPE_ANYATOMICTYPE = 4;
+    int XQBASETYPE_ANYATOMICTYPE = 4;
 
     /**
      * Represents the schema type <code>xs:untypedAtomic</code>
      */
-    public static final int XQBASETYPE_UNTYPEDATOMIC = 5;
+    int XQBASETYPE_UNTYPEDATOMIC = 5;
 
     /**
      * Represents the schema type <code>xs:dayTimeDuration</code>
      */
-    public static final int XQBASETYPE_DAYTIMEDURATION = 6;
+    int XQBASETYPE_DAYTIMEDURATION = 6;
 
     /**
      * Represents the schema type <code>xs:yearMonthDuration</code>
      */
-    public static final int XQBASETYPE_YEARMONTHDURATION = 7;
+    int XQBASETYPE_YEARMONTHDURATION = 7;
 
     /**
      * Represents the schema type <code>xs:anyURI</code>
      */
-    public static final int XQBASETYPE_ANYURI = 8;
+    int XQBASETYPE_ANYURI = 8;
 
     /**
      * Represents the schema type <code>xs:base64Binary</code>
      */
-    public static final int XQBASETYPE_BASE64BINARY = 9;
+    int XQBASETYPE_BASE64BINARY = 9;
 
     /**
      * Represents the schema type <code>xs:boolean</code>
      */
-    public static final int XQBASETYPE_BOOLEAN = 10;
+    int XQBASETYPE_BOOLEAN = 10;
 
     /**
      * Represents the schema type <code>xs:date</code>
      */
-    public static final int XQBASETYPE_DATE = 11;
+    int XQBASETYPE_DATE = 11;
 
     /**
      * Represents the schema type <code>xs:int</code>
      */
-    public static final int XQBASETYPE_INT = 12;
+    int XQBASETYPE_INT = 12;
 
     /**
      * Represents the schema type <code>xs:integer</code>
      */
-    public static final int XQBASETYPE_INTEGER = 13;
+    int XQBASETYPE_INTEGER = 13;
 
     /**
      * Represents the schema type <code>xs:short</code>
      */
-    public static final int XQBASETYPE_SHORT = 14;
+    int XQBASETYPE_SHORT = 14;
 
     /**
      * Represents the schema type <code>xs:long</code>
      */
-    public static final int XQBASETYPE_LONG = 15;
+    int XQBASETYPE_LONG = 15;
 
     /**
      * Represents the schema type <code>xs:dateTime</code>
      */
-    public static final int XQBASETYPE_DATETIME = 16;
+    int XQBASETYPE_DATETIME = 16;
 
     /**
      * Represents the schema type <code>xs:decimal</code>
      */
-    public static final int XQBASETYPE_DECIMAL = 17;
+    int XQBASETYPE_DECIMAL = 17;
 
     /**
      * Represents the schema type <code>xs:double</code>
      */
-    public static final int XQBASETYPE_DOUBLE = 18;
+    int XQBASETYPE_DOUBLE = 18;
 
     /**
      * Represents the schema type <code>xs:duration</code>
      */
-    public static final int XQBASETYPE_DURATION = 19;
+    int XQBASETYPE_DURATION = 19;
 
     /**
      * Represents the schema type <code>xs:float</code>
      */
-    public static final int XQBASETYPE_FLOAT = 20;
+    int XQBASETYPE_FLOAT = 20;
 
     /**
      * Represents the schema type <code>xs:gDay</code>
      */
-    public static final int XQBASETYPE_GDAY = 21;
+    int XQBASETYPE_GDAY = 21;
 
     /**
      * Represents the schema type <code>xs:gMonth</code>
      */
-    public static final int XQBASETYPE_GMONTH = 22;
+    int XQBASETYPE_GMONTH = 22;
 
     /**
      * Represents the schema type <code>xs:gMonthDay</code>
      */
-    public static final int XQBASETYPE_GMONTHDAY = 23;
+    int XQBASETYPE_GMONTHDAY = 23;
 
     /**
      * Represents the schema type <code>xs:gYear</code>
      */
-    public static final int XQBASETYPE_GYEAR = 24;
+    int XQBASETYPE_GYEAR = 24;
 
     /**
      * Represents the schema type <code>xs:gYearMonth</code>
      */
-    public static final int XQBASETYPE_GYEARMONTH = 25;
+    int XQBASETYPE_GYEARMONTH = 25;
 
     /**
      * Represents the schema type <code>xs:hexBinary</code>
      */
-    public static final int XQBASETYPE_HEXBINARY = 26;
+    int XQBASETYPE_HEXBINARY = 26;
 
     /**
      * Represents the schema type <code>xs:NOTATION</code>
      */
-    public static final int XQBASETYPE_NOTATION = 27;
+    int XQBASETYPE_NOTATION = 27;
 
     /**
      * Represents the schema type <code>xs:QName</code>
      */
-    public static final int XQBASETYPE_QNAME = 28;
+    int XQBASETYPE_QNAME = 28;
 
     /**
      * Represents the schema type <code>xs:string</code>
      */
-    public static final int XQBASETYPE_STRING = 29;
+    int XQBASETYPE_STRING = 29;
 
     /**
      * Represents the schema type <code>xs:time</code>
      */
-    public static final int XQBASETYPE_TIME = 30;
+    int XQBASETYPE_TIME = 30;
 
     /**
      * Represents the schema type <code>xs:byte</code>
      */
-    public static final int XQBASETYPE_BYTE = 31;
+    int XQBASETYPE_BYTE = 31;
 
     /**
      * Represents the schema type <code>xs:nonPositiveInteger</code>
      */
-    public static final int XQBASETYPE_NONPOSITIVE_INTEGER = 32;
+    int XQBASETYPE_NONPOSITIVE_INTEGER = 32;
 
     /**
      * Represents the schema type <code>xs:nonNegativeInteger</code>
      */
-    public static final int XQBASETYPE_NONNEGATIVE_INTEGER = 33;
+    int XQBASETYPE_NONNEGATIVE_INTEGER = 33;
 
     /**
      * Represents the schema type <code>xs:negativeInteger</code>
      */
-    public static final int XQBASETYPE_NEGATIVE_INTEGER = 34;
+    int XQBASETYPE_NEGATIVE_INTEGER = 34;
 
     /**
      * Represents the schema type <code>xs:positiveInteger</code>
      */
-    public static final int XQBASETYPE_POSITIVE_INTEGER = 35;
+    int XQBASETYPE_POSITIVE_INTEGER = 35;
 
     /**
      * Represents the schema type <code>xs:unsignedLong</code>
      */
-    public static final int XQBASETYPE_UNSIGNED_LONG = 36;
+    int XQBASETYPE_UNSIGNED_LONG = 36;
 
     /**
      * Represents the schema type <code>xs:unsignedInt</code>
      */
-    public static final int XQBASETYPE_UNSIGNED_INT = 37;
+    int XQBASETYPE_UNSIGNED_INT = 37;
 
     /**
      * Represents the schema type <code>xs:unsignedShort</code>
      */
-    public static final int XQBASETYPE_UNSIGNED_SHORT = 38;
+    int XQBASETYPE_UNSIGNED_SHORT = 38;
 
     /**
      * Represents the schema type <code>xs:unsignedByte</code>
      */
-    public static final int XQBASETYPE_UNSIGNED_BYTE = 39;
+    int XQBASETYPE_UNSIGNED_BYTE = 39;
 
     /**
      * Represents the schema type <code>xs:normalizedString</code>
      */
-    public static final int XQBASETYPE_NORMALIZED_STRING = 40;
+    int XQBASETYPE_NORMALIZED_STRING = 40;
 
     /**
      * Represents the schema type <code>xs:token</code>
      */
-    public static final int XQBASETYPE_TOKEN = 41;
+    int XQBASETYPE_TOKEN = 41;
 
     /**
      * Represents the schema type <code>xs:language</code>
      */
-    public static final int XQBASETYPE_LANGUAGE = 42;
+    int XQBASETYPE_LANGUAGE = 42;
 
     /**
      * Represents the schema type <code>xs:Name</code>
      */
-    public static final int XQBASETYPE_NAME = 43;
+    int XQBASETYPE_NAME = 43;
 
     /**
      * Represents the schema type <code>xs:NCName</code>
      */
-    public static final int XQBASETYPE_NCNAME = 44;
+    int XQBASETYPE_NCNAME = 44;
 
     /**
      * Represents the schema type <code>xs:NMToken</code>
      */
-    public static final int XQBASETYPE_NMTOKEN = 45;
+    int XQBASETYPE_NMTOKEN = 45;
 
     /**
      * Represents the schema type <code>xs:ID</code>
      */
-    public static final int XQBASETYPE_ID = 46;
+    int XQBASETYPE_ID = 46;
 
     /**
      * Represents the schema type <code>xs:IDREF</code>
      */
-    public static final int XQBASETYPE_IDREF = 47;
+    int XQBASETYPE_IDREF = 47;
 
     /**
      * Represents the schema type <code>xs:ENTITY</code>
      */
-    public static final int XQBASETYPE_ENTITY = 48;
+    int XQBASETYPE_ENTITY = 48;
 
     /**
      * Represents the schema type <code>xs:IDREFS</code>.
@@ -350,17 +350,17 @@ public interface XQItemType extends XQSequenceType {
      * <code>XQITEMKIND_ELEMENT</code>, <code>XQITEMKIND_DOCUMENT_ELEMENT</code>,
      * or <code>XQITEMKIND_ATTRIBUTE</code>
      */
-    public static final int XQBASETYPE_IDREFS = 49;
+    int XQBASETYPE_IDREFS = 49;
 
     /**
      * Represents the schema type <code>xs:ENTITIES</code>
      */
-    public static final int XQBASETYPE_ENTITIES = 50;
+    int XQBASETYPE_ENTITIES = 50;
 
     /**
      * Represents the schema type <code>xs:NMTOKENS</code>
      */
-    public static final int XQBASETYPE_NMTOKENS = 51;
+    int XQBASETYPE_NMTOKENS = 51;
 
     /**
      * Returns the base type of the item. One of the <code>XQBASETYPE_*</code>
@@ -383,7 +383,7 @@ public interface XQItemType extends XQSequenceType {
      *                     <code>XQITEMKIND_SCHEMA_ATTRIBUTE</code>, or
      *                     <code>XQITEMKIND_ATOMIC</code>
      */
-    public int getBaseType() throws XQException;
+    int getBaseType() throws XQException;
 
     /**
      * Returns the kind of the item.
@@ -392,7 +392,7 @@ public interface XQItemType extends XQSequenceType {
      * @return int      one of the <code>XQITEMKIND_*</code> constants
      *         indicating the basic kind  of the item
      */
-    public int getItemKind();
+    int getItemKind();
 
     /**
      * Returns the occurrence indicator for the item type. This method
@@ -401,7 +401,7 @@ public interface XQItemType extends XQSequenceType {
      * @return int      indicating the occurrence indicator
      */
     @Override
-    public int getItemOccurrence();
+    int getItemOccurrence();
 
     /**
      * Returns a human-readable implementation-defined
@@ -409,7 +409,7 @@ public interface XQItemType extends XQSequenceType {
      *
      * @return String              a string representation of the item type
      */
-    public String toString();
+    String toString();
 
     /**
      * Returns the name of the node in case the item kind is an
@@ -432,7 +432,7 @@ public interface XQItemType extends XQSequenceType {
      *                     <code>XQITEMKIND_ATTRIBUTE</code>, or
      *                     <code>XQITEMKIND_SCHEMA_ATTRIBUTE</code>
      */
-    public QName getNodeName() throws XQException;
+    QName getNodeName() throws XQException;
 
     /**
      * Returns the schema location URI of the schema that contains the item's
@@ -455,7 +455,7 @@ public interface XQItemType extends XQSequenceType {
      *         implementation does not support retrieving the
      *         schema URI.
      */
-    public URI getSchemaURI();
+    URI getSchemaURI();
 
     /**
      * Represents a type name (global or local).
@@ -479,7 +479,7 @@ public interface XQItemType extends XQSequenceType {
      *                     <code>XQITEMKIND_ATTRIBUTE</code>, or
      *                     <code>XQITEMKIND_SCHEMA_ATTRIBUTE</code>
      */
-    public QName getTypeName() throws XQException;
+    QName getTypeName() throws XQException;
 
     /**
      * Represents whether the item type is an anonymous type in the schema.
@@ -487,7 +487,7 @@ public interface XQItemType extends XQSequenceType {
      * @return <code>true</code> if the item type is an anonymous
      *         type in the schema, <code>false</code> otherwise
      */
-    public boolean isAnonymousType();
+    boolean isAnonymousType();
 
     /**
      * Returns whether the element type is nillable or not.
@@ -495,7 +495,7 @@ public interface XQItemType extends XQSequenceType {
      * @return <code>true</code> if the element type is nillable,
      *         <code>false</code> otherwise
      */
-    public boolean isElementNillable();
+    boolean isElementNillable();
 
     /**
      * Returns the name of the processing instruction type. As such the item
@@ -505,7 +505,7 @@ public interface XQItemType extends XQSequenceType {
      *         <code>null</code> if it is a wildcard
      * @throws XQException if the item kind is not <code>XQITEMKIND_PI</code>
      */
-    public String getPIName() throws XQException;
+    String getPIName() throws XQException;
 
     /**
      * Compares the specified object with this item type for equality. The result
@@ -540,7 +540,7 @@ public interface XQItemType extends XQSequenceType {
      * @return <code>true</code> if the input item type object represents
      *         the same XQuery item type, <code>false</code> otherwise
      */
-    public boolean equals(Object o);
+    boolean equals(Object o);
 
     /**
      * Returns a hash code consistent with the definition of the equals method.
@@ -569,6 +569,6 @@ public interface XQItemType extends XQSequenceType {
      *
      * @return hash code for this item type
      */
-    public int hashCode();
+    int hashCode();
 
-};
+}

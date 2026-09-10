@@ -19,8 +19,8 @@ import net.sf.saxon.type.Type;
 
 public class Trigger extends PatternWatch {
 
-    private ItemFeed action;
-    private XPathContext selectionContext;
+    private final ItemFeed action;
+    private final XPathContext selectionContext;
     private boolean matchCurrentGroup = false;
 
 

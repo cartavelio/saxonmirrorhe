@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class AncestorPatternOptimizer extends PatternOptimizer {
 
-    private static AncestorPatternOptimizer THE_INSTANCE = new AncestorPatternOptimizer();
+    private static final AncestorPatternOptimizer THE_INSTANCE = new AncestorPatternOptimizer();
 
     public static AncestorPatternOptimizer getInstance() {
         return THE_INSTANCE;

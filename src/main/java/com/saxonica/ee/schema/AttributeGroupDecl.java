@@ -36,14 +36,14 @@ public final class AttributeGroupDecl extends SchemaStructure
      * Each object in this list is an AttributeUse
      */
 
-    private List<AttributeUse> attributes;
+    private final List<AttributeUse> attributes;
 
     /**
      * The collection of AttributeGroup References for this
      * AttributeGroup. Each object in this list is an AttributeGroupReference
      */
 
-    private List<AttributeGroupReference> references;
+    private final List<AttributeGroupReference> references;
 
     /**
      * The anyAttribute wildcard, if any
@@ -757,11 +757,11 @@ public final class AttributeGroupDecl extends SchemaStructure
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue("Attribute Group Definition");
+                        return StringItem.bmp("Attribute Group Definition");
                     case "implementation":
                         return new ObjectValue<>(AttributeGroupDecl.this);
                     case "name":
-                        return new StringValue(getName(), BuiltInAtomicType.NCNAME);
+                        return new StringItem(getName(), BuiltInAtomicType.NCNAME);
                     case "target namespace":
                         return new AnyURIValue(getTargetNamespace());
                     case "attribute uses":

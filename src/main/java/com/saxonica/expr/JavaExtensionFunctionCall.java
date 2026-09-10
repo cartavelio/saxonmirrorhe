@@ -12,7 +12,7 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.JavaExternalObjectType;
@@ -553,7 +553,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 }
                 try {
                     argValues[0] = argValues[0].materialize(); // bug 3723
-                    theInstance = getTargetInstance((Sequence)argValues[0], context);
+                    theInstance = getTargetInstance(argValues[0], context);
                     // this fails if the first argument is not of a suitable class
                 } catch (XPathException err) {
                     err.maybeSetLocation(getLocation());
@@ -577,7 +577,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 Object result = invokeMethod(method, theInstance, params);
                 if (method.getReturnType() == Void.TYPE) {
                     if (returnVoidAsThis) {
-                        return (Sequence)argValues[0];
+                        return argValues[0];
                     } else {
                         return EmptySequence.getInstance();
                     }
@@ -625,7 +625,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     throw new XPathException("Must supply an argument for a non-static extension function");
                 }
                 try {
-                    theInstance = getTargetInstance((Sequence)argValues[0], context);
+                    theInstance = getTargetInstance(argValues[0], context);
                     // this fails if the first argument is not of a suitable class
                 } catch (XPathException err) {
                     err.maybeSetLocation(getLocation());
@@ -709,7 +709,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
         try {
             for (int i = firstArg; i < argValues.length; i++) {
-                params[j] = argumentConverters[i].convert((Sequence)argValues[i], paramTypes[j], context);
+                params[j] = argumentConverters[i].convert(argValues[i], paramTypes[j], context);
                 j++;
             }
         } catch (XPathException e) {
@@ -899,7 +899,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
     public static String toCamelCase(String name, boolean debug, Logger diag) {
         if (name.indexOf('-') >= 0) {
-            FastStringBuffer buff = new FastStringBuffer(name.length());
+            StringBuilder buff = new StringBuilder(name.length());
             boolean afterHyphen = false;
             for (int n = 0; n < name.length(); n++) {
                 char c = name.charAt(n);
@@ -907,9 +907,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                     afterHyphen = true;
                 } else {
                     if (afterHyphen) {
-                        buff.cat(Character.toUpperCase(c));
+                        buff.append(Character.toUpperCase(c));
                     } else {
-                        buff.cat(c);
+                        buff.append(c);
                     }
                     afterHyphen = false;
                 }

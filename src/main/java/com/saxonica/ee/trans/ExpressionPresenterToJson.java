@@ -6,9 +6,10 @@ import net.sf.saxon.event.Sink;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.JSONEmitter;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * This class handles export of packages for Saxon-JS 2.0 by converting the XML representation
@@ -17,7 +18,7 @@ import net.sf.saxon.value.StringValue;
 
 public class ExpressionPresenterToJson extends ProxyReceiver {
 
-    private JSONEmitter out;
+    private final JSONEmitter out;
     private boolean pending = false;
     private int level = 0;
 
@@ -39,10 +40,10 @@ public class ExpressionPresenterToJson extends ProxyReceiver {
         }
         out.startMap(false);
         out.writeKey("N");
-        out.writeAtomicValue(new StringValue(elemName.getLocalPart()));
+        out.writeAtomicValue(new StringItem(elemName.getLocalPart()));
         for (AttributeInfo att : attributes) {
             out.writeKey(att.getNodeName().getLocalPart());
-            out.writeAtomicValue(new StringValue(att.getValue()));
+            out.writeAtomicValue(new StringItem(att.getValue()));
         }
         pending = true;
         level++;
@@ -64,10 +65,10 @@ public class ExpressionPresenterToJson extends ProxyReceiver {
     }
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         // Used to output the checksum
         out.writeKey(target);
-        out.writeAtomicValue(new StringValue(data));
+        out.writeAtomicValue(new StringItem(data.tidy()));
     }
 
     /**

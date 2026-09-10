@@ -4,6 +4,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaComponent;
@@ -12,7 +15,7 @@ import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.List;
 
@@ -22,7 +25,7 @@ import java.util.List;
 public class PatternFacet extends Facet {
 
     Configuration config;
-    StringValue requiredValue;
+    UnicodeString requiredValue;
     RegularExpression regex;
     String flags = "";
     boolean noMerge;
@@ -43,8 +46,8 @@ public class PatternFacet extends Facet {
     }
 
     @Override
-    public String getValue() {
-        return requiredValue.getStringValue();
+    public UnicodeString getValue() {
+        return requiredValue;
     }
 
     public RegularExpression getRegularExpression() {
@@ -52,7 +55,7 @@ public class PatternFacet extends Facet {
     }
 
     public void setValue(String value) {
-        requiredValue = StringValue.makeStringValue(value);
+        requiredValue = StringView.of(value).tidy();
     }
 
     /**
@@ -85,7 +88,7 @@ public class PatternFacet extends Facet {
     public void compile(List<String> warnings) throws SchemaException {
         try {
             String lang = config.getXsdVersion() == Configuration.XSD11 ? "XSD11" : "XSD10";
-            regex = config.compileRegularExpression(getValue(), flags, lang, warnings);
+            regex = config.compileRegularExpression(requiredValue, flags, lang, warnings);
         } catch (XPathException e) {
             throw new SchemaException(e.getMessage());
         }
@@ -106,9 +109,9 @@ public class PatternFacet extends Facet {
      * @param pat the new branch, which must be a valid regular expression
      */
 
-    public void addBranch(String pat) {
+    public void addBranch(CodePoints pat) {
         try {
-            setValue('(' + getValue() + ")|(" + pat + ')');
+            setValue('(' + getValue().toString() + ")|(" + pat + ')');
             compile(null);
         } catch (SchemaException e) {
             throw new AssertionError(e);
@@ -147,11 +150,11 @@ public class PatternFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue(getName());
+                    return new StringItem(getName());
                 case "implementation":
                     return new ObjectValue<>(PatternFacet.this);
                 case "value":
-                    return requiredValue;
+                    return new StringItem(requiredValue);
                 default:
                     return EmptySequence.getInstance();
             }

@@ -7,6 +7,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -608,7 +609,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      */
 
     @Override
-    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
+    public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         if (workingType != null) {
             return workingType.getTypedValue(value, resolver, rules);
@@ -652,7 +653,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
      */
 
     @Override
-    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+    public ValidationFailure validateContent(/*@NotNull*/ UnicodeString value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         if (workingType != null) {
             return workingType.validateContent(value, nsResolver, rules);
         } else if (getValidationStatus() == INVALID) {

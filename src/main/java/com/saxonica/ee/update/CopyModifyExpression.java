@@ -20,10 +20,10 @@ import java.util.Set;
  */
 public class CopyModifyExpression extends Expression {
 
-    private int validationMode;
-    private Operand updateOp;
-    private Operand returnOp;
-    private Operand copyBindingsOp;
+    private final int validationMode;
+    private final Operand updateOp;
+    private final Operand returnOp;
+    private final Operand copyBindingsOp;
 
     /**
      * Create a copy-modify expression (also known as a transform expresion)

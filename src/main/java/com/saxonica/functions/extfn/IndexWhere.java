@@ -38,9 +38,9 @@ public class IndexWhere extends SystemFunction {
 
     private static class IndexIterator implements SequenceIterator {
         private int index = 0;
-        private SequenceIterator base;
-        private Function predicate;
-        private XPathContext context;
+        private final SequenceIterator base;
+        private final Function predicate;
+        private final XPathContext context;
 
         public IndexIterator(SequenceIterator base, XPathContext context, Function predicate) {
             this.base = base;

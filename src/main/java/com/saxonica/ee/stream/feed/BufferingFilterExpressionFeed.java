@@ -25,7 +25,7 @@ public class BufferingFilterExpressionFeed extends ItemFeed {
 
     Expression filter;
     XPathContext localContext;
-    private List<Item> inputValue = new ArrayList<>(4);
+    private final List<Item> inputValue = new ArrayList<>(4);
 
     public BufferingFilterExpressionFeed(Expression expr, ItemFeed result, XPathContext context) {
         super(expr, result, context);

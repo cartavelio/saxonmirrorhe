@@ -50,7 +50,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         }
 
         // push the content onto the stack
-        compiler.compileToPrimitive(select, CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
+        compiler.compileToPrimitive(select, String.class, OnEmpty.RETURN_EMPTY_STRING);
 
         generateAttributeValidationPushCode(compiler, instr, nodeName, -1);
 
@@ -62,7 +62,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         allocateStatic(compiler, locationId);
         ga.push(opt);
         visitAnnotation(compiler, "FixedAttributeCompiler - call attribute()");
-        ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class, CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(Outputter.class, "attribute", NodeName.class, SimpleType.class, String.class, Location.class, Integer.TYPE);
     }
 
     /**

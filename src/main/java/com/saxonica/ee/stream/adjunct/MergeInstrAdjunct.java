@@ -21,7 +21,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
         if (!actuallyStreamable) {
             boolean fallback = config.getBooleanProperty(Feature.STREAMING_FALLBACK);
             if (fallback) {
-                FastStringBuffer buffer = new FastStringBuffer(120);
+                StringBuilder buffer = new StringBuilder(120);
                 buffer.append("Executing without streaming. ");
                 for (String s : reasons) {
                     buffer.append(s + ". ");
@@ -73,7 +73,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
                 config.makeErrorReporter().report(new XmlProcessingIncident(buffer.toString()).asWarning());
                 mergeSource.streamable = false;
             } else {
-                FastStringBuffer buffer = new FastStringBuffer(120);
+                StringBuilder buffer = new StringBuilder(120);
                 buffer.append("Streaming requested for xsl:merge, but the construct is not streamable. ");
                 for (String s : reasons) {
                     buffer.append(s + ". ");

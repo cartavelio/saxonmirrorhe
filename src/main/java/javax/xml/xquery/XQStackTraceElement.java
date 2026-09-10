@@ -16,12 +16,12 @@ import java.io.Serializable;
  */
 public class XQStackTraceElement implements Serializable {
 
-    private String module;
+    private final String module;
     private int line = -1;
     private int column = -1;
     private int position = -1;
-    private QName function;
-    private XQStackTraceVariable[] variables;
+    private final QName function;
+    private final XQStackTraceVariable[] variables;
 
     /**
      * Construct an <code>XQStackTraceElement</code> object representing

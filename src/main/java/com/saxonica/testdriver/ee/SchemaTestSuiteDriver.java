@@ -37,7 +37,7 @@ public class SchemaTestSuiteDriver {
 
     public final static String testNS = "http://www.w3.org/XML/2004/xml-schema-test-suite/";
     public String scmSchemaLocation = "c:/MyJava/samples/scm/scmschema.scm";
-    private Licensor licensor = new Licensor();
+    private final Licensor licensor = new Licensor();
 
     public final static QName QN_bugzilla = new QName("bugzilla");
     public final static QName QN_contributor = new QName("contributor");

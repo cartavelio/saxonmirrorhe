@@ -44,7 +44,7 @@ import java.util.Map;
 
 public class StreamingAdjunct {
 
-    private static Map<String, Class<? extends StreamingAdjunct>> adjunctMap = new HashMap<>(50);
+    private static final Map<String, Class<? extends StreamingAdjunct>> adjunctMap = new HashMap<>(50);
 
     private static void map(String s, Class<? extends StreamingAdjunct> a) {
         adjunctMap.put(s, a);

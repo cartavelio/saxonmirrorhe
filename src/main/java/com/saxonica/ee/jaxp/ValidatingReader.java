@@ -21,8 +21,8 @@ import java.io.IOException;
  */
 public class ValidatingReader implements XMLReader {
 
-    private EnterpriseConfiguration config;
-    private XMLReader parser;
+    private final EnterpriseConfiguration config;
+    private final XMLReader parser;
     private ContentHandler contentHandler;
 
     /**

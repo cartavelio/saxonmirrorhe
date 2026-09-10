@@ -1367,7 +1367,7 @@ public class UserComplexType extends UserDefinedType
             // with an incompatible type.
 
             // Schema Part 1, Schema Component Constraint: Derivation Valid (Extension)
-            // #cos-ct-extends clause 1.5 (as refined in XML Schema 1.1)
+            // See #cos-ct-extends clause 1.5 (as refined in XML Schema 1.1)
 
             for (AttributeUse au : attributes.getAttributeUses()) {
                 StructuredQName fp = au.getTargetComponentName();
@@ -1409,7 +1409,7 @@ public class UserComplexType extends UserDefinedType
             // with an incompatible type.
 
             // Schema Part 1, Schema Component Constraint: Derivation Valid (Extension)
-            // #cos-ct-extends clause 1.5 (as refined in XML Schema 1.1)
+            // See #cos-ct-extends clause 1.5 (as refined in XML Schema 1.1)
 
             if (particle != null) {
                 IntHashSet extensionElements = new IntHashSet(10);
@@ -3018,7 +3018,7 @@ public class UserComplexType extends UserDefinedType
             if (node.isNilled()) {
                 return EmptyAtomicSequence.getInstance();
             }
-            return new UntypedAtomicValue(node.getStringValueCS());
+            return new UntypedAtomicValue(node.getUnicodeStringValue());
         } else if (isEmptyContent()) {
             return EmptyAtomicSequence.getInstance();
         } else {
@@ -3245,31 +3245,31 @@ public class UserComplexType extends UserDefinedType
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue("Complex Type Definition");
+                        return StringItem.bmp("Complex Type Definition");
                     case "implementation":
                         return new ObjectValue<>(type);
                     case "name":
                         if (type.isAnonymousType()) {
                             return EmptySequence.getInstance();
                         } else {
-                            return new StringValue(type.getName(), BuiltInAtomicType.NCNAME);
+                            return new StringItem(type.getName(), BuiltInAtomicType.NCNAME);
                         }
                     case "target namespace":
                         if (type.isAnonymousType()) {
                             return EmptySequence.getInstance();
                         } else {
-                            return new AnyURIValue(type.getTargetNamespace());
+                            return new AnyURIValue((type.getTargetNamespace()));
                         }
                     case "base type definition":
                         return type.getBaseType().getComponentAsFunction();
                     case "final": {
-                        List<StringValue> list = new ArrayList<StringValue>();
+                        List<StringItem> list = new ArrayList<StringItem>();
                         int f = type.getFinalProhibitions();
                         if ((f & SchemaType.DERIVATION_RESTRICTION) != 0) {
-                            list.add(new StringValue("restriction"));
+                            list.add(StringItem.bmp("restriction"));
                         }
                         if ((f & SchemaType.DERIVATION_EXTENSION) != 0) {
-                            list.add(new StringValue("extension"));
+                            list.add(StringItem.bmp("extension"));
                         }
                         return SequenceExtent.makeSequenceExtent(list);
                     }
@@ -3281,7 +3281,7 @@ public class UserComplexType extends UserDefinedType
                             return EmptySequence.getInstance();
                         }
                     case "derivation method":
-                        return new StringValue(
+                        return new StringItem(
                                 type.getDerivationMethod() == SchemaType.DERIVATION_RESTRICTION ? "restriction" : "extension");
                     case "abstract":
                         return BooleanValue.get(type.isAbstract());
@@ -3310,7 +3310,7 @@ public class UserComplexType extends UserDefinedType
                                 String key = arguments[0].head().getStringValue();
                                 switch (key) {
                                     case "class":
-                                        return new StringValue("Content Type");
+                                        return StringItem.bmp("Content Type");
                                     case "variety":
                                         String variety;
                                         switch (type.getVariety()) {
@@ -3328,7 +3328,7 @@ public class UserComplexType extends UserDefinedType
                                                 variety = "simple";
                                                 break;
                                         }
-                                        return new StringValue(variety);
+                                        return StringItem.bmp(variety);
                                     case "particle":
                                         if (type.getVariety() == UserComplexType.VARIETY_MIXED || type.getVariety() == UserComplexType.VARIETY_ELEMENT_ONLY) {
                                             return ((UserComplexType) type).getParticle().getComponentAsFunction();
@@ -3348,9 +3348,9 @@ public class UserComplexType extends UserDefinedType
                                                         String key = arguments[0].head().getStringValue();
                                                         switch (key) {
                                                             case "class":
-                                                                return new StringValue("Open Content");
+                                                                return StringItem.bmp("Open Content");
                                                             case "mode":
-                                                                return new StringValue(mode);
+                                                                return new StringItem(mode);
                                                             case "wildcard":
                                                                 return ctype.getOpenContentWildcard().getComponentAsFunction();
                                                             default:
@@ -3378,13 +3378,13 @@ public class UserComplexType extends UserDefinedType
                         };
                         return new CallableFunction(1, contentType, SchemaComponent.COMPONENT_FUNCTION_TYPE);
                     case "prohibited substitutions": {
-                        List<StringValue> list = new ArrayList<>();
+                        List<StringItem> list = new ArrayList<>();
                         int s = type.getBlock();
                         if ((s & SchemaType.DERIVATION_EXTENSION) != 0) {
-                            list.add(new StringValue("extension"));
+                            list.add(StringItem.bmp("extension"));
                         }
                         if ((s & SchemaType.DERIVATION_RESTRICTION) != 0) {
-                            list.add(new StringValue("restriction"));
+                            list.add(StringItem.bmp("restriction"));
                         }
                         return SequenceExtent.makeSequenceExtent(list);
                     }

@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class DoInstr extends Instruction  {
 
-    private Operand actionOp;
+    private final Operand actionOp;
 
     public DoInstr(Expression select) {
         actionOp = new Operand(this, select, OperandRole.NAVIGATE);

@@ -25,7 +25,7 @@ public interface XQDataSource {
      * @return a connection to the XML datasource
      * @throws XQException if a datasource access error occurs
      */
-    public XQConnection getConnection() throws XQException;
+    XQConnection getConnection() throws XQException;
 
     /**
      * Attempts to create a connection to an XML datasource using an
@@ -43,7 +43,7 @@ public interface XQDataSource {
      *                     <code>XQConnection</code>, or (3) if
      *                     the <code>con</code> parameter is <code>null</code>
      */
-    public XQConnection getConnection(Connection con) throws XQException;
+    XQConnection getConnection(Connection con) throws XQException;
 
     /**
      * Attempts to establish a connection to an XML datasource using the
@@ -55,7 +55,7 @@ public interface XQDataSource {
      * @return a connection to the XML datasource
      * @throws XQException if a datasource access error occurs
      */
-    public XQConnection getConnection(String username, String passwd)
+    XQConnection getConnection(String username, String passwd)
             throws XQException;
 
     /**
@@ -71,7 +71,7 @@ public interface XQDataSource {
      * @return the datasource login time limit
      * @throws XQException if a datasource access error occurs
      */
-    public int getLoginTimeout() throws XQException;
+    int getLoginTimeout() throws XQException;
 
     /**
      * Retrieves the log writer for this <code>XQDataSource</code> object.
@@ -87,7 +87,7 @@ public interface XQDataSource {
      *         <code>null</code> if logging is disabled
      * @throws XQException if a datasource access error occurs
      */
-    public java.io.PrintWriter getLogWriter() throws XQException;
+    java.io.PrintWriter getLogWriter() throws XQException;
 
     /**
      * Returns an array containing the property names supported by this
@@ -108,7 +108,7 @@ public interface XQDataSource {
      * @return <code>String[]</code> an array of property names
      *         supported by this implementation
      */
-    public String[] getSupportedPropertyNames();
+    String[] getSupportedPropertyNames();
 
     /**
      * Sets the named property to the specified value.
@@ -126,7 +126,7 @@ public interface XQDataSource {
      *                     determined to be invalid, or (3) the <code>name</code>
      *                     parameter is <code>null</code>
      */
-    public void setProperty(String name, String value) throws XQException;
+    void setProperty(String name, String value) throws XQException;
 
     /**
      * Returns the current value of the named property if set, else
@@ -141,7 +141,7 @@ public interface XQDataSource {
      * @throws XQException if (1) a given property is not supported, or
      *                     (2) the name parameter is <code>null</code>
      */
-    public String getProperty(String name) throws XQException;
+    String getProperty(String name) throws XQException;
 
     /**
      * Sets the data source properties from the specified <code>Properties</code>
@@ -161,7 +161,7 @@ public interface XQDataSource {
      *                     determined to be invalid, or (3) the
      *                     <code>props</code> parameter is <code>null</code>
      */
-    public void setProperties(Properties props) throws XQException;
+    void setProperties(Properties props) throws XQException;
 
     /**
      * Sets the maximum time in seconds that this datasource will wait while
@@ -177,7 +177,7 @@ public interface XQDataSource {
      * @param seconds the datasource login time limit
      * @throws XQException if a datasource access error occurs
      */
-    public void setLoginTimeout(int seconds) throws XQException;
+    void setLoginTimeout(int seconds) throws XQException;
 
     /**
      * Sets the log writer for this <code>XQDataSource</code> object to the given
@@ -193,6 +193,6 @@ public interface XQDataSource {
      *            <code>null</code>
      * @throws XQException if a datasource access error occurs
      */
-    public void setLogWriter(java.io.PrintWriter out) throws XQException;
+    void setLogWriter(java.io.PrintWriter out) throws XQException;
 }
 

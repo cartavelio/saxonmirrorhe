@@ -16,7 +16,7 @@ public class KeySelectorWatch extends SelectorWatch {
 
     // A list of all keyref Watches that reference the unique/key constraint
     // handled by this KeySelectorWatch
-    private List<RefSelectorWatch> keyrefs = new ArrayList<>(4);
+    private final List<RefSelectorWatch> keyrefs = new ArrayList<>(4);
 
     public KeySelectorWatch(ConstraintChecker checker, IdentityConstraint uniqueConstraint) {
         super(checker, uniqueConstraint);

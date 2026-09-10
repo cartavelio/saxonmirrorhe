@@ -44,8 +44,8 @@ public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
 
     public static class SubsequenceFilter implements FilteringFeed.Filter {
 
-        private int first;
-        private int last;
+        private final int first;
+        private final int last;
 
         public SubsequenceFilter(int first, int last) {
             this.first = first;

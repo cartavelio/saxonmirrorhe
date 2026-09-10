@@ -12,6 +12,8 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -80,17 +82,17 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
                     NodeInfo node = (NodeInfo)item;
                     int kind = node.getNodeKind();
                     if (kind == Type.ATTRIBUTE) {
-                         out.attribute(NameOfNode.makeName(node), (SimpleType)node.getSchemaType(),
-                                       node.getStringValueCS(), getExpression().getLocation(), ReceiverOption.NONE);
+                        out.attribute(NameOfNode.makeName(node), (SimpleType)node.getSchemaType(),
+                                      node.getStringValue(), getExpression().getLocation(), ReceiverOption.NONE);
                     } else {
                         ((NodeInfo) item).copy(out, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, getExpression().getLocation());
                     }
                     previousAtomic = false;
                 } else if (item instanceof AtomicValue) {
                     if (previousAtomic) {
-                        out.characters(" ", Loc.NONE, ReceiverOption.SEPARATOR);
+                        out.characters(UnicodeString.SINGLE_SPACE, Loc.NONE, ReceiverOption.SEPARATOR);
                     }
-                    out.characters(item.getStringValueCS(), getExpression().getLocation(), ReceiverOption.NONE);
+                    out.characters(item.getUnicodeStringValue(), getExpression().getLocation(), ReceiverOption.NONE);
                     previousAtomic = true;
                 } else if (item instanceof ArrayItem) {
                     for (GroundedValue members : ((ArrayItem)item).members()) {
@@ -234,7 +236,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.attribute(attName, typeCode, value, location, properties);
@@ -270,7 +272,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.characters(chars, location, properties);
@@ -282,7 +284,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.processingInstruction(name, data, location, properties);
@@ -294,7 +296,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
     }
 
     @Override
-    public void comment(CharSequence content, Location location, int properties) throws XPathException {
+    public void comment(CodePoints content, Location location, int properties) throws XPathException {
         if (!hasFailed()) {
             try {
                 next.comment(content, location, properties);

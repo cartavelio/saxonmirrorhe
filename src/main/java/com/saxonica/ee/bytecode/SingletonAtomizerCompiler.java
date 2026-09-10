@@ -12,7 +12,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -118,7 +118,7 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
 
                 ga.loadLocal(itemVar);
                 ga.invokeInstanceMethod(Item.class, "getStringValue");
-                ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+                ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
                 ga.storeLocal(resultVar);
                 ga.goTo(loop);
                 methodInfo.placeLabel(notExternalLab);

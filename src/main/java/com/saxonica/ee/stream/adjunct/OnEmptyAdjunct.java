@@ -8,11 +8,9 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -112,7 +110,7 @@ public class OnEmptyAdjunct extends TransmissionAdjunct implements FeedMaker {
         }
 
         @Override
-        public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+        public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
             if (isEmpty) {
                 super.attribute(attName, typeCode, value, location, properties);
             }
@@ -133,21 +131,21 @@ public class OnEmptyAdjunct extends TransmissionAdjunct implements FeedMaker {
         }
 
         @Override
-        public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+        public void characters(CodePoints chars, Location location, int properties) throws XPathException {
             if (isEmpty) {
                 super.characters(chars, location, properties);
             }
         }
 
         @Override
-        public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+        public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
             if (isEmpty) {
                 super.processingInstruction(name, data, location, properties);
             }
         }
 
         @Override
-        public void comment(CharSequence content, Location location, int properties) throws XPathException {
+        public void comment(CodePoints content, Location location, int properties) throws XPathException {
             if (isEmpty) {
                 super.comment(content, location, properties);
             }

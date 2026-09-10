@@ -6,7 +6,7 @@ import net.sf.saxon.pull.NamespaceContextImpl;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.MissingComponentException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
@@ -29,9 +29,9 @@ import java.util.List;
  */
 public class PullToStax implements XMLStreamReader {
 
-    private PullNamespaceReducer provider;
+    private final PullNamespaceReducer provider;
     private boolean previousAtomic;
-    private FastStringBuffer currentTextNode = new FastStringBuffer(FastStringBuffer.C64);
+    private final StringBuilder currentTextNode = new StringBuilder(64);
     private int currentStaxEvent = XMLStreamConstants.START_DOCUMENT;
     private XPathException pendingException = null;
 
@@ -173,7 +173,7 @@ public class PullToStax implements XMLStreamReader {
             return currentTextNode.length();
         } else {
             try {
-                return provider.getStringValue().length();
+                return provider.getStringValue().toString().length();
             } catch (XPathException e) {
                 pendingException = e;
                 return 0;
@@ -189,7 +189,9 @@ public class PullToStax implements XMLStreamReader {
     @Override
     public char[] getTextCharacters() {
         if (previousAtomic) {
-            return currentTextNode.toCharArray();
+            char[] chars = new char[currentTextNode.length()];
+            currentTextNode.getChars(0, currentTextNode.length(), chars, 0);
+            return chars;
         } else {
             try {
                 String stringValue = provider.getStringValue().toString();
@@ -218,7 +220,7 @@ public class PullToStax implements XMLStreamReader {
             return end - sourceStart;
         } else {
             try {
-                String stringValue = provider.getStringValue().subSequence(sourceStart, sourceStart + length).toString();
+                String stringValue = provider.getStringValue().tidy().substring(sourceStart, sourceStart + length).toString();
                 stringValue.getChars(0, length, target, targetStart);
                 return length;
             } catch (XPathException e) {
@@ -249,9 +251,9 @@ public class PullToStax implements XMLStreamReader {
             case ATOMIC_VALUE:
                 currentTextNode.setLength(0);
                 if (previousAtomic) {
-                    currentTextNode.cat(' ');
+                    currentTextNode.append(' ');
                 }
-                currentTextNode.append(provider.getAtomicValue().getStringValue());
+                currentTextNode.append(provider.getAtomicValue().getUnicodeStringValue().toString());
                 currentStaxEvent = XMLStreamConstants.CHARACTERS;
                 break;
             case START_DOCUMENT:
@@ -362,7 +364,8 @@ public class PullToStax implements XMLStreamReader {
     @Override
     public boolean isWhiteSpace() {
         try {
-            return currentStaxEvent == XMLStreamConstants.CHARACTERS && Whitespace.isWhite(provider.getStringValue());
+            return currentStaxEvent == XMLStreamConstants.CHARACTERS
+                    && Whitespace.isAllWhite(provider.getStringValue());
         } catch (XPathException e) {
             pendingException = e;
             return false;
@@ -522,7 +525,7 @@ public class PullToStax implements XMLStreamReader {
 
     public static class SourceStreamLocation implements javax.xml.stream.Location {
 
-        private net.sf.saxon.s9api.Location locator;
+        private final net.sf.saxon.s9api.Location locator;
 
         /**
          * Create a StAX SourceStreamLocation object based on a given SAX SourceLocator

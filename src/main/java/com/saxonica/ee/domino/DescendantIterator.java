@@ -15,11 +15,11 @@ import java.util.function.IntPredicate;
 
 final class DescendantIterator implements AxisIterator {
 
-    private DominoTree tree;
-    private DominoNode startNode;
+    private final DominoTree tree;
+    private final DominoNode startNode;
     private int nextNodeNr;
-    private int startDepth;
-    private NodeTest test;
+    private final int startDepth;
+    private final NodeTest test;
     private final IntPredicate matcher;
 
     /**

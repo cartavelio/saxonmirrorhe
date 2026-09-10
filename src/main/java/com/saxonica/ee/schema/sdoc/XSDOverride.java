@@ -7,7 +7,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
@@ -71,7 +71,7 @@ public class XSDOverride extends SchemaElement {
             throw new SchemaException("The xsl:override/@schemaLocation resolves to a source with no known system ID");
         }
 
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         fsb.append(source.getSystemId());
         fsb.append("?referrer=");
         fsb.append(documentBase);

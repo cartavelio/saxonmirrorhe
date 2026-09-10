@@ -16,7 +16,7 @@ import java.util.Iterator;
 
 public class PedigreeMapItem extends DelegatingMapItem implements MapItem, PedigreeValue {
 
-    private Pedigree pedigree;
+    private final Pedigree pedigree;
 
     /**
      * Create a PedigreeMapItem with an empty pedigree

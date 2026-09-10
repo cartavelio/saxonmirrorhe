@@ -5,14 +5,16 @@ import com.saxonica.ee.schema.UserAtomicType;
 import com.saxonica.ee.stream.om.FleetingNode;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
@@ -22,16 +24,16 @@ import net.sf.saxon.value.UntypedAtomicValue;
 
 public class FieldChecker extends AbstractReceiver {
 
-    private SelectorWatch parentWatch;
+    private final SelectorWatch parentWatch;
     private NamespaceResolver namespaceResolver;
-    private AtomicSequence[] currentRow;
-    private int column;
-    private boolean matchElements;
+    private final AtomicSequence[] currentRow;
+    private final int column;
+    private final boolean matchElements;
     private boolean active = false;
     private boolean nillableElement = false;
     private NodeName elementName;
     private SchemaType elementType;
-    private FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C64);
+    private final UnicodeBuilder buffer = new UnicodeBuilder();
     private Location textLocationId = null;
     int depth = 0;
 
@@ -94,7 +96,7 @@ public class FieldChecker extends AbstractReceiver {
             elementType = typeCode;
             elementName = nameCode;
             active = true;
-            buffer.setLength(0);
+            buffer.clear();
         }
         depth++;
     }
@@ -115,12 +117,12 @@ public class FieldChecker extends AbstractReceiver {
         final Configuration config = getConfiguration();
         ConversionRules rules = config.getConversionRules();
         SimpleType type = (SimpleType) attribute.getSchemaType();
-        CharSequence value = attribute.getStringValue();
+        UnicodeString value = attribute.getUnicodeStringValue();
         if (type.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
             // See MS test case idZ015 and bug 4063. If the attribute has been skip-validated
             // then it doesn't qualify as a member of the key-sequence of the node according to the XSD 1.1
             // spec. So ignore it.
-            // val = new UntypedAtomicValue(value);
+            // val = StringValue.untypedAtomic(value);
         } else {
             try {
                 if (type.isNamespaceSensitive()) {
@@ -159,11 +161,11 @@ public class FieldChecker extends AbstractReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         // buffer the value, because it may be split by comments and PIs
         //System.err.println("FieldChecker " + this + ".characters() " + chars);
         if (active && matchElements && depth == 1) {
-            buffer.cat(chars);
+            buffer.append(chars);
         }
         nillableElement = ReceiverOption.contains(properties, ReceiverOption.NILLABLE_ELEMENT);
         textLocationId = locationId;
@@ -174,9 +176,9 @@ public class FieldChecker extends AbstractReceiver {
         if (active && matchElements && depth == 1) {
             AtomicSequence val;
             SchemaType eltype = elementType;
-
+            UnicodeString fieldVal = buffer.toUnicodeString();
             if (eltype == null || eltype instanceof AnySimpleType) {
-                val = new UntypedAtomicValue(buffer.toString()); // force to String because buffer is mutable
+                val = new UntypedAtomicValue(fieldVal); // force to String because buffer is mutable
             } else {
                 SchemaType contentType = eltype;
                 if (eltype instanceof ComplexType) {
@@ -197,16 +199,16 @@ public class FieldChecker extends AbstractReceiver {
                 assert contentType != null;
                 if (contentType.getFingerprint() == StandardNames.XS_STRING) {
                     // fast path for a commmon case
-                    val = StringValue.makeStringValue(buffer.toString()); // force to String because buffer is mutable
+                    val = StringItem.makeStringValue(buffer.toString()); // force to String because buffer is mutable
                 } else if (((SimpleType) contentType).isNamespaceSensitive()) {
                     val = ((SimpleType) contentType).getTypedValue(
-                            buffer, namespaceResolver, getConfiguration().getConversionRules());
+                            fieldVal, namespaceResolver, getConfiguration().getConversionRules());
                 } else if (contentType.isAtomicType()) {
                     // We've already validated the value, and for equality matching we only need a value of the
                     // correct primitive type.
                     AtomicType prim = ((AtomicType)contentType).getPrimitiveItemType();
                     StringConverter converter = prim.getStringConverter(getConfiguration().getConversionRules());
-                    val = converter.convertString(buffer).asAtomic();
+                    val = converter.convertString(fieldVal).asAtomic();
                     if (contentType instanceof UserAtomicType) {
                         // To reduce memory use, use a shared instance where possible
                         EnumerationFacetSet en = (EnumerationFacetSet)((UserAtomicType)contentType).getFacet(EnumerationFacetSet.class);
@@ -217,7 +219,7 @@ public class FieldChecker extends AbstractReceiver {
                 } else {
                     // a list or union type
                     val = ((SimpleType) contentType).getTypedValue(
-                            buffer, namespaceResolver, getConfiguration().getConversionRules());
+                            fieldVal, namespaceResolver, getConfiguration().getConversionRules());
                 }
             }
             parentWatch.addFieldValue(currentRow, column, val, nillableElement, textLocationId);

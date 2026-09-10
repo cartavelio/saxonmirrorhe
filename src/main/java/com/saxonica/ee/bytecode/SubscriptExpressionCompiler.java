@@ -37,7 +37,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
         visitLineNumber(compiler, ga, expression);
 
         if (index instanceof Literal) {
-            GroundedValue value = ((Literal) index).getValue();
+            GroundedValue value = ((Literal) index).getGroundedValue();
             if (value instanceof NumericValue && ((NumericValue) value).isWholeNumber()) {
                 LabelInfo grounded = methodInfo.newLabel("grounded");
                 LabelInfo memo = methodInfo.newLabel("memo");
@@ -124,8 +124,8 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
             // Stack: int int
             ga.ifZCmp(GeneratorAdapter.LT, popAndReturnEmpty.label());
             // Stack: int
-        }
 
+        }
 
         // We now have an int on the stack containing the evaluated subscript
 

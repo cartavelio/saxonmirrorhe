@@ -16,7 +16,7 @@ import net.sf.saxon.trans.XPathException;
  * has been evaluated, a rule can be eliminated if it requires a different value for the characteristic.
  */
 public class PreconditionMatcher extends RuleSearchState {
-    private XPathContext context;
+    private final XPathContext context;
     private Boolean[] preconditionState;  // This must be a Boolean[] object as null is a valid value.
     private Object[] characteristics;
 

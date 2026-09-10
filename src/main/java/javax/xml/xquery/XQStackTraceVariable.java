@@ -15,8 +15,8 @@ import java.io.Serializable;
  * @see XQQueryException <code>XQQueryException</code>
  */
 public class XQStackTraceVariable implements Serializable {
-    private QName qname;
-    private String value;
+    private final QName qname;
+    private final String value;
 
     /**
      * Construct a stack trace variable object.

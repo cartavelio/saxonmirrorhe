@@ -112,7 +112,7 @@ public class PackageLoaderPE extends PackageLoaderHE {
                 final SymbolicName name = ((UserFunctionReference) target).getSymbolicName();
                 loader.completionActions.add(() -> coercedFn2.setTargetFunction(loader.userFunctions.get(name)));
             } else if (target instanceof FunctionLiteral) {
-                targetFn = (Function) ((Literal) target).getValue();
+                targetFn = (Function) ((Literal) target).getGroundedValue();
                 coercedFn = new CoercedFunction(targetFn, (SpecificFunctionType) type);
             } else {
                 throw new AssertionError();

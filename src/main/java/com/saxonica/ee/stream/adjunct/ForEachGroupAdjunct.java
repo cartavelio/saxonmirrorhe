@@ -250,9 +250,9 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
 
     private static class GroupedGroundedFeed extends ItemFeed {
 
-        private List<Item> currentGroup = new ArrayList<>();
+        private final List<Item> currentGroup = new ArrayList<>();
         private int groupCounter = 0;
-        private GroupBoundaryTester boundaryTester;
+        private final GroupBoundaryTester boundaryTester;
         private AtomicSequence currentGroupingKey;
 
         public GroupedGroundedFeed(ForEachGroup instruction, ItemFeed result, XPathContext context) {
@@ -309,7 +309,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
         // In some cases we have no choice. But there are cases where we could do better, notably
         // if the for-each-group action is to create a new result document.
 
-        private List<Item> population = new ArrayList<>();
+        private final List<Item> population = new ArrayList<>();
 
         public GroupedGroundedDistributedFeed(ForEachGroup instruction, ItemFeed result, XPathContext context) {
             super(instruction, result, context);

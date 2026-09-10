@@ -8,6 +8,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -21,11 +22,11 @@ import java.util.Arrays;
  */
 public class Erector implements Receiver {
 
-    private Configuration config;
-    private Document domDocument;
-    private DOMSender sender;
+    private final Configuration config;
+    private final Document domDocument;
+    private final DOMSender sender;
     private DominoNode currentRoot;
-    private NamePool namePool;
+    private final NamePool namePool;
     private String systemId;
 
     public static final int PARENT_POINTER_INTERVAL = 10;
@@ -282,10 +283,9 @@ public class Erector implements Receiver {
      */
 
     @Override
-    public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
-        final int len = chars.length();
-        if (len > 0) {
-            nodeNr = makeTextNode(chars, len);
+    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (!chars.isEmpty()) {
+            nodeNr = makeTextNode(chars);
         }
     }
 
@@ -294,12 +294,11 @@ public class Erector implements Receiver {
      * on the tree is already a text node, the new text will be appended to it.
      *
      * @param chars the contents of the text node
-     * @param len   the length of the text node
      * @return the node number of the created text node, or the text node to which
      * this text has been appended.
      */
 
-    protected int makeTextNode(CharSequence chars, int len) {
+    protected int makeTextNode(CodePoints chars) {
         DominoTree tt = tree;
 
         int n = tt.numberOfNodes - 1;
@@ -327,7 +326,7 @@ public class Erector implements Receiver {
      */
 
     @Override
-    public void processingInstruction(String piname, /*@NotNull*/ CharSequence remainder, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String piname, /*@NotNull*/ CodePoints remainder, Location locationId, int properties) throws XPathException {
         DominoTree tt = tree;
         int fp = namePool.allocateFingerprint("", piname);
 
@@ -348,7 +347,7 @@ public class Erector implements Receiver {
      */
 
     @Override
-    public void comment(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
 
         DominoTree tt = tree;
         nodeNr = tt.addNode(Type.COMMENT, currentDepth, NULL_FP, sender.getCurrentNode());

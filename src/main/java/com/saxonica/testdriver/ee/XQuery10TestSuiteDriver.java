@@ -20,7 +20,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AnyURIValue;
@@ -80,14 +80,14 @@ public class XQuery10TestSuiteDriver {
     private boolean generateByteCode = false;
     private boolean debugBytecode = false;
     private boolean noSource = false;
-    private HashMap documentCache = new HashMap(50);
+    private final HashMap documentCache = new HashMap(50);
     private String catalogfile = "XQTSCatalog.xml";
 
-    private TransformerFactory tfactory = new TransformerFactoryImpl();
+    private final TransformerFactory tfactory = new TransformerFactoryImpl();
 
     private XMLStreamWriter results;
-    private Writer compileScript = null;
-    private PrintStream monitor = System.err;
+    private final Writer compileScript = null;
+    private final PrintStream monitor = System.err;
     private Logger log;
     private String indent = "yes";
     private String specVersion = "3.0";
@@ -112,7 +112,7 @@ public class XQuery10TestSuiteDriver {
     }
 
     private NodeInfo getChildElement(NodeInfo parent, NameTest child) {
-        return (NodeInfo) parent.iterateAxis(AxisInfo.CHILD, child).next();
+        return parent.iterateAxis(AxisInfo.CHILD, child).next();
     }
 
     public void go(String[] args) throws SAXException, ParserConfigurationException {
@@ -256,7 +256,7 @@ public class XQuery10TestSuiteDriver {
                     new StreamSource(new File(testSuiteDir + "/" + catalogfile))
             );
 
-            NodeInfo catalogTop = (NodeInfo) catalog.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+            NodeInfo catalogTop = catalog.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
             catalogVersion = catalogTop.getAttributeValue("", "version");
 
 
@@ -275,7 +275,7 @@ public class XQuery10TestSuiteDriver {
 
             AxisIterator schemas = catalog.getRootNode().iterateAxis(AxisInfo.DESCENDANT, schemaNT);
             while (!noSource) {
-                NodeInfo schemaElement = (NodeInfo) schemas.next();
+                NodeInfo schemaElement = schemas.next();
                 if (schemaElement == null) {
                     break;
                 }
@@ -457,7 +457,7 @@ public class XQuery10TestSuiteDriver {
 
                 setQueryParameters(catalog, testCase, dqc, inputUriNT, collectionNT);
                 if (unfolded) {
-                    dqc.setParameter(new StructuredQName("", "", "zlsJJ"), new UntypedAtomicValue(""));
+                    dqc.setParameter(new StructuredQName("", "", "zlsJJ"), UntypedAtomicValue.EMPTY_STRING);
                 }
 
                 NodeInfo defaultCollection = getChildElement(testCase, defaultCollectionNT);
@@ -513,7 +513,7 @@ public class XQuery10TestSuiteDriver {
                         continue; // results apply to a different version
                     }
                     String resultsDir = testSuiteDir + "/ExpectedTestResults/" + filePath;
-                    String resultsPath = resultsDir + outputFileElement.getStringValue();
+                    String resultsPath = resultsDir + outputFileElement.getUnicodeStringValue();
                     String comparisonMethod = outputFileElement.getAttributeValue("", "compare");
                     String comparisonResult;
                     if (comparisonMethod.equals("Ignore")) {
@@ -565,7 +565,7 @@ public class XQuery10TestSuiteDriver {
                         results.writeAttribute("comment", possibleMatch);
                     } else if (expectedError != null) {
                         results.writeAttribute("result", "fail");
-                        results.writeAttribute("comment", "expected " + expectedError.getStringValue() + ", got success");
+                        results.writeAttribute("comment", "expected " + expectedError.getUnicodeStringValue() + ", got success");
                     } else {
                         results.writeAttribute("result", "fail");
                     }
@@ -706,7 +706,7 @@ public class XQuery10TestSuiteDriver {
             throws java.io.IOException, XMLStreamException {
         String actualError = err.getErrorCodeLocalPart();
         AxisIterator expectedErrors = testCase.iterateAxis(AxisInfo.CHILD, expectedErrorNT);
-        FastStringBuffer expected = new FastStringBuffer(20);
+        StringBuilder expected = new StringBuilder(20);
         while (true) {
             NodeInfo expectedError = expectedErrors.next();
             if (expectedError == null) {
@@ -1049,9 +1049,9 @@ public class XQuery10TestSuiteDriver {
     }
 
     private void findDiff(String s1, String s2) {
-        FastStringBuffer sb1 = new FastStringBuffer(s1.length());
+        StringBuilder sb1 = new StringBuilder(s1.length());
         sb1.append(s1);
-        FastStringBuffer sb2 = new FastStringBuffer(s2.length());
+        StringBuilder sb2 = new StringBuilder(s2.length());
         sb2.append(s2);
         int i = 0;
         while (true) {
@@ -1311,7 +1311,7 @@ public class XQuery10TestSuiteDriver {
     }
 
     private String lowercase(String name) {
-        FastStringBuffer sb = new FastStringBuffer(name.length());
+        StringBuilder sb = new StringBuilder(name.length());
         name = name.toLowerCase();
         for (int p = 0; p < name.length(); p++) {
             char c = name.charAt(p);
@@ -1323,7 +1323,7 @@ public class XQuery10TestSuiteDriver {
     }
 
     private String makeClassName(String groupName, String mainName) {
-        FastStringBuffer sb = new FastStringBuffer(mainName.length());
+        StringBuilder sb = new StringBuilder(mainName.length());
         sb.append(groupName);
         sb.append(".");
         mainName = mainName.substring(0, 1).toUpperCase() + mainName.substring(1).toLowerCase();

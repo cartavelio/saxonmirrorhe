@@ -78,12 +78,12 @@ public abstract class ToItemCompiler extends ExpressionCompiler {
                 || th.relationship(expression.getItemType(), BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT
                 || th.relationship(expression.getItemType(), BuiltInAtomicType.ANY_URI) != Affinity.DISJOINT) {
             ga.loadLocal(itemVar);
-            ga.instanceOf(org.objectweb.asm.Type.getType(StringValue.class));
+            ga.instanceOf(org.objectweb.asm.Type.getType(StringItem.class));
             LabelInfo notString = methodInfo.newLabel("notString");
             ga.ifZCmp(GeneratorAdapter.EQ, notString.label());
             ga.loadLocal(itemVar);
-            ga.checkClass(StringValue.class);
-            ga.invokeInstanceMethod(StringValue.class, "isZeroLength");
+            ga.checkClass(StringItem.class);
+            ga.invokeInstanceMethod(StringItem.class, "isEmpty");
             ga.not();
             ga.goTo(end);
             methodInfo.placeLabel(notString);

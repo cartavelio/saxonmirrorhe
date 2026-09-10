@@ -19,9 +19,9 @@ import java.util.Stack;
 
 public class FilteringFeed extends GroundedItemFeed {
 
-    private Filter filter;
+    private final Filter filter;
     private int position;
-    private Stack<Boolean> matchStack = new Stack<>();
+    private final Stack<Boolean> matchStack = new Stack<>();
     //private Stack<Integer> nodeKindStack = new Stack<>();
     private boolean terminated;
 

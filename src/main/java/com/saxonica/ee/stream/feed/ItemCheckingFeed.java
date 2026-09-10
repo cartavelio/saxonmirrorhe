@@ -28,11 +28,11 @@ public class ItemCheckingFeed extends ItemFeed {
 
     // TODO: simplify this by using a DelegatingFeed that delegates to a TypeCheckingFilter
 
-    private ItemType requiredType;
-    private RoleDiagnostic role;
-    private Configuration config;
+    private final ItemType requiredType;
+    private final RoleDiagnostic role;
+    private final Configuration config;
     private int level = 0;
-    private boolean allowAnyElement;
+    private final boolean allowAnyElement;
 
     public ItemCheckingFeed(Expression checker, ItemFeed result, XPathContext context) {
         super(checker, result, context);

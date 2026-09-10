@@ -22,8 +22,8 @@ import java.util.List;
 
 public class NextIterationFeed extends ItemFeed {
 
-    private int streamedArgument;
-    private List<Item> inputValue = new ArrayList<>(4);
+    private final int streamedArgument;
+    private final List<Item> inputValue = new ArrayList<>(4);
     Sequence[] newValues;
 
     public NextIterationFeed(Expression inst, ItemFeed result, XPathContext context, int arg) throws XPathException {

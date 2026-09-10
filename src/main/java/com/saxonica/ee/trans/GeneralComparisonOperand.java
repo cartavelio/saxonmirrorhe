@@ -34,7 +34,7 @@ public class GeneralComparisonOperand extends Characteristic<IntSet> {
             SequenceIterator iter = exp.iterate(context);
             IntHashSet keys = new IntHashSet();
             iter.forEachOrFail(item -> {
-                keys.add(collator.getCollationKey(item.getStringValueCS()).hashCode());
+                keys.add(collator.getCollationKey(item.getUnicodeStringValue()).hashCode());
             });
             return keys;
         } else {
@@ -42,7 +42,7 @@ public class GeneralComparisonOperand extends Characteristic<IntSet> {
             if (item == null) {
                 return IntEmptySet.getInstance();
             } else {
-                return new IntSingletonSet(collator.getCollationKey(item.getStringValueCS()).hashCode());
+                return new IntSingletonSet(collator.getCollationKey(item.getUnicodeStringValue()).hashCode());
             }
         }
     }

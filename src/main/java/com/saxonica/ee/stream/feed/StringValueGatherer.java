@@ -1,9 +1,10 @@
 package com.saxonica.ee.stream.feed;
 
 import com.saxonica.ee.validate.AbstractReceiver;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.UnicodeBuilder;
 
 
 /**
@@ -13,15 +14,15 @@ import net.sf.saxon.tree.util.FastStringBuffer;
 
 public class StringValueGatherer extends AbstractReceiver {
 
-    private FastStringBuffer buffer;
+    private final UnicodeBuilder buffer;
 
-    public StringValueGatherer(FastStringBuffer buffer) {
+    public StringValueGatherer(UnicodeBuilder buffer) {
         this.buffer = buffer;
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        buffer.cat(chars);
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        buffer.append(chars);
     }
 
 }

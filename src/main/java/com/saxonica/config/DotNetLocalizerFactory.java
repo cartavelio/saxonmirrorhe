@@ -19,11 +19,11 @@ import java.util.Properties;
  */
 public class DotNetLocalizerFactory extends LocalizerFactory {
 
-    private Configuration config;
+    private final Configuration config;
 
     private HashMap<String, Class<? extends Numberer>> numbererClasses =
             new HashMap<String, Class<? extends Numberer>>(10);
-    private HashMap<String, Numberer> numbererInstances =
+    private final HashMap<String, Numberer> numbererInstances =
             new HashMap<String, Numberer>(10);
 
     public DotNetLocalizerFactory(Configuration config) {
@@ -88,8 +88,8 @@ public class DotNetLocalizerFactory extends LocalizerFactory {
             // We emulate some of the JDK7 features for handling private extension keys.
             // and pass the private keys separately from the Locale
             // We also have to deconstruct the language-country pairing.
-            String parts[] = language.split("-x-");
-            String langRegion[] = parts[0].split("-");
+            String[] parts = language.split("-x-");
+            String[] langRegion = parts[0].split("-");
             String privateKeys = null;
             if (parts.length == 2) {
                 privateKeys = parts[1];

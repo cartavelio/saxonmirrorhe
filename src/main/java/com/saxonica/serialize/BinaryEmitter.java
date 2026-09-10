@@ -1,6 +1,8 @@
 package com.saxonica.serialize;
 
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
@@ -56,7 +58,7 @@ public abstract class BinaryEmitter extends Emitter {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (outputStream == null) {
             if (streamResult == null) {
                 throw new IllegalStateException("BinaryEmitter must have a StreamResult to write to");
@@ -71,7 +73,7 @@ public abstract class BinaryEmitter extends Emitter {
                 throw new IllegalStateException("BinaryEmitter's StreamResult must have an OutputStream to write to");
             }
         }
-        byte[] bytes = textNodeToBinary(chars);
+        byte[] bytes = textNodeToBinary(chars.tidy());
         try {
             outputStream.write(bytes);
         } catch (IOException err) {
@@ -79,15 +81,15 @@ public abstract class BinaryEmitter extends Emitter {
         }
     }
 
-    protected abstract byte[] textNodeToBinary(CharSequence chars) throws XPathException;
+    protected abstract byte[] textNodeToBinary(UnicodeString chars) throws XPathException;
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String name, CodePoints data, Location locationId, int properties) throws XPathException {
 
     }
 
     @Override
-    public void comment(CharSequence content, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints content, Location locationId, int properties) throws XPathException {
 
     }
 

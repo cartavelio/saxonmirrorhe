@@ -2,11 +2,13 @@ package com.saxonica.ee.domino;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependAxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
@@ -22,8 +24,8 @@ import java.util.function.Predicate;
  */
 public class DominoAttr implements NodeInfo {
 
-    private DominoTree tree;
-    private DominoNode parent;
+    private final DominoTree tree;
+    private final DominoNode parent;
     private final Attr domAttr;
 
     public DominoAttr(DominoTree tree, DominoNode parent, Attr domAttr) {
@@ -401,7 +403,7 @@ public class DominoAttr implements NodeInfo {
      *               that uniquely identifies this node, across all documents.
      */
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         getParent().generateId(buffer);
         buffer.append("a");
         buffer.append(Integer.toString(tree.getNamePool().allocateFingerprint(getURI(), getLocalPart())));
@@ -450,42 +452,18 @@ public class DominoAttr implements NodeInfo {
      * node as defined in the XPath 2.0 data model, except that all nodes are treated as being
      * untyped: it is not an error to get the string value of a node with a complex type.
      * For atomic values, the method returns the result of casting the atomic value to a string.
-     * <p>If the calling code can handle any CharSequence, the method {@link #getStringValueCS} should
-     * be used. If the caller requires a string, this method is preferred.</p>
      *
      * @return the string value of the item
      * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
      *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
      *                                       needed)
-     * @see #getStringValueCS
      * @since 8.4
      */
     @Override
-    public String getStringValue() {
-        return domAttr.getValue();
+    public UnicodeString getUnicodeStringValue() {
+        return StringView.of(domAttr.getValue()).tidy();
     }
 
-    /**
-     * Get the string value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String. The method satisfies the rule that
-     * <code>X.getStringValueCS().toString()</code> returns a string that is equal to
-     * <code>X.getStringValue()</code>.
-     * <p>Note that two CharSequence values of different types should not be compared using equals(), and
-     * for the same reason they should not be used as a key in a hash table.</p>
-     * <p>If the calling code can handle any CharSequence, this method should
-     * be used. If the caller requires a string, the {@link #getStringValue} method is preferred.</p>
-     *
-     * @return the string value of the item
-     * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
-     *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
-     *                                       needed)
-     * @see #getStringValue
-     * @since 8.4
-     */
-    @Override
-    public CharSequence getStringValueCS() {
-        return domAttr.getValue();
-    }
 
     /**
      * Atomize the item.
@@ -496,7 +474,7 @@ public class DominoAttr implements NodeInfo {
      */
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getStringValue());
+        return new UntypedAtomicValue(getUnicodeStringValue());
     }
 
     /**

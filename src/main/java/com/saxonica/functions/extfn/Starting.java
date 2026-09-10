@@ -61,10 +61,10 @@ public abstract class Starting extends SystemFunction {
 
     private static class StartingIterator implements SequenceIterator {
 
-        private SequenceIterator baseIterator;
-        private Function start;
-        private boolean inclusive;
-        private XPathContext context;
+        private final SequenceIterator baseIterator;
+        private final Function start;
+        private final boolean inclusive;
+        private final XPathContext context;
         private boolean started;
 
         StartingIterator(SequenceIterator in, Function start, boolean inclusive, XPathContext context) {

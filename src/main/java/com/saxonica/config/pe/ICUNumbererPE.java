@@ -31,11 +31,11 @@ public class ICUNumbererPE extends AbstractNumberer {
     private String useCardinal;
     private String useOrdinal;
     private String useNumberOrdinal;
-    private Map<String, String> ordinalParamIndex = new ConcurrentHashMap<>();
-    private ArrayList<String> spelloutCardinalRulesets = new ArrayList<>();
-    private ArrayList<String> spelloutOrdinalRulesets = new ArrayList<>();
-    private ArrayList<String> spelloutNumberingRulesets = new ArrayList<>();
-    private ArrayList<String> numberOrdinalRulesets = new ArrayList<>();
+    private final Map<String, String> ordinalParamIndex = new ConcurrentHashMap<>();
+    private final ArrayList<String> spelloutCardinalRulesets = new ArrayList<>();
+    private final ArrayList<String> spelloutOrdinalRulesets = new ArrayList<>();
+    private final ArrayList<String> spelloutNumberingRulesets = new ArrayList<>();
+    private final ArrayList<String> numberOrdinalRulesets = new ArrayList<>();
     private Locale locale;
     private Locale defaultedLocale;
 
@@ -47,13 +47,13 @@ public class ICUNumbererPE extends AbstractNumberer {
         MONTH_SHORT = "MMM",
         MONTH_NARROW = "MMMMM";
 
-    private static String[] preferences = {"-verbose", "", "-native", "-neuter", "-feminine", "-masculine"};
+    private static final String[] preferences = {"-verbose", "", "-native", "-neuter", "-feminine", "-masculine"};
 
     private RuleBasedNumberFormat rbnf = null;
     private RuleBasedNumberFormat rbnfNumber = null;
-    private ThreadLocal<HashMap<String, SimpleDateFormat>> simpleDateFormats = new ThreadLocal<>();
+    private final ThreadLocal<HashMap<String, SimpleDateFormat>> simpleDateFormats = new ThreadLocal<>();
 
-    private static HashMap<String, String> schemeCodes = new HashMap<>();
+    private static final HashMap<String, String> schemeCodes = new HashMap<>();
 
     static {
         schemeCodes.put("do", "%digits-ordinal");

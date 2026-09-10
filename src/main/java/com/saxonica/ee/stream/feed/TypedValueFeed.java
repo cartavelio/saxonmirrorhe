@@ -7,13 +7,16 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * This class is used when a streamed template requests evaluation of the typed value
@@ -53,13 +56,13 @@ public class TypedValueFeed extends AbsorptionFeed {
     // handling of events coming directly from the source document.
 
     private int depth = 0;
-    private FastStringBuffer buffer;
+    private StringBuilder buffer;
 
 
     @Override
     public void startDocument(int properties) throws XPathException {
         if (depth == 0) {
-            buffer = new FastStringBuffer(256);
+            buffer = new StringBuilder(256);
         }
         depth++;
     }
@@ -68,14 +71,14 @@ public class TypedValueFeed extends AbsorptionFeed {
     public void endDocument() throws XPathException {
         depth--;
         if (depth == 0) {
-            append(new StringValue(buffer));
+            append(new StringItem(buffer));
         }
     }
 
     @Override
     public void startElement(NodeName elemName, SchemaType typeCode, Location location, int properties) throws XPathException {
         if (depth == 0) {
-            buffer = new FastStringBuffer(256);
+            buffer = new StringBuilder(256);
         }
         depth++;
     }
@@ -88,14 +91,14 @@ public class TypedValueFeed extends AbsorptionFeed {
     @Override
     public void namespace(String prefix, String namespaceUri, int properties) throws XPathException {
         if (depth == 0) {
-            characters(namespaceUri, Loc.NONE, properties);
+            characters(StringView.of(namespaceUri), Loc.NONE, properties);
         }
     }
 
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         if (depth == 0) {
-            characters(value, location, properties);
+            characters(StringView.of(value), location, properties);
         }
     }
 
@@ -108,30 +111,30 @@ public class TypedValueFeed extends AbsorptionFeed {
     public void endElement() throws XPathException {
         depth--;
         if (depth == 0) {
-            append(new StringValue(buffer));
+            append(new StringItem(buffer));
         }
     }
 
     @Override
-    public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
         if (depth == 0) {
-            append(new StringValue(chars));
+            append(new StringItem(chars.tidy()));
         } else {
-            buffer.cat(chars);
+            buffer.append(chars);
         }
     }
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
         if (depth == 0) {
             characters(data, location, properties);
         }
     }
 
     @Override
-    public void comment(CharSequence content, Location location, int properties) throws XPathException {
+    public void comment(CodePoints content, Location location, int properties) throws XPathException {
         if (depth == 0) {
-            characters(content, Loc.NONE, properties);;
+            characters(content, Loc.NONE, properties);
         }
     }
 
@@ -144,12 +147,12 @@ public class TypedValueFeed extends AbsorptionFeed {
      */
 
     private static class PendingTypedValue extends PendingItem {
-        public FastStringBuffer buffer;
+        public UnicodeBuilder buffer;
         public FleetingParentNode node;
 
         public PendingTypedValue(int sequence, FleetingParentNode node) {
             super(sequence);
-            buffer = new FastStringBuffer(100);
+            buffer = new UnicodeBuilder();
             this.node = node;
         }
 
@@ -160,13 +163,13 @@ public class TypedValueFeed extends AbsorptionFeed {
 
         @Override
         public Sequence deliver() throws XPathException {
-            node.setStringValue(buffer);
+            node.setStringValue(buffer.toUnicodeString());
             return node.atomize();
         }
 
         @Override
         public void rollback() {
-            buffer.setLength(0);
+            buffer.clear();
         }
     }
 }

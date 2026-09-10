@@ -49,7 +49,7 @@ public class SQLInsertFn extends SystemFunction {
                 statement.append(',');
                 valList.append(',');
             }
-            statement.append(kvp.key.getStringValue());
+            statement.append(kvp.key.getUnicodeStringValue());
             valList.append('?');
             AtomicSequence as = Atomizer.atomize(kvp.value);
             if (as.getLength() != 1) {
@@ -77,7 +77,7 @@ public class SQLInsertFn extends SystemFunction {
                 Object value;
                 switch (parameterClassName) {
                     case "java.lang.String":
-                        value = v.getStringValue();
+                        value = v.getUnicodeStringValue();
                         break;
                     case "java.sql.Date":
                         value = java.sql.Date.valueOf(v.getStringValue());

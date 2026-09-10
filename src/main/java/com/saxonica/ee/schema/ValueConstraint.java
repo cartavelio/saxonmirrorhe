@@ -2,17 +2,18 @@ package com.saxonica.ee.schema;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -31,13 +32,13 @@ public class ValueConstraint {
      * The variety of this constraint: default or fixed
      */
 
-    private Variety variety;
+    private final Variety variety;
 
     /**
      * The lexical form of the constraint (the default or fixed value as it appears in the source
      * schema document, after whitespace normalization if required)
      */
-    private String lexicalForm;
+    private UnicodeString lexicalForm;
 
     /**
      * The typed value of this constraint
@@ -51,13 +52,16 @@ public class ValueConstraint {
 
     /**
      * Constructor; supplies the lexical form of the value as a string. The typed value will initially
-     * be set to the lexical form as an instance of UntypedAtomic.
+     * be set to the lexical form as an instance of UntypedAtomic. The lexical form may be null, in which
+     * case {@link #setValue} must be called to supply the typed value
      */
 
-    public ValueConstraint(Variety variety, String lexicalForm) {
+    public ValueConstraint(Variety variety, UnicodeString lexicalForm) {
         this.variety = variety;
         this.lexicalForm = lexicalForm;
-        this.typedValue = new UntypedAtomicValue(lexicalForm);
+        if (lexicalForm != null) {
+            this.typedValue = new UntypedAtomicValue(lexicalForm);
+        }
     }
 
     /**
@@ -77,7 +81,7 @@ public class ValueConstraint {
      * written in the source schema.
      */
 
-    public String getLexicalForm() {
+    public UnicodeString getLexicalForm() {
         return lexicalForm;
     }
 
@@ -87,7 +91,7 @@ public class ValueConstraint {
      * @param value the lexical form of the value.
      */
 
-    void setLexicalForm(String value) {
+    void setLexicalForm(UnicodeString value) {
         lexicalForm = value;
     }
 
@@ -133,14 +137,14 @@ public class ValueConstraint {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Value Constraint");
+                    return StringItem.bmp("Value Constraint");
                 case "variety":
-                    return new StringValue(variety == FIXED ? "fixed" : "default");
+                    return StringItem.bmp(variety == FIXED ? "fixed" : "default");
                 case "value":
                     return getValue() == null ?
-                            new StringValue(getLexicalForm()) : getValue();
+                            new StringItem(getLexicalForm()) : getValue();
                 case "lexical form":
-                    return new StringValue(getLexicalForm());
+                    return new StringItem(getLexicalForm());
                 default:
                     return EmptySequence.getInstance();
             }
@@ -163,7 +167,7 @@ public class ValueConstraint {
 
     boolean makeTypedValue(SchemaCompiler compiler, SimpleType stype, NamespaceResolver resolver, Location loc) throws SchemaException {
         lexicalForm = Whitespace.applyWhitespaceNormalization(
-                stype.getWhitespaceAction(), lexicalForm).toString();
+                stype.getWhitespaceAction(), lexicalForm);
         ConversionRules rules = compiler.getConfiguration().getConversionRules();
         ValidationFailure err = stype.validateContent(lexicalForm, resolver, rules);
         if (err != null) {
@@ -177,7 +181,7 @@ public class ValueConstraint {
             if (stype.isNamespaceSensitive()) {
                 setValue(stype.getTypedValue(lexicalForm, resolver, rules));
             } else if (stype.isAtomicType()) {
-                setValue(Converter.convert(new StringValue(lexicalForm), (AtomicType) stype, rules));
+                setValue(Converter.convert(new StringItem(lexicalForm), (AtomicType) stype, rules));
             } else if (stype instanceof AnySimpleType) {
                 setValue(new UntypedAtomicValue(lexicalForm));
             } else if (getValue().getLength() == 1) { // MHK 2018-11-14 - I don't understand this
@@ -201,7 +205,7 @@ public class ValueConstraint {
      * @throws ValidationException if the value is not valid as an instance of the type
      */
 
-    public boolean testFixedValue(Configuration config, CharSequence value, SimpleType type, NamespaceResolver resolver)
+    public boolean testFixedValue(Configuration config, UnicodeString value, SimpleType type, NamespaceResolver resolver)
             throws ValidationException {
         if (variety != FIXED) {
             return true;
@@ -217,7 +221,7 @@ public class ValueConstraint {
 
     public void serialize(SchemaModelSerializer serializer) throws XPathException {
         serializer.startElement(variety == FIXED ? "fixed" : "default");
-        serializer.emitAttribute("lexicalForm", getLexicalForm());
+        serializer.emitAttribute("lexicalForm", getLexicalForm().toString());
         serializer.emitTypedValue(getValue());
         serializer.endElement();
     }

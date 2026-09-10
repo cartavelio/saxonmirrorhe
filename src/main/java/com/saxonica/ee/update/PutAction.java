@@ -16,8 +16,8 @@ import java.util.Set;
  */
 public class PutAction extends PendingUpdateAction {
 
-    private NodeInfo node;
-    private String outputUri;
+    private final NodeInfo node;
+    private final String outputUri;
 
 
     public PutAction(NodeInfo node, String outputUri) {

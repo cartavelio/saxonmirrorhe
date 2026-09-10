@@ -19,7 +19,7 @@ import java.util.Set;
  */
 public class SaxonXQMetaData implements XQMetaData {
 
-    private SaxonXQConnection connection;
+    private final SaxonXQConnection connection;
 
     /**
      * Create the metadata for a given Saxon configuration

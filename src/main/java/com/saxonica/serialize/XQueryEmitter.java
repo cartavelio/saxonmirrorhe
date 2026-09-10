@@ -1,8 +1,9 @@
 package com.saxonica.serialize;
 
 import net.sf.saxon.serialize.XMLEmitter;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 
 import java.io.IOException;
 
@@ -19,45 +20,45 @@ public class XQueryEmitter extends XMLEmitter {
      * Write contents of array to current writer, after escaping special characters.
      * This method converts the XML special characters (such as &lt; and &amp;) into their
      * predefined entities.
-     *
      * @param chars       The character sequence containing the string
      * @param inAttribute Set to true if the text is in an attribute value
      */
 
     @Override
-    protected void writeEscape(final CharSequence chars, final boolean inAttribute) throws IOException, XPathException {
+    protected void writeEscape(UnicodeString chars, final boolean inAttribute) throws IOException, XPathException {
         boolean inBraces = false;
-        FastStringBuffer buff = new FastStringBuffer(chars.length());
+        chars = chars.tidy();
+        UnicodeBuilder buff = new UnicodeBuilder();
         for (int i = 0; i < chars.length(); i++) {
-            char c = chars.charAt(i);
-            if (!inBraces && c == '{' && chars.charAt(i + 1) != '{') {
+            int c = chars.codePointAt(i);
+            if (!inBraces && c == '{' && chars.codePointAt(i + 1) != '{') {
                 inBraces = true;
-                buff.cat((char) 0);   // switch disable-output-escaping on
+                buff.append((char) 0);   // switch disable-output-escaping on
             } else if (inBraces && c == '}') {
                 inBraces = false;
-                buff.cat((char) 0);   // switch disable-output-escaping off
+                buff.append((char) 0);   // switch disable-output-escaping off
             } else if (inBraces && c == '"') {
-                buff.cat((char) 0);
+                buff.append((char) 0);
                 i++;
                 do {
-                    buff.cat(c);
-                    c = chars.charAt(i++);
+                    buff.append(c);
+                    c = chars.codePointAt(i++);
                 } while (c != '"');
-                buff.cat((char) 0);
+                buff.append((char) 0);
                 i--;
             } else if (inBraces && c == '\'') {
-                buff.cat((char) 0);
+                buff.append((char) 0);
                 i++;
                 do {
-                    buff.cat(c);
-                    c = chars.charAt(i++);
+                    buff.append(c);
+                    c = chars.codePointAt(i++);
                 } while (c != '\'');
-                buff.cat((char) 0);
+                buff.append((char) 0);
                 i--;
             }
-            buff.cat(c);
+            buff.append(c);
         }
-        super.writeEscape(buff, inAttribute);
+        super.writeEscape(buff.toUnicodeString(), inAttribute);
     }
 }
 

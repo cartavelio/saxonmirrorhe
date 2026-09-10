@@ -66,6 +66,6 @@ public interface XQResultSequence extends XQSequence {
      * @return the connection associated with this result sequence
      * @throws XQException if the result sequence is in a closed state
      */
-    public XQConnection getConnection() throws XQException;
+    XQConnection getConnection() throws XQException;
 
 }

@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class StaticQueryContextEE extends StaticQueryContextPE {
 
-    private Map<String, QueryLibrary> compiledLibraries =
+    private final Map<String, QueryLibrary> compiledLibraries =
             Collections.synchronizedMap(new HashMap<String, QueryLibrary>());
     private boolean schemaAware;
     private boolean streaming;

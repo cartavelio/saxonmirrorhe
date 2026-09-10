@@ -10,7 +10,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.objectweb.asm.Type;
 
 import java.lang.reflect.*;
@@ -68,7 +68,7 @@ public class JavaExtensionFunctionCallCompiler extends ToIteratorCompiler {
                 ga.invokeStaticMethod(Int64Value.class, "makeIntegerValue", Long.TYPE);
             } else if (jefc.getReturnClass() == Character.TYPE) {
                 ga.invokeStaticMethod(Character.class, "toString", Character.TYPE);
-                ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+                ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
             } else if (jefc.getReturnClass() == Float.TYPE) {
                 ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
             } else if (jefc.getReturnClass() == Double.TYPE) {
@@ -261,7 +261,7 @@ public class JavaExtensionFunctionCallCompiler extends ToIteratorCompiler {
                 if (jfc.getArg(i) instanceof Literal) {
                     try {
                         // try to do the conversion now, without supplying any context; but recover if this fails
-                        Object obj = converter.convert(((Literal) jfc.getArg(i)).getValue(), requiredClass, null);
+                        Object obj = converter.convert(((Literal) jfc.getArg(i)).getGroundedValue(), requiredClass, null);
                         allocateStatic(compiler, obj);
                         done = true;
                     } catch (Exception err) {

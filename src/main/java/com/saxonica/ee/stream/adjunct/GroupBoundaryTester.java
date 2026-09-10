@@ -27,7 +27,7 @@ public abstract class GroupBoundaryTester {
     // localContext contains the iterator over the nodes selected by the for-each-group instruction,
     // and is the context in which the inner inverted expression is evaluated
 
-    private XPathContext localContext;
+    private final XPathContext localContext;
     private ForEachGroup controllingExpression;
 
     public GroupBoundaryTester(ForEachGroup expression, XPathContext context) {

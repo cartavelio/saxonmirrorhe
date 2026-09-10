@@ -54,8 +54,8 @@ import java.util.Properties;
  */
 public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAccessor {
 
-    /*@Nullable*/ private Item item;
-    private Configuration config;
+    /*@Nullable*/ private final Item item;
+    private final Configuration config;
     SaxonXQDataFactory dataFactory;
 
     public SaxonXQItem(/*@Nullable*/ Item item, /*@NotNull*/ SaxonXQDataFactory factory) {
@@ -189,12 +189,8 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
         } else if (item instanceof AtomicValue) {
             Orphan orphan = new Orphan(config);
             orphan.setNodeKind(Type.TEXT);
-            orphan.setStringValue(item.getStringValue());
+            orphan.setStringValue(item.getUnicodeStringValue());
             return new PullToStax(nodeAsDocument(orphan));
-//            EventIterator contentIterator = new SingletonEventIterator(item);
-//            EventIterator eventIterator = new BracketedDocumentIterator(contentIterator);
-//            eventIterator = new Decomposer(eventIterator, pipe);
-//            return new EventToStaxBridge(eventIterator, pipe);
         } else {
             throw new XQException("Cannot deliver functions, maps, or arrays in the form of an XMLStreamReader");
         }

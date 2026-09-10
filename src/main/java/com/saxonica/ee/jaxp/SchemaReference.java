@@ -21,7 +21,7 @@ import javax.xml.validation.ValidatorHandler;
  */
 public class SchemaReference extends Schema {
 
-    private PreparedSchema schema;
+    private final PreparedSchema schema;
 
     /**
      * Create a SchemaReference to wrap a supplied PreparedSchema object

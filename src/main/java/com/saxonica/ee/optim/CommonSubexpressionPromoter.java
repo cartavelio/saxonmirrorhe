@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class CommonSubexpressionPromoter {
 
-    private OptimizerEE optimizer;
+    private final OptimizerEE optimizer;
 
     public CommonSubexpressionPromoter(OptimizerEE opt) {
         this.optimizer = opt;

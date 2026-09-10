@@ -25,13 +25,13 @@ import java.util.concurrent.*;
 
 public final class MultithreadedContextMappingIterator implements SequenceIterator {
 
-    private FocusIterator base;
-    private Expression action;
-    private XPathContextMinor context;
+    private final FocusIterator base;
+    private final Expression action;
+    private final XPathContextMinor context;
     private SequenceIterator stepIterator = null;
-    private LastPositionFinder lastPositionFinder;
-    private ExecutorService service;
-    private BlockingQueue<Future<Sequence>> resultQueue = new LinkedBlockingQueue<>();
+    private final LastPositionFinder lastPositionFinder;
+    private final ExecutorService service;
+    private final BlockingQueue<Future<Sequence>> resultQueue = new LinkedBlockingQueue<>();
 
     /**
      * Construct an Iterator that will apply a specified action expression to

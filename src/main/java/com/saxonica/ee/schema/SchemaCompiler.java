@@ -36,26 +36,27 @@ import java.util.*;
 
 public class SchemaCompiler {
 
-    private EnterpriseConfiguration config;
+    private final EnterpriseConfiguration config;
     // During a schema validation episode, the SchemaCompiler knows which schema it is validating
     private PreparedSchema preparedSchema;
     private int[] occurrenceLimits;
-    private SchemaURIResolver schemaURIResolver;
+    private final SchemaURIResolver schemaURIResolver;
     private ErrorReporter errorReporter;
     private HashMap<IdentityConstraintReference, SchemaType> identityConstraintsAwaitingTypeChecking = null;
     private int errorCount = 0;
     private int xsdlVersion = Configuration.XSD10;
-    private boolean allowDanglingReferences;
+    private final boolean allowDanglingReferences;
 
 
-    private HashMap<String, XSDSchema> documentsAlreadyRead = new HashMap<>(10);
-    private HashSet<String> documentsBeingRead = new HashSet<>(10);
+    private final HashMap<String, XSDSchema> documentsAlreadyRead = new HashMap<>(10);
+    private final HashSet<String> documentsBeingRead = new HashSet<>(10);
     private PipelineConfiguration pipelineConfiguration;
     private SchemaDocumentTransformer chameleonTransformer = null;
     private SchemaDocumentTransformer overrideTransformer = null;
-    private Set<String> componentsReportedMissing = new HashSet<>();
+    private final Set<String> componentsReportedMissing = new HashSet<>();
     private Set<UserComplexType> scheduledForAutomaton = new HashSet<>();
     private Set<UserComplexType[]> scheduledForAutomatonCheck = new HashSet<>();
+
 
     /**
      * Create a SchemaCompiler
@@ -614,9 +615,9 @@ public class SchemaCompiler {
             chameleonTransformer = new SchemaDocumentTransformer(config, "chameleon.xsl");
         }
         HashMap<StructuredQName, Sequence> params = new HashMap<StructuredQName, Sequence>();
-        params.put(new StructuredQName("", "", "newTargetNamespace"), new AnyURIValue(referrer.getXSDSchema().getTargetNamespace()));
+        params.put(new StructuredQName("", "", "newTargetNamespace"), new AnyURIValue((referrer.getXSDSchema().getTargetNamespace())));
         GlobalParameterSet parameterSet = new GlobalParameterSet();
-        parameterSet.put(new StructuredQName("", "", "newTargetNamespace"), new AnyURIValue(referrer.getXSDSchema().getTargetNamespace()));
+        parameterSet.put(new StructuredQName("", "", "newTargetNamespace"), new AnyURIValue((referrer.getXSDSchema().getTargetNamespace())));
         TreeInfo doc = chameleonTransformer.transform(this, pipelineConfiguration, referrer, input, parameterSet);
         return new SchemaDocument(doc);
     }

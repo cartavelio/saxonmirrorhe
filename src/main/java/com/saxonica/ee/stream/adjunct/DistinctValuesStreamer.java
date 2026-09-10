@@ -39,7 +39,7 @@ public class DistinctValuesStreamer
 
         private StringCollator collator;
         private HashSet<AtomicMatchKey> lookup;
-        private int implicitTimezone;
+        private final int implicitTimezone;
 
         DistinctValuesFeed(Expression expr, ItemFeed result, XPathContext context) {
             super(expr, result, context);

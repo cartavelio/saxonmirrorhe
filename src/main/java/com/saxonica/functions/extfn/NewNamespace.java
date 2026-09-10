@@ -2,10 +2,8 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -32,11 +30,11 @@ public class NewNamespace extends SystemFunction {
         Orphan orphan = new Orphan(context.getConfiguration());
         orphan.setNodeKind(Type.NAMESPACE);
         String name = arguments[0].head().getStringValue();
-        if (!NameChecker.isValidNCName(name)) {
+        if (!NameChecker.isValidNCName(StringTool.codePoints(name))) {
             throw new XPathException("Name of namespace node must be a valid NCName: " + name, "FORG0001");
         }
-        orphan.setNodeName(new FingerprintedQName("","",name));
-        orphan.setStringValue(arguments[1].head().getStringValueCS());
+        orphan.setNodeName(new FingerprintedQName("", "", name));
+        orphan.setStringValue(arguments[1].head().getUnicodeStringValue());
         return orphan;
     }
 

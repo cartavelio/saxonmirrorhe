@@ -53,6 +53,7 @@ import java.util.List;
  * This class implements the saxon:compile-XPath() extension function,
  * which is specially-recognized by the system because it needs access
  * to parts of the static context.
+ * <p>
  * <p>The compile-XPath() extension function compiles an XPath expression to a SEF
  * representation. It was originally defined for Saxon-JS to allow free-standing compilation
  * and execution of dynamic XPath expressions in the browser; this is a back-port to
@@ -90,7 +91,7 @@ public class CompileXPath extends SystemFunction {
         MapItem options = (MapItem) arguments[1].head();
         MapItem locals = (MapItem) arguments[2].head();
 
-        StringValue type = (StringValue) options.get(new StringValue("type"));
+        StringItem type = (StringItem) options.get(StringItem.bmp("type"));
         final String exprText = content.getStringValue();
 
         IndependentContext env = new IndependentContext(configuration) {
@@ -101,24 +102,24 @@ public class CompileXPath extends SystemFunction {
             }
         };
 
-        BooleanValue backwards = (BooleanValue) options.get(new StringValue("backwardCompatibility"));
+        BooleanValue backwards = (BooleanValue) options.get(StringItem.bmp("backwardCompatibility"));
         env.setBackwardsCompatibilityMode(backwards != null && backwards.getBooleanValue());
 
         boolean inCatch;
 
-        BooleanValue inCatchVal = (BooleanValue) options.get(new StringValue("inCatch"));
+        BooleanValue inCatchVal = (BooleanValue) options.get(StringItem.bmp("inCatch"));
         inCatch = inCatchVal != null && inCatchVal.getBooleanValue();
 
-        StringValue contextType = (StringValue) options.get(new StringValue("context-type"));
+        StringItem contextType = (StringItem) options.get(StringItem.bmp("context-type"));
         ItemType contextItemType = AnyItemType.getInstance();
 
-        MapItem namespaces = (MapItem) options.get(new StringValue("namespaces"));
+        MapItem namespaces = (MapItem) options.get(StringItem.bmp("namespaces"));
         if (namespaces != null) {
             AtomicIterator<?> keys = namespaces.keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 String prefix = key.getStringValue();
-                String uri = namespaces.get(key).getStringValue();
+                String uri = namespaces.get(key).getUnicodeStringValue().toString();
                 if (uri.equals("~")) {
                     uri = NamespaceConstant.getUriForConventionalPrefix(prefix);
                 }
@@ -137,7 +138,7 @@ public class CompileXPath extends SystemFunction {
                 env.declareNamespace(prefix, uri);
             }
         }
-        MapItem globals = (MapItem) options.get(new StringValue("globals"));
+        MapItem globals = (MapItem) options.get(StringItem.bmp("globals"));
         ArrayList<String> knownGlobals = new ArrayList<>();
         if (globals != null) {
             AtomicIterator<?> keys = globals.keys();
@@ -159,7 +160,7 @@ public class CompileXPath extends SystemFunction {
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 SequenceExtent s = (SequenceExtent) locals.get(key);
-                String st = ((StringValue)s.itemAt(2)).getStringValue();
+                String st = ((StringItem)s.itemAt(2)).getStringValue();
                 int slot = (int) ((Int64Value)s.itemAt(1)).longValue();
                 if (slot > maxSlot){
                     maxSlot = slot;
@@ -172,7 +173,7 @@ public class CompileXPath extends SystemFunction {
 
         FunctionLibraryList libraryList = new FunctionLibraryList();
         ExecutableFunctionLibrary userFunctionLibrary = new ExecutableFunctionLibrary(context.getController().getConfiguration()) {
-            HashMap<SymbolicName.F, UserFunction> lib = new HashMap<>();
+            final HashMap<SymbolicName.F, UserFunction> lib = new HashMap<>();
 
             @Override
             public boolean isAvailable(SymbolicName.F functionName) {
@@ -226,7 +227,7 @@ public class CompileXPath extends SystemFunction {
             }
         }
 
-        MapItem globalFunctions = (MapItem) options.get(new StringValue("globalFunctions"));
+        MapItem globalFunctions = (MapItem) options.get(StringItem.bmp("globalFunctions"));
 
         XPathParser parser = configuration.newExpressionParser("XP", false, 31);// Used for parsing sequence type
         /* This is a hack at present - really we should use parts of the retained static context,
@@ -291,7 +292,7 @@ public class CompileXPath extends SystemFunction {
         // TODO - make sure function not found is detected.
         Expression expr;
         try {
-            if (type != null && "pattern".equals(type.getStringValue())) {
+            if (type != null && "pattern".equals(type.getUnicodeStringValue())) {
                 expr = Pattern.make(exprText, env, null);
             } else {
                 expr = make(exprText, env, 0, Token.EOF, null, inCatch);
@@ -314,10 +315,10 @@ public class CompileXPath extends SystemFunction {
         out.setDefaultNamespace(exportURI);
         expr.export(out);
         NodeInfo node = b.getCurrentRoot().iterateAxis(AxisInfo.CHILD).next();
-        StringValue st = new StringValue(expr.getStaticType().toAlphaCode());
+        StringItem st = new StringItem(expr.getStaticType().toAlphaCode());
         HashTrieMap result = new HashTrieMap();
-        result.initialPut(new StringValue("expr"), node);
-        result.initialPut(new StringValue("type"), st);
+        result.initialPut(StringItem.bmp("expr"), node);
+        result.initialPut(StringItem.bmp("type"), st);
 
         return result;
     }
@@ -333,10 +334,11 @@ public class CompileXPath extends SystemFunction {
     /**
      * Upgraded from ExpressionTool.make() to permit 'in-catch' conversion of error variables
      * to calls on saxon:dynamic-error-info()
-     * <p>Parse an XPath expression. This performs the basic analysis of the expression against the
+     * <p>
+     * Parse an XPath expression. This performs the basic analysis of the expression against the
      * grammar, it binds variable references and function calls to variable definitions and
      * function definitions, and it performs context-independent expression rewriting for
-     * optimization purposes.</p>
+     * optimization purposes.
      *
      * @param expression   The expression (as a character string)
      * @param env          An object giving information about the compile-time

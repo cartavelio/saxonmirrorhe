@@ -7,6 +7,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.util.Orphan;
@@ -17,9 +19,9 @@ import net.sf.saxon.type.Type;
 /**
  * An GroundedItemFeed is an ItemFeed in which decomposed document and element nodes
  * (that is, start|end Document|Element events) are not accepted, and parentless leaf nodes supplied
- * using methods such as {@link #characters} or {@link #attribute(NodeName, SimpleType, CharSequence, Location, int)}
+ * using methods such as {@link #characters} or {@link Outputter#attribute(NodeName, SimpleType, String, Location, int)}
  * are converted into calls on {@link #append(Item)} supplying an {@link net.sf.saxon.tree.util.Orphan}
- * item.
+ * item.</p>
  */
 
 public abstract class GroundedItemFeed extends ItemFeed {
@@ -100,7 +102,7 @@ public abstract class GroundedItemFeed extends ItemFeed {
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.NAMESPACE);
             orphan.setNodeName(new NoNamespaceName(prefix));
-            orphan.setStringValue(namespaceUri);
+            orphan.setStringValue(StringView.tidy(namespaceUri));
             append(orphan);
         } else {
             buildingOutputter.namespace(prefix, namespaceUri, properties);
@@ -108,13 +110,13 @@ public abstract class GroundedItemFeed extends ItemFeed {
     }
 
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         if (buildingOutputter == null) {
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.ATTRIBUTE);
             orphan.setTypeAnnotation(typeCode);
             orphan.setNodeName(attName);
-            orphan.setStringValue(value);
+            orphan.setStringValue(StringView.tidy(value));
             append(orphan);
         } else {
             buildingOutputter.attribute(attName, typeCode, value, location, properties);
@@ -145,11 +147,11 @@ public abstract class GroundedItemFeed extends ItemFeed {
     }
 
     @Override
-    public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location location, int properties) throws XPathException {
         if (buildingOutputter == null) {
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.TEXT);
-            orphan.setStringValue(chars);
+            orphan.setStringValue(chars.tidy());
             append(orphan);
         } else {
             buildingOutputter.characters(chars, location, properties);
@@ -157,12 +159,12 @@ public abstract class GroundedItemFeed extends ItemFeed {
     }
 
     @Override
-    public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+    public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
         if (buildingOutputter == null) {
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.PROCESSING_INSTRUCTION);
             orphan.setNodeName(new NoNamespaceName(name));
-            orphan.setStringValue(data);
+            orphan.setStringValue(data.tidy());
             append(orphan);
         } else {
             buildingOutputter.processingInstruction(name, data, location, properties);
@@ -170,11 +172,11 @@ public abstract class GroundedItemFeed extends ItemFeed {
     }
 
     @Override
-    public void comment(CharSequence content, Location location, int properties) throws XPathException {
+    public void comment(CodePoints content, Location location, int properties) throws XPathException {
         if (buildingOutputter == null) {
             Orphan orphan = new Orphan(getConfiguration());
             orphan.setNodeKind(Type.COMMENT);
-            orphan.setStringValue(content);
+            orphan.setStringValue(content.tidy());
             append(orphan);
         } else {
             buildingOutputter.comment(content, location, properties);

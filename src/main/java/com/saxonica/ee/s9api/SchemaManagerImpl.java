@@ -17,7 +17,7 @@ import javax.xml.transform.Source;
  */
 public class SchemaManagerImpl extends SchemaManager {
 
-    private Processor processor;
+    private final Processor processor;
     private ErrorReporter errorReporter;
 
     public SchemaManagerImpl(Processor processor) {

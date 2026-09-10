@@ -96,7 +96,7 @@ public class MultithreadedForEach extends ForEach {
         if (threadsOp == null) {
             return 1;
         } else {
-            CharSequence threadsValue = getThreads().evaluateAsString(context);
+            String threadsValue = getThreads().evaluateAsString(context).toString();
             int threads = 0;
             try {
                 threads = Integer.parseInt(threadsValue.toString());

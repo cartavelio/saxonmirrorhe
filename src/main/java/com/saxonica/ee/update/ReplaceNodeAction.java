@@ -11,8 +11,8 @@ import java.util.Set;
  */
 public class ReplaceNodeAction extends PendingUpdateAction {
 
-    private NodeInfo[] content;
-    private MutableNodeInfo targetNode;
+    private final NodeInfo[] content;
+    private final MutableNodeInfo targetNode;
 
     /**
      * Create a ReplaceNodeAction

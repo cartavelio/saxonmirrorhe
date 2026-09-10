@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
  */
 public class LSSchemaResolver implements SchemaURIResolver {
 
-    private LSResourceResolver resourceResolver;
+    private final LSResourceResolver resourceResolver;
     private Configuration config;
 
     public LSSchemaResolver(LSResourceResolver resolver, Configuration config) {

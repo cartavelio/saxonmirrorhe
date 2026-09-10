@@ -4,6 +4,8 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
@@ -30,15 +32,15 @@ public class ExplicitTimezoneFacet extends Facet {
     }
 
     @Override
-    public String getValue() {
+    public UnicodeString getValue() {
         switch (facetValue) {
             case REQUIRED:
-                return "required";
+                return BMPString.of("required");
             case OPTIONAL:
-                return "optional";
+                return BMPString.of("optional");
             case PROHIBITED:
             default:
-                return "prohibited";
+                return BMPString.of("prohibited");
         }
     }
 
@@ -123,11 +125,11 @@ public class ExplicitTimezoneFacet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue(getName());
+                    return new StringItem(getName());
                 case "implementation":
                     return new ObjectValue<>(ExplicitTimezoneFacet.this);
                 case "value":
-                    return new StringValue(getValue());
+                    return new StringItem(getValue());
                 case "fixed":
                     return BooleanValue.get(isFixed());
                 default:

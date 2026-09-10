@@ -6,16 +6,17 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.*;
 import net.sf.saxon.tree.tiny.AncestorIterator;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
@@ -31,8 +32,8 @@ import java.util.function.Predicate;
  */
 public class DominoNode implements NodeInfo, VirtualNode {
 
-    private DominoTree tree;
-    private int nodeNr;
+    private final DominoTree tree;
+    private final int nodeNr;
     private DominoNode parent;
 
     public DominoNode(DominoTree tree, int nodeNr) {
@@ -184,10 +185,10 @@ public class DominoNode implements NodeInfo, VirtualNode {
      *               that uniquely identifies this node, across all documents.
      */
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         buffer.append("d");
         buffer.append(Long.toString(tree.getDocumentNumber()));
-        buffer.cat(TinyNodeImpl.NODE_LETTER[getNodeKind()]);
+        buffer.append(TinyNodeImpl.NODE_LETTER[getNodeKind()]);
         buffer.append(Integer.toString(nodeNr));
     }
 
@@ -713,9 +714,9 @@ public class DominoNode implements NodeInfo, VirtualNode {
         switch (getNodeKind()) {
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return new StringValue(getStringValueCS());
+                return new StringItem(getUnicodeStringValue());
             default:
-                return new UntypedAtomicValue(getStringValueCS());
+                return new UntypedAtomicValue(getUnicodeStringValue());
         }
     }
 
@@ -728,41 +729,41 @@ public class DominoNode implements NodeInfo, VirtualNode {
      * <p>Note that two CharSequence values of different types should not be compared using equals(), and
      * for the same reason they should not be used as a key in a hash table.</p>
      * <p>If the calling code can handle any CharSequence, this method should
-     * be used. If the caller requires a string, the {@link #getStringValue} method is preferred.</p>
+     * be used. If the caller requires a string, the {@link #getUnicodeStringValue} method is preferred.</p>
      *
      * @return the string value of the item
      * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
      *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
      *                                       needed)
-     * @see #getStringValueCS
      * @since 8.4
      */
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
                 if (hasChildNodes()) {
                     NodeList children1 = getDomNode().getChildNodes();
-                    FastStringBuffer sb1 = new FastStringBuffer(16);
+                    UnicodeBuilder sb1 = new UnicodeBuilder();
                     DOMNodeWrapper.expandStringValue(children1, sb1);
-                    return sb1;
+                    return sb1.toUnicodeString();
                 } else {
-                    return "";
+                    return EmptyUniString.getInstance();
                 }
 
             case Type.ATTRIBUTE:
                 return emptyIfNull(((Attr) getDomNode()).getValue());
 
             case Type.TEXT:
-                String value = emptyIfNull(getDomNode().getNodeValue());
+                UnicodeString value = emptyIfNull(getDomNode().getNodeValue());
                 if ((tree.nameCode[nodeNr] & DominoTree.HAS_CONTINUATION) != 0) {
-                    FastStringBuffer buffer = new FastStringBuffer(value);
+                    UnicodeBuilder buffer = new UnicodeBuilder();
+                    buffer.append(value);
                     Node textNode = getDomNode();
                     while ((textNode = textNode.getNextSibling()) != null) {
                         buffer.append(emptyIfNull(textNode.getNodeValue()));
                     }
-                    return buffer;
+                    return buffer.toUnicodeString();
                 } else {
                     return value;
                 }
@@ -772,32 +773,12 @@ public class DominoNode implements NodeInfo, VirtualNode {
                 return emptyIfNull(getDomNode().getNodeValue());
 
             default:
-                return "";
+                return EmptyUniString.getInstance();
         }
     }
 
-    private static String emptyIfNull(String s) {
-        return s == null ? "" : s;
-    }
-
-    /**
-     * Get the value of the item as a string. For nodes, this is the string value of the
-     * node as defined in the XPath 2.0 data model, except that all nodes are treated as being
-     * untyped: it is not an error to get the string value of a node with a complex type.
-     * For atomic values, the method returns the result of casting the atomic value to a string.
-     * <p>If the calling code can handle any CharSequence, the method {@link #getStringValueCS} should
-     * be used. If the caller requires a string, this method is preferred.</p>
-     *
-     * @return the string value of the item
-     * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
-     *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
-     *                                       needed)
-     * @see #getStringValue
-     * @since 8.4
-     */
-    @Override
-    public String getStringValue() {
-        return getStringValueCS().toString();
+    private static UnicodeString emptyIfNull(String s) {
+        return s == null ? EmptyUniString.getInstance() : StringView.of(s).tidy();
     }
 
     /**

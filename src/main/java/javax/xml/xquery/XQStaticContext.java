@@ -72,7 +72,7 @@ public interface XQStaticContext {
      * @return <code>String</code> array containing the namespace prefixes.
      *         Cannot be <code>null</code>
      */
-    public String[] getNamespacePrefixes();
+    String[] getNamespacePrefixes();
 
     /**
      * Retrieves the namespace URI associated with a prefix. An <code>XQException</code>
@@ -85,7 +85,7 @@ public interface XQStaticContext {
      * @throws XQException if a <code>null</code> prefix is specified or if the prefix
      *                     is unknown
      */
-    public String getNamespaceURI(String prefix) throws XQException;
+    String getNamespaceURI(String prefix) throws XQException;
 
     /**
      * Declares a namespace prefix and associates it with a namespace URI. If the namespace URI is
@@ -97,7 +97,7 @@ public interface XQStaticContext {
      * @throws XQException if (1) a <code>null</code> prefix, or (2) a <code>null</code> namespace
      *                     URI is specified
      */
-    public void declareNamespace(String prefix, String uri) throws XQException;
+    void declareNamespace(String prefix, String uri) throws XQException;
 
     /**
      * Gets the URI of the default element/type namespace, the empty string
@@ -106,7 +106,7 @@ public interface XQStaticContext {
      * @return the URI of the default element/type namespace,
      *         if set, else the empty string. Cannot be <code>null</code>
      */
-    public String getDefaultElementTypeNamespace();
+    String getDefaultElementTypeNamespace();
 
     /**
      * Sets the URI of the default element/type namespace, the empty string
@@ -117,7 +117,7 @@ public interface XQStaticContext {
      *            Cannot be <code>null</code>.
      * @throws XQException if a <code>null</code> uri is specified
      */
-    public void setDefaultElementTypeNamespace(String uri) throws XQException;
+    void setDefaultElementTypeNamespace(String uri) throws XQException;
 
     /**
      * Gets the URI of the default function namespace, the empty string
@@ -126,7 +126,7 @@ public interface XQStaticContext {
      * @return the URI of the default function namespace,
      *         if set, else the empty string. Cannot be <code>null</code>
      */
-    public String getDefaultFunctionNamespace();
+    String getDefaultFunctionNamespace();
 
     /**
      * Sets the URI of the default function namespace, the empty string
@@ -137,7 +137,7 @@ public interface XQStaticContext {
      *            Cannot be <code>null</code>.
      * @throws XQException if a <code>null</code> URI is specified
      */
-    public void setDefaultFunctionNamespace(String uri) throws XQException;
+    void setDefaultFunctionNamespace(String uri) throws XQException;
 
     /**
      * Gets the static type of the context item. <code>null</code> if unspecified.
@@ -145,7 +145,7 @@ public interface XQStaticContext {
      * @return the static type of the context item,
      *         if set, else <code>null</code>
      */
-    public XQItemType getContextItemStaticType();
+    XQItemType getContextItemStaticType();
 
     /**
      * Sets the static type of the context item, specify <code>null</code>
@@ -156,7 +156,7 @@ public interface XQStaticContext {
      * @throws XQException if the <code>contextItemType</code> is not
      *                     a valid <code>XQItemType</code>
      */
-    public void setContextItemStaticType(XQItemType contextItemType)
+    void setContextItemStaticType(XQItemType contextItemType)
             throws XQException;
 
     /**
@@ -165,7 +165,7 @@ public interface XQStaticContext {
      * @return the URI of the default collation.
      *         Cannot be <code>null</code>.
      */
-    public String getDefaultCollation();
+    String getDefaultCollation();
 
     /**
      * Sets the URI of the default collation.
@@ -174,7 +174,7 @@ public interface XQStaticContext {
      *            Cannot be <code>null</code>.
      * @throws XQException if a <code>null</code> URI is specified
      */
-    public void setDefaultCollation(String uri) throws XQException;
+    void setDefaultCollation(String uri) throws XQException;
 
     /**
      * Gets the construction mode defined in the static context.
@@ -183,7 +183,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.CONSTRUCTION_MODE_PRESERVE</code>,
      *         <code>XQConstants.CONSTRUCTION_MODE_STRIP</code>
      */
-    public int getConstructionMode();
+    int getConstructionMode();
 
     /**
      * Sets the construction mode in the static context.
@@ -195,7 +195,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.CONSTRUCTION_MODE_PRESERVE</code>,
      *                     <code>XQConstants.CONSTRUCTION_MODE_STRIP</code>
      */
-    public void setConstructionMode(int mode) throws XQException;
+    void setConstructionMode(int mode) throws XQException;
 
     /**
      * Gets the ordering mode defined in the static context.
@@ -204,7 +204,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.ORDERING_MODE_ORDERED</code>,
      *         <code>XQConstants.ORDERING_MODE_UNORDERED</code>.
      */
-    public int getOrderingMode();
+    int getOrderingMode();
 
     /**
      * Sets the ordering mode in the static context.
@@ -216,7 +216,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.ORDERING_MODE_ORDERED</code>,
      *                     <code>XQConstants.ORDERING_MODE_UNORDERED</code>
      */
-    public void setOrderingMode(int mode) throws XQException;
+    void setOrderingMode(int mode) throws XQException;
 
     /**
      * Gets the default order for empty sequences defined in the static context.
@@ -225,7 +225,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.DEFAULT_ORDER_FOR_EMPTY_SEQUENCES_GREATEST</code>,
      *         <code>XQConstants.DEFAULT_ORDER_FOR_EMPTY_SEQUENCES_LEAST</code>.
      */
-    public int getDefaultOrderForEmptySequences();
+    int getDefaultOrderForEmptySequences();
 
     /**
      * Sets the default order for empty sequences in the static context.
@@ -237,7 +237,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.DEFAULT_ORDER_FOR_EMPTY_SEQUENCES_GREATEST</code>,
      *                     <code>XQConstants.DEFAULT_ORDER_FOR_EMPTY_SEQUENCES_LEAST</code>
      */
-    public void setDefaultOrderForEmptySequences(int order) throws XQException;
+    void setDefaultOrderForEmptySequences(int order) throws XQException;
 
     /**
      * Gets the boundary-space policy defined in the static context.
@@ -246,7 +246,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.BOUNDARY_SPACE_PRESERVE</code>,
      *         <code>XQConstants.BOUNDARY_SPACE_STRIP</code>.
      */
-    public int getBoundarySpacePolicy();
+    int getBoundarySpacePolicy();
 
     /**
      * Sets the boundary-space policy in the static context.
@@ -258,7 +258,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.BOUNDARY_SPACE_PRESERVE</code>,
      *                     <code>XQConstants.BOUNDARY_SPACE_STRIP</code>
      */
-    public void setBoundarySpacePolicy(int policy) throws XQException;
+    void setBoundarySpacePolicy(int policy) throws XQException;
 
     /**
      * Gets the preserve part of the copy-namespaces mode
@@ -268,7 +268,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.COPY_NAMESPACES_MODE_PRESERVE</code>,
      *         <code>XQConstants.COPY_NAMESPACES_MODE_NO_PRESERVE</code>.
      */
-    public int getCopyNamespacesModePreserve();
+    int getCopyNamespacesModePreserve();
 
     /**
      * Sets the preserve part of the copy-namespaces mode in the static context.
@@ -280,7 +280,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.COPY_NAMESPACES_MODE_PRESERVE</code>,
      *                     <code>XQConstants.COPY_NAMESPACES_MODE_NO_PRESERVE</code>
      */
-    public void setCopyNamespacesModePreserve(int mode) throws XQException;
+    void setCopyNamespacesModePreserve(int mode) throws XQException;
 
     /**
      * Gets the inherit part of the copy-namespaces mode
@@ -290,7 +290,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.COPY_NAMESPACES_MODE_INHERIT</code>,
      *         <code>XQConstants.COPY_NAMESPACES_MODE_NO_INHERIT</code>.
      */
-    public int getCopyNamespacesModeInherit();
+    int getCopyNamespacesModeInherit();
 
     /**
      * Sets the inherit part of the copy-namespaces mode in the static context.
@@ -302,7 +302,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.COPY_NAMESPACES_MODE_INHERIT</code>,
      *                     <code>XQConstants.COPY_NAMESPACES_MODE_NO_INHERIT</code>
      */
-    public void setCopyNamespacesModeInherit(int mode) throws XQException;
+    void setCopyNamespacesModeInherit(int mode) throws XQException;
 
     /**
      * Gets the Base URI, if set in the static context, else the empty string.
@@ -310,7 +310,7 @@ public interface XQStaticContext {
      * @return the base URI, if set, else the empty string.
      *         Cannot be <code>null</code>..
      */
-    public String getBaseURI();
+    String getBaseURI();
 
     /**
      * Sets the Base URI in the static context, specify the empty string to make it undefined.
@@ -319,7 +319,7 @@ public interface XQStaticContext {
      *                Cannot be <code>null</code>.
      * @throws XQException if a <code>null</code> base uri is specified
      */
-    public void setBaseURI(String baseUri) throws XQException;
+    void setBaseURI(String baseUri) throws XQException;
 
     /**
      * Gets the value of the binding mode property.
@@ -329,7 +329,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.BINDING_MODE_IMMEDIATE</code>,
      *         or<code>XQConstants.BINDING_MODE_DEFERRED</code>.
      */
-    public int getBindingMode();
+    int getBindingMode();
 
     /**
      * Sets the binding mode property.
@@ -342,7 +342,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.BINDING_MODE_IMMEDIATE</code>,
      *                     <code>XQConstants.BINDING_MODE_DEFERRED</code>
      */
-    public void setBindingMode(int bindingMode) throws XQException;
+    void setBindingMode(int bindingMode) throws XQException;
 
     /**
      * Gets the value of the holdability property.
@@ -351,7 +351,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.HOLDTYPE_HOLD_CURSORS_OVER_COMMIT</code>,
      *         or <code>XQConstants.HOLDTYPE_CLOSE_CURSORS_AT_COMMIT</code>.
      */
-    public int getHoldability();
+    int getHoldability();
 
     /**
      * Sets the holdability property.
@@ -363,7 +363,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.HOLDTYPE_HOLD_CURSORS_OVER_COMMIT</code>,
      *                     <code>XQConstants.HOLDTYPE_CLOSE_CURSORS_AT_COMMIT</code>
      */
-    public void setHoldability(int holdability) throws XQException;
+    void setHoldability(int holdability) throws XQException;
 
     /**
      * Gets the value of the language type and version property.
@@ -375,7 +375,7 @@ public interface XQStaticContext {
      *         or a negative value indicating a vendor specific
      *         query language type and version.
      */
-    public int getQueryLanguageTypeAndVersion();
+    int getQueryLanguageTypeAndVersion();
 
     /**
      * Sets the input query language type and version.
@@ -391,7 +391,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.LANGTYPE_XQUERY</code>,
      *                     <code>XQConstants.LANGTYPE_XQUERYX</code> and is not negative
      */
-    public void setQueryLanguageTypeAndVersion(int langType) throws XQException;
+    void setQueryLanguageTypeAndVersion(int langType) throws XQException;
 
     /**
      * Gets the value of the scrollability property.
@@ -401,7 +401,7 @@ public interface XQStaticContext {
      *         <code>XQConstants.SCROLLTYPE_FORWARD_ONLY</code>, or
      *         <code>XQConstants.SCROLLTYPE_SCROLLABLE</code>.
      */
-    public int getScrollability();
+    int getScrollability();
 
     /**
      * Sets the scrollability of the result sequence.
@@ -414,7 +414,7 @@ public interface XQStaticContext {
      *                     <code>XQConstants.SCROLLTYPE_FORWARD_ONLY</code>,
      *                     <code>XQConstants.SCROLLTYPE_SCROLLABLE</code>
      */
-    public void setScrollability(int scrollability) throws XQException;
+    void setScrollability(int scrollability) throws XQException;
 
     /**
      * Retrieves the number of seconds an implementation will wait for a
@@ -423,7 +423,7 @@ public interface XQStaticContext {
      * @return the query execution timeout value in seconds.
      *         A value of 0 indicates no limit.
      */
-    public int getQueryTimeout();
+    int getQueryTimeout();
 
     /**
      * Sets the number of seconds an implementation will wait for a
@@ -436,6 +436,6 @@ public interface XQStaticContext {
      *                A value of 0 indicates no limit
      * @throws XQException if the passed in value is negative
      */
-    public void setQueryTimeout(int seconds) throws XQException;
+    void setQueryTimeout(int seconds) throws XQException;
 
 }

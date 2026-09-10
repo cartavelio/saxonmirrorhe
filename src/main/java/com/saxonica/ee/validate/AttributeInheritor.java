@@ -22,9 +22,9 @@ import java.util.Stack;
 public class AttributeInheritor extends ProxyReceiver {
 
     private AttributeMap bufferedAttributes;
-    private Stack<AttributeMap> inheritedAttributeStack = new Stack<>();
-    private Stack<NodeName> elementNameStack = new Stack<>();
-    private Stack<NamespaceMap> namespaceMapStack = new Stack<>();
+    private final Stack<AttributeMap> inheritedAttributeStack = new Stack<>();
+    private final Stack<NodeName> elementNameStack = new Stack<>();
+    private final Stack<NamespaceMap> namespaceMapStack = new Stack<>();
     private boolean empty = true;
 
     // We can make an element node representing this start tag for use in evaluation xs:alternative

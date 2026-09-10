@@ -14,7 +14,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class GroupEndingTester extends GroupBoundaryTester {
 
-    private Pattern pattern;
+    private final Pattern pattern;
     private boolean foundEndingItem = true;
 
     public GroupEndingTester(ForEachGroup expression, XPathContext context) {

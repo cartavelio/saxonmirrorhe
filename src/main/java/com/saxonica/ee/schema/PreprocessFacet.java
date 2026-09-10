@@ -5,7 +5,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.trans.XPathException;
@@ -57,7 +59,7 @@ public class PreprocessFacet extends Facet {
 
     /*@Nullable*/
     @Override
-    public String getValue() {
+    public UnicodeString getValue() {
         return null;
     }
 
@@ -118,14 +120,14 @@ public class PreprocessFacet extends Facet {
      * @return the value after preprocessing using the XPath expression defined in this facet
      */
 
-    public CharSequence preprocess(CharSequence input) throws ValidationException {
+    public UnicodeString preprocess(UnicodeString input) throws ValidationException {
         XPathExpression exp = action.getCondition();
         try {
             XPathDynamicContext context = exp.createDynamicContext();
             if (action.getValueVariable() != null) {
-                context.setVariable(action.getValueVariable(), new StringValue(input));
+                context.setVariable(action.getValueVariable(), new StringItem(input));
             }
-            return exp.evaluateSingle(context).getStringValueCS();
+            return ((GroundedValue) exp.evaluateSingle(context)).getUnicodeStringValue();
         } catch (XPathException err) {
             throw new ValidationException(err);
         }
@@ -138,7 +140,7 @@ public class PreprocessFacet extends Facet {
      * @return the value after postprocessing using the reverse XPath expression defined in this facet
      */
 
-    public CharSequence postprocess(CharSequence input) throws ValidationException {
+    public UnicodeString postprocess(UnicodeString input) throws ValidationException {
         if (reverseAction == null) {
             return input;
         }
@@ -146,9 +148,9 @@ public class PreprocessFacet extends Facet {
         try {
             XPathDynamicContext context = exp.createDynamicContext();
             if (action.getValueVariable() != null) {
-                context.setVariable(reverseAction.getValueVariable(), new StringValue(input));
+                context.setVariable(reverseAction.getValueVariable(), new StringItem(input));
             }
-            return exp.evaluateSingle(context).getStringValueCS();
+            return ((GroundedValue) exp.evaluateSingle(context)).getUnicodeStringValue();
         } catch (XPathException err) {
             throw new ValidationException(err);
         }
@@ -189,7 +191,7 @@ public class PreprocessFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue(getName());
+                        return new StringItem(getName());
                     case "implementation":
                         return new ObjectValue<>(PreprocessFacet.this);
                     case "action":

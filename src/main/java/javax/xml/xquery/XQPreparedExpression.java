@@ -94,7 +94,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *
      * @throws XQException if the prepared expression is in a closed state
      */
-    public void cancel() throws XQException;
+    void cancel() throws XQException;
 
     /**
      * Checks if the prepared expression in a closed state.
@@ -102,7 +102,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      * @return <code>true</code> if the prepared expression is in
      *         a closed state, <code>false</code> otherwise.
      */
-    public boolean isClosed();
+    boolean isClosed();
 
     /**
      * Closes the expression object  and release all resources associated with
@@ -116,7 +116,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *
      * @throws XQException if there are errors when closing the expression
      */
-    public void close() throws XQException;
+    void close() throws XQException;
 
     /**
      * Executes the prepared query expression.
@@ -129,7 +129,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *                     expression, (2) the prepared expression is in a closed state,
      *                     or (3) the query execution is cancelled
      */
-    public XQResultSequence executeQuery() throws XQException;
+    XQResultSequence executeQuery() throws XQException;
 
     /**
      * Retrieves all the external variables defined in the prolog of the
@@ -140,7 +140,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *         Empty array if there are no external variables present.
      * @throws XQException if the prepared expression is in a closed state
      */
-    public QName[] getAllExternalVariables() throws XQException;
+    QName[] getAllExternalVariables() throws XQException;
 
     /**
      * Retrieves the names of all unbound external variables.
@@ -151,7 +151,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *         is returned
      * @throws XQException if the prepared expression is in a closed state
      */
-    public QName[] getAllUnboundExternalVariables() throws XQException;
+    QName[] getAllUnboundExternalVariables() throws XQException;
 
     /**
      * Gets the static type information of the result sequence. If an
@@ -163,7 +163,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *         result information.
      * @throws XQException if the prepared expression is in a closed state
      */
-    public XQSequenceType getStaticResultType() throws XQException;
+    XQSequenceType getStaticResultType() throws XQException;
 
     /**
      * Retrieves the static type of a given external variable.
@@ -176,7 +176,7 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *                     in a closed state, or (3) the <code>name</code>
      *                     parameter is <code>null</code>
      */
-    public XQSequenceType getStaticVariableType(QName name) throws XQException;
+    XQSequenceType getStaticVariableType(QName name) throws XQException;
 
     /**
      * Gets an <code>XQStaticContext</code> representing the values for all
@@ -187,6 +187,6 @@ public interface XQPreparedExpression extends XQDynamicContext {
      *         the values for all expression properties
      * @throws XQException if the expression is in a closed state
      */
-    public XQStaticContext getStaticContext() throws XQException;
+    XQStaticContext getStaticContext() throws XQException;
 
-};
+}

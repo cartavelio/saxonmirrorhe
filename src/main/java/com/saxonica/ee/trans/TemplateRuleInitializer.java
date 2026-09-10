@@ -33,10 +33,10 @@ import java.util.List;
 
 public class TemplateRuleInitializer {
 
-    private Compilation compilation;
-    private XSLTemplate xslTemplate;
-    private ComponentDeclaration decl;
-    private StructuredQName modeName;
+    private final Compilation compilation;
+    private final XSLTemplate xslTemplate;
+    private final ComponentDeclaration decl;
+    private final StructuredQName modeName;
     private boolean firstTime = true;
 
     TemplateRuleInitializer(Compilation comp, ComponentDeclaration decl, StructuredQName modeName) {

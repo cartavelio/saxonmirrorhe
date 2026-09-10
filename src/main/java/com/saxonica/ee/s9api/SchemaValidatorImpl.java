@@ -52,7 +52,7 @@ import static net.sf.saxon.s9api.streams.Steps.child;
 
 public class SchemaValidatorImpl extends SchemaValidator {
 
-    private Processor processor;
+    private final Processor processor;
     private boolean lax;
     private InvalidityHandler invalidityHandler;
     private Destination destination;
@@ -62,7 +62,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
     private boolean useXsiSchemaLocation;
     private boolean keepStatistics;
     private ValidationStatistics latestStatistics = null;
-    private GlobalParameterSet suppliedParams = new GlobalParameterSet();
+    private final GlobalParameterSet suppliedParams = new GlobalParameterSet();
     private int threadCount = Runtime.getRuntime().availableProcessors();
 
     public SchemaValidatorImpl(Processor processor) {
@@ -398,7 +398,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
     }
 
     class ValidationTask implements java.util.concurrent.Callable<Outcome<Boolean>> {
-        private Source source;
+        private final Source source;
         private ValidationCompletionAction action = null;
         private InvalidityHandler handler = null;
 

@@ -7,11 +7,12 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.str.UnicodeBuilder;
 
 
 /**
@@ -45,8 +46,8 @@ public class SimpleContentFeed extends AbsorptionFeed {
     protected Sequence processGroundedItem(Item item) throws XPathException {
         if (item instanceof NodeInfo && ((NodeInfo)item).getNodeKind() == Type.TEXT) {
             // discard zero-length text nodes
-            CharSequence cs = item.getStringValueCS();
-            if (cs.length() == 0) {
+            CodePoints cs = item.getUnicodeStringValue();
+            if (cs.isEmpty()) {
                 return EmptySequence.getInstance();
             } else {
                 return item.atomize();
@@ -72,12 +73,12 @@ public class SimpleContentFeed extends AbsorptionFeed {
      */
 
     private static class PendingContent extends PendingItem {
-        public FastStringBuffer buffer;
+        public UnicodeBuilder buffer;
         public FleetingParentNode node;
 
         public PendingContent(int sequence, FleetingParentNode node) {
             super(sequence);
-            buffer = new FastStringBuffer(100);
+            buffer = new UnicodeBuilder();
             this.node = node;
         }
 
@@ -90,18 +91,18 @@ public class SimpleContentFeed extends AbsorptionFeed {
         public Sequence deliver() throws XPathException {
             if (node instanceof FleetingElementNode) {
                 FleetingElementNode element = (FleetingElementNode) node;
-                element.setStringValue(buffer);
+                element.setStringValue(buffer.toUnicodeString());
                 return element.atomize();
             } else {
                 FleetingDocumentNode document = (FleetingDocumentNode) node;
-                document.setStringValue(buffer);
+                document.setStringValue(buffer.toUnicodeString());
                 return document.atomize();
             }
         }
 
         @Override
         public void rollback() {
-            buffer.setLength(0);
+            buffer.clear();
         }
     }
 }

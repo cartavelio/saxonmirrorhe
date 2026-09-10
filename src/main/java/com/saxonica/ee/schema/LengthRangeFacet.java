@@ -1,10 +1,12 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -21,8 +23,8 @@ public abstract class LengthRangeFacet extends Facet {
     int requiredLength;
 
     @Override
-    public String getValue() {
-        return "" + requiredLength;
+    public UnicodeString getValue() {
+        return BMPString.of("" + requiredLength);
     }
 
     @Override
@@ -73,8 +75,8 @@ public abstract class LengthRangeFacet extends Facet {
 
     @Override
     public boolean testAtomicValue(final AtomicValue value) {
-        if (value instanceof StringValue) { //includes AnyURIValue
-            return testLength(((StringValue) value).getStringLength());
+        if (value instanceof StringItem) { //includes AnyURIValue
+            return testLength(((StringItem) value).length32());
         } else if (value instanceof HexBinaryValue) {
             return testLength(((HexBinaryValue) value).getLengthInOctets());
         } else if (value instanceof Base64BinaryValue) {
@@ -102,7 +104,7 @@ public abstract class LengthRangeFacet extends Facet {
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue(getName());
+                        return new StringItem(getName());
                     case "implementation":
                         return new ObjectValue<>(LengthRangeFacet.this);
                     case "value":

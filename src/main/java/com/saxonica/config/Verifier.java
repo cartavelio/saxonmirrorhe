@@ -3,6 +3,8 @@ package com.saxonica.config;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.LicenseException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Base64BinaryValue;
@@ -31,7 +33,7 @@ public class Verifier {
 
     private static final int MS_A_DAY = 24 * 3600 * 1000;
     private License primaryLicense = null;
-    private IntHashMap<License> secondaryLicenses = new IntHashMap<>();
+    private final IntHashMap<License> secondaryLicenses = new IntHashMap<>();
 
     protected int status = UNREAD;
 
@@ -56,7 +58,7 @@ public class Verifier {
             "C41202C8857897E46B40FD7624A9CB0CC9E8";
 
 
-    private static byte[] key = convertHexToBinary(PUBLIC_KEY);
+    private static final byte[] key = convertHexToBinary(PUBLIC_KEY);
 
     Verifier() { }
 
@@ -238,7 +240,7 @@ public class Verifier {
 
     synchronized int registerSecondaryLicense(String dmk) {
         try {
-            Base64BinaryValue b64 = new Base64BinaryValue(dmk);
+            Base64BinaryValue b64 = new Base64BinaryValue(StringView.of(dmk).tidy());
             byte[] binary = b64.getBinaryValue();
             ByteArrayInputStream is = new ByteArrayInputStream(binary);
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
@@ -363,9 +365,9 @@ public class Verifier {
                     }
                 }
             }
-            DateValue licenseIssued = new DateValue(features.getProperty("Issued").substring(0, 10) + 'Z');
+            DateValue licenseIssued = new DateValue(BMPString.of(features.getProperty("Issued").substring(0, 10) + 'Z'));
             // some licenses were wrongly issued with YYYY-MM-DDTHH:MM:SS format
-            DateValue majorVersionIssued = new DateValue(Version.getMajorReleaseDate() + 'Z');
+            DateValue majorVersionIssued = new DateValue(BMPString.of(Version.getMajorReleaseDate() + 'Z'));
             String upgradeDays = features.getProperty("UpgradeDays");
             int udays = 366;
             if (upgradeDays != null) {
@@ -376,7 +378,7 @@ public class Verifier {
                 throw new LicenseException("The " + licenseDesc + " does not cover upgrade to this Saxon version",
                         LicenseException.EXPIRED);
             }
-            DateValue minorVersionIssued = new DateValue(Version.getReleaseDate() + 'Z');
+            DateValue minorVersionIssued = new DateValue(BMPString.of(Version.getReleaseDate() + 'Z'));
             String maintenanceDays = features.getProperty("MaintenanceDays");
             int mdays = udays;
             if (maintenanceDays != null) {
@@ -483,7 +485,7 @@ public class Verifier {
 
     private static class License {
 
-        private Properties features;
+        private final Properties features;
 
         private License(Properties features) {
             this.features = features;
@@ -505,7 +507,7 @@ public class Verifier {
             }
             try {
                 String evaluating = features.getProperty("Evaluation");
-                DateValue expiryDate = new DateValue(expiration);
+                DateValue expiryDate = new DateValue(BMPString.of(expiration));
                 long expiryTimeMillis = expiryDate.getCalendar().getTime().getTime();
                 long time = expiryTimeMillis - System.currentTimeMillis();
                 if ("yes".equals(evaluating) && (time / 300000) % 151 == 0) {

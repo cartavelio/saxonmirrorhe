@@ -23,7 +23,7 @@ public class SaxonAssign extends XSLGeneralVariable {
 
     private Assign instruction;
     private SequenceType requiredType;
-    private SourceBinding sourceBinding = new SourceBinding(this);
+    private final SourceBinding sourceBinding = new SourceBinding(this);
 
     private final static EnumSet<SourceBinding.BindingProperty> allowedAttributes =
             EnumSet.of(SourceBinding.BindingProperty.SELECT);

@@ -7,6 +7,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.resource.Loader;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
 
@@ -71,9 +72,7 @@ public class LastModified extends SystemFunction {
         }
         long lastMod;
         try {
-            URLConnection connection = absoluteURL.openConnection();
-            connection.setRequestProperty("Accept-Encoding", "gzip");
-            connection.connect();
+            URLConnection connection = Loader.urlConnection(absoluteURL);
             lastMod = connection.getLastModified();
         } catch (IOException e) {
             XPathException err = new XPathException("Cannot read from URI supplied to saxon:last-modified(). Base='"

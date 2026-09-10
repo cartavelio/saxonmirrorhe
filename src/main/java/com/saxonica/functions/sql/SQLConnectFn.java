@@ -11,7 +11,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -43,11 +43,11 @@ public class SQLConnectFn extends SystemFunction {
 
         MapItem options = (MapItem)arguments[0].head();
 
-        String dbString = str(options.get(new StringValue("database")));
-        String dbDriverString = str(options.get(new StringValue("driver")));
-        String userString = str(options.get(new StringValue("user")));
-        String pwdString = str(options.get(new StringValue("password")));
-        String autoCommitString = str(options.get(new StringValue("autoCommit")));
+        String dbString = str(options.get(StringItem.bmp("database")));
+        String dbDriverString = str(options.get(StringItem.bmp("driver")));
+        String userString = str(options.get(StringItem.bmp("user")));
+        String pwdString = str(options.get(StringItem.bmp("password")));
+        String autoCommitString = str(options.get(StringItem.bmp("autoCommit")));
 
         try {
             // the following hack is necessary to load JDBC drivers

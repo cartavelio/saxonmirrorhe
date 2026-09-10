@@ -21,7 +21,7 @@ import java.io.StringReader;
 
 public class URIResourceResolver implements URIResolver {
 
-    private LSResourceResolver resolver;
+    private final LSResourceResolver resolver;
 
     public URIResourceResolver(LSResourceResolver resolver) {
         this.resolver = resolver;

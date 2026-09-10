@@ -13,7 +13,6 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.StringValue;
 
 import java.util.TreeMap;
 
@@ -27,27 +26,24 @@ public class KeyMap extends SystemFunction {
 
     @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue keyName = (StringValue) arguments[0].head();
+        String keyName = arguments[0].head().getStringValue();
         NodeInfo doc = (NodeInfo) arguments[1].head();
-        StringValue min = (StringValue) arguments[2].head();
-        StringValue max = (StringValue) arguments[3].head();
+        String min = arguments[2].head().getStringValue();
+        String max = arguments[3].head().getStringValue();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
-        String lex = keyName.getStringValue();
         StructuredQName keyQName = StructuredQName.fromLexicalQName(
-                lex, false, true, getRetainedStaticContext()
+                keyName, false, true, getRetainedStaticContext()
         );
         KeyManager keyManager = getRetainedStaticContext().getPackageData().getKeyManager();
         KeyDefinitionSet kds = keyManager.getKeyDefinitionSet(keyQName);
         if (kds == null) {
-            throw new XPathException("Key definition " + keyName.getStringValue() + " not found");
+            throw new XPathException("Key definition " + keyName + " not found");
         }
-        checkKeyDefinition(th, kds, keyName.getStringValue());
-        String minS = min == null ? null : min.getStringValue();
-        String maxS = max == null ? null : max.getStringValue();
+        checkKeyDefinition(th, kds, keyName);
         KeyIndex index = keyManager.obtainIndex(kds, doc.getTreeInfo(), context);
         return new RangeKey(
-                minS, maxS, (TreeMap<AtomicMatchKey, Object>) index.getUnderlyingMap());
+                min, max, (TreeMap<AtomicMatchKey, Object>) index.getUnderlyingMap());
     }
 
 

@@ -42,7 +42,7 @@ public interface XQDataFactory {
      *                     instance failed, or (4) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromAtomicValue(String value, XQItemType type)
+    XQItem createItemFromAtomicValue(String value, XQItemType type)
             throws XQException;
 
     /**
@@ -71,7 +71,7 @@ public interface XQDataFactory {
      *                     underlying object implementing the interface
      *                     is closed
      */
-    public XQItem createItemFromString(String value, XQItemType type)
+    XQItem createItemFromString(String value, XQItemType type)
             throws XQException;
 
     /**
@@ -120,7 +120,7 @@ public interface XQDataFactory {
      *                     failed, or (3) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromDocument(String value, String baseURI, XQItemType type) throws XQException;
+    XQItem createItemFromDocument(String value, String baseURI, XQItemType type) throws XQException;
 
     /**
      * Creates an item from the given value.
@@ -168,7 +168,7 @@ public interface XQDataFactory {
      *                     failed, or (3) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromDocument(Reader value, String baseURI, XQItemType type) throws XQException;
+    XQItem createItemFromDocument(Reader value, String baseURI, XQItemType type) throws XQException;
 
     /**
      * Creates an item from the given value.
@@ -216,7 +216,7 @@ public interface XQDataFactory {
      *                     failed, or (3) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromDocument(InputStream value, String baseURI, XQItemType type) throws XQException;
+    XQItem createItemFromDocument(InputStream value, String baseURI, XQItemType type) throws XQException;
 
     /**
      * Creates an item from the given value.
@@ -258,7 +258,7 @@ public interface XQDataFactory {
      *                     or (3) the underlying object implementing the interface
      *                     is closed
      */
-    public XQItem createItemFromDocument(javax.xml.stream.XMLStreamReader value, XQItemType type)
+    XQItem createItemFromDocument(javax.xml.stream.XMLStreamReader value, XQItemType type)
             throws XQException;
 
     /**
@@ -308,7 +308,7 @@ public interface XQDataFactory {
      *                     or (3) the underlying object implementing the interface
      *                     is closed
      */
-    public XQItem createItemFromDocument(javax.xml.transform.Source value, XQItemType type) throws XQException;
+    XQItem createItemFromDocument(javax.xml.transform.Source value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -329,7 +329,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (3) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromObject(Object value, XQItemType type) throws XQException;
+    XQItem createItemFromObject(Object value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -348,7 +348,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (2) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromBoolean(boolean value, XQItemType type) throws XQException;
+    XQItem createItemFromBoolean(boolean value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -368,7 +368,7 @@ public interface XQDataFactory {
      *                     implementing the interface is closed
      */
 
-    public XQItem createItemFromByte(byte value, XQItemType type) throws XQException;
+    XQItem createItemFromByte(byte value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -387,7 +387,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (2) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromDouble(double value, XQItemType type) throws XQException;
+    XQItem createItemFromDouble(double value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -406,7 +406,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (2) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromFloat(float value, XQItemType type) throws XQException;
+    XQItem createItemFromFloat(float value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -425,7 +425,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (2) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromInt(int value, XQItemType type) throws XQException;
+    XQItem createItemFromInt(int value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -444,7 +444,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (2) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromLong(long value, XQItemType type) throws XQException;
+    XQItem createItemFromLong(long value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -465,7 +465,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (3) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromNode(Node value, XQItemType type) throws XQException;
+    XQItem createItemFromNode(Node value, XQItemType type) throws XQException;
 
     /**
      * Creates an item from a given value. The value is converted into an
@@ -484,7 +484,7 @@ public interface XQDataFactory {
      *                     to an XDM instance failed, or (2) the underlying object
      *                     implementing the interface is closed
      */
-    public XQItem createItemFromShort(short value, XQItemType type) throws XQException;
+    XQItem createItemFromShort(short value, XQItemType type) throws XQException;
 
     /**
      * Creates a copy of the specified <code>XQItem</code>. This method can be used, for
@@ -498,7 +498,7 @@ public interface XQDataFactory {
      *                     (2) the underlying object implementing the interface is
      *                     closed, (3) the specified item is closed
      */
-    public XQItem createItem(XQItem item) throws XQException;
+    XQItem createItem(XQItem item) throws XQException;
 
     /**
      * Creates a copy of the specified <code>XQSequence</code>. The newly created
@@ -521,7 +521,7 @@ public interface XQDataFactory {
      *                     or (5) the underlying object implementing the
      *                     interface is closed
      */
-    public XQSequence createSequence(XQSequence s) throws XQException;
+    XQSequence createSequence(XQSequence s) throws XQException;
 
     /**
      * Creates an <code>XQSequence</code>, containing all the items from the
@@ -544,7 +544,7 @@ public interface XQDataFactory {
      *                     or (3) underlying object implementing the interface
      *                     is closed
      */
-    public XQSequence createSequence(java.util.Iterator i) throws XQException;
+    XQSequence createSequence(java.util.Iterator i) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing an XQuery atomic type.
@@ -574,7 +574,7 @@ public interface XQDataFactory {
      *                     passed in, or (2) the underlying object implementing
      *                     the interface is closed
      */
-    public XQItemType createAtomicType(int basetype) throws XQException;
+    XQItemType createAtomicType(int basetype) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing an XQuery atomic type.
@@ -615,7 +615,7 @@ public interface XQDataFactory {
      *                     if the <code>typename</code> refers to a predefinied
      *                     type and does not match <code>basetype</code>
      */
-    public XQItemType createAtomicType(int basetype, QName typename, URI schemaURI) throws XQException;
+    XQItemType createAtomicType(int basetype, QName typename, URI schemaURI) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -665,7 +665,7 @@ public interface XQDataFactory {
      *                     <code>XQItemType.XQBASETYPE_UNTYPED</code>
      *                     or <code>XQItemType.XQBASETYPE_ANYTYPE</code>
      */
-    public XQItemType createAttributeType(QName nodename, int basetype) throws XQException;
+    XQItemType createAttributeType(QName nodename, int basetype) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -733,8 +733,8 @@ public interface XQDataFactory {
      *                     if the <code>typename</code> refers to a predefinied
      *                     type and does not match <code>basetype</code>
      */
-    public XQItemType createAttributeType(QName nodename, int basetype,
-                                          QName typename, URI schemaURI) throws XQException;
+    XQItemType createAttributeType(QName nodename, int basetype,
+                                   QName typename, URI schemaURI) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -772,8 +772,8 @@ public interface XQDataFactory {
      *                     is closed, or (4) the implementation does
      *                     not support user-defined XML schema types
      */
-    public XQItemType createSchemaAttributeType(QName nodename, int basetype,
-                                                URI schemaURI) throws XQException;
+    XQItemType createSchemaAttributeType(QName nodename, int basetype,
+                                         URI schemaURI) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -799,7 +799,7 @@ public interface XQDataFactory {
      *         <code>comment()</code> type
      * @throws XQException if the underlying object implementing the interface is closed
      */
-    public XQItemType createCommentType() throws XQException;
+    XQItemType createCommentType() throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -820,7 +820,7 @@ public interface XQDataFactory {
      *                     or (4) the implementation does not support user-defined XML
      *                     schema types
      */
-    public XQItemType createDocumentElementType(XQItemType elementType) throws XQException;
+    XQItemType createDocumentElementType(XQItemType elementType) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -841,7 +841,7 @@ public interface XQDataFactory {
      *                     (4) the implementation does not support user-defined XML
      *                     schema types
      */
-    public XQItemType createDocumentSchemaElementType(XQItemType elementType) throws XQException;
+    XQItemType createDocumentSchemaElementType(XQItemType elementType) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -852,7 +852,7 @@ public interface XQDataFactory {
      *         <code>document-node()</code> type
      * @throws XQException if the underlying object implementing the interface is closed
      */
-    public XQItemType createDocumentType() throws XQException;
+    XQItemType createDocumentType() throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -896,7 +896,7 @@ public interface XQDataFactory {
      * @throws XQException if (1) the underlying object implementing the interface
      *                     is closed
      */
-    public XQItemType createElementType(QName nodename, int basetype) throws XQException;
+    XQItemType createElementType(QName nodename, int basetype) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -972,8 +972,8 @@ public interface XQDataFactory {
      *                     (4) if the <code>typename</code> refers to a predefinied
      *                     type and does not match <code>basetype</code>
      */
-    public XQItemType createElementType(QName nodename, int basetype, QName typename,
-                                        URI schemaURI, boolean allowNill) throws XQException;
+    XQItemType createElementType(QName nodename, int basetype, QName typename,
+                                 URI schemaURI, boolean allowNill) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -1005,8 +1005,8 @@ public interface XQDataFactory {
      *                     interface is closed, or (3) the implementation does
      *                     not support user-defined XML schema types
      */
-    public XQItemType createSchemaElementType(QName nodename, int basetype,
-                                              URI schemaURI) throws XQException;
+    XQItemType createSchemaElementType(QName nodename, int basetype,
+                                       URI schemaURI) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery item type.
@@ -1025,7 +1025,7 @@ public interface XQDataFactory {
      * @throws XQException if the underlying object implementing the interface
      *                     is closed
      */
-    public XQItemType createItemType() throws XQException;
+    XQItemType createItemType() throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery <code>node()</code>
@@ -1037,7 +1037,7 @@ public interface XQDataFactory {
      * @throws XQException if the underlying object implementing the interface
      *                     is closed
      */
-    public XQItemType createNodeType() throws XQException;
+    XQItemType createNodeType() throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -1077,7 +1077,7 @@ public interface XQDataFactory {
      * @throws XQException if the underlying object implementing the interface is
      *                     closed
      */
-    public XQItemType createProcessingInstructionType(String piTarget)
+    XQItemType createProcessingInstructionType(String piTarget)
             throws XQException;
 
     /**
@@ -1108,7 +1108,7 @@ public interface XQDataFactory {
      *                     or (4) the underlying object implementing the
      *                     interface is closed
      */
-    public XQSequenceType createSequenceType(XQItemType item, int occurence) throws XQException;
+    XQSequenceType createSequenceType(XQItemType item, int occurence) throws XQException;
 
     /**
      * Creates a new <code>XQItemType</code> object representing the XQuery
@@ -1120,5 +1120,5 @@ public interface XQDataFactory {
      * @throws XQException if the underlying object implementing the interface is
      *                     closed
      */
-    public XQItemType createTextType() throws XQException;
-};
+    XQItemType createTextType() throws XQException;
+}

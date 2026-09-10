@@ -172,4 +172,4 @@ public final class XQConstants {
      */
     public static final int BINDING_MODE_DEFERRED = 1;
 
-};
+}

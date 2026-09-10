@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class MotionlessFeed extends ItemFeed {
 
-    private Expression expression;
+    private final Expression expression;
     private boolean selected;
 
     public MotionlessFeed(Expression expression, ItemFeed result, XPathContext context) {

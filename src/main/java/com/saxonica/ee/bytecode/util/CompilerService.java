@@ -19,7 +19,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.value.*;
 import org.objectweb.asm.ClassVisitor;
@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -42,27 +43,27 @@ import java.util.Stack;
  */
 public class CompilerService implements ICompilerService {
 
-    private Configuration config;
+    private final Configuration config;
     private int flags = ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES;
-    private Stack<GeneratedMethodInfo> currentMethods = new Stack<>();
-    private Stack<GeneratedClassInfo> currentClasses = new Stack<>();
+    private final Stack<GeneratedMethodInfo> currentMethods = new Stack<>();
+    private final Stack<GeneratedClassInfo> currentClasses = new Stack<>();
     private ClassLoader myClassLoader = null;
 
     private int maxClasses = 10000;
     private static int classCounter = 0; // counted for the VM, not for the Configuration
-    private HostLanguage hostLanguage;
+    private final HostLanguage hostLanguage;
     /**
      * Indicate in a map a list of methods to be added in the main class at the end of the class generation
      * ExpressionCompiler is the hashMap key because we only expect one generated method per ExpressionCompiler
      */
-    private HashMap<ExpressionCompiler, GeneratedExpression> addMethods = new HashMap<>();
+    private final HashMap<ExpressionCompiler, GeneratedExpression> addMethods = new HashMap<>();
     public static int tracePoint = 0;
     private static int sequenceNumber = 0;
     private boolean displayByteCode;
     private boolean debugByteCode;
     private String debugByteCodeDirectory;
     public int mostRecentLineNumber = -1;
-    private static HashMap<String, ExpressionCompiler> expressionCompilers = new HashMap<>();
+    private static final HashMap<String, ExpressionCompiler> expressionCompilers = new HashMap<>();
 
     static {
         expressionCompilers.put("ExistsCompiler", new ExistsCompiler());
@@ -216,7 +217,7 @@ public class CompilerService implements ICompilerService {
             if (Literal.isEmptySequence(expression)) {
                 ga.invokeStaticMethod(EmptySequence.class, "getInstance");
             } else {
-                ExpressionCompiler.allocateStatic(this, ((Literal) expression).getValue());
+                ExpressionCompiler.allocateStatic(this, ((Literal) expression).getGroundedValue());
             }
         } else if (Cardinality.allowsMany(expression.getCardinality())) {
             compileToIterator(expression);
@@ -283,7 +284,7 @@ public class CompilerService implements ICompilerService {
 
     private static class ObjectIdentityWrapper {
 
-        private Object theObject;
+        private final Object theObject;
 
         public ObjectIdentityWrapper(Object obj) {
             theObject = obj;
@@ -989,7 +990,7 @@ public class CompilerService implements ICompilerService {
                     myClass.getField(staticVar.name).set(null, staticVar.object);
                 } catch (NoSuchFieldException ex) {
                     System.out.println(staticVar.name + " NoSuchException error");
-                    String classStr = new String(classFile, "UTF-8");
+                    String classStr = new String(classFile, StandardCharsets.UTF_8);
 
                     System.out.println(classStr);
                     throw new AssertionError(ex);
@@ -1042,17 +1043,17 @@ public class CompilerService implements ICompilerService {
         return staticVariableInfo;
     }
 
-    private void appendJavaName(String local, FastStringBuffer sb) {
+    private void appendJavaName(String local, StringBuilder sb) {
         for (int i = 0; i < local.length(); i++) {
             char c = local.charAt(i);
             if (!Character.isJavaIdentifierPart(c)) {
                 if (c == '/') {
                     sb.append("_Slash_");
                 } else {
-                    sb.cat('_');
+                    sb.append('_');
                 }
             } else {
-                sb.cat(c);
+                sb.append(c);
             }
         }
     }
@@ -1070,7 +1071,7 @@ public class CompilerService implements ICompilerService {
         if (name.length() > 256) {
             name = name.substring(0, 256);
         }
-        FastStringBuffer sb = new FastStringBuffer(name.length());
+        StringBuilder sb = new StringBuilder(name.length());
         appendJavaName(name, sb);
         return sb.toString();
     }

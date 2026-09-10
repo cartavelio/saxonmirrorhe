@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class EqualityPatternOptimizer extends PatternOptimizer {
 
-    private static EqualityPatternOptimizer THE_INSTANCE = new EqualityPatternOptimizer();
+    private static final EqualityPatternOptimizer THE_INSTANCE = new EqualityPatternOptimizer();
 
     public static EqualityPatternOptimizer getInstance() {
         return THE_INSTANCE;
@@ -51,7 +51,8 @@ public class EqualityPatternOptimizer extends PatternOptimizer {
         StringCollator collator = ((ComparisonExpression) exp).getAtomicComparer().getCollator();
         GeneralComparisonOperand chic = new GeneralComparisonOperand(collator, lhs);
         chic = (GeneralComparisonOperand) allocateCharacteristic(characteristics, chic);
-        AtomicMatchKey key = collator.getCollationKey(((StringLiteral) ((ComparisonExpression) exp).getRhsExpression()).getStringValue());
+        AtomicMatchKey key = collator.getCollationKey(
+                ((StringLiteral) ((ComparisonExpression) exp).getRhsExpression()).getString());
         Precondition.StringHashPrecondition p = new Precondition.StringHashPrecondition(chic, key, collator);
         addPrecondition(rule, preconditions, p);
 

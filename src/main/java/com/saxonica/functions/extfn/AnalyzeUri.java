@@ -9,7 +9,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -45,35 +45,35 @@ public class AnalyzeUri extends SystemFunction {
             dict.initialPut("isOpaque", BooleanValue.get(test));
             String val = uri.getAuthority();
             if (val != null) {
-                dict.initialPut("authority", new StringValue(val));
+                dict.initialPut("authority", new StringItem(val));
             }
             val = uri.getRawAuthority();
             if (val != null) {
-                dict.initialPut("rawAuthority", new StringValue(val));
+                dict.initialPut("rawAuthority", new StringItem(val));
             }
             val = uri.getUserInfo();
             if (val != null) {
-                dict.initialPut("userInfo", new StringValue(val));
+                dict.initialPut("userInfo", new StringItem(val));
             }
             val = uri.getRawUserInfo();
             if (val != null) {
-                dict.initialPut("rawUserInfo", new StringValue(val));
+                dict.initialPut("rawUserInfo", new StringItem(val));
             }
             val = uri.getScheme();
             if (val != null) {
-                dict.initialPut("scheme", new StringValue(val));
+                dict.initialPut("scheme", new StringItem(val));
             }
             val = uri.getHost();
             if (val != null) {
-                dict.initialPut("host", new StringValue(val));
+                dict.initialPut("host", new StringItem(val));
             }
             val = uri.getSchemeSpecificPart();
             if (val != null) {
-                dict.initialPut("schemeSpecificPart", new StringValue(val));
+                dict.initialPut("schemeSpecificPart", new StringItem(val));
             }
             val = uri.getRawSchemeSpecificPart();
             if (val != null) {
-                dict.initialPut("rawSchemeSpecificPart", new StringValue(val));
+                dict.initialPut("rawSchemeSpecificPart", new StringItem(val));
             }
             int port = uri.getPort();
             if (port >= 0) {
@@ -81,19 +81,19 @@ public class AnalyzeUri extends SystemFunction {
             }
             val = uri.getPath();
             if (val != null) {
-                dict.initialPut("path", new StringValue(val));
+                dict.initialPut("path", new StringItem(val));
             }
             val = uri.getRawPath();
             if (val != null) {
-                dict.initialPut("rawPath", new StringValue(val));
+                dict.initialPut("rawPath", new StringItem(val));
             }
             val = uri.getRawQuery();
             if (val != null) {
-                dict.initialPut("rawQuery", new StringValue(val));
+                dict.initialPut("rawQuery", new StringItem(val));
             }
             val = uri.getQuery();
             if (val != null) {
-                dict.initialPut("query", new StringValue(val));
+                dict.initialPut("query", new StringItem(val));
                 DictionaryMap params = new DictionaryMap();
                 StringTokenizer t = new StringTokenizer(val, ";&");
                 while (t.hasMoreTokens()) {
@@ -102,7 +102,7 @@ public class AnalyzeUri extends SystemFunction {
                     if (eq >= 0) {
                         String keyword = tok.substring(0, eq);
                         String value = tok.substring(eq + 1);
-                        params.initialAppend(keyword, new StringValue(value));
+                        params.initialAppend(keyword, new StringItem(value));
                     } else {
                         params.initialAppend(tok, EmptySequence.getInstance());
                     }
@@ -111,20 +111,20 @@ public class AnalyzeUri extends SystemFunction {
             }
             val = uri.getRawFragment();
             if (val != null) {
-                dict.initialPut("rawFragment", new StringValue(val));
+                dict.initialPut("rawFragment", new StringItem(val));
             }
             val = uri.getFragment();
             if (val != null) {
-                dict.initialPut("fragment", new StringValue(val));
+                dict.initialPut("fragment", new StringItem(val));
             }
             val = uri.toASCIIString();
             if (val != null) {
-                dict.initialPut("asciiString", new StringValue(val));
+                dict.initialPut("asciiString", new StringItem(val));
             }
             return dict;
         } catch (URISyntaxException e) {
             dict.initialPut("isValid", BooleanValue.FALSE);
-            dict.initialPut("error", new StringValue(e.getMessage()));
+            dict.initialPut("error", new StringItem(e.getMessage()));
             return dict;
         }
     }

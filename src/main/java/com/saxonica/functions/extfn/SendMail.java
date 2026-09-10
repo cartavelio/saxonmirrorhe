@@ -16,7 +16,7 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -81,7 +81,7 @@ public class SendMail extends SystemFunction {
 
     private static GroundedValue checkMailProperty(XPathContext context, MapItem emailConfigMap, String keyStr, String errorMessage, SequenceType expectedType) throws XPathException {
         try {
-            Sequence sequence = emailConfigMap.get(new StringValue(keyStr));
+            Sequence sequence = emailConfigMap.get(new StringItem(keyStr));
             GroundedValue groundedValue = sequence.materialize();
             if (!expectedType.matches(groundedValue, context.getConfiguration().getTypeHierarchy())) {
                 throw new XPathException("saxon:send-mail error: Invalid type for email configuration option " + keyStr, SaxonErrorCode.SXJM0001, context);
@@ -155,13 +155,14 @@ public class SendMail extends SystemFunction {
         String otherStr;
 
         // throw new XPathException("Invalid number of arguments  for attachment map", SaxonErrorCode.SXJE0051, context);
-        if (mapItem.get(new StringValue("setFilename")) != null) {
+        if (mapItem.get(StringItem.bmp("setFilename")) != null) {
             setFileName = ((Item) checkMailProperty(context, mapItem, "setFilename", null, SequenceType.SINGLE_STRING)).getStringValue();
             attachment.setFileName(setFileName);
         }
 
-        if (mapItem.get(new StringValue("contentFromFile")) != null) {
-            otherStr = checkMailProperty(context, mapItem, "contentFromFile", null, SequenceType.SINGLE_STRING).getStringValue();
+        if (mapItem.get(StringItem.bmp("contentFromFile")) != null) {
+            otherStr = checkMailProperty(context, mapItem, "contentFromFile", null, SequenceType.SINGLE_STRING)
+                    .getUnicodeStringValue().toString();
             if (otherStr != null) {
                 DataSource source = new FileDataSource(otherStr);
                 //attachment.setContent(source, mimeType);
@@ -174,9 +175,9 @@ public class SendMail extends SystemFunction {
             }
         }
 
-        if (mapItem.get(new StringValue("contentFromURI")) != null) {
+        if (mapItem.get(StringItem.bmp("contentFromURI")) != null) {
 
-            otherStr = ((Item) checkMailProperty(context, mapItem, "contentFromURI", null, SequenceType.SINGLE_STRING)).getStringValue();
+            otherStr = ((Item) checkMailProperty(context, mapItem, "contentFromURI", null, SequenceType.SINGLE_STRING)).getUnicodeStringValue().toString();
             if (otherStr != null) {
                 URL uri;
                 try {
@@ -196,15 +197,15 @@ public class SendMail extends SystemFunction {
 
                 return attachment
             }*/
-        if (mapItem.get(new StringValue("stringContent")) != null) {
-            otherStr = ((Item) checkMailProperty(context, mapItem, "stringContent", null, SequenceType.SINGLE_STRING)).getStringValue();
+        if (mapItem.get(StringItem.bmp("stringContent")) != null) {
+            otherStr = ((Item) checkMailProperty(context, mapItem, "stringContent", null, SequenceType.SINGLE_STRING)).getUnicodeStringValue().toString();
 
             if (otherStr != null) {
                 attachment.setText(otherStr);
                 return attachment;
             }
-        } else if (mapItem.get(new StringValue("contentFromString")) != null) {
-            otherStr = ((Item) checkMailProperty(context, mapItem, "contentFromString", null, SequenceType.SINGLE_STRING)).getStringValue();
+        } else if (mapItem.get(StringItem.bmp("contentFromString")) != null) {
+            otherStr = ((Item) checkMailProperty(context, mapItem, "contentFromString", null, SequenceType.SINGLE_STRING)).getUnicodeStringValue().toString();
 
             if (otherStr != null) {
                 attachment.setText(otherStr);
@@ -277,8 +278,8 @@ public class SendMail extends SystemFunction {
             MailSSLSocketFactory sf = null;
             try {
                 sf = new MailSSLSocketFactory();
-            } catch (GeneralSecurityException|SecurityException e) {
-                throw new XPathException(e);
+            } catch (GeneralSecurityException e) {
+                e.printStackTrace();
             }
             sf.setTrustAllHosts(true);
             mailProps.put("mail.smtp.ssl.trust", server);
@@ -337,7 +338,7 @@ public class SendMail extends SystemFunction {
 
         String content = "";
 
-        if (contentItem instanceof StringValue) {
+        if (contentItem instanceof StringItem) {
             content = contentItem.getStringValue();
         } else if (contentItem instanceof Item || htmlOption) {
 

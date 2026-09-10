@@ -6,7 +6,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.Substring;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Generate bytecode for evaluation of a call to the substring() function
@@ -28,18 +28,18 @@ public class SubstringCompiler extends ToItemCompiler {
         compiler.compileToItem(fnc.getArg(0));
         returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, substringReturn, 0);
 
-        ga.checkClass(StringValue.class);
+        ga.checkClass(StringItem.class);
 
         if (numArgs == 2) {
             compiler.compileToItem(fnc.getArg(1));
             ga.checkClass(NumericValue.class);
-            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class);
+            ga.invokeStaticMethod(Substring.class, "substring", StringItem.class, NumericValue.class);
         } else {
             compiler.compileToItem(fnc.getArg(1));
             ga.checkClass(NumericValue.class);
             compiler.compileToItem(fnc.getArg(2));
             ga.checkClass(NumericValue.class);
-            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class, NumericValue.class);
+            ga.invokeStaticMethod(Substring.class, "substring", StringItem.class, NumericValue.class, NumericValue.class);
         }
 
         methodInfo.placeLabel(substringReturn);
@@ -67,25 +67,25 @@ public class SubstringCompiler extends ToItemCompiler {
             ga.dup();
             ga.ifNonNull(stringArgNonNull.label());
             ga.pop();
-            allocateStatic(compiler, StringValue.EMPTY_STRING);
+            allocateStatic(compiler, StringItem.EMPTY_STRING);
             ga.goTo(substringReturn);
             methodInfo.placeLabel(stringArgNonNull);
         }
 
-        ga.checkClass(StringValue.class);
+        ga.checkClass(StringItem.class);
 
         if (numArgs == 2) {
             compiler.compileToItem(fnc.getArg(1));
             ga.checkClass(NumericValue.class);
-            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(Substring.class, "substring", StringItem.class, NumericValue.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
         } else {
             compiler.compileToItem(fnc.getArg(1));
             ga.checkClass(NumericValue.class);
             compiler.compileToItem(fnc.getArg(2));
             ga.checkClass(NumericValue.class);
-            ga.invokeStaticMethod(Substring.class, "substring", StringValue.class, NumericValue.class, NumericValue.class);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(Substring.class, "substring", StringItem.class, NumericValue.class, NumericValue.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
         }
 
         methodInfo.placeLabel(substringReturn);

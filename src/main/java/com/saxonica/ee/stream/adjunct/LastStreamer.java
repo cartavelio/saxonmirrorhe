@@ -26,7 +26,7 @@ public class LastStreamer extends StreamingAdjunct {
 
     @Override
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
-        Posture cp = ((ContextItemStaticInfoEE)contextInfo).getContextItemPosture();
+        Posture cp = contextInfo.getContextItemPosture();
         if (cp == Posture.STRIDING || cp == Posture.CRAWLING || cp == Posture.ROAMING) {
             if (reasons != null) {
                 reasons.add("Call to last() is not streamable when processing streamed nodes");

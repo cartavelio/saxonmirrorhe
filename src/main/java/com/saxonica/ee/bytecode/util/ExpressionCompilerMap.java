@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public class ExpressionCompilerMap {
 
-    private static HashMap<String, ExpressionCompiler> map = new HashMap<>();
+    private static final HashMap<String, ExpressionCompiler> map = new HashMap<>();
 
     static {
         map.put("mergeAdj", new AdjacentTextNodeMergerCompiler());

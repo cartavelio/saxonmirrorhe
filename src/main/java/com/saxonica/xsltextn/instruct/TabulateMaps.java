@@ -23,7 +23,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -37,8 +37,8 @@ import java.util.List;
 
 public class TabulateMaps extends Instruction {
 
-    private Operand rootOp;
-    private Operand selectOp;
+    private final Operand rootOp;
+    private final Operand selectOp;
 
     /**
      * Create the instruction
@@ -203,11 +203,11 @@ public class TabulateMaps extends Instruction {
                             GroundedValue value = selectedMap.get(k);
                             if (value == null) {
                                 selectedMap = selectedMap.addEntry(k, kvp.value);
-                            } else if (k instanceof StringValue) {
+                            } else if (k instanceof StringItem) {
                                 String ks = k.getStringValue();
                                 for (int suffix = 1; suffix < Integer.MAX_VALUE; suffix++) {
                                     ks = ks + (suffix + "");
-                                    StringValue sv = new StringValue(ks);
+                                    StringItem sv = new StringItem(ks);
                                     if (selectedMap.get(sv) == null) {
                                         selectedMap = selectedMap.addEntry(sv, kvp.value);
                                         break;
@@ -223,11 +223,11 @@ public class TabulateMaps extends Instruction {
                 parent = pedigree.getContainer();
             }
             String keysKey = "_keys";
-            while (selectedMap.get(new StringValue(keysKey)) != null) {
+            while (selectedMap.get(new StringItem(keysKey)) != null) {
                 keysKey = keysKey + "_";
             }
             List<GroundedValue> copy = new ArrayList<>(keys);
-            selectedMap = selectedMap.addEntry(new StringValue(keysKey),
+            selectedMap = selectedMap.addEntry(new StringItem(keysKey),
                                                new SimpleArrayItem(copy));
             output.append(selectedMap);
         }

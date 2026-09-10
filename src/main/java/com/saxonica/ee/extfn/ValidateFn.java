@@ -79,7 +79,7 @@ public class ValidateFn extends SystemFunction {
                 Sequence val;
 
                 // buildTree = true() | false() | ()
-                val = options.get(new StringValue("buildTree"));
+                val = options.get(StringItem.bmp("buildTree"));
                 if (val != null && val.head() != null) {
                     if (val instanceof BooleanValue) {
                         buildTree = ((BooleanValue) val).getBooleanValue();
@@ -90,7 +90,7 @@ public class ValidateFn extends SystemFunction {
                 }
 
                 // type = QName
-                val = options.get(new StringValue("type"));
+                val = options.get(StringItem.bmp("type"));
                 if (val != null) {
                     if (val instanceof QNameValue) {
                         schemaType = config.getSchemaType(((QNameValue) val).getStructuredQName());
@@ -103,10 +103,10 @@ public class ValidateFn extends SystemFunction {
                 }
 
                 // processContents = strict | lax
-                val = options.get(new StringValue("processContents"));
+                val = options.get(StringItem.bmp("processContents"));
                 if (val != null) {
-                    if (val instanceof StringValue) {
-                        String s = ((StringValue) val).getStringValue();
+                    if (val instanceof StringItem) {
+                        String s = ((StringItem) val).getStringValue();
                         switch (s) {
                             case "strict":
                                 // no action
@@ -123,7 +123,7 @@ public class ValidateFn extends SystemFunction {
                 }
 
                 // expandDefaults = true() | false()
-                val = options.get(new StringValue("expandDefaults"));
+                val = options.get(StringItem.bmp("expandDefaults"));
                 if (val != null) {
                     if (val instanceof BooleanValue) {
                         expand = ((BooleanValue) val).getBooleanValue();
@@ -145,7 +145,7 @@ public class ValidateFn extends SystemFunction {
                     QNameValue qKey;
                     if (key instanceof QNameValue) {
                         qKey = (QNameValue) key;
-                    } else if (key instanceof StringValue) {
+                    } else if (key instanceof StringItem) {
                         qKey = new QNameValue("", "", key.getStringValue());
                     } else {
                         throw new XPathException("key value in third argument to saxon:validate must be a string or QName");
@@ -246,10 +246,10 @@ public class ValidateFn extends SystemFunction {
                         // test whether the value actually conforms to the given type
                         simpleType = (SimpleType) schemaType;
                         ValidationFailure err = simpleType.validateContent(
-                            input.getStringValue(), DummyNamespaceResolver.getInstance(), context.getConfiguration().getConversionRules());
+                                input.getUnicodeStringValue(), DummyNamespaceResolver.getInstance(), context.getConfiguration().getConversionRules());
                         if (err != null) {
                             ValidationFailure ve = new ValidationFailure(
-                                "Attribute value " + Err.wrap(input.getStringValue(), Err.VALUE) +
+                                "Attribute value " + Err.wrap(input.getUnicodeStringValue(), Err.VALUE) +
                                     " does not match the required type " +
                                     schemaType.getDescription() + ". " +
                                     err.getMessage());
@@ -262,7 +262,7 @@ public class ValidateFn extends SystemFunction {
                         validation == Validation.LAX) {
                         try {
                             simpleType = config.validateAttribute(
-                                NameOfNode.makeName(input).getStructuredQName(), input.getStringValue(), validation);
+                                    NameOfNode.makeName(input).getStructuredQName(), input.getUnicodeStringValue(), validation);
 
                         } catch (ValidationException e) {
                             ValidationFailure vf = e.getValidationFailure();
@@ -277,7 +277,7 @@ public class ValidateFn extends SystemFunction {
                         Orphan result = new Orphan(config);
                         result.setNodeKind(Type.ATTRIBUTE);
                         result.setNodeName(NameOfNode.makeName(input));
-                        result.setStringValue(input.getStringValue());
+                        result.setStringValue(input.getUnicodeStringValue());
                         result.setTypeAnnotation(simpleType);
                         resultNode = result;
                     } else {
@@ -311,16 +311,16 @@ public class ValidateFn extends SystemFunction {
                     if (v.getErrorCodeQName() != null) {
                         im.initialPut("code", new QNameValue(v.getErrorCodeQName(), BuiltInAtomicType.QNAME));
                     }
-                    im.initialPut("message", new StringValue(v.getMessage()));
+                    im.initialPut("message", new StringItem(v.getMessage()));
 
                     if (v.getSchemaPart() != -1) {
                         im.initialPut("specPart", new Int64Value(v.getSchemaPart()));
                     }
                     if (v.getConstraintName() != null) {
-                        im.initialPut("constraint", new StringValue(v.getConstraintName()));
+                        im.initialPut("constraint", new StringItem(v.getConstraintName()));
                     }
                     if (v.getConstraintClauseNumber() != null) {
-                        im.initialPut("clause", new StringValue(v.getConstraintClauseNumber()));
+                        im.initialPut("clause", new StringItem(v.getConstraintClauseNumber()));
                     }
                     if (v.getLineNumber() != -1) {
                         im.initialPut("line", new Int64Value(v.getLineNumber()));
@@ -329,16 +329,16 @@ public class ValidateFn extends SystemFunction {
                         im.initialPut("colummn", new Int64Value(v.getColumnNumber()));
                     }
                     if (v.getSystemId() != null) {
-                        im.initialPut("systemId", new StringValue(v.getSystemId()));
+                        im.initialPut("systemId", new StringItem(v.getSystemId()));
                     }
                     if (v.getPublicId() != null) {
-                        im.initialPut("publicId", new StringValue(v.getPublicId()));
+                        im.initialPut("publicId", new StringItem(v.getPublicId()));
                     }
                     if (v.getInvalidNode() != null) {
                         im.initialPut("node", v.getInvalidNode());
                     }
                     if (v.getPath() != null) {
-                        im.initialPut("path", new StringValue(v.getPath().getPathUsingUris()));
+                        im.initialPut("path", new StringItem(v.getPath().getPathUsingUris()));
                     }
 
                     errors.add(im);

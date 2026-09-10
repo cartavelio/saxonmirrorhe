@@ -14,7 +14,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.TextFragmentValue;
 import org.objectweb.asm.Type;
@@ -83,15 +83,15 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 //                textValue = constantText;
                 ga.push(instr.getConstantText().toString());
             } else {
-//                FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.SMALL);
+//                StringBuilder sb = new StringBuilder(StringBuilder.SMALL);
 //                SequenceIterator iter = content.iterate(context);
-                int fsbVar = methodInfo.allocateLocal(FastStringBuffer.class);
+                int fsbVar = methodInfo.allocateLocal(StringBuilder.class);
                 int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
 
-                ga.newInstance(FastStringBuffer.class);
+                ga.newInstance(StringBuilder.class);
                 ga.dup();
-                ga.push(FastStringBuffer.C64);
-                ga.invokeConstructor(FastStringBuffer.class, Integer.TYPE);
+                ga.push(64);
+                ga.invokeConstructor(StringBuilder.class, Integer.TYPE);
                 ga.storeLocal(fsbVar);
 
                 compiler.compileToIterator(instr.getContentExpression());
@@ -111,14 +111,14 @@ public class DocumentInstrCompiler extends ToPushCompiler {
                 ga.invokeInstanceMethod(Item.class, "getStringValueCS");
                 ga.loadLocal(fsbVar);
                 ga.swap();
-                ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+                ga.invokeInstanceMethod(StringBuilder.class, "append", CharSequence.class);
                 ga.goTo(loop);
 
                 methodInfo.placeLabel(loopDone);
                 ga.pop();
 //                textValue = sb.condense();
                 ga.loadLocal(fsbVar);
-                ga.invokeInstanceMethod(FastStringBuffer.class, "condense");
+                ga.invokeInstanceMethod(StringBuilder.class, "condense");
 
                 methodInfo.releaseLocal(fsbVar);
                 methodInfo.releaseLocal(iterVar);

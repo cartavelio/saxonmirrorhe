@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class Inversion {
 
-    private List<PushAction> route = new ArrayList<>();
+    private final List<PushAction> route = new ArrayList<>();
 
     /**
      * Compute the Jackson inversion of an expression. The effect is (a) to determine whether the

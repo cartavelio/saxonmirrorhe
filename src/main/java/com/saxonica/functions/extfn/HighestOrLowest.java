@@ -83,10 +83,10 @@ public class HighestOrLowest extends SystemFunction {
                                     " must be an atomic value", "XPTY0004");
                 }
                 AtomicValue keyVal = (AtomicValue)key.head();
-                if (keyVal instanceof UntypedAtomicValue) {
+                if (keyVal.isUntypedAtomic()) {
                     StringToDouble converter = context.getConfiguration().getConversionRules().getStringToDoubleConverter();
                     try {
-                        keyVal = new DoubleValue(converter.stringToNumber(keyVal.getStringValueCS()));
+                        keyVal = new DoubleValue(converter.stringToNumber(keyVal.getUnicodeStringValue()));
                     } catch (NumberFormatException e) {
                         XPathException de = new XPathException("Failed to convert key to xs:double: " + e.getMessage(), "FORG0001");
                         de.setXPathContext(context);

@@ -1,5 +1,6 @@
 package com.saxonica.serialize;
 
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.HexBinaryValue;
 import net.sf.saxon.value.Whitespace;
@@ -13,8 +14,8 @@ import net.sf.saxon.value.Whitespace;
 public class HexBinaryEmitter extends BinaryEmitter {
 
     @Override
-    protected byte[] textNodeToBinary(CharSequence chars) throws XPathException {
-        return new HexBinaryValue(Whitespace.trimWhitespace(chars)).getBinaryValue();
+    protected byte[] textNodeToBinary(UnicodeString chars) throws XPathException {
+        return new HexBinaryValue(Whitespace.trim(chars)).getBinaryValue();
     }
 }
 

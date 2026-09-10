@@ -13,7 +13,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
@@ -29,12 +29,12 @@ import java.util.List;
  */
 public class InsertExpression extends BasicUpdatingExpression {
 
-    private int position;
-    private int constructionMode;
-    private boolean inheritNamespaces;
-    private boolean preserveNamespaces;
-    private Operand sourceOp;
-    private Operand targetOp;
+    private final int position;
+    private final int constructionMode;
+    private final boolean inheritNamespaces;
+    private final boolean preserveNamespaces;
+    private final Operand sourceOp;
+    private final Operand targetOp;
 
 
     /**
@@ -174,7 +174,7 @@ public class InsertExpression extends BasicUpdatingExpression {
         out.startElement("insert", this);
         out.emitAttribute("position", SaxonInsert.encodePosition(position));
         out.emitAttribute("constructionMode", constructionMode + "");
-        FastStringBuffer fsb = new FastStringBuffer(2);
+        StringBuilder fsb = new StringBuilder(2);
         if (inheritNamespaces) {
             fsb.append("i");
         }

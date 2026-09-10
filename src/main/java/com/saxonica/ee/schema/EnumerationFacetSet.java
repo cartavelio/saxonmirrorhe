@@ -1,14 +1,14 @@
 package com.saxonica.ee.schema;
 
-import com.saxonica.ee.validate.CompactStringValue;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SchemaComponent;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.*;
@@ -27,13 +27,13 @@ public class EnumerationFacetSet extends Facet {
      * The set of allowed values, indexed by the result of calling getSchemaComparable()
      */
 
-    private HashMap<Comparable, AtomicSequence> typedValues = new HashMap<>(20);
+    private final HashMap<Comparable, AtomicSequence> typedValues = new HashMap<>(20);
 
     /**
      * The allowed values, as strings
      */
 
-    private List<String> stringValues = new ArrayList<>(20);
+    private final List<String> stringValues = new ArrayList<>(20);
 
     /**
      * The name of this facet.
@@ -63,8 +63,8 @@ public class EnumerationFacetSet extends Facet {
      */
 
     public void addEnumerationValue(AtomicSequence val, String stringValue) {
-        if (val instanceof StringValue) {
-            val = new CompactStringValue(val.getStringValue());
+        if (val instanceof StringItem) {
+            val = new StringItem(val.getUnicodeStringValue().economize());
         }
         typedValues.put(val.getSchemaComparable(), val);
         stringValues.add(stringValue);
@@ -73,17 +73,22 @@ public class EnumerationFacetSet extends Facet {
 
     /**
      * Get a string representation of the value of the facet
+     * @return the concatenation of the enumeration values, comma-separated
      */
 
     @Override
-    public String getValue() {
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+    public UnicodeString getValue() {
+        UnicodeBuilder sb = new UnicodeBuilder();
+        boolean first = true;
         for (AtomicSequence v : typedValues.values()) {
-            sb.append(v.getStringValue());
-            sb.append(", ");
+            if (first) {
+                first = false;
+            } else {
+                sb.appendLatin(", ");
+            }
+            sb.append(v.getUnicodeStringValue());
         }
-        sb.setLength(sb.length() - 2);
-        return sb.toString();
+        return sb.toUnicodeString();
     }
 
     /**
@@ -171,7 +176,7 @@ public class EnumerationFacetSet extends Facet {
                     namespaceSensitive = true;
                 }
             }
-            serializer.emitAttribute("value", v.getStringValue());
+            serializer.emitAttribute("value", v.getUnicodeStringValue().toString());
             if (namespaceSensitive) {
                 serializer.emitAttribute("namespaceSensitive", "true");
             }
@@ -185,15 +190,15 @@ public class EnumerationFacetSet extends Facet {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue(getName());
+                    return new StringItem(getName());
                 case "implementation":
                     return new ObjectValue<>(EnumerationFacetSet.this);
                 case "value":
                     // This is a set of typed values, where each typed value is potentially a list.
                     // We therefore return the string values (bug 4024)
-                    List<StringValue> list = new ArrayList<>();
+                    List<StringItem> list = new ArrayList<>();
                     for (String s : stringValues) {
-                        list.add(new StringValue(s));
+                        list.add(new StringItem(s));
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 case "typed-value":

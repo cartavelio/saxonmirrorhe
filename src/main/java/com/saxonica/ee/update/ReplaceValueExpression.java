@@ -7,6 +7,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.MutableNodeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.XQueryParser;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -18,8 +19,8 @@ import net.sf.saxon.value.SequenceType;
  */
 public class ReplaceValueExpression extends BasicUpdatingExpression {
 
-    private Operand targetOp;
-    private Operand replacementOp;
+    private final Operand targetOp;
+    private final Operand replacementOp;
 
     /**
      * Create a ReplaceValue expression
@@ -203,7 +204,7 @@ public class ReplaceValueExpression extends BasicUpdatingExpression {
             throw er;
         }
         try {
-            ReplaceValueAction action = new ReplaceValueAction(newString, (MutableNodeInfo) targetNode);
+            ReplaceValueAction action = new ReplaceValueAction(StringView.tidy(newString), (MutableNodeInfo) targetNode);
             action.setOriginator(this);
             ((PendingUpdateListImpl) pul).add(action);
         } catch (XPathException e) {

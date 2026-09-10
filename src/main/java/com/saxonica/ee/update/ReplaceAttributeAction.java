@@ -14,9 +14,9 @@ import java.util.Set;
  */
 public class ReplaceAttributeAction extends PendingUpdateAction {
 
-    private NodeInfo element;
-    private NodeInfo oldAttribute;
-    private AttributeMap newAttributes;
+    private final NodeInfo element;
+    private final NodeInfo oldAttribute;
+    private final AttributeMap newAttributes;
 
     /**
      * Create a ReplaceAttributeAction
@@ -55,7 +55,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
         for (AttributeInfo att : newAttributes) {
             NodeName name = att.getNodeName();
             SimpleType typeCode = att.getType();
-            CharSequence value = att.getValue();
+            String value = att.getValue();
             int properties = att.getProperties();
             if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
                 throw new XPathException("Attempting to add an attribute that already exists");

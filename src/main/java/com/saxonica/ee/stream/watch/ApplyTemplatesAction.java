@@ -345,7 +345,7 @@ public class ApplyTemplatesAction extends ItemFeed {
         super.close();
     }
 
-    private static AncestorQualifiedPattern CHILD_NODE_SELECTION =
+    private static final AncestorQualifiedPattern CHILD_NODE_SELECTION =
             new AncestorQualifiedPattern(
                     new NodeTestPattern(MultipleNodeKindTest.CHILD_NODE), AnchorPattern.getInstance(), AxisInfo.PARENT);
 

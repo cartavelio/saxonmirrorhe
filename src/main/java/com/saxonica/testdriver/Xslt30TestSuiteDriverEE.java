@@ -170,7 +170,7 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
 
             } else if ("XSD_1.1".equals(value)) {
                 String requiredVersion = inverse ? "1.0" : "1.1";
-                final String oldVersion = (String) env.processor.getConfigurationProperty(Feature.XSD_VERSION);
+                final String oldVersion = env.processor.getConfigurationProperty(Feature.XSD_VERSION);
                 if (env != null) {
                     env.resetActions.add(new Environment.ResetAction() {
                         @Override

@@ -14,8 +14,9 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Arrays;
 import java.util.List;
@@ -305,13 +306,13 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
         register("replace-with", 3, ReplaceWith.class, BuiltInAtomicType.STRING,
                  ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, stringReplacer, ONE, null);
 
         register("replace-with", 4, ReplaceWith.class, BuiltInAtomicType.STRING,
                  ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringItem.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, stringReplacer, ONE, null)
                 .arg(3, BuiltInAtomicType.STRING, ONE, null);
@@ -341,6 +342,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, config.getJavaExternalObjectType(PreparedStylesheet.class), ONE, null)
                 .arg(1, AnyNodeTest.getInstance(), ONE, null)
                 .arg(2, AnyItemType.getInstance(), STAR, null);
+
+        register("unindexed", 1, Unindexed.class, AnyItemType.getInstance(), STAR, CTRL)
+                .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance());
 
         register("with-pedigree", 1, WithPedigree.class, AnyFunctionType.getInstance(), ONE, 0)
                 .arg(0, AnyFunctionType.getInstance(), ONE, null);

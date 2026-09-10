@@ -79,7 +79,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public boolean getBoolean() throws XQException;
+    boolean getBoolean() throws XQException;
 
     /**
      * Gets the current item as a <code>byte</code>.
@@ -95,7 +95,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public byte getByte() throws XQException;
+    byte getByte() throws XQException;
 
     /**
      * Gets the current item as a <code>double</code>.
@@ -111,7 +111,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public double getDouble() throws XQException;
+    double getDouble() throws XQException;
 
     /**
      * Gets the current item as a <code>float</code>.
@@ -127,7 +127,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public float getFloat() throws XQException;
+    float getFloat() throws XQException;
 
     /**
      * Gets the current item as an <code>int</code>.
@@ -143,7 +143,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public int getInt() throws XQException;
+    int getInt() throws XQException;
 
     /**
      * Gets the type of the item.
@@ -158,7 +158,7 @@ public interface XQItemAccessor {
      * @throws XQException if (1) there are errors accessing the type of the item,
      *                     or (2) the underlying sequence or item is in a closed state
      */
-    public XQItemType getItemType() throws XQException;
+    XQItemType getItemType() throws XQException;
 
     /**
      * Gets the current item as a Java <code>String</code>. The current item
@@ -179,7 +179,7 @@ public interface XQItemAccessor {
      *                     sequences, a get or write method was already
      *                     invoked on the current item
      */
-    public String getAtomicValue() throws XQException;
+    String getAtomicValue() throws XQException;
 
     /**
      * Gets the current item as a <code>long</code>.
@@ -195,7 +195,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public long getLong() throws XQException;
+    long getLong() throws XQException;
 
 
     /**
@@ -217,7 +217,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public org.w3c.dom.Node getNode() throws XQException;
+    org.w3c.dom.Node getNode() throws XQException;
 
     /**
      * Returns the URI for this item. If the item is a document node, then this
@@ -240,7 +240,7 @@ public interface XQItemAccessor {
      *                     (2) the current item is not a node, (3) if the
      *                     underlying sequence or item is in a closed state
      */
-    public java.net.URI getNodeUri() throws XQException;
+    java.net.URI getNodeUri() throws XQException;
 
     /**
      * Gets the current item as an <code>Object</code>.
@@ -257,7 +257,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public java.lang.Object getObject() throws XQException;
+    java.lang.Object getObject() throws XQException;
 
     /**
      * Read the current item as an <code>XMLStreamReader</code> object, as described
@@ -284,7 +284,7 @@ public interface XQItemAccessor {
      *                     instance into a StAX event stream (XMLStreamReader), XQuery
      *                     API for Java (XQJ) 1.0</i>
      */
-    public javax.xml.stream.XMLStreamReader getItemAsStream() throws XQException;
+    javax.xml.stream.XMLStreamReader getItemAsStream() throws XQException;
 
     /**
      * Serializes the current item  according to the
@@ -310,7 +310,7 @@ public interface XQItemAccessor {
      *                     invoked on the current item, or (4)
      *                     if there are errors during serialization
      */
-    public java.lang.String getItemAsString(java.util.Properties props)
+    java.lang.String getItemAsString(java.util.Properties props)
             throws XQException;
 
     /**
@@ -327,7 +327,7 @@ public interface XQItemAccessor {
      *                     get or write method was already invoked on the
      *                     current item
      */
-    public short getShort() throws XQException;
+    short getShort() throws XQException;
 
     /**
      * Checks if the item "matches" an item type, as defined in
@@ -391,7 +391,7 @@ public interface XQItemAccessor {
      *                     user defined schema type, or (4) the <code>type</code>
      *                     parameter is <code>null</code>
      */
-    public boolean instanceOf(XQItemType type) throws XQException;
+    boolean instanceOf(XQItemType type) throws XQException;
 
     /**
      * Serializes the current item to a <code>Writer</code> according to
@@ -418,7 +418,7 @@ public interface XQItemAccessor {
      *                     (4) if there are errors during serialization, or
      *                     (5) the <code>os</code> parameter is <code>null</code>
      */
-    public void writeItem(java.io.OutputStream os, java.util.Properties props)
+    void writeItem(java.io.OutputStream os, java.util.Properties props)
             throws XQException;
 
     /**
@@ -451,7 +451,7 @@ public interface XQItemAccessor {
      *                     (4) if there are errors during serialization, or
      *                     (5) the <code>ow</code> parameter is <code>null</code>
      */
-    public void writeItem(java.io.Writer ow, java.util.Properties props)
+    void writeItem(java.io.Writer ow, java.util.Properties props)
             throws XQException;
 
     /**
@@ -478,7 +478,7 @@ public interface XQItemAccessor {
      *                     into a SAX event stream, or (5) the <code>saxhdlr</code>
      *                     parameter is <code>null</code>
      */
-    public void writeItemToSAX(org.xml.sax.ContentHandler saxhdlr)
+    void writeItemToSAX(org.xml.sax.ContentHandler saxhdlr)
             throws XQException;
 
     /**
@@ -507,7 +507,7 @@ public interface XQItemAccessor {
      *                     <code>Result</code> object, or (5) the <code>result</code>
      *                     parameter is <code>null</code>
      */
-    public void writeItemToResult(javax.xml.transform.Result result)
+    void writeItemToResult(javax.xml.transform.Result result)
             throws XQException;
 
-};
+}

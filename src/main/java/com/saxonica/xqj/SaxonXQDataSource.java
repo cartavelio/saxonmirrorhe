@@ -35,7 +35,7 @@ import java.util.Properties;
  */
 public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvider {
 
-    private Configuration config;
+    private final Configuration config;
     private PrintWriter logger;
 
     /**
@@ -168,7 +168,7 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
 
     }
 
-    /*@NotNull*/ private static String[] supportedPropertyNames = {
+    /*@NotNull*/ private static final String[] supportedPropertyNames = {
             "allowExternalFunctions",
             "dtdValidation",
             "expandAttributeDefaults",

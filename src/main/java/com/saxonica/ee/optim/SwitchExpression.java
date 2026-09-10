@@ -33,12 +33,12 @@ import java.util.*;
  */
 public class SwitchExpression extends Expression implements TailCallReturner, ConditionalInstruction {
 
-    private Operand subjectOp;
-    private List<Operand> actions;
-    private Map<AtomicMatchKey, Integer> map;
+    private final Operand subjectOp;
+    private final List<Operand> actions;
+    private final Map<AtomicMatchKey, Integer> map;
     private Map<AtomicMatchKey, AtomicValue> originalValues;
-    private Operand defaultActionOp;
-    private StringCollator collation;
+    private final Operand defaultActionOp;
+    private final StringCollator collation;
     private boolean isInstruction;
 
     public final static OperandRole SUBJECT =

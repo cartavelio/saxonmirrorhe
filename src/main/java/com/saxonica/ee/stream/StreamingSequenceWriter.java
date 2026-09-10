@@ -12,7 +12,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class StreamingSequenceWriter extends SequenceWriter {
 
-    private Outputter out;
+    private final Outputter out;
 
     public StreamingSequenceWriter(PipelineConfiguration pipe, Outputter out) {
         super(pipe);

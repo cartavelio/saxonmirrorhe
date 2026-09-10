@@ -23,12 +23,12 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator {
     // NOTE: have experimented with a dedicated iterator for the child axis matching against
     // elements only, by fingerprint - no measurable improvement obtained.
 
-    private DominoTree tree;
+    private final DominoTree tree;
     private int nextNodeNr;
-    /*@Nullable*/ private NodeTest test;
-    private DominoNode startNode;
-    private DominoNode parentNode;
-    private boolean getChildren;
+    /*@Nullable*/ private final NodeTest test;
+    private final DominoNode startNode;
+    private final DominoNode parentNode;
+    private final boolean getChildren;
     private boolean needToAdvance = false;
     private final IntPredicate matcher;
 

@@ -91,7 +91,7 @@ public class VariableReferenceAdjunct extends StreamingAdjunct {
                                 for (Operand o : parent.operands()) {
                                     if (o.getChildExpression() == e && o.isHigherOrder()) {
                                         reasons.add("A reference to the streaming parameter $" + var.getDisplayName() +
-                                                " appears in a higher-order context (that is, it needs to be evaluated repeatedly)");
+                                                            " appears in a higher-order context (that is, it needs to be evaluated repeatedly)");
                                         return PostureAndSweep.ROAMING_AND_FREE_RANGING;
                                     }
                                 }

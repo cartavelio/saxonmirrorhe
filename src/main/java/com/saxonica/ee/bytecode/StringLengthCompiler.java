@@ -6,7 +6,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.StringLength_1;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.objectweb.asm.Type;
 
 /**
@@ -38,7 +38,7 @@ public class StringLengthCompiler extends ToItemCompiler {
             compiler.compileToPrimitive(fnc.getArg(0), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
         }
 
-        ga.invokeStaticMethod(StringValue.class, "getStringLength", CharSequence.class);
+        ga.invokeStaticMethod(StringItem.class, "getStringLength", CharSequence.class);
 
         if (requiredClass == Long.TYPE) {
             ga.cast(Type.INT_TYPE, Type.LONG_TYPE);

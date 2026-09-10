@@ -24,9 +24,7 @@ public class CannotCompileException extends Exception {
     public CannotCompileException(String reason, boolean recoverable) {
         this.reason = reason;
         this.recoverable = recoverable;
-        if (!recoverable) {
-            assert false;
-        }
+        assert recoverable;
     }
 
     public CannotCompileException(Expression expr, String reason) {

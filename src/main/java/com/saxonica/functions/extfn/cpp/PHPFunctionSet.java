@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class PHPFunctionSet extends BuiltInFunctionSet {
 
-    private static PHPFunctionSet THE_INSTANCE = new PHPFunctionSet();
+    private static final PHPFunctionSet THE_INSTANCE = new PHPFunctionSet();
 
     private PHPFunctionSet() {
         init();
@@ -85,7 +85,7 @@ public class PHPFunctionSet extends BuiltInFunctionSet {
                         boolean isInteger = th.isSubType(operandType, BuiltInAtomicType.INTEGER);
                         if (th.isSubType(operandType, BuiltInAtomicType.STRING)) {
                             funcArgTypes[i] = "string";
-                            funcArgs[i] = value.getStringValue();
+                            funcArgs[i] = value.getUnicodeStringValue();
                         } else if (isInteger) {
                             funcArgTypes[i] = "integer";
                             funcArgs[i] = new Integer((int) ((IntegerValue) value).longValue());

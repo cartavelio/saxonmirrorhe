@@ -13,7 +13,7 @@ import net.sf.saxon.type.MissingComponentException;
 public class MissingComponentExceptionImpl extends MissingComponentException {
 
     // The ComponentReference that could not be resolved
-    private ComponentReference reference;
+    private final ComponentReference reference;
 
     public MissingComponentExceptionImpl(ComponentReference ref) {
         super("Unresolved reference to schema component " +

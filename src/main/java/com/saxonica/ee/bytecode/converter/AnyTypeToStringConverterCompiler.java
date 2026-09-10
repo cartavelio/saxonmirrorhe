@@ -6,7 +6,7 @@ import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Generate code for a AnyType to String CastExpression
@@ -23,10 +23,10 @@ public class AnyTypeToStringConverterCompiler extends ConverterCompiler {
             LabelInfo end = methodInfo.newLabel("endAnyTypeToItem");
             ga.dup();
             ga.ifNull(end.label());
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
             methodInfo.placeLabel(end);
         } else {
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
         }
     }
 
@@ -57,10 +57,7 @@ public class AnyTypeToStringConverterCompiler extends ConverterCompiler {
 
     private void generateNonNullCode(Class requiredClass, Generator ga) {
         ga.checkClass(AtomicValue.class);
-        ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
-        if (requiredClass == String.class) {
-            ga.invokeInstanceMethod(CharSequence.class, "toString");
-        }
+        ga.invokeInstanceMethod(AtomicValue.class, "getStringValue");
     }
 }
 

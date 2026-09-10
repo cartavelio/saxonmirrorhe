@@ -25,7 +25,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.DateTimeValue;
@@ -79,20 +79,20 @@ public class UpdateTestSuiteDriver {
     private boolean onwards = false;
     private boolean unfolded = false;
     //private boolean runCompiled = false;
-    private HashMap<String, NodeInfo> sourceIndex = new HashMap<String, NodeInfo>(50);
-    private HashMap uriMap = new HashMap(50);
+    private final HashMap<String, NodeInfo> sourceIndex = new HashMap<String, NodeInfo>(50);
+    private final HashMap uriMap = new HashMap(50);
 
-    private TransformerFactory tfactory = new TransformerFactoryImpl();
+    private final TransformerFactory tfactory = new TransformerFactoryImpl();
 
     private Writer results;
-    private Writer compileScript = null;
-    private PrintStream monitor = System.err;
+    private final Writer compileScript = null;
+    private final PrintStream monitor = System.err;
     private Logger log;
     private Object guiForm;
     private int successes = 0;
     private int failures = 0;
     private int wrongErrorResults = 0;
-    private List<String> failingTests = new ArrayList<>();
+    private final List<String> failingTests = new ArrayList<>();
 
     /**
      * Some tests use schemas that conflict with others, so they can't use the common schema cache.
@@ -537,7 +537,7 @@ public class UpdateTestSuiteDriver {
                         }
                         foundExpectedResults = true;
                         String resultsDir = testSuiteDir + "/ExpectedTestResults/" + filePath;
-                        String resultsPath = resultsDir + outputFileElement.getStringValue();
+                        String resultsPath = resultsDir + outputFileElement.getUnicodeStringValue();
                         String comparisonMethod = outputFileElement.getAttributeValue("", "compare");
                         String comparisonResult;
                         if (comparisonMethod.equals("Ignore")) {
@@ -576,7 +576,7 @@ public class UpdateTestSuiteDriver {
                             } else if (expectedError != null) {
                                 failures++;
                                 results.write("  <test-case name='" + testName + "' result='fail' comment='" +
-                                        "expected " + expectedError.getStringValue() + ", got success'/>\n");
+                                        "expected " + expectedError.getUnicodeStringValue() + ", got success'/>\n");
                                 failingTests.add(testName);
                             } else if (foundExpectedResults) {
                                 failures++;
@@ -729,7 +729,7 @@ public class UpdateTestSuiteDriver {
      */
 
     private TreeInfo loadDocument(String id) throws XPathException {
-        NodeInfo sourceElement = (NodeInfo) sourceIndex.get(id);
+        NodeInfo sourceElement = sourceIndex.get(id);
         String schema = sourceElement.getAttributeValue("", "schema");
         String fileName = sourceElement.getAttributeValue("", "FileName");
         Source ss = new StreamSource(new File(testSuiteDir + "/" + fileName));
@@ -750,9 +750,9 @@ public class UpdateTestSuiteDriver {
             throws IOException {
         String actualError = err.getErrorCodeLocalPart();
         AxisIterator expectedErrors = state.iterateAxis(AxisInfo.CHILD, expectedErrorNT);
-        FastStringBuffer expected = new FastStringBuffer(20);
+        StringBuilder expected = new StringBuilder(20);
         while (true) {
-            NodeInfo expectedError = (NodeInfo) expectedErrors.next();
+            NodeInfo expectedError = expectedErrors.next();
             if (expectedError == null) {
                 break;
             }
@@ -767,7 +767,7 @@ public class UpdateTestSuiteDriver {
             expected.append(" ");
         }
         if (!reportResult) {
-            FastStringBuffer fsb = new FastStringBuffer(20);
+            StringBuilder fsb = new StringBuilder(20);
             fsb.append("-");
             state.generateId(fsb);
             testName += fsb.toString();
@@ -1062,9 +1062,9 @@ public class UpdateTestSuiteDriver {
     }
 
     private void findDiff(String s1, String s2) {
-        FastStringBuffer sb1 = new FastStringBuffer(s1.length());
+        StringBuilder sb1 = new StringBuilder(s1.length());
         sb1.append(s1);
-        FastStringBuffer sb2 = new FastStringBuffer(s2.length());
+        StringBuilder sb2 = new StringBuilder(s2.length());
         sb2.append(s2);
         int i = 0;
         while (true) {

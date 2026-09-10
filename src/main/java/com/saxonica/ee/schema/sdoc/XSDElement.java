@@ -5,8 +5,9 @@ import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
@@ -179,7 +180,7 @@ public class XSDElement extends SchemaElement {
         // error recovery code
         if (element == null && isTopLevel()) {
             element = new ElementDecl((EnterpriseConfiguration) getConfiguration(), isTopLevel(), this);
-            FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder buff = new StringBuilder(64);
             generateId(buff);
             element.setGeneratedId(buff.toString());
             element.setNamespaceResolver(getAllNamespaces());
@@ -187,7 +188,7 @@ public class XSDElement extends SchemaElement {
         }
         if (elementParticle == null && !isTopLevel()) {
             element = new ElementDecl((EnterpriseConfiguration) getConfiguration(), isTopLevel(), this);
-            FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder buff = new StringBuilder(64);
             generateId(buff);
             element.setGeneratedId(buff.toString());
             element.setNamespaceResolver(getAllNamespaces());
@@ -228,7 +229,7 @@ public class XSDElement extends SchemaElement {
             // @default
             attValue = atts.getValue("", "default");
             if (attValue != null) {
-                element.setValueConstraint(new ValueConstraint(ValueConstraint.Variety.DEFAULT, attValue));
+                element.setValueConstraint(new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(attValue)));
             }
 
             // @final
@@ -251,7 +252,7 @@ public class XSDElement extends SchemaElement {
                 if (atts.getValue("", "default") != null) {
                     mutuallyExclusiveAttributes("default", "fixed");
                 } else {
-                    element.setValueConstraint(new ValueConstraint(ValueConstraint.Variety.FIXED, attValue));
+                    element.setValueConstraint(new ValueConstraint(ValueConstraint.Variety.FIXED, StringView.tidy(attValue)));
                 }
             }
 

@@ -25,7 +25,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public class Pedigree {
 
-    private PedigreeValue container;
+    private final PedigreeValue container;
     private int index = -1;
     private AtomicValue key;
 

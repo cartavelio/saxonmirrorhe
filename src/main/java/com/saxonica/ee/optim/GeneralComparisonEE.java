@@ -302,7 +302,7 @@ public class GeneralComparisonEE extends GeneralComparison {
                 AtomicValue v1 = first1;
                 if (t1 == UType.UNTYPED_ATOMIC && hashTableType != UType.UNTYPED_ATOMIC) {
                     t1 = hashTableType;
-                    ConversionResult result = untypedConverter.convertString(v1.getStringValueCS());
+                    ConversionResult result = untypedConverter.convertString(v1.getUnicodeStringValue());
                     if (result instanceof ValidationFailure) {
                         String msg = "Failure converting untypedAtomic value to " +
                                 hashTableType +
@@ -388,7 +388,7 @@ public class GeneralComparisonEE extends GeneralComparison {
                 AtomicValue v2 = first2;
                 if (t2 == UType.UNTYPED_ATOMIC && hashTableType != UType.UNTYPED_ATOMIC) {
                     t2 = hashTableType;
-                    ConversionResult result = untypedConverter.convertString(v2.getStringValueCS());
+                    ConversionResult result = untypedConverter.convertString(v2.getUnicodeStringValue());
                     if (result instanceof ValidationFailure) {
                         String msg = "Failure converting untypedAtomic value to " +
                                 hashTableType +

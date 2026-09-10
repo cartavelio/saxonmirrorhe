@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class StreamerMap {
 
-    private static HashMap<String, Class<? extends StreamingAdjunct>> map =
+    private static final HashMap<String, Class<? extends StreamingAdjunct>> map =
             new HashMap<>();
 
     static {

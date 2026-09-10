@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class MultithreadingFactory {
 
-    private EnterpriseConfiguration config;
+    private final EnterpriseConfiguration config;
 
     /**
      * Create a <tt>MultithreadingFactory</tt>

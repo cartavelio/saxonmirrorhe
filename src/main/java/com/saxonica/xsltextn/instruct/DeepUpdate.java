@@ -29,9 +29,9 @@ import java.util.IdentityHashMap;
 
 public class DeepUpdate extends Instruction {
 
-    private Operand rootOp;
-    private Operand selectOp;
-    private Operand actionOp;
+    private final Operand rootOp;
+    private final Operand selectOp;
+    private final Operand actionOp;
 
 
     public DeepUpdate(Expression root, Expression select, Expression action) {

@@ -15,7 +15,7 @@ import net.sf.saxon.trans.XPathException;
 public class GroupStartingTester extends GroupBoundaryTester {
 
     private int pos = 0;
-    private Pattern pattern;
+    private final Pattern pattern;
 
     public GroupStartingTester(ForEachGroup expression, XPathContext context) {
         super(expression, context);

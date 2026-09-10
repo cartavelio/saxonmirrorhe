@@ -12,17 +12,16 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.AdjacentTextNodeMerger;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * Streaming implementation of an AdjacentTextNodeMerger expression
@@ -71,7 +70,7 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
 
     private static class AdjacentTextNodeMergerFeed extends ItemFeed {
 
-        private FastStringBuffer buffer = new FastStringBuffer(100);
+        private final UnicodeBuilder buffer = new UnicodeBuilder();
         private boolean prevText = false;
 
         AdjacentTextNodeMergerFeed(Expression exp, ItemFeed result, XPathContext context) {
@@ -89,9 +88,9 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
         @Override
         public void append(Item item) throws XPathException {
             if (AdjacentTextNodeMerger.isTextNode(item)) {
-                CharSequence s = item.getStringValueCS();
-                if (s.length() > 0) {
-                    buffer.cat(s);
+                UnicodeString s = item.getUnicodeStringValue();
+                if (!s.isEmpty()) {
+                    buffer.append(s);
                     prevText = true;
                 }
             } else {
@@ -101,9 +100,9 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
         }
 
         @Override
-        public void characters(CharSequence chars, Location location, int properties) throws XPathException {
-            if (chars.length() > 0) {
-                buffer.cat(chars);
+        public void characters(CodePoints chars, Location location, int properties) throws XPathException {
+            if (!chars.isEmpty()) {
+                buffer.append(chars);
                 prevText = true;
             }
         }
@@ -112,9 +111,9 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
             if (prevText) {
                 Orphan o = new Orphan(getPipelineConfiguration().getConfiguration());
                 o.setNodeKind(Type.TEXT);
-                o.setStringValue(buffer.toString());
+                o.setStringValue(buffer.toUnicodeString());
                 getNextOutputter().append(o);
-                buffer.setLength(0);
+                buffer.clear();
             }
             prevText = false;
 
@@ -139,13 +138,13 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
         }
 
         @Override
-        public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+        public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
             prevText = false;
             super.processingInstruction(name, data, location, properties);
         }
 
         @Override
-        public void comment(CharSequence content, Location location, int properties) throws XPathException {
+        public void comment(CodePoints content, Location location, int properties) throws XPathException {
             prevText = false;
             super.comment(content, location, properties);
         }

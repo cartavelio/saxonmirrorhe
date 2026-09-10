@@ -15,7 +15,7 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
 
@@ -26,8 +26,8 @@ import static net.sf.saxon.type.SchemaComponent.ValidationStatus.INVALID;
  */
 public class TypeAlternative extends SchemaStructure implements SchemaComponent {
 
-    private XPathExpression condition;
-    private String conditionText;
+    private final XPathExpression condition;
+    private final String conditionText;
     private NamespaceResolver namespaceContext;
     private String baseURI;
     private String defaultNamespace;
@@ -224,7 +224,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Type Alternative");
+                    return StringItem.bmp("Type Alternative");
                 case "implementation":
                     return new ObjectValue<>(this);
                 case "test":

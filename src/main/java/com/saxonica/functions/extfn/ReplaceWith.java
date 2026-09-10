@@ -5,8 +5,9 @@ import net.sf.saxon.functions.RegexFunction;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -31,30 +32,29 @@ public class ReplaceWith extends RegexFunction  {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-        StringValue arg0 = (StringValue)arguments[0].head();
-        CharSequence input = arg0 == null ? "" : arg0.getStringValueCS();
+        StringItem arg0 = (StringItem)arguments[0].head();
+        StringItem input = arg0 == null ? StringItem.EMPTY_STRING : arg0;
 
         if (arguments.length == 3) {
             Sequence[] extra = new Sequence[4];
             System.arraycopy(arguments, 0, extra, 0, 3);
-            extra[3] = new StringValue("");
+            extra[3] = StringItem.EMPTY_STRING;
             arguments = extra;
         }
         Function arg2 = (Function) arguments[2].head();
-        java.util.function.Function<CharSequence, CharSequence> fn = in -> {
+        java.util.function.Function<UnicodeString, UnicodeString> fn = in -> {
                 try {
-                    Sequence result = arg2.call(context, new Sequence[]{new StringValue(in)});
-                    return result.head().getStringValueCS();
+                    Sequence result = arg2.call(context, new Sequence[]{new StringItem(in)});
+                    return result.head().getUnicodeStringValue();
                 } catch (XPathException e) {
                     throw new AssertionError(e);
                 }
             };
 
         RegularExpression re = getRegularExpression(arguments);
-        CharSequence res = re.replaceWith(input, fn);
-        return StringValue.makeStringValue(res);
+        return new StringItem(re.replaceWith(input.getUnicodeStringValue(), fn));
     }
 
 }

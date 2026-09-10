@@ -14,10 +14,10 @@ import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.HashMap;
 import java.util.Stack;
@@ -32,8 +32,8 @@ import java.util.Stack;
 public abstract class SelectorWatch extends PatternWatch {
 
     IdentityConstraint identityConstraint;
-    private ConstraintChecker constraintChecker;
-    private int numberOfColumns;
+    private final ConstraintChecker constraintChecker;
+    private final int numberOfColumns;
     private AtomicSequence[] currentRow;
     private Stack<AtomicSequence[]> activationStack = null;
     HashMap<ValueEntry, Integer> table = new HashMap<>(100);
@@ -366,8 +366,8 @@ public abstract class SelectorWatch extends PatternWatch {
          */
 
         protected final AtomicSequence compact(AtomicSequence value) {
-            if (value instanceof StringValue) {
-                return new CompactStringValue(value.getStringValue());
+            if (value instanceof StringItem) {
+                return new CompactStringValue(value.getUnicodeStringValue());
             } else {
                 return value;
             }
@@ -428,15 +428,15 @@ public abstract class SelectorWatch extends PatternWatch {
         }
 
         public String toString() {
-            FastStringBuffer sb = new FastStringBuffer(100);
-            sb.cat('(');
+            StringBuilder sb = new StringBuilder(100);
+            sb.append('(');
             for (int i = 0; i < values.length; i++) {
                 if (i != 0) {
                     sb.append(", ");
                 }
                 sb.append(displayValue(values[i]));
             }
-            sb.cat(')');
+            sb.append(')');
             return sb.toString();
         }
     }

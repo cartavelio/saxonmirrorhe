@@ -4,7 +4,7 @@ import net.sf.saxon.om.NamePool;
 import net.sf.saxon.pull.PullFilter;
 import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 /**
  * PullTracer is a PullFilter that can be inserted into a pull pipeline for diagnostic purposes. It traces
@@ -30,7 +30,7 @@ public class PullTracer extends PullFilter {
      * copies it to the branch Receiver, and then returns the event to the caller.
      *
      * @return an integer code indicating the type of event. The code
-     *         {@link net.sf.saxon.pull.PullProvider.Event#END_OF_INPUT} is returned at the end of the sequence.
+     *         {@code END_OF_INPUT} is returned at the end of the sequence.
      */
 
     @Override
@@ -62,13 +62,13 @@ public class PullTracer extends PullFilter {
             case TEXT:
                 System.err.println("TEXT");
                 try {
-                    CharSequence cs = this.getStringValue();
-                    FastStringBuffer sb = new FastStringBuffer(cs.length() * 5);
-                    sb.cat('(');
+                    String cs = this.getStringValue().toString();
+                    StringBuilder sb = new StringBuilder(cs.length() * 5);
+                    sb.append('(');
                     for (int i = 0; i < cs.length(); i++) {
-                        sb.append((int) cs.charAt(i) + " ");
+                        sb.append(cs.charAt(i));
                     }
-                    sb.cat(')');
+                    sb.append(')');
                     System.err.println(sb);
                 } catch (XPathException err) {
                     // no-op
@@ -97,7 +97,7 @@ public class PullTracer extends PullFilter {
 
             case ATOMIC_VALUE:
                 try {
-                    System.err.println("ATOMIC VALUE: " + in.getStringValue());
+                    System.err.println("ATOMIC VALUE: " + in.getStringValue().toString());
                 } catch (XPathException e) {
                     //
                 }

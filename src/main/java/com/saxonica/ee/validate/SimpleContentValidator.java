@@ -6,13 +6,15 @@ import com.saxonica.ee.schema.ValueConstraint;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
+import net.sf.saxon.str.UnicodeBuilder;
 
 /**
  * This class is a filter that is used to validate that an element has simple content
@@ -34,7 +36,7 @@ public class SimpleContentValidator extends AttributeValidator {
     // The fixed value, if any
     private ValueConstraint fixedValue = null;
     // The canonical lexical representation of the fixed value, if any
-    private CharSequence fixedValueLexicalForm = null;
+    private UnicodeString fixedValueLexicalForm = null;
     // The Comparable corresponding to the fixed value, if any
     private Comparable fixedValueComparable = null;
     // The default value, if any
@@ -42,7 +44,7 @@ public class SimpleContentValidator extends AttributeValidator {
     // Flag indicating that the fixed/default value needs to be validated
     private boolean needToValidateConstraint = false;
     // Buffer to capture element content
-    private FastStringBuffer buffer = new FastStringBuffer(FastStringBuffer.C64);
+    private final UnicodeBuilder buffer = new UnicodeBuilder();
 
     /**
      * Create a simple content validator
@@ -144,9 +146,9 @@ public class SimpleContentValidator extends AttributeValidator {
 
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
-        buffer.cat(chars);
+        buffer.append(chars);
         if (getNillability() == Nillability.ALLOWED) {
             properties |= (ReceiverOption.NILLABLE_ELEMENT);
         }
@@ -225,9 +227,9 @@ public class SimpleContentValidator extends AttributeValidator {
                 } else {
                     // if a value was supplied check that it matches the fixed value
                     AtomicSequence actual =
-                        simpleType.getTypedValue(buffer, getNamespaceResolver(), getConfiguration().getConversionRules());
+                        simpleType.getTypedValue(buffer.toUnicodeString(), getNamespaceResolver(), getConfiguration().getConversionRules());
                     if (!actual.getSchemaComparable().equals(fixedValueComparable)) {
-                        String message = "The content " + Err.wrap(buffer, Err.VALUE) + " of " +
+                        String message = "The content " + Err.wrap(buffer.toString(), Err.VALUE) + " of " +
                             getContainingElementName() + " does not match the fixed value " +
                             Err.wrap(fixedValueLexicalForm, Err.VALUE);
                         ValidationFailure ve = new ValidationFailure(message);
@@ -239,9 +241,9 @@ public class SimpleContentValidator extends AttributeValidator {
             } else {
                 // there's no fixed value and no applicable default value: do the validation
                 ConversionRules rules = getValidationContext();
-                ValidationFailure err = simpleType.validateContent(buffer, getNamespaceResolver(), rules);
+                ValidationFailure err = simpleType.validateContent(buffer.toUnicodeString(), getNamespaceResolver(), rules);
                 if (err != null) {
-                    String message = "The content " + Err.wrap(buffer, Err.VALUE) + " of " +
+                    String message = "The content " + Err.wrap(buffer.toString(), Err.VALUE) + " of " +
                             getContainingElementName() + " does not match the required simple type. " +
                             err.getMessage();
                     ValidationFailure ve = new ValidationFailure(message);

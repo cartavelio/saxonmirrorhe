@@ -25,6 +25,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringItem;
 
 import java.util.*;
 
@@ -42,7 +43,7 @@ import java.util.*;
 
 public class DotNetExtensionLibrary implements FunctionLibrary {
 
-    private ProfessionalConfiguration config;
+    private final ProfessionalConfiguration config;
     private DotNetExtensionFunctionFactory functionFactory;
 
     // HashMap containing URI->Class mappings. This includes conventional
@@ -258,11 +259,10 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
 
                     if (significantArgs >= 0) {
 
-                        boolean allParamsAreInParams = true;
+                        boolean allParamsAreInParams = false;
                         for (ParameterInfo theParameterType : theParameterTypes) {
-                            if (theParameterType.get_IsOut() || theParameterType.get_IsOptional()) {
-                                allParamsAreInParams = false;
-                                break;
+                            if (!theParameterType.get_IsIn()) {
+                                allParamsAreInParams = true;
                             }
                         }
 
@@ -275,8 +275,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
                             }
                         }
 
-                        if (theParameterTypes.length == significantArgs &&
-                                (significantArgs == 0 || allParamsAreInParams)){
+                        if (allParamsAreInParams) {
                             boolean usesContext = theParameterTypes.length > 0 &&
                                     theParameterTypes[0].get_ParameterType()
                                             .get_FullName().equals("net.sf.saxon.expr.XPathContext");
@@ -519,7 +518,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
                 }
             }
 
-            boolean eliminated[] = new boolean[candidates];
+            boolean[] eliminated = new boolean[candidates];
             for (int i = 0; i < candidates; i++) {
                 eliminated[i] = false;
             }
@@ -652,7 +651,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
         }
 
         int noOfArgs = args.length;
-        int preferences[] = new int[noOfArgs];
+        int[] preferences = new int[noOfArgs];
         int firstParam = 0;
 
         if (params.length > 0 && params[0].get_Name().equals("XPathContext")) {
@@ -732,7 +731,7 @@ public class DotNetExtensionLibrary implements FunctionLibrary {
      * @param required      The .NET Class named in the method signature
      * @return an integer indicating the relative preference for converting this primitive type
      *         to this .NET class. A high number indicates a low preference. All values are in the range
-     *         50 to 100. For example, the conversion of an XPath String to {@link net.sf.saxon.value.StringValue} is 50, while
+     *         50 to 100. For example, the conversion of an XPath String to {@link StringItem} is 50, while
      *         XPath String to {@link String} is 51. The value -1 indicates that the conversion is not allowed.
      */
 

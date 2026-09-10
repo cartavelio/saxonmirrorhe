@@ -27,7 +27,7 @@ import java.util.List;
 public class ConstraintChecker extends WatchManager {
 
     private ValidationContext validationContext;
-    private List<Watch> prearrangedWatches = new ArrayList<>(4);
+    private final List<Watch> prearrangedWatches = new ArrayList<>(4);
 
     public ConstraintChecker(PipelineConfiguration pipe) {
         super(pipe);

@@ -402,7 +402,7 @@ public class Edge {
         private MaxOccursTerm() {
         }
 
-        private static MaxOccursTerm THE_INSTANCE = new MaxOccursTerm();
+        private static final MaxOccursTerm THE_INSTANCE = new MaxOccursTerm();
 
         public static MaxOccursTerm getInstance() {
             return THE_INSTANCE;
@@ -415,7 +415,7 @@ public class Edge {
             super(null, null);
         }
 
-        private static MaxOccursParticle THE_INSTANCE = new MaxOccursParticle();
+        private static final MaxOccursParticle THE_INSTANCE = new MaxOccursParticle();
 
         public static MaxOccursParticle getInstance() {
             return THE_INSTANCE;

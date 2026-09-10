@@ -6,10 +6,7 @@ import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.QNameParser;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -20,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +37,7 @@ import java.util.Map;
 
 public class QuickXPathParser implements XPathParser.Accelerator {
 
-    private static Map<Long, ExpressionMaker> patterns = new HashMap<>();
+    private static final Map<Long, ExpressionMaker> patterns = new HashMap<>();
 
     public QuickXPathParser() {
     }
@@ -169,7 +166,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         // string literal
         patterns.put(
                 key(Token.STRING_LITERAL),
-                (values, env) -> StringLiteral.makeLiteral(StringValue.makeStringValue(values.get(0))));
+                (values, env) -> StringLiteral.makeLiteral(StringItem.makeStringValue(values.get(0))));
 
         // numeric literal
         patterns.put(
@@ -326,7 +323,7 @@ public class QuickXPathParser implements XPathParser.Accelerator {
         patterns.put(
                 key(Token.FUNCTION, Token.STRING_LITERAL, Token.RPAR),
                 (values, env) -> {
-                    Expression arg = StringLiteral.makeLiteral(StringValue.makeStringValue(values.get(1)));
+                    Expression arg = StringLiteral.makeLiteral(StringItem.makeStringValue(values.get(1)));
                     arg.setLocation(env.getContainingLocation());
                     StructuredQName name = verifyFunctionQName(values.get(0), env);
                     List<String> reasons = new ArrayList<>();

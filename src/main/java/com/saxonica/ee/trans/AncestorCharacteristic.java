@@ -13,8 +13,8 @@ import net.sf.saxon.trans.XPathException;
  */
 public class AncestorCharacteristic extends Characteristic<Boolean> {
 
-    private Pattern pattern;
-    private boolean isParent;
+    private final Pattern pattern;
+    private final boolean isParent;
 
     /**
      * Define an AncestorCharacteristic

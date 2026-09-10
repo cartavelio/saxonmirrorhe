@@ -5,6 +5,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
@@ -143,7 +144,7 @@ public class FleetingElementNode extends FleetingParentNode {
         attr.setNodeKind(Type.ATTRIBUTE);
         attr.setNodeName(attInfo.getNodeName());
         attr.setTypeAnnotation(attInfo.getType());
-        attr.setStringValue(attInfo.getValue());
+        attr.setStringValue(StringView.tidy(attInfo.getValue()));
         return attr;
     }
 

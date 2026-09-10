@@ -86,7 +86,7 @@ public interface XQConnection extends XQDataFactory {
      *
      * @throws XQException if there is an error during closing the connection.
      */
-    public void close() throws XQException;
+    void close() throws XQException;
 
     /**
      * Sets the auto-commit attribute to the given state. If a connection is in
@@ -108,7 +108,7 @@ public interface XQConnection extends XQDataFactory {
      *                     or (2) auto-commit is turned off but the
      *                     implementation doesn't support transactions
      */
-    public void setAutoCommit(boolean autoCommit) throws XQException;
+    void setAutoCommit(boolean autoCommit) throws XQException;
 
     /**
      * Gets the auto-commit attribute of this connection
@@ -118,7 +118,7 @@ public interface XQConnection extends XQDataFactory {
      *         in auto-commit mode; otherwise <code>false</code>
      * @throws XQException if the connection is in a closed state
      */
-    public boolean getAutoCommit() throws XQException;
+    boolean getAutoCommit() throws XQException;
 
     /**
      * Makes all changes made in the current transaction permanent and releases
@@ -132,7 +132,7 @@ public interface XQConnection extends XQDataFactory {
      * @throws XQException if the connection is in a closed state
      *                     or this connection is operating in auto-commit mode
      */
-    public void commit() throws XQException;
+    void commit() throws XQException;
 
     /**
      * Creates a new <code>XQExpression</code> object that can be used
@@ -144,7 +144,7 @@ public interface XQConnection extends XQDataFactory {
      *         multiple expressions
      * @throws XQException if the connection is in a closed state
      */
-    public XQExpression createExpression() throws XQException;
+    XQExpression createExpression() throws XQException;
 
     /**
      * Creates a new <code>XQExpression</code> object that can be used to
@@ -159,7 +159,7 @@ public interface XQConnection extends XQDataFactory {
      * @throws XQException if (1) the connection is in a closed state, or
      *                     (2) the specified argument is <code>null</code>
      */
-    public XQExpression createExpression(XQStaticContext properties) throws XQException;
+    XQExpression createExpression(XQStaticContext properties) throws XQException;
 
     /**
      * Gets the metadata for this connection.
@@ -168,7 +168,7 @@ public interface XQConnection extends XQDataFactory {
      *         this connection
      * @throws XQException if the connection is in a closed state
      */
-    public XQMetaData getMetaData() throws XQException;
+    XQMetaData getMetaData() throws XQException;
 
     /**
      * Checks if the connection is closed.
@@ -176,7 +176,7 @@ public interface XQConnection extends XQDataFactory {
      * @return <code>true</code> if the connection is in a closed state,
      *         <code>false</code> otherwise
      */
-    public boolean isClosed();
+    boolean isClosed();
 
     /**
      * Prepares an expression for execution. <p>
@@ -191,7 +191,7 @@ public interface XQConnection extends XQDataFactory {
      *                     (2) there are errors preparing the expression,
      *                     or (3) the xquery parameter is <code>null</code>
      */
-    public XQPreparedExpression prepareExpression(String xquery)
+    XQPreparedExpression prepareExpression(String xquery)
             throws XQException;
 
     /**
@@ -208,8 +208,8 @@ public interface XQConnection extends XQDataFactory {
      * @throws XQException if (1) the connection is in a closed state, or
      *                     (2) the specified argument is <code>null</code>
      */
-    public XQPreparedExpression prepareExpression(java.lang.String xquery,
-                                                  XQStaticContext properties) throws XQException;
+    XQPreparedExpression prepareExpression(java.lang.String xquery,
+                                           XQStaticContext properties) throws XQException;
 
     /**
      * Prepares an expression for execution. <p>
@@ -224,7 +224,7 @@ public interface XQConnection extends XQDataFactory {
      *                     (2) there are errors preparing the expression,
      *                     or (3) the xquery parameter is <code>null</code>
      */
-    public XQPreparedExpression prepareExpression(Reader xquery)
+    XQPreparedExpression prepareExpression(Reader xquery)
             throws XQException;
 
     /**
@@ -241,8 +241,8 @@ public interface XQConnection extends XQDataFactory {
      * @throws XQException if (1) the connection is in a closed state, or
      *                     (2) the specified argument is <code>null</code>
      */
-    public XQPreparedExpression prepareExpression(Reader xquery,
-                                                  XQStaticContext properties) throws XQException;
+    XQPreparedExpression prepareExpression(Reader xquery,
+                                           XQStaticContext properties) throws XQException;
 
     /**
      * Prepares an expression for execution. <p>
@@ -257,7 +257,7 @@ public interface XQConnection extends XQDataFactory {
      *                     (2) there are errors preparing the expression
      *                     or (3) the xquery parameter is <code>null</code>
      */
-    public XQPreparedExpression prepareExpression(InputStream xquery) throws XQException;
+    XQPreparedExpression prepareExpression(InputStream xquery) throws XQException;
 
     /**
      * Prepares an expression for execution. <p>
@@ -273,8 +273,8 @@ public interface XQConnection extends XQDataFactory {
      * @throws XQException if (1) the connection is in a closed state, or
      *                     (2) the specified argument is <code>null</code>
      */
-    public XQPreparedExpression prepareExpression(InputStream xquery,
-                                                  XQStaticContext properties) throws XQException;
+    XQPreparedExpression prepareExpression(InputStream xquery,
+                                           XQStaticContext properties) throws XQException;
 
     /**
      * Undoes all changes made in the current transaction and releases any
@@ -285,7 +285,7 @@ public interface XQConnection extends XQDataFactory {
      *                     or this connection is operating
      *                     in auto-commit mode
      */
-    public void rollback() throws XQException;
+    void rollback() throws XQException;
 
 
     /**
@@ -300,7 +300,7 @@ public interface XQConnection extends XQDataFactory {
      *         default values for all expression properties
      * @throws XQException if the connection is in a closed state
      */
-    public XQStaticContext getStaticContext() throws XQException;
+    XQStaticContext getStaticContext() throws XQException;
 
     /**
      * Sets the default values for all expression properties. The
@@ -311,6 +311,6 @@ public interface XQConnection extends XQDataFactory {
      *                   values of expression properties
      * @throws XQException if the connection is in a closed state
      */
-    public void setStaticContext(XQStaticContext properties) throws XQException;
+    void setStaticContext(XQStaticContext properties) throws XQException;
 
-};
+}

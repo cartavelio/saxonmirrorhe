@@ -22,11 +22,11 @@ import net.sf.saxon.value.EmptySequence;
 
 public final class IndexedFilterExpression extends Expression {
 
-    private Operand baseOp;
-    private Operand useOp;
-    private Operand searchOp;
-    private AtomicComparer comparer;
-    private boolean convertUntypedToOther;
+    private final Operand baseOp;
+    private final Operand useOp;
+    private final Operand searchOp;
+    private final AtomicComparer comparer;
+    private final boolean convertUntypedToOther;
 
     /**
      * Constructor

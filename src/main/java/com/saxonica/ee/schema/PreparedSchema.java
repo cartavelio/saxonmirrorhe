@@ -52,7 +52,7 @@ public class PreparedSchema extends SchemaStructure implements NotationSet {
      * The set of all target namespaces of components in this schema
      */
 
-    private Set<String> targetNamespaces = new HashSet<>();
+    private final Set<String> targetNamespaces = new HashSet<>();
 
     /**
      * The global attribute declarations for this Schema, indexed by their name

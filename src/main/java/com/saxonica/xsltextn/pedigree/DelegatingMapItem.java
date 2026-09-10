@@ -23,7 +23,7 @@ import net.sf.saxon.value.SequenceType;
 
 public abstract class DelegatingMapItem implements MapItem {
 
-    private MapItem base;
+    private final MapItem base;
 
     /**
      * Create a {@code DelegatingMapItem} that delegates all map-related access

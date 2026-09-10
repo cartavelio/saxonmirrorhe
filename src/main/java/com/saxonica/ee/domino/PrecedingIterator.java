@@ -17,12 +17,12 @@ import java.util.function.IntPredicate;
 
 final class PrecedingIterator implements AxisIterator {
 
-    private DominoTree tree;
-    private DominoNode startNode;
+    private final DominoTree tree;
+    private final DominoNode startNode;
     private DominoNode current;
-    private NodeTest test;
+    private final NodeTest test;
     private int nextAncestorDepth;
-    private boolean includeAncestors;
+    private final boolean includeAncestors;
     private final IntPredicate matcher;
 
     public PrecedingIterator(/*@NotNull*/ DominoTree doc, /*@NotNull*/ DominoNode node,

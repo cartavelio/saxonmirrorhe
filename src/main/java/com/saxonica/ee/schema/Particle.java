@@ -5,14 +5,13 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntHashSet;
 
 /**
@@ -290,14 +289,14 @@ public abstract class Particle extends SimpleComponentReference implements UserS
                 String key = arguments[0].head().getStringValue();
                 switch (key) {
                     case "class":
-                        return new StringValue("Particle");
+                        return StringItem.bmp("Particle");
                     case "implementation":
                         return new ObjectValue<>(Particle.this);
                     case "min occurs":
                         return new Int64Value(getMinOccurs(), BuiltInAtomicType.NON_NEGATIVE_INTEGER, false);
                     case "max occurs":
                         if (getMaxOccurs() < 0) {
-                            return new StringValue("unbounded");
+                            return StringItem.bmp("unbounded");
                         } else {
                             return new Int64Value(getMaxOccurs(), BuiltInAtomicType.NON_NEGATIVE_INTEGER, false);
                         }

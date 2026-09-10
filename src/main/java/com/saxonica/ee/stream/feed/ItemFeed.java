@@ -72,7 +72,7 @@ public abstract class ItemFeed extends ProxyOutputter {
 
     private Terminator terminator;
     private Expression expression;
-    private XPathContext context;
+    private final XPathContext context;
     private boolean failed = false;
 
     public ItemFeed(ItemFeed result, XPathContext context) {

@@ -5,7 +5,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.z.IntToIntMap;
 import net.sf.saxon.functions.Translate;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Generate bytecode for evaluation of a call to the translate() function
@@ -25,18 +25,18 @@ public class TranslateCompiler extends ToStringCompiler {
 
         compiler.compileToItem(fnc.getArg(0));
         returnZeroLengthStringIfNull(fnc.getArg(0), ga, methodInfo, translateReturn, 0);
-        ga.checkClass(StringValue.class);
+        ga.checkClass(StringItem.class);
 
         IntToIntMap staticMap = fn.getStaticMap();
         if (staticMap != null) {
             allocateStatic(compiler, staticMap);
-            ga.invokeStaticMethod(Translate.class, "translateUsingMap", StringValue.class, IntToIntMap.class);
+            ga.invokeStaticMethod(Translate.class, "translateUsingMap", StringItem.class, IntToIntMap.class);
         } else {
             compiler.compileToItem(fnc.getArg(1));
-            ga.checkClass(StringValue.class);
+            ga.checkClass(StringItem.class);
             compiler.compileToItem(fnc.getArg(2));
-            ga.checkClass(StringValue.class);
-            ga.invokeStaticMethod(Translate.class, "translate", StringValue.class, StringValue.class, StringValue.class);
+            ga.checkClass(StringItem.class);
+            ga.invokeStaticMethod(Translate.class, "translate", StringItem.class, StringItem.class, StringItem.class);
         }
         if (requiredClass == String.class) {
             ga.invokeInstanceMethod(CharSequence.class, "toString");

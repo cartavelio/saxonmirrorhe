@@ -27,8 +27,8 @@ import java.util.List;
 public class FunctionAnnotations extends SystemFunction {
 
 
-    private static List<String> returnTypeNames = new ArrayList<>();
-    private static List<SequenceType> returnTypeTypes = new ArrayList<>();
+    private static final List<String> returnTypeNames = new ArrayList<>();
+    private static final List<SequenceType> returnTypeTypes = new ArrayList<>();
 
 
     static {

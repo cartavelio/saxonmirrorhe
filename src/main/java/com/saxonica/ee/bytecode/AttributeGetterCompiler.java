@@ -6,6 +6,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
@@ -73,7 +75,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getNodeKind");
         // item kind
         LabelInfo isElement = methodInfo.newLabel("isElement");
-        ga.push((int) Type.ELEMENT);
+        ga.push(Type.ELEMENT);
         ga.ifICmp(GeneratorAdapter.EQ, isElement.label());
         // item
         ga.pop();
@@ -141,7 +143,9 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         // UAV string UAV
         ga.swap();
         // UAV UAV string
-        ga.invokeConstructor(UntypedAtomicValue.class, CharSequence.class);
+        ga.invokeStaticMethod(StringView.class,"tidy",String.class);
+        // UAV UAV UnicodeString
+        ga.invokeConstructor(UntypedAtomicValue.class, UnicodeString.class);
         // UAV
         ga.goTo(end);
 
@@ -167,7 +171,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getNodeKind");
         // item kind
         LabelInfo isElement = methodInfo.newLabel("isElement");
-        ga.push((int) Type.ELEMENT);
+        ga.push(Type.ELEMENT);
         ga.ifICmp(GeneratorAdapter.EQ, isElement.label());
         // item
         ga.pop();
@@ -190,7 +194,9 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         // UAV string UAV
         ga.swap();
         // UAV UAV string
-        ga.invokeConstructor(UntypedAtomicValue.class, CharSequence.class);
+        ga.invokeStaticMethod(StringView.class, "tidy", String.class);
+        // UAV UAV UnicodeString
+        ga.invokeConstructor(UntypedAtomicValue.class, UnicodeString.class);
         // UAV
         ga.goTo(end);
 

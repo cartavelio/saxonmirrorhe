@@ -16,9 +16,9 @@ import java.util.List;
 
 public class SQLTable implements Sequence /* of MapItem */ {
 
-    private Connection connection;
-    private String tableName;
-    private XPathContext context;
+    private final Connection connection;
+    private final String tableName;
+    private final XPathContext context;
 
     SQLTable(Connection connection, String tableName, XPathContext context) {
         this.connection = connection;

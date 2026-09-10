@@ -13,10 +13,10 @@ import java.util.Set;
  */
 public class InsertAction extends PendingUpdateAction {
 
-    private NodeInfo[] content;
-    private MutableNodeInfo targetNode;
-    private int position;
-    private boolean inheritNamespaces;
+    private final NodeInfo[] content;
+    private final MutableNodeInfo targetNode;
+    private final int position;
+    private final boolean inheritNamespaces;
 
     /**
      * Create an InsertAction

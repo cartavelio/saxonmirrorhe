@@ -5,17 +5,18 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.CallableFunction;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
 
@@ -212,7 +213,7 @@ public final class AttributeUse extends SimpleComponentReference
      * @return the default attribute value if there is one, otherwise null
      */
 
-    public String getUnderlyingDefaultValue() throws MissingComponentException {
+    public UnicodeString getUnderlyingDefaultValue() throws MissingComponentException {
         if (getDefaultValueLexicalForm() == null) {
             AttributeDecl declaration = (AttributeDecl) getTarget();
             if (declaration != null) {
@@ -435,7 +436,7 @@ public final class AttributeUse extends SimpleComponentReference
             serializer.emitAttribute("inheritable", isInheritable() ? "true" : "false");
             serializer.emitAttribute("ref", serializer.getId(getAttributeDeclaration(), false));
             if (getDefaultValueLexicalForm() != null) { // for backwards compatibility
-                serializer.emitAttribute("default", getDefaultValueLexicalForm());
+                serializer.emitAttribute("default", getDefaultValueLexicalForm().toString());
             }
             if (getValueConstraint() != null) {
                 getValueConstraint().serialize(serializer);
@@ -450,7 +451,7 @@ public final class AttributeUse extends SimpleComponentReference
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Attribute Use");
+                    return StringItem.bmp("Attribute Use");
                 case "implementation":
                     return new ObjectValue<>(AttributeUse.this);
                 case "required":

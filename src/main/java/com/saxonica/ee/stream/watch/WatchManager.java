@@ -12,6 +12,8 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -37,7 +39,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
     private boolean startDocumentPending;
     private int startDocumentProperties;
-    private FleetingDocumentNode documentNode;
+    private final FleetingDocumentNode documentNode;
 
     //private StartTagBuffer startTagBuffer;
 
@@ -63,7 +65,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     // stack of Watch objects that have been activated. One entry for each level of element nesting;
     // the entry holds a list of Watch objects that were activated at that level of nesting
 
-    private Stack<Receiver> activeReceiverStack = new Stack<>();
+    private final Stack<Receiver> activeReceiverStack = new Stack<>();
     // stack of Receiver objects that are listening to events. The number of recievers added at each
     // level of element nesting is recorded in receiverCountStack
 
@@ -86,7 +88,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         }
     }
 
-    private List<GroupingScope> capturingScopes = new ArrayList<>();
+    private final List<GroupingScope> capturingScopes = new ArrayList<>();
 
     private void trace(String message) {
         if (TRACING) {
@@ -381,7 +383,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
                             att.setNodeName(nameCode);
                             att.setTypeAnnotation(attribute.getType());
                             att.setParent(elementStack[elementStackTop - 1]);
-                            att.setStringValue(attribute.getValue());
+                            att.setStringValue(StringView.tidy(attribute.getValue()));
                         }
                         boolean matches = watch.matchesNode(att, context);
                         if (matches) {
@@ -426,7 +428,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
 
         try {
             //trace("text: " + Err.wrap(chars));
@@ -438,10 +440,11 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
             for (Watch watch : watchList) {
                 if (watch.matchesNodesOfKind(UType.TEXT)) {  // optimization: most patterns match element nodes only
                     if (node == null) {
+                        chars = chars.save(); // Until now, the characters are in a mutable buffer supplied by the XML parser
                         node = new FleetingNode();
                         node.setNodeKind(Type.TEXT);
                         node.setParent(parent);
-                        node.setStringValue(chars.toString());
+                        node.setStringValue(chars.tidy());
                         node.setTypeAnnotation(BuiltInAtomicType.UNTYPED_ATOMIC);
                     }
                     boolean matches = watch.matchesNode(node, context);
@@ -596,7 +599,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
 
         ensureStackSpace();
 
@@ -604,7 +607,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         FleetingParentNode parent = elementStackTop > 0 ? elementStack[elementStackTop - 1] : documentNode;
         node.setNodeKind(Type.COMMENT);
         node.setParent(parent);
-        node.setStringValue(chars.toString());
+        node.setStringValue(chars.tidy());
         node.setTypeAnnotation(BuiltInAtomicType.UNTYPED_ATOMIC);
 
         if (startDocumentPending) {
@@ -634,7 +637,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         ensureStackSpace();
 
         FleetingNode node = new FleetingNode();
@@ -643,7 +646,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
         node.setParent(parent);
         NoNamespaceName nodeName = new NoNamespaceName(target);
         node.setNodeName(nodeName);
-        node.setStringValue(data.toString());
+        node.setStringValue(data.tidy());
         node.setTypeAnnotation(BuiltInAtomicType.UNTYPED_ATOMIC);
 
         if (startDocumentPending) {

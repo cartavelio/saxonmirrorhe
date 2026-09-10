@@ -27,11 +27,11 @@ import java.util.IdentityHashMap;
  */
 public class GlobalExtractor {
 
-    private Expression root;
-    private GlobalVariableManager globalVariableManager;
-    private ExpressionVisitor visitor;
-    private IdentityHashMap<Expression, String> ineligibles = new IdentityHashMap<Expression, String>();
-    private boolean tracing;
+    private final Expression root;
+    private final GlobalVariableManager globalVariableManager;
+    private final ExpressionVisitor visitor;
+    private final IdentityHashMap<Expression, String> ineligibles = new IdentityHashMap<Expression, String>();
+    private final boolean tracing;
 
     public final static int COST_THRESHOLD = 3;
 

@@ -22,8 +22,8 @@ import java.util.Iterator;
  */
 public class CompiledExpression extends Expression {
 
-    private GeneratedCode byteCode;
-    private Expression original; // this link is not considered an operand, and cannot be changed
+    private final GeneratedCode byteCode;
+    private final Expression original; // this link is not considered an operand, and cannot be changed
     private String className;
 
     public CompiledExpression(Expression original, GeneratedCode byteCode) {

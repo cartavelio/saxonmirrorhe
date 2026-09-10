@@ -429,7 +429,7 @@ public class Streamability {
             return Sweep.FREE_RANGING;
         }
         // Rule 2
-        if (((ContextItemStaticInfoEE)contextInfo).getContextItemPosture() == Posture.GROUNDED) {
+        if (contextInfo.getContextItemPosture() == Posture.GROUNDED) {
             return Sweep.MOTIONLESS;
         }
         // Rule 3

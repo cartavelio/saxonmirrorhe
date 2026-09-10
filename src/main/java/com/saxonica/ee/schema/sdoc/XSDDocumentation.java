@@ -9,6 +9,7 @@ import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.ValidationFailure;
@@ -70,7 +71,7 @@ public class XSDDocumentation extends SchemaElement {
 
         String lang = atts.getValue(NamespaceConstant.XML, "lang");
         if (lang != null) {
-            ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(lang);
+            ValidationFailure vf = StringConverter.StringToLanguage.INSTANCE.validate(StringView.tidy(lang));
             if (vf != null) {
                 error("Value of xml:lang attribute is not a valid language code");
             }

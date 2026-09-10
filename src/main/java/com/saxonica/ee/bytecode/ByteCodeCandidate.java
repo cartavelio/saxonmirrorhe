@@ -29,15 +29,15 @@ import net.sf.saxon.trans.XPathException;
 public class ByteCodeCandidate extends UnaryExpression implements TailCallReturner {
     public static int GENERATED_COUNTER = 0;
     public static long GENERATION_TIMER = 0;
-    private String objectName;
+    private final String objectName;
     private long countDown = 100;
-    private ExpressionOwner owner;
+    private final ExpressionOwner owner;
     private NamespaceResolver namespaceResolver = null;
     private Expression targetExpression = null;
-    private int id;
+    private final int id;
     private ByteCodeMonitor byteCodeMonitor;
     private static int nextId = 0;
-    private int requiredEvaluationModes;
+    private final int requiredEvaluationModes;
     public int compiledMode;
 
     public ByteCodeCandidate(ExpressionOwner owner, Expression child, String objectName, int requiredEvaluationModes) {

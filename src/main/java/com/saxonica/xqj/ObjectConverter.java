@@ -52,6 +52,6 @@ public interface ObjectConverter {
      * @throws XQException if the Java object cannot be converted to an XQItem
      */
 
-    public Item convertToItem(Object value, XQItemType type) throws XQException;
+    Item convertToItem(Object value, XQItemType type) throws XQException;
 }
 

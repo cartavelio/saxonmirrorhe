@@ -15,7 +15,7 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 import org.objectweb.asm.Type;
 
@@ -163,7 +163,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
         compiler.compileToItem(nameExpr);
         ga.dup();
-        ga.ifNotInstance(StringValue.class, notStrInstance);
+        ga.ifNotInstance(StringItem.class, notStrInstance);
         ga.invokeInstanceMethod(Item.class, "getStringValue");
         ga.invokeStaticMethod(Whitespace.class, "trimWhitespace", CharSequence.class);
         ga.invokeInstanceMethod(CharSequence.class, "toString");
@@ -201,7 +201,6 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.storeLocal(prefixVar);
         ga.pop();
         ga.goTo(test1);
-
 
 
         methodInfo.placeLabel(notEQName);
@@ -318,7 +317,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.push(compAttr.getLocation().getSystemId());
             ga.push(compAttr.getLocation().getLineNumber());
             ga.invokeStaticMethod(Callback.class, "makeXmlNamespaceException",
-                    String.class, String.class, Boolean.TYPE, String.class, Integer.TYPE);
+                                  String.class, String.class, Boolean.TYPE, String.class, Integer.TYPE);
             ga.throwException();
             //ga.goTo(end);
 
@@ -371,7 +370,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
             ga.loadLocal(uriVar);
             ga.ifNonNull(uriNotNull.label());
             if (namespace instanceof StringLiteral) {
-                ga.push(((StringLiteral) namespace).getStringValue());
+                ga.push(((StringLiteral) namespace).stringify());
                 ga.storeLocal(uriVar);
 
             } else {

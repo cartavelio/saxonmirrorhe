@@ -35,7 +35,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 
@@ -53,7 +53,7 @@ import java.util.*;
 public class XQueryExpressionEE extends XQueryExpression {
 
     private boolean allowDocumentProjection;
-    private boolean isUpdating;
+    private final boolean isUpdating;
     private PathMap pathMap;
     private Inversion inversion;
 
@@ -111,7 +111,7 @@ public class XQueryExpressionEE extends XQueryExpression {
             ContextItemStaticInfoEE contextInfo = new ContextItemStaticInfoEE(contextItemType, false, Posture.STRIDING);
             PostureAndSweep ps = Streamability.getStreamability(expression, contextInfo, reasons);
             if (ps.getPosture() == Posture.ROAMING || ps.getSweep() == Sweep.FREE_RANGING) {
-                FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+                StringBuilder fsb = new StringBuilder(256);
                 fsb.append("Streaming is not possible. ");
                 for (String r : reasons) {
                     fsb.append(r);

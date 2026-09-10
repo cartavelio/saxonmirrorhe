@@ -21,7 +21,7 @@ import net.sf.saxon.value.SequenceType;
 
 public class Assign extends Instruction implements BindingReference {
 
-    private Operand selectOp;
+    private final Operand selectOp;
     private GlobalVariable binding;    // link to the variable declaration
 
     public Assign(Expression select) {

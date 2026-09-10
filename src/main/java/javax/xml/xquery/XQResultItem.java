@@ -61,5 +61,5 @@ public interface XQResultItem extends XQItem {
      * @return the connection associated with this result item
      * @throws XQException if the result item is in a closed state
      */
-    public XQConnection getConnection() throws XQException;
-};
+    XQConnection getConnection() throws XQException;
+}

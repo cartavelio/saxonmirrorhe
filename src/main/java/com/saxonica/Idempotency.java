@@ -23,8 +23,8 @@ package com.saxonica;
 import java.util.ArrayList;
 
 public class Idempotency {
-    private static String compilerSource = "XSLT-SEF-compiler.xsl";
-    private static String common[] = new String[]{
+    private static final String compilerSource = "XSLT-SEF-compiler.xsl";
+    private static final String[] common = new String[]{
             "-s:"+compilerSource,
             "-im:compile-complete",
             "-l:on",
@@ -34,8 +34,8 @@ public class Idempotency {
             "-relocate:on"
            };
 
-    private static String completeOpts =    "?options=map{'traceProgress':false(),'timing':true(),'justStatic':false(),'justNormalize':false(),'noXPath':false(),'noBindings':false()}";
-    private static String partialOpts =    "?options=map{'traceProgress':false(),'timing':true(),'justStatic':false(),'justNormalize':false(),'noXPath':true(),'noBindings':false()}";
+    private static final String completeOpts =    "?options=map{'traceProgress':false(),'timing':true(),'justStatic':false(),'justNormalize':false(),'noXPath':false(),'noBindings':false()}";
+    private static final String partialOpts =    "?options=map{'traceProgress':false(),'timing':true(),'justStatic':false(),'justNormalize':false(),'noXPath':true(),'noBindings':false()}";
 
     private static void run(String xsl, String sef) throws Exception {
         run(xsl,sef,completeOpts);
@@ -50,10 +50,10 @@ public class Idempotency {
             p0.add(a);
         }
         p0.add(opts);
-        net.sf.saxon.Transform.main((String[]) p0.toArray(new String[0]));
+        net.sf.saxon.Transform.main(p0.toArray(new String[0]));
     }
 
-    public static void main(String args[])
+    public static void main(String[] args)
             throws java.lang.Exception {
         //run("XSLT-SEF-compiler.xsl","test/compiler.sef");
         run(compilerSource,"test/compiler.sef");

@@ -380,7 +380,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      */
 
     @Override
-    public void characters(char ch[], int start, int length) throws SAXException {
+    public void characters(char[] ch, int start, int length) throws SAXException {
         next.characters(ch, start, length);
     }
 
@@ -388,7 +388,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * Receive notification of ignorable whitespace in element content.
      */
     @Override
-    public void ignorableWhitespace(char ch[], int start, int length) throws SAXException {
+    public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
         next.ignorableWhitespace(ch, start, length);
     }
 
@@ -460,7 +460,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      * Report an XML comment anywhere in the document.
      */
     @Override
-    public void comment(char ch[], int start, int length) throws SAXException {
+    public void comment(char[] ch, int start, int length) throws SAXException {
         next.comment(ch, start, length);
     }
 

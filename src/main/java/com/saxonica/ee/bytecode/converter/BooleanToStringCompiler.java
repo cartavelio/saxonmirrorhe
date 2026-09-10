@@ -8,7 +8,7 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Generate code for a Boolean to String CastExpression
@@ -30,14 +30,14 @@ public class BooleanToStringCompiler extends ConverterCompiler {
             LabelInfo empty = methodInfo.newLabel("returnEmpty");
             LabelInfo end = methodInfo.newLabel("end");
             compileToPrimitive(compiler, expression, Boolean.TYPE, new OnEmpty.UnwindAndJump(empty));
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
             ga.goTo(end);
             methodInfo.placeLabel(empty);
             ga.pushNull();
             methodInfo.placeLabel(end);
         } else {
             compileToPrimitive(compiler, expression, Boolean.TYPE, OnEmpty.RETURN_NULL);
-            ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
+            ga.invokeStaticMethod(StringItem.class, "makeStringValue", CharSequence.class);
         }
     }
 

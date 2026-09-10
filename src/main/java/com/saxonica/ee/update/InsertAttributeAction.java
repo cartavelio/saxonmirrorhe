@@ -14,11 +14,11 @@ import java.util.Set;
  */
 public class InsertAttributeAction extends PendingUpdateAction {
 
-    private MutableNodeInfo element;
-    private NodeName name;
-    private SimpleType typeCode;
-    private CharSequence value;
-    private int properties;
+    private final MutableNodeInfo element;
+    private final NodeName name;
+    private final SimpleType typeCode;
+    private final String value;
+    private final int properties;
 
     /**
      * Create a InsertAttributeAction
@@ -30,7 +30,7 @@ public class InsertAttributeAction extends PendingUpdateAction {
      * @param properties properties including IS_ID and IS_IDREF properties
      */
 
-    InsertAttributeAction(MutableNodeInfo element, NodeName name, SimpleType typeCode, CharSequence value, int properties) {
+    InsertAttributeAction(MutableNodeInfo element, NodeName name, SimpleType typeCode, String value, int properties) {
         this.element = element;
         this.name = fixNodeName(name);
         this.typeCode = typeCode;
@@ -98,7 +98,7 @@ public class InsertAttributeAction extends PendingUpdateAction {
      * @return the string value of the new attribute
      */
 
-    public CharSequence getNewStringValue() {
+    public String getNewStringValue() {
         return value;
     }
 

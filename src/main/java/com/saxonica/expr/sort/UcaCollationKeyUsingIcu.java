@@ -12,7 +12,7 @@ import java.text.CollationKey;
 
 
 public class UcaCollationKeyUsingIcu extends CollationKey {
-    private com.ibm.icu.text.CollationKey ucaKey;
+    private final com.ibm.icu.text.CollationKey ucaKey;
 
     /**
      * Package-private constructor. Collation keys are constructed using the factory

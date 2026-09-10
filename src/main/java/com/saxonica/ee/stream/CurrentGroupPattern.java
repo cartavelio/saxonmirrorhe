@@ -20,7 +20,7 @@ import net.sf.saxon.trans.XPathException;
  */
 public class CurrentGroupPattern extends AnchorPattern {
 
-    private static CurrentGroupPattern THE_INSTANCE = new CurrentGroupPattern();
+    private static final CurrentGroupPattern THE_INSTANCE = new CurrentGroupPattern();
 
     public static CurrentGroupPattern getInstance() {
         return THE_INSTANCE;

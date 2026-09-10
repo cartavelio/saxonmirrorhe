@@ -3,11 +3,11 @@ package com.saxonica.ee.stream.om;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -28,7 +28,7 @@ public class FleetingNode implements NodeInfo {
     private int nodeKind;
     private NodeName nodeName;
     private SchemaType typeAnnotation;
-    private CharSequence stringValue;
+    private UnicodeString stringValue;
     private int nodeNumber;
 
     public FleetingNode() {
@@ -89,7 +89,7 @@ public class FleetingNode implements NodeInfo {
         this.nodeKind = nodeKind;
     }
 
-    public void setStringValue(CharSequence stringValue) {
+    public void setStringValue(UnicodeString stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -297,11 +297,11 @@ public class FleetingNode implements NodeInfo {
      */
 
     @Override
-    public final String getStringValue() {
+    public final UnicodeString getUnicodeStringValue() {
         if (stringValue == null) {
             throw new UnsupportedOperationException("The string value of a streamed node is not available");
         }
-        return stringValue.toString();
+        return stringValue;
     }
 
     /**
@@ -577,16 +577,16 @@ public class FleetingNode implements NodeInfo {
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
                 getParent().generateId(buffer);
-                buffer.cat('a');
+                buffer.append('a');
                 buffer.append(((FleetingElementNode)getParent()).getAttributeIndex(getURI(), getLocalPart())+"");
                 break;
             case Type.NAMESPACE:
                 getParent().generateId(buffer);
-                buffer.cat('n');
+                buffer.append('n');
                 buffer.append(((FleetingElementNode) getParent()).getNamespaceNodeIndex(getLocalPart()) + "");
                 break;
             case Type.DOCUMENT:
@@ -634,27 +634,6 @@ public class FleetingNode implements NodeInfo {
     public void setSystemId(String systemId) {
         // no action
     }
-
-    /**
-     * Get the string value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String. The method satisfies the rule that
-     * <code>X.getStringValueCS().toString()</code> returns a string that is equal to
-     * <code>X.getStringValue()</code>.
-     * <p>Note that two CharSequence values of different types should not be compared using equals(), and
-     * for the same reason they should not be used as a key in a hash table.</p>
-     * <p>If the calling code can handle any CharSequence, this method should
-     * be used. If the caller requires a string, the {@link #getStringValue} method is preferred.</p>
-     *
-     * @return the string value of the item
-     * @see #getStringValue
-     * @since 8.4
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        return stringValue.toString(); // ensure that we get an immutable value
-    }
-
 
     @Override
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {

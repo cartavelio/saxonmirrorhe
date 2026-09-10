@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class GeneralPatternOptimizer extends PatternOptimizer {
 
-    private static List<PatternOptimizer> patternOptimizers = new ArrayList<PatternOptimizer>();
+    private static final List<PatternOptimizer> patternOptimizers = new ArrayList<PatternOptimizer>();
 
     static {
         patternOptimizers.add(EqualityPatternOptimizer.getInstance());
@@ -22,7 +22,7 @@ public class GeneralPatternOptimizer extends PatternOptimizer {
         patternOptimizers.add(AncestorPatternOptimizer.getInstance());
     }
 
-    private static GeneralPatternOptimizer THE_INSTANCE = new GeneralPatternOptimizer();
+    private static final GeneralPatternOptimizer THE_INSTANCE = new GeneralPatternOptimizer();
 
     public static GeneralPatternOptimizer getInstance() {
         return THE_INSTANCE;

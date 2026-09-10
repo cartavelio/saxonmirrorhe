@@ -12,7 +12,7 @@ import java.lang.reflect.Modifier;
  */
 public class Generator extends GeneratorAdapter {
 
-    private static String[] exceptionList = {"net/sf/saxon/trans/XPathException"};
+    private static final String[] exceptionList = {"net/sf/saxon/trans/XPathException"};
 
 
     /**

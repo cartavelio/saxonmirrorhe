@@ -13,6 +13,7 @@ import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -75,7 +76,7 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
                         }
 
                         @Override
-                        public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+                        public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
                             writer.attribute(attName, typeCode, value, location, properties);
                         }
 
@@ -85,17 +86,17 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
                         }
 
                         @Override
-                        public void characters(CharSequence chars, Location location, int properties) throws XPathException {
+                        public void characters(CodePoints chars, Location location, int properties) throws XPathException {
                             writer.characters(chars, location, properties);
                         }
 
                         @Override
-                        public void processingInstruction(String name, CharSequence data, Location location, int properties) throws XPathException {
+                        public void processingInstruction(String name, CodePoints data, Location location, int properties) throws XPathException {
                             writer.processingInstruction(name, data, location, properties);
                         }
 
                         @Override
-                        public void comment(CharSequence content, Location location, int properties) throws XPathException {
+                        public void comment(CodePoints content, Location location, int properties) throws XPathException {
                             writer.comment(content, location, properties);
                         }
 
@@ -212,7 +213,7 @@ public class LetExpressionAdjunct extends StreamingAdjunct {
     public PostureAndSweep computeStreamability(ContextItemStaticInfoEE contextInfo, List<String> reasons) {
         LetExpression expr = (LetExpression)getExpression();
         if (expr.getSequence() instanceof ContextItemExpression &&
-                ((ContextItemStaticInfoEE)contextInfo).getContextItemPosture() != Posture.GROUNDED) {
+                contextInfo.getContextItemPosture() != Posture.GROUNDED) {
             // this is typically binding a variable to implement the current() function. We assess the usages of the bound
             // variable, and if all usages are INSPECTION, we change the operand usage to INSPECTION to make it streamable
             if (!hasNonInspectionUsage(expr, expr.getAction())) {

@@ -49,7 +49,7 @@ public class RootExpressionCompiler extends ToItemCompiler {
         ga.dup();
 
         ga.invokeInstanceMethod(NodeInfo.class, "getNodeKind");
-        ga.push((int) Type.DOCUMENT);
+        ga.push(Type.DOCUMENT);
         ga.ifICmp(GeneratorAdapter.EQ, end.label());
 
         // Throw error - DocumentRoot is null

@@ -52,7 +52,7 @@ public class LetExpressionAdjunctB extends TransmissionAdjunct {
     public ItemFeed makeItemFeed(WatchManager watchManager, final ItemFeed out, final XPathContext context) throws XPathException {
         return new ItemFeed(getExpression(), out, context) {
 
-            private XPathContext context = getContext();
+            private final XPathContext context = getContext();
 
             @Override
             public void open(Terminator terminator) throws XPathException {

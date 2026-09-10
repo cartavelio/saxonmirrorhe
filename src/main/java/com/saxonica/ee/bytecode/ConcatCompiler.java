@@ -6,7 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
@@ -30,11 +30,11 @@ public class ConcatCompiler extends ToStringCompiler {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "Concat-item");
         int valVar = methodInfo.allocateLocal(AtomicValue.class);
-        int sbVar = methodInfo.allocateLocal(FastStringBuffer.class);
-        ga.newInstance(Type.getType(FastStringBuffer.class));
+        int sbVar = methodInfo.allocateLocal(StringBuilder.class);
+        ga.newInstance(Type.getType(StringBuilder.class));
         ga.dup();
-        ga.push(FastStringBuffer.C64);
-        ga.invokeConstructor(FastStringBuffer.class, Integer.TYPE);
+        ga.push(64);
+        ga.invokeConstructor(StringBuilder.class, Integer.TYPE);
         ga.storeLocal(sbVar);
         for (int i = 0; i < numArgs; i++) {
             if (th.isSubType(fnc.getArg(i).getItemType(), BuiltInAtomicType.STRING) &&
@@ -42,7 +42,7 @@ public class ConcatCompiler extends ToStringCompiler {
                 // this path is particularly useful for literal arguments
                 ga.loadLocal(sbVar);
                 compiler.compileToPrimitive(fnc.getArg(i), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-                ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+                ga.invokeInstanceMethod(StringBuilder.class, "append", CharSequence.class);
             } else {
                 compiler.compileToItem(fnc.getArg(i));
                 ga.checkClass(AtomicValue.class);
@@ -56,14 +56,14 @@ public class ConcatCompiler extends ToStringCompiler {
                 ga.loadLocal(sbVar);
                 ga.loadLocal(valVar);
                 ga.invokeInstanceMethod(AtomicValue.class, "getStringValueCS");
-                ga.invokeInstanceMethod(FastStringBuffer.class, "append", CharSequence.class);
+                ga.invokeInstanceMethod(StringBuilder.class, "append", CharSequence.class);
                 if (nullLab != null) {
                     methodInfo.placeLabel(nullLab);
                 }
             }
         }
         ga.loadLocal(sbVar);
-        ga.invokeInstanceMethod(FastStringBuffer.class, "condense");
+        ga.invokeInstanceMethod(StringBuilder.class, "condense");
         methodInfo.releaseLocal(valVar);
         methodInfo.releaseLocal(sbVar);
         if (requiredClass == String.class) {

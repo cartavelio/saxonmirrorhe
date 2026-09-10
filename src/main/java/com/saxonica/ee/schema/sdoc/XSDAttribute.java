@@ -5,6 +5,7 @@ import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 
@@ -162,7 +163,7 @@ public class XSDAttribute extends SchemaElement {
         // @default
         attValue = atts.getValue("", "default");
         if (attValue != null && !nc.hasURI(NamespaceConstant.SCHEMA_INSTANCE)) {
-            ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, attValue);
+            ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.DEFAULT, StringView.tidy(attValue));
             if (attributeUse != null) {
                 attributeUse.setValueConstraint(vc);
             } else if (attributeDecl != null) {
@@ -180,7 +181,7 @@ public class XSDAttribute extends SchemaElement {
             if (atts.getValue("", "default") != null && !nc.hasURI(NamespaceConstant.SCHEMA_INSTANCE)) {
                 mutuallyExclusiveAttributes("fixed", "default");
             }
-            ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.FIXED, attValue);
+            ValueConstraint vc = new ValueConstraint(ValueConstraint.Variety.FIXED, StringView.tidy(attValue));
             if (attributeUse != null) {
                 attributeUse.setValueConstraint(vc);
             } else if (attributeDecl != null) {

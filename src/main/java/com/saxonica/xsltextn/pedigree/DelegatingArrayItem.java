@@ -16,7 +16,7 @@ import net.sf.saxon.z.IntSet;
  */
 public abstract class DelegatingArrayItem extends AbstractArrayItem {
 
-    private ArrayItem base;
+    private final ArrayItem base;
 
     public DelegatingArrayItem(ArrayItem base) {
         this.base = base;

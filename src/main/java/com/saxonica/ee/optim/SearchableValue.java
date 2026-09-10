@@ -5,10 +5,8 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
@@ -152,13 +150,13 @@ public abstract class SearchableValue implements GroundedValue {
     }
 
     @Override
-    public String getStringValue() throws XPathException {
+    public UnicodeString getUnicodeStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
     @Override
-    public CharSequence getStringValueCS() throws XPathException {
-        return SequenceTool.getStringValue(this);
+    public String getStringValue() throws XPathException {
+        return SequenceTool.stringify(this);
     }
 
     /**
@@ -186,7 +184,7 @@ public abstract class SearchableValue implements GroundedValue {
         if (len == 0) {
             return EmptySequence.getInstance();
         } else if (len == 1) {
-            return (GroundedValue)itemAt(0);
+            return itemAt(0);
         } else {
             return this;
         }

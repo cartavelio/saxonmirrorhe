@@ -6,6 +6,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -249,7 +251,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     }
                 } else {
                     // base type must be xs:any (if this can happen at all???)
-                    val = new StringValue(e.getValue());
+                    val = new StringItem(e.getValue());
                 }
 //                // Check the value against all the other facets. It's not an error if it's invalid,
 //                // but it makes the enumeration value useless
@@ -259,7 +261,7 @@ public abstract class UserSimpleType extends UserDefinedType
                         if (!(facet instanceof EnumerationFacet || facet instanceof EnumerationFacetSet ||
                                 facet instanceof AssertionFacet || facet instanceof WhitespaceFacet)) {
                             if (!facet.testAtomicValue(atom)) {
-                                String value = atom.getStringValue();
+                                CodePoints value = atom.getUnicodeStringValue();
                                 String message = "Enumeration value " + Err.wrap(value, Err.VALUE) +
                                         " is not a valid instance of the type: " +
                                         "it contravenes the " + facet.getName() + " facet";
@@ -273,14 +275,14 @@ public abstract class UserSimpleType extends UserDefinedType
                     }
                     // Don't bother checking in other cases - too complicated
                 }
-                efs.addEnumerationValue(val, e.getValue());
+                efs.addEnumerationValue(val, e.getValue().toString());
                 facetList.remove(i);
                 enumFound = true;
             } else if (facetList.get(i) instanceof PatternFacet && !((PatternFacet) facetList.get(i)).isDoNotMerge()) {
                 if (pf == null) {
                     pf = (PatternFacet) facetList.get(i);
                 } else {
-                    String pat = facetList.get(i).getValue();
+                    CodePoints pat = facetList.get(i).getValue();
                     pf.addBranch(pat);
                     facetList.remove(i);
                 }
@@ -379,7 +381,7 @@ public abstract class UserSimpleType extends UserDefinedType
      * @return the string after whitespace normalization
      */
 
-    public CharSequence applyWhitespaceNormalization(CharSequence value) {
+    public UnicodeString applyWhitespaceNormalization(UnicodeString value) {
         final int action = getWhitespaceAction();
         return Whitespace.applyWhitespaceNormalization(action, value);
     }
@@ -494,7 +496,7 @@ public abstract class UserSimpleType extends UserDefinedType
             if (isNamespaceSensitive()) {
                 resolver = node.getNodeKind() == Type.ELEMENT ? node.getAllNamespaces() : node.getParent().getAllNamespaces();
             }
-            return getTypedValue(node.getStringValueCS(), resolver, getConfiguration().getConversionRules());
+            return getTypedValue(node.getUnicodeStringValue(), resolver, getConfiguration().getConversionRules());
         } catch (ValidationException err) {
             throw new XPathException("Internal error: value doesn't match its type annotation. " + err.getMessage());
         }
@@ -607,7 +609,7 @@ public abstract class UserSimpleType extends UserDefinedType
      */
 
     @Override
-    public CharSequence preprocess(CharSequence input) throws ValidationException {
+    public UnicodeString preprocess(UnicodeString input) throws ValidationException {
         for (Facet f : getExtendedFacetList()) {
             if (f instanceof PreprocessFacet) {
                 input = ((PreprocessFacet) f).preprocess(input);
@@ -627,7 +629,7 @@ public abstract class UserSimpleType extends UserDefinedType
      */
 
     @Override
-    public CharSequence postprocess(CharSequence input) throws ValidationException {
+    public UnicodeString postprocess(UnicodeString input) throws ValidationException {
         for (Facet f : getExtendedFacetList()) {
             if (f instanceof PreprocessFacet) {
                 input = ((PreprocessFacet) f).postprocess(input);
@@ -653,22 +655,22 @@ public abstract class UserSimpleType extends UserDefinedType
      */
 
     public ValidationFailure checkAgainstFacets(
-            AtomicSequence primitiveValue, /*@Nullable*/ CharSequence lexicalValue, List<Facet> facets, ConversionRules rules) {
-        StringValue normalizedValue = null;
+            AtomicSequence primitiveValue, UnicodeString lexicalValue, List<Facet> facets, ConversionRules rules) {
+        UnicodeString normalizedValue = null;
         for (Facet f : facets) {
 
             if (f instanceof PatternFacet) {
                 if (normalizedValue == null) {
                     if (lexicalValue == null) {
-                        normalizedValue = StringValue.makeStringValue(primitiveValue.getStringValueCS());
+                        normalizedValue = primitiveValue.getUnicodeStringValue();
                     } else {
-                        normalizedValue = StringValue.makeStringValue(applyWhitespaceNormalization(lexicalValue));
-                        if (primitiveValue instanceof StringValue) {
-                            ((StringValue) primitiveValue).setStringValueCS(normalizedValue.getStringValueCS());
-                        }
+                        normalizedValue = applyWhitespaceNormalization(lexicalValue);
+//                        if (primitiveValue instanceof StringValue) {
+//                            ((StringValue) primitiveValue).setStringValueCS(normalizedValue.getStringValueCS());
+//                        }
                     }
                 }
-                if (!f.testAtomicValue(normalizedValue)) {
+                if (!f.testAtomicValue(new StringItem(normalizedValue))) {
                     return makeValidationFailure(primitiveValue, this, f);
                 }
             } else if (f instanceof AssertionFacet) {
@@ -721,7 +723,7 @@ public abstract class UserSimpleType extends UserDefinedType
      */
 
     private static String displayValue(AtomicSequence primitiveValue) {
-        String v = primitiveValue.getStringValue();
+        String v = primitiveValue.getUnicodeStringValue().toString();
         if (v.length() > 30) {
             v = v.substring(0, 30) + "...";
         }
@@ -816,35 +818,35 @@ public abstract class UserSimpleType extends UserDefinedType
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "class":
-                    return new StringValue("Simple Type Definition");
+                    return StringItem.bmp("Simple Type Definition");
                 case "implementation":
                     return new ObjectValue<>(type);
                 case "name":
                     if (type.isAnonymousType()) {
                         return EmptySequence.getInstance();
                     } else {
-                        return new StringValue(type.getName(), BuiltInAtomicType.NCNAME);
+                        return new StringItem(type.getName(), BuiltInAtomicType.NCNAME);
                     }
                 case "target namespace":
                     if (type.isAnonymousType()) {
                         return EmptySequence.getInstance();
                     } else {
-                        return new AnyURIValue(type.getTargetNamespace());
+                        return new AnyURIValue((type.getTargetNamespace()));
                     }
                 case "final": {
-                    List<StringValue> list = new ArrayList<>();
+                    List<StringItem> list = new ArrayList<>();
                     int f = type.getFinalProhibitions();
                     if ((f & SchemaType.DERIVATION_RESTRICTION) != 0) {
-                        list.add(new StringValue("restriction"));
+                        list.add(StringItem.bmp("restriction"));
                     }
                     if ((f & SchemaType.DERIVATION_EXTENSION) != 0) {
-                        list.add(new StringValue("extension"));
+                        list.add(StringItem.bmp("extension"));
                     }
                     if ((f & SchemaType.DERIVATION_LIST) != 0) {
-                        list.add(new StringValue("list"));
+                        list.add(StringItem.bmp("list"));
                     }
                     if ((f & SchemaType.DERIVATION_UNION) != 0) {
-                        list.add(new StringValue("union"));
+                        list.add(StringItem.bmp("union"));
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
@@ -891,7 +893,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     } else if (type.isUnionType()) {
                         variety = "union";
                     }
-                    return new StringValue(variety);
+                    return new StringItem(variety);
                 case "primitive type definition":
                     if (type == BuiltInAtomicType.ANY_ATOMIC || !type.isAtomicType()) {
                         return EmptySequence.getInstance();

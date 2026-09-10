@@ -25,9 +25,9 @@ import java.util.List;
 public class GroupAdjacentTester extends GroupBoundaryTester {
 
     private List<AtomicMatchKey> currentGroupingComparisonKey;
-    private StringCollator collator;
+    private final StringCollator collator;
     private AtomicSequence currentGroupingKey;
-    private int implicitTimezone;
+    private final int implicitTimezone;
 
     public GroupAdjacentTester(ForEachGroup expression, XPathContext context) {
         super(expression, context);

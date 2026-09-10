@@ -7,6 +7,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -24,26 +25,26 @@ import java.util.List;
 public class AllElementValidator extends AttributeValidator {
 
     // The complex type that we are validating against
-    private UserComplexType type;
+    private final UserComplexType type;
 
     // The AllModelGroup
-    private AllModelGroup allGroup;
+    private final AllModelGroup allGroup;
 
     // Boolean to indicate whether mixed content is allowed. If not, all non-whitespace
     // character data is rejected
-    private boolean mixed;
+    private final boolean mixed;
 
     // Boolean to indicate whether any child elements have been encountered
     private boolean empty = true;
 
     // Boolean to indicate whether empty content is allowed
-    private boolean emptiable;
+    private final boolean emptiable;
 
     // Maintains a count for each particle that needs to be counted, including wildcards
     // For wildcards, the n'th wildcard uses the n'th counter.
     // For element particles, the counter map associated with the all model group maps the
     // element fingerprint to a position in the counter array
-    private int[] counters;
+    private final int[] counters;
 
     // Boolean to indicate whether whitespace in element-only content is to be stripped
     private boolean ignoreIgnorable;
@@ -232,12 +233,12 @@ public class AllElementValidator extends AttributeValidator {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
         if (mixed) {
             nextReceiver.characters(chars, locationId, properties);
             empty = false;
-        } else if (Whitespace.isWhite(chars)) {
+        } else if (Whitespace.isAllWhite(chars)) {
             if (!ignoreIgnorable) {
                 nextReceiver.characters(chars, locationId, properties);
             }

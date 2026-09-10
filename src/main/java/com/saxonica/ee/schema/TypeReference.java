@@ -17,8 +17,8 @@ public class TypeReference extends SchemaStructure implements ComponentReference
     /**
      * The name of the type object referenced
      */
-    private StructuredQName qName;
-    private int fingerprint;
+    private final StructuredQName qName;
+    private final int fingerprint;
     private boolean dangling;
 
     /**

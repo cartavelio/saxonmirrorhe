@@ -276,8 +276,8 @@ public class Validate {
             }
 
             if (showTime) {
-                System.err.println(config.getProductTitle());
-                System.err.println(Version.platform.getPlatformVersion());
+                config.getLogger().info(config.getProductTitle());
+                config.getLogger().info(Version.platform.getPlatformVersion());
             }
             config.displayLicenseMessage();
             processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, validationMode);
@@ -339,7 +339,7 @@ public class Validate {
 
             if (showTime && !schemaFileNames.isEmpty()) {
                 long endTime = new Date().getTime();
-                System.err.println("Schema checking successful. Time: " + (endTime - startTime) + "ms.");
+                config.getLogger().info("Schema checking successful. Time: " + (endTime - startTime) + "ms.");
                 CommandLineOptions.showMemoryUsed();
                 //TimeUnit.MINUTES.sleep(1); // Useful for getting a heap dump
             }
@@ -408,7 +408,7 @@ public class Validate {
                         Source source = loadDocument(sourceFileName, useURLs, config);
                         processFile(source, validator);
                         if (showTime) {
-                            System.err.println("Validation successful");
+                            config.getLogger().info("Validation successful");
                         }
                         validCount++;
                         if (source instanceof SAXSource) {
@@ -420,13 +420,13 @@ public class Validate {
                     } catch (SaxonApiException e) {
                         if (e.getCause() instanceof ValidationException) {
                             if (showTime) {
-                                System.err.println("Validation complete: errors found");
+                                config.getLogger().warning("Validation complete: errors found");
                             } else {
-                                System.err.println("Validation of file " + sourceFileName + " completed: errors found");
+                                config.getLogger().warning("Validation of file " + sourceFileName + " completed: errors found");
                             }
                             invalidCount++;
                         } else {
-                            System.err.println("Failed to process file " + sourceFileName + ": " + e.getMessage());
+                            config.getLogger().error("Failed to process file " + sourceFileName + ": " + e.getMessage());
                             unreadableCount++;
                         }
                     }
@@ -434,7 +434,7 @@ public class Validate {
 
 
                 if (showTime && validCount + invalidCount > 1) {
-                    System.err.println(validCount + " valid document" + (validCount == 1 ? "" : "s") + "; " +
+                    config.getLogger().info(validCount + " valid document" + (validCount == 1 ? "" : "s") + "; " +
                             invalidCount + " invalid document" + (invalidCount == 1 ? "" : "s") +
                             (unreadableCount == 0 ? "" : "; " + unreadableCount + " unreadable or ill-formed document"
                                     + (unreadableCount == 1 ? "" : "s")));
@@ -458,7 +458,7 @@ public class Validate {
                 scmSerializer.setOutputProperty(Serializer.Property.INDENT, "yes");
                 manager.exportComponents(scmSerializer);
                 if (showTime) {
-                    System.err.println("Schema component model written to " + scmOutputFile.getAbsolutePath());
+                    config.getLogger().info("Schema component model written to " + scmOutputFile.getAbsolutePath());
                 }
             }
         } catch (SchemaException err) {
@@ -535,8 +535,8 @@ public class Validate {
      * @return the requested return code
      */
 
-    protected static int quit(String message, int code) {
-        System.err.println(message);
+    protected int quit(String message, int code) {
+        config.getLogger().info(message);
         return code;
     }
 
@@ -600,7 +600,7 @@ public class Validate {
             throws SaxonApiException {
 
         if (showTime) {
-            System.err.println("Processing " + source.getSystemId());
+            config.getLogger().info("Processing " + source.getSystemId());
         }
         long startTime = new Date().getTime();
 
@@ -609,7 +609,7 @@ public class Validate {
         }
         if (showTime) {
             long endTime = new Date().getTime();
-            System.err.println("Validation time: " + (endTime - startTime) + "ms.");
+            config.getLogger().info("Validation time: " + (endTime - startTime) + "ms.");
             CommandLineOptions.showMemoryUsed();
         }
     }
@@ -622,17 +622,17 @@ public class Validate {
      */
     protected void badUsage(String message) {
         if (!"".equals(message)) {
-            System.err.println(message);
+            config.getLogger().error(message);
         }
         if (!showTime) {
-            System.err.println(config.getProductTitle());
+            config.getLogger().info(config.getProductTitle());
         }
-        System.err.println("Usage: see http://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
-        System.err.println("Format: " + CommandLineOptions.getCommandName(this) + " options");
+        config.getLogger().info("Usage: see http://www.saxonica.com/documentation/index.html#!schema-processing/commandline");
+        config.getLogger().info("Format: " + CommandLineOptions.getCommandName(this) + " options");
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
-        System.err.println("Options available:" + options.displayPermittedOptions());
-        System.err.println("Use -XYZ:? for details of option XYZ");
+        config.getLogger().info("Options available:" + options.displayPermittedOptions());
+        config.getLogger().info("Use -XYZ:? for details of option XYZ");
         if (allowExit) {
             if ("".equals(message)) {
                 System.exit(0);
