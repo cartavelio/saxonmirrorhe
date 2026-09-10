@@ -128,6 +128,8 @@
             <code>xs:double</code> and <code>xs:decimal</code> are compared by converting both values to
             decimals, not to doubles.</p>
         
+        <p>The function <code>fn:format-number</code> can now take an options map as the third argument.</p>
+        
         <p>The functions <code>fn:min</code> and <code>fn:max</code> now return one of the items from
         the input sequence <emph>as is</emph>, rather than converting it to <code>xs:double</code>.</p>
         
