@@ -1066,7 +1066,7 @@ public class Environment implements ResourceResolver {
                         environment.sourceDocs.put(res.uri, res.doc);
                         environment.sourceDocs.put(rawUri, res.doc);
 
-                    } catch (SaxonApiException e) {
+                    } catch (Exception e) {
                         //e.printStackTrace();
                         driver.println("*** failed to build source document " + href + " - " + e.getMessage());
                     }
