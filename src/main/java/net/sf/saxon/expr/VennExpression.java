@@ -136,7 +136,7 @@ public class VennExpression extends BinaryExpression {
      */
 
     @Override
-    public final int computeCardinality() {
+    protected final int computeCardinality() {
         final int c1 = getLhsExpression().getCardinality();
         final int c2 = getRhsExpression().getCardinality();
         switch (operator) {

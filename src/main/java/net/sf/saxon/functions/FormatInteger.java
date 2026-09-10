@@ -294,6 +294,7 @@ public class FormatInteger extends SystemFunction implements StatefulSystemFunct
                         }
                         lastGroupingPos = groupingPosition;
                     }
+                    break;
             }
         }
         if (regularCheck && groupingPositions.size() >= 1) {

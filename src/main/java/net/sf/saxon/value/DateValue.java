@@ -138,6 +138,7 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
         typeLabel = BuiltInAtomicType.DATE;
     }
 
+    //#if CSHARP==false
     /**
      * Create a DateValue (with no timezone) from a Java LocalDate object
      * @param localDate the supplied local date
@@ -167,6 +168,8 @@ public class DateValue extends GDateValue implements Comparable<DateValue> {
         setTimezoneInMinutes(tz);
         typeLabel = BuiltInAtomicType.DATE;
     }
+
+    //#endif
 
     /**
      * Static factory method: construct a DateValue from a string in the lexical form

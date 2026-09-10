@@ -27,7 +27,6 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -180,7 +179,7 @@ public class Doc_2 extends SystemFunction implements Callable {
         Source source = config.getSourceResolver().resolveSource(new StreamSource(abs.toASCIIString()), config);
 
         TreeInfo newdoc;
-        if (source instanceof NodeInfo || source instanceof DOMSource) {
+        if (DocumentFn.sourceIsTree(source)) {
             NodeInfo startNode = controller.prepareInputTree(source);
             newdoc = startNode.getTreeInfo();
         } else {

@@ -95,7 +95,7 @@ public abstract class CodePoints implements Comparable<CodePoints> {
 
     public CodePoints concat(CodePoints other) {
         UnicodeBuilder ub = new UnicodeBuilder();
-        return ub.append(this).append(other).toUnicodeString();
+        return ub.accept(this).accept(other).toUnicodeString();
     }
 
     @Override

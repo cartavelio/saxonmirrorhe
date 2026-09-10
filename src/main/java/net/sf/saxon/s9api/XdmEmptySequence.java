@@ -7,6 +7,8 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.transpile.CSharpReplaceBody;
+
 import java.util.Collections;
 
 /**
@@ -35,6 +37,7 @@ public class XdmEmptySequence extends XdmValue {
         return THE_INSTANCE;
     }
 
+    @CSharpReplaceBody(code="super(Collections.emptyList<XdmItem>());")
     private XdmEmptySequence() {
         super(Collections.emptyList());
     }

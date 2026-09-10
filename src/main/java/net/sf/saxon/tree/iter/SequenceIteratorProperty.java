@@ -1,11 +1,13 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 
 /**
  * Defines possible properties of a {@link SequenceIterator}
  */
 
+@CSharpSimpleEnum
 public enum SequenceIteratorProperty {
 
     /**

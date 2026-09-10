@@ -10,17 +10,18 @@ package net.sf.saxon.trace;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.PushToReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.TransformerReceiver;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.*;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Push;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -33,7 +34,10 @@ import net.sf.saxon.value.StringItem;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * A trace listener that records timing information for templates and functions, outputting this
@@ -247,9 +251,7 @@ public class TimingTraceListener implements TraceListener {
      */
 
     private InputStream getStylesheetInputStream() {
-        List<String> messages = new ArrayList<>();
-        List<ClassLoader> classLoaders = new ArrayList<>();
-        return Configuration.locateResource("profile.xsl", messages, classLoaders);
+        return Version.platform.locateResource("profile.xsl", new ArrayList<>());
     }
 
 }

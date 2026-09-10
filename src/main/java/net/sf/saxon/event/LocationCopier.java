@@ -20,7 +20,7 @@ import net.sf.saxon.om.NodeInfo;
  * pipeline, but does not itself see the pipeline events.</i></p>
  */
 
-public class LocationCopier implements CopyInformee<Location> {
+public class LocationCopier implements CopyInformee {
     
     private final boolean wholeDocument;
 

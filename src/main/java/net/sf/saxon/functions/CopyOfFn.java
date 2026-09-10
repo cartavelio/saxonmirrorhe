@@ -37,7 +37,7 @@ public class CopyOfFn extends SystemFunction {
     public Sequence call(final XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence in = arguments.length == 0 ? context.getContextItem() : arguments[0];
         SequenceIterator input = in.iterate();
-        SequenceIterator output = new ItemMappingIterator(input, item -> {
+        SequenceIterator output = ItemMappingIterator.map(input, item -> {
             if (!(item instanceof NodeInfo)) {
                 return item;
             } else {

@@ -9,10 +9,8 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.StructuredQName;
 
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A QNameTest that is the union of a number of supplied QNameTests
@@ -65,12 +63,22 @@ public class UnionQNameTest implements QNameTest {
      * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
      *
      * @return a string representation of the QNameTest, suitable for use in export files. The format is
-     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
+     * a sequence of alternatives separated by spaces, where each alternative is one of '*',
      * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
      */
     @Override
     public String exportQNameTest() {
-        return String.join(" ", tests.stream().map(QNameTest::exportQNameTest).collect(Collectors.toList()));
+        StringBuilder builder = new StringBuilder();
+        boolean first = true;
+        for (QNameTest test : tests) {
+            if (!first) {
+                builder.append(" ");
+            } else {
+                first = false;
+            }
+            builder.append(test.exportQNameTest());
+        }
+        return builder.toString();
     }
 
     /**

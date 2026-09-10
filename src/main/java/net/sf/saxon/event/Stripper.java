@@ -55,9 +55,9 @@ public class Stripper extends ProxyReceiver {
     // that we are in a space-preserving element.
 
     // We implement our own stack to avoid the overhead of allocating objects. The two booleans
-    // are held as the leas-significant bits of a byte.
+    // are held as the least-significant bits of an integer.
 
-    private byte[] stripStack = new byte[100];
+    private int[] stripStack = new int[100];
     private int top = 0;
 
     /**
@@ -90,12 +90,12 @@ public class Stripper extends ProxyReceiver {
         return rule.isSpacePreserving(name, type);
     }
 
-    public static final byte ALWAYS_PRESERVE = 0x01;    // whitespace always preserved (e.g. xsl:text)
-    public static final byte ALWAYS_STRIP = 0x02;       // whitespace always stripped (e.g. xsl:choose)
-    public static final byte STRIP_DEFAULT = 0x00;      // no special action
-    public static final byte PRESERVE_PARENT = 0x04;    // parent element specifies xml:space="preserve"
-    public static final byte SIMPLE_CONTENT = 0x08;     // type annotation indicates simple typed content
-    public static final byte ASSERTIONS_EXIST = 0x10;   // XSD 1.1 assertions are in scope
+    public static final int ALWAYS_PRESERVE = 0x01;    // whitespace always preserved (e.g. xsl:text)
+    public static final int ALWAYS_STRIP = 0x02;       // whitespace always stripped (e.g. xsl:choose)
+    public static final int STRIP_DEFAULT = 0x00;      // no special action
+    public static final int PRESERVE_PARENT = 0x04;    // parent element specifies xml:space="preserve"
+    public static final int SIMPLE_CONTENT = 0x08;     // type annotation indicates simple typed content
+    public static final int ASSERTIONS_EXIST = 0x10;   // XSD 1.1 assertions are in scope
 
 
     /**
@@ -117,8 +117,8 @@ public class Stripper extends ProxyReceiver {
         //System.err.println("startElement " + elemName.getDisplayName());
         nextReceiver.startElement(elemName, type, attributes, namespaces, location, properties);
 
-        byte preserveParent = stripStack[top];
-        byte preserve = (byte) (preserveParent & (PRESERVE_PARENT | ASSERTIONS_EXIST));
+        int preserveParent = stripStack[top];
+        int preserve = preserveParent & (PRESERVE_PARENT | ASSERTIONS_EXIST);
 
         int elementStrip = isSpacePreserving(elemName, type);
         if (elementStrip == ALWAYS_PRESERVE) {
@@ -157,8 +157,6 @@ public class Stripper extends ProxyReceiver {
     }
 
     private final static CodePoints S_PRESERVE = BMPString.of("preserve");
-
-    private static final NodeName XML_SPACE = new FingerprintedQName("xml", NamespaceConstant.XML, "space", StandardNames.XML_SPACE);
 
     /**
      * Handle an end-of-element event

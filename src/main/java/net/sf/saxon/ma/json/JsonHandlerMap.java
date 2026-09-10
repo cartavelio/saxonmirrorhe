@@ -15,9 +15,13 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -65,7 +69,8 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void startArray() {
-        ArrayItem map = new SimpleArrayItem(new ArrayList<>());
+        List<GroundedValue> memberList = new ArrayList<>();
+        ArrayItem map = new SimpleArrayItem(memberList);
         stack.push(map);
     }
 

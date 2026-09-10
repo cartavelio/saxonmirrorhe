@@ -7,11 +7,13 @@
 
 package net.sf.saxon.functions.hof;
 
-import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
@@ -38,18 +40,21 @@ public class FilterFn extends SystemFunction {
     }
 
     private SequenceIterator evalFilter(
-            final Function function, SequenceIterator base, final XPathContext context) {
-        ItemMappingFunction map = new ItemMappingFunction() {
-            private final Sequence[] args = new Sequence[1];
-
-            @Override
-            public Item mapItem(Item item) throws XPathException {
-                args[0] = item;
-                BooleanValue result = (BooleanValue) dynamicCall(function, context, args).head();
-                return result.getBooleanValue() ? item : null;
-            }
-        };
-        return new ItemMappingIterator(base, map);
+            final Function function, SequenceIterator basis, final XPathContext context) {
+        return ItemMappingIterator.filter(basis,
+                    item -> ((BooleanValue) dynamicCall(function, context, new Sequence[]{item}).head()).getBooleanValue());
+//        )
+//        ItemMappingFunction map = new ItemMappingFunction() {
+//            private final Sequence[] args = new Sequence[1];
+//
+//            @Override
+//            public Item mapItem(Item item) throws XPathException {
+//                args[0] = item;
+//                BooleanValue result = (BooleanValue) dynamicCall(function, context, args).head();
+//                return result.getBooleanValue() ? item : null;
+//            }
+//        };
+//        return new ItemMappingIterator(basis, map);
     }
 
     @Override

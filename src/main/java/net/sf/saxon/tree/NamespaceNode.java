@@ -10,15 +10,15 @@ package net.sf.saxon.tree;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.NodeListIterator;
 import net.sf.saxon.tree.iter.PrependAxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -29,7 +29,6 @@ import net.sf.saxon.value.StringItem;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * This class represents a namespace node; it is used in several tree models.
@@ -391,7 +390,7 @@ public class NamespaceNode implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
@@ -582,7 +581,7 @@ public class NamespaceNode implements NodeInfo {
      */
 
     /*@NotNull*/
-    public static AxisIterator makeIterator(final NodeInfo element, @CSharpParameterType(key = "net.sf.saxon.pattern.NodeTest") Predicate<? super NodeInfo> test) {
+    public static AxisIterator makeIterator(final NodeInfo element, NodePredicate test) {
         List<NodeInfo> nodes = new ArrayList<>();
         Iterator<NamespaceBinding> bindings = element.getAllNamespaces().iterator();
         int position = 0;
@@ -603,7 +602,7 @@ public class NamespaceNode implements NodeInfo {
                 nodes.add(node);
             }
         }
-        return new ListIterator.OfNodes(nodes);
+        return new NodeListIterator(nodes);
     }
 }
 

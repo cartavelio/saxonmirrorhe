@@ -21,9 +21,10 @@ import java.util.Iterator;
  * An implementation of AtomicSequence that contains no items.
  */
 
-public enum EmptyAtomicSequence implements AtomicSequence {
+public class EmptyAtomicSequence implements AtomicSequence {
 
-    INSTANCE;
+    private EmptyAtomicSequence() {}
+    private final static EmptyAtomicSequence INSTANCE = new EmptyAtomicSequence();
 
     public static EmptyAtomicSequence getInstance() {
         return INSTANCE;

@@ -59,10 +59,7 @@ public abstract class AbstractStaticContext implements StaticContext {
     protected boolean usingDefaultFunctionLibrary;
     private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
     private UnprefixedElementMatchingPolicy unprefixedElementPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
-    private BiConsumer<String, Location> warningHandler = (message, locator) -> {
-        XmlProcessingIncident incident = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, locator).asWarning();
-        config.makeErrorReporter().report(incident);
-    };
+    private BiConsumer<String, Location> warningHandler;
 
     /**
      * Set the Configuration. This is protected so it can be used only by subclasses;
@@ -74,6 +71,10 @@ public abstract class AbstractStaticContext implements StaticContext {
     protected void setConfiguration(Configuration config) {
         this.config = config;
         this.defaultCollationName = config.getDefaultCollationName();
+        warningHandler = (message, locator) -> {
+            XmlProcessingIncident incident = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, locator).asWarning();
+            config.makeErrorReporter().report(incident);
+        };
     }
 
     /**

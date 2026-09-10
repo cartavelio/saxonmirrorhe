@@ -7,7 +7,10 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
@@ -17,7 +20,6 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.value.StringItem;
 
 /**
@@ -67,9 +69,9 @@ public class Error extends SystemFunction implements Callable {
         e.setErrorCodeQName(qname.getStructuredQName());
         e.setXPathContext(context);
         if (getArity() > 2 && errObject != null) {
-            Sequence errorObject = errObject.materialize();
-            if (errorObject instanceof ZeroOrOne) {
-                Item root = ((ZeroOrOne) errorObject).head();
+            GroundedValue errorObject = errObject.materialize();
+            if (errorObject.getLength() == 1) {
+                Item root = errorObject.head();
                 if ((root instanceof NodeInfo) && ((NodeInfo) root).getNodeKind() == Type.DOCUMENT) {
                     AxisIterator iter = ((NodeInfo) root).iterateAxis(AxisInfo.CHILD,
                             new NameTest(Type.ELEMENT, "", "error", context.getConfiguration().getNamePool()));

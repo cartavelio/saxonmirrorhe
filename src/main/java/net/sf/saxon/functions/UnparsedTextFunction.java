@@ -147,8 +147,8 @@ public abstract class UnparsedTextFunction extends SystemFunction {
         UnicodeBuilder buffer = new UnicodeBuilder();
         readFile(checker, reader, new UniStringConsumer() {
             @Override
-            public UniStringConsumer append(CodePoints chars) {
-                return buffer.append(chars);
+            public UniStringConsumer accept(CodePoints chars) {
+                return buffer.accept(chars);
             }
         });
         return buffer.toUnicodeString();
@@ -217,11 +217,11 @@ public abstract class UnparsedTextFunction extends SystemFunction {
                 first = false;
             }
             if (mask <= 0xff) {
-                output.append(new Twine8(buffer, start, actual));
+                output.accept(new Twine8(buffer, start, actual));
             } else if (mask <= 0xffff) {
-                output.append(new Twine16(buffer, start, actual));
+                output.accept(new Twine16(buffer, start, actual));
             } else {
-                output.append(StringView.of(new String(buffer, start, len)));
+                output.accept(StringView.of(new String(buffer, start, len)));
             }
         }
         reader.close();

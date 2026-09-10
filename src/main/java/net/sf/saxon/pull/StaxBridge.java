@@ -47,7 +47,7 @@ public class StaxBridge implements PullProvider {
     private NamePool namePool;
     private final HashMap<String, NodeName> nameCache = new HashMap<>();
     private final Stack<NamespaceMap> namespaceStack = new Stack<>();
-    private List unparsedEntities = null;
+    private List<?> unparsedEntities = null;
     PullEvent currentEvent = PullEvent.START_OF_INPUT;
     int depth = 0;
     boolean ignoreIgnorable = false;
@@ -232,7 +232,7 @@ public class StaxBridge implements PullProvider {
             case XMLStreamConstants.COMMENT:
                 return PullEvent.COMMENT;
             case XMLStreamConstants.DTD:
-                unparsedEntities = (List) reader.getProperty("javax.xml.stream.entities");
+                unparsedEntities = (List<?>) reader.getProperty("javax.xml.stream.entities");
                 return next();
             case XMLStreamConstants.END_DOCUMENT:
                 return PullEvent.END_DOCUMENT;
@@ -474,7 +474,7 @@ public class StaxBridge implements PullProvider {
                             if (combinedText == null) {
                                 combinedText = new UnicodeBuilder();
                             }
-                            combinedText.append(
+                            combinedText.accept(
                                     StringView.of(new String(reader.getTextCharacters(), reader.getTextStart(), reader.getTextLength())));
                         } else if (event == XMLStreamConstants.START_ELEMENT) {
                             depth++;

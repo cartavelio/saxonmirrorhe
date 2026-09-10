@@ -86,7 +86,7 @@ public abstract class TinyParentNodeImpl extends TinyNodeImpl {
                 if (sb == null) {
                     sb = new UnicodeBuilder();
                 }
-                sb.append(TinyTextImpl.getStringValue(tree, next));
+                sb.accept(TinyTextImpl.getStringValue(tree, next));
             } else if (kind == Type.WHITESPACE_TEXT) {
                 if (sb == null) {
                     sb = new UnicodeBuilder();

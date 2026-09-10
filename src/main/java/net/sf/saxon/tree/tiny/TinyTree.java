@@ -926,7 +926,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
     @Override
     public final TinyNodeImpl getNode(int nr) {
-        switch (nodeKind[nr]) {
+        switch ((short)nodeKind[nr]) {
             case Type.DOCUMENT:
                 return (TinyDocumentImpl) getRootNode();
             case Type.ELEMENT:
@@ -963,7 +963,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
      */
 
     AtomicValue getAtomizedValueOfUntypedNode(int nodeNr) {
-        switch (nodeKind[nodeNr]) {
+        switch ((short)nodeKind[nodeNr]) {
             case Type.ELEMENT:
             case Type.DOCUMENT:
                 int level = depth[nodeNr];
@@ -989,7 +989,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 UnicodeBuilder sb = new UnicodeBuilder();
                 while (next < numberOfNodes && depth[next] > level) {
                     if (nodeKind[next] == Type.TEXT) {
-                        sb.append(TinyTextImpl.getStringValue(this, next));
+                        sb.accept(TinyTextImpl.getStringValue(this, next));
                     } else if (nodeKind[next] == Type.WHITESPACE_TEXT) {
                         WhitespaceTextImpl.appendStringValue(this, next, sb);
                     }
@@ -1354,8 +1354,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     @Override
     public Iterator<String> getUnparsedEntityNames() {
         if (entityTable == null) {
-            List<String> emptyList = Collections.emptyList();
-            return emptyList.iterator();
+            return Collections.emptyIterator();
         } else {
             return entityTable.keySet().iterator();
         }

@@ -34,6 +34,7 @@ import net.sf.saxon.style.SourceBinding;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntArraySet;
@@ -41,8 +42,6 @@ import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 
 import java.util.*;
-
-import static net.sf.saxon.type.BuiltInAtomicType.*;
 
 /**
  * Parser for XPath expressions and XSLT patterns.
@@ -90,6 +89,8 @@ public class XPathParser {
     protected CodeInjector codeInjector = null;
     private Accelerator accelerator = null;
 
+
+    @CSharpSimpleEnum
     public enum ParsedLanguage {XPATH, XSLT_PATTERN, SEQUENCE_TYPE, XQUERY, EXTENDED_ITEM_TYPE}
 
     protected ParsedLanguage language = ParsedLanguage.XPATH; // know which language we are parsing, for diagnostics
@@ -736,6 +737,7 @@ public class XPathParser {
         switch (t.currentToken) {
             case Token.EOF:
                 grumble("Expected an expression, but reached the end of the input");
+                return null;
             case Token.FOR:
             case Token.LET:
             case Token.FOR_MEMBER:
@@ -765,7 +767,7 @@ public class XPathParser {
                     return parseTryCatchExpression();
                 }
                 // else drop through
-
+                CSharp.emitCode("goto default;");
             default:
                 Expression e1 = parseBinaryExpression(parseUnaryExpression(), 4);
                 // Process ternary conditional
@@ -836,10 +838,10 @@ public class XPathParser {
                         at = getSimpleType(t.currentTokenValue);
                         nextToken();
                     }
-                    if (at == ANY_ATOMIC) {
+                    if (at == BuiltInAtomicType.ANY_ATOMIC) {
                         grumble("No value is castable to xs:anyAtomicType", "XPST0080");
                     }
-                    if (at == NOTATION) {
+                    if (at == BuiltInAtomicType.NOTATION) {
                         grumble("No value is castable to xs:NOTATION", "XPST0080");
                     }
 
@@ -873,6 +875,7 @@ public class XPathParser {
                     }
                     lhs = makeBinaryExpression(lhs, operator, rhs);
                     setLocation(lhs, offset);
+                    break;
             }
         }
         return lhs;
@@ -1485,7 +1488,7 @@ public class XPathParser {
     /*@NotNull*/
     private ItemType getPlainType(String qname) throws XPathException {
         if (scanOnly) {
-            return STRING;
+            return BuiltInAtomicType.STRING;
         }
         StructuredQName sq = null;
         try {
@@ -1523,6 +1526,7 @@ public class XPathParser {
                 grumble("The type " + qname + " is not atomic", "XPST0051");
                 assert false;
             }
+//#if CSHARP==false
         } else if (uri.equals(NamespaceConstant.JAVA_TYPE)) {
             Class theClass;
             try {
@@ -1533,6 +1537,7 @@ public class XPathParser {
                 return AnyItemType.getInstance();
             }
             return config.getJavaExternalObjectType(theClass);
+//#endif
         } else if (uri.equals(NamespaceConstant.DOT_NET_TYPE)) {
             return Version.platform.getExternalObjectType(config, uri, local);
         } else {
@@ -1551,20 +1556,20 @@ public class XPathParser {
                 return (ItemType) st;
             } else if (st.isComplexType()) {
                 grumble("Type (" + qname + ") is a complex type", "XPST0051");
-                return ANY_ATOMIC;
+                return BuiltInAtomicType.ANY_ATOMIC;
             } else if (((SimpleType) st).isListType()) {
                 grumble("Type (" + qname + ") is a list type", "XPST0051");
-                return ANY_ATOMIC;
+                return BuiltInAtomicType.ANY_ATOMIC;
             } else if (allowXPath30Syntax) {
                 grumble("Type (" + qname + ") is a union type that cannot be used as an item type", "XPST0051");
-                return ANY_ATOMIC;
+                return BuiltInAtomicType.ANY_ATOMIC;
             } else {
                 grumble("The union type (" + qname + ") cannot be used as an item type unless XPath 3.0 is enabled", "XPST0051");
-                return ANY_ATOMIC;
+                return BuiltInAtomicType.ANY_ATOMIC;
             }
         }
         grumble("Unknown atomic type " + qname, "XPST0051");
-        return ANY_ATOMIC;
+        return BuiltInAtomicType.ANY_ATOMIC;
     }
 
     private void checkAllowedType(StaticContext env, BuiltInAtomicType type) throws XPathException {
@@ -1603,7 +1608,7 @@ public class XPathParser {
     /*@NotNull*/
     private CastingTarget getSimpleType(/*@NotNull*/ String qname) throws XPathException {
         if (scanOnly) {
-            return STRING;
+            return BuiltInAtomicType.STRING;
         }
         StructuredQName sq = null;
         try {
@@ -1640,7 +1645,7 @@ public class XPathParser {
                 } else {
                     grumble("Unknown simple type " + qname, "XPST0051");
                 }
-                return ANY_ATOMIC;
+                return BuiltInAtomicType.ANY_ATOMIC;
             }
             if (allowXPath30Syntax) {
                 // XPath 3.0
@@ -1658,13 +1663,13 @@ public class XPathParser {
                     return (AtomicType) st;
                 } else if (st.isComplexType()) {
                     grumble("Cannot cast to a complex type (" + qname + ")", "XPST0051");
-                    return ANY_ATOMIC;
+                    return BuiltInAtomicType.ANY_ATOMIC;
                 } else if (((SimpleType) st).isListType()) {
                     grumble("Casting to a list type (" + qname + ") requires XPath 3.0", "XPST0051");
-                    return ANY_ATOMIC;
+                    return BuiltInAtomicType.ANY_ATOMIC;
                 } else {
                     grumble("casting to a union type (" + qname + ") requires XPath 3.0", "XPST0051");
-                    return ANY_ATOMIC;
+                    return BuiltInAtomicType.ANY_ATOMIC;
                 }
             }
         }
@@ -1714,6 +1719,7 @@ public class XPathParser {
                 break;
             default:
                 occurrenceFlag = StaticProperty.EXACTLY_ONE;
+                break;
         }
         return occurrenceFlag;
     }
@@ -1824,11 +1830,11 @@ public class XPathParser {
                 return makeLocalNameTest(Type.ATTRIBUTE, tokv);
             } else {
                 grumble("Expected NodeTest after '@'");
-                return ANY_ATOMIC;
+                return BuiltInAtomicType.ANY_ATOMIC;
             }
         } else {
             grumble("Expected type name in SequenceType, found " + Token.tokens[t.currentToken]);
-            return ANY_ATOMIC;
+            return BuiltInAtomicType.ANY_ATOMIC;
         }
         return primaryType;
     }
@@ -2094,6 +2100,7 @@ public class XPathParser {
                     int op = t.currentToken;
                     nextToken();
                     primaryType = new CombinedNodeTest((NodeTest) primaryType, op, (NodeTest) parseItemType());
+                    break;
             }
         }
         expect(Token.RPAR);
@@ -2573,6 +2580,7 @@ public class XPathParser {
                 } else {
                     grumble("Expected '(' or '{' after '->'");
                 }
+                break;
             }
             case Token.NODEKIND:
                 if (t.currentTokenValue.equals("function")) {
@@ -2598,7 +2606,11 @@ public class XPathParser {
                 NodeTest test = parseNodeTest(Type.ELEMENT);
                 if (test instanceof AnyNodeTest) {
                     // handles patterns of the form match="node()"
-                    test = defaultAxis == AxisInfo.CHILD ? MultipleNodeKindTest.CHILD_NODE : NodeKindTest.ATTRIBUTE;
+                    if (defaultAxis == AxisInfo.CHILD) {
+                        test = MultipleNodeKindTest.CHILD_NODE;
+                    } else {
+                        test = NodeKindTest.ATTRIBUTE;
+                    }
                 }
                 AxisExpression ae = new AxisExpression(defaultAxis, test);
                 setLocation(ae);
@@ -2619,6 +2631,7 @@ public class XPathParser {
 
                     default:
                         grumble("@ must be followed by a NodeTest");
+                        break;
                 }
                 break;
 
@@ -2646,6 +2659,7 @@ public class XPathParser {
 
                     default:
                         grumble("Unexpected token " + currentTokenDisplay() + " after axis name");
+                        break;
                 }
                 break;
 
@@ -2662,7 +2676,7 @@ public class XPathParser {
                     case "_":
                         return parserExtension.parseUnderscoreFunction(this);
                 }
-                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.ELEMENT_NAME");
+                CSharp.emitCode("goto case net.sf.saxon.expr.parser.Token.ELEMENT_QNAME");
                 // else fall through
             case Token.ELEMENT_QNAME:
             case Token.ATTRIBUTE_QNAME:
@@ -2676,7 +2690,7 @@ public class XPathParser {
 
             default:
                 grumble("Unexpected token " + currentTokenDisplay() + " at start of expression");
-                //break;
+                break;
         }
         return new ErrorExpression();
     }
@@ -3878,7 +3892,8 @@ public class XPathParser {
         details.outerVariablesUsed = new ArrayList<>(4);
         details.implicitParams = new ArrayList<>(4);
         inlineFunctionStack.push(details);
-        setRangeVariables(new Stack<>());
+        //noinspection Convert2Diamond
+        setRangeVariables(new Stack<LocalBinding>());
         nextToken();
         HashSet<StructuredQName> paramNames = new HashSet<>(8);
         List<UserFunctionParameter> params = new ArrayList<>(8);
@@ -4106,7 +4121,7 @@ public class XPathParser {
             InlineFunctionDetails details = inlineFunctionStack.get(s);
             Stack<LocalBinding> outerVariables = details.outerVariables;
             for (int v = outerVariables.size() - 1; v >= 0; v--) {
-                LocalBinding b2 = outerVariables.elementAt(v);
+                LocalBinding b2 = outerVariables.get(v);
                 if (b2.getVariableQName().equals(qName)) {
                     for (int bs = s; bs <= inlineFunctionStack.size() - 1; bs++) {
                         details = inlineFunctionStack.get(bs);
@@ -4399,7 +4414,7 @@ public class XPathParser {
     /*@Nullable*/
     protected LocalBinding findRangeVariable(StructuredQName qName) {
         for (int v = rangeVariables.size() - 1; v >= 0; v--) {
-            LocalBinding b = rangeVariables.elementAt(v);
+            LocalBinding b = rangeVariables.get(v);
             if (b.getVariableQName().equals(qName)) {
                 return b;
             }

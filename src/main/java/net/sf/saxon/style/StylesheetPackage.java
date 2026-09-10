@@ -647,7 +647,7 @@ public class StylesheetPackage extends PackageData {
 
             Visibility oldV = oldC.getVisibility();
 
-            Visibility newV = null;
+            Visibility newV = Visibility.UNDEFINED;
 
             if (overrides.contains(name) && !(oldC.getActor() instanceof Mode)) {
                 newV = Visibility.HIDDEN;
@@ -655,9 +655,9 @@ public class StylesheetPackage extends PackageData {
                 Visibility acceptedVisibility = explicitAcceptedVisibility(name, acceptors);
                 if (acceptedVisibility != null) {
                     if (!XSLAccept.isCompatible(oldV, acceptedVisibility)) {
-                        throw new XPathException("Cannot accept a " + oldV.show() +
+                        throw new XPathException("Cannot accept a " + Err.describeVisibility(oldV) +
                                                          " component (" + name + ") from package " + usedPackage.getPackageName()
-                                                         + " with visibility " + acceptedVisibility.show(), "XTSE3040");
+                                                         + " with visibility " + Err.describeVisibility(acceptedVisibility), "XTSE3040");
                     }
                     newV = acceptedVisibility;
                 } else {
@@ -669,7 +669,7 @@ public class StylesheetPackage extends PackageData {
                     }
                 }
 
-                if (newV == null) {
+                if (newV == Visibility.UNDEFINED) {
                     if (oldV == Visibility.PUBLIC || oldV == Visibility.FINAL) {
                         newV = Visibility.PRIVATE;
                     } else {
@@ -678,7 +678,8 @@ public class StylesheetPackage extends PackageData {
                 }
             }
 
-            trace(oldC.getActor().getSymbolicName() + " (" + oldV.show() + ") becomes " + newV.show());
+            trace(oldC.getActor().getSymbolicName() + " (" + Err.describeVisibility(oldV)
+                          + ") becomes " + Err.describeVisibility(newV));
 
             final Component newC = Component.makeComponent(oldC.getActor(), newV, VisibilityProvenance.DERIVED, this, oldC.getDeclaringPackage());
             correspondence.put(oldC, newC);

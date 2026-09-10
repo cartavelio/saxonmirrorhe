@@ -271,7 +271,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                 SequenceIterator iter = getContentExpression().iterate(context);
                 Item item;
                 while ((item = iter.next()) != null) {
-                    sb.append(item.getUnicodeStringValue());
+                    sb.accept(item.getUnicodeStringValue());
                 }
                 textValue = sb.toUnicodeString();
             }

@@ -433,10 +433,7 @@ public class StringItem extends AtomicValue {
                     try {
                         current = ((c - 55296) * 1024) + ((int) value.charAt(inpos++) - 56320) + 65536;
                     } catch (StringIndexOutOfBoundsException e) {
-                        System.err.println("Invalid surrogate at end of string");
-                        System.err.println(StringTool.diagnosticDisplay(value.toString()));
-                        e.printStackTrace();
-                        throw e;
+                        throw new AssertionError("Invalid surrogate at end of string: " + StringTool.diagnosticDisplay(value.toString()));
                     }
                 } else {
                     current = c;
@@ -455,8 +452,8 @@ public class StringItem extends AtomicValue {
         UnicodeBuilder buffer = new UnicodeBuilder();
 
         @Override
-        public UniStringConsumer append(CodePoints chars) {
-            buffer.append(chars);
+        public UniStringConsumer accept(CodePoints chars) {
+            buffer.accept(chars);
             return this;
         }
 

@@ -18,7 +18,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * The tree information for a tree acting as a wrapper for a JDOM2 Document.
@@ -77,9 +76,7 @@ public class JDOM2DocumentWrapper extends GenericTreeInfo {
             NodeInfo node;
             while ((node = iter.next()) != null) {
                 Element element = (Element) ((JDOM2NodeWrapper) node).node;
-                List attributes = element.getAttributes();
-                for (Object attribute : attributes) {
-                    Attribute att = (Attribute) attribute;
+                for (Attribute att : element.getAttributes()) {
                     if (att.getAttributeType() == Attribute.ID_TYPE) {
                         idIndex.put(att.getValue(), element);
                     }

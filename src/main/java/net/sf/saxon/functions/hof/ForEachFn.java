@@ -45,16 +45,7 @@ public class ForEachFn extends SystemFunction {
     }
 
     private SequenceIterator evalMap(final Function function, SequenceIterator base, final XPathContext context) {
-        MappingFunction map = new MappingFunction() {
-            private final Sequence[] args = new Sequence[1];
-
-            @Override
-            public SequenceIterator map(Item item) throws XPathException {
-                args[0] = item;
-                return dynamicCall(function, context, args).iterate();
-            }
-        };
-        return new MappingIterator(base, map);
+        return MappingIterator.map(base, item -> dynamicCall(function, context, new Sequence[]{item}).iterate());
     }
 
 }

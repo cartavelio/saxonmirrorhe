@@ -14,6 +14,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ import java.util.List;
  */
 public abstract class Clause {
 
+    @CSharpSimpleEnum
     public enum ClauseName { FOR, LET, WINDOW, GROUP_BY, COUNT, ORDER_BY, WHERE, TRACE, FOR_MEMBER}
 
     private Location location;

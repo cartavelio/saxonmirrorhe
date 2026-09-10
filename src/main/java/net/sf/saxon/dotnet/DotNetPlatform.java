@@ -110,6 +110,28 @@ public class DotNetPlatform implements Platform {
     }
 
     /**
+     * Read a resource file issued with the Saxon product
+     *
+     * @param filename the filename of the file to be read
+     * @param messages List to be populated with messages in the event of failure
+     * @return an InputStream for reading the file/resource
+     */
+
+    /*@Nullable*/
+    public InputStream locateResource(String filename, List<String> messages) {
+        throw new UnsupportedOperationException(); // TODO: not yet implemented
+        // C# code:
+//        try {
+//            _assembly = Assembly.GetExecutingAssembly();
+//            _textStreamReader = new StreamReader(_assembly.GetManifestResourceStream("*Namespace*.*FileName*.txt"));
+//        } catch
+//        {
+//            Console.WritelLine("Error accessing resource!");
+//        }
+    }
+
+
+    /**
      * Get a parser by instantiating the SAXParserFactory
      *
      * @return the parser (XMLReader)

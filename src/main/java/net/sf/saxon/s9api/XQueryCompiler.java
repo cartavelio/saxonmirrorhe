@@ -17,6 +17,7 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingAbort;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.ErrorListener;
 import java.io.*;
@@ -37,6 +38,11 @@ import java.util.List;
  * @since 9.0
  */
 
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class XQueryCompiler {
 
     private final Processor processor;

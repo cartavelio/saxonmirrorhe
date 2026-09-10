@@ -98,17 +98,17 @@ public interface Function extends Item, Callable, GroundedValue {
 
     XPathContext makeNewContext(XPathContext callingContext, ContextOriginator originator);
 
-    /**
-     * Invoke the function
-     *
-     * @param context the XPath dynamic evaluation context
-     * @param args    the actual arguments to be supplied
-     * @return the result of invoking the function
-     * @throws XPathException if a dynamic error occurs within the function
-     */
-
-    @Override
-    Sequence call(XPathContext context, Sequence[] args) throws XPathException;
+//    /**
+//     * Invoke the function
+//     *
+//     * @param context the XPath dynamic evaluation context
+//     * @param args    the actual arguments to be supplied
+//     * @return the result of invoking the function
+//     * @throws XPathException if a dynamic error occurs within the function
+//     */
+//
+//    @Override
+//    Sequence call(XPathContext context, Sequence[] args) throws XPathException;
 
     /**
      * Test whether this FunctionItem is deep-equal to another function item,

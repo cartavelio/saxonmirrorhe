@@ -7,20 +7,18 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.transpile.CSharpSimpleEnum;
+
 /**
  * Enumeration class giving the different visibility levels defined for components in XSLT 3.0
  */
 
+@CSharpSimpleEnum
 public enum Visibility {
     PUBLIC,
     PRIVATE,
     FINAL,
     ABSTRACT,
-    HIDDEN
-;
-
-    public String show() {
-        return super.toString().toLowerCase();
-    }
-
+    HIDDEN,
+    UNDEFINED
 }

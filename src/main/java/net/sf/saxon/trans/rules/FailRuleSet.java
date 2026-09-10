@@ -54,7 +54,9 @@ public class FailRuleSet implements BuiltInRuleSet {
         String id = (item instanceof NodeInfo ?
                 "the node " + Navigator.getPath((NodeInfo) item) :
                 "the atomic value " + item.getUnicodeStringValue());
-        XPathException err = new XPathException("No user-defined template rule matches " + id, "XTDE0555");
+        XPathException err = new XPathException("No user-defined template rule in " +
+                                                    context.getCurrentMode().getActor().getModeTitle(false) +
+                                                        " matches " + id, "XTDE0555");
         err.setLocator(locationId.saveLocation());
         throw err;
     }

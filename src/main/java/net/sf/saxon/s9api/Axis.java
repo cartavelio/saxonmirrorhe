@@ -12,6 +12,7 @@ import net.sf.saxon.om.AxisInfo;
 /**
  * This is an enumeration class containing constants representing the thirteen XPath axes
  */
+
 public enum Axis {
     ANCESTOR(AxisInfo.ANCESTOR),
     ANCESTOR_OR_SELF(AxisInfo.ANCESTOR_OR_SELF),

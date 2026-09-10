@@ -551,7 +551,8 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 });
             } else {
                 // Use the iterate() method to create a virtual copy.
-                iterate(context).forEachOrFail(out::append);
+                //noinspection Convert2MethodRef
+                iterate(context).forEachOrFail(item -> out.append(item));
             }
         } else {
 

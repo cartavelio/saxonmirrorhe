@@ -164,7 +164,7 @@ public class JsonReceiver implements Receiver {
         }
 
         if (!atStart) {
-            output.append(BMPString.of(","));
+            output.accept(BMPString.of(","));
             if (indenting) {
                 indent(stack.size());
             }
@@ -183,7 +183,7 @@ public class JsonReceiver implements Receiver {
                                                      "' is not a valid xs:boolean", ERR_INPUT);
                 }
             }
-            key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, new ControlChar()));
+            key = (alreadyEscaped ? handleEscapedString(key) : escape(key, false, isControlChar));
 
             String normalizedKey = alreadyEscaped ? unescape(key) : key;
             boolean added = keyChecker.peek().add(normalizedKey);
@@ -192,35 +192,35 @@ public class JsonReceiver implements Receiver {
             }
 
             String base = indenting ? " : " : ":";
-            output.append(BMPString.of("\""))
-                    .append(StringView.of(key))
-                    .append(BMPString.of("\""))
-                    .append(BMPString.of(base));
+            output.accept(BMPString.of("\""))
+                    .accept(StringView.of(key))
+                    .accept(BMPString.of("\""))
+                    .accept(BMPString.of(base));
         }
         String local = elemName.getLocalPart();
         switch (local) {
             case "array":
                 if (indenting) {
                     indent(stack.size());
-                    output.append(BMPString.of("[ "));
+                    output.accept(BMPString.of("[ "));
                 } else {
-                    output.append(BMPString.of("["));
+                    output.accept(BMPString.of("["));
                 }
                 atStart = true;
                 break;
             case "map":
                 if (indenting) {
                     indent(stack.size());
-                    output.append(BMPString.of("{ "));
+                    output.accept(BMPString.of("{ "));
                 } else {
-                    output.append(BMPString.of("{"));
+                    output.accept(BMPString.of("{"));
                 }
                 atStart = true;
                 keyChecker.push(new HashSet<>());
                 break;
             case "null":
                 checkParent(local, parent);
-                output.append(BMPString.of("null"));
+                output.accept(BMPString.of("null"));
                 atStart = false;
                 break;
             case "string":
@@ -264,7 +264,7 @@ public class JsonReceiver implements Receiver {
             try {
                 boolean b = StringConverter.StringToBoolean.INSTANCE.convertString(uContent).asAtomic().effectiveBooleanValue();
                 String base = b ? "true" : "false";
-                output.append(BMPString.of(base));
+                output.accept(BMPString.of(base));
             } catch (XPathException e) {
                 throw new XPathException("xml-to-json: Value of <boolean> element is not a valid xs:boolean", ERR_INPUT);
             }
@@ -275,25 +275,25 @@ public class JsonReceiver implements Receiver {
                     if (Double.isNaN(d) || Double.isInfinite(d)) {
                         throw new XPathException("xml-to-json: Infinity and NaN are not allowed", ERR_INPUT);
                     }
-                    output.append(new DoubleValue(d).getUnicodeStringValue());
+                    output.accept(new DoubleValue(d).getUnicodeStringValue());
                 } catch (NumberFormatException e) {
                     throw new XPathException("xml-to-json: Invalid number: " + textBuffer, ERR_INPUT);
                 }
             } else {
                 Sequence result = SystemFunction.dynamicCall(
                         numberFormatter, pipe.getXPathContext(), new Sequence[]{new StringItem(uContent)});
-                output.append(((StringItem)result).getUnicodeStringValue());
+                output.accept(((StringItem)result).getUnicodeStringValue());
             }
 
         } else if (local.equals("string")) {
-            output.append(BMPString.of("\""));
+            output.accept(BMPString.of("\""));
             String str = textBuffer.toString();
             if (escaped) {
-                output.append(StringView.of(handleEscapedString(content)));
+                output.accept(StringView.of(handleEscapedString(content)));
             } else {
-                output.append(StringView.of(escape(content, false, new ControlChar())));
+                output.accept(StringView.of(escape(content, false, isControlChar)));
             }
-            output.append(BMPString.of("\""));
+            output.accept(BMPString.of("\""));
         } else if (!Whitespace.isAllWhite(uContent)) {
             throw new XPathException("xml-to-json: Element " + name.getDisplayName() + " must have no text content", ERR_INPUT);
         }
@@ -301,11 +301,11 @@ public class JsonReceiver implements Receiver {
         escaped = false;
         if (local.equals("array")) {
             String base = indenting ? " ]" : "]";
-            output.append(BMPString.of(base));
+            output.accept(BMPString.of(base));
         } else if (local.equals("map")) {
             keyChecker.pop();
             String base = indenting ? " }" : "}";
-            output.append(BMPString.of(base));
+            output.accept(BMPString.of(base));
         }
         atStart = false;
     }
@@ -325,7 +325,7 @@ public class JsonReceiver implements Receiver {
         StringBuilder out = new StringBuilder(str.length() * 2);
         boolean afterEscapeChar = false;
         for (int i = 0; i < str.length(); i++) {
-            int c = str.codePointAt(i);
+            char c = str.charAt(i);
             if (c == '"' && !afterEscapeChar) {
                 out.append("\\\"");
             } else if (c < 32 || (c >= 127 && c < 160)) {
@@ -399,6 +399,7 @@ public class JsonReceiver implements Receiver {
                     } else {
                         out.appendCodePoint(c);
                     }
+                    break;
             }
         }
         return out.toString();
@@ -412,12 +413,7 @@ public class JsonReceiver implements Receiver {
         return hex;
     }
 
-    private static class ControlChar implements IntPredicate {
-        @Override
-        public boolean test(int c) {
-            return c < 31 || (c >= 127 && c <= 159);
-        }
-    }
+    private IntPredicate isControlChar = c -> c < 31 || (c >= 127 && c <= 159);
 
     @Override
     public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
@@ -459,9 +455,9 @@ public class JsonReceiver implements Receiver {
      */
 
     private void indent(int depth) throws XPathException {
-        output.append(BMPString.of("\n"));
+        output.accept(BMPString.of("\n"));
         for (int i = 0; i < depth; i++) {
-            output.append(StringConstants.SINGLE_SPACE);
+            output.accept(StringConstants.SINGLE_SPACE);
         }
     }
 
@@ -479,12 +475,12 @@ public class JsonReceiver implements Receiver {
         }
         StringBuilder buffer = new StringBuilder(literal.length());
         for (int i = 0; i < literal.length(); i++) {
-            int c = literal.codePointAt(i);
+            char c = literal.charAt(i);
             if (c == '\\') {
                 if (i++ == literal.length() - 1) {
                     throw new XPathException("String '" + Err.wrap(literal) + "' ends in backslash ", "FOJS0007");
                 }
-                switch (literal.codePointAt(i)) {
+                switch (literal.charAt(i)) {
                     case '"':
                         buffer.append('"');
                         break;
@@ -520,7 +516,7 @@ public class JsonReceiver implements Receiver {
                         }
                         break;
                     default:
-                        int next = literal.codePointAt(i);
+                        int next = literal.charAt(i);
                         String xx = next < 256 ? next + "" : "x" + Integer.toHexString(next);
                         throw new XPathException("Unknown escape sequence \\" + xx, "FOJS0007");
                 }

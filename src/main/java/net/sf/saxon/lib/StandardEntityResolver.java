@@ -8,6 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -695,8 +696,7 @@ public class StandardEntityResolver implements EntityResolver {
             traceDestination.info("Fetching Saxon copy of " + filename);
         }
         List<String> messages = new ArrayList<>();
-        List<ClassLoader> classLoaders = new ArrayList<>();
-        InputStream in = Configuration.locateResource(filename, messages, classLoaders);
+        InputStream in = Version.platform.locateResource(filename, messages);
         if (tracing) {
             for (String s : messages) {
                 traceDestination.info(s);

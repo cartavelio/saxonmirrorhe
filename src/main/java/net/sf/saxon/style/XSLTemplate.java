@@ -1022,7 +1022,11 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             match = match.optimize(visitor, cisi);
 
             if (!isDeferredCompilation(getCompilation())) {
-                Expression body = compiledTemplateRules.values().stream().findFirst().map(TemplateRule::getBody).orElse(null);
+                Expression body = null;
+                for (TemplateRule r : compiledTemplateRules.values()) {
+                     body = r.getBody();
+                     break;
+                }
                 // Until now, all template rules share the same body.
 
                 ExpressionTool.resetPropertiesWithinSubtree(body);

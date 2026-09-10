@@ -12,6 +12,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.s9api.Location;
@@ -20,8 +21,6 @@ import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
-
-import java.util.function.Predicate;
 
 /**
  * This class represents a node within a tree produced by the snapshot() function, as a virtual copy of
@@ -233,7 +232,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
             case Type.NAMESPACE:

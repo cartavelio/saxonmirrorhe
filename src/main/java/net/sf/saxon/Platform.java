@@ -22,6 +22,7 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -70,6 +71,17 @@ public interface Platform {
      */
 
     String getPlatformSuffix();
+
+    /**
+     * Read a resource file issued with the Saxon product
+     *
+     * @param filename the filename of the file to be read
+     * @param messages List to be populated with messages in the event of failure
+     * @return an InputStream for reading the file/resource
+     */
+
+    /*@Nullable*/
+    InputStream locateResource(String filename, List<String> messages);
 
     /**
      * Get a parser by instantiating the SAXParserFactory

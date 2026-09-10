@@ -8,6 +8,7 @@
 package net.sf.saxon.serialize.charcode;
 
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
 
 import javax.xml.transform.OutputKeys;
 import java.nio.charset.Charset;
@@ -110,6 +111,9 @@ public class CharacterSetFactory {
 
             // Otherwise see if the Java VM knows anything about the character set
 
+            CSharp.emitCode("throw new XPathException(\"Unknown encoding requested: \" + encoding);");
+
+//#if CSHARP==false
             Charset charset;
             try {
                 charset = Charset.forName(encoding);
@@ -125,6 +129,7 @@ public class CharacterSetFactory {
                 e.setErrorCode("SESU0007");
                 throw e;
             }
+//#endif
         }
     }
 

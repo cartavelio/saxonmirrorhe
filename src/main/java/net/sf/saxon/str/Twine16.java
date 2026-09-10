@@ -8,7 +8,6 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
 
@@ -205,23 +204,6 @@ public class Twine16 extends UnicodeString {
     }
 
 
-    /**
-     * Get an atomic value that encapsulates this match key. Needed to support the collation-key() function.
-     *
-     * @return an atomic value that encapsulates this match key
-     */
-
-    public Base64BinaryValue getCodepointCollationKey() {
-        int len = chars.length;
-        byte[] result = new byte[len * 3];
-        for (int i = 0, j = 0; i < len; i++) {
-            char c = chars[i];
-            result[j++] = (byte) 0;
-            result[j++] = (byte) ((c >> 8) & 0xff);
-            result[j++] = (byte) (c & 0xff);
-        }
-        return new Base64BinaryValue(result);
-    }
 
     @Override
     public int getWidth() {

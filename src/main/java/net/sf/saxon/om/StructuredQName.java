@@ -350,7 +350,7 @@ public class StructuredQName implements IdentityComparable {
 
     public int hashCode() {
         if (cachedHashCode == -1) {
-            int h = 0x8004a00b;
+            int h = 0x5004a00b;
             h ^= prefixStart;
             h ^= localNameStart;
             for (int i = localNameStart; i < prefixStart; i++) {
@@ -371,7 +371,7 @@ public class StructuredQName implements IdentityComparable {
      */
 
     public static int computeHashCode(CharSequence uri, CharSequence local) {
-        int h = 0x8004a00b;
+        int h = 0x5004a00b;
         int localLen = local.length();
         int uriLen = uri.length();
         int totalLen = localLen + uriLen;
@@ -383,6 +383,7 @@ public class StructuredQName implements IdentityComparable {
         return h;
     }
 
+    //#if CSHARP==false
     /**
      * Convert the StructuredQName to a javax.xml.namespace.QName
      *
@@ -392,7 +393,8 @@ public class StructuredQName implements IdentityComparable {
     public QName toJaxpQName() {
         return new javax.xml.namespace.QName(getURI(), getLocalPart(), getPrefix());
     }
-
+    //#endif
+    
     /**
      * Get the NamespaceBinding (prefix/uri pair) corresponding to this name
      *

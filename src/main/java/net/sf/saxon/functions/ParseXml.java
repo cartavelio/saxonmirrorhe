@@ -17,9 +17,13 @@ import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pull.PullProvider;
+import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
+import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringItem;
@@ -45,12 +49,33 @@ public class ParseXml extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringItem input = (StringItem) arguments[0].head();
-        return input == null ? ZeroOrOne.empty() : new ZeroOrOne(evalParseXml(input, context));
+        if (input == null) {
+            return EmptySequence.getInstance();
+            //#if CSHARP==false
+        } else if (usePushParser()) {
+            return parseXmlPush(input, context);
+            //#endif
+        } else {
+            return parseXmlPull(input, context);
+        }
     }
 
-    private NodeInfo evalParseXml(StringItem inputArg, XPathContext context) throws XPathException {
+    @CSharpReplaceBody(code="return false;")
+    private static boolean usePushParser() {
+        return true;
+    }
+
+    //#if CSHARP==false
+    /**
+     * Evaluate the function using a push parser (SAX parser, obtained using JAXP)
+     * @param inputArg the string content of the XML to be parsed
+     * @param context the XPath evaluation context
+     * @return the parsed document, as a tree
+     * @throws XPathException if parsing fails
+     */
+    private NodeInfo parseXmlPush(StringItem inputArg, XPathContext context) throws XPathException {
         String baseURI = getRetainedStaticContext().getStaticBaseUriString();
 
         RetentiveErrorHandler errorHandler = new RetentiveErrorHandler();
@@ -122,14 +147,72 @@ public class ParseXml extends SystemFunction implements Callable {
         public void captureRetainedErrors(XPathException xe) {
             List<SAXParseException> retainedErrors = errors;
             if (!retainedErrors.isEmpty()) {
-                List<ObjectValue<SAXParseException>> wrappedErrors = new ArrayList<>();
+                List<Item> wrappedErrors = new ArrayList<>();
                 for (SAXParseException e : retainedErrors) {
-                    wrappedErrors.add(new ObjectValue<>(e));
+                    wrappedErrors.add(new ObjectValue<SAXParseException>(e));
                 }
                 xe.setErrorObject(SequenceExtent.makeSequenceExtent(wrappedErrors));
             }
         }
     }
+    //#endif
+
+    /**
+     * Evaluate the function using a pull parser (typically the .NET XmlReader)
+     *
+     * @param inputArg the string content of the XML to be parsed
+     * @param context  the XPath evaluation context
+     * @return the parsed document, as a tree
+     * @throws XPathException if parsing fails
+     */
+    private NodeInfo parseXmlPull(StringItem inputArg, XPathContext context) throws XPathException {
+        String baseURI = getRetainedStaticContext().getStaticBaseUriString();
+
+        RetentiveErrorHandler errorHandler = new RetentiveErrorHandler();
+        try {
+            Controller controller = context.getController();
+            if (controller == null) {
+                throw new XPathException("parse-xml() function is not available in this environment");
+            }
+            Configuration config = controller.getConfiguration();
+            PullProvider parser = null; // some magic here
+
+            StringReader sr = new StringReader(inputArg.getStringValue());
+            InputSource is = new InputSource(sr);
+            is.setSystemId(baseURI);
+            Source source = new PullSource(parser);
+            source.setSystemId(baseURI);
+
+            Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
+            Receiver s = b;
+            ParseOptions options = new ParseOptions(config.getParseOptions());
+            PackageData pd = getRetainedStaticContext().getPackageData();
+            if (pd instanceof StylesheetPackage) {
+                options.setSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
+                    s = config.getAnnotationStripper(s);
+                }
+            } else {
+                options.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+            }
+
+            s.setPipelineConfiguration(b.getPipelineConfiguration());
+
+            Sender.send(source, s, options);
+
+            TinyDocumentImpl node = (TinyDocumentImpl) b.getCurrentRoot();
+            node.setBaseURI(baseURI);
+            b.reset();
+            return node;
+        } catch (XPathException err) {
+            XPathException xe = new XPathException("First argument to parse-xml() is not a well-formed and namespace-well-formed XML document. XML parser reported: " +
+                                                           err.getMessage(), "FODC0006");
+            errorHandler.captureRetainedErrors(xe);
+            xe.maybeSetContext(context);
+            throw xe;
+        }
+    }
+
 }
 
 // Copyright (c) 2010-2020 Saxonica Limited

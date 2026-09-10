@@ -8,10 +8,8 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
@@ -136,7 +134,7 @@ public class FilterIterator implements SequenceIterator {
                                         filter);
                 return false;
             } else {
-                ExpressionTool.ebvError("a sequence starting with " + first.getGenre().getDescription() + " (" + first.toShortString() + ")", filter);
+                ExpressionTool.ebvError("a sequence starting with " + Err.describeGenre(first.getGenre()) + " (" + first.toShortString() + ")", filter);
                 return false;
             }
         }

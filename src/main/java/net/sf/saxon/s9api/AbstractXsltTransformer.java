@@ -20,8 +20,8 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 
 import javax.xml.transform.ErrorListener;
@@ -40,6 +40,11 @@ import java.util.Objects;
  * A class that exists to contain common code shared between XsltTransformer and Xslt30Transformer
  */
 
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 abstract class AbstractXsltTransformer {
     protected Processor processor;
     protected XsltController controller;

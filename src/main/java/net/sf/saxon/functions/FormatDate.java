@@ -198,6 +198,7 @@ public class FormatDate extends SystemFunction implements Callable {
                     break;
                 default:
                     format = '1' + format;
+                    break;
             }
         }
 
@@ -719,7 +720,7 @@ public class FormatDate extends SystemFunction implements Callable {
         int zeroDigit = -1;
         int[] expandedFormat = StringTool.expand(StringView.of(format));
         for (int ch : expandedFormat) {
-            if (Character.isDigit(ch)) {
+            if (Character.getType(ch) == Character.DECIMAL_DIGIT_NUMBER) {
                 digits++;
                 if (zeroDigit < 0) {
                     zeroDigit = Alphanumeric.getDigitFamily(ch);
@@ -809,10 +810,10 @@ public class FormatDate extends SystemFunction implements Callable {
 
 
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue value = (CalendarValue) arguments[0].head();
         if (value == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         String format = arguments[1].head().getStringValue();
 
@@ -828,18 +829,27 @@ public class FormatDate extends SystemFunction implements Callable {
         String calendar = calendarVal == null ? null : calendarVal.getStringValue();
         String language = languageVal == null ? null : languageVal.getStringValue();
         String place = countryVal == null ? null : countryVal.getStringValue();
-        if (place != null && place.contains("/") && value.hasTimezone() && !(value instanceof TimeValue)) {
-            TimeZone zone = NamedTimeZone.getNamedTimeZone(place);
-            if (zone != null) {
-                int offset = zone.getOffset(value.toDateTime().getCalendar().getTimeInMillis());
-                value = value.adjustTimezone(offset / 60000);
-            }
+        if (place != null) {
+            value = adjustTimezoneToPlace(value, place);
         }
         String result = formatDate(value, format, language, place, context);
         if (calendarVal != null) {
             result = adjustCalendar(calendar, result, context);
         }
-        return new ZeroOrOne(new StringItem(result));
+        return new StringItem(result);
+    }
+
+    private CalendarValue adjustTimezoneToPlace(CalendarValue value, String place) {
+        //#if CSHARP==false
+        if (place.contains("/") && value.hasTimezone() && !(value instanceof TimeValue)) {
+            TimeZone zone = NamedTimeZone.getNamedTimeZone(place);
+            if (zone != null) {
+                int offset = zone.getOffset(value.toDateTime().getCalendar().getTimeInMillis());
+                return value.adjustTimezone(offset / 60000);
+            }
+        }
+        //#endif
+        return value;
     }
 
 }

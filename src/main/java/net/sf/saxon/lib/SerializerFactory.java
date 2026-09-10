@@ -68,6 +68,8 @@ public class SerializerFactory {
     public Configuration getConfiguration() {
         return config;
     }
+
+    //#ifdef CSHARP==false
     /**
      * Create a serializer with given output properties, and return
      * an XMLStreamWriter that can be used to feed events to the serializer.
@@ -86,6 +88,7 @@ public class SerializerFactory {
         r = new NamespaceReducer(r);
         return new StreamWriterToReceiver(r);
     }
+    //#endif
 
     /**
      * Get a Receiver that wraps a given Result object. Saxon calls this method to construct
@@ -228,9 +231,7 @@ public class SerializerFactory {
             SerializationParamsHandler ph = new SerializationParamsHandler();
             ph.setSerializationParams(doc.getRootNode());
             Properties paramDocProps = ph.getSerializationProperties().getProperties();
-            Enumeration<?> names = paramDocProps.propertyNames();
-            while (names.hasMoreElements()) {
-                String name = (String)names.nextElement();
+            for (String name : paramDocProps.stringPropertyNames()){
                 String value = paramDocProps.getProperty(name);
                 props2.setProperty(name, value);
             }
@@ -357,6 +358,7 @@ public class SerializerFactory {
                         }
                     }
                 }
+                break;
             }
             if (emitter != null) {
                 emitter.setOutputProperties(props);
@@ -423,6 +425,7 @@ public class SerializerFactory {
             } else {
                 return new TreeReceiver(receiver);
             }
+//#if DOTNET == false
         } else if (result instanceof SAXResult) {
             ContentHandlerProxy proxy = newContentHandlerProxy();
             proxy.setUnderlyingContentHandler(((SAXResult) result).getHandler());
@@ -438,7 +441,6 @@ public class SerializerFactory {
             }
             //proxy.open();
             return makeSequenceNormalizer(proxy, props);
-//#if DOTNET == false
         } else if (result instanceof StAXResult) {
             StAXResultHandler handler = new StAXResultHandlerImpl();
             Receiver r = handler.getReceiver(result, props);
@@ -448,9 +450,8 @@ public class SerializerFactory {
         } else {
             if (pipe != null) {
                 // try to find an external object model that knows this kind of Result
-                List externalObjectModels = pipe.getConfiguration().getExternalObjectModels();
-                for (Object externalObjectModel : externalObjectModels) {
-                    ExternalObjectModel model = (ExternalObjectModel) externalObjectModel;
+                List<ExternalObjectModel> externalObjectModels = pipe.getConfiguration().getExternalObjectModels();
+                for (ExternalObjectModel model : externalObjectModels) {
                     Receiver builder = model.getDocumentBuilder(result);
                     if (builder != null) {
                         builder.setSystemId(result.getSystemId());

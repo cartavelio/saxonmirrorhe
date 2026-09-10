@@ -300,7 +300,7 @@ public class SequenceTool {
             if (!ub.isEmpty()) {
                 ub.append(' ');
             }
-            ub.append(item.getUnicodeStringValue());
+            ub.accept(item.getUnicodeStringValue());
         });
         return ub.toUnicodeString();
     }

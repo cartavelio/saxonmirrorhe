@@ -105,9 +105,9 @@ public class Serialize extends SystemFunction implements Callable {
         "suppress-indentation", "undeclare-prefixes", "use-character-maps", "version"
     };
 
-    private boolean isParamName(String string) {
+    private boolean isParamName(String name) {
         for (String s : paramNames) {
-            if (s.equals(string)) {
+            if (s.equals(name)) {
                 return true;
             }
         }
@@ -120,9 +120,9 @@ public class Serialize extends SystemFunction implements Callable {
             "supply-source-locator", "suppress-indentation"
     };
 
-    private boolean isParamNameSaxon(String string) {
+    private boolean isParamNameSaxon(String name) {
         for (String s : paramNamesSaxon) {
-            if (s.equals(string)) {
+            if (s.equals(name)) {
                 return true;
             }
         }

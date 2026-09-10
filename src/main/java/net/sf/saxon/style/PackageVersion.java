@@ -37,7 +37,7 @@ public class PackageVersion implements Comparable<PackageVersion> {
      * @param values the sequence of integer components
      */
     public PackageVersion(int[] values) {
-        parts = new ArrayList<Integer>(values.length);
+        parts = new ArrayList<>(values.length);
         for (int value : values) {
             parts.add(value);
         }

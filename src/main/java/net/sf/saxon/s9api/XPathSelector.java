@@ -17,6 +17,7 @@ import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.URIResolver;
 import java.util.Map;
@@ -25,6 +26,11 @@ import java.util.Map;
  * An XPathSelector represents a compiled and loaded XPath expression ready for execution.
  * The XPathSelector holds details of the dynamic evaluation context for the XPath expression.
  */
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 @SuppressWarnings({"ForeachStatement"})
 public class XPathSelector implements Iterable<XdmItem> {
 
@@ -224,6 +230,7 @@ public class XPathSelector implements Iterable<XdmItem> {
         }
     }
 
+    //#if CSHARP==false
     /**
      * Evaluate the expression, returning the result as an <code>Stream</code>.
      *
@@ -239,6 +246,7 @@ public class XPathSelector implements Iterable<XdmItem> {
     public XdmStream<XdmItem> stream() throws SaxonApiUncheckedException {
         return iterator().stream();
     }
+    //#endif
 
     /**
      * Evaluate the XPath expression, returning the effective boolean value of the result.

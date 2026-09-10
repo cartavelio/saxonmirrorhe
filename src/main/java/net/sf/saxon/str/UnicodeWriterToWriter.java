@@ -49,7 +49,7 @@ public class UnicodeWriterToWriter implements UnicodeWriter {
             writer.write(UTF16CharacterSet.highSurrogate(codepoint));
             writer.write(UTF16CharacterSet.lowSurrogate(codepoint));
         } else {
-            writer.write(codepoint);
+            writer.write((char)codepoint);
         }
     }
 

@@ -68,7 +68,7 @@ public class BMPString extends UnicodeString {
         if (codePoint > 65535) {
             return -1;
         }
-        return base.indexOf(codePoint);
+        return base.indexOf((char)codePoint);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class BMPString extends UnicodeString {
         if (codePoint > 65535) {
             return -1;
         }
-        return base.indexOf(codePoint, from32);
+        return base.indexOf((char)codePoint, from32);
     }
 
     /**
@@ -118,7 +118,7 @@ public class BMPString extends UnicodeString {
             return new BMPString(base + ((BMPString)other).base);
         } else {
             UnicodeBuilder ub = new UnicodeBuilder();
-            return ub.append(this).append(other).toUnicodeString();
+            return ub.accept(this).accept(other).toUnicodeString();
         }
     }
 

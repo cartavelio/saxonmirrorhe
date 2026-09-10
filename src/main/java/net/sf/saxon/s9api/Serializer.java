@@ -679,6 +679,7 @@ public class Serializer extends AbstractDestination {
         }
     }
 
+    //#if CSHARP==false
     /**
      * Get an XMLStreamWriter that can be used for writing application-generated XML
      * to be output via this serializer.
@@ -694,7 +695,9 @@ public class Serializer extends AbstractDestination {
         r = new NamespaceReducer(r);
         return new StreamWriterToReceiver(r);
     }
+    //#endif
 
+    //#if CSHARP==false
     /**
      * Get a ContentHandler that can be used to direct the output of a SAX parser (or other
      * source of SAX events) to this serializer.
@@ -714,6 +717,7 @@ public class Serializer extends AbstractDestination {
         rch.setPipelineConfiguration(r.getPipelineConfiguration());
         return rch;
     }
+    //#endif
 
     /**
      * Get the current output destination.

@@ -17,8 +17,12 @@ import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceMethod;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -68,7 +72,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
             if (++count == 2) {
                 checkAllowsMany(Loc.NONE);
             }
-            checkItemType(NodeKindTest.NAMESPACE, null, Loc.NONE);
+            checkItemType(NodeKindTest.NAMESPACE, Loc.NONE);
         }
         getNextOutputter().namespace(prefix, namespaceUri, properties);
     }
@@ -312,9 +316,20 @@ public class TypeCheckingFilter extends ProxyOutputter {
         return true;
     }
 
+    @CSharpReplaceMethod(code="private void checkItemType<T>(net.sf.saxon.type.ItemType type, java.util.function.Supplier<T> itemSupplier, net.sf.saxon.s9api.Location locationId) where T : net.sf.saxon.om.Item {\n"
+            + "            if (!(typeHierarchy.isSubType(type, itemType))) {\n"
+            + "                throwTypeError(type, itemSupplier(), locationId);\n"
+            + "            }\n"
+            + "        }")
     private void checkItemType(ItemType type, Supplier<? extends Item> itemSupplier, Location locationId) throws XPathException {
         if (!typeHierarchy.isSubType(type, itemType)) {
-            throwTypeError(type, itemSupplier == null ? null : itemSupplier.get(), locationId);
+            throwTypeError(type, itemSupplier.get(), locationId);
+        }
+    }
+
+    private void checkItemType(ItemType type, Location locationId) throws XPathException {
+        if (!typeHierarchy.isSubType(type, itemType)) {
+            throwTypeError(type, null, locationId);
         }
     }
 

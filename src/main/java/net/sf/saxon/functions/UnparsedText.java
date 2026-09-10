@@ -14,8 +14,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.*;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringItem;
 
@@ -41,11 +44,11 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne<StringItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringItem hrefVal = (StringItem) arguments[0].head();
         String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
         try {
-            return new ZeroOrOne<>(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
+            return SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
         } catch (XPathException e) {
             if (getArity() == 2 && e.getErrorCodeLocalPart().equals("FOUT1200")) {
                 e.setErrorCode("FOUT1190");
@@ -58,8 +61,8 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         if (stable) {
-            ZeroOrOne<StringItem> result = call(context, arguments);
-            StringItem value = result.head();
+            Sequence result = call(context, arguments);
+            StringItem value = (StringItem)result.head();
             if (value != null) {
                 destination.append(value, Loc.NONE, ReceiverOption.NONE);
             }
@@ -150,7 +153,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
     }
 
     // diagnostic method to output the octets of a file
-
+    //#if CSHARP==false
     public static void main(String[] args) throws Exception {
         StringBuilder sb1 = new StringBuilder(256);
         StringBuilder sb2 = new StringBuilder(256);
@@ -174,5 +177,5 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
         }
         is.close();
     }
-
+     //#endif
 }

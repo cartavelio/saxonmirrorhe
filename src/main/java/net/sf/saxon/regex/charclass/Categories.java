@@ -8,6 +8,7 @@
 package net.sf.saxon.regex.charclass;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
@@ -109,7 +110,7 @@ public class Categories {
 
         CATEGORIES = new HashMap<>(30);
 
-        InputStream in = Configuration.locateResource("categories.xml", new ArrayList<>(), new ArrayList<>());
+        InputStream in = Version.platform.locateResource("categories.xml", new ArrayList<>());
         if (in == null) {
             throw new RuntimeException("Unable to read categories.xml file");
         }

@@ -381,7 +381,7 @@ public abstract class ItemType {
      * ItemType representing a built-in atomic type
      */
 
-    static class BuiltInAtomicItemType extends ItemType {
+    protected static class BuiltInAtomicItemType extends ItemType {
 
         private final BuiltInAtomicType underlyingType;
         private final ConversionRules conversionRules;

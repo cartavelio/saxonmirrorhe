@@ -188,8 +188,9 @@ public class ArrayItemType extends AnyFunctionType {
      * @return a string representation of the type, in notation resembling but not necessarily
      *         identical to XPath syntax
      */
+    @SuppressWarnings("Convert2MethodRef")
     public String toString() {
-        return makeString(SequenceType::toString);
+        return makeString(st -> st.toString());
     }
 
     private String makeString(Function<SequenceType, String> show) {
@@ -213,9 +214,10 @@ public class ArrayItemType extends AnyFunctionType {
      *
      * @return the string representation as an instance of the XPath SequenceType construct
      */
+    @SuppressWarnings("Convert2MethodRef")
     @Override
     public String toExportString() {
-        return makeString(SequenceType::toExportString);
+        return makeString(st -> st.toExportString());
     }
 
     /**

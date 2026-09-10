@@ -8,14 +8,14 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.AtomicListIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.SchemaComparable;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class AtomicArray implements AtomicSequence {
     /**
      * Create an AtomicArray supplying the contents as an iterator
      *
-     * @param iter the iterator that supplies the atomic values (which must be position
+     * @param iter the iterator that supplies the atomic values (which must be positioned
      *             at the start of the sequence, and which will be consumed by the method).
      * @throws XPathException     if evaluation of the SequenceIterator fails
      * @throws ClassCastException if any of the items returned by the SequenceIterator is not atomic
@@ -68,7 +68,7 @@ public class AtomicArray implements AtomicSequence {
 
     @Override
     public AtomicIterator iterate() {
-        return new ListIterator.Atomic(content);
+        return new AtomicListIterator(content);
     }
 
     /**
@@ -151,7 +151,7 @@ public class AtomicArray implements AtomicSequence {
             } else {
                 first = false;
             }
-            ub.append(av.getUnicodeStringValue());
+            ub.accept(av.getUnicodeStringValue());
         }
         return ub.toUnicodeString();
     }

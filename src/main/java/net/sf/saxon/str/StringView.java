@@ -72,7 +72,7 @@ public class StringView extends CodePoints {
             return sv;
         } else {
             UnicodeBuilder ub = new UnicodeBuilder();
-            return ub.append(this).append(other).toUnicodeString();
+            return ub.accept(this).accept(other).toUnicodeString();
         }
     }
 

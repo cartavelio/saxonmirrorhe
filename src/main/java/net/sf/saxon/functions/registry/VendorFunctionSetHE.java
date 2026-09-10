@@ -103,9 +103,9 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
         register("array-as-sequence-of-maps", 1, ArrayAsSequenceOfMaps.class, arrayRepresentation, STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE,null);
 
-        RecordTest mapRepresentation = new RecordTest(
+        @SuppressWarnings("RedundantArrayCreation") RecordTest mapRepresentation = new RecordTest(
                 Arrays.asList("key", "value"),
-                Arrays.asList(SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE),
+                Arrays.asList(new SequenceType[]{SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE}),
                 Collections.emptyList(),
                 false);
         register("map-as-sequence-of-maps", 1, MapAsSequenceOfMaps.class, mapRepresentation, STAR, 0)

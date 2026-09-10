@@ -81,7 +81,8 @@ public class Sum extends FoldingFunction {
     public static AtomicValue total(SequenceIterator in, XPathContext context, Location locator) throws XPathException {
         try {
             SumFold fold = new SumFold(context, null);
-            in.forEachOrFail(fold::processItem);
+            //noinspection Convert2MethodRef
+            in.forEachOrFail(it -> fold.processItem(it));
             return (AtomicValue)fold.result().head();
         } catch (XPathException e) {
             e.maybeSetLocation(locator);

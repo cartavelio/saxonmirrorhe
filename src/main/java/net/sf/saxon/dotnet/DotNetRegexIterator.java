@@ -53,14 +53,14 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      * to obtain each matching substring. But the iterator also returns non-matching substrings
      * if these appear between the matching substrings.
      *
-     * @param string  the string to be analysed
+     * @param str  the string to be analysed
      * @param pattern the regular expression
      */
 
-    public DotNetRegexIterator(String string, Regex pattern) {
-        theString = string;
+    public DotNetRegexIterator(String str, Regex pattern) {
+        theString = str;
         this.pattern = pattern;
-        matcher = pattern.Matches(string).GetEnumerator();
+        matcher = pattern.Matches(str).GetEnumerator();
         nextString = null;
     }
 

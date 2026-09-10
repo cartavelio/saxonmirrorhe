@@ -153,6 +153,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
     public synchronized void setSource(Source source) {
         if (source instanceof NodeInfo) {
             setInitialContextNode(new XdmNode((NodeInfo) source));
+            //#if CSHARP==false
         } else if (source instanceof DOMSource) {
             if (((DOMSource)source).getNode() == null) {
                 DocumentImpl doc = new DocumentImpl();
@@ -162,6 +163,7 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
                 NodeInfo n = processor.getUnderlyingConfiguration().unravel(source);
                 setInitialContextNode(new XdmNode(n));
             }
+            //#endif
         } else {
             initialSource = source;
         }
@@ -327,10 +329,12 @@ public class XsltTransformer extends AbstractXsltTransformer implements Destinat
             if ((gcr == null || !gcr.isAbsentFocus()) && initialSelection != null) {
                 if (initialSelection instanceof NodeInfo) {
                     reset = maybeSetGlobalContextItem((NodeInfo) initialSelection);
+                    //#if CSHARP==false
                 } else if (initialSelection instanceof DOMSource) {
                     NodeInfo node = controller.prepareInputTree(initialSelection);
                     reset = maybeSetGlobalContextItem(node);
                     initialSelection = node;
+                    //#endif
                 } else {
                     NodeInfo node = controller.makeSourceTree(initialSelection, getSchemaValidationMode().getNumber());
                     reset = maybeSetGlobalContextItem(node);

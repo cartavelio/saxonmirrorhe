@@ -16,6 +16,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationParams;
 import org.xml.sax.EntityResolver;
@@ -37,14 +38,18 @@ import java.util.*;
  */
 
 @SuppressWarnings("WeakerAccess")
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class ParseOptions {
 
     private int schemaValidation = Validation.DEFAULT;
     private int dtdValidation = Validation.DEFAULT;
     private StructuredQName topLevelElement;
     private SchemaType topLevelType;
-    /*@Nullable*/ private transient XMLReader parser = null;
-    private Maker<XMLReader> parserMaker;
+
     /*@Nullable*/ private Boolean wrapDocument = null;
     /*@Nullable*/ private TreeModel treeModel = null;
     //private int stripSpace = Whitespace.UNSPECIFIED;
@@ -52,8 +57,6 @@ public class ParseOptions {
     /*@Nullable*/ private Boolean lineNumbering = null;
     private boolean pleaseClose = false;
     /*@Nullable*/ private transient ErrorReporter errorReporter = null;
-    /*@Nullable*/ private transient EntityResolver entityResolver = null;
-    /*@Nullable*/ private transient ErrorHandler errorHandler = null;
     /*@Nullable*/ private List<FilterFactory> filters = null;
     private boolean continueAfterValidationErrors = false;
     private boolean addCommentsAfterValidationErrors = false;
@@ -68,6 +71,13 @@ public class ParseOptions {
     private Map<String, Object> parserProperties = null;
     private InvalidityHandler invalidityHandler = null;
     private Set<? extends Accumulator> applicableAccumulators = null; // null means "all"
+
+    //#if CSHARP==false
+    private transient XMLReader parser = null;
+    private Maker<XMLReader> parserMaker;
+    private transient EntityResolver entityResolver = null;
+    private transient ErrorHandler errorHandler = null;
+    //#endif
 
     /**
      * Create a ParseOptions object with default options set
@@ -89,16 +99,13 @@ public class ParseOptions {
         setDTDValidationMode(p.dtdValidation);
         topLevelElement = p.topLevelElement;
         topLevelType = p.topLevelType;
-        parserMaker = p.getXMLReaderMaker();
-        parser = p.parser;
+
         wrapDocument = p.wrapDocument;
         treeModel = p.treeModel;
         spaceStrippingRule = p.spaceStrippingRule;
         lineNumbering = p.lineNumbering;
         pleaseClose = p.pleaseClose;
-        errorHandler = p.errorHandler;
         errorReporter = p.errorReporter;
-        entityResolver = p.entityResolver;
         invalidityHandler = p.invalidityHandler;
         stable = p.stable;
         if (p.filters != null) {
@@ -118,6 +125,13 @@ public class ParseOptions {
         applicableAccumulators = p.applicableAccumulators;
         checkEntityReferences = p.checkEntityReferences;
         validationStatisticsRecipient = p.validationStatisticsRecipient;
+
+        //#if (CSHARP==false)
+        parserMaker = p.getXMLReaderMaker();
+        parser = p.parser;
+        errorHandler = p.errorHandler;
+        entityResolver = p.entityResolver;
+        //#endif
     }
 
     /**
@@ -151,9 +165,6 @@ public class ParseOptions {
         if (options.topLevelType != null) {
             topLevelType = options.topLevelType;
         }
-        if (options.parser != null) {
-            parser = options.parser;
-        }
         if (options.wrapDocument != null) {
             wrapDocument = options.wrapDocument;
         }
@@ -169,12 +180,7 @@ public class ParseOptions {
         if (options.pleaseClose) {
             pleaseClose = true;
         }
-        if (options.errorReporter != null) {
-            errorReporter = options.errorReporter;
-        }
-        if (options.entityResolver != null) {
-            entityResolver = options.entityResolver;
-        }
+
         if (options.filters != null) {
             if (filters == null) {
                 filters = new ArrayList<>();
@@ -206,6 +212,17 @@ public class ParseOptions {
             addCommentsAfterValidationErrors = true;
         }
         validationErrorLimit = java.lang.Math.min(validationErrorLimit, options.validationErrorLimit);
+        //#if (CSHARP==false)
+        if (options.parser != null) {
+            parser = options.parser;
+        }
+        if (options.errorReporter != null) {
+            errorReporter = options.errorReporter;
+        }
+        if (options.entityResolver != null) {
+            entityResolver = options.entityResolver;
+        }
+        //#endif
     }
 
     /**
@@ -231,10 +248,12 @@ public class ParseOptions {
         if (lineNumbering == null) {
             lineNumbering = config.isLineNumbering();
         }
+
+        //#if (CSHARP==false)
         if (errorReporter == null) {
             setErrorReporter(config.makeErrorReporter());
         }
-
+        //#endif
     }
 
     /**
@@ -622,6 +641,7 @@ public class ParseOptions {
         return lineNumbering != null;
     }
 
+    //#if CSHARP==false
     /**
      * Set the SAX parser (XMLReader) to be used. This method must be used with care, because
      * an XMLReader is not thread-safe. If there is any chance that this ParseOptions object will
@@ -731,6 +751,7 @@ public class ParseOptions {
         return errorHandler;
     }
 
+    //#endif
 
     /**
      * Assuming that the contained Source is a node in a tree, indicate whether a tree should be created
@@ -1043,6 +1064,7 @@ public class ParseOptions {
                 if (ss.getReader() != null) {
                     ss.getReader().close();
                 }
+            //#if (CSHARP==false)
             } else if (source instanceof SAXSource) {
                 InputSource is = ((SAXSource) source).getInputSource();
                 if (is != null) {
@@ -1053,6 +1075,7 @@ public class ParseOptions {
                         is.getCharacterStream().close();
                     }
                 }
+            //#endif
             } else if (source instanceof AugmentedSource) {
                 ((AugmentedSource)source).close();
             }

@@ -40,8 +40,13 @@ import java.util.EnumSet;
 public class XSLGlobalVariable extends StyleElement implements StylesheetComponent {
 
     private SlotManager slotManager; // used to manage local variables declared inside this global variable
-    protected SourceBinding sourceBinding = new SourceBinding(this);
+    protected SourceBinding sourceBinding;
     protected GlobalVariable compiledVariable = null;
+
+    public XSLGlobalVariable() {
+        sourceBinding = new SourceBinding(this);
+        sourceBinding.setProperty(SourceBinding.BindingProperty.GLOBAL, true);
+    }
 
     /**
      * Get the source binding object that holds information about the declared variable.
@@ -99,9 +104,6 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
 
 
 
-    public XSLGlobalVariable() {
-        sourceBinding.setProperty(SourceBinding.BindingProperty.GLOBAL, true);
-    }
 
     protected EnumSet<SourceBinding.BindingProperty> getPermittedAttributes() {
         return EnumSet.of(SourceBinding.BindingProperty.ASSIGNABLE,

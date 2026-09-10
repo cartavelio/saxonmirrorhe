@@ -10,6 +10,7 @@ package net.sf.saxon.tree.wrapper;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -20,8 +21,6 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
-
-import java.util.function.Predicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
@@ -271,7 +270,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         int nodeKind = getNodeKind();
         switch (axisNumber) {

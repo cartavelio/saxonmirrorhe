@@ -696,7 +696,7 @@ public abstract class PJConverter {
 
         @Override
         public ZeroOrMore<Item> convert(Sequence value, Class<?> targetClass, XPathContext context) throws XPathException {
-            return new ZeroOrMore<>(value.iterate());
+            return ZeroOrMore.fromSequenceIterator(value.iterate());
         }
 
     }

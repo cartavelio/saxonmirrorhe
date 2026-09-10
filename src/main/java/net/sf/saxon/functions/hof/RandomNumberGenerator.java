@@ -159,10 +159,10 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
         long seed;
         if (arguments.length == 0) {
             // seed value must be repeatable within execution scope
-            seed = context.getCurrentDateTime().getCalendar().getTimeInMillis();
+            seed = context.getCurrentDateTime().randomSeed();
         } else {
             AtomicValue val = (AtomicValue) arguments[0].head();
-            seed = val == null ? context.getCurrentDateTime().getCalendar().getTimeInMillis() : val.hashCode();
+            seed = val == null ? context.getCurrentDateTime().randomSeed() : val.hashCode();
         }
         return generator(seed, context);
     }

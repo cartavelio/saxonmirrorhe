@@ -7,26 +7,15 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceExtent;
 
-import java.util.EnumSet;
 import java.util.List;
 
 /**
- * Class ListIterator, iterates over a sequence of items held in a Java List
+ * Class ListIterator, iterates over a sequence of items held in a Java List.
  */
 
-public class ListIterator
-        implements UnfailingIterator, LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
-
-    private int index = 0;
-    protected List<? extends Item> list;
+public class ListIterator extends GenericListIterator<Item> {
 
     /**
      * Create a ListIterator over a given List
@@ -34,91 +23,9 @@ public class ListIterator
      * @param list the list: all objects in the list must be instances of {@link Item}
      */
 
-    public ListIterator(List<? extends Item> list) {
-        index = 0;
-        this.list = list;
+    public ListIterator(List<Item> list) {
+        super(list);
     }
 
-    @Override
-    public boolean hasNext() {
-        return index < list.size();
-    }
-
-    /*@Nullable*/
-    @Override
-    public Item next() {
-        if (index >= list.size()) {
-            return null;
-        }
-        return list.get(index++);
-    }
-
-    @Override
-    public int getLength() {
-        return list.size();
-    }
-
-    /**
-     * Get properties of this iterator, as a bit-significant integer.
-     *
-     * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link SequenceIteratorProperty#GROUNDED}, {@link SequenceIteratorProperty#LAST_POSITION_FINDER},
-     *         and {@link SequenceIteratorProperty#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
-     */
-
-    @Override
-    public EnumSet<SequenceIteratorProperty> getProperties() {
-        return EnumSet.of(SequenceIteratorProperty.LOOKAHEAD, SequenceIteratorProperty.GROUNDED, SequenceIteratorProperty.LAST_POSITION_FINDER);
-    }
-
-    /**
-     * Return a Sequence containing all the items in the sequence returned by this
-     * SequenceIterator
-     *
-     * @return the corresponding GroundedValue
-     */
-
-    /*@Nullable*/
-    @Override
-    public GroundedValue materialize() {
-        return SequenceExtent.makeSequenceExtent(list);
-    }
-
-    @Override
-    public GroundedValue getResidue()  {
-        List<? extends Item> l2 = list;
-        if (index != 0) {
-            l2 = l2.subList(index, l2.size());
-        }
-        return SequenceExtent.makeSequenceExtent(l2);
-    }
-
-    @Override
-    public SequenceIterator getReverseIterator() {
-        return new ReverseListIterator(list);
-    }
-
-    public static class Atomic extends ListIterator implements AtomicIterator {
-        public Atomic (List<? extends AtomicValue> list) {
-            super(list);
-        }
-        public AtomicValue next() {
-            return (AtomicValue)super.next();
-        }
-    }
-
-    public static class OfNodes extends ListIterator implements AxisIterator {
-        public OfNodes(List<NodeInfo> list) {
-            super(list);
-        }
-
-        @Override
-        public NodeInfo next() {
-            return (NodeInfo)super.next();
-        }
-
-    }
 }
 

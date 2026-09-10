@@ -222,16 +222,17 @@ public class AtomicSortComparer implements AtomicComparer {
         return compareAtomicValues(a, b) == 0;
     }
 
-    public static AtomicMatchKey COLLATION_KEY_NaN = new AtomicMatchKey() {
+    private static class MatchKeyForNaN implements AtomicMatchKey {
         @Override
         public AtomicValue asAtomic() {
             // The logic here is to choose a value that compares equal to itself but not equal to any other
-            // number. We use StructuredQName because it has a simple equals() method.
+            // value. We use StructuredQName because it has a simple equals() method.
 
             return new QNameValue("saxon", "http://saxon.sf.net/collation-key", "NaN");
         }
     };
 
+    public static AtomicMatchKey COLLATION_KEY_NaN = new MatchKeyForNaN();
     /**
      * Create a string representation of this AtomicComparer that can be saved in a compiled
      * package and used to reconstitute the AtomicComparer when the package is reloaded

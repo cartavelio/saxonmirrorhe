@@ -21,6 +21,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.ItemType;
@@ -55,6 +56,7 @@ public class SourceBinding {
 
     //private int properties;
 
+    @CSharpSimpleEnum
     public enum BindingProperty {
         PRIVATE, GLOBAL, PARAM, TUNNEL, REQUIRED, IMPLICITLY_REQUIRED, ASSIGNABLE,
         SELECT, AS, DISALLOWS_CONTENT, STATIC, VISIBILITY, IMPLICITLY_DECLARED}

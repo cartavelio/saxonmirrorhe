@@ -181,11 +181,10 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     public UnicodeString getUnicodeStringValue() {
         if (node instanceof List) {
             // This wrapper is mapped to a list of adjacent text nodes
-            List nodes = (List) node;
+            List<Text> nodes = (List<Text>) node;
             UnicodeBuilder fsb = new UnicodeBuilder();
-            for (Object node1 : nodes) {
-                Text o = (Text) node1;
-                fsb.append(getStringValue(o));
+            for (Text o : nodes) {
+                fsb.accept(getStringValue(o));
             }
             return fsb.toUnicodeString();
         } else {

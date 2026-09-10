@@ -13,7 +13,6 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
-
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -254,7 +253,7 @@ public class RoleDiagnostic {
 
         if (requiredItemType.getGenre() != item.getGenre()) {
             message.append(" is ");
-            message.append(item.getGenre().getDescription());
+            message.append(Err.describeGenre(item.getGenre()));
         } else {
             message.append(" does not match. ");
             if (th != null) {

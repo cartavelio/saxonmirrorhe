@@ -318,8 +318,8 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         if (isUpdateQuery()) {
             throw new XPathException("Cannot call evaluateSingle() on an updating query");
         }
-        SequenceIterator iterator = iterator(env);
-        Item item = iterator.next();
+        SequenceIterator iter = iterator(env);
+        Item item = iter.next();
         if (item == null) {
             return null;
         }
@@ -374,7 +374,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
                 return iterator;
             } else {
-                return new ErrorReportingIterator(iterator, controller.getErrorReporter());
+                return new ErrorReportingIterator(iterator, controller.getErrorReporter(), getLocation());
             }
         } catch (XPathException err) {
             TransformerException terr = err;
@@ -512,9 +512,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         Properties baseProperties = controller.getExecutable().getPrimarySerializationProperties().getProperties();
         SerializerFactory sf = controller.getConfiguration().getSerializerFactory();
         if (outputProperties != null) {
-            Enumeration iter = outputProperties.propertyNames();
-            while (iter.hasMoreElements()) {
-                String key = (String) iter.nextElement();
+            for (String key : outputProperties.stringPropertyNames()) {
                 String value = outputProperties.getProperty(key);
                 try {
                     value = sf.checkOutputProperty(key, value);
@@ -760,13 +758,15 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
      * any exceptions that are raised to the ErrorListener
      */
 
-    private class ErrorReportingIterator implements SequenceIterator {
+    private static class ErrorReportingIterator implements SequenceIterator {
         private final SequenceIterator base;
         private final ErrorReporter reporter;
+        private final Location location;
 
-        public ErrorReportingIterator(SequenceIterator base, ErrorReporter reporter) {
+        public ErrorReportingIterator(SequenceIterator base, ErrorReporter reporter, Location location) {
             this.base = base;
             this.reporter = reporter;
+            this.location = location;
         }
 
         /*@Nullable*/
@@ -775,7 +775,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             try {
                 return base.next();
             } catch (XPathException e1) {
-                e1.maybeSetLocation(expression.getLocation());
+                e1.maybeSetLocation(location);
                 XmlProcessingException err = new XmlProcessingException(e1);
                 reporter.report(err);
                 e1.setHasBeenReported(true);

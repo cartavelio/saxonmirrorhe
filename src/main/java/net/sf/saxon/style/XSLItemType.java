@@ -18,7 +18,7 @@ import net.sf.saxon.value.SequenceType;
  * to be used in an itemType with the syntax <code>type(N)</code>.
  */
 
-public class XSLItemType extends StyleElement {      // renamed to solve a transient build problem
+public class XSLItemType extends StyleElement {
 
     private StructuredQName itemTypeName;
     private boolean resolved = false;
@@ -89,7 +89,7 @@ public class XSLItemType extends StyleElement {      // renamed to solve a trans
     }
 
     public ItemType tryToResolve() throws XPathException {
-        StaticContext env = new TypeAliasContext();
+        StaticContext env = new TypeAliasContext(this);
         resolved = true;
         ItemType type = makeItemType(env);
         return resolved ? type : null;
@@ -142,10 +142,10 @@ public class XSLItemType extends StyleElement {      // renamed to solve a trans
         return null;
     }
 
-    private class TypeAliasContext extends ExpressionContext {
+    private static class TypeAliasContext extends ExpressionContext {
 
-        public TypeAliasContext() {
-            super(XSLItemType.this, new StructuredQName("", "", "as"));
+        public TypeAliasContext(XSLItemType declaration) {
+            super(declaration, new StructuredQName("", "", "as"));
         }
 
         /**
@@ -160,7 +160,7 @@ public class XSLItemType extends StyleElement {      // renamed to solve a trans
         public ItemType resolveTypeAlias(StructuredQName typeName) {
             ItemType resolved = super.resolveTypeAlias(typeName);
             if (resolved == null) {
-                markUnresolved();
+                ((XSLItemType)getStyleElement()).markUnresolved();
                 return AnyItemType.getInstance();
             } else {
                 return resolved;

@@ -452,16 +452,14 @@ public class XQueryFunction implements Declaration, Location {
             body = LoopLifter.process(body, visitor, ContextItemStaticInfo.ABSENT);
         }
         if (opt.isOptionSet(OptimizerOptions.EXTRACT_GLOBALS)) {
-            final Executable exec = ((QueryModule)getStaticContext()).getExecutable();
             GlobalVariableManager manager = new GlobalVariableManager() {
                 @Override
                 public void addGlobalVariable(GlobalVariable variable) throws XPathException {
                     PackageData pd = staticContext.getPackageData();
                     variable.setPackageData(pd);
-                    //exec.registerGlobalVariable(variable);
                     SlotManager sm = pd.getGlobalSlotManager();
                     int slot = sm.allocateSlotNumber(variable.getVariableQName());
-                    variable.compile(exec, slot);
+                    variable.compile(staticContext.getExecutable(), slot);
                     pd.addGlobalVariable(variable);
                 }
 

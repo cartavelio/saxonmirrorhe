@@ -573,7 +573,7 @@ public class ContentHandlerProxy implements Receiver {
          */
 
         /*@Nullable*/
-        public Stack getContextItemStack() {
+        public Stack<Item> getContextItemStack() {
             return contextItemStack;
         }
 

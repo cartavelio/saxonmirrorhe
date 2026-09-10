@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.str.*;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.z.IntIterator;
 
@@ -165,6 +166,7 @@ public class Whitespace {
             true                                                     // 32
     };
 
+    @CSharpSimpleEnum
     private enum TokenCategory {INITIAL_WHITESPACE, SEPARATOR_WHITESPACE, FINAL_WHITESPACE, CONTENT}
 
     @FunctionalInterface
@@ -404,7 +406,7 @@ public class Whitespace {
         tokenize(in.codePoints(), (s, e, cat) -> {
             switch (cat) {
                 case CONTENT:
-                    builder.append(in.substring(s, e));
+                    builder.accept(in.substring(s, e));
                     break;
                 case SEPARATOR_WHITESPACE:
                     builder.append(' ');
@@ -438,7 +440,7 @@ public class Whitespace {
         tokenize(in.codePoints(), (s, e, cat) -> {
             switch (cat) {
                 case CONTENT:
-                    builder.append(in.substring(s, e));
+                    builder.accept(in.substring(s, e));
                     break;
                 case SEPARATOR_WHITESPACE:
                     for (int i=s; i<e; i++) {

@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
@@ -20,6 +21,7 @@ import net.sf.saxon.value.IntegerValue;
 
 public abstract class AccessorFn extends ScalarSystemFunction {
     
+    @CSharpSimpleEnum
     public enum Component {
         YEAR, MONTH, DAY, HOURS, MINUTES, SECONDS, TIMEZONE,
         LOCALNAME, NAMESPACE, PREFIX, MICROSECONDS, NANOSECONDS, WHOLE_SECONDS, YEAR_ALLOWING_ZERO
@@ -59,15 +61,6 @@ public abstract class AccessorFn extends ScalarSystemFunction {
             default:
                 return null;
         }
-    }
-
-    /**
-     * Get the required component
-     * @return the integer code identifying of the required component
-     */
-
-    public int getRequiredComponent() {
-        return getComponentId().ordinal();
     }
 
     /**

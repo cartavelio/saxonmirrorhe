@@ -44,7 +44,7 @@ public class ItemMappingIterator
     private boolean oneToOne = false;
 
     /**
-     * Construct an ItemMappingIterator that will apply a specified DummyItemMappingFunction to
+     * Construct an ItemMappingIterator that will apply a specified ItemMappingFunction to
      * each Item returned by the base iterator.
      *
      * @param base   the base iterator
@@ -54,6 +54,24 @@ public class ItemMappingIterator
     public ItemMappingIterator(SequenceIterator base, ItemMappingFunction action) {
         this.base = base;
         this.action = action;
+    }
+
+    /**
+     * Factory method designed for use when the mapping function is a lambda expression
+     * Example of usage: {@code ItemMappingIterator.map(base, item -> item.getParentNode())}
+     */
+
+    public static ItemMappingIterator map(SequenceIterator base, ItemMapper.Lambda mappingExpression) {
+        return new ItemMappingIterator(base, ItemMapper.of(mappingExpression));
+    }
+
+    /**
+     * Factory method designed for use when the mapping function is designed to filter the input nodes
+     * Example of usage: {@code ItemMappingIterator.filter(base, item -> item.hasChildNodes())}
+     */
+
+    public static ItemMappingIterator filter(SequenceIterator base, ItemFilter.Lambda filterExpression) {
+        return new ItemMappingIterator(base, ItemFilter.of(filterExpression));
     }
 
     /**

@@ -40,19 +40,19 @@ import java.util.List;
  */
 
 public class REProgram {
-    static final int OPT_HASBACKREFS = 1;
-    static final int OPT_HASBOL = 2;
+    protected static final int OPT_HASBACKREFS = 1;
+    protected static final int OPT_HASBOL = 2;
 
-    Operation operation;
-    REFlags flags;
-    UnicodeString prefix;              // Prefix string optimization
-    IntPredicateProxy initialCharClass;
-    List<RegexPrecondition> preconditions = new java.util.ArrayList<RegexPrecondition>();
-    int minimumLength = 0;
-    int fixedLength = -1;
-    int optimizationFlags;      // Optimization flags (REProgram.OPT_*)
-    int maxParens = -1;
-    int backtrackingLimit = -1;
+    protected Operation operation;
+    protected REFlags flags;
+    protected UnicodeString prefix;              // Prefix string optimization
+    protected IntPredicateProxy initialCharClass;
+    protected List<RegexPrecondition> preconditions = new java.util.ArrayList<RegexPrecondition>();
+    protected int minimumLength = 0;
+    protected int fixedLength = -1;
+    protected int optimizationFlags;      // Optimization flags (REProgram.OPT_*)
+    protected int maxParens = -1;
+    protected int backtrackingLimit = -1;
 
     /**
      * Constructs a program object from a character array

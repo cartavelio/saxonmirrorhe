@@ -125,7 +125,7 @@ public class Numberer_tr extends AbstractNumberer {
     }
 
     @Override
-    public String toOrdinalWords(String string, long l, int format) {
+    public String toOrdinalWords(String str, long l, int format) {
         String number = numberer(l, format);
 
         String[] lookFor = {"sıfır", "bir", "iki", "üç", "dört", "beş", "altı", "yedi", "sekiz", "dokuz", "on", "yirmi", "otuz", "kırk", "elli", "altmış", "yetmiş", "seksen", "doksan", "yüz", "kentilyon", "katrilyon", "trilyon", "milyar", "milyon", "bin"};
@@ -186,36 +186,36 @@ public class Numberer_tr extends AbstractNumberer {
         return gunAdi.toString();
     }
 
-    private String abbreviate(String string, int max) {
-        if (string.length() <= max) {
-            return string;
+    private String abbreviate(String str, int max) {
+        if (str.length() <= max) {
+            return str;
         }
 
         // first try: camelBump the string -- no length to max comparison
-        string = camelBump(string);
-        if (string.length() <= max) {
-            return string;
+        str = camelBump(str);
+        if (str.length() <= max) {
+            return str;
         }
 
         // second try: remove vowels (except capitalized vowels -- they are the "bump"s) till length <= max
-        string = removeVowels(string, max);
-        if (string.length() <= max) {
-            return string;
+        str = removeVowels(str, max);
+        if (str.length() <= max) {
+            return str;
         }
 
         // third try: remove consonants (except capitalized consonants -- they are the "bump"s) till length <= max
-        string = removeConsonants(string, max);
-        if (string.length() <= max) {
-            return string;
+        str = removeConsonants(str, max);
+        if (str.length() <= max) {
+            return str;
         }
 
         // last ditch: remaining chars are capitalized, chop string after position=max
-        return string.substring(0, max);
+        return str.substring(0, max);
     }
 
-    public String camelBump(String string) {
+    public String camelBump(String str) {
         // CamelBump the words first thing
-        char[] chars = string.trim().toCharArray();
+        char[] chars = str.trim().toCharArray();
         // Capitalize every word and delete spaces
         char[] camelBump = new char[chars.length];
         int n = 0;
@@ -236,23 +236,23 @@ public class Numberer_tr extends AbstractNumberer {
             precedingSpace = false;
         }
 
-        string = new String(camelBump, 0, n);
+        str = new String(camelBump, 0, n);
 
-        return string;
+        return str;
     }
 
-    private String removeVowels(String string, int max) {
-        int diff = string.length() - max;
+    private String removeVowels(String str, int max) {
+        int diff = str.length() - max;
         String toRemove = "aeıioöuü";
         StringBuffer sb = new StringBuffer();
-        string = reverse(string);
-        for (int c = 0; c < string.length(); c++) {
+        str = reverse(str);
+        for (int c = 0; c < str.length(); c++) {
             if (diff <= 0) {
-                sb.append(string.charAt(c));
+                sb.append(str.charAt(c));
                 continue;
             }
-            if (toRemove.indexOf(string.charAt(c)) == -1) {
-                sb.append(string.charAt(c));
+            if (toRemove.indexOf(str.charAt(c)) == -1) {
+                sb.append(str.charAt(c));
             } else {
                 diff--;
             }
@@ -261,18 +261,18 @@ public class Numberer_tr extends AbstractNumberer {
         return reverse(sb.toString());
     }
 
-    private String removeConsonants(String string, int max) {
-        int diff = string.length() - max;
+    private String removeConsonants(String str, int max) {
+        int diff = str.length() - max;
         String toRemove = "bcçdfgğhjklmnprsştvyz";
         StringBuffer sb = new StringBuffer();
-        string = reverse(string);
-        for (int c = 0; c < string.length(); c++) {
+        str = reverse(str);
+        for (int c = 0; c < str.length(); c++) {
             if (diff <= 0) {
-                sb.append(string.charAt(c));
+                sb.append(str.charAt(c));
                 continue;
             }
-            if (toRemove.indexOf(string.charAt(c)) == -1) {
-                sb.append(string.charAt(c));
+            if (toRemove.indexOf(str.charAt(c)) == -1) {
+                sb.append(str.charAt(c));
             } else {
                 diff--;
             }

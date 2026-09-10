@@ -11,6 +11,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntSingletonSet;
@@ -152,8 +153,8 @@ public class NameTest extends NodeTest implements QNameTest {
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         final int[] nameCodeArray = tree.getNameCodeArray();
-        return nodeNr -> (nameCodeArray[nodeNr] & 0xfffff) == fingerprint &&
-                (nodeKindArray[nodeNr] & 0x0f) == nodeKind;
+        return IntPredicateLambda.of(nodeNr -> (nameCodeArray[nodeNr] & 0xfffff) == fingerprint &&
+                (nodeKindArray[nodeNr] & 0x0f) == nodeKind);
     }
 
     /**

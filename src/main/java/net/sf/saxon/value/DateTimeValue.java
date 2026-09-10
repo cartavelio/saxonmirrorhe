@@ -18,6 +18,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -49,7 +50,11 @@ import java.util.*;
  */
 
 public final class DateTimeValue extends CalendarValue
-        implements Comparable<DateTimeValue>, TemporalAccessor {
+        implements Comparable<DateTimeValue>
+        //#if CSHARP==false
+        , TemporalAccessor
+        //#endif
+{
 
     private int year;       // the year as written, +1 for BC years
     private byte month;     // the month as written, range 1-12
@@ -910,6 +915,13 @@ public final class DateTimeValue extends CalendarValue
                 hour, minute, (byte) js, nanoseconds.intValue(), 0);
     }
 
+    @CSharpReplaceBody(code="return (((long)minute)*360 + ((long)second))*60) * 1000000000L + (long)nanoseconds;")
+    public long randomSeed() {
+        return getCalendar().getTimeInMillis();
+    }
+
+    //#if CSHARP==false
+    
     /**
      * Get a Java Calendar object representing the value of this DateTime. This will respect the timezone
      * if there is one (provided the timezone is within the range supported by the {@code GregorianCalendar}
@@ -1003,6 +1015,8 @@ public final class DateTimeValue extends CalendarValue
     public LocalDateTime toLocalDateTime() {
         return LocalDateTime.from(this);
     }
+
+    //#endif
 
     /**
      * Convert to string
@@ -1299,6 +1313,8 @@ public final class DateTimeValue extends CalendarValue
         return SingletonIterator.makeIterator(Int64Value.makeIntegerValue(value));
     }
 
+    //#if CSHARP==false
+
     @Override
     public boolean isSupported(TemporalField field) {
         if (field.equals(ChronoField.OFFSET_SECONDS)) {
@@ -1414,6 +1430,8 @@ public final class DateTimeValue extends CalendarValue
             return field.getFrom(this);
         }
     }
+
+    //#endif
 
     /**
      * Compare the value to another dateTime value, following the XPath comparison semantics
@@ -1583,10 +1601,10 @@ public final class DateTimeValue extends CalendarValue
      */
 
     public int hashCode() {
-        return hashCode(year, month, day, hour, minute, second, nanosecond, getTimezoneInMinutes());
+        return computeHashCode(year, month, day, hour, minute, second, nanosecond, getTimezoneInMinutes());
     }
 
-    static int hashCode(int year, byte month, byte day, byte hour, byte minute, byte second, int nanosecond, int tzMinutes) {
+    public static int computeHashCode(int year, byte month, byte day, byte hour, byte minute, byte second, int nanosecond, int tzMinutes) {
         int tz = tzMinutes == CalendarValue.NO_TIMEZONE ? 0 : -tzMinutes;
         int h = hour;
         int mi = minute;

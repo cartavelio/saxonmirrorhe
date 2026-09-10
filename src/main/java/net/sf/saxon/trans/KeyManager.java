@@ -493,7 +493,8 @@ public class KeyManager {
             } else {
                 doc.setUserData("saxon:key-index-list", indexList);
             }
-            docIndexes.put(doc, new WeakReference<>(indexList));
+            //noinspection Convert2Diamond
+            docIndexes.put(doc, new WeakReference<IntHashMap<KeyIndex>>(indexList));
         } else {
             indexList = indexRef.get();
         }

@@ -184,17 +184,17 @@ public class StandardErrorReporter
     /**
      * Report an error or warning
      *
-     * @param error the error or warning being reported
+     * @param processingError the error or warning being reported
      */
 
     @Override
-    public void report(XmlProcessingError error) {
-        if (error != latestError) {
-            latestError = error;
-            if (error.isWarning()) {
-                warning(error);
+    public void report(XmlProcessingError processingError) {
+        if (processingError != latestError) {
+            latestError = processingError;
+            if (processingError.isWarning()) {
+                warning(processingError);
             } else {
-                error(error);
+                error(processingError);
             }
         }
     }
@@ -480,7 +480,7 @@ public class StandardErrorReporter
             StringBuilder sb = new StringBuilder(message);
             Throwable e = err.getCause();
             while (e != null) {
-                if (!(e instanceof SAXParseException)) {
+                if (!(isSAXParseException(e))) {
                     if (e instanceof RuntimeException) {
                         StringWriter sw = new StringWriter();
                         e.printStackTrace(new PrintWriter(sw));
@@ -497,6 +497,15 @@ public class StandardErrorReporter
             }
             return sb.toString();
         }
+    }
+
+    @SuppressWarnings({"", "PointlessBooleanExpression"})
+    private boolean isSAXParseException(Throwable err) {
+        return false
+        //#if CSHARP==false
+            || err instanceof SAXParseException
+        //#endif        
+                ;
     }
 
     /**

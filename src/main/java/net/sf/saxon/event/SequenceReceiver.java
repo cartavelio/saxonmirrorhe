@@ -17,8 +17,6 @@ import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ExternalObject;
 
 /**
  * SequenceReceiver: this extension of the Receiver interface is used when processing
@@ -173,48 +171,55 @@ public abstract class SequenceReceiver implements Receiver {
 
     protected void decompose(Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item != null) {
-            if (item instanceof AtomicValue || item instanceof ExternalObject) {
-                if (previousAtomic) {
-                    characters(StringConstants.SINGLE_SPACE, locationId, ReceiverOption.NONE);
-                }
-                characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
-                previousAtomic = true;
-            } else if (item instanceof ArrayItem) {
-                flatten((ArrayItem)item, locationId, copyNamespaces);
-            } else if (item instanceof Function) {
-                String thing = item instanceof MapItem ? "map" : "function item";
-                String errorCode = getErrorCodeForDecomposingFunctionItems();
-                if (errorCode.startsWith("SENR")) {
-                    throw new XPathException("Cannot serialize a " + thing + " using this output method", errorCode, locationId);
-                } else {
-                    throw new XPathException("Cannot add a " + thing + " to an XDM node tree", errorCode, locationId);
-                }
-            } else {
-                NodeInfo node = (NodeInfo)item;
-                int kind = node.getNodeKind();
-                if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
-                    // see test case doe-0801, -2 -3 - needed for output buffered within try/catch, xsl:fork etc
-                    characters(item.getUnicodeStringValue(), locationId, ReceiverOption.DISABLE_ESCAPING);
-                    previousAtomic = false;
-                } else if (kind == Type.DOCUMENT) {
-                    startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
-                    for (NodeInfo child : node.children()) {
-                        append(child, locationId, copyNamespaces);
+            switch (item.getGenre()) {
+                case ATOMIC:
+                case EXTERNAL:
+                    if (previousAtomic) {
+                        characters(StringConstants.SINGLE_SPACE, locationId, ReceiverOption.NONE);
                     }
-                    previousAtomic = false;
-                    endDocument();
-                } else if (kind == Type.ATTRIBUTE || kind == Type.NAMESPACE) {
-                    String thing = kind == Type.ATTRIBUTE ? "an attribute" : "a namespace";
-                    throw new XPathException("Sequence normalization: Cannot process " + thing + " node", "SENR0001", locationId);
+                    characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
+                    previousAtomic = true;
+                    break;
+                case ARRAY:
+                    flatten((ArrayItem) item, locationId, copyNamespaces);
+                    break;
+                case MAP:
+                case FUNCTION:
+                    String thing = item instanceof MapItem ? "map" : "function item";
+                    String errorCode = getErrorCodeForDecomposingFunctionItems();
+                    if (errorCode.startsWith("SENR")) {
+                        throw new XPathException("Cannot serialize a " + thing + " using this output method", errorCode, locationId);
+                    } else {
+                        throw new XPathException("Cannot add a " + thing + " to an XDM node tree", errorCode, locationId);
+                    }
+                case NODE:
+                default:
+                    NodeInfo node = (NodeInfo) item;
+                    int kind = node.getNodeKind();
+                    if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
+                        // see test case doe-0801, -2 -3 - needed for output buffered within try/catch, xsl:fork etc
+                        characters(item.getUnicodeStringValue(), locationId, ReceiverOption.DISABLE_ESCAPING);
+                        previousAtomic = false;
+                    } else if (kind == Type.DOCUMENT) {
+                        startDocument(ReceiverOption.NONE); // needed to ensure that illegal namespaces or attributes in the content are caught
+                        for (NodeInfo child : node.children()) {
+                            append(child, locationId, copyNamespaces);
+                        }
+                        previousAtomic = false;
+                        endDocument();
+                    } else if (kind == Type.ATTRIBUTE || kind == Type.NAMESPACE) {
+                        String description = kind == Type.ATTRIBUTE ? "an attribute" : "a namespace";
+                        throw new XPathException("Sequence normalization: Cannot process " + description + " node", "SENR0001", locationId);
 
-                } else {
-                    int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
-                    if (ReceiverOption.contains(copyNamespaces, ReceiverOption.ALL_NAMESPACES)) {
-                        copyOptions |= CopyOptions.ALL_NAMESPACES;
+                    } else {
+                        int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
+                        if (ReceiverOption.contains(copyNamespaces, ReceiverOption.ALL_NAMESPACES)) {
+                            copyOptions |= CopyOptions.ALL_NAMESPACES;
+                        }
+                        ((NodeInfo) item).copy(this, copyOptions, locationId);
+                        previousAtomic = false;
                     }
-                    ((NodeInfo) item).copy(this, copyOptions, locationId);
-                    previousAtomic = false;
-                }
+                    break;
             }
         }
     }

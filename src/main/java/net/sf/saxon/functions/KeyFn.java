@@ -243,8 +243,8 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             if (origin.equals(doc)) {
                 return new LazySequence(all);
             }
-            return new LazySequence(new ItemMappingIterator(all, ItemFilter.of(
-                    item -> Navigator.isAncestorOrSelf(origin, (NodeInfo) item))));
+            return new LazySequence(ItemMappingIterator.filter(all,
+                    item -> Navigator.isAncestorOrSelf(origin, (NodeInfo) item)));
 
         } else {
             // Changed by bug 2929 and bug 4656
@@ -266,8 +266,8 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
             if (origin.equals(doc)) {
                 return new LazySequence(allResults);
             }
-            return new LazySequence(new ItemMappingIterator(allResults, ItemFilter.of(item ->
-                Navigator.isAncestorOrSelf(origin, (NodeInfo) item))));
+            return new LazySequence(ItemMappingIterator.filter(allResults, item ->
+                Navigator.isAncestorOrSelf(origin, (NodeInfo) item)));
         }
     }
 

@@ -195,7 +195,7 @@ public abstract class ContextStackFrame {
                 diag = "item";
             }
             out.error("  in built-in template rule for " + diag + " in " +
-                              context.getCurrentMode().getActor().getModeTitle().toLowerCase());
+                              context.getCurrentMode().getActor().getModeTitle(false));
         }
     }
 

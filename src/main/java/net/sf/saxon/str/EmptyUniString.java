@@ -8,9 +8,6 @@
 package net.sf.saxon.str;
 
 import net.sf.saxon.expr.sort.EmptyIntIterator;
-import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.Base64BinaryValue;
-import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.function.IntPredicate;
@@ -132,36 +129,7 @@ public final class EmptyUniString extends UnicodeString {
     public boolean isEmpty() {
         return true;
     }
-
-    /**
-     * Iterate over a string, returning a sequence of integers representing the Unicode code-point values
-     *
-     * @return an iterator over the characters (Unicode code points) in the string
-     */
-
-    /*@NotNull*/
-    public synchronized AtomicIterator iterateCharacters() {
-        return new AtomicIterator() {
-            private final IntIterator cp = codePoints();
-
-            @Override
-            public Int64Value next() {
-                return cp.hasNext() ? new Int64Value(cp.next()) : null;
-            }
-        };
-    }
-
-
-    /**
-     * Get an atomic value that encapsulates this match key. Needed to support the collation-key() function.
-     *
-     * @return an atomic value that encapsulates this match key
-     */
-
-    public Base64BinaryValue getCodepointCollationKey() {
-        return new Base64BinaryValue(new byte[0]);
-    }
-
+    
     @Override
     public int getWidth() {
         return 0;

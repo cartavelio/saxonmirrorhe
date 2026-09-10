@@ -48,21 +48,13 @@ public class SnapshotFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence in = arguments.length == 0 ? context.getContextItem() : arguments[0];
-        SequenceIterator iter = snapshotSequence(in.iterate(), context);
+        SequenceIterator iter = snapshotSequence(in.iterate());
         return new LazySequence(iter);
     }
 
-    public static SequenceIterator snapshotSequence(SequenceIterator nodes, final XPathContext context) {
-        return new ItemMappingIterator(nodes, getMappingFunction());
-    }
-
-    /**
-     * Get a mapping function that can be used to take a snapshot of every item in a sequence
-     * @return a suitable mapping function
-     */
-
-    public static ItemMappingFunction getMappingFunction() {
-        return ItemMapper.of(SnapshotFn::snapshotSingle);
+    public static SequenceIterator snapshotSequence(SequenceIterator nodes) {
+        //noinspection Convert2MethodRef
+        return ItemMappingIterator.map(nodes, it -> snapshotSingle(it));
     }
 
     /**
@@ -112,8 +104,12 @@ public class SnapshotFn extends SystemFunction {
             builder.setUnparsedEntity(name, properties[0], properties[1]);
         }
 
-        SchemaType ancestorType = context.getController().getExecutable().isSchemaAware() ?
-                AnyType.getInstance() : Untyped.getInstance();
+        SchemaType ancestorType;
+        if (context.getController().getExecutable().isSchemaAware()) {
+            ancestorType = AnyType.getInstance();
+        } else {
+            ancestorType = Untyped.getInstance();
+        }
         for (int i = ancestors.size() - 1; i >= 0; i--) {
             NodeInfo anc = ancestors.get(i);
             int kind = anc.getNodeKind();

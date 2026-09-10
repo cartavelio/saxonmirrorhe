@@ -14,12 +14,14 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamePool;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.rules.*;
+import net.sf.saxon.trans.rules.BuiltInRuleSet;
+import net.sf.saxon.trans.rules.Rule;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A CompoundMode is a mode representing the templates contained within an xsl:override element in a using package
@@ -198,7 +200,7 @@ public class CompoundMode extends Mode {
      * @throws XPathException if an error occurs
      */
     @Override
-    public Rule getRule(Item item, XPathContext context, SimpleMode.RuleFilter filter) throws XPathException {
+    public Rule getRule(Item item, XPathContext context, Predicate<Rule> filter) throws XPathException {
         Rule r = overrides.getRule(item, context, filter);
         if (r == null) {
             r = base.getRule(item, context, filter);

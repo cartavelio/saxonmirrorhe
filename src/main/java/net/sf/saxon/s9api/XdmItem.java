@@ -154,6 +154,7 @@ public abstract class XdmItem extends XdmValue {
         return null; // Overridden in XdmMap. The method is retained on this interface for compatibility reasons.
     }
 
+    //#ifdef CSHARP==false
     /**
      * Get a stream comprising the items in this value
      *
@@ -165,6 +166,7 @@ public abstract class XdmItem extends XdmValue {
         return new XdmStream<>(Stream.of(this));
     }
 
+    //#endif
 
 
     /**
