@@ -193,7 +193,7 @@
     
     <category name="extensions">
         
-        <p>The Saxon extension functions <code>saxon:evaluate</code>, <code>saxon:eval</code>, <code>saxon:expression</code>
+        <p>The Saxon extension functions <code>saxon:evaluate</code>, <code>saxon:eval</code>, and <code>saxon:expression</code>
              have been dropped. (The function <code>saxon:evaluate-node</code> was dropped in Saxon 10). 
             The same effect (and more) can be achieved using the standard XSLT 3.0 instruction <code>xsl:evaluate</code>.</p>
         
@@ -235,9 +235,23 @@
                 to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
         </ul>
         
-       <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:contains-sequence(), fn:ends-with-sequence(), 
-           fn:expanded-QName(), fn:foot(), fn:intersperse(), fn:parse-QName(), fn:replicate(), fn:starts-with-sequence(),
-           fn:truncate(), and fn:while() are implemented.</p>
+       <p>The proposed 4.0 functions fn:all(), fn:all-equal(), fn:all-different(), fn:characters(), 
+           fn:contains-sequence(), fn:ends-with-sequence(), 
+           fn:expanded-QName(), fn:foot(), fn:highest(), fn:identity(), fn:index-where(), 
+           fn:in-scope-namespaces(), fn:intersperse(), fn:is-NaN(), 
+           fn:items-after(), fn:items-at(), fn:items-before(), fn:items-ending-where(), fn:items-starting-where(), 
+           fn:iterate-while(), fn:lowest(), fn:op(), fn:parcel()*, fn:parts()*, fn:parse-QName(), 
+           fn:replicate(), fn:slice()*, fn:some(), fn:starts-with-sequence(),
+           fn:truncate(), and fn:unparcel()*  are implemented. Specifications of these functions
+           can be found in <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html"
+               class="bodylink">the QT4CG draft specification</a>.</p>
+        
+        <aside><p>None of these functions can be regarded as 100% stable, but the
+        ones marked with an asterisk are especially likely to be removed or changed as
+        work on the 4.0 specifications progresses.</p>
+        
+        <p>A few of these functions were already available in Saxon 11, but the specifications
+        (and in some cases the function names) may have changed.</p></aside>
         
    
         
