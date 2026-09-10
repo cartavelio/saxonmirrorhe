@@ -1175,7 +1175,7 @@ namespace TestDriver {
             string type = dependency.NodeName.LocalName;
             string value = dependency.GetAttributeValue("value") ?? "*";
 
-            String tv = type + "/" + value;
+            string tv = type + "/" + value;
             bool inverse = "false".Equals(dependency.GetAttributeValue("satisfied"));
             bool needed = !"false".Equals(dependency.GetAttributeValue("satisfied"));
 
@@ -1187,7 +1187,7 @@ namespace TestDriver {
                 return !needed;
             }
 
-            String edition = env.processor.Edition;
+            string edition = env.processor.Edition;
 
             if (needsPE.Contains(type) || needsPE.Contains(tv)) {
                 return (edition.Equals("PE") || edition.Equals("EE")) == needed;
@@ -1212,7 +1212,7 @@ namespace TestDriver {
                     bool atLeast = value.EndsWith("+");
                     value = value.Replace("+", "");
 
-                    String specName = SpecAttr.ShortNameAndVersionOf(requestedSpec).Replace("XT", "XSLT");
+                    string specName = SpecAttr.ShortNameAndVersionOf(requestedSpec).Replace("XT", "XSLT");
                     int order = value.CompareTo(specName);
                     return atLeast ? order <= 0 : order == 0;
 
@@ -1322,6 +1322,9 @@ namespace TestDriver {
                     return false;
                 case "year_component_values":
                     if ("support year zero".Equals(value)) {
+                        if (requestedSpec == Spec.XT40) {
+                            return !inverse;
+                        }
                         if (env != null) {
                             string oldValue = (string)env.processor.GetProperty(Saxon.Api.Feature.XSD_VERSION);
                             env.processor.SetProperty(Saxon.Api.Feature.XSD_VERSION, inverse ? "1.0" : "1.1");
