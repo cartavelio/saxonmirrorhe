@@ -23,6 +23,7 @@ import net.sf.saxon.trans.Instantiator;
 import net.sf.saxon.trans.Maker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpNullable;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import org.xml.sax.XMLReader;
 
 import java.io.File;
@@ -119,6 +120,7 @@ public class URIQueryParameters {
             }
         } else if (keyword.equals("xinclude")) {
             if (value.equals("yes")) {
+                checkXIncludeIsSupported();
                 xinclude = Optional.of(Boolean.TRUE);
             } else if (value.equals("no")) {
                 xinclude = Optional.of(Boolean.FALSE);
@@ -142,6 +144,11 @@ public class URIQueryParameters {
             parserMaker = Optional.of(new Instantiator<>(value, config));
             //#endif
         }
+    }
+
+    @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"XInclude is not supported in SaxonCS\");")
+    private static void checkXIncludeIsSupported() throws XPathException {
+        // No action on SaxonJ
     }
 
     public static FilenameFilter makeGlobFilter(String value) throws XPathException {
