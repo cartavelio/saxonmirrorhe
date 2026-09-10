@@ -46,7 +46,8 @@ public class DuplicateValues extends CollatingFunctionFixed {
 
 
     /**
-     * Iterator class to return the distinct values in a sequence
+     * Iterator class to return the duplicated values in a sequence (returns the
+     * second occurrence of each value)
      */
 
     public static class DuplicatesIterator implements SequenceIterator {
@@ -58,7 +59,7 @@ public class DuplicateValues extends CollatingFunctionFixed {
         private final HashSet<AtomicMatchKey> secondValues = new HashSet<>(40);
 
         /**
-         * Create an iterator over the distinct values in a sequence
+         * Create an iterator over the duplicate values in a sequence
          *
          * @param base     the input sequence. This must return atomic values only.
          * @param collator The comparer used to obtain comparison keys from each value;

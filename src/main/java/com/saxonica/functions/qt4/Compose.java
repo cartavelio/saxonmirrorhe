@@ -39,4 +39,4 @@ public class Compose extends SystemFunction {
 }
 
 
-// Copyright (c) 2023 Saxonica Limited
+// Copyright (c) 2025 Saxonica Limited
