@@ -31,7 +31,7 @@
       If the <code>-u</code> option is used on the command line, or if
       the source file name begins with <code>http:</code> or <code>https:</code> or
         <code>file:</code> or <code>classpath:</code>, then the source file name is resolved 
-      as follows:
+      as follows:</p>
       
       <ul>
         <li><p class="javaonly">On Java, the <code>URIResolver</code> is called, and returns
@@ -405,7 +405,7 @@
     your own.</p>
     
     <p class="csonly">On .NET, <code>Processor.RegisterCollection()</code> accepts on object of type
-      <code>IEnumerable&lt;Resource></IResource></code>: you can implement your own kind of <code>IEnumeration</code>
+      <code>IEnumerable&lt;IResource&gt;</code>: you can implement your own kind of <code>IEnumeration</code>
     and your own kind of <code>IResource</code>, or you can use an existing implementation.</p>
     
     <section id="user-collections" title="Writing your own Collection Finder">
@@ -457,15 +457,15 @@
             a relational database.</p>
         </li>
         <li>
-          <li><p class="csonly">On .NET, the <code>CollectionFinder</code> is a delegate
+          <p class="csonly">On .NET, the <code>CollectionFinder</code> is a delegate
             so you will typically implement it directly as a lambda expression. It accepts a URI as input
-            (supplied as a string), and returns an instance of <code>IEnumerable&lt;IResource</code>.</p>
+            (supplied as a string), and returns an instance of <code>IEnumerable&lt;IResource&gt;</code>.</p>
             <p class="csonly">You can either reuse the existing implementations of <code>IResource</code>,
               or you can write your own. The key method that the <code>IResource</code> object must
               provide is <code>GetItem()</code> which returns the resource in the form of an XDM item.
               It is good practice to delay any extensive work such as parsing until the
               <code>GetItem()</code> method is called: this reduces the memory footprint, and enables
-              parallel evaluation of multiple threads.
+              parallel evaluation of multiple threads.</p>
             <p class="csonly">For example, a <code>CollectionFinder</code> written to handle collection URIs using the
               scheme name "sql" might be supplied as:</p>
             <samp><![CDATA[processor.CollectionFinder = uri => 
@@ -513,7 +513,7 @@
       <li><code>ActiveSource</code>: this is a Saxon extension of the JAXP <code>Source</code> interface,
       allowing you to define your own kind of input source: all you need to do is implement the method
       <code>deliver()</code>, which delivers the contents of the resource to a Saxon <code>Receiver</code></li>
-      <li><code>NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code.</li>
+      <li><code>NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code>.</li>
     </ul>
      <p>In addition, the s9api <a class="javalink"
         href="net.sf.saxon.s9api.XdmNode">XdmNode</a> class has an <code>asSource()</code> method,
