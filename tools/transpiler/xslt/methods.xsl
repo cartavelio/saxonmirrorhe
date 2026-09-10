@@ -546,7 +546,7 @@
    
    <!-- Convert method calls applied to Exception classes -->
    <xsl:template match="*[(exists(@RESOLVED_TYPE) and f:isExceptionType(@RESOLVED_TYPE)) 
-             or (exists(@DECLARING_TYPE) and f:isExceptionType(@DECLARING_TYPE))]" priority="20">
+             or (exists(@DECLARING_TYPE) and f:isExceptionType(@DECLARING_TYPE))]" priority="25">
       <!--<xsl:message>Exception.{name/@identifier}()</xsl:message>-->
       <xsl:choose>
          <xsl:when test="name/@identifier = 'getMessage'">
@@ -1362,10 +1362,10 @@
          <xsl:when test="name/@identifier = 'write' 
                          and ends-with(@RESOLVED_TYPE, 'Stream') 
                          and count(arguments/argument) = 1
-                         and (f:expressionType(arguments/argument[1])=('java.lang.Byte', 'byte')
+                         and (f:expressionType(arguments/argument[1])=('java.lang.Byte', 'byte', 'java.lang.int', 'int')
                              or arguments/argument[1][@nodeType='ArrayAccessExpr'][*[2][@RESOLVED_TYPE='byte[]']])">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>
-            <xsl:text>.WriteByte(</xsl:text>
+            <xsl:text>.WriteByte((byte)</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
             <xsl:text>)</xsl:text>           
          </xsl:when>
