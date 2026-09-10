@@ -46,7 +46,7 @@ public class IdValidator extends ValidatingFilter {
     private final HashSet<String> idValues = new HashSet<>(100);
     private final HashSet<String> unresolvedRefs = new HashSet<>(100);
     /*@Nullable*/ private IdValueChecker currentElementChecker = null;
-    private final UnicodeBuilder buffer = new UnicodeBuilder();
+    private final UnicodeBuilder buffer = new UnicodeBuilder(32);
     private Location textLocationId = Loc.NONE;
     private final Map<SchemaType, IdValueChecker> checkerMap = new HashMap<>(10);
 

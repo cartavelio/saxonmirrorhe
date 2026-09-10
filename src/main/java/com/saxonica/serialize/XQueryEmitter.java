@@ -28,7 +28,7 @@ public class XQueryEmitter extends XMLEmitter {
     protected void writeEscape(UnicodeString chars, final boolean inAttribute) throws IOException, XPathException {
         boolean inBraces = false;
         chars = chars.tidy();
-        UnicodeBuilder buff = new UnicodeBuilder();
+        UnicodeBuilder buff = new UnicodeBuilder(chars.length32() + 20);
         for (int i = 0; i < chars.length(); i++) {
             int c = chars.codePointAt(i);
             if (!inBraces && c == '{' && chars.codePointAt(i + 1) != '{') {

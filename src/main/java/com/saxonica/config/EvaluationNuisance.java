@@ -20,7 +20,7 @@ public class EvaluationNuisance extends ProxyReceiver {
 
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
-        UnicodeBuilder fsb = new UnicodeBuilder();
+        UnicodeBuilder fsb = new UnicodeBuilder(chars.length32() + 20);
         IntIterator iter = chars.codePoints();
         int i = 0;
         while (iter.hasNext()) {
