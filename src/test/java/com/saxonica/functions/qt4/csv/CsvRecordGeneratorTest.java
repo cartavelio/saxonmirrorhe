@@ -1,17 +1,14 @@
 package com.saxonica.functions.qt4.csv;
 
 import com.saxonica.test.matchers.MatchesCsvRecordGetFunction;
-import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,7 +27,7 @@ import static net.sf.saxon.test.xdmfixtures.AtomicValueBuilder.string;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-class CsvXdmGeneratorTest {
+class CsvRecordGeneratorTest {
     CsvRecordGenerator subject;
     Map<String, GroundedValue> options = new HashMap<>();
     MapItem expected;
