@@ -26,13 +26,13 @@ public abstract class BuiltInType {
      * Table of all built in types, indexed by fingerprint
      */
 
-    private static final IntHashMap<SchemaType> lookup = new IntHashMap<SchemaType>(100);
+    private static final IntHashMap<SchemaType> lookup = new IntHashMap<>(100);
 
     /**
      * Table of all built in types, indexed by local name
      */
 
-    private static final Map<String, SchemaType> lookupByLocalName = new HashMap<String, SchemaType>(100);
+    private static final Map<String, SchemaType> lookupByLocalName = new HashMap<>(100);
 
     /**
      * Class is never instantiated
