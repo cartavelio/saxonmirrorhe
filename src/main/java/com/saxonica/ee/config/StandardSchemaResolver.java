@@ -21,7 +21,7 @@ import java.util.ArrayList;
  * The default schema resolver used when no other is requested
  */
 public class StandardSchemaResolver implements SchemaURIResolver {
-    public static final String SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema ";
+    public static final String SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema";
     public static final String VALIDATION_PURPOSE = "http://www.rddl.org/purposes#validation";
 
     private EnterpriseConfiguration config;
