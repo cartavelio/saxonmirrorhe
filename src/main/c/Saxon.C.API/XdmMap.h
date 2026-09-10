@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2025 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -49,18 +49,16 @@ public:
    */
   virtual ~XdmMap() {}
 
-  //! XdmMap constructor which is a wrapper object from the Java XdmMap object -
-  //! internal use
+  //! XdmMap constructor which is a wrapper object from the Java XdmMap object - internal use
   /**
    * @param obj - The internal Java object for the XdmMap is wrapped here in the
    * C++ XdmMap
    */
   XdmMap(int64_t obj);
 
-  //! Create an XdmMap supplying the entries in the form of a std::map, where
-  //! the keys and values in the std::map are XDM values
+  //! Create an XdmMap supplying the entries in the form of a std::map
   /**
-   *
+   * The keys and values in the std::map are XDM values
    * @param map - a std::map whose entries are the (key, value) pairs
    */
   XdmMap(std::map<XdmAtomicValue *, XdmValue *> map);
@@ -74,8 +72,7 @@ public:
    */
   int mapSize();
 
-  //! Returns the value to which the specified key is mapped, or NULL if this
-  //! map contains no mapping for the key.
+  //! Returns the value to which the specified key is mapped, or NULL if this map contains no mapping for the key.
   /**
    *
    *
@@ -87,8 +84,7 @@ public:
    */
   XdmValue *get(XdmAtomicValue *key);
 
-  //! Returns the value to which the specified string-valued key is mapped, or
-  //! NULL if this map contains no mapping for the key.
+  //! Returns the value to which the specified string-valued key is mapped, or NULL if this map contains no mapping for the key.
   /**
    * This is a convenience method to save the trouble of converting the String
    * to an <code>XdmAtomicValue</code>.
@@ -102,8 +98,7 @@ public:
    */
   XdmValue *get(const char *key);
 
-  //!  Returns the value to which the specified integer-valued key is mapped or
-  //!  NULL if this map contains no mapping for the key.
+  //!  Returns the value to which the specified integer-valued key is mapped or NULL if this map contains no mapping for the key.
   /**
    * This is a convenience method to save the trouble of converting the integer
    * to an <code>XdmAtomicValue</code>.
@@ -117,12 +112,10 @@ public:
    */
   XdmValue *get(int key);
 
-  //! Returns the value to which the specified double-valued key is mapped,
-  //! or NULL if this map contains no mapping for the key. This is a convenience
-  //! method to save the trouble of converting the double to an
-  //! <code>XdmAtomicValue</code>.
+  //! Returns the value to which the specified double-valued key is mapped, or NULL if this map contains no mapping for the key.
   /**
-   *
+  * This is a convenience method to save the trouble of converting
+  * the double to an <code>XdmAtomicValue</code>.
    * @param key the key whose associated value is to be returned. This is
    * treated as an instance of <code>xs:double</code> (which will also match
    *            entries whose key belongs to another numeric type)
@@ -132,12 +125,10 @@ public:
    */
   XdmValue *get(double key);
 
-  //!  Returns the value to which the specified integer-valued key is mapped
-  //! or NULL if this map contains no mapping for the key. This is a convenience
-  //! method to save the trouble of converting the integer to an
-  //! <code>XdmAtomicValue</code>.
+  //!  Returns the value to which the specified integer-valued key is mapped or NULL if this map contains no mapping for the key.
   /**
-   *
+   * This is a convenience method to save the trouble of converting the
+   * integer to an <code>XdmAtomicValue</code>.
    * @param key the key whose associated value is to be returned. This is
    * treated as an instance of <code>xs:integer</code> (which will also match
    *            entries whose key belongs to another numeric type)
@@ -177,8 +168,7 @@ public:
    */
   std::set<XdmAtomicValue *> keySet();
 
-  //! Get the keys present in the map in the form of an unordered pointer array
-  //! of XdmAtomicValue.
+  //! Get the keys present in the map in the form of an unordered pointer array of XdmAtomicValue.
   /**
    *
    * @return an unordered pointer array of the keys present in this map, in
@@ -194,8 +184,7 @@ public:
    */
   bool isEmpty();
 
-  //! Returns <code>true</code> if this map contains a mapping for the specified
-  //! key.
+  //! Returns <code>true</code> if this map contains a mapping for the specified key.
   /**
    * More formally, returns true if and only if
    * this map contains a mapping for a key k such that
@@ -207,8 +196,7 @@ public:
    */
   bool containsKey(XdmAtomicValue *key);
 
-  //! Returns a std::list containing the values found in this map, that is, the
-  //! value parts of the key-value pairs.
+  //! Returns a std::list containing the values found in this map, that is, the value parts of the key-value pairs.
   /**
    *
    *
@@ -218,8 +206,7 @@ public:
    */
   std::list<XdmValue *> valuesAsList();
 
-  //! Returns a pointer array containing the values found in this map, that is,
-  //! the value parts of the key-value pairs.
+  //! Returns a pointer array containing the values found in this map, that is, the value parts of the key-value pairs.
   /**
    *
    *
@@ -247,8 +234,7 @@ public:
   //! Get the type of the object
   XDM_TYPE getType() { return XDM_MAP; }
 
-  //! The toString() method returns a simple XML serialization of the node with
-  //! defaulted serialization parameters.
+  //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
   /**
    *
    * <p>In the case of an element node, the result will be a well-formed

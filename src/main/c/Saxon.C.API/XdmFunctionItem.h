@@ -64,7 +64,8 @@ public:
    * name.
    *
    * @return the function name as a string in the EQName notation, or null for
-   * an anonymous inline function item
+   * an anonymous inline function item.
+   * The caller is responsible for deallocation of memory. Use `operator delete`
    */
   const char *getName();
 
@@ -82,7 +83,8 @@ public:
    * Get the string value of the function
    *
    * @return nothing is returned; this method always throws an exceptionn because the XdmFunctionItem
-   * has no associated string value
+   * has no associated string value.
+   * The caller is responsible for deallocation of memory. Use `operator delete`
    */
   const char *getStringValue();
 

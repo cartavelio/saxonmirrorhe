@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2025 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -66,15 +66,13 @@ public:
    */
   virtual ~XdmItem();
 
-  //! Increment reference count of this XdmItem - Memory management - Internal
-  //! use only
+  //! Increment reference count of this XdmItem - Memory management - Internal use only
   /**
    * this method is used for internal memory management.
    */
   virtual void incrementRefCount();
 
-  //! Decrement reference count of this XdmItem - Memory management - Internal
-  //! use only
+  //! Decrement reference count of this XdmItem - Memory management - Internal use only
   /**
    * this method is used for internal memory management.
    */
@@ -139,9 +137,15 @@ public:
    */
   virtual const char *getStringValue();
 
-  //! The toString() method returns a simple XML serialization of the node with
-  //! defaulted serialization parameters. The caller should deallocate memory
-  //! using `operator delete`.
+  //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
+ /**
+ * Get the string value of the item. For a node, this gets the string value
+ * of the node. For an atomic value, it has the same effect as casting the value
+ * to a string. In all cases the result is the same as applying the XPath string()
+ * function.
+ * The caller should deallocate memory using `operator delete`.
+ * @returns const char * - The string representation of the XdmItem.
+  */
   const char *toString();
 
   /**

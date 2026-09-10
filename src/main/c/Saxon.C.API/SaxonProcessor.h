@@ -125,8 +125,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
 
 //==========================================
 
-//! The <code>SaxonProcessor</code> class acts as a factory for generating
-//! XQuery, XPath, Schema and XSLT compilers.
+//! The <code>SaxonProcessor</code> class acts as a factory for generating XQuery, XPath, Schema and XSLT compilers.
 /*! The <code>SaxonProcessor</code> class not only generates XQuery, XPath,
  * Schema and XSLT Processors, but is used to create Xdm objects from primitive
  * types.
@@ -198,8 +197,7 @@ public:
    */
   SaxonProcessor(const SaxonProcessor &other);
 
-  //! Destructor method. At the end of the program call the release() method to
-  //! clear the JVM.
+  //! Destructor method. At the end of the program call the release() method to clear the JVM.
   ~SaxonProcessor();
 
   //! Get any error message thrown by the processor
@@ -213,14 +211,14 @@ public:
   /**
    * A DocumentBuilder is used to load source XML documents.
    *
-   * @return a newly created pointer to the DocumentBuilder. The caller is responsible for deallocation
+   * @return a newly created pointer to the DocumentBuilder. The caller is responsible for deallocation of memory. Use `delete`
    */
   DocumentBuilder *newDocumentBuilder();
 
   //! Create an Xslt30Processor.
   /*!
    * An Xslt30Processor is used to compile XSLT30 stylesheets.
-   * @return a newly created pointer to Xslt30Processor object. The caller is responsible for deallocation
+   * @return a newly created pointer to Xslt30Processor object. The caller is responsible for deallocation of memory. Use `delete`
    */
   Xslt30Processor *newXslt30Processor();
 
@@ -228,26 +226,24 @@ public:
   /*!
    * An XQueryProcessor is used to compile XQuery queries.
    *
-   * @return Pointer to a newly created XQueryProcessor. The caller is responsible for deallocation
+   * @return Pointer to a newly created XQueryProcessor. The caller is responsible for deallocation of memory. Use `delete`
    */
   XQueryProcessor *newXQueryProcessor();
 
-  //! Create an XPathProcessor. An XPathProcessor is used to compile XPath
-  //! expressions.
+  //! Create an XPathProcessor. An XPathProcessor is used to compile XPath expressions.
   /*!
    *
    *
-   * @return Pointer to a newly created XPathProcessor. The caller is responsible for deallocation
+   * @return Pointer to a newly created XPathProcessor. The caller is responsible for deallocation of memory. Use `delete`
    */
   XPathProcessor *newXPathProcessor();
 
 
-  //! Create a SchemaValidator which can be used to validate instance documents
-  //! against the schema held by this SchemaManager
+  //! Create a SchemaValidator which can be used to validate instance documents against the schema held by this SchemaManager
   /**
    *
    *
-   * @return Pointer to a new SchemaValidator. The caller is responsible for deallocation
+   * @return Pointer to a new SchemaValidator. The caller is responsible for deallocation of memory. Use `delete`
    */
   SchemaValidator *newSchemaValidator();
 
@@ -259,13 +255,12 @@ public:
    * @param str the String value. NULL is taken as equivalent to "".
    * @param encoding -  the encoding of the string. If not specified then the
    * platform default encoding is used.
-   * @return Pointer to XdmAtomicValue corresponding StringValue. The caller is responsible for deallocation
+   * @return Pointer to XdmAtomicValue corresponding StringValue. The caller is responsible for deallocation of memory. Use `delete`
    */
   XdmAtomicValue *makeStringValue(std::string str,
                                   const char *encoding = nullptr);
 
-  //! Factory method. Unlike the constructor, this avoids creating a new
-  //! StringValue in the case
+  //! Factory method to create a String value as a new XdmAtomicValue.
   /*!
    *
    * of a zero-length string (and potentially other strings, in future)
@@ -273,18 +268,19 @@ public:
    * @param str - the char pointer array. nullptr is taken as equivalent to "".
    * @param encoding -  the encoding of the string. If not specified then the
    * platform default encoding is used.
-   * @return Pointer to XdmAtomicValue corresponding StringValue. The caller is responsible for deallocation
+   * @return Pointer to XdmAtomicValue corresponding StringValue. The caller is responsible for deallocation of memory using `delete`
    */
   XdmAtomicValue *makeStringValue(const char *str,
                                   const char *encoding = nullptr);
 
+   //! Factory method to create an Integer value represented by an XdmAtomicValue
   /*!
-   * Factory method: makes either an Int64Value or a BigIntegerValue depending
+   * Makes either an Int64Value or a BigIntegerValue depending
    * on the value supplied
    *
    * @param i the supplied primitive integer value
    * @return Pointer to the value as a XdmAtomicValue which is a BigIntegerValue or
-   * Int64Value as appropriate. The caller is responsible for deallocation
+   * Int64Value as appropriate. The caller is responsible for deallocation of memory using `delete`
    */
   XdmAtomicValue *makeIntegerValue(int i);
 
@@ -292,21 +288,19 @@ public:
   /*!
    *
    * @param d the value of the double
-   * @return Pointer to a new XdmAtomicValue. The caller is responsible for deallocation
+   * @return Pointer to a new XdmAtomicValue. The caller is responsible for deallocation of memory using `delete`
    */
   XdmAtomicValue *makeDoubleValue(double d);
 
-  //! Factory method. make an XdmAtomicValue from a primitive float value
+  //! Factory method to make an XdmAtomicValue from a primitive float value
   /*!
    *
-   *
    * @param f the value of the float
-   * @return Pointer to a new XdmAtomicValue. The caller is responsible for deallocation
+   * @return Pointer to a new XdmAtomicValue. The caller is responsible for deallocation of memory using `delete`
    */
   XdmAtomicValue *makeFloatValue(float f);
 
-  //! Factory method: makes either an Int64Value or a BigIntegerValue depending
-  //! on the value supplied
+  //! Factory method: makes either an Int64Value or a BigIntegerValue depending on the value supplied
   /*!
    *
    *
@@ -316,13 +310,13 @@ public:
    */
   XdmAtomicValue *makeLongValue(long l);
 
-  //! Factory method: makes a XdmAtomicValue representing a boolean Value
+  //! Factory method: makes an XdmAtomicValue representing a boolean Value
   /*!
    *
    *
    * @param b true or false, to determine which boolean value is
    *              required
-   * @return Pointer to the XdmAtomicValue requested. The caller is responsible for deallocation
+   * @return Pointer to the XdmAtomicValue requested. The caller is responsible for deallocation of memory using `delete`
    */
   XdmAtomicValue *makeBooleanValue(bool b);
 
@@ -330,18 +324,18 @@ public:
   /**
    *
    * @param str - The value given in a string form in clark notation. {uri}local
-   * @return Pointer to the XdmAtomicValue. The caller is responsible for deallocation
+   * @return Pointer to the XdmAtomicValue. The caller is responsible for deallocation of memory using `delete`
    */
   XdmAtomicValue *makeQNameValue(const char *str);
 
-  //! Create an Xdm Atomic value from string representation
+  //! Create a Xdm Atomic value from string representation
   /*!
    *
    * @param type    - Local name of a type in the XML Schema namespace.
    * @param value - The value given in a string form.
    * In the case of a QName the value supplied must be in clark notation.
    * {uri}local
-   * @return Pointer to the XdmValue. The caller is responsible for deallocation
+   * @return Pointer to the XdmValue. The caller is responsible for deallocation of memory using `delete`
    */
   XdmAtomicValue *makeAtomicValue(const char *type, const char *value);
 
@@ -351,7 +345,7 @@ public:
    * @param input the input array of booleans
    * @param length - the number of items in the array
    * @return Pointer to an XdmArray whose members are xs:boolean values corresponding
-   * one-to-one with the input. The caller is responsible for deallocation
+   * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`
    */
   XdmArray *makeArray(const char **input, int length);
 
@@ -361,7 +355,7 @@ public:
    * @param input  - the input array of short values
    * @param length - the number of items in the array
    * @return Pointer to an XdmArray whose members are xs:boolean values corresponding
-   * one-to-one with the input. The caller is responsible for deallocation
+   * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`
    */
   XdmArray *makeArray(short *input, int length);
 
@@ -371,7 +365,7 @@ public:
    * @param input  - the input array of int values
    * @param length - the number of items in the array
    * @return Pointer to an XdmArray whose members are xs:boolean values corresponding
-   * one-to-one with the input. The caller is responsible for deallocation
+   * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`
    */
   XdmArray *makeArray(int *input, int length);
 
@@ -381,7 +375,7 @@ public:
    * @param input  - the input array of long values
    * @param length - the number of items in the array
    * @return Pointer to an XdmArray whose members are xs:boolean values corresponding
-   * one-to-one with the input. The caller is responsible for deallocation
+   * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`
    */
   XdmArray *makeArray(long long *input, int length);
 
@@ -390,7 +384,7 @@ public:
    * @param input  - the input array of boolean values
    * @param length - the number of items in the array
    * @return Pointer to an XdmArray whose members are xs:boolean values corresponding
-   * one-to-one with the input. The caller is responsible for deallocation
+   * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`
    */
   XdmArray *makeArray(bool *input, int length);
 
@@ -400,7 +394,7 @@ public:
    * @param values the input array of XdmValue pointers
    * @param length - the number of items in the array
    * @return Pointer to an XdmArray whose members are XdmValue values corresponding
-   * one-to-one with the input. The caller is responsible for deallocation
+   * one-to-one with the input. The caller is responsible for deallocation of memory using `delete`
    */
   XdmArray *makeArray(XdmValue **values, int length);
 
@@ -413,7 +407,7 @@ public:
    * @param dataMap  is std::map, which consists of keys as XdmAtomicValue and
    * value is XdmValue.
    * @return Pointer to an XdmMap whose members are key, value pair given as
-   * (XdmAtomicValue, XdmValue). The caller is responsible for deallocation
+   * (XdmAtomicValue, XdmValue). The caller is responsible for deallocation of memory using `delete`
    */
   XdmMap *makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap);
 
@@ -423,7 +417,7 @@ public:
    * @param dataMap  is std::map, which consists of keys as std::string and
    * value is XdmValue. Keys are converted to XdmAtomicValue objects
    * @return Pointer to an XdmMap whose members are key, value pair given as
-   * (XdmAtomicValue, XdmValue). The caller is responsible for deallocation
+   * (XdmAtomicValue, XdmValue). The caller is responsible for deallocation of memory using `delete`
    */
   static XdmMap *makeMap2(std::map<std::string, XdmValue *> dataMap);
 
@@ -434,7 +428,7 @@ public:
    * @param values - The values are given as a pointer array of XdmValue
    * @param len - The length of the arrays given as argument
    * @return Pointer to an XdmMap whose members are key, value pair given as
-   * (XdmAtomicValue, XdmValue). The caller is responsible for deallocation
+   * (XdmAtomicValue, XdmValue). The caller is responsible for deallocation of memory using `delete`
    */
   XdmMap *makeMap3(XdmAtomicValue **keys, XdmValue **values, int len);
 
@@ -469,8 +463,7 @@ public:
    */
   const char *getStringValue(XdmItem *item);
 
-  //! Parse a lexical representation of the source document and return it as an
-  //! XdmNode
+  //! Parse a lexical representation of the source document and return it as an XdmNode
   /**
    *
    * @param source the source document as a lexical string
@@ -512,8 +505,7 @@ public:
   XdmNode *parseXmlFromUri(const char *source,
                            SchemaValidator *validator = nullptr);
 
-  //! Parse a lexical representation of the JSON and return it as an
-  //! XdmValue
+  //! Parse a lexical representation of the JSON and return it as an XdmValue
   /**
    *
    * @param source the JSON as a lexical string
@@ -560,9 +552,10 @@ public:
    */
   bool exceptionOccurred();
 
-  //! Clears any exception that is currently being thrown. If no exception is
-  //! currently being thrown, this routine has no effect.
+  //! Clears any exception that is currently being thrown.
  /**
+  * If no exception is currently being thrown, this routine has no effect.
+  *
   * @deprecated - This method is no longer used. We now throw exceptions
   */
   void exceptionClear();
@@ -591,16 +584,14 @@ public:
    */
   void deleteXdmAtomicValueArray(XdmAtomicValue **arr, int len);
 
-  //! Checks for pending exceptions and creates a SaxonApiException object,
-  //! which handles one or more local exceptions objects
+  //! Checks for pending exceptions and creates a SaxonApiException object. Note: no longer used
  /**
   * @deprecated - This method is no longer used. We now throw exceptions
   */
   static SaxonApiException *checkForExceptionCPP(
       /*JNIEnv *env, jclass callingClass, jobject callingObject*/);
 
-  //! Clean up and destroy Java VM to release memory used. Method to be called
-  //! at the end of the program
+  //! Clean up and destroy Java VM to release memory used. Method to be called at the end of the program
   static void release();
 
   //! Attaches a current thread to the Java VM
@@ -744,15 +735,6 @@ public:
       return true;
   } **/
 
-  //! Check for exception thrown in the underlying JNI. Then create the
-  //! SaxonApiException class which the user can retrieve
-  /**
-   *
-   * @param cppClass
-   * @return The SaxonApiException with information about the exception thrown
-   */
-  // SaxonApiException *checkAndCreateException(jclass cppClass);
-
   static int jvmCreatedCPP; /*!< Flag to indicate jvm created - used in memory
                                management */
   static sxnc_environment
@@ -760,8 +742,7 @@ public:
                        cross compiled SaxonC library. */
   std::string cwd;  /*!< current working directory */
 
-  //! Utility method required for python and PHP extension to delete string
-  //! created in the C++ code-base
+  //! Utility method required for python and PHP extension to delete string created in the C++ code-base
   /**
   * @param data - the string data to be deleted using the operator delete
   */

@@ -611,8 +611,7 @@ cdef class PySaxonProcessor:
     def make_string_value(self, value, encoding = None):
         """
         make_string_value(self, value, encoding = None)
-        Factory method. Unlike the constructor, this avoids creating a new StringValue in the case
-        of a zero-length string (and potentially other strings, in future)
+        Factory method to create a String value as a new XdmAtomicValue.
         Args:
             value (str): The String value. NULL is taken as equivalent to "".
             encoding (str): The encoding of the string. If not specified then the platform default encoding is used.

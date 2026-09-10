@@ -28,7 +28,7 @@ class XdmAtomicValue : public XdmItem {
 public:
   //! A default Constructor.
   /**
-   * Create a empty atomic value
+   * Create an empty atomic value
    */
   XdmAtomicValue();
 

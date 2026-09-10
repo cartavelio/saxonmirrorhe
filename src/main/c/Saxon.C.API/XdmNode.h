@@ -56,8 +56,7 @@ class XdmValue;
 class XdmNode : public XdmItem {
 
 public:
-  //! XdmNode constructor created as a wrapper around an existing Saxon Java
-  //! object
+  //! XdmNode constructor created as a wrapper around an existing Saxon Java object
   /**
    * XdmNode constructor created from a JNI Java object. This is for internal
    * use only
@@ -66,8 +65,7 @@ public:
    */
   XdmNode(int64_t);
 
-  //! XdmNode constructor created as a wrapper around an existing Saxon Java
-  //! object
+  //! XdmNode constructor created as a wrapper around an existing Saxon Java object
   /**
    * XdmNode constructor created from a JNI Java object. This is for internal
    * use only
@@ -117,8 +115,7 @@ public:
    */
   XDM_NODE_KIND getNodeKind();
 
-  //! Get the name of the node, as a string in the form of a EQName.
- //! Deallocation of memory is done internally.
+  //! Get the name of the node, as a string in the form of a EQName. Deallocation of memory is done internally.
   /**
    *
    *
@@ -127,8 +124,7 @@ public:
    */
   const char *getNodeName();
 
-  //! Get the local name of the node.
-  //! Deallocation of memory is done internally.
+  //! Get the local name of the node. Deallocation of memory is done internally.
   /**
    *
    *
@@ -163,8 +159,7 @@ public:
    */
   int getColumnNumber();
 
-  //! Get the base URI of this node
-  //! Deallocation of memory is done internally.
+  //! Get the base URI of this node. Deallocation of memory is done internally.
   /**
    *
    * @return the base URI, as defined in the XDM model. The value may be null if
@@ -173,14 +168,14 @@ public:
    */
   const char *getBaseUri();
 
-  //! Get the string value of the item. For a node, this gets the string value
-  //! of the node.  The caller should deallocate memory using `operator delete`
+  //! Get the string value of the item. For a node, this gets the string value of the node.
   /**
    * For an atomic value, it has the same effect as casting the value
    * to a string. In all cases the result is the same as applying the XPath
    * string() function. <p>For atomic values, the result is the same as the
    * result of calling <code>toString</code>. This is not the case for nodes,
    * where <code>toString</code> returns an XML serialization of the node.</p>
+   * The caller should deallocate memory using `operator delete`
    *
    * @return the result of converting the item to a string.
    * @remark the SaxonProcessor argument has been removed from release
@@ -188,9 +183,7 @@ public:
    */
   const char *getStringValue();
 
-  //! The toString() method returns a simple XML serialization of the node with
-  //! defaulted serialization parameters. The caller must deallocate memory
-  //! using `operator delete`
+  //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
 
   /**
    *
@@ -212,6 +205,8 @@ public:
    * escaped form. To get the unescaped string value of a text node, use
    * <code>getStringValue()</code> instead.</p>
    *
+   * The caller must deallocate memory using `operator delete`
+   *
    * @return a simple XML serialization of the node. Under error conditions the
    * method may return an error message which will always begin with the label
    * "Error: ".
@@ -227,8 +222,7 @@ public:
    */
   XdmNode *getParent();
 
-  //! Get the string value of a named attribute (in no namespace) of this
-  //! element
+  //! Get the string value of a named attribute (in no namespace) of this element
   /**
    *
    * User is responsible for memory management for the attribute nodes. Deallocate using `operator delete`
@@ -284,14 +278,13 @@ public:
    */
   EnumXdmAxis convertEnumXdmAxis(int n) { return static_cast<EnumXdmAxis>(n); }
 
-  //! Get the count of nodes in the nodeAxis array. Cached from the last call to
-  //! nodeAxis
+  //! Get the count of nodes in the nodeAxis array. Cached from the last call to nodeAxis
   int axisNodeCount();
 
-  //! Get the underlying JNI Java object for the XdmNode
+  //! Internal method to get the underlying Graalvm Java object for the XdmNode
   /**
    *
-   * @return jobject - The unwrapped JNI object for the XdmNode
+   * @return int64_t - The unwrapped Graalvm object for the XdmNode
    */
   int64_t getUnderlyingValue() { return XdmItem::getUnderlyingValue(); }
 
@@ -353,8 +346,7 @@ public:
 
     bool hasRelinquishedChildren();
 
-  //! Utility method required for python and PHP extension to delete string
-  //! created in the C++ code-base
+  //! Internal method. Required for python and PHP extension to delete string created in the C++ code-base
   /**
   * @param fetchedChildren - the array of pointers to child nodes to be deleted
   */

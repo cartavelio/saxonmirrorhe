@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2022 - 2023 Saxonica Limited.
+// Copyright (c) 2022 - 2025 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License,
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can
 // obtain one at http://mozilla.org/MPL/2.0/. This Source Code Form is
@@ -44,7 +44,7 @@ class XdmValue {
 public:
   //! A default Constructor.
   /**
-   * Create a empty value
+   * Create an empty value
    */
   XdmValue() { initialize(); }
 
@@ -107,10 +107,9 @@ public:
    */
   virtual ~XdmValue();
 
-  //! This is deprecated and a no-op, C++ destructor handles this case. Delete
-  //! the XdmValue object and clean up all items in the sequence. Release
-  //! the underlying JNI object.
-  /*
+  //! This is deprecated and a no-op, C++ destructor handles this case.
+  /**
+   * Delete the XdmValue object and clean up all items in the sequence. Release the underlying JNI object.
    *! @deprecated
    */
   void releaseXdmValue();
@@ -146,7 +145,7 @@ public:
 
   //! Create a string representation of the value.
   /**
-   * The is the result of serializing
+   * The result of serializing
    * the value using the adaptive serialization method.
    * @return a string representation of the value.
    * The caller is responsible for memory deallocation. Must use `operator delete`
@@ -165,23 +164,21 @@ public:
     return refCount;
   }
 
-  //! Increment reference count of this XdmValue - Memory management - Internal
-  //! use only
+  //! Increment reference count of this XdmValue - Memory management - Internal use only
   /**
    * this method is used for internal memory management.
    */
   virtual void incrementRefCount();
 
-  //! Decrement reference count of this XdmValue - Memory management - Internal
-  //! use only
+  //! Decrement reference count of this XdmValue - Memory management - Internal use only
   /**
    * this method is used for internal memory management.
    */
   virtual void decrementRefCount();
 
   /**
-   * Get Java XdmValue object.
-   * @return jobject - The Java object of the XdmValue in its JNI representation
+   * Internal method. Get Java XdmValue object.
+   * @return int64_t - Graalvm reference to the Java object of the XdmValue.
    */
   virtual int64_t getUnderlyingValue();
 
