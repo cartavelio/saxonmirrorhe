@@ -55,7 +55,9 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TreeStatistics;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.ObjectValue;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringToDouble11;
 import net.sf.saxon.z.*;
 import org.xml.sax.*;
 import org.xml.sax.ext.DefaultHandler2;
@@ -1347,9 +1349,9 @@ public class Configuration implements SourceResolver, NotationSet {
         if (version == 30) {
             return XSLT30FunctionSet.getInstance();
         } else if (version == 40) {
-            return XSLT40FunctionSet.getInstance();
+            throw new IllegalArgumentException("XSLT 4.0 requires Saxon-PE or higher");
         } else {
-            throw new IllegalArgumentException("Unsupported XSLT version " + version + " (must be 30 or 40)");
+            throw new IllegalArgumentException("Unsupported XSLT version " + version + " (must be 30)");
         }
     }
 
@@ -1368,7 +1370,7 @@ public class Configuration implements SourceResolver, NotationSet {
             case 31:
                 return XPath31FunctionSet.getInstance();
             case 40:
-                return XPath40FunctionSet.getInstance();
+                throw new IllegalArgumentException("Version 4.0 requires Saxon-PE or higher");
             default:
                 return XPath31FunctionSet.getInstance();
         }

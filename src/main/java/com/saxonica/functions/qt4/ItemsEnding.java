@@ -1,4 +1,4 @@
-package net.sf.saxon.functions.hof;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
@@ -8,18 +8,18 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
 /**
- * This class supports the two extension functions saxon:items-from and saxon:items-after,
+ * This class supports the two extension functions saxon:items-until and saxon:items-before,
  * also available as experimental XPath 4.0 functions in the fn namespace.
  * These functions take two arguments: the first is a sequence of items, the second is a
- * function used as a predicate to determine the first item to be included in the result.
+ * function used as a predicate to determine the last item to be included in the result.
  * The functions differ in whether the matching item is included in the result or not.
  */
 
-public abstract class ItemsStarting extends SystemFunction {
+public abstract class ItemsEnding extends SystemFunction {
 
     protected abstract boolean includeMatchingItem();
 
-    public static class ItemsFrom extends ItemsStarting {
+    public static class ItemsUntil extends ItemsEnding {
         @Override
         protected boolean includeMatchingItem() {
             return true;
@@ -27,11 +27,11 @@ public abstract class ItemsStarting extends SystemFunction {
 
         @Override
         public String getStreamerName() {
-            return "saxon:ItemsFrom";
+            return "saxon:ItemsUntil";
         }
     }
 
-    public static class ItemsAfter extends ItemsStarting {
+    public static class ItemsBefore extends ItemsEnding {
         @Override
         protected boolean includeMatchingItem() {
             return false;
@@ -39,7 +39,7 @@ public abstract class ItemsStarting extends SystemFunction {
 
         @Override
         public String getStreamerName() {
-            return "saxon:ItemsAfter";
+            return "saxon:ItemsBefore";
         }
     }
 
@@ -56,46 +56,52 @@ public abstract class ItemsStarting extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
-        FunctionItem startCondition = (FunctionItem) arguments[1].head();
-        return new LazySequence(new StartingIterator(
-                input.iterate(), startCondition, includeMatchingItem(), context));
+        FunctionItem endCondition = (FunctionItem) arguments[1].head();
+        return new LazySequence(new EndingIterator(
+                input.iterate(), endCondition, includeMatchingItem(), context));
     }
 
-    private static class StartingIterator implements SequenceIterator {
+    private static class EndingIterator implements SequenceIterator {
 
         private final SequenceIterator baseIterator;
-        private final FunctionItem start;
+        private final FunctionItem end;
         private final boolean inclusive;
         private final XPathContext context;
-        private boolean started;
+        private boolean finished;
 
-        StartingIterator(SequenceIterator in, FunctionItem start, boolean inclusive, XPathContext context) {
+        EndingIterator(SequenceIterator in, FunctionItem end, boolean inclusive, XPathContext context) {
             this.baseIterator = in;
-            this.start = start;
+            this.end = end;
             this.inclusive = inclusive;
             this.context = context;
         }
 
         @Override
         public Item next() {
-            Item item;
-            while ((item = baseIterator.next()) != null) {
-                if (started) {
+            try {
+                if (finished) {
+                    return null;
+                }
+                Item item = baseIterator.next();
+                if (item == null) {
+                    finished = true;
+                    return null;
+                }
+                BooleanValue matches = (BooleanValue)end.call(context, SequenceTool.fromItems(item)).head();
+                if (matches.getBooleanValue()) {
+                    finished = true;
+                    if (inclusive) {
+                        return item;
+                    } else {
+                        baseIterator.close();
+                        return null;
+                    }
+                } else {
                     return item;
                 }
-                try {
-                    BooleanValue matches = (BooleanValue) start.call(context, SequenceTool.fromItems(item)).head();
-                    if (matches.getBooleanValue()) {
-                        started = true;
-                        if (inclusive) {
-                            return item;
-                        }
-                    }
-                } catch (XPathException e) {
-                    throw new UncheckedXPathException(e);
-                }
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
             }
-            return null;
         }
 
         @Override

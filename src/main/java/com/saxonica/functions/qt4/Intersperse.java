@@ -5,11 +5,12 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;

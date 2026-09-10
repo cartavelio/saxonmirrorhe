@@ -5,7 +5,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.functions.Parts;
+import com.saxonica.functions.qt4.Parts;
 
 /**
  * This class implements the saxon:analyze-uri() function which returns a map containing the components

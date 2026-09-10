@@ -5,21 +5,23 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
-import net.sf.saxon.expr.LastItemExpression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * This class implements the function fn:foot(), which is proposed as a standard function in XPath 4.0
+ * This class implements the function fn:unparcel(), which is a proposed function in XPath 4.0
+ * to unwrap a sequence that has been wrapped as a parcel item
  */
 
-public class FootFn extends SystemFunction {
+public class UnparcelFn extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -32,11 +34,17 @@ public class FootFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        try {
-            Item foot = LastItemExpression.getLast(arguments[0].iterate());
-            return SequenceTool.itemOrEmpty(foot);
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
+        Item arg = arguments[0].head();
+        return unparcel(arg, context);
+    }
+
+    public static GroundedValue unparcel(Item arg, XPathContext context) throws XPathException {
+        if (arg instanceof Parcel) {
+            return ((Parcel) arg).getValue();
+        } else if (Parcel.TYPE.matches(arg, context.getConfiguration().getTypeHierarchy())) {
+            return ((MapItem) arg).get(Parcel.parcelKey);
+        } else {
+            throw new XPathException("The first argument of fn:unparcel must be a parcel", "XPTY0004");
         }
     }
 }

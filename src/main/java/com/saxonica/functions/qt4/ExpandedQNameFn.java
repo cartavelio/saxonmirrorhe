@@ -1,17 +1,18 @@
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.StringValue;
 
 /**
- * Implements the saxon:is-NaN() function. Returns true if the supplied argument is NaN.
- * Also available as experimental XPath 4.0 function fn:is-NaN().
+ * Implements the fn:expanded-QName() function proposed for 4.0
  */
 
-public class IsNaN extends SystemFunction {
+public class ExpandedQNameFn extends SystemFunction {
 
     /**
      * Evaluate this function call
@@ -25,8 +26,12 @@ public class IsNaN extends SystemFunction {
      */
 
     @Override
-    public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return BooleanValue.get(((AtomicValue)arguments[0].head()).isNaN());
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        QNameValue s = (QNameValue)arguments[0].head();
+        if (s == null) {
+            return EmptySequence.getInstance();
+        }
+        return new StringValue(s.getStructuredQName().getEQName());
     }
 
 

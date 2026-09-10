@@ -5,42 +5,31 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.CollatingFunctionFixed;
+import net.sf.saxon.functions.Count;
+import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * The proposed XPath 4.0 unique() function, with the collation argument already known
+ * The proposed XPath 4.0 all-equal() function, with the collation argument already known
  */
 
-public class UniqueFn extends CollatingFunctionFixed {
+public class AllEqual extends CollatingFunctionFixed {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringCollator collator = getStringCollator();
         DistinctValues.DistinctIterator iter =
                 new DistinctValues.DistinctIterator(arguments[0].iterate(), collator, context);
-        List<String> listener = new ArrayList<>(1);
-        iter.notifyDuplicates(() -> listener.add("gotcha!"));
-        while (iter.next() != null) {
-            if (!listener.isEmpty()) {
-                iter.close();
-                return BooleanValue.FALSE;
-            }
-        }
-        return BooleanValue.get(listener.isEmpty());
+        int count = Count.count(iter);
+        return BooleanValue.get(count <= 1);
     }
-
-
-
-
 
 }
 

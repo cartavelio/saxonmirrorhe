@@ -1,5 +1,6 @@
 package com.saxonica.functions.extfn;
 
+import com.saxonica.functions.qt4.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
@@ -8,10 +9,9 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.number.NamedTimeZone;
-import net.sf.saxon.functions.*;
-import net.sf.saxon.functions.hof.ItemsEnding;
-import net.sf.saxon.functions.hof.IndexWhere;
-import net.sf.saxon.functions.hof.ItemsStarting;
+import net.sf.saxon.functions.ContextItemAccessorFunction;
+import net.sf.saxon.functions.Doc_2;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.FeatureKeys;
@@ -125,7 +125,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("analyze-uri", 1, e -> e.populate( AnalyzeUri::new, analyzeUriResult, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("array-member", 1, e -> e.populate( ParcelFn::new, Parcel.TYPE, ONE, 0)
+        register("array-member", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("base64Binary-to-octets", 1, e -> e.populate( Base64BinaryToOctets::new, BuiltInAtomicType.INTEGER, STAR, 0)
@@ -135,7 +135,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("characters", 1, e -> e.populate( CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
+        register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("column-number", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.INTEGER, ONE, CITEM | LATE));
@@ -241,7 +241,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("is-defaulted", 1, e -> e.populate( IsDefaulted::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), ONE, null));
 
-        register("is-NaN", 1, e -> e.populate( IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("is-NaN", 1, e -> e.populate(IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
         register("items-after", 2, e -> e.populate(ItemsStarting.ItemsAfter::new, AnyItemType.getInstance(), STAR, 0)

@@ -12,6 +12,7 @@ import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.functions.extfn.ObjectMap;
 import com.saxonica.functions.extfn.VendorFunctionSetPE;
 import com.saxonica.functions.registry.XQUpdate10FunctionSet;
+import com.saxonica.functions.registry.XSLT40FunctionSet;
 import com.saxonica.serialize.SerializerFactoryPE;
 import com.saxonica.trans.ModePE;
 import com.saxonica.trans.PackageLoaderPE;
@@ -624,11 +625,60 @@ public class ProfessionalConfiguration extends Configuration {
         }
     }
 
+    /**
+     * Get the set of functions in the "fn" namespace defined in the XSLT and F&amp;O specifications
+     *
+     * @param version The XSLT version (30 or 40)
+     * @return the function library
+     */
 
+    @Override
+    public BuiltInFunctionSet getXSLTFunctionSet(int version) {
+        if (version == 30) {
+            return XSLT30FunctionSet.getInstance();
+        } else if (version == 40) {
+            return XSLT40FunctionSet.getInstance();
+        } else {
+            throw new IllegalArgumentException("Unsupported XSLT version " + version + " (must be 30 or 40)");
+        }
+    }
+
+    @Override
+    public BuiltInFunctionSet getXPathFunctionSet(int version) {
+        switch (version) {
+            case 20:
+                return XPath20FunctionSet.getInstance();
+            case 30:
+            case 305:
+                return XPath30FunctionSet.getInstance();
+            case 31:
+                return XPath31FunctionSet.getInstance();
+            case 40:
+                return com.saxonica.functions.registry.XPath40FunctionSet.getInstance();
+            default:
+                return XPath31FunctionSet.getInstance();
+        }
+    }
 
     @Override
     public BuiltInFunctionSet getXQueryUpdateFunctionSet() {
         return XQUpdate10FunctionSet.getInstance();
+    }
+
+    /**
+     * Make a function in the "fn" namespace
+     *
+     * @param localName the local name of the function
+     * @param arity     the arity of the function
+     * @return the function
+     */
+
+    public SystemFunction makeSystemFunction(String localName, int arity) {
+        try {
+            return getXSLTFunctionSet(40).makeFunction(localName, arity);
+        } catch (XPathException e) {
+            return null;
+        }
     }
 
     /**

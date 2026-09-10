@@ -5,24 +5,21 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions.hof;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.SequenceType;
 
 /**
- * This class implements the function fn:some(), which is a proposed function for XPath 4.0
+ * This class implements the function fn:iterate-while(), which is a proposed function for XPath 4.0
  */
 
-public class SomeFn extends SystemFunction {
+public class IterateWhileFn extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -35,21 +32,17 @@ public class SomeFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        SequenceIterator iter = arguments[0].iterate();
-        FunctionItem predicate = arguments.length > 1
-                ? (FunctionItem) arguments[1].head()
-                : new CoercedFunction(SystemFunction.makeFunction("identity", getRetainedStaticContext(), 1),
-                                      new SpecificFunctionType(
-                                            new SequenceType[]{SequenceType.SINGLE_ITEM},
-                                            SequenceType.SINGLE_BOOLEAN));
-        for (Item item; (item = iter.next()) != null; ) {
-            boolean condition = ((BooleanValue) dynamicCall(predicate, context, new Sequence[]{item}).head()).getBooleanValue();
+        GroundedValue input = arguments[0].materialize();
+        FunctionItem predicate = (FunctionItem) arguments[1].head();
+        FunctionItem action = (FunctionItem) arguments[2].head();
+        while (true) {
+            boolean condition = ((BooleanValue) dynamicCall(predicate, context, input).head()).getBooleanValue();
             if (condition) {
-                iter.close();
-                return BooleanValue.TRUE;
+                input = dynamicCall(action, context, input).materialize();
+            } else {
+                return input;
             }
         }
-        return BooleanValue.FALSE;
     }
 
 

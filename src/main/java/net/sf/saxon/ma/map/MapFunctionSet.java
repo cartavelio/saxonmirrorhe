@@ -7,13 +7,16 @@
 
 package net.sf.saxon.ma.map;
 
+import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.InsertBefore;
+import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
@@ -128,6 +131,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
 
+        //#if EE==true || PE==true
         if (version >= 40) {
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
@@ -185,6 +189,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(1, FILTER_TYPE, ONE | INS, null));
 
         }
+        //#endif
 
     }
 

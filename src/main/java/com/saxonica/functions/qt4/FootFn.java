@@ -5,19 +5,22 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
+import net.sf.saxon.expr.LastItemExpression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * This class implements the function fn:parcel(), which is a proposed function in XPath 4.0
- * to wrap a sequence as a single item
+ * This class implements the function fn:foot(), which is proposed as a standard function in XPath 4.0
  */
 
-public class ParcelFn extends SystemFunction {
+public class FootFn extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -30,6 +33,11 @@ public class ParcelFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return new Parcel(arguments[0].materialize());
+        try {
+            Item foot = LastItemExpression.getLast(arguments[0].iterate());
+            return SequenceTool.itemOrEmpty(foot);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 }

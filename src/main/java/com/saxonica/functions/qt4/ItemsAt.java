@@ -5,10 +5,11 @@
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -19,7 +20,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
 
 /**
- * Implements the XPath 2.0 subsequence() function with two arguments
+ * Implements the XPath 4.0 items-at() function
  */
 
 public class ItemsAt extends SystemFunction {

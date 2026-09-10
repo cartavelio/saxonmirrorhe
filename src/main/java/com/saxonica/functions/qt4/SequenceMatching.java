@@ -1,4 +1,4 @@
-package net.sf.saxon.functions.hof;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.expr.XPathContext;

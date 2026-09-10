@@ -1,6 +1,7 @@
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.om.NamespaceBinding;

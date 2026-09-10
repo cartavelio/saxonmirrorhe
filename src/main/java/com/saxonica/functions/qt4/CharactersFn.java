@@ -1,15 +1,9 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2022 Saxonica Limited
-// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-package net.sf.saxon.functions;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.ItemMapper;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -20,8 +14,8 @@ import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
 
 /**
- * Implements the proposed fn:characters() function. This splits a supplied string into a sequence of
- * single-character strings
+ * Implements the saxon:characters() or fn:characters() function.
+ * This splits a supplied string into a sequence of single-character strings
  */
 
 public class CharactersFn extends SystemFunction {
@@ -53,5 +47,5 @@ public class CharactersFn extends SystemFunction {
 
 }
 
-// Copyright (c) 2020 Saxonica Limited
+// Copyright (c) 2020-2022 Saxonica Limited
 
