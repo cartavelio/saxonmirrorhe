@@ -73,6 +73,11 @@
                <a href="/starting/installing">Installing SaxonC</a>, and the installation documentation for
                the <a href="/starting/installingphp">PHP extension</a> and <a
                   href="/starting/installingpython">Python extension</a>.</li>
+            <li>The SAXONC_HOME environment variable is no longer used for the location of the installed
+               SaxonC library. Dynamic linking of the library is done according to the system default. For
+               example, for a unix system lookup is done according to the path /lib, and then /usr/lib (or
+               /usr/local/lib for MacOS). In some systems the LD_LIBRARY_PATH environment variable can be used
+               instead.</li>
             <li>For Python users, the product is now available as a Python wheel package on pypi,
                for multiple platforms. This means that it can be installed with pip, which greatly simplifies
                the installation process. See <a href="/starting/installingpython">Python extension</a> for
