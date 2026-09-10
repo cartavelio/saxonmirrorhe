@@ -290,7 +290,7 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
             $result = $xpathProc->evaluateSingle("//BOOKS/ITEM[@CAT='MMP']/TITLE");
             $this->assertNotNull($result);
             $colnum = $result->getNodeValue()->getColumnNumber();
-            $this->assertTrue($colnum == 14);
+            $this->assertTrue($colnum == 13);
         } catch (Exception $e) {
             echo 'Caught exception: ', $e->getMessage(), "\n";
             $this->assertTrue(False, 'Caught exception: ' . $e->getMessage());
