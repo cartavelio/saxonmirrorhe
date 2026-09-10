@@ -21,12 +21,12 @@ namespace Saxon.Hej.regex {
             return this;
         }
         public override Saxon.Hej.z.IntIterator iterateMatches(Saxon.Hej.regex.REMatcher matcher, int position) {
-            return new Inner_IntIterator_d1504e157(this, matcher, position);
+            return new Inner_IntIterator_d1449e157(this, matcher, position);
         }
     
-        private class Inner_IntIterator_d1504e157 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_d1449e157 : Saxon.Hej.z.IntIterator {
             private readonly OpReluctantFixed outerInstance;
-            public Inner_IntIterator_d1504e157(OpReluctantFixed outerInstance, Saxon.Hej.regex.REMatcher matcher, int position) {
+            public Inner_IntIterator_d1449e157(OpReluctantFixed outerInstance, Saxon.Hej.regex.REMatcher matcher, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.position = position;

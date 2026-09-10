@@ -58,9 +58,9 @@ namespace Saxon.Hej.@event {
         }
         public virtual Saxon.Hej.str.UniStringConsumer getStringReceiver(bool asTextNode) {
             if (asTextNode) {
-                return new Inner_AbstractUniStringConsumer_d620e729(this);
+                return new Inner_AbstractUniStringConsumer_d589e729(this);
             } else {
-                return new Inner_AbstractUniStringConsumer_d620e640(this);
+                return new Inner_AbstractUniStringConsumer_d589e640(this);
             }
         }
         public virtual void close() {
@@ -69,9 +69,9 @@ namespace Saxon.Hej.@event {
             return false;
         }
     
-        private class Inner_AbstractUniStringConsumer_d620e640 : Saxon.Hej.str.AbstractUniStringConsumer {
+        private class Inner_AbstractUniStringConsumer_d589e640 : Saxon.Hej.str.AbstractUniStringConsumer {
             private readonly Outputter outerInstance;
-            public Inner_AbstractUniStringConsumer_d620e640(Outputter outerInstance) {
+            public Inner_AbstractUniStringConsumer_d589e640(Outputter outerInstance) {
                 this.outerInstance = outerInstance;
                 buffer = new Saxon.Hej.str.UnicodeBuilder();
             }
@@ -85,9 +85,9 @@ namespace Saxon.Hej.@event {
             }
         }
 
-        private class Inner_AbstractUniStringConsumer_d620e729 : Saxon.Hej.str.AbstractUniStringConsumer {
+        private class Inner_AbstractUniStringConsumer_d589e729 : Saxon.Hej.str.AbstractUniStringConsumer {
             private readonly Outputter outerInstance;
-            public Inner_AbstractUniStringConsumer_d620e729(Outputter outerInstance) {
+            public Inner_AbstractUniStringConsumer_d589e729(Outputter outerInstance) {
                 this.outerInstance = outerInstance;
                 buffer = new Saxon.Hej.str.UnicodeBuilder();
             }

@@ -422,7 +422,7 @@ namespace Saxon.Hej.trans {
             }
             despatcher.setPipelineConfiguration(makePipelineConfiguration());
             Saxon.Hej.@event.Outputter finalResult = dest;
-            return new Inner_ProxyReceiver_d1866e3198(this, despatcher, finalResult);
+            return new Inner_ProxyReceiver_d1799e3198(this, despatcher, finalResult);
         }
         public System.Collections.Generic.Stack<Saxon.Hej.expr.instruct.AttributeSet> getAttributeSetEvaluationStack() { lock(this) {
             long thread = Saxon.Ejava.lang.Thread.currentThread().getId();
@@ -433,9 +433,9 @@ namespace Saxon.Hej.trans {
             attributeSetEvaluationStacks.Remove(thread);
         }}
     
-        private class Inner_ProxyReceiver_d1866e3198 : Saxon.Hej.@event.ProxyReceiver {
+        private class Inner_ProxyReceiver_d1799e3198 : Saxon.Hej.@event.ProxyReceiver {
             private readonly XsltController outerInstance;
-            public Inner_ProxyReceiver_d1866e3198(XsltController outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Outputter finalResult) : base(arg1) {
+            public Inner_ProxyReceiver_d1799e3198(XsltController outerInstance, /*AA*/Saxon.Hej.@event.Receiver arg1, Saxon.Hej.@event.Outputter finalResult) : base(arg1) {
                 this.outerInstance = outerInstance;
                 this.finalResult = finalResult;
             }

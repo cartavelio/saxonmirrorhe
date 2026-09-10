@@ -338,12 +338,12 @@ namespace Saxon.Hej.ma.arrays {
                 return Saxon.Hej.ma.arrays.SimpleArrayItem.makeSimpleArrayItem(((Saxon.Hej.om.Sequence)(arguments[0])).iterate());
             }
             public override Saxon.Hej.functions.Fold getFold(Saxon.Hej.expr.XPathContext context, params Saxon.Hej.om.Sequence[]  additionalArguments) {
-                return new Inner_Fold_d1298e3994(this);
+                return new Inner_Fold_d1253e3994(this);
             }
         
-            private class Inner_Fold_d1298e3994 : Saxon.Hej.functions.Fold {
+            private class Inner_Fold_d1253e3994 : Saxon.Hej.functions.Fold {
                 private readonly ArrayFromSequence outerInstance;
-                public Inner_Fold_d1298e3994(ArrayFromSequence outerInstance) {
+                public Inner_Fold_d1253e3994(ArrayFromSequence outerInstance) {
                     this.outerInstance = outerInstance;
                     members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
                 }
@@ -361,9 +361,9 @@ namespace Saxon.Hej.ma.arrays {
 
         }
     
-        private class Inner_Fold_d1298e3994 : Saxon.Hej.functions.Fold {
+        private class Inner_Fold_d1253e3994 : Saxon.Hej.functions.Fold {
             private readonly ArrayFromSequence outerInstance;
-            public Inner_Fold_d1298e3994(ArrayFromSequence outerInstance) {
+            public Inner_Fold_d1253e3994(ArrayFromSequence outerInstance) {
                 this.outerInstance = outerInstance;
                 members = new System.Collections.Generic.List<Saxon.Hej.om.GroundedValue>();
             }

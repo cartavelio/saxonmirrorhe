@@ -138,7 +138,7 @@ namespace Saxon.Hej.expr.instruct {
                 return null;
             } else {
                 if ((((getSelect().getItemType() == Saxon.Hej.type.BuiltInAtomicType.STRING) && !(isDisableOutputEscaping())) && !(Saxon.Hej.value.Cardinality.allowsZero(getCardinality())))) {
-                    Saxon.Hej.@event.Outputter toText = new Inner_ProxyOutputter_d843e1043(this, output);
+                    Saxon.Hej.@event.Outputter toText = new Inner_ProxyOutputter_d807e1043(this, output);
                     getSelect().process(toText, context);
                     return null;
                 } else {
@@ -198,9 +198,9 @@ namespace Saxon.Hej.expr.instruct {
             @out.endElement();
         }
     
-        private class Inner_ProxyOutputter_d843e1043 : Saxon.Hej.@event.ProxyOutputter {
+        private class Inner_ProxyOutputter_d807e1043 : Saxon.Hej.@event.ProxyOutputter {
             private readonly ValueOf outerInstance;
-            public Inner_ProxyOutputter_d843e1043(ValueOf outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
+            public Inner_ProxyOutputter_d807e1043(ValueOf outerInstance, /*AA*/Saxon.Hej.@event.Outputter arg1) : base(arg1) {
                 this.outerInstance = outerInstance;
             }
             public override void append(Saxon.Hej.om.Item item) {

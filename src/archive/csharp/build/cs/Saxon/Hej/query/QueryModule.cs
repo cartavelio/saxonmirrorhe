@@ -630,7 +630,7 @@ namespace Saxon.Hej.query {
             activeNamespaces.pop();
         }
         public Saxon.Hej.om.NamespaceResolver getLiveNamespaceResolver() {
-            return new Inner_NamespaceResolver_d1458e4607(this);
+            return new Inner_NamespaceResolver_d1404e4607(this);
         }
         public string checkURIForPrefix(string prefix) {
             if ((activeNamespaces != null)) {
@@ -769,9 +769,9 @@ namespace Saxon.Hej.query {
         
         }
     
-        private class Inner_NamespaceResolver_d1458e4607 : Saxon.Hej.om.NamespaceResolver {
+        private class Inner_NamespaceResolver_d1404e4607 : Saxon.Hej.om.NamespaceResolver {
             private readonly QueryModule outerInstance;
-            public Inner_NamespaceResolver_d1458e4607(QueryModule outerInstance) {
+            public Inner_NamespaceResolver_d1404e4607(QueryModule outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public string getURIForPrefix(string prefix, bool useDefault) {

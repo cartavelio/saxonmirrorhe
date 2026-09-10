@@ -45,7 +45,7 @@ namespace Saxon.Hej.str {
             return new Saxon.Hej.str.Twine8(bytes);
         }
         public static Saxon.Hej.z.IntIterator codePoints(string value) {
-            return new Inner_IntIterator_d1648e383(value);
+            return new Inner_IntIterator_d1587e383(value);
         }
         public static string diagnosticDisplay(string s) {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(s.Length);
@@ -170,8 +170,8 @@ namespace Saxon.Hej.str {
             }
         }
     
-        private class Inner_IntIterator_d1648e383 : Saxon.Hej.z.IntIterator {
-            public Inner_IntIterator_d1648e383(string value) {
+        private class Inner_IntIterator_d1587e383 : Saxon.Hej.z.IntIterator {
+            public Inner_IntIterator_d1587e383(string value) {
                 this.value = value;
                 i = 0;
             }

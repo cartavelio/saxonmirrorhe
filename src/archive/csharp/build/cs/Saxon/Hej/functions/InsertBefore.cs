@@ -9,7 +9,7 @@ namespace Saxon.Hej.functions {
             return Saxon.Hej.om.SequenceTool.toLazySequence(new Saxon.Hej.functions.InsertBefore.InsertIterator(arguments[0].iterate(), arguments[2].iterate(), pos));
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
-            return new Inner_SystemFunctionCall_d1130e161(this, this, arguments);
+            return new Inner_SystemFunctionCall_d1088e161(this, this, arguments);
         }
         public class InsertIterator : Saxon.Hej.om.SequenceIterator {
             private readonly Saxon.Hej.om.SequenceIterator @base;
@@ -65,9 +65,9 @@ namespace Saxon.Hej.functions {
             return "InsertBefore";
         }
     
-        private class Inner_SystemFunctionCall_d1130e161 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_d1088e161 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly InsertBefore outerInstance;
-            public Inner_SystemFunctionCall_d1130e161(InsertBefore outerInstance, InsertBefore arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_d1088e161(InsertBefore outerInstance, InsertBefore arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.type.ItemType getItemType() {

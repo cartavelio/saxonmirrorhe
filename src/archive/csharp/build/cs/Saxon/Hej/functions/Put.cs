@@ -4,15 +4,15 @@ using System.Linq;
 namespace Saxon.Hej.functions {
     public class Put : Saxon.Hej.functions.SystemFunction {
         public override Saxon.Hej.expr.Expression makeFunctionCall(Saxon.Hej.expr.Expression[] arguments) {
-            return new Inner_SystemFunctionCall_d1165e88(this, this, arguments);
+            return new Inner_SystemFunctionCall_d1122e88(this, this, arguments);
         }
         public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
             throw new Saxon.Hej.trans.XPathException("Dynamic evaluation of fn:put() is not supported");
         }
     
-        private class Inner_SystemFunctionCall_d1165e88 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_d1122e88 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly Put outerInstance;
-            public Inner_SystemFunctionCall_d1165e88(Put outerInstance, Put arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_d1122e88(Put outerInstance, Put arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public string staticBaseUri() {

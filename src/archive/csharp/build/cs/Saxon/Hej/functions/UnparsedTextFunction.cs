@@ -71,7 +71,7 @@ namespace Saxon.Hej.functions {
         }
         public static Saxon.Hej.str.UnicodeString readFile(Saxon.Hej.z.IntPredicateProxy checker, System.IO.TextReader reader) {
             Saxon.Hej.str.UnicodeBuilder buffer = new Saxon.Hej.str.UnicodeBuilder();
-            readFile(checker, reader, new Inner_AbstractUniStringConsumer_d1231e797(buffer));
+            readFile(checker, reader, new Inner_AbstractUniStringConsumer_d1187e797(buffer));
             return buffer.toUnicodeString();
         }
         public static void readFile(Saxon.Hej.z.IntPredicateProxy checker, System.IO.TextReader reader, Saxon.Hej.str.UniStringConsumer output) {
@@ -143,8 +143,8 @@ namespace Saxon.Hej.functions {
             return bytesRead == 0;
         }
     
-        private class Inner_AbstractUniStringConsumer_d1231e797 : Saxon.Hej.str.AbstractUniStringConsumer {
-            public Inner_AbstractUniStringConsumer_d1231e797(Saxon.Hej.str.UnicodeBuilder buffer) {
+        private class Inner_AbstractUniStringConsumer_d1187e797 : Saxon.Hej.str.AbstractUniStringConsumer {
+            public Inner_AbstractUniStringConsumer_d1187e797(Saxon.Hej.str.UnicodeBuilder buffer) {
                 this.buffer = buffer;
             }
             private Saxon.Hej.str.UnicodeBuilder buffer;

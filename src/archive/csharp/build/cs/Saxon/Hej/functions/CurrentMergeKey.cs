@@ -11,7 +11,7 @@ namespace Saxon.Hej.functions {
             return controllingInstruction;
         }
         public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
-            return new Inner_SystemFunctionCall_d1064e123(this, this, arguments);
+            return new Inner_SystemFunctionCall_d1023e123(this, this, arguments);
         }
         public Saxon.Hej.om.SequenceIterator iterate(Saxon.Hej.expr.XPathContext c) {
             Saxon.Hej.expr.sort.GroupIterator gi = c.getCurrentMergeGroupIterator();
@@ -24,9 +24,9 @@ namespace Saxon.Hej.functions {
             return Saxon.Hej.om.SequenceTool.toLazySequence(iterate(context));
         }
     
-        private class Inner_SystemFunctionCall_d1064e123 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_d1023e123 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly CurrentMergeKey outerInstance;
-            public Inner_SystemFunctionCall_d1064e123(CurrentMergeKey outerInstance, CurrentMergeKey arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_d1023e123(CurrentMergeKey outerInstance, CurrentMergeKey arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.expr.Expression getScopingExpression() {

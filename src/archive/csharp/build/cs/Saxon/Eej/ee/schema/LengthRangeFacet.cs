@@ -47,13 +47,13 @@ namespace Saxon.Eej.ee.schema {
         }
         public abstract override bool testLength(int actualLength);
         public override Saxon.Hej.om.Function getFacetAsFunctionItem() {
-            Saxon.Hej.expr.Callable callable = new Inner_Callable_d108e373(this);
+            Saxon.Hej.expr.Callable callable = new Inner_Callable_d99e373(this);
             return new Saxon.Hej.functions.CallableFunction(1, callable, Saxon.Hej.type.SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
         }
     
-        private class Inner_Callable_d108e373 : Saxon.Hej.expr.Callable {
+        private class Inner_Callable_d99e373 : Saxon.Hej.expr.Callable {
             private readonly LengthRangeFacet outerInstance;
-            public Inner_Callable_d108e373(LengthRangeFacet outerInstance) {
+            public Inner_Callable_d99e373(LengthRangeFacet outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {

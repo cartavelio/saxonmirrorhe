@@ -137,7 +137,7 @@ namespace Saxon.Hej.functions.hof {
             }
             Saxon.Hej.ma.map.MapItem functionsMap = new Saxon.Impl.DataModel.ImmMap();
             Saxon.Hej.query.XQueryFunctionLibrary functionLib = lib.getGlobalFunctionLibrary();
-            Saxon.Hej.expr.ExportAgent agent = new Inner_ExportAgent_d1117e1373(this);
+            Saxon.Hej.expr.ExportAgent agent = new Inner_ExportAgent_d1076e1373(this);
             foreach (Saxon.Hej.query.XQueryFunction function in functionLib.getFunctionDefinitions()) {
                 Saxon.Hej.ma.map.MapItem newMap;
                 Saxon.Hej.value.QNameValue functionQName = new Saxon.Hej.value.QNameValue(function.getFunctionName(), Saxon.Hej.type.BuiltInAtomicType.QNAME);
@@ -158,9 +158,9 @@ namespace Saxon.Hej.functions.hof {
             return map;
         }
     
-        private class Inner_ExportAgent_d1117e1373 : Saxon.Hej.expr.ExportAgent {
+        private class Inner_ExportAgent_d1076e1373 : Saxon.Hej.expr.ExportAgent {
             private readonly LoadXqueryModule outerInstance;
-            public Inner_ExportAgent_d1117e1373(LoadXqueryModule outerInstance) {
+            public Inner_ExportAgent_d1076e1373(LoadXqueryModule outerInstance) {
                 this.outerInstance = outerInstance;
             }
             public void export(Saxon.Hej.trace.ExpressionPresenter @out) {

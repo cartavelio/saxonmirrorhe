@@ -4,7 +4,7 @@ using System.Linq;
 namespace Saxon.Eej.ee.extfn {
     public class StreamFn : Saxon.Hej.functions.SystemFunction {
         public override Saxon.Hej.expr.Expression makeFunctionCall(params Saxon.Hej.expr.Expression[]  arguments) {
-            return new Inner_SystemFunctionCall_d39e88(this, this, arguments);
+            return new Inner_SystemFunctionCall_d34e88(this, this, arguments);
         }
         public override Saxon.Hej.expr.Expression makeOptimizedFunctionCall(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextInfo, params Saxon.Hej.expr.Expression[]  arguments) {
             Saxon.Hej.expr.parser.Optimizer opt = visitor.getConfiguration().obtainOptimizer();
@@ -25,9 +25,9 @@ namespace Saxon.Eej.ee.extfn {
             throw new Saxon.Hej.trans.XPathException("The function saxon:stream() cannot be called dynamically");
         }
     
-        private class Inner_SystemFunctionCall_d39e88 : Saxon.Hej.expr.SystemFunctionCall {
+        private class Inner_SystemFunctionCall_d34e88 : Saxon.Hej.expr.SystemFunctionCall {
             private readonly StreamFn outerInstance;
-            public Inner_SystemFunctionCall_d39e88(StreamFn outerInstance, StreamFn arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
+            public Inner_SystemFunctionCall_d34e88(StreamFn outerInstance, StreamFn arg1, /*AA*/Saxon.Hej.expr.Expression[] arg2) : base(arg1, arg2) {
                 this.outerInstance = outerInstance;
             }
             public override Saxon.Hej.expr.Expression optimize(Saxon.Hej.expr.parser.ExpressionVisitor visitor, Saxon.Hej.expr.parser.ContextItemStaticInfo contextItemType) {

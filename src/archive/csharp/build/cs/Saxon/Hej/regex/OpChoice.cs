@@ -62,7 +62,7 @@ namespace Saxon.Hej.regex {
             return this;
         }
         public override Saxon.Hej.z.IntIterator iterateMatches(Saxon.Hej.regex.REMatcher matcher, int position) {
-            return new Inner_IntIterator_d1497e472(this, matcher, position);
+            return new Inner_IntIterator_d1442e472(this, matcher, position);
         }
         public override string display() {
             Saxon.Ejava.lang.StringBuilder fsb = new Saxon.Ejava.lang.StringBuilder(64);
@@ -80,9 +80,9 @@ namespace Saxon.Hej.regex {
             return fsb.ToString();
         }
     
-        private class Inner_IntIterator_d1497e472 : Saxon.Hej.z.IntIterator {
+        private class Inner_IntIterator_d1442e472 : Saxon.Hej.z.IntIterator {
             private readonly OpChoice outerInstance;
-            public Inner_IntIterator_d1497e472(OpChoice outerInstance, Saxon.Hej.regex.REMatcher matcher, int position) {
+            public Inner_IntIterator_d1442e472(OpChoice outerInstance, Saxon.Hej.regex.REMatcher matcher, int position) {
                 this.outerInstance = outerInstance;
                 this.matcher = matcher;
                 this.position = position;
