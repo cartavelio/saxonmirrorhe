@@ -20,11 +20,11 @@ import java.util.EnumSet;
 public class LookaheadIteratorImpl implements LookaheadIterator {
 
     private final SequenceIterator base;
-    /*@Nullable*/ private Item next;
+    /*@Nullable*/ private Item _next;
 
     private LookaheadIteratorImpl(/*@NotNull*/ SequenceIterator base) throws XPathException {
         this.base = base;
-        next = base.next();
+        _next = base.next();
     }
 
     /*@NotNull*/
@@ -38,15 +38,15 @@ public class LookaheadIteratorImpl implements LookaheadIterator {
 
     @Override
     public boolean hasNext() {
-        return next != null;
+        return _next != null;
     }
 
     /*@Nullable*/
     @Override
     public Item next() throws XPathException {
-        Item current = next;
-        if (next != null) {
-            next = base.next();
+        Item current = _next;
+        if (_next != null) {
+            _next = base.next();
         }
         return current;
     }

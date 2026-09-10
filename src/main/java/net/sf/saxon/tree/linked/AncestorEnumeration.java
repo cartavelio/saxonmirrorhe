@@ -8,7 +8,6 @@
 package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NodeTest;
 
 import java.util.function.Predicate;
 
@@ -26,7 +25,7 @@ final class AncestorEnumeration extends TreeEnumeration {
 
     @Override
     protected void step() {
-        next = next.getParent();
+        nextNode = nextNode.getParent();
     }
 
 }

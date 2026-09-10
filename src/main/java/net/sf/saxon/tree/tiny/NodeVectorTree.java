@@ -22,9 +22,7 @@ public interface NodeVectorTree {
      * Ask whether the tree contains non-trivial type information (from schema validation)
      * @return true if type information is present
      */
-    default boolean isTyped() {
-        return false;
-    }
+    boolean isTyped();
 
     /**
      * Construct a NodeInfo representing the node at a given position in the tree

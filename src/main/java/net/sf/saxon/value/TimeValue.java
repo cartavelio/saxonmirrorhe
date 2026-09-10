@@ -28,7 +28,7 @@ import java.util.*;
  * A value of type xs:time
  */
 
-public final class TimeValue extends CalendarValue implements Comparable {
+public final class TimeValue extends CalendarValue implements Comparable<TimeValue> {
 
     private byte hour;
     private byte minute;
@@ -537,7 +537,7 @@ public final class TimeValue extends CalendarValue implements Comparable {
     /**
      * Compare the value to another dateTime value
      *
-     * @param other The other dateTime value
+     * @param otherTime The other dateTime value
      * @return negative value if this one is the earler, 0 if they are chronologically equal,
      *         positive value if this one is the later. For this purpose, dateTime values with an unknown
      *         timezone are considered to be UTC values (the Comparable interface requires
@@ -547,8 +547,7 @@ public final class TimeValue extends CalendarValue implements Comparable {
      */
 
     @Override
-    public int compareTo(Object other) {
-        TimeValue otherTime = (TimeValue) other;
+    public int compareTo(TimeValue otherTime) {
         if (getTimezoneInMinutes() == otherTime.getTimezoneInMinutes()) {
             if (hour != otherTime.hour) {
                 return IntegerValue.signum(hour - otherTime.hour);
@@ -589,7 +588,7 @@ public final class TimeValue extends CalendarValue implements Comparable {
         TimeValue otherTime = (TimeValue) other;
         if (getTimezoneInMinutes() == otherTime.getTimezoneInMinutes()) {
             // The values have the same time zone, or neither has a timezone
-            return compareTo(other);
+            return compareTo(otherTime);
         } else {
             return toDateTime().compareTo(otherTime.toDateTime(), implicitTimezone);
         }
@@ -598,19 +597,24 @@ public final class TimeValue extends CalendarValue implements Comparable {
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
-        return new TimeComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new TimeComparable(this);
     }
 
-    private class TimeComparable implements Comparable {
+    private static class TimeComparable implements SchemaComparable {
+
+        private final TimeValue value;
+        public TimeComparable(TimeValue value) {
+            this.value = value;
+        }
 
         /*@NotNull*/
         public TimeValue asTimeValue() {
-            return TimeValue.this;
+            return value;
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             if (o instanceof TimeComparable) {
                 DateTimeValue dt0 = asTimeValue().toDateTime();
                 DateTimeValue dt1 = ((TimeComparable) o).asTimeValue().toDateTime();
@@ -621,17 +625,17 @@ public final class TimeValue extends CalendarValue implements Comparable {
         }
 
         public boolean equals(/*@NotNull*/ Object o) {
-            return compareTo(o) == 0;
+            return o instanceof TimeComparable && compareTo((TimeComparable)o) == 0;
         }
 
         public int hashCode() {
-            return TimeValue.this.toDateTime().getSchemaComparable().hashCode();
+            return value.toDateTime().getSchemaComparable().hashCode();
         }
     }
 
 
     public boolean equals(Object other) {
-        return other instanceof TimeValue && compareTo(other) == 0;
+        return other instanceof TimeValue && compareTo((TimeValue)other) == 0;
     }
 
     public int hashCode() {

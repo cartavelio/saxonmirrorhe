@@ -481,7 +481,7 @@ public class EnumerationType implements AtomicType {
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-significant
-     * integer with fields such as {@link SchemaType#DERIVATION_LIST} and {@link SchemaType#DERIVATION_EXTENSION}.
+     * integer with fields such as {@link Derivatiion#DERIVATION_LIST} and {@link Derivatiion#DERIVATION_EXTENSION}.
      * This corresponds to the property "prohibited substitutions" in the schema component model.
      *
      * @return the value of the 'block' attribute for this type
@@ -507,18 +507,18 @@ public class EnumerationType implements AtomicType {
      * Gets the integer code of the derivation method used to derive this type from its
      * parent. Returns zero for primitive types.
      *
-     * @return a numeric code representing the derivation method, for example {@link SchemaType#DERIVATION_RESTRICTION}
+     * @return a numeric code representing the derivation method, for example {@link Derivation#DERIVATION_RESTRICTION}
      */
     @Override
     public int getDerivationMethod() {
-        return SchemaType.DERIVATION_RESTRICTION;
+        return Derivation.DERIVATION_RESTRICTION;
     }
 
     /**
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     * containing bits such as {@link SchemaType#DERIVATION_EXTENSION}
+     * containing bits such as {@link Derivatiion#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {
@@ -529,7 +529,7 @@ public class EnumerationType implements AtomicType {
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link SchemaType#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link Derivatiion#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
     @Override
@@ -619,11 +619,11 @@ public class EnumerationType implements AtomicType {
     /**
      * Get the validation status of this component.
      *
-     * @return one of the values {@link ValidationStatus#UNVALIDATED}, {@link ValidationStatus#VALIDATING},
-     * {@link ValidationStatus#VALIDATED}, {@link ValidationStatus#INVALID}, {@link ValidationStatus#INCOMPLETE}
+     * @return one of the values {@link SchemaValidationStatus#UNVALIDATED}, {@link SchemaValidationStatus#VALIDATING},
+     * {@link SchemaValidationStatus#VALIDATED}, {@link SchemaValidationStatus#INVALID}, {@link SchemaValidationStatus#INCOMPLETE}
      */
     @Override
-    public ValidationStatus getValidationStatus() {
+    public SchemaValidationStatus getValidationStatus() {
         return null;
     }
 

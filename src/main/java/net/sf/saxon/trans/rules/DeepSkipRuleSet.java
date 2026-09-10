@@ -84,11 +84,11 @@ public class DeepSkipRuleSet implements BuiltInRuleSet {
      * @return the default action for unmatched element nodes: one of DEEP_COPY, APPLY_TEMPLATES, DEEP_SKIP, FAIL
      */
     @Override
-    public int[] getActionForParentNodes(int nodeKind) {
+    public BuiltInRules[] getActionForParentNodes(int nodeKind) {
         if (nodeKind == Type.DOCUMENT) {
-            return new int[]{APPLY_TEMPLATES_TO_CHILDREN};
+            return new BuiltInRules[]{BuiltInRules.APPLY_TEMPLATES_TO_CHILDREN};
         } else {
-            return new int[]{DEEP_SKIP};
+            return new BuiltInRules[]{BuiltInRules.DEEP_SKIP};
         }
     }
 }

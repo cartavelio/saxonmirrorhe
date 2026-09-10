@@ -61,7 +61,7 @@ public class Query {
     protected String outputFileName = null;
     protected String moduleURIResolverClass = null;
     protected final String uriResolverClass = null;
-    protected boolean explain = false;
+    protected boolean explaining = false;
     protected boolean wrap = false;
     protected boolean projection = false;
     protected boolean streaming = false;
@@ -308,7 +308,7 @@ public class Query {
                 }
             }
 
-            if (explain) {
+            if (explaining) {
                 config.setBooleanProperty(Feature.TRACE_OPTIMIZER_DECISIONS, true);
             }
 
@@ -367,7 +367,7 @@ public class Query {
                 }
             }
 
-            if (explain && exp != null) {
+            if (explaining && exp != null) {
                 Serializer out;
                 if (explainOutputFileName == null || explainOutputFileName.equals("")) {
                     out = processor.newSerializer(System.err);
@@ -539,7 +539,7 @@ public class Query {
 
         backup = "on".equals(options.getOptionValue("backup"));
         explainOutputFileName = options.getOptionValue("explain");
-        explain = explainOutputFileName != null;
+        explaining = explainOutputFileName != null;
         moduleURIResolverClass = options.getOptionValue("mr");
         outputFileName = options.getOptionValue("o");
         streaming = "on".equals(options.getOptionValue("stream"));
@@ -906,7 +906,7 @@ public class Query {
             }
             if (projection) {
                 builder.setDocumentProjectionQuery(exp);
-                if (explain) {
+                if (explaining) {
                     exp.getUnderlyingCompiledQuery().explainPathMap();
                 }
             }

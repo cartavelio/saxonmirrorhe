@@ -10,7 +10,7 @@ package net.sf.saxon.z;
 /**
  * An immutable integer set containing every integer
  */
-public class IntUniversalSet implements IntSet {
+public class IntUniversalSet extends IntSet {
 
     private static final IntUniversalSet THE_INSTANCE = new IntUniversalSet();
 

@@ -162,7 +162,7 @@ public class CombinedNodeTest extends NodeTest {
             if (nodetest2 instanceof ContentTypeTest) {
                 SchemaType schemaType = ((ContentTypeTest) nodetest2).getSchemaType();
                 if (forExport) {
-                    schemaType = schemaType.getNearestNamedType();
+                    schemaType = TypeHierarchy.getNearestNamedType(schemaType);
                 }
                 content = ", " + schemaType.getEQName();
                 if (nodetest2.isNillable()) {

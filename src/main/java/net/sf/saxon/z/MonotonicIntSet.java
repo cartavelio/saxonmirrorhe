@@ -18,7 +18,7 @@ import java.util.Arrays;
  * is an UnsupportedOperationException
  */
 
-public class MonotonicIntSet implements IntSet {
+public class MonotonicIntSet extends IntSet {
 
     /**
      * The array of integers, which will always be sorted
@@ -174,7 +174,7 @@ public class MonotonicIntSet implements IntSet {
                 }
             }
         } else {
-            return IntSet.super.union(other);
+            return super.union(other);
         }
     }
 
@@ -200,9 +200,9 @@ public class MonotonicIntSet implements IntSet {
         StringBuilder sb = new StringBuilder(used * 4);
         for (int i = 0; i < used; i++) {
             if (i == used - 1) {
-                sb.append(contents[i] + "");
+                sb.append(contents[i]);
             } else if (contents[i] + 1 != contents[i + 1]) {
-                sb.append(contents[i] + ",");
+                sb.append(contents[i]).append(",");
             } else {
                 int j = i + 1;
                 while (contents[j] == contents[j - 1] + 1) {
@@ -211,7 +211,7 @@ public class MonotonicIntSet implements IntSet {
                         break;
                     }
                 }
-                sb.append(contents[i] + "-" + contents[j - 1] + ",");
+                sb.append(contents[i]).append("-").append(contents[j - 1]).append(",");
                 i = j;
             }
         }

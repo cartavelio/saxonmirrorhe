@@ -999,11 +999,12 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
 
             case Type.TEXT:
                 return new StringItem(TinyTextImpl.getStringValue(this, nodeNr));
-            case Type.WHITESPACE_TEXT:
+            case Type.WHITESPACE_TEXT: {
                 long compressedValue = ((long) alpha[nodeNr] << 32) | ((long) beta[nodeNr] & 0xffffffffL);
                 return new UntypedAtomicValue(new CompressedWhitespace(compressedValue));
+            }
             case Type.COMMENT:
-            case Type.PROCESSING_INSTRUCTION:
+            case Type.PROCESSING_INSTRUCTION: {
                 int start2 = alpha[nodeNr];
                 int len2 = beta[nodeNr];
                 if (len2 == 0) {
@@ -1012,6 +1013,7 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
                 char[] dest = new char[len2];
                 assert commentBuffer != null;
                 return new StringItem(commentBuffer.substring(start2, start2 + len2));
+            }
             default:
                 throw new IllegalStateException("Unknown node kind");
         }

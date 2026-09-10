@@ -28,7 +28,7 @@ import java.util.StringTokenizer;
  */
 
 
-public class NestedIntegerValue extends AtomicValue implements Comparable, AtomicMatchKey {
+public class NestedIntegerValue extends AtomicValue implements Comparable<NestedIntegerValue>, AtomicMatchKey {
 
     public static NestedIntegerValue ONE = new NestedIntegerValue(new int[]{1});
     public static NestedIntegerValue TWO = new NestedIntegerValue(new int[]{2});
@@ -89,8 +89,8 @@ public class NestedIntegerValue extends AtomicValue implements Comparable, Atomi
 
 
     @Override
-    public Comparable getSchemaComparable() {
-        return this;
+    public SchemaComparable getSchemaComparable() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -127,22 +127,17 @@ public class NestedIntegerValue extends AtomicValue implements Comparable, Atomi
 
 
     @Override
-    public int compareTo(Object other) {
-        if (!(other instanceof NestedIntegerValue)) {
-            throw new ClassCastException("NestedIntegerValue is not comparable to " + other.getClass());
-        } else {
-            NestedIntegerValue v2 = (NestedIntegerValue) other;
-            for (int i = 0; i < value.length && i < v2.value.length; i++) {
-                if (value[i] != v2.value[i]) {
-                    if (value[i] < v2.value[i]) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
+    public int compareTo(NestedIntegerValue v2) {
+        for (int i = 0; i < value.length && i < v2.value.length; i++) {
+            if (value[i] != v2.value[i]) {
+                if (value[i] < v2.value[i]) {
+                    return -1;
+                } else {
+                    return 1;
                 }
             }
-            return Integer.signum(value.length - v2.value.length);
         }
+        return Integer.signum(value.length - v2.value.length);
     }
 
 }

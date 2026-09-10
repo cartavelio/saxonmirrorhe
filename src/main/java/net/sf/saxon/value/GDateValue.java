@@ -391,8 +391,8 @@ public abstract class GDateValue extends CalendarValue {
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
-        return new GDateComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new GDateComparable(this);
     }
 
     /**
@@ -424,21 +424,28 @@ public abstract class GDateValue extends CalendarValue {
         }
     }
 
-    private class GDateComparable implements Comparable {
+    private static class GDateComparable implements SchemaComparable {
+
+        private final GDateValue value;
+
+        public GDateComparable(GDateValue value) {
+            this.value = value;
+        }
+
 
         /*@NotNull*/
         public GDateValue asGDateValue() {
-            return GDateValue.this;
+            return value;
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             if (o instanceof GDateComparable) {
                 if (asGDateValue().getPrimitiveType() != ((GDateComparable) o).asGDateValue().getPrimitiveType()) {
                     return SequenceTool.INDETERMINATE_ORDERING;
                 }
-                DateTimeValue dt0 = GDateValue.this.toDateTime();
-                DateTimeValue dt1 = ((GDateComparable) o).asGDateValue().toDateTime();
+                DateTimeValue dt0 = value.toDateTime();
+                DateTimeValue dt1 = ((GDateComparable) o).value.toDateTime();
                 return dt0.getSchemaComparable().compareTo(dt1.getSchemaComparable());
             } else {
                 return SequenceTool.INDETERMINATE_ORDERING;
@@ -446,11 +453,11 @@ public abstract class GDateValue extends CalendarValue {
         }
 
         public boolean equals(/*@NotNull*/ Object o) {
-            return compareTo(o) == 0;
+            return o instanceof GDateComparable && compareTo((GDateComparable)o) == 0;
         }
 
         public int hashCode() {
-            return GDateValue.this.toDateTime().getSchemaComparable().hashCode();
+            return value.toDateTime().getSchemaComparable().hashCode();
         }
     }
 

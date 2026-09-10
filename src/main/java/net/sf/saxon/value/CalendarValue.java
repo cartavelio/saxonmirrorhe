@@ -294,7 +294,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      */
     @Override
     public AtomicMatchKey asMapKey() {
-        return new CalendarValueMapKey();
+        return new CalendarValueMapKey(this);
     }
 
     /**
@@ -383,7 +383,12 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         sb.append((char) (value % 10 + '0'));
     }
 
-    private class CalendarValueMapKey implements AtomicMatchKey {
+    private static class CalendarValueMapKey implements AtomicMatchKey {
+
+        private final CalendarValue value;
+        public CalendarValueMapKey(CalendarValue value) {
+            this.value = value;
+        }
         /**
          * Get an atomic value that encapsulates this match key. Needed to support the collation-key() function.
          *
@@ -391,14 +396,14 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
          */
         @Override
         public AtomicValue asAtomic() {
-            return CalendarValue.this;
+            return value;
         }
 
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof CalendarValueMapKey) {
-                CalendarValue a = CalendarValue.this;
-                CalendarValue b = (CalendarValue)((CalendarValueMapKey)obj).asAtomic();
+                CalendarValue a = value;
+                CalendarValue b = ((CalendarValueMapKey)obj).value;
                 if (a.hasTimezone() == b.hasTimezone()) {
                     if (a.hasTimezone()) {
                         return a.adjustTimezone(b.tzMinutes).isIdentical(b);

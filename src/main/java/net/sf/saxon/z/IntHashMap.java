@@ -231,7 +231,7 @@ public class IntHashMap<T> {
      */
 
     public IntIterator keyIterator() {
-        return new IntHashMapKeyIterator();
+        return new IntHashMapKeyIterator(this);
     }
 
     /**
@@ -250,12 +250,7 @@ public class IntHashMap<T> {
      */
 
     public Iterable<T> valueSet() {
-        return new Iterable<T>() {
-            @Override
-            public Iterator<T> iterator() {
-                return valueIterator();
-            }
-        };
+        return this::valueIterator;
     }
 
     /**
@@ -279,7 +274,7 @@ public class IntHashMap<T> {
      */
 
     public void display(PrintStream ps) {
-        IntIterator iter = new IntHashMapKeyIterator();
+        IntIterator iter = new IntHashMapKeyIterator(this);
         while (iter.hasNext()) {
             int key = iter.next();
             Object value = get(key);
@@ -290,18 +285,20 @@ public class IntHashMap<T> {
     /**
      * Iterator over keys
      */
-    private class IntHashMapKeyIterator implements IntIterator {
+    private static class IntHashMapKeyIterator implements IntIterator {
 
         private int i = 0;
+        private IntHashMap<?> map;
 
-        public IntHashMapKeyIterator() {
+        public IntHashMapKeyIterator(IntHashMap<?> map) {
+            this.map = map;
             i = 0;
         }
 
         @Override
         public boolean hasNext() {
-            while (i < _key.length) {
-                if (_value[i] != null) {
+            while (i < map._key.length) {
+                if (map._value[i] != null) {
                     return true;
                 } else {
                     i++;
@@ -312,7 +309,7 @@ public class IntHashMap<T> {
 
         @Override
         public int next() {
-            return _key[i++];
+            return map._key[i++];
         }
     }
 
@@ -368,86 +365,93 @@ public class IntHashMap<T> {
      */
 
     public IntSet keySet() {
-        return new IntSet() {
-            @Override
-            public void clear() {
-                throw new UnsupportedOperationException("Immutable set");
-            }
+        return new IntHashMapKeySet(this);
+    }
 
-            @Override
-            public IntSet copy() {
-                IntHashSet s = new IntHashSet();
-                IntIterator ii = iterator();
-                while (ii.hasNext()) {
-                    s.add(ii.next());
-                }
-                return s;
-            }
+    private static class IntHashMapKeySet extends IntSet {
+        private final IntHashMap<?> map;
+        public IntHashMapKeySet(IntHashMap<?> map) {
+            this.map = map;
+        }
 
-            @Override
-            public IntSet mutableCopy() {
-                return copy();
-            }
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("Immutable set");
+        }
 
-            @Override
-            public boolean isMutable() {
-                return false;
+        @Override
+        public IntSet copy() {
+            IntHashSet s = new IntHashSet();
+            IntIterator ii = iterator();
+            while (ii.hasNext()) {
+                s.add(ii.next());
             }
+            return s;
+        }
 
-            @Override
-            public int size() {
-                return _n;
-            }
+        @Override
+        public IntSet mutableCopy() {
+            return copy();
+        }
 
-            @Override
-            public boolean isEmpty() {
-                return _n == 0;
-            }
+        @Override
+        public boolean isMutable() {
+            return false;
+        }
 
-            @Override
-            public boolean contains(int key) {
-                return _value[indexOf(key)] != null;
-            }
+        @Override
+        public int size() {
+            return map._n;
+        }
 
-            @Override
-            public boolean remove(int value) {
-                throw new UnsupportedOperationException("Immutable set");
-            }
+        @Override
+        public boolean isEmpty() {
+            return map._n == 0;
+        }
 
-            @Override
-            public boolean add(int value) {
-                throw new UnsupportedOperationException("Immutable set");
-            }
+        @Override
+        public boolean contains(int key) {
+            return map._value[map.indexOf(key)] != null;
+        }
 
-            @Override
-            public IntIterator iterator() {
-                return new IntHashMapKeyIterator();
-            }
+        @Override
+        public boolean remove(int value) {
+            throw new UnsupportedOperationException("Immutable set");
+        }
 
-            @Override
-            public IntSet union(IntSet other) {
-                return copy().union(other);
-            }
+        @Override
+        public boolean add(int value) {
+            throw new UnsupportedOperationException("Immutable set");
+        }
 
-            @Override
-            public IntSet intersect(IntSet other) {
-                return copy().intersect(other);
-            }
+        @Override
+        public IntIterator iterator() {
+            return new IntHashMapKeyIterator(map);
+        }
 
-            @Override
-            public IntSet except(IntSet other) {
-                return copy().except(other);
-            }
+        @Override
+        public IntSet union(IntSet other) {
+            return copy().union(other);
+        }
 
-            @Override
-            public boolean containsAll(IntSet other) {
-                return copy().containsAll(other);
-            }
+        @Override
+        public IntSet intersect(IntSet other) {
+            return copy().intersect(other);
+        }
 
-            public String toString() {
-                return IntHashSet.toString(iterator());
-            }
-        };
+        @Override
+        public IntSet except(IntSet other) {
+            return copy().except(other);
+        }
+
+        @Override
+        public boolean containsAll(IntSet other) {
+            return copy().containsAll(other);
+        }
+
+        public String toString() {
+            return IntHashSet.toString(iterator());
+        }
     }
 
 }

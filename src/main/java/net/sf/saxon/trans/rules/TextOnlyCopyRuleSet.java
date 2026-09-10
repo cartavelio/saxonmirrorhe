@@ -122,8 +122,8 @@ public class TextOnlyCopyRuleSet implements BuiltInRuleSet {
      * @return the default action for unmatched nodes: one of DEEP_COPY, SHALLOW_SKIP, DEEP_SKIP, FAIL, etc
      */
     @Override
-    public int[] getActionForParentNodes(int nodeKind) {
-        return new int[]{APPLY_TEMPLATES_TO_CHILDREN};
+    public BuiltInRules[] getActionForParentNodes(int nodeKind) {
+        return new BuiltInRules[]{BuiltInRules.APPLY_TEMPLATES_TO_CHILDREN};
     }
 }
 

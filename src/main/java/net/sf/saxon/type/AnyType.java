@@ -15,7 +15,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.value.UntypedAtomicValue;
 import net.sf.saxon.z.IntHashSet;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * This class has a singleton instance which represents the XML Schema built-in type xs:anyType,
@@ -79,20 +79,21 @@ public enum AnyType implements ComplexType {
 
     /**
      * Get the variety of this complex type. This will be one of the values
-     * {@link #VARIETY_EMPTY}, {@link #VARIETY_MIXED}, {@link #VARIETY_SIMPLE}, or
-     * {@link #VARIETY_ELEMENT_ONLY}
+     * {@link ComplexVariety#EMPTY}, {@link ComplexVariety#MIXED}, {@link ComplexVariety#VARIETY_SIMPLE}, or
+     * {@link ComplexVariety#VARIETY_ELEMENT_ONLY}
+     * @return {@link ComplexVariety#MIXED}
      */
 
     @Override
-    public int getVariety() {
-        return VARIETY_MIXED;
+    public ComplexVariety getVariety() {
+        return ComplexVariety.MIXED;
     }
 
     /**
      * Get the validation status - always valid
      */
     @Override
-    public ValidationStatus getValidationStatus() {
+    public SchemaValidationStatus getValidationStatus() {
         return VALIDATED;
     }
 
@@ -142,7 +143,7 @@ public enum AnyType implements ComplexType {
      * parent. Returns zero for primitive types.
      *
      * @return a numeric code representing the derivation method, for example
-     *         {@link SchemaType#DERIVATION_RESTRICTION}
+     *         {@link Derivation#DERIVATION_RESTRICTION}
      */
 
     @Override
@@ -154,7 +155,7 @@ public enum AnyType implements ComplexType {
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link SchemaType#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link Derivatiion#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
 
@@ -167,7 +168,7 @@ public enum AnyType implements ComplexType {
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     *         containing bits such as {@link net.sf.saxon.type.SchemaType#DERIVATION_EXTENSION}
+     *         containing bits such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {
@@ -272,7 +273,7 @@ public enum AnyType implements ComplexType {
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-signnificant
-     * integer with fields such as {@link SchemaType#DERIVATION_LIST} and {@link SchemaType#DERIVATION_EXTENSION}
+     * integer with fields such as {@link Derivatiion#DERIVATION_LIST} and {@link Derivatiion#DERIVATION_EXTENSION}
      *
      * @return the value of the 'block' attribute for this type
      */

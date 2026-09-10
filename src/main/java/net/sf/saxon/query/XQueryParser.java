@@ -5081,6 +5081,7 @@ public class XQueryParser extends XPathParser {
             char prior = (char) 0;
             char penult = (char) 0;
             try {
+                boolean continueOuter = false;
                 while (true) {
                     c = t.nextChar();
                     if (prior == '`' && c == '{') {
@@ -5093,18 +5094,23 @@ public class XQueryParser extends XPathParser {
                             sb.setLength(0);
                             continue;
                         } else {
-                            continue outer;
+                            continueOuter = true;
+                            break;
                         }
                     } else if (penult == ']' && prior == '`' && c == '`') {
                         sb.setLength(sb.length() - 2);
                         components.add(new StringLiteral(sb.toString()));
                         t.lookAhead();
                         t.next();
-                        break outer;
+                        continueOuter = false;
+                        break;
                     }
                     sb.append(c);
                     penult = prior;
                     prior = c;
+                }
+                if (!continueOuter) {
+                    break;
                 }
             } catch (StringIndexOutOfBoundsException e) {
                 grumble("String constructor is missing ]`` terminator ");

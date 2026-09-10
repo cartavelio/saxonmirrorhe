@@ -100,8 +100,8 @@ public class DeepCopyRuleSet implements BuiltInRuleSet {
      * @return the default action for unmatched element nodes: one of DEEP_COPY, APPLY_TEMPLATES, SKIP, FAIL
      */
     @Override
-    public int[] getActionForParentNodes(int nodeKind) {
-        return new int[]{DEEP_COPY};
+    public BuiltInRules[] getActionForParentNodes(int nodeKind) {
+        return new BuiltInRules[]{BuiltInRules.DEEP_COPY};
     }
 
     /**

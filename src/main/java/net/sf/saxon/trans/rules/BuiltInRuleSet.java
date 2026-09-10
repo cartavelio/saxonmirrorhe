@@ -55,14 +55,7 @@ public interface BuiltInRuleSet extends ContextOriginator {
      * @return the sequence of actions to be taken
      */
 
-    int[] getActionForParentNodes(int nodeKind);
-
-    int DEEP_COPY = 1;
-    int DEEP_SKIP = 3;
-    int FAIL = 4;
-    int SHALLOW_COPY = 5;
-    int APPLY_TEMPLATES_TO_ATTRIBUTES = 6;
-    int APPLY_TEMPLATES_TO_CHILDREN = 7;
+    BuiltInRules[] getActionForParentNodes(int nodeKind);
 
 }
 

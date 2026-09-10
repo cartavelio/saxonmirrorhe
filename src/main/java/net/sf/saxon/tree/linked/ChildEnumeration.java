@@ -15,15 +15,15 @@ final class ChildEnumeration extends TreeEnumeration {
 
     public ChildEnumeration(NodeImpl node, Predicate<? super NodeInfo> nodeTest) {
         super(node, nodeTest);
-        next = node.getFirstChild();
-        while (!conforms(next)) {
+        nextNode = node.getFirstChild();
+        while (!conforms(nextNode)) {
             step();
         }
     }
 
     @Override
     protected void step() {
-        next = next.getNextSibling();
+        nextNode = nextNode.getNextSibling();
     }
 
 }

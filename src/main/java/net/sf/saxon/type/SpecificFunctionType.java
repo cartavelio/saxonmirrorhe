@@ -7,7 +7,6 @@
 
 package net.sf.saxon.type;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
@@ -24,7 +23,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -40,7 +38,11 @@ public class SpecificFunctionType extends AnyFunctionType {
     private final SequenceType[] argTypes;
     private final SequenceType resultType;
     private final AnnotationList annotations;
-    private Configuration config;
+
+
+    public final static FunctionItemType COMPONENT_FUNCTION_TYPE =
+            new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.ANY_SEQUENCE);
+
 
     public SpecificFunctionType(SequenceType[] argTypes, SequenceType resultType) {
         this.argTypes = Objects.requireNonNull(argTypes);
@@ -354,8 +356,8 @@ public class SpecificFunctionType extends AnyFunctionType {
             }
         }
 
-        Affinity rel = th.relationship(((Function) item).getFunctionItemType(), this);
-        return rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY;
+        Affinity affinity = th.relationship(((Function) item).getFunctionItemType(), this);
+        return affinity == Affinity.SAME_TYPE || affinity == Affinity.SUBSUMED_BY;
     }
 
     /**

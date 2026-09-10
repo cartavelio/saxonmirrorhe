@@ -83,19 +83,19 @@ public class Numberer_fr extends AbstractNumberer {
     private String toWords(long number, boolean terminal) {
         if (number == 0) {
             return "Z\u00e9ro";
-        } else if (number >= 1000000000000000000l) {
-            long rem = number % 1000000000000000000l;
-            long n = number / 1000000000000000000l;
+        } else if (number >= 1000000000000000000L) {
+            long rem = number % 1000000000000000000L;
+            long n = number / 1000000000000000000L;
             String s = (n == 1 ? "Un" : toWords(n, true));
             return s + " quintillion" + (n > 1 ? "s" : "") + (rem == 0 ? "" : " " + toWords(rem, LOWER_CASE, terminal));
-        } else if (number >= 1000000000000000l) {
-            long rem = number % 1000000000000000l;
-            long n = number / 1000000000000000l;
+        } else if (number >= 1000000000000000L) {
+            long rem = number % 1000000000000000L;
+            long n = number / 1000000000000000L;
             String s = (n == 1 ? "Un" : toWords(n, true));
             return s + " quatrillion" + (n > 1 ? "s" : "") + (rem == 0 ? "" : " " + toWords(rem, LOWER_CASE, terminal));
-        } else if (number >= 1000000000000l) {
-            long rem = number % 1000000000000l;
-            long n = number / 1000000000000l;
+        } else if (number >= 1000000000000L) {
+            long rem = number % 1000000000000L;
+            long n = number / 1000000000000L;
             String s = (n == 1 ? "Un" : toWords(n, true));
             return s + " trillion" + (n > 1 ? "s" : "") + (rem == 0 ? "" : " " + toWords(rem, LOWER_CASE, terminal));
         } else if (number >= 1000000000) {
@@ -215,17 +215,17 @@ public class Numberer_fr extends AbstractNumberer {
       */
     @Override
     public String monthName(int month, int minWidth, int maxWidth) {
-        String name = frenchMonths[month - 1];
+        StringBuilder name = new StringBuilder(frenchMonths[month - 1]);
         if (maxWidth < 3) {
             maxWidth = 3;
         }
         if (name.length() > maxWidth) {
-            name = name.substring(0, maxWidth);
+            name = new StringBuilder(name.substring(0, maxWidth));
         }
         while (name.length() < minWidth) {
-            name = name + " ";
+            name.append(" ");
         }
-        return name;
+        return name.toString();
     }
 
     /*
@@ -235,17 +235,17 @@ public class Numberer_fr extends AbstractNumberer {
       */
     @Override
     public String dayName(int day, int minWidth, int maxWidth) {
-        String name = frenchDays[day - 1];
+        StringBuilder name = new StringBuilder(frenchDays[day - 1]);
         if (maxWidth < 3) {
             maxWidth = 3;
         }
         if (name.length() > maxWidth) {
-            name = name.substring(0, maxWidth);
+            name = new StringBuilder(name.substring(0, maxWidth));
         }
         while (name.length() < minWidth) {
-            name = name + " ";
+            name.append(" ");
         }
-        return name;
+        return name.toString();
     }
 
 }

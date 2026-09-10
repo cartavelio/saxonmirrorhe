@@ -21,7 +21,7 @@ public class NodeWrappingAxisIterator<B>
         implements AxisIterator, LookaheadIterator {
 
 
-    Iterator<? extends B> base;
+    private final Iterator<? extends B> base;
     private final NodeWrappingFunction<? super B, NodeInfo> wrappingFunction;
 
 

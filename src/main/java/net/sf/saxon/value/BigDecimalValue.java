@@ -590,10 +590,11 @@ public final class BigDecimalValue extends DecimalValue {
 
     /**
      * Get an object that implements XML Schema comparison semantics
+     * @return
      */
 
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         return new DecimalComparable(this);
     }
 
@@ -602,7 +603,7 @@ public final class BigDecimalValue extends DecimalValue {
      * DecimalValue or with some other representation of an XPath numeric value
      */
 
-    protected static class DecimalComparable implements Comparable {
+    protected static class DecimalComparable implements SchemaComparable {
 
         protected BigDecimalValue value;
 
@@ -615,7 +616,7 @@ public final class BigDecimalValue extends DecimalValue {
         }
 
         @Override
-        public int compareTo(Object o) {
+        public int compareTo(SchemaComparable o) {
             if (o instanceof DecimalComparable) {
                 return asBigDecimal().compareTo(((DecimalComparable) o).asBigDecimal());
             } else if (o instanceof Int64Value.Int64Comparable) {
@@ -628,7 +629,7 @@ public final class BigDecimalValue extends DecimalValue {
         }
 
         public boolean equals(Object o) {
-            return compareTo(o) == 0;
+            return o instanceof SchemaComparable && compareTo((SchemaComparable)o) == 0;
         }
 
         public int hashCode() {

@@ -82,6 +82,26 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
         this.baseConfiguration = base;
     }
 
+    private static class ContentHandlerProxyWithStartAndEnd extends ContentHandlerProxy {
+        @Override
+        public void startDocument(int properties) throws XPathException {
+            try {
+                getUnderlyingContentHandler().startDocument();
+            } catch (SAXException e) {
+                throw XPathException.makeXPathException(e);
+            }
+        }
+
+        @Override
+        public void endDocument() throws XPathException {
+            try {
+                getUnderlyingContentHandler().endDocument();
+            } catch (SAXException e) {
+                throw XPathException.makeXPathException(e);
+            }
+        }
+    }
+
     /**
      * Create a Configuration based on the contents of this configuration file
      *
@@ -93,25 +113,7 @@ public class ConfigurationReader implements ContentHandler, NamespaceResolver {
     public Configuration makeConfiguration(Source source) throws XPathException {
 
         if (source instanceof NodeInfo) {
-            ContentHandlerProxy proxy = new ContentHandlerProxy() {
-                @Override
-                public void startDocument(int properties) throws XPathException {
-                    try {
-                        getUnderlyingContentHandler().startDocument();
-                    } catch (SAXException e) {
-                        throw XPathException.makeXPathException(e);
-                    }
-                }
-
-                @Override
-                public void endDocument() throws XPathException {
-                    try {
-                        getUnderlyingContentHandler().endDocument();
-                    } catch (SAXException e) {
-                        throw XPathException.makeXPathException(e);
-                    }
-                }
-            };
+            ContentHandlerProxy proxy = new ContentHandlerProxyWithStartAndEnd();
             proxy.setUnderlyingContentHandler(this);
             proxy.setPipelineConfiguration(((NodeInfo) source).getConfiguration().makePipelineConfiguration());
             proxy.open();

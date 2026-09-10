@@ -277,11 +277,12 @@ public final class Int64Value extends IntegerValue {
 
     /**
      * Get an object that implements XML Schema comparison semantics
+     * @return a comparable
      */
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         return new Int64Comparable(this);
     }
 
@@ -290,7 +291,7 @@ public final class Int64Value extends IntegerValue {
      * Int64Value or with some other representation of an XPath numeric value
      */
 
-    protected static class Int64Comparable implements Comparable {
+    protected static class Int64Comparable implements SchemaComparable {
 
         protected Int64Value value;
 
@@ -303,7 +304,7 @@ public final class Int64Value extends IntegerValue {
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
+        public int compareTo(SchemaComparable o) {
             if (o instanceof Int64Comparable) {
                 long long0 = value.longValue();
                 long long1 = ((Int64Comparable) o).value.longValue();
@@ -328,8 +329,10 @@ public final class Int64Value extends IntegerValue {
         public boolean equals(/*@NotNull*/ Object o) {
             if (o instanceof Int64Comparable) {
                 return asLong() == ((Int64Comparable) o).asLong();
+            } else if (o instanceof SchemaComparable) {
+                return compareTo((SchemaComparable)o) == 0;
             } else {
-                return compareTo(o) == 0;
+                return false;
             }
         }
 

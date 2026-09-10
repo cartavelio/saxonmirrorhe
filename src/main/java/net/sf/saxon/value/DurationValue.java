@@ -825,7 +825,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
+    public SchemaComparable getSchemaComparable() {
         return getSchemaComparable(this);
     }
 
@@ -838,7 +838,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
 
     /*@NotNull*/
-    public static Comparable getSchemaComparable(/*@NotNull*/ DurationValue value) {
+    public static SchemaComparable getSchemaComparable(/*@NotNull*/ DurationValue value) {
         int m = value.months;
         long s = value.seconds;
         int n = value.nanoseconds;
@@ -855,7 +855,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * having ordering rules that implement the XML Schema specification.
      */
 
-    private static class DurationComparable implements Comparable<DurationComparable> {
+    private static class DurationComparable implements SchemaComparable {
 
         private final int months;
         private final long seconds;
@@ -870,44 +870,39 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         /**
          * Compare two durations according to the XML Schema rules.
          *
-         * @param other the other duration
+         * @param o the other duration
          * @return -1 if this duration is smaller; 0 if they are equal; +1 if this duration is greater;
          *         {@link net.sf.saxon.om.SequenceTool#INDETERMINATE_ORDERING} if there is no defined order
          */
 
         @Override
-        public int compareTo(DurationComparable other) {
-            //DurationComparable other = ;
-//            if (o instanceof DurationComparable) {
-//                other = (DurationComparable) o;
-//            } else if (o instanceof YearMonthDurationValue) {
-//                other = (DurationComparable) getSchemaComparable((YearMonthDurationValue) o);
-//            } else if (o instanceof DayTimeDurationValue) {
-//                other = (DurationComparable) getSchemaComparable((DayTimeDurationValue) o);
-//            } else {
-//                return SequenceTool.INDETERMINATE_ORDERING;
-//            }
-            if (months == other.months) {
-                if (seconds == other.seconds) {
-                    return Integer.compare(nanoseconds, other.nanoseconds);
+        public int compareTo(SchemaComparable o) {
+            if (o instanceof DurationComparable) {
+                DurationComparable other = (DurationComparable) o;
+                if (months == other.months) {
+                    if (seconds == other.seconds) {
+                        return Integer.compare(nanoseconds, other.nanoseconds);
+                    } else {
+                        return Long.compare(seconds, other.seconds);
+                    }
                 } else {
-                    return Long.compare(seconds, other.seconds);
+                    // The months figure varies, but the seconds figure might tip things over if it's high
+                    // enough. We make the assumption, however, that the nanoseconds won't affect things.
+                    double oneDay = 24e0 * 60e0 * 60e0;
+                    double min0 = monthsToDaysMinimum(months) * oneDay + seconds;
+                    double max0 = monthsToDaysMaximum(months) * oneDay + seconds;
+                    double min1 = monthsToDaysMinimum(other.months) * oneDay + other.seconds;
+                    double max1 = monthsToDaysMaximum(other.months) * oneDay + other.seconds;
+                    if (max0 < min1) {
+                        return -1;
+                    } else if (min0 > max1) {
+                        return +1;
+                    } else {
+                        return SequenceTool.INDETERMINATE_ORDERING;
+                    }
                 }
             } else {
-                // The months figure varies, but the seconds figure might tip things over if it's high
-                // enough. We make the assumption, however, that the nanoseconds won't affect things.
-                double oneDay = 24e0 * 60e0 * 60e0;
-                double min0 = monthsToDaysMinimum(months) * oneDay + seconds;
-                double max0 = monthsToDaysMaximum(months) * oneDay + seconds;
-                double min1 = monthsToDaysMinimum(other.months) * oneDay + other.seconds;
-                double max1 = monthsToDaysMaximum(other.months) * oneDay + other.seconds;
-                if (max0 < min1) {
-                    return -1;
-                } else if (min0 > max1) {
-                    return +1;
-                } else {
-                    return SequenceTool.INDETERMINATE_ORDERING;
-                }
+                return SequenceTool.INDETERMINATE_ORDERING;
             }
         }
 

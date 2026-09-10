@@ -111,43 +111,47 @@ public class Base64BinaryValue extends AtomicValue implements AtomicMatchKey, Co
 
     /**
      * Support XML Schema comparison semantics
+     * @return
      */
 
     /*@NotNull*/
     @Override
-    public Comparable getSchemaComparable() {
-        return new Base64BinaryComparable();
+    public SchemaComparable getSchemaComparable() {
+        return new Base64BinaryComparable(this);
     }
 
     /**
      * Private inner class to support XML Schema comparison semantics
      */
 
-    private class Base64BinaryComparable implements Comparable {
+    private static class Base64BinaryComparable implements SchemaComparable {
+        private final Base64BinaryValue value;
+        public Base64BinaryComparable(Base64BinaryValue value) {
+            this.value = value;
+        }
 
         /*@NotNull*/
         public Base64BinaryValue getBase64BinaryValue() {
-            return Base64BinaryValue.this;
+            return value;
         }
 
         @Override
-        public int compareTo(/*@NotNull*/ Object o) {
-            if (o instanceof Base64BinaryComparable &&
-                    Arrays.equals(getBase64BinaryValue().binaryValue,
-                            ((Base64BinaryComparable) o).getBase64BinaryValue().binaryValue)) {
+        public int compareTo(SchemaComparable o) {
+            if (o instanceof Base64BinaryComparable
+                    && Arrays.equals(value.binaryValue, ((Base64BinaryComparable)o).value.binaryValue)) {
                 return 0;
             } else {
                 return SequenceTool.INDETERMINATE_ORDERING;
             }
         }
 
-        @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
         public boolean equals(/*@NotNull*/ Object o) {
-            return compareTo(o) == 0;
+            return o instanceof Base64BinaryComparable &&
+                    compareTo((Base64BinaryComparable)o) == 0;
         }
 
         public int hashCode() {
-            return Base64BinaryValue.this.hashCode();
+            return value.hashCode();
         }
     }
 

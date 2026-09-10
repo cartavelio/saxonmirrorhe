@@ -24,6 +24,7 @@ import net.sf.saxon.tree.tiny.WhitespaceTextImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.ComplexType;
+import net.sf.saxon.type.ComplexVariety;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
@@ -321,8 +322,8 @@ public class DeepEqual extends CollatingFunctionFixed {
                     }
 
                     if (n1.getSchemaType().isComplexType()) {
-                        int variety1 = ((ComplexType) n1.getSchemaType()).getVariety();
-                        int variety2 = ((ComplexType) n2.getSchemaType()).getVariety();
+                        ComplexVariety variety1 = ((ComplexType) n1.getSchemaType()).getVariety();
+                        ComplexVariety variety2 = ((ComplexType) n2.getSchemaType()).getVariety();
                         if (variety1 != variety2) {
                             explain(reporter, "both elements have complex type, but a different variety", flags, n1, n2);
                             return false;

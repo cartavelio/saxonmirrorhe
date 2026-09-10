@@ -122,7 +122,7 @@ public abstract class AtomicValue
      */
 
     @Override
-    public abstract Comparable getSchemaComparable();
+    public abstract SchemaComparable getSchemaComparable();
 
     /**
      * Get an object value that implements the XPath equality and ordering comparison semantics for this value.

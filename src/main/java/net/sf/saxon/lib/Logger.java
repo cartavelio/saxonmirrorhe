@@ -7,8 +7,6 @@
 
 package net.sf.saxon.lib;
 
-import org.jetbrains.annotations.NotNull;
-
 import javax.xml.transform.stream.StreamResult;
 import java.io.Writer;
 
@@ -110,35 +108,42 @@ public abstract class Logger {
      */
 
     public Writer asWriter() {
-        return new Writer() {
-            StringBuilder builder = new StringBuilder();
+        return new LoggingWriter(this);
+    }
 
-            @Override
-            public void write(@NotNull char[] cbuf, int off, int len) {
-                for (int i = 0; i < len; i++) {
-                    char ch = cbuf[off + i];
-                    if (ch == '\n') {
-                        println(builder.toString(), INFO);
-                        builder.setLength(0);
-                    } else {
-                        builder.append(ch);
-                    }
-                }
-            }
+    private static class LoggingWriter extends Writer {
+        private final StringBuilder builder = new StringBuilder();
+        private final Logger logger;
 
-            @Override
-            public void flush() {
-                if (builder.length() > 0) {
-                    println(builder.toString(), INFO);
+        public LoggingWriter(Logger logger) {
+            this.logger = logger;
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) {
+            for (int i = 0; i < len; i++) {
+                char ch = cbuf[off + i];
+                if (ch == '\n') {
+                    logger.println(builder.toString(), INFO);
                     builder.setLength(0);
+                } else {
+                    builder.append(ch);
                 }
             }
+        }
 
-            @Override
-            public void close() {
-                flush();
+        @Override
+        public void flush() {
+            if (builder.length() > 0) {
+                logger.println(builder.toString(), INFO);
+                builder.setLength(0);
             }
-        };
+        }
+
+        @Override
+        public void close() {
+            flush();
+        }
     }
 
     /**

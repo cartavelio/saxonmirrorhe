@@ -8,7 +8,6 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.om.Function;
-import net.sf.saxon.value.SequenceType;
 
 /**
  * This is a marker interface that represents any "schema component" as defined in the XML Schema
@@ -18,16 +17,14 @@ import net.sf.saxon.value.SequenceType;
  */
 public interface SchemaComponent {
 
-    enum ValidationStatus {UNVALIDATED, FIXED_UP, VALIDATING, VALIDATED, INVALID, INCOMPLETE}
-
     /**
      * Get the validation status of this component.
      *
-     * @return one of the values {@link ValidationStatus#UNVALIDATED}, {@link ValidationStatus#VALIDATING},
-     *         {@link ValidationStatus#VALIDATED}, {@link ValidationStatus#INVALID}, {@link ValidationStatus#INCOMPLETE}
+     * @return one of the values {@link SchemaValidationStatus#UNVALIDATED}, {@link SchemaValidationStatus#VALIDATING},
+     *         {@link SchemaValidationStatus#VALIDATED}, {@link SchemaValidationStatus#INVALID}, {@link SchemaValidationStatus#INCOMPLETE}
      */
 
-    ValidationStatus getValidationStatus();
+    SchemaValidationStatus getValidationStatus();
 
     /**
      * Get the redefinition level. This is zero for a component that has not been redefined;
@@ -56,13 +53,6 @@ public interface SchemaComponent {
     Function getComponentAsFunction();
     //#endif
 
-
-    /**
-     * The function type of the function returned by getComponentAsFunction()
-     */
-
-    FunctionItemType COMPONENT_FUNCTION_TYPE =
-            new SpecificFunctionType(new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.ANY_SEQUENCE);
 
 }
 

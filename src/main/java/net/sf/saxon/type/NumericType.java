@@ -18,7 +18,7 @@ import net.sf.saxon.value.*;
 
 import java.util.Arrays;
 
-import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
+import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
  * Singleton class representing the class xs:numeric as defined in XPath 3.1: a union type
@@ -485,7 +485,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-significant
-     * integer with fields such as {@link net.sf.saxon.type.SchemaType#DERIVATION_LIST} and {@link net.sf.saxon.type.SchemaType#DERIVATION_EXTENSION}.
+     * integer with fields such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_LIST} and {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}.
      * This corresponds to the property "prohibited substitutions" in the schema component model.
      *
      * @return the value of the 'block' attribute for this type
@@ -511,18 +511,18 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * Gets the integer code of the derivation method used to derive this type from its
      * parent. Returns zero for primitive types.
      *
-     * @return a numeric code representing the derivation method, for example {@link net.sf.saxon.type.SchemaType#DERIVATION_RESTRICTION}
+     * @return a numeric code representing the derivation method, for example {@link Derivation#DERIVATION_RESTRICTION}
      */
     @Override
     public int getDerivationMethod() {
-        return SchemaType.DERIVATION_RESTRICTION;
+        return Derivation.DERIVATION_RESTRICTION;
     }
 
     /**
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     *         containing bits such as {@link net.sf.saxon.type.SchemaType#DERIVATION_EXTENSION}
+     *         containing bits such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {
@@ -533,7 +533,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link net.sf.saxon.type.SchemaType#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link net.sf.saxon.type.Derivatiion#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
     @Override
@@ -638,7 +638,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * Get the validation status of this component.
      */
     @Override
-    public ValidationStatus getValidationStatus() {
+    public SchemaValidationStatus getValidationStatus() {
         return VALIDATED;
     }
 

@@ -49,7 +49,7 @@ final class NamedChildIterator implements AxisIterator, LookaheadIterator, Atomi
         nextNodeNr = node.nodeNr + 1;
 
         // check if this matches the conditions
-        //if (nextNodeNr >= 0) {
+        //if (nextNr >= 0) {
             if (((tree.nodeKind[nextNodeNr] & 0xf) != Type.ELEMENT) || (tree.nameCode[nextNodeNr] & 0xfffff) != fingerprint) {
                 needToAdvance = true;
             }
