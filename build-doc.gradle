@@ -234,7 +234,7 @@ task product_jeljavadoc(
                "-docletpath", cp,
                "-source", "1.8"] + packages.keySet()
 
-    command = ["echo", "FIXME: the .NET javadoc is not being built"]
+    //command = ["echo", "FIXME: the .NET javadoc is not being built"]
   }
     
   doLast {
@@ -243,19 +243,19 @@ task product_jeljavadoc(
     }
   }
 
-  doLast {
-    // FIXME: the .NET javadoc is not being built
-    def output = new FileWriter(new File("${buildDir}/jeljavadoc/jeldoclet-out.xml"))
-    output.write("<jel></jel>\n")
-    output.close()
-  }
+  //doLast {
+  //  // FIXME: the .NET javadoc is not being built
+  //  def output = new FileWriter(new File("${buildDir}/jeljavadoc/jeldoclet-out.xml"))
+  //  output.write("<jel></jel>\n")
+  //  output.close()
+  //}
 
-  doLast {
-    // FIXME: the .NET javadoc is not being built
-    def output = new FileWriter(new File("${buildDir}/jeljavadoc/p-jeldoclet-out.xml"))
-    output.write("<package-comments></package-comments>\n")
-    output.close()
-  }
+  //doLast {
+  //  // FIXME: the .NET javadoc is not being built
+  //  def output = new FileWriter(new File("${buildDir}/jeljavadoc/p-jeldoclet-out.xml"))
+  //  output.write("<package-comments></package-comments>\n")
+  //  output.close()
+  //}
 }
 
 task product_xsljavadoc(
