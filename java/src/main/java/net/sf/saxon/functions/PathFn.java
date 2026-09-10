@@ -267,7 +267,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
     private final static UnicodeChar QUOT = new UnicodeChar('"');
 
     /**
-     * Get the path to an XNode
+     * Get the path to an X JNode
      *
      * @param node       the node whose path is required
      * @return the path, as a StringValue.
@@ -301,7 +301,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
                 return new StringValue(buffer);
             }
             if (n.getParent().getContent() instanceof ArrayItem) {
-                UnicodeString step = new Twine8("/*[").concat(n.getSelector().getUnicodeStringValue()).concat(new UnicodeChar(']'));
+                UnicodeString step = new UnicodeChar('/').concat(n.getSelector().getUnicodeStringValue());  // PR2706
                 buffer = step.concat(buffer);
             } else {
                 AtomicValue selector = n.getSelector();
