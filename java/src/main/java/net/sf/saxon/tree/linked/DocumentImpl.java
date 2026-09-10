@@ -113,6 +113,18 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     }
 
     /**
+     * Ask whether element and attribute nodes in this tree use fingerprints to represent
+     * node names
+     *
+     * @return true if element and attribute nodes in this tree maintain a fingerprint
+     * accessible using the {@link NodeInfo#getFingerprint()} method.
+     */
+    @Override
+    public boolean isFingerprinted() {
+        return true;
+    }
+
+    /**
      * Get the durability of nodes in the tree. This affects how they are handled in a memo function
      * cache, to optimize memory and garbage collection. By default, all nodes are considered durable
      * unless otherwise specified

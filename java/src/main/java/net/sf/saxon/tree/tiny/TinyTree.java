@@ -222,6 +222,18 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
         //addNamespace(0, NamespaceBinding.XML);
     }
 
+    /**
+     * Ask whether element and attribute nodes in this tree use fingerprints to represent
+     * node names
+     *
+     * @return true if element and attribute nodes in this tree maintain a fingerprint
+     * accessible using the {@link NodeInfo#getFingerprint()} method.
+     */
+    @Override
+    public boolean isFingerprinted() {
+        return true;
+    }
+
     private void ensureNodeCapacity(short kind, int needed) {
         if (nodeKind.length < numberOfNodes + needed) {
             //System.err.println("Number of nodes = " + numberOfNodes);

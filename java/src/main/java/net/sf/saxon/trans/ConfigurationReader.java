@@ -784,7 +784,12 @@ public class ConfigurationReader implements Receiver {
     private void error(String element, String attribute, String actual, String required) {
         XmlProcessingIncident err;
         if (attribute == null) {
-            err = new XmlProcessingIncident("Invalid configuration element " + element);
+            if (required.equals("#obsolete")) {
+                err = new XmlProcessingIncident("Obsolete configuration element " +
+                                                        element).asWarning();
+            } else {
+                err = new XmlProcessingIncident("Invalid configuration element " + element);
+            }
         } else if (actual == null) {
             err = new XmlProcessingIncident("Missing configuration property " +
                                              element + "/@" + attribute);
@@ -845,21 +850,9 @@ public class ConfigurationReader implements Receiver {
                     }
                     //#endif
                 } else if ("schemaDocument".equals(localName)) {
-                    throw new UnsupportedOperationException();
-//                    try {
-//                        Source source = getInputSource(content);
-//                        targetConfig.addSchemaSource(source);
-//                    } catch (XPathException e) {
-//                        errors.add(new XmlProcessingException(e));
-//                    }
+                    error(localName, null, null, "#obsolete");
                 } else if ("schemaComponentModel".equals(localName)) {
-                    throw new UnsupportedOperationException();
-//                    try {
-//                        Source source = getInputSource(content);
-//                        targetConfig.importComponents(source);
-//                    } catch (XPathException e) {
-//                        errors.add(new XmlProcessingException(e));
-//                    }
+                    error(localName, null, null, "#obsolete");
                 } else if ("catalogFile".equals(localName)) {
                     URI baseURI = URI.create(systemId);
                     catalogFiles.add(baseURI.resolve(content).toString());

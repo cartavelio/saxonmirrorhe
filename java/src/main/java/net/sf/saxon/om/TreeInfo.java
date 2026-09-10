@@ -70,6 +70,16 @@ public interface TreeInfo {
     }
 
     /**
+     * Ask whether element and attribute nodes in this tree use fingerprints to represent
+     * node names
+     *
+     * @return true if element and attribute nodes in this tree maintain a fingerprint
+     * accessible using the {@link NodeInfo#getFingerprint()} method.
+     */
+
+    boolean isFingerprinted();
+
+    /**
      * Ask whether the tree is mutable. A mutable tree can be modified (without changes to node
      * identity) using XQuery Update primitives, or equivalents in other languages (such as Saxon
      * XSLT extensions). "Mutable" here means mutable using XSLT/XQuery mechanisms, not using

@@ -227,39 +227,17 @@ public abstract class SteppingNavigator {
             } else if (predicate instanceof NamedXNodePredicate) {
                 NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
                 int fingerprint = fpTest.getRequiredFingerprint();
-                if (fingerprint != -1 && fpTest.getNodeKind() == Type.ELEMENT && fpTest.isFingerprintSufficient()) {
+                if (fingerprint != -1
+                        && start.getTreeInfo().isFingerprinted()
+                        && fpTest.getNodeKind() == Type.ELEMENT
+                        && fpTest.isFingerprintSufficient()) {
                     stepper = new FollowingFingerprintedElementStepper(start, fingerprint);
                 }
             }
             if (stepper == null) {
                 stepper = new FollowingFilteredNodeStepper(start, predicate);
             }
-//            } else if (test instanceof NodeKindType) {
-//                if (((NodeKindType)test).getPrimitiveType() == Type.ELEMENT) {
-//                    stepper = new FollowingElementStepper(start, null, null);
-//                } else {
-//                    stepper = new FollowingFilteredNodeStepper(start, test);
-//                }
-//            } else if (test instanceof LocalNameTest) {
-//                if (((LocalNameTest)test).getPrimitiveType() == Type.ELEMENT) {
-//                    LocalNameTest nt = (LocalNameTest) test;
-//                    stepper = new FollowingElementStepper(start, null, nt.getLocalName());
-//                } else {
-//                    stepper = new FollowingFilteredNodeStepper(start, test);
-//                }
-//            } else if (test instanceof NamespaceTest) {
-//                if (((NamespaceTest)test).getPrimitiveType() == Type.ELEMENT) {
-//                    NamespaceTest nt = (NamespaceTest) test;
-//                    stepper = new FollowingElementStepper(start, nt.getNamespaceURI(), null);
-//                } else {
-//                    stepper = new FollowingFilteredNodeStepper(start, test);
-//                }
-//                    } else {
-//                        stepper = new FollowingFilteredNodeStepper(start, test);
-//                    }
-//                }
         }
-        //}
 
 
         @Override

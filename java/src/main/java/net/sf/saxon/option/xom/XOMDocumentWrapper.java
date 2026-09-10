@@ -66,6 +66,18 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
     }
 
     /**
+     * Ask whether element and attribute nodes in this tree use fingerprints to represent
+     * node names
+     *
+     * @return true if element and attribute nodes in this tree maintain a fingerprint
+     * accessible using the {@link NodeInfo#getFingerprint()} method.
+     */
+    @Override
+    public boolean isFingerprinted() {
+        return false;
+    }
+
+    /**
      * Wrap a node in the XOM document.
      *
      * @param node The node to be wrapped. This must be a node in the same

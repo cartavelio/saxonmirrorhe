@@ -102,6 +102,18 @@ public class GenericTreeInfo implements TreeInfo
     }
 
     /**
+     * Ask whether element and attribute nodes in this tree use fingerprints to represent
+     * node names
+     *
+     * @return true if element and attribute nodes in this tree maintain a fingerprint
+     * accessible using the {@link NodeInfo#getFingerprint()} method.
+     */
+    @Override
+    public boolean isFingerprinted() {
+        return false;
+    }
+
+    /**
      * Set the systemId of the document node (for most implementations, this is likely to be the systemId
      * of the entire tree)
      * @param systemId the system ID

@@ -13,6 +13,7 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -273,7 +274,12 @@ public class StylesheetModule {
                 PreparedStylesheet pss = new PreparedStylesheet(compilation);
                 PrincipalStylesheetModule psm = compilation.compilePackage(doc.asActiveSource());
                 if (compilation.getErrorCount() > 0) {
-                    XPathException e = new XPathException("Errors were reported during stylesheet compilation");
+                    String message = "Errors were reported during stylesheet compilation";
+                    if (compilation.getCompilerInfo().getErrorReporter() instanceof StandardErrorReporter rep) {
+                        XmlProcessingError first = rep.getFirstError();
+                        message += ". " + first.getMessage();
+                    }
+                    XPathException e = new XPathException(message);
                     e.setHasBeenReported(true); // only intended as an exception message, not something to report to ErrorListener
                     throw e;
                 }

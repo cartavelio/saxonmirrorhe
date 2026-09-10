@@ -52,6 +52,7 @@ public class StandardErrorReporter
     private int stackTraceDetail = 2;
     private final Set<String> warningsIssued = new HashSet<>();
     protected transient Logger logger = new StandardLogger();
+    private XmlProcessingError firstError;
     private XmlProcessingError latestError;
     private boolean outputErrorCodes = true;
     private Set<StructuredQName> suppressedWarnings;
@@ -226,6 +227,9 @@ public class StandardErrorReporter
 
     @Override
     public void report(XmlProcessingError processingError) {
+        if (firstError == null) {
+            firstError = processingError;
+        }
         if (processingError != latestError) {
             latestError = processingError;
             if (processingError.isWarning()) {
@@ -645,6 +649,10 @@ public class StandardErrorReporter
 
     public XmlProcessingError getLatestError() {
         return latestError;
+    }
+
+    public XmlProcessingError getFirstError() {
+        return firstError;
     }
 
 }

@@ -50,7 +50,9 @@ public class Compilation {
      * @param precedence the import precedence of the variable
      * @param isParam true if this is a parameter, falso for a variable.
      */
-    private record ValueAndPrecedence(GroundedValue value, NestedIntegerValue precedence, boolean isParam) {
+    private record ValueAndPrecedence(GroundedValue value,
+                                      NestedIntegerValue precedence,
+                                      boolean isParam) {
     }
 
     // diagnostic switch to control output of timing information
