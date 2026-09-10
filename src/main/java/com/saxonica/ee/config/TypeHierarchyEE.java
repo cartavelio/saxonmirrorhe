@@ -37,7 +37,7 @@ public class TypeHierarchyEE extends TypeHierarchy {
     @Override
     protected Affinity computeContentRelationship(ItemType t1, ItemType t2) {
 
-
+        Affinity contentRelationship;
         if (t1 instanceof DocumentNodeTest) {
             if (t2 instanceof DocumentNodeTest) {
                 contentRelationship = relationship(((DocumentNodeTest) t1).getElementTest(),
