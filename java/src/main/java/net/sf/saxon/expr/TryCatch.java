@@ -337,6 +337,10 @@ public class TryCatch extends Expression {
         public PushEvaluator elaborateForPush() {
             TryCatch expr = (TryCatch) getExpression();
             PushEvaluator tryPush = expr.getTryExpr().makeElaborator().elaborateForPush();
+            SequenceEvaluator finallyEval =
+                    expr.finallyOp == null
+                            ? null
+                            : expr.finallyOp.getChildExpression().makeElaborator().eagerly();
             return (output, context) -> {
                 PipelineConfiguration pipe = output.getPipelineConfiguration();
                 XPathContextMajor c1 = context.newContext();
@@ -412,6 +416,14 @@ public class TryCatch extends Expression {
                     err.setHasBeenReported(false);
                     throw err;
 
+                } finally {
+                    if (finallyEval != null) {
+                        Sequence f = finallyEval.evaluate(context);
+                        if (f.head() != null) {
+                            //noinspection ThrowFromFinallyBlock
+                            throw new XPathException("The 'finally' expression must evaluate to ()", "XQTY0153");
+                        }
+                    }
                 }
                 return null;
             };
@@ -471,9 +483,14 @@ public class TryCatch extends Expression {
                     }
                     err.setHasBeenReported(false);
                     throw err;
-                }
-                if (finallyEval != null) {
-                    finallyEval.evaluate(context);
+                } finally {
+                    if (finallyEval != null) {
+                        Sequence f = finallyEval.evaluate(context);
+                        if (f.head() != null) {
+                            //noinspection ThrowFromFinallyBlock
+                            throw new XPathException("The 'finally' expression must evaluate to ()", "XQTY0153");
+                        }
+                    }
                 }
                 return result.iterate();
             };
@@ -519,9 +536,14 @@ public class TryCatch extends Expression {
                     }
                     err.setHasBeenReported(false);
                     throw err;
-                }
-                if (finallyEval != null) {
-                    finallyEval.evaluate(context);
+                } finally {
+                    if (finallyEval != null) {
+                        Sequence f = finallyEval.evaluate(context);
+                        if (f.head() != null) {
+                            //noinspection ThrowFromFinallyBlock
+                            throw new XPathException("The 'finally' expression must evaluate to ()", "XQTY0153");
+                        }
+                    }
                 }
                 return result;
             };
