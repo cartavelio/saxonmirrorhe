@@ -15,23 +15,21 @@ import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
 import org.graalvm.word.WordFactory;
+import com.oracle.svm.core.annotate.*;
 
 /**
  * * This class is to use with Saxon on C++
  */
 public class SaxonCException  {
 
-    Throwable throwable;
-
+    public static Throwable throwable = null;
+    
+    @Uninterruptible(reason = "exception handler")
     public SaxonCException(Throwable e) {
         throwable = e;
+
     }
 
-    public static long addException(SaxonApiException exception){
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(new SaxonCException(exception));
-
-        return handle.rawValue();
-    }
 
     public String getMessage(){
         return throwable.getMessage();
@@ -44,34 +42,54 @@ public class SaxonCException  {
 
 
     @CEntryPoint(name = "j_getErrorMessage")
-    public static CCharPointer j_getErrorMessage(IsolateThread thread, ObjectHandle exceptionRef){
-        SaxonCException exception = SaxonCAPI.objectHandles.get(exceptionRef);
-        
+    public static CCharPointer j_getErrorMessage(IsolateThread thread){
+        SaxonApiException exception = null;
+        if(throwable == null) {
+            return WordFactory.nullPointer();
+        }
+        if(throwable instanceof SaxonApiException) {
+           exception = (SaxonApiException)throwable;
+        } else {
+            exception = new SaxonApiException(throwable);
+        }
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(exception.getMessage());
         return holder.get();
     }
 
     @CEntryPoint(name = "j_getLineNumber")
-    public static int getLinenumber(IsolateThread thread, ObjectHandle exceptionRef){
-        SaxonCException exception = SaxonCAPI.objectHandles.get(exceptionRef);
-        Throwable throwable = exception.getThrowable();
-        if(throwable instanceof SaxonApiException) {
-            return ((SaxonApiException)throwable).getLineNumber();
+    public static int getLinenumber(IsolateThread thread){
+        SaxonApiException exception = null;
+        if(throwable == null) {
+            return -1;
         }
-        return -1;
+        if(throwable instanceof SaxonApiException) {
+           exception = (SaxonApiException)throwable;
+        } else {
+            exception = new SaxonApiException(throwable);
+        }
+        return exception.getLineNumber();
     }
 
 
     @CEntryPoint(name = "j_getErroCode")
-    public static CCharPointer getErroCode(IsolateThread thread, ObjectHandle exceptionRef){
-        SaxonCException exception = SaxonCAPI.objectHandles.get(exceptionRef);
-        Throwable throwable = exception.getThrowable();
-        if(throwable instanceof SaxonApiException) {
-            String qnameStr =  ((SaxonApiException)throwable).getErrorCode().getClarkName();
-            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qnameStr);
-            return holder.get();
+    public static CCharPointer getErroCode(IsolateThread thread){
+        SaxonApiException exception = null;
+        if(throwable == null) {
+            return WordFactory.nullPointer();
         }
-        return WordFactory.nullPointer();
+        if(throwable instanceof SaxonApiException) {
+           exception = (SaxonApiException)throwable;
+        } else {
+            exception = new SaxonApiException(throwable);
+        }
+        String qnameStr = exception.getErrorCode().getClarkName();
+        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(qnameStr);
+        return holder.get();
+    }
+
+    @CEntryPoint(name = "j_clearException")
+    public static void clearException(IsolateThread thread) {
+        throwable = null;
     }
 
 

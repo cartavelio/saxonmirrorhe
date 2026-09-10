@@ -759,7 +759,7 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
     cout << "ExampleSimple1 taken from PHP:" << endl;
 
     XsltExecutable * executable = proc->compileFromFile("../php/xsl/foo.xsl");
-    std::cerr<<"examplesample1 cp0-1"<<endl;
+
     if(executable== nullptr) {
         sresult->failure++;
         sresult->failureList.push_back("exampleSimple1");
@@ -1514,7 +1514,9 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
     parameterValues["b"] = a2;
     executable->setInitialTemplateParameters(parameterValues, false);
     executable->setInitialMatchSelection(node);
+    cout << "testInitialTemplate cp2" << endl;
     XdmValue *result = executable->applyTemplatesReturningValue();
+    cout << "testInitialTemplate cp3" << endl;
     if (result != NULL) {
         sresult->success++;
         cout << "Result=" << result->getHead()->getStringValue() << endl;
@@ -2458,11 +2460,11 @@ int main(int argc, char* argv[]) {
     }
     //testValidation(trans,sresult);
     std::cerr << "testXSLT30 cp1" << std::endl;
-   // testInitialTemplate(processor, trans, sresult);
+    testInitialTemplate(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
-    //exampleSimple1Err(trans, sresult);
+    exampleSimple1Err(trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 

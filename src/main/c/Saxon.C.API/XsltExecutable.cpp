@@ -563,8 +563,8 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         }
         value = new XdmValue(result, false);
         return value;
-    }else {
-
+    }else if(result==-2){
+        std::cerr<<"Exception thrown in Java code - cp0: "<<j_getErrorMessage(SaxonProcessor::sxn_environ->thread)<<std::endl;
        // createException();
 
 
