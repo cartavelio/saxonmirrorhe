@@ -67,13 +67,7 @@ int XdmItem::size(){
 }
 
 int64_t XdmItem::getUnderlyingValue(){
-#ifdef DEBUG
-    std::cerr<<std::endl<<"XdmItem-getUnderlyingValue:"<<std::endl;
-#endif
     if(!value) {
-#ifdef DEBUG
-        std::cerr<<std::endl<<"XdmItem-getUnderlyingValue - nullptr:"<<std::endl;
-#endif
         return -1;
     }
     return value;
@@ -115,6 +109,9 @@ XDM_TYPE XdmItem::getType(){
 }
 
 XdmItem::~XdmItem() {
+    if(value >0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
+    }
     value = -1;
     /*else {
          decrementRefCount();

@@ -260,7 +260,10 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
             return nullptr;
         }
 	    XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
-
+        if(processorDataRef > 0) {
+            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+            processorDataRef = -1;
+        }
 		return executable;
 
 
@@ -278,6 +281,10 @@ XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
         return nullptr;
     }
     XsltExecutable * executable = new XsltExecutable(proc->procRef, objRef, cwdXT, proc->getResourcesDirectory());
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     return executable;
 
 
@@ -311,6 +318,10 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
         return nullptr;
     }
     XsltExecutable * executable = new XsltExecutable(proc->procRef,objRef, cwdXT, proc->getResourcesDirectory());
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     return executable;
 }
 
@@ -326,7 +337,10 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const ch
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
 
     int64_t  result = j_transformToValue(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)sourcefile, (char *)stylesheetfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if (result > 0) {
                 int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
 			    XdmValue * value = new XdmValue();
@@ -388,6 +402,10 @@ void Xslt30Processor::transformFileToFile(const char* source,
     if(status == -2) {
         createException();
     }
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
 }
 
 
@@ -408,6 +426,10 @@ const char * Xslt30Processor::transformFileToString(const char* source,
     char * result = j_transformToString(SaxonProcessor::sxn_environ->thread,(void *)fn, (char *)cwdXT.c_str(), (void *)cppXT, (void *) nullptr, (char *)source, (char *)stylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(result == nullptr) {
         createException();
+    }
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
     }
     return result;
 }

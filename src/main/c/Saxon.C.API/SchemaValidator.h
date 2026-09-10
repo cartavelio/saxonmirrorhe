@@ -46,6 +46,9 @@ public:
     */
     SchemaValidator(const SchemaValidator &other);
 
+    //! Destructor method. At the end of the program call the release() method to clear the JVM.
+    ~SchemaValidator();
+
 
     //! The copy assignment= operator
     /*!

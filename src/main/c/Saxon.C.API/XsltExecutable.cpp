@@ -387,7 +387,8 @@ void XsltExecutable::clearProperties() {
     
     properties.clear();
     if(selectionRef != -1) {
-            selectionRef = -1;
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)selectionRef);
+        selectionRef = -1;
     }
 
 }
@@ -461,7 +462,10 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
     if(status == -2) {
         exceptionFound = true;
     }
-
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     return;
 
 }
@@ -505,6 +509,10 @@ const char *XsltExecutable::applyTemplatesReturningString() {
     if(result == nullptr) {
         exceptionFound = true;
     }
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     return result;
 
 }
@@ -534,8 +542,12 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         optionStr = "rd";
         addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
-    std::cerr<<"selectionRef ="<<(long)selectionRef<<std::endl;
+
     int64_t result = j_applyTemplatesReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)(selectionRef == -1 ? (void *)NULL : (void *)selectionRef), (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if (result > 0) {
 
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
@@ -617,7 +629,10 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
         }
 
         j_callFunctionReturningFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (char *)outfile, (argumentValuesRef == -1? (void *) NULL :(void *)argumentValuesRef), (processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
+        if(processorDataRef > 0) {
+            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+            processorDataRef = -1;
+        }
         return;
 
 }
@@ -658,7 +673,10 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     }
     allocFn fn = operator new;
     char * result = j_callFunctionReturningString(SaxonProcessor::sxn_environ->thread, (void *)fn, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName,  (void *)(argumentValuesRef == -1 ? (void *)nullptr : (void *)argumentValuesRef), (void *)(processorDataRef == -1 ? (void *) nullptr: (void *)processorDataRef));
-
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     return result;
 
 
@@ -700,6 +718,10 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
     }
 
     int64_t  result = j_callFunctionReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (void *)argumentValuesRef,  (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
         XdmValue * value = new XdmValue();
@@ -772,7 +794,10 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
     }
 
     j_callTemplateReturningFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (char *)outfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
 }
 
 
@@ -803,7 +828,10 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
     }
     allocFn fn = operator new;
     char * result = j_callTemplateReturningString(SaxonProcessor::sxn_environ->thread, (void*)fn, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
-
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     return result;
 
 }
@@ -835,6 +863,10 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     }
 
     int64_t result = j_callTemplateReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
 
@@ -914,6 +946,11 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
     }
     char * cstylesheet = nullptr;
     int64_t result = j_transformToValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *) nullptr, (void *)executableRef, (char *)sourcefile, cstylesheet,  (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
+
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
+    }
     if (result > 0) {
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
 
@@ -993,6 +1030,10 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
     long status = j_transformToFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *) nullptr, (void *)executableRef,  (char *)source, cstylesheet, (char *)outputfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(status == -2) {
         exceptionFound = true;
+    }
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
     }
 }
 
@@ -1088,6 +1129,10 @@ const char *XsltExecutable::transformFileToString(const char *source) {
     char *  result = j_transformToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(char *)cwdXE.c_str(), (void *)nullptr, (void *)executableRef, (char *)source, cstylesheet, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(result == nullptr) {
         exceptionFound = true;
+    }
+    if(processorDataRef > 0) {
+        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef);
+        processorDataRef = -1;
     }
     return result;
 }
