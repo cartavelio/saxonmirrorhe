@@ -436,7 +436,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
 
-    @CEntryPoint(name = "applyTemplatesReturningValue")
+    @CEntryPoint(name = "j_applyTemplatesReturningValue")
     public static long applyTemplatesReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle xsltExecutableRef, ObjectHandle sourceObjRef , ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         XsltExecutable executable = objectHandles.get(xsltExecutableRef);
         
