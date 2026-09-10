@@ -16,6 +16,7 @@ from libcpp.map cimport map
 from cython.operator import dereference, postincrement
 from os.path import isfile
 import sys
+import os
 from enum import IntEnum
 
 from libc.stdlib cimport free, malloc, realloc
@@ -208,9 +209,11 @@ cdef class PySaxonProcessor:
             c_str = py_config_string if config_file is not None else ""
             if c_str is not NULL:
                 self.thisptr = new saxoncClasses.SaxonProcessor(c_str)
+                self.thisptr.setcwd(os.getcwd().encode('UTF-8'))
         else:
             try:
                 self.thisptr = new saxoncClasses.SaxonProcessor(l)
+                self.thisptr.setcwd(os.getcwd().encode('UTF-8'))
             except:
                 raise Exception("Failed to create PySaxonProcessor object") from None
 
