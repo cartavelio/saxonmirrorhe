@@ -49,11 +49,6 @@
       <xs:attribute name="allowExternalFunctions" use="optional" type="xs:boolean"/>
       <xs:attribute name="allowMultiThreading" use="optional" type="xs:boolean"/>
       <xs:attribute name="allowOldJavaUriFormat" use="optional" type="xs:boolean"/>
-      <xs:attribute name="allowStreamabilityExtensions" use="optional" type="xs:boolean">
-        <xs:annotation>
-          <xs:documentation> Saxon 9.5 only. </xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="allowSyntaxExtensions" use="optional" type="xs:boolean"/>    
       <xs:attribute name="allowedProtocols" use="optional" type="xs:string"/>
       <xs:attribute name="collationUriResolver" use="optional" type="c:javaClassNameType"/>

@@ -27,9 +27,14 @@
         <xsl:call-template name="consistency-check"/>
     </xsl:template>
     
+    <xsl:variable name="schema-exceptions" as="xs:string*" select="('configuration/@edition', 'configuration/@label')"/>
+    
     <xsl:template match="xs:attribute">
         <xsl:variable name="key" select="concat(ancestor::xs:element/@name, '/@', @name)"/>
         <xsl:variable name="feature" select="(doc($FeatureKeys)//feature[configfile=$key], doc($AdditionalFeatures)//feature[configfile=$key])"/>
+        <xsl:if test="empty($feature) and not($key = $schema-exceptions)">
+            <xsl:message>*** Schema entry not found in FeatureKeys <xsl:value-of select="$key"/></xsl:message>
+        </xsl:if>
         <xsl:if test="empty($feature) and empty(xs:annotation/xs:documentation)">
             <xsl:message>*** No documentation for attribute <xsl:value-of select="$key"/></xsl:message>
         </xsl:if>
