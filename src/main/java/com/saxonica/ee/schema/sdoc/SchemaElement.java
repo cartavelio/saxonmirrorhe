@@ -420,7 +420,7 @@ public abstract class SchemaElement extends ElementImpl {
 
     protected void warning(String err) throws SchemaException {
         XmlProcessingIncident exception = new XmlProcessingIncident(err, SaxonErrorCode.SXWN9018, this).asWarning();
-        ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
+        ErrorReporter reporter = getSchemaNodeFactory().getSchemaCompiler().getErrorReporter();
         reporter.report(exception);
         if (exception.getTerminationMessage() != null) {
             throw new SchemaException(exception.getTerminationMessage());

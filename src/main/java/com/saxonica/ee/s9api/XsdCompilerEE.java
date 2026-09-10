@@ -1,6 +1,7 @@
 package com.saxonica.ee.s9api;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.config.StandardSchemaResolver;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SchemaModelLoader;
@@ -40,6 +41,7 @@ public class XsdCompilerEE extends XsdCompiler {
             ((StandardErrorReporter) errorReporter).setOutputErrorCodes(false);
         }
         xsdVersion = processor.getUnderlyingConfiguration().getXsdVersion();
+        resolver = new StandardSchemaResolver((EnterpriseConfiguration)processor.getUnderlyingConfiguration());
     }
 
 
