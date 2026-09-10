@@ -53,6 +53,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * A Gizmo is a simple tool for performing a particular easily specified transformation on an XML
@@ -422,12 +423,12 @@ public class Gizmo {
      * @return an iterator over the results of the expression
      * @throws XPathException if evaluation of the expression fails
      */
-    private SequenceIterator getSelectedItems(StringBuilder selection, int terminator) throws XPathException {
+    private SequenceIterator getSelectedItems(StringBuilder selection, Predicate<Token> terminator) throws XPathException {
         XPathExpression expr = getExpression(selection, terminator);
         return evaluateExpression(expr, currentDoc);
     }
 
-    private List<NodeInfo> listOfSelectedItems(StringBuilder selection, int terminator) throws XPathException {
+    private List<NodeInfo> listOfSelectedItems(StringBuilder selection, Predicate<Token> terminator) throws XPathException {
         // Gather all the items first, then delete them. See bug 5106
         List<NodeInfo> nodes = new ArrayList<>();
         Item node;
@@ -438,7 +439,7 @@ public class Gizmo {
         return nodes;
     }
 
-    private XPathExpression getExpression(StringBuilder selection, int terminator) throws XPathException {
+    private XPathExpression getExpression(StringBuilder selection, Predicate<Token> terminator) throws XPathException {
         XPathEvaluator evaluator = new XPathEvaluator(config);
         evaluator.setStaticContext(env);
         for (StructuredQName var : variables.keySet()) {
@@ -506,7 +507,7 @@ public class Gizmo {
 
     private void copy(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
-        SequenceIterator iter = getSelectedItems(buffer, Token.EOF);
+        SequenceIterator iter = getSelectedItems(buffer, tok -> tok == Token.EOF);
         Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
         builder.open();
         builder.startDocument(0);
@@ -529,7 +530,7 @@ public class Gizmo {
         needCurrentDoc();
         saveCurrentDoc();
         // Gather all the items first, then delete them. See bug 5106
-        List<NodeInfo> nodes = listOfSelectedItems(buffer, Token.EOF);
+        List<NodeInfo> nodes = listOfSelectedItems(buffer, tok -> tok == Token.EOF);
         // Drop element indexes
         dropElementIndexes();
         for (Item item : nodes) {
@@ -611,10 +612,10 @@ public class Gizmo {
     private void rename(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         saveCurrentDoc();
-        List<NodeInfo> nodes = listOfSelectedItems(buffer, Token.AS);
+        List<NodeInfo> nodes = listOfSelectedItems(buffer, tok -> tok instanceof Token.NameToken && ((Token.NameToken)tok).getValue().equals("as"));
         dropElementIndexes();
         buffer.replace(0, 3, "");
-        XPathExpression renamer = getExpression(buffer, Token.EOF);
+        XPathExpression renamer = getExpression(buffer, tok -> tok == Token.EOF);
         for (NodeInfo item : nodes) {
             if (item instanceof MutableNodeInfo) {
                 Item newName = evaluateExpression(renamer, item).next();
@@ -636,7 +637,8 @@ public class Gizmo {
     private void replace(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         saveCurrentDoc();
-        List<NodeInfo> nodes = listOfSelectedItems(buffer, Token.WITH);
+        List<NodeInfo> nodes = listOfSelectedItems(buffer,
+                                                   tok -> tok instanceof Token.NameToken && ((Token.NameToken) tok).getValue().equals("with"));
         dropElementIndexes();
         buffer.replace(0, 5, "");
         XQueryExpression replacement = getQuery(buffer);
@@ -723,7 +725,8 @@ public class Gizmo {
     private void update(StringBuilder buffer, String where) throws XPathException {
         needCurrentDoc();
         saveCurrentDoc();
-        List<NodeInfo> nodes = listOfSelectedItems(buffer, Token.WITH);
+        List<NodeInfo> nodes = listOfSelectedItems(buffer,
+                                                   tok -> tok instanceof Token.NameToken && ((Token.NameToken) tok).getValue().equals("with"));
         dropElementIndexes();
         buffer.replace(0, 5, "");
         XQueryExpression newContent = getQuery(buffer);
@@ -867,7 +870,8 @@ public class Gizmo {
         }
         DocumentImpl saved = currentDoc;
 
-        GroundedValue value = SequenceTool.toGroundedValue(getSelectedItems(new StringBuilder(buffer.substring(ws + 1)), Token.EOF));
+        GroundedValue value = SequenceTool.toGroundedValue(
+                getSelectedItems(new StringBuilder(buffer.substring(ws + 1)), tok -> tok == Token.EOF));
         if (varName.equals(".")) {
             saveCurrentDoc();
             if (value.getLength() == 1 && value.itemAt(0) instanceof DocumentImpl) {
@@ -916,7 +920,7 @@ public class Gizmo {
 
     private void list(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
-        SequenceIterator iter = getSelectedItems(buffer, Token.EOF);
+        SequenceIterator iter = getSelectedItems(buffer, tok -> tok == Token.EOF);
         GroundedValue value = SequenceTool.toGroundedValue(iter);
         int size = value.getLength();
         if (size != 1) {
@@ -939,7 +943,7 @@ public class Gizmo {
         if (buffer.toString().trim().isEmpty()) {
             buffer = new StringBuilder(".");
         }
-        SequenceIterator iter = getSelectedItems(buffer, Token.EOF);
+        SequenceIterator iter = getSelectedItems(buffer, tok -> tok == Token.EOF);
         GroundedValue value = SequenceTool.toGroundedValue(iter);
         int size = value.getLength();
         if (size != 1) {

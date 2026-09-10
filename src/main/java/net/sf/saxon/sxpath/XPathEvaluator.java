@@ -119,7 +119,7 @@ public class XPathEvaluator {
         exec.setFunctionLibrary(lib);
 
         Optimizer opt = config.obtainOptimizer();
-        Expression exp = ExpressionTool.make(expression, staticContext, 0, -1, null);
+        Expression exp = ExpressionTool.make(expression, staticContext, 0, tok -> tok == Token.EOF, null);
         RetainedStaticContext rsc = staticContext.makeRetainedStaticContext();
         exp.setRetainedStaticContext(rsc);
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);

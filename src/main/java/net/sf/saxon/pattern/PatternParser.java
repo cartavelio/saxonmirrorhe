@@ -65,7 +65,7 @@ public class PatternParser extends XPathParser {
         }
         allowXPath40Syntax = env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) || env.getXPathVersion() == 40;
         if (isSelectionPattern(trimmed)) {
-            Expression e = parse(pattern, 0, Token.EOF, env);
+            Expression e = parse(pattern, 0, tok -> tok == Token.EOF, env);
             if (e instanceof Pattern) {
                 return (Pattern) e;
             } else if (e instanceof ContextItemExpression) {
@@ -149,7 +149,7 @@ public class PatternParser extends XPathParser {
             expect(Token.EOF);
             return result;
         } else {
-            Expression exp = parse(pattern, 0, Token.EOF, env);
+            Expression exp = parse(pattern, 0, tok -> tok == Token.EOF, env);
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
 
             // If we have a union pattern, check that neither operand is a PredicatePattern
@@ -241,7 +241,7 @@ public class PatternParser extends XPathParser {
         Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
-        } else if (allowXPath40Syntax && Token.isNameToken(t.currentToken) && t.peekAhead() == Token.LPAREN &&
+        } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
                 (t.currentTokenValue.equals("record")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
             ItemType type = parseItemType();
             Expression expr = new ItemTypePattern(type);
@@ -251,12 +251,11 @@ public class PatternParser extends XPathParser {
                 expr = parsePredicate(expr).toPattern(env.getConfiguration());
             }
             return expr;
-        } else if (allowXPath40Syntax && Token.isNameToken(t.currentToken) && t.peekAhead() == Token.LPAREN &&
+        } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&
                 t.currentTokenValue.equals("atomic")) {
             nextToken();
-            expectName();
-            StructuredQName typeName =
-                    makeStructuredQName(t.currentTokenValue,env.getDefaultElementNamespace());
+            String name = expectName();
+            StructuredQName typeName = makeStructuredQName(name, env.getDefaultElementNamespace());
             nextToken();
             expect(Token.RPAREN);
             nextToken();
@@ -295,57 +294,57 @@ public class PatternParser extends XPathParser {
         if (inPredicate > 0) {
             return super.parseBasicStep(firstInPattern);
         } else {
-            int tok = Token.isNameToken(t.currentToken) ? Token.NAME : t.currentToken;
-            switch (tok) {
-                case Token.DOLLAR:
-                    if (!firstInPattern) {
-                        grumble("In an XSLT 3.0 pattern, a variable reference is allowed only as the first step in a path");
-                        return null;
-                    } else {
-                        return super.parseBasicStep(firstInPattern);
+            Token tok = t.currentToken;
+            if (tok == Token.DOLLAR) {
+                if (!firstInPattern) {
+                    grumble("In an XSLT 3.0 pattern, a variable reference is allowed only as the first step in a path");
+                    return null;
+                } else {
+                    return super.parseBasicStep(firstInPattern);
+                }
+                // TODO: reinstate these restrictions
+//                case Token.STRING_LITERAL:
+//                case Token.NUMBER:
+//                case Token.HEX_INTEGER:
+//                case Token.BINARY_INTEGER:
+//                case Token.ELEMENT_QNAME:
+//                case Token.ATTRIBUTE_QNAME:
+//                case Token.NAMESPACE_QNAME:
+//                case Token.PI_QNAME:
+//                case Token.START_TAG:
+//                case Token.NAMED_FUNCTION_REF:
+//                case Token.DOTDOT:
+//                    grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
+//                    return null;
+//                case Token.FUNCTION_CALL:
+//                    if (!firstInPattern) {
+//                        grumble("In an XSLT pattern, a function call is allowed only as the first step in a path");
+//                    }
+//                    return super.parseBasicStep(firstInPattern);
+            }
+            if (tok instanceof Token.NameToken) {
+                if (t.peekAhead() == Token.LPAREN) {
+                    switch (t.currentTokenValue) {
+                        case "type":
+                        case "tuple":
+                        case "union":
+                        case "map":
+                        case "array":
+                        case "atomic":
+                            return parserExtension.parseTypePattern(this);
+                        default:
+                            return super.parseBasicStep(firstInPattern);
                     }
-
-                case Token.STRING_LITERAL:
-                case Token.NUMBER:
-                case Token.HEX_INTEGER:
-                case Token.BINARY_INTEGER:
-                case Token.ELEMENT_QNAME:
-                case Token.ATTRIBUTE_QNAME:
-                case Token.NAMESPACE_QNAME:
-                case Token.PI_QNAME:
-                case Token.START_TAG:
-                case Token.NAMED_FUNCTION_REF:
-                case Token.DOTDOT:
+                } else if (t.peekAhead() == Token.LCURLY) {
                     grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
                     return null;
-                case Token.FUNCTION_CALL:
-                    if (!firstInPattern) {
-                        grumble("In an XSLT pattern, a function call is allowed only as the first step in a path");
-                    }
+                } else {
                     return super.parseBasicStep(firstInPattern);
-                case Token.NAME:
-                    if (t.peekAhead() == Token.LPAREN) {
-                        switch (t.currentTokenValue) {
-                            case "type":
-                            case "tuple":
-                            case "union":
-                            case "map":
-                            case "array":
-                            case "atomic":
-                                return parserExtension.parseTypePattern(this);
-                            default:
-                                return super.parseBasicStep(firstInPattern);
-                        }
-                    } else if (t.peekAhead() == Token.LCURLY) {
-                        grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
-                        return null;
-                    } else {
-                        return super.parseBasicStep(firstInPattern);
-                    }
-                default:
-                    return super.parseBasicStep(firstInPattern);
-
+                }
+            } else {
+                return super.parseBasicStep(firstInPattern);
             }
+
         }
     }
 
@@ -407,21 +406,18 @@ public class PatternParser extends XPathParser {
         if (inPredicate > 0) {
             return super.parseFunctionArgument();
         } else {
-            switch (t.currentToken) {
-                case Token.DOLLAR:
-                    int offset = t.currentTokenStartOffset;
-                    StructuredQName variableName = parseVariableName();
-                    return resolveVariableReference(offset, variableName);
-
-                case Token.STRING_LITERAL:
-                    return parseStringLiteral(true);
-
-                case Token.NUMBER:
-                    return parseNumericLiteral(true);
-
-                default:
-                    grumble("A function argument in an XSLT pattern must be a variable reference or literal");
-                    return null;
+            Token tok = t.currentToken;
+            if (tok == Token.DOLLAR) {
+                int offset = t.currentTokenStartOffset;
+                StructuredQName variableName = parseVariableName();
+                return resolveVariableReference(offset, variableName);
+            } else if (tok instanceof Token.StringLiteral) {
+                return parseStringLiteral(true);
+            } else if (tok instanceof Token.NumericLiteral) {
+                return parseNumericLiteral(true);
+            } else {
+                grumble("A function argument in an XSLT pattern must be a variable reference or literal");
+                return null;
             }
         }
     }

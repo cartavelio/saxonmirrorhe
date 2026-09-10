@@ -671,7 +671,7 @@ public class ConfigurationReader implements Receiver {
         XPathParser parser = new XPathParser(env);
         GroundedValue value = null;
         try {
-            Expression exp = parser.parse(select, 0, Token.EOF, env);
+            Expression exp = parser.parse(select, 0, tok -> tok == Token.EOF, env);
             value = SequenceTool.toGroundedValue(exp.iterate(env.makeEarlyEvaluationContext()));
         } catch (XPathException e) {
             error(e);

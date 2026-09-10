@@ -113,7 +113,7 @@ public class Optimizer {
             trace("Rewrote position() ~= last()", e2);
             return e2;
         }
-        e2 = optimizePositionVsLast(rhs, lhs, Token.inverse(vc.getOperator()));
+        e2 = optimizePositionVsLast(rhs, lhs, OperatorSymbol.inverse(vc.getOperator()));
         if (e2 != null) {
             trace("Rewrote last() ~= position()", e2);
             return e2;

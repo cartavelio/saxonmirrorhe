@@ -267,7 +267,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                 t1.equals(BuiltInAtomicType.ANY_ATOMIC) || t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
             // then no static type checking is possible
         } else {
-            if (!Type.isPossiblyComparable(pt0, pt1, Token.isOrderedOperator(singletonOperator), allow40)) {
+            if (!Type.isPossiblyComparable(pt0, pt1, OperatorSymbol.isOrderedOperator(singletonOperator), allow40)) {
                 String message = "In {" + toShortString() + "}: cannot compare " + t0 + " to " + t1;
                 if (Cardinality.allowsZero(c0) || Cardinality.allowsZero(c1)) {
                     if (!doneWarnings) { // avoid duplicate warnings
@@ -290,7 +290,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         }
 
-        runtimeCheckNeeded = !Type.isGuaranteedGenerallyComparable(pt0, pt1, Token.isOrderedOperator(singletonOperator));
+        runtimeCheckNeeded = !Type.isGuaranteedGenerallyComparable(pt0, pt1, OperatorSymbol.isOrderedOperator(singletonOperator));
 
         if (!Cardinality.allowsMany(c0) /*c0 == StaticProperty.EXACTLY_ONE*/ &&
                 !Cardinality.allowsMany(c1) /*c1 == StaticProperty.EXACTLY_ONE */ &&
@@ -678,7 +678,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             } else {
                 // a1 is untyped atomic
                 if (a0 instanceof NumericValue) {
-                    return UntypedNumericComparer.quickCompare((StringValue) a1, (NumericValue) a0, Token.inverse(operator), rules);
+                    return UntypedNumericComparer.quickCompare((StringValue) a1, (NumericValue) a0, OperatorSymbol.inverse(operator), rules);
                 } else if (a0 instanceof StringValue) {
                     // no conversion needed
                 } else {
@@ -747,7 +747,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
     }
 
     protected GeneralComparison getInverseComparison() {
-        GeneralComparison20 gc2 = new GeneralComparison20(getRhsExpression(), Token.inverse(operator), getLhsExpression());
+        GeneralComparison20 gc2 = new GeneralComparison20(getRhsExpression(), OperatorSymbol.inverse(operator), getLhsExpression());
         gc2.setRetainedStaticContext(getRetainedStaticContext());
         return gc2;
     }

@@ -457,7 +457,7 @@ public class CombinedNodeTest extends NodeTest {
     }
 
     /**
-     * Get the operator used to combine the two node tests: one of {@link net.sf.saxon.expr.parser.Token#UNION},
+     * Get the operator used to combine the two node tests: one of {@link net.sf.saxon.expr.parser.Token#VBAR},
      * {@link net.sf.saxon.expr.parser.Token#INTERSECT}, {@link net.sf.saxon.expr.parser.Token#EXCEPT},
      *
      * @return the operator

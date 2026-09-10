@@ -42,6 +42,8 @@ import java.util.function.Supplier;
 
 public class ForExpression extends Assignation {
 
+    ;
+
     private int actionCardinality = StaticProperty.ALLOWS_MANY;
 
     private LocalVariableBinding positionVariable;

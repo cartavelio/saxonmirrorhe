@@ -1,5 +1,6 @@
-package net.sf.saxon.expr.parser;public class ForQualifier {
-}
+package net.sf.saxon.expr.parser;
+
+public enum ForQualifier {FOR_ITEM, FOR_MEMBER, FOR_KEY, FOR_VALUE, FOR_SLIDING_WINDOW, FOR_TUMBLING_WINDOW}
 
 //
 // The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");

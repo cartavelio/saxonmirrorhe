@@ -2243,7 +2243,7 @@ public class PackageLoaderHE implements IPackageLoader {
             StructuredQName name = loader.getQNameAttribute(element, "var");
             SequenceType requiredType = loader.parseAlphaCode(element, "as");
             QuantifiedExpression qEx = new QuantifiedExpression();
-            qEx.setOperator(Token.EVERY);
+            qEx.setOperator(QuantifiedExpression.Qualifier.EVERY);
             qEx.setSequence(select);
             qEx.setRequiredType(requiredType);
             qEx.setSlotNumber(slot);
@@ -3135,7 +3135,7 @@ public class PackageLoaderHE implements IPackageLoader {
             StructuredQName name = loader.getQNameAttribute(element, "var");
             SequenceType requiredType = loader.parseAlphaCode(element, "as");
             QuantifiedExpression qEx = new QuantifiedExpression();
-            qEx.setOperator(Token.SOME);
+            qEx.setOperator(QuantifiedExpression.Qualifier.SOME);
             qEx.setSequence(select);
             qEx.setRequiredType(requiredType);
             qEx.setSlotNumber(slot);

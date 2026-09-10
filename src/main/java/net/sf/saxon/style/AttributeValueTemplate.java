@@ -82,7 +82,7 @@ public abstract class AttributeValueTemplate {
                 //parser.setDefaultContainer(container);
                 //parser.setLanguage(XPathParser.ParsedLanguage.XPATH, 31);
                 parser.setAllowAbsentExpression(true);
-                exp = parser.parse(avt, i0 + 1, Token.RCURLY, env);
+                exp = parser.parse(avt, i0 + 1, tok -> tok == Token.RCURLY, env);
                 exp.setRetainedStaticContext(env.makeRetainedStaticContext());
                 exp = exp.simplify();
                 last = parser.getTokenizer().currentTokenStartOffset + 1;

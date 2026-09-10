@@ -705,7 +705,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             } else if (rhs.isCallOn(PositionAndLast.Position.class)
                     && NumericType.isNumericType(lhs.getItemType())) {
                 comparand = lhs;
-                operator = Token.inverse(operator);
+                operator = OperatorSymbol.inverse(operator);
             } else {
                 return null;
             }

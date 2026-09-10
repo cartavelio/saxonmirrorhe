@@ -288,7 +288,7 @@ public abstract class BinaryExpression extends Expression {
      * @return true if the operators are the inverse of each other
      */
     protected static boolean isInverse(OperatorSymbol op1, OperatorSymbol op2) {
-        return op1 != op2 && op1 == Token.inverse(op2);
+        return op1 != op2 && op1 == OperatorSymbol.inverse(op2);
     }
 
     /**
@@ -404,7 +404,7 @@ public abstract class BinaryExpression extends Expression {
     protected int computeHashCode() {
         // Ensure that an operator and its inverse get the same hash code,
         // so that (A lt B) has the same hash code as (B gt A)
-        int opHash = Math.min(operator.hashCode(), Token.inverse(operator).hashCode());
+        int opHash = Math.min(operator.hashCode(), OperatorSymbol.inverse(operator).hashCode());
         return opHash
                 ^ getLhsExpression().hashCode()
                 ^ getRhsExpression().hashCode();
@@ -432,7 +432,7 @@ public abstract class BinaryExpression extends Expression {
     private String parenthesize(Expression operand) {
         String operandStr = operand.toShortString();
         if (operand instanceof BinaryExpression &&
-                XPathParser.operatorPrecedence(((BinaryExpression) operand).operator) < XPathParser.operatorPrecedence(operator)) {
+                OperatorSymbol.operatorPrecedence(((BinaryExpression) operand).operator) < OperatorSymbol.operatorPrecedence(operator)) {
             operandStr = "(" + operandStr + ")";
         }
         return operandStr;

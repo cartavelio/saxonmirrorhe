@@ -73,14 +73,11 @@ public class ExpressionTool {
 
     /*@NotNull*/
     public static Expression make(String expression, StaticContext env,
-                                  int start, int terminator,
+                                  int start, Predicate<Token> terminator,
                                   CodeInjector codeInjector) throws XPathException {
         XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
         if (codeInjector != null) {
             parser.setCodeInjector(codeInjector);
-        }
-        if (terminator == -1) {
-            terminator = Token.EOF;
         }
         Expression exp = parser.parse(expression, start, terminator, env);
         // TODO: parser.parse() already sets the retained static context

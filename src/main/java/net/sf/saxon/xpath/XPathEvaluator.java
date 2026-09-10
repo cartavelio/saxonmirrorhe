@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.Type;
 import org.xml.sax.InputSource;
@@ -199,7 +200,7 @@ public class XPathEvaluator implements XPath {
         try {
             Executable exec = new Executable(getConfiguration());
             exec.setSchemaAware(staticContext.getPackageData().isSchemaAware());
-            Expression exp = ExpressionTool.make(expr, staticContext, 0, -1, null);
+            Expression exp = ExpressionTool.make(expr, staticContext, 0, tok -> tok == Token.EOF, null);
             ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
             final ContextItemStaticInfo contextItemType = getConfiguration().makeContextItemStaticInfo(Type.ITEM_TYPE, true);
             exp = exp.typeCheck(visitor, contextItemType).optimize(visitor, contextItemType);

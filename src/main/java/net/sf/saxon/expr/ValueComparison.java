@@ -214,7 +214,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
         needsRuntimeCheck =
                 p0.equals(BuiltInAtomicType.ANY_ATOMIC) || p1.equals(BuiltInAtomicType.ANY_ATOMIC);
 
-        if (!needsRuntimeCheck && !Type.isPossiblyComparable(p0, p1, Token.isOrderedOperator(operator), allow40)) {
+        if (!needsRuntimeCheck && !Type.isPossiblyComparable(p0, p1, OperatorSymbol.isOrderedOperator(operator), allow40)) {
             boolean opt0 = Cardinality.allowsZero(getLhsExpression().getCardinality());
             boolean opt1 = Cardinality.allowsZero(getRhsExpression().getCardinality());
             if (opt0 || opt1) {
@@ -317,7 +317,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     @Override
     public Expression negate() {
-        ValueComparison vc = new ValueComparison(getLhsExpression(), Token.negate(operator), getRhsExpression());
+        ValueComparison vc = new ValueComparison(getLhsExpression(), OperatorSymbol.negate(operator), getRhsExpression());
         if (resultWhenEmpty == null || resultWhenEmpty == BooleanValue.FALSE) {
             vc.resultWhenEmpty = BooleanValue.TRUE;
         } else {
@@ -393,7 +393,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
     public static boolean compare(AtomicValue v0, OperatorSymbol op, AtomicValue v1, AtomicComparer comparer, boolean checkTypes)
             throws XPathException {
         if (checkTypes &&
-                !Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), Token.isOrderedOperator(op))) {
+                !Type.isGuaranteedComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), OperatorSymbol.isOrderedOperator(op))) {
             throw new XPathException("Cannot compare " + Type.displayTypeName(v0) +
                     " to " + Type.displayTypeName(v1)).withErrorCode("XPTY0004").asTypeError();
         }

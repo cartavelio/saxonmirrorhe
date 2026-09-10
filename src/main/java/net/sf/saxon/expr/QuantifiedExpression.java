@@ -34,7 +34,9 @@ import java.util.function.Supplier;
 
 public class QuantifiedExpression extends Assignation {
 
-    private int operator;       // Token.SOME or Token.EVERY
+    public enum Qualifier { SOME, EVERY }
+
+    private Qualifier qualifier;
 
     /**
      * Get a name identifying the kind of expression, in terms meaningful to a user.
@@ -46,27 +48,27 @@ public class QuantifiedExpression extends Assignation {
 
     @Override
     public String getExpressionName() {
-        return Token.tokens[operator];
+        return qualifier.toString().toLowerCase();
     }
 
     /**
-     * Set the operator, either {@link Token#SOME} or {@link Token#EVERY}
+     * Set the operator, either {@link Qualifier#SOME} or {@link Qualifier#EVERY}
      *
      * @param operator the operator
      */
 
-    public void setOperator(int operator) {
-        this.operator = operator;
+    public void setOperator(Qualifier operator) {
+        this.qualifier = operator;
     }
 
     /**
-     * Get the operator, either {@link Token#SOME} or {@link Token#EVERY}
+     * Get the operator, either @link Qualifier#SOME} or {@link Qualifier#EVERY}
      *
      * @return the operator
      */
 
-    public int getOperator() {
-        return operator;
+    public Qualifier getOperator() {
+        return qualifier;
     }
 
     /**
@@ -93,7 +95,7 @@ public class QuantifiedExpression extends Assignation {
         getSequenceOp().typeCheck(visitor, contextInfo);
 
         if (Literal.isEmptySequence(getSequence())) {
-            return Literal.makeLiteral(BooleanValue.get(operator != Token.SOME), this);
+            return Literal.makeLiteral(BooleanValue.get(qualifier != Qualifier.SOME), this);
         }
 
         // "some" and "every" have no ordering constraints
@@ -156,7 +158,7 @@ public class QuantifiedExpression extends Assignation {
         if (Literal.hasEffectiveBooleanValue(ebv, true)) {
             // some $x satisfies true() => exists($x)
             // every $x satisfies true() => true()
-            if (getOperator() == Token.SOME) {
+            if (getOperator() == Qualifier.SOME) {
                 return SystemFunction.makeCall("exists", getRetainedStaticContext(), getSequence());
             } else {
                 Expression e2 = new Literal(BooleanValue.TRUE);
@@ -166,7 +168,7 @@ public class QuantifiedExpression extends Assignation {
         } else if (Literal.hasEffectiveBooleanValue(ebv, false)) {
             // some $x satisfies false() => false()
             // every $x satisfies false() => empty($x)
-            if (getOperator() == Token.SOME) {
+            if (getOperator() == Qualifier.SOME) {
                 Expression e2 = new Literal(BooleanValue.FALSE);
                 ExpressionTool.copyLocationInfo(this, e2);
                 return e2;
@@ -178,7 +180,7 @@ public class QuantifiedExpression extends Assignation {
             GroundedValue seq = ((Literal)getSequence()).getGroundedValue();
             int len = seq.getLength();
             if (len == 0) {
-                Expression e2 = new Literal(BooleanValue.get(getOperator() == Token.EVERY));
+                Expression e2 = new Literal(BooleanValue.get(getOperator() == Qualifier.EVERY));
                 ExpressionTool.copyLocationInfo(this, e2);
                 return e2;
             } else if (len == 1) {
@@ -252,7 +254,7 @@ public class QuantifiedExpression extends Assignation {
     public Expression copy(RebindingMap rebindings) {
         QuantifiedExpression qe = new QuantifiedExpression();
         ExpressionTool.copyLocationInfo(this, qe);
-        qe.setOperator(operator);
+        qe.setOperator(qualifier);
         qe.setVariableQName(variableName);
         qe.setRequiredType(requiredType);
         qe.setSequence(getSequence().copy(rebindings));
@@ -300,7 +302,7 @@ public class QuantifiedExpression extends Assignation {
         // Now test to see if some or all of the tests are true. The same
         // logic is used for the SOME and EVERY operators
 
-        final boolean some = operator == Token.SOME;
+        final boolean some = qualifier == Qualifier.SOME;
         int slot = getLocalSlotNumber();
         Item it;
         while ((it = base.next()) != null) {
@@ -347,14 +349,14 @@ public class QuantifiedExpression extends Assignation {
      */
 
     public String toString() {
-        return (operator == Token.SOME ? "some" : "every") + " $" + getVariableEQName() +
+        return (qualifier == Qualifier.SOME ? "some" : "every") + " $" + getVariableEQName() +
                 " in " + getSequence() + " satisfies " +
                 ExpressionTool.parenthesize(getAction());
     }
 
     @Override
     public String toShortString() {
-        return (operator == Token.SOME ? "some" : "every") + " $" + getVariableName() +
+        return getExpressionName() + " $" + getVariableName() +
                 " in " + getSequence().toShortString() + " satisfies ...";
     }
 
@@ -365,7 +367,7 @@ public class QuantifiedExpression extends Assignation {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        out.startElement(Token.tokens[operator], this);
+        out.startElement(getExpressionName(), this);
         out.emitAttribute("var", getVariableQName());
         out.emitAttribute("slot", ""+slotNumber);
         getSequence().export(out);
@@ -395,7 +397,7 @@ public class QuantifiedExpression extends Assignation {
             final QuantifiedExpression expr = (QuantifiedExpression) getExpression();
             final PullEvaluator selectEval = expr.getSequence().makeElaborator().elaborateForPull();
             final BooleanEvaluator satisfiesEval = expr.getAction().makeElaborator().elaborateForBoolean();
-            final boolean some = expr.getOperator() == Token.SOME;
+            final boolean some = expr.getOperator() == Qualifier.SOME;
             final int slot = expr.getLocalSlotNumber();
 
             return context -> {
