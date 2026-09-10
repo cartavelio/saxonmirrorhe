@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -36,7 +35,7 @@ import net.sf.saxon.type.ItemType;
  * is created for the purpose.
  */
 
-public class UseWhenStaticContext extends AbstractStaticContext implements StaticContext {
+public class UseWhenStaticContext extends AbstractStaticContext {
 
     private final NamespaceResolver namespaceContext;
     private final FunctionLibrary functionLibrary;

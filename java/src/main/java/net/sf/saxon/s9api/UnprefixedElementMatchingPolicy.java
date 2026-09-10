@@ -21,14 +21,18 @@ public enum UnprefixedElementMatchingPolicy {
      * The standard W3C policy, whereby element names are implicitly qualified by the
      * default namespace for elements and types, as defined in the XPath static context.
      * In XSLT this can be set using the <code>[xsl:]xpath-default-namespace</code>
-     * attribute, or programmatically using {@link XsltCompiler#setDefaultElementNamespace(String)}
+     * attribute, or programmatically using {@link XsltCompiler#setDefaultElementNamespace(String)}.
+     * In 4.0 it can also be set by using <code>declare default element namespace 'uuuu';</code>
+     * within the expression itself.
      */
     DEFAULT_NAMESPACE,
 
     /**
      * Under this policy, unprefixed element names match on the local part only; an element
      * with this local name is matched regardless of its namespace (that is, it can have any
-     * namespace, or none)
+     * namespace, or none). This can be set from the command line using -ns:##any, or from
+     * the XSLT, XQuery, or XPath compiler API, or within XPath and XQuery using the declaration
+     * <code>declare default element namespace "##any"</code>.
      */
     ANY_NAMESPACE,
 

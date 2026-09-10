@@ -126,6 +126,20 @@ public interface StaticContext {
     Expression bindVariable(StructuredQName qName) throws XPathException;
 
     /**
+     * Register a namespace that is explicitly declared in the prolog of the expression or
+     * query module.
+     *
+     * @param prefix The namespace prefix. Must not be null.
+     * @param uri    The namespace URI. Must not be null. The value "" (zero-length string) is used
+     *               to undeclare a namespace; it is not an error if there is no existing binding for
+     *               the namespace prefix.
+     * @throws net.sf.saxon.trans.XPathException if the declaration is invalid
+     */
+
+    //void declarePrologNamespace(String prefix, NamespaceUri uri) throws XPathException;
+
+
+    /**
      * Get the function library containing all the in-scope functions available in this static
      * context
      *
@@ -144,12 +158,36 @@ public interface StaticContext {
     String getDefaultCollationName();
 
     /**
+     * Register a namespace that is explicitly declared in the prolog of the XPath expression or query module.
+     *
+     * @param prefix The namespace prefix. Must not be null. May be zero-length to declare the default namespace
+     *               for elements and types.
+     * @param uri    The namespace URI. Must not be null. The value "" (zero-length string) is used
+     *               to undeclare a namespace; it is not an error if there is no existing binding for
+     *               the namespace prefix. Must not be "##any", which is handled separately.
+     * @throws net.sf.saxon.trans.XPathException if the declaration is invalid
+     */
+
+    void declarePrologNamespace(String prefix, NamespaceUri uri) throws XPathException;
+
+    /**
      * Get the default XPath namespace for elements and types
      *
      * @return the default namespace, or {@link NamespaceConstant#NULL} for the non-namespace
      */
 
     NamespaceUri getDefaultElementNamespace();
+
+    /**
+     * Set the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
+     * The value can be any of {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE} (the default),
+     * which uses the value of {@link #getDefaultElementNamespace()}, or {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE_OR_NONE},
+     * which matches both the namespace given in {@link #getDefaultElementNamespace()} and the null namespace,
+     * or {@link UnprefixedElementMatchingPolicy#ANY_NAMESPACE}, which matches any namespace (that is, it
+     * matches by local name only).
+     */
+
+    void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy);
 
     /**
      * Get the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
@@ -161,9 +199,7 @@ public interface StaticContext {
      * @return the policy for matching unprefixed element names
      */
 
-    default UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
-        return UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
-    }
+    UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy();
 
     /**
      * Get the default function namespace

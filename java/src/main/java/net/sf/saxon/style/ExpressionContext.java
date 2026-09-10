@@ -43,7 +43,8 @@ public class ExpressionContext implements StaticContext {
     private final StructuredQName attributeName;
     private Location containingLocation = null;
     private RetainedStaticContext retainedStaticContext = null;
-
+    private NamespaceMap prologNamespaces = NamespaceMap.emptyMap();
+    private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = null;
 
     /**
      * Create a static context for XPath expressions in an XSLT stylesheet
@@ -65,6 +66,27 @@ public class ExpressionContext implements StaticContext {
     @Override
     public Configuration getConfiguration() {
         return element.getConfiguration();
+    }
+
+    /**
+     * Register a namespace that is explicitly declared in the prolog of the XPath expression or query module.
+     *
+     * @param prefix The namespace prefix. Must not be null. May be zero-length to declare the default namespace
+     *               for elements and types.
+     * @param uri    The namespace URI. Must not be null. The value "" (zero-length string) is used
+     *               to undeclare a namespace; it is not an error if there is no existing binding for
+     *               the namespace prefix. Must not be "##any", which is handled separately.
+     * @throws XPathException if the declaration is invalid
+     */
+    @Override
+    public void declarePrologNamespace(String prefix, NamespaceUri uri) throws XPathException {
+        if (prefix.equals("xml") != (uri==NamespaceUri.XML)) {
+            throw new XPathException("Incorrect declaration of XML namespace", "XQST0070");
+        }
+        if (prologNamespaces.getNamespaceUri(prefix) != null) {
+            throw new XPathException("Duplicate namespace declaration", "XQST0033");
+        }
+        prologNamespaces = prologNamespaces.put(prefix, uri);
     }
 
     /**
@@ -191,7 +213,11 @@ public class ExpressionContext implements StaticContext {
     @Override
     public NamespaceResolver getNamespaceResolver() {
         NamespaceMap map = element.getModuleRoot().getFixedNamespaces();
-        return map == null ? element.getAllNamespaces() : map;
+        map = map == null ? element.getAllNamespaces() : map;
+        if (!prologNamespaces.isEmpty()) {
+            map = map.putAll(prologNamespaces);
+        }
+        return map;
     }
 
     /**
@@ -349,6 +375,12 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public NamespaceUri getDefaultElementNamespace() {
+        if (!prologNamespaces.isEmpty()) {
+            NamespaceUri uri = prologNamespaces.getNamespaceUri("");
+            if (uri != null) {
+                return uri;
+            }
+        }
         return element.getDefaultXPathNamespace();
     }
 
@@ -432,6 +464,21 @@ public class ExpressionContext implements StaticContext {
     }
 
     /**
+     * Set the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
+     * The value can be any of {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE} (the default),
+     * which uses the value of {@link #getDefaultElementNamespace()}, or {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE_OR_NONE},
+     * which matches both the namespace given in {@link #getDefaultElementNamespace()} and the null namespace,
+     * or {@link UnprefixedElementMatchingPolicy#ANY_NAMESPACE}, which matches any namespace (that is, it
+     * matches by local name only).
+     *
+     * @param policy the policy for matching unprefixed element names in path expressions
+     */
+    @Override
+    public void setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy) {
+        unprefixedElementMatchingPolicy = policy;
+    }
+
+    /**
      * Get the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
      * The value can be any of {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE} (the default),
      * which uses the value of {@link #getDefaultElementNamespace()}, or {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE_OR_NONE},
@@ -441,7 +488,10 @@ public class ExpressionContext implements StaticContext {
      */
     @Override
     public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
-        return element.getCompilation().getCompilerInfo().getUnprefixedElementMatchingPolicy();
+        if (unprefixedElementMatchingPolicy == null) {
+            return element.getCompilation().getCompilerInfo().getUnprefixedElementMatchingPolicy();
+        }
+        return unprefixedElementMatchingPolicy;
     }
 }
 

@@ -17,8 +17,8 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
-import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
@@ -26,6 +26,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -61,6 +62,7 @@ public abstract class AbstractStaticContext implements StaticContext {
     private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
     private UnprefixedElementMatchingPolicy unprefixedElementPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private WarningHandler warningHandler;
+    private NamespaceMap prologNamespaces = NamespaceMap.emptyMap();
 
     /**
      * Set the Configuration. This is protected so it can be used only by subclasses;
@@ -139,16 +141,6 @@ public abstract class AbstractStaticContext implements StaticContext {
      * This can be overridden using setFunctionLibrary().
      */
 
-    protected final void setDefaultFunctionLibrary() {
-        FunctionLibraryList lib = new FunctionLibraryList();
-        lib.addFunctionLibrary(XPath31FunctionSet.getInstance());
-        lib.addFunctionLibrary(getConfiguration().getBuiltInExtensionLibraryList(31));
-        lib.addFunctionLibrary(new ConstructorFunctionLibrary(getConfiguration()));
-        lib.addFunctionLibrary(config.getIntegratedFunctionLibrary());
-        config.addExtensionBinders(lib);
-        setFunctionLibrary(lib);
-    }
-
     public final void setDefaultFunctionLibrary(int version) {
         FunctionLibraryList lib = new FunctionLibraryList();
         lib.addFunctionLibrary(config.getXPathFunctionSet(version));
@@ -166,6 +158,34 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     protected final void addFunctionLibrary(FunctionLibrary library) {
         libraryList.addFunctionLibrary(library);
+    }
+
+    /**
+     * Register a namespace that is explicitly declared in the prolog of the expression or
+     * query module.
+     *
+     * @param prefix The namespace prefix. Must not be null.
+     * @param uri    The namespace URI. Must not be null. The value "" (zero-length string) is used
+     *               to undeclare a namespace; it is not an error if there is no existing binding for
+     *               the namespace prefix.
+     * @throws XPathException if the declaration is invalid
+     */
+   // @Override
+    public void declarePrologNamespace(String prefix, NamespaceUri uri) throws XPathException {
+        if (prefix == null) {
+            throw new NullPointerException("Null prefix supplied to declarePrologNamespace()");
+        }
+        if (uri == null) {
+            throw new NullPointerException("Null namespace URI supplied to declarePrologNamespace()");
+        }
+        if (prefix.equals("xml") != uri.equals(NamespaceUri.XML)) {
+            throw new XPathException("Invalid declaration of the XML namespace", "XQST0070");
+        }
+        if (prologNamespaces.getNamespaceUri(prefix) != null) {
+            throw new XPathException("Duplicate declaration of namespace prefix \"" + prefix + '"', "XQST0033");
+        } else {
+            prologNamespaces = prologNamespaces.put(prefix, uri);
+        }
     }
 
     /**

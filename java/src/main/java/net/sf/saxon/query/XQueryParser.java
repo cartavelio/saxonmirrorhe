@@ -82,31 +82,15 @@ public class XQueryParser extends XPathParser {
     public final Set<NamespaceUri> importedModules = new HashSet<>(5);
     final List<Import> schemaImports = new ArrayList<>(5);
     final List<Import> moduleImports = new ArrayList<>(5);
-    private List<DraftExpression> draftExpressions = new ArrayList<>();
 
     private final Set<StructuredQName> outputPropertiesSeen = new HashSet<>(4);
     private Properties parameterDocProperties;
 
     private final static Set<String> reservedNames = new HashSet<>(200);
-    static {
-        String[] kw = ("allowing ancestor ancestor-or-self and array as ascending at attribute "
-                + "base-uri boundary-space by case cast castable catch child collation comment "
-                + "construction context copy-namespaces count decimal-format decimal-separator "
-                + "declare default descendant descendant-or-self descending digit div document "
-                + "document-node element else empty empty-sequence encoding end enum eq every "
-                + "except exponent-separator external false finally fixed fn following "
-                + "following-or-self following-sibling following-sibling-or-self follows "
-                + "for function ge get gnode greatest group grouping-separator gt idiv "
-                + "if import in infinity inherit instance intersect is is-not item jnode "
-                + "key lax le least let lt map member minus-sign mod module namespace "
-                + "namespace-node NaN ne next no-inherit no-preserve node of only option "
-                + "or order ordered ordering otherwise parent pattern-separator per-mille "
-                + "percent precedes preceding preceding-or-self preceding-sibling "
-                + "preceding-sibling-or-self preserve previous processing-instruction "
-                + "record return satisfies schema schema-attribute schema-element self "
-                + "sliding some stable start strict strip switch text then to treat true "
-                + "try tumbling type typeswitch union unordered validate value variable "
-                + "version when where while window xquery zero-digit").split("\\s");
+    static {       // Revised by PR2481
+        String[] kw = ("and case div else eq except follows follows-or-is "
+                       + "for ge gt idiv intersect is is-not le let lt mod ne or otherwise "
+                       + "precedes precedes-or-is return satisfies to union where while").split("\\s");
 
         reservedNames.addAll(Arrays.asList(kw));
     }
@@ -3440,17 +3424,13 @@ public class XQueryParser extends XPathParser {
         }
         String qname = ((Token.NameToken) ahead).getValue();
 
-        switch (kind) {
-            case "element":
-            case "attribute":
-            case "processing-instruction":
-            case "namespace":
-                return !(languageVersion >= 40 && reservedNames.contains(qname));
-            case "update":
-                return languageVersion >= 40 &&
-                        (qname.equals("map") || qname.equals("array"));
-        }
-        return false;
+        return switch (kind) {
+            case "element", "attribute", "processing-instruction", "namespace" ->
+                    !(languageVersion >= 40 && reservedNames.contains(qname));
+            case "update" -> languageVersion >= 40 &&
+                    (qname.equals("map") || qname.equals("array"));
+            default -> false;
+        };
     }
 
     /**
@@ -4400,7 +4380,7 @@ public class XQueryParser extends XPathParser {
                     }
                 }
                 namespaceCount++;
-                ((QueryModule) env).declareActiveNamespace(prefix, uri);
+                ((QueryModule) env).declareConstructedNamespace(prefix, uri);
             }
             if (lexicalNames.contains(attName)) {
                 if (isNamespace) {

@@ -137,8 +137,8 @@ public class QNameParser {
             if (uri.contains("{")) {
                 throw new XPathException("Invalid EQName: URI contains opening brace", errorOnBadSyntax);
             }
-            if (unescaper != null && uri.contains("&")) {
-                uri = unescaper.unescape(uri).toString();
+            if (unescaper != null && uri.indexOf('&') >= 0) {
+                uri = unescaper.unescape(uri);
             }
             if (uri.equals(NamespaceConstant.XMLNS)) {
                 throw new XPathException("The string '" + NamespaceConstant.XMLNS + "' cannot be used as a namespace URI", "XQST0070");

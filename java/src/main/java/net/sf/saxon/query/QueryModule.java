@@ -13,7 +13,6 @@ import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -52,15 +51,14 @@ public class QueryModule implements StaticContext {
     private URI locationURI;
     private String baseURI;
     private NamespaceUri moduleNamespace; // null only if moduleIsMainModule is false
-    private HashMap<String, NamespaceUri> explicitPrologNamespaces;
-    private Stack<NamespaceMap> activeNamespaces;  // The namespace bindings declared in element constructors
+    private HashMap<String, NamespaceUri> prologNamespaces;
+    private Stack<NamespaceMap> constructedNamespaces;  // The namespace bindings declared in element constructors
     private HashMap<StructuredQName, GlobalVariable> variables;
     // global variables declared in this module
     private HashMap<StructuredQName, GlobalVariable> libraryVariables;
     // all global variables defined in library modules
     // defined only on the top-level module
     private HashMap<StructuredQName, UndeclaredVariable> undeclaredVariables;
-    private HashSet<NamespaceUri> importedSchemata;    // The schema target namespaces imported into this module
     private HashMap<NamespaceUri, HashSet<String>> loadedSchemata;
     // For the top-level module only, all imported schemas for all modules,
     // Key is the targetNamespace, value is the set of absolutized location URIs
@@ -106,7 +104,7 @@ public class QueryModule implements StaticContext {
         moduleIsMainModule = true;
         topModule = this;
         languageLevel = sqc.getLanguageVersion();
-        activeNamespaces = new Stack<>();
+        constructedNamespaces = new Stack<>();
         baseURI = sqc.getBaseURI();
         defaultCollationName = sqc.getDefaultCollationName();
         try {
@@ -168,7 +166,7 @@ public class QueryModule implements StaticContext {
         }
         init(userQueryContext);
         packageData = importer.getPackageData();
-        activeNamespaces = new Stack<>();
+        constructedNamespaces = new Stack<>();
         executable = null;
         optimizerOptions = importer.optimizerOptions;
     }
@@ -188,13 +186,11 @@ public class QueryModule implements StaticContext {
         if (isTopLevelModule()) {
             libraryVariables = new HashMap<>(10);
         }
-        importedSchemata = new HashSet<>(5);
-        //importedSchemata.add(NamespaceConstant.JSON);
         importedModuleNamespaces = new HashSet<>(5);
         moduleNamespace = null;
-        activeNamespaces = new Stack<>();
+        constructedNamespaces = new Stack<>();
 
-        explicitPrologNamespaces = new HashMap<>(10);
+        prologNamespaces = new HashMap<>(10);
         if (sqc != null) {
             //executable = sqc.getExecutable();
             inheritNamespaces = sqc.isInheritNamespaces();
@@ -425,7 +421,7 @@ public class QueryModule implements StaticContext {
         // The only part of the RetainedStaticContext that can change as the query module is parsed is the
         // "activeNamespaces", that is, namespaces declared on direct element constructors. If this is empty,
         // we can reuse the top-level static context on each request.
-        if (activeNamespaces.isEmpty()) {
+        if (constructedNamespaces.isEmpty()) {
             if (moduleStaticContext == null) {
                 moduleStaticContext = new RetainedStaticContext(this);
             }
@@ -1175,45 +1171,6 @@ public class QueryModule implements StaticContext {
         }
     }
 
-    /**
-     * Add an imported schema to this static context. A query module can reference
-     * types in a schema provided two conditions are satisfied: the schema containing those
-     * types has been loaded into the Configuration, and the target namespace has been imported
-     * by this query module. This method achieves the second of these conditions. It does not
-     * cause the schema to be loaded.
-     *
-     * @param targetNamespace The target namespace of the schema to be added
-     * @param baseURI         The base URI against which the locationURIs are to be absolutized
-     * @param locationURIs    a list of strings containing the absolutized URIs of the "location hints" supplied
-     *                        for this schema
-     * @since 8.4
-     */
-
-    public void addImportedSchema(NamespaceUri targetNamespace, String baseURI, /*@NotNull*/ List<String> locationURIs) {
-        if (importedSchemata == null) {
-            importedSchemata = new HashSet<>(5);
-        }
-        importedSchemata.add(targetNamespace);
-        HashMap<NamespaceUri, HashSet<String>> loadedSchemata = getTopLevelModule().loadedSchemata;
-        if (loadedSchemata == null) {
-            loadedSchemata = new HashMap<>(5);
-            getTopLevelModule().loadedSchemata = loadedSchemata;
-        }
-        HashSet<String> entries = loadedSchemata.get(targetNamespace);
-        if (entries == null) {
-            entries = new HashSet<>(locationURIs.size());
-            loadedSchemata.put(targetNamespace, entries);
-        }
-        for (String relative : locationURIs) {
-            try {
-                URI abs = ResolveURI.makeAbsolute(relative, baseURI);
-                entries.add(abs.toString());
-            } catch (URISyntaxException e) {
-                // ignore the URI if it's not valid
-            }
-        }
-    }
-
     public void addImportedModule(QueryModule module) {
         importedModules.add(module);
     }
@@ -1307,18 +1264,20 @@ public class QueryModule implements StaticContext {
         if (prefix.equals("xml") != uri.equals(NamespaceUri.XML)) {
             staticError("Invalid declaration of the XML namespace", "XQST0070");
         }
-        if (explicitPrologNamespaces.get(prefix) != null) {
+        if (prologNamespaces.get(prefix) != null) {
             staticError("Duplicate declaration of namespace prefix \"" + prefix + '"', "XQST0033");
         } else {
-            explicitPrologNamespaces.put(prefix, uri);
+            prologNamespaces.put(prefix, uri);
         }
     }
 
     /**
-     * Declare an active namespace, that is, a namespace which as well as affecting the static
+     * Declare a constructed namespace, that is, a namespace written as a namespace declaration on
+     * a direct element constructor. Such a namespace as well as affecting the static
      * context of the query, will also be copied to the result tree when element constructors
-     * are evaluated. When searching for a prefix-URI binding, active namespaces are searched
-     * first, then passive namespaces. Active namespaces are later undeclared (in reverse sequence)
+     * are evaluated. When searching for a prefix-URI binding, constructed namespaces are searched
+     * first, then prolog-declared namespaces, then externally predeclared namespaces.
+     * Constructed namespaces are later undeclared (in reverse sequence)
      * using {@link #undeclareNamespace()}.
      * <p>This method is intended for internal use only.</p>
      *
@@ -1326,17 +1285,17 @@ public class QueryModule implements StaticContext {
      * @param uri    the namespace URI
      */
 
-    public void declareActiveNamespace(/*@Nullable*/ String prefix, /*@Nullable*/ NamespaceUri uri) {
+    public void declareConstructedNamespace(String prefix, NamespaceUri uri) {
         if (prefix == null) {
-            throw new NullPointerException("Null prefix supplied to declareActiveNamespace()");
+            throw new NullPointerException("Null prefix supplied to declareConstructedNamespace()");
         }
         if (uri == null) {
-            throw new NullPointerException("Null namespace URI supplied to declareActiveNamespace()");
+            throw new NullPointerException("Null namespace URI supplied to declareConstructedNamespace()");
         }
 
-        NamespaceMap nsMap = activeNamespaces.isEmpty() ? NamespaceMap.emptyMap() : activeNamespaces.peek();
+        NamespaceMap nsMap = constructedNamespaces.isEmpty() ? NamespaceMap.emptyMap() : constructedNamespaces.peek();
         nsMap = nsMap.put(prefix, uri);
-        activeNamespaces.push(nsMap);
+        constructedNamespaces.push(nsMap);
 
     }
 
@@ -1346,11 +1305,11 @@ public class QueryModule implements StaticContext {
      * It is NOT called when an XML 1.1-style namespace undeclaration is encountered.
      * <p>This method is intended for internal use only.</p>
      *
-     * @see #declareActiveNamespace(String, NamespaceUri)
+     * @see #declareConstructedNamespace(String, NamespaceUri)
      */
 
     public void undeclareNamespace() {
-        activeNamespaces.pop();
+        constructedNamespaces.pop();
     }
 
     /**
@@ -1395,7 +1354,7 @@ public class QueryModule implements StaticContext {
     }
 
     /**
-     * Get the matching policy for unprefixed element names in axis steps. This is a Saxon extension.
+     * Get the matching policy for unprefixed element names in axis steps.
      * The value can be any of {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE} (the default),
      * which uses the value of {@link #getDefaultElementNamespace()}, or {@link UnprefixedElementMatchingPolicy#DEFAULT_NAMESPACE_OR_NONE},
      * which matches both the namespace given in {@link #getDefaultElementNamespace()} and the null namespace,
@@ -1432,10 +1391,10 @@ public class QueryModule implements StaticContext {
      */
 
     /*@Nullable*/
-    public NamespaceUri checkURIForPrefix(/*@NotNull*/ String prefix) {
-        // Search the active (local) namespaces first, then the module-level namespaces, then the global namespaces.
-        if (!activeNamespaces.isEmpty()) {
-            NamespaceMap nsMap = activeNamespaces.peek();
+    public NamespaceUri checkURIForPrefix(String prefix) {
+        // Search the local namespaces first, then the prolog namespaces, then the predeclared namespaces.
+        if (!constructedNamespaces.isEmpty()) {
+            NamespaceMap nsMap = constructedNamespaces.peek();
             NamespaceUri ns = nsMap.getNamespaceUri(prefix);
             if (ns != null) {
                 if (ns.isEmpty() && !prefix.isEmpty()) {
@@ -1448,7 +1407,7 @@ public class QueryModule implements StaticContext {
         if (prefix.isEmpty()) {
             return defaultElementNamespace;
         }
-        NamespaceUri uri = explicitPrologNamespaces.get(prefix);
+        NamespaceUri uri = prologNamespaces.get(prefix);
         if (uri != null) {
             // A zero-length URI means the prefix was undeclared in the prolog, and we mustn't look elsewhere
             return uri.isEmpty() ? null : uri;
@@ -1553,10 +1512,10 @@ public class QueryModule implements StaticContext {
 
     /*@NotNull*/
     NamespaceMap getActiveNamespaceBindings() {
-        if (activeNamespaces.isEmpty()) {
+        if (constructedNamespaces.isEmpty()) {
             return NamespaceMap.emptyMap();
         }
-        return activeNamespaces.peek().withoutUndeclarations();
+        return constructedNamespaces.peek().withoutUndeclarations();
     }
 
     /**
@@ -1578,16 +1537,16 @@ public class QueryModule implements StaticContext {
         for (NamespaceBinding e : predeclaredNamespaces.getNamespaceBindings()) {
             result = result.put(e.getPrefix(), e.getNamespaceUri());
         }
-        for (Map.Entry<String, NamespaceUri> e : explicitPrologNamespaces.entrySet()) {
+        for (Map.Entry<String, NamespaceUri> e : prologNamespaces.entrySet()) {
             result = result.put(e.getKey(), e.getValue());
         }
         if (!defaultElementNamespace.isEmpty()) {
             result = result.put("", defaultElementNamespace);
         }
-        if (activeNamespaces.isEmpty()) {
+        if (constructedNamespaces.isEmpty()) {
             return result;
         }
-        NamespaceMap activeNS = activeNamespaces.peek();
+        NamespaceMap activeNS = constructedNamespaces.peek();
         for (NamespaceBinding binding : activeNS.getNamespaceBindings()) {
             result = result.put(binding.getPrefix(), binding.getNamespaceUri());
         }

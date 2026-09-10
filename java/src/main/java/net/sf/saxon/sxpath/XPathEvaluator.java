@@ -34,7 +34,7 @@ import net.sf.saxon.type.Type;
 
 public class XPathEvaluator {
 
-    private XPathStaticContext staticContext;
+    private IndependentContext staticContext;
 
     /**
      * Construct an XPathEvaluator with a specified configuration.
@@ -70,7 +70,7 @@ public class XPathEvaluator {
      *                <p>Setting a new static context clears any variables and namespaces that have previously been declared.</p>
      */
 
-    public void setStaticContext(XPathStaticContext context) {
+    public void setStaticContext(IndependentContext context) {
         staticContext = context;
     }
 
@@ -82,7 +82,7 @@ public class XPathEvaluator {
      * @return the static context object
      */
 
-    public XPathStaticContext getStaticContext() {
+    public IndependentContext getStaticContext() {
         return staticContext;
     }
 

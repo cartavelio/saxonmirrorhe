@@ -648,10 +648,10 @@ public class XPathParser {
 
         if (exp == null) {
 
-            qNameParser = new QNameParser(env.getNamespaceResolver())
-                .withAcceptEQName(languageVersion >= 30, languageVersion)
-                .withErrorOnBadSyntax(language == ParsedLanguage.XSLT_PATTERN ? "XTSE0340" : "XPST0003")
-                .withErrorOnUnresolvedPrefix("XPST0081");
+//            qNameParser = new QNameParser(env.getNamespaceResolver())
+//                .withAcceptEQName(languageVersion >= 30, languageVersion)
+//                .withErrorOnBadSyntax(language == ParsedLanguage.XSLT_PATTERN ? "XTSE0340" : "XPST0003")
+//                .withErrorOnUnresolvedPrefix("XPST0081");
 
             charChecker = env.getConfiguration().getValidCharacterChecker();
             t = new Tokenizer();
@@ -833,13 +833,13 @@ public class XPathParser {
                  String uri = expectStringLiteral();
                  nextToken();
                  if (uri.equals("##any")) {
-                     ((IndependentContext) env).setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+                     env.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
                  } else {
                      NamespaceUri nsUri = NamespaceUri.of(uri);
                      if (nsUri == NamespaceUri.XML || nsUri == NamespaceUri.XMLNS) {
                          grumble("Namespace uri " + uri + " is disallowed", "XQST0070");
                      }
-                     ((IndependentContext) env).declareNamespace("", nsUri);
+                     env.declarePrologNamespace("", nsUri);
                  }
                  readToken(Token.SEMICOLON);
             }
@@ -865,9 +865,15 @@ public class XPathParser {
                 if (nsUri == NamespaceUri.XML || nsUri == NamespaceUri.XMLNS) {
                     grumble("Namespace uri " + uri + " is disallowed", "XQST0070");
                 }
-                ((IndependentContext)env).declareNamespace(prefix, NamespaceUri.of(uri));
+                env.declarePrologNamespace(prefix, NamespaceUri.of(uri));
                 readToken(Token.SEMICOLON);
             }
+        }
+        if (qNameParser == null) {
+            qNameParser = new QNameParser(env.getNamespaceResolver())
+                    .withAcceptEQName(languageVersion >= 30, languageVersion)
+                    .withErrorOnBadSyntax(language == ParsedLanguage.XSLT_PATTERN ? "XTSE0340" : "XPST0003")
+                    .withErrorOnUnresolvedPrefix("XPST0081");
         }
         Expression exp = parseExprSingle();
         ArrayList<Expression> list = null;

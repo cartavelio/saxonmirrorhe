@@ -42,7 +42,7 @@ import java.util.Iterator;
  */
 
 public class IndependentContext extends AbstractStaticContext
-        implements XPathStaticContext, NamespaceResolver {
+        implements NamespaceResolver {
 
     protected HashMap<String, NamespaceUri> namespaces = new HashMap<>(10);
     protected HashMap<StructuredQName, XPathVariable> variables = new HashMap<>(20);
@@ -150,7 +150,7 @@ public class IndependentContext extends AbstractStaticContext
         if (uri == null) {
             throw new NullPointerException("Null namespace URI supplied to declareNamespace()");
         }
-        if ("".equals(prefix)) {
+        if (prefix.isEmpty()) {
             setDefaultElementNamespace(uri);
         } else {
             namespaces.put(prefix, uri);
@@ -245,7 +245,6 @@ public class IndependentContext extends AbstractStaticContext
      * @param resolver the external NamespaceResolver
      */
 
-    @Override
     public void setNamespaceResolver(NamespaceResolver resolver) {
         externalResolver = resolver;
     }
@@ -287,7 +286,6 @@ public class IndependentContext extends AbstractStaticContext
      *         declared.
      */
 
-    @Override
     public XPathVariable declareVariable(QNameValue qname) {
         return declareVariable(qname.getStructuredQName());
     }
@@ -303,7 +301,6 @@ public class IndependentContext extends AbstractStaticContext
      *         declared.
      */
 
-    @Override
     public XPathVariable declareVariable(NamespaceUri namespaceURI, String localName) {
         StructuredQName qName = new StructuredQName("", namespaceURI==null ? NamespaceUri.NULL : namespaceURI, localName);
         return declareVariable(qName);
@@ -452,7 +449,6 @@ public class IndependentContext extends AbstractStaticContext
      * the static context itself.
      */
 
-    @Override
     public SlotManager getStackFrameMap() {
         SlotManager map = getConfiguration().makeSlotManager();
         XPathVariable[] va = new XPathVariable[variables.size()];
@@ -588,7 +584,6 @@ public class IndependentContext extends AbstractStaticContext
      *
      * @return true if it is known that the context item for evaluating the expression will have no parent
      */
-    @Override
     public boolean isContextItemParentless() {
         return parentlessContextItem;
     }
