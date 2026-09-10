@@ -13,6 +13,7 @@ using JVersion = Saxon.Hej.Version;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Saxon.Ejava.net;
 #if EE
 using Saxon.Eej.functions.registry;
 #endif
@@ -461,7 +462,9 @@ namespace TestDriver {
                 foreach (XdmItem file in files) {
                     string filename = file.StringValue;
                     Uri abs = new Uri(testCase.BaseUri, filename);
-                    sources[u++] = new TextResource(new WebClient().DownloadString(abs), abs);
+                    Stream stream = new URL(abs).openStream();
+                    StreamReader reader = new StreamReader(stream);
+                    sources[u++] = new TextResource(reader.ReadToEnd(), abs);
                 }
 
                 return sources;

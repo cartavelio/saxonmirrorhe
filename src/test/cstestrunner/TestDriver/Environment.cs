@@ -26,6 +26,7 @@ using JStructuredQName = Saxon.Hej.om.StructuredQName;
 using Saxon.Hej;
 using Saxon.Hej.lib;
 using Saxon.Callbacks;
+using Saxon.Ejava.net;
 #if EE
 using Saxon.Eej.ee.stream;
 #endif
@@ -71,6 +72,15 @@ namespace TestDriver {
         public string streamedInputValidation = "skip";
         internal bool failedToBuild = false;
 
+        private static byte[] ToByteArray(Stream stream)
+        {
+            if (stream is MemoryStream) {
+                return ((MemoryStream)stream).ToArray();
+            }
+            MemoryStream ms = new();
+            stream.CopyTo(ms);
+            return ms.ToArray();
+        }
 
         /**
          * Construct a local default environment for a test set
@@ -558,11 +568,9 @@ namespace TestDriver {
                 if (href != null) {
                     if (href.StartsWith("http")) {
                         resources.Add(nominalUri, () => {
-                            WebClient wc = new WebClient();
-                            wc.Encoding = enc1;
-                            byte[] content = wc.DownloadData(href);
-                            string str = enc1.GetString(content);
-                            //string str = wc.DownloadString(href);
+                            Stream stream = new URL(nominalUri).openStream();
+                            StreamReader reader = new (stream, enc1);
+                            string str = reader.ReadToEnd();
                             return new TextResource(str, nominalUri);
                         });
                     }
@@ -572,8 +580,8 @@ namespace TestDriver {
                         resources.Add(nominalUri, () => {
                             try {
                                 // TODO: this logic should surely be in the standard UnparsedTextResolver?
-                                WebClient wc = new WebClient();
-                                byte[] content = wc.DownloadData(resourceUri);
+                                Stream stream = new URL(resourceUri).openStream();
+                                byte[] content = ToByteArray(stream);
                                 Encoding enc2 = enc1;
                                 if (encoding == "utf-16" && content.Length >= 2) {
                                     // Seems we need to resolve endianness ourselves
