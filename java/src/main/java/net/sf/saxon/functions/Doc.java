@@ -189,7 +189,9 @@ public class Doc extends SystemFunction implements Callable {
 
 
         }
-
+        if (parseOptions.getSchemaValidationMode() != Validation.STRIP && parseOptions.getSchema() == null) {
+            parseOptions = parseOptions.withSchema(packageData.getImportedSchema(""));
+        }
 
         NodeInfo item = DocumentFn.makeDoc(href, getRetainedStaticContext().getStaticBaseUriString(), packageData, parseOptions, context, null, false);
         if (item == null) {
