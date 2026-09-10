@@ -104,6 +104,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     public PackageLoaderHE(Configuration config) {
         this.config = config;
+        importedSchema = config.emptySchema();
         overriding = new ExecutableFunctionLibrary(config);
         underriding = new ExecutableFunctionLibrary(config);
         try {
@@ -335,7 +336,10 @@ public class PackageLoaderHE implements IPackageLoader {
 
         readGlobalContext(packageElement);
         readSchemaNamespaces(packageElement);
-        importedSchema = readSchema(packageElement);
+        Schema packageSchema = readSchema(packageElement);
+        if (packageSchema != null) {
+            importedSchema = packageSchema;
+        }
         if (importedSchema != null) {
             pack.setImportedSchema(importedSchema);
         }

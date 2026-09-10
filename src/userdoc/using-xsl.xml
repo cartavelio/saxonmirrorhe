@@ -665,6 +665,21 @@
             </td>
          </tr>
          
+          <tr class="javaonly">
+            <td>
+               <p>-TC:filename</p>
+            </td>
+            <td>
+               <p>This causes coverage information
+                  to be output to the specified file. The output is an XML file containing
+                  details of trace points and how often each one was executed (including
+                  trace points that were never executed): it is intended to provide
+                  raw data for subsequence analysis by third-party tools. This option
+                  cannot be using at the same time as other tracing options.
+               </p>
+            </td>
+         </tr>
+         
          <tr class="javaonly">
             <td>
                <p>-threads:N</p>
