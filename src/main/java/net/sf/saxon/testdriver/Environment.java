@@ -68,6 +68,7 @@ public class Environment implements ResourceResolver {
     public XQueryCompiler xqueryCompiler;
     public XsltCompiler xsltCompiler;
     public XsltExecutable xsltExecutable;
+    public XsdSchema xsdSchema;
     public File exportedStylesheet;
     public XdmItem contextItem;
     public HashMap<QName, XdmValue> params = new HashMap<>();
@@ -246,11 +247,11 @@ public class Environment implements ResourceResolver {
         // load the requested schema documents
 
         XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
-        XsdSchema schema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
+        environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
 
         // load the requested source documents
 
-        loadSourceDocuments(driver, xpc, env, environment, builder, schema);
+        loadSourceDocuments(driver, xpc, env, environment, builder, environment.xsdSchema);
 
         // create a collection URI resolver to handle the requested collections
 

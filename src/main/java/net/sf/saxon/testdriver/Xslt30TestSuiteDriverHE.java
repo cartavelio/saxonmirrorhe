@@ -867,8 +867,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 src = ((XdmNode) ini.contextItem).getUnderlyingNode();
             }
             if (src != null && !"skip".equals(env.streamedInputValidation)) {
-                Processor processor = sheet.getProcessor();
-                SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+                SchemaValidator validator = env.xsdSchema.newValidator();
                 src = validator.asSource(src);
             }
 
