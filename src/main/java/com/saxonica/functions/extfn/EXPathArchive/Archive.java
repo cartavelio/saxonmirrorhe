@@ -77,7 +77,7 @@ public class Archive {
         UNKNOWN, ZIP, GZIP
     }
 
-    private static final HashMap<ArchiveType, String> archiveTypes = new HashMap<>() {
+    private static final HashMap<ArchiveType, String> archiveTypes = new HashMap<ArchiveType, String>() {
         {
             put(ArchiveType.ZIP, "zip");
             put(ArchiveType.GZIP, "gzip");
@@ -89,7 +89,7 @@ public class Archive {
         STORED, DEFLATE, UNKNOWN, MIXED
     }
 
-    private static final HashMap<CompressionType, String> compressionTypes = new HashMap<>() {
+    private static final HashMap<CompressionType, String> compressionTypes = new HashMap<CompressionType, String>() {
         {
             put(CompressionType.STORED, "stored");
             put(CompressionType.DEFLATE, "deflate");
