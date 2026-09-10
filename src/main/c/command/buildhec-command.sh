@@ -13,6 +13,6 @@ export PATH=$JET_HOME/bin:$PATH
 export LD_LIBRARY_PATH=$JET_HOME/lib/x86/shared:$LD_LIBRARY_PATH
 
 
-gcc  Transform.c -o transform -ldl -lc -DEEC -I../Saxon.C.API/jni $1 $2
+gcc  Transform.c -o transform -ldl -lc -DHEC -I../Saxon.C.API/jni $1 $2
 
-gcc  Query.c -o query -ldl -lc -DEEC -I../Saxon.C.API/jni $1 $2
+gcc  Query.c -o query -ldl -lc -DHEC -I../Saxon.C.API/jni $1 $2
