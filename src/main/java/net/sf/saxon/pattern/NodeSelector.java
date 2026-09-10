@@ -19,7 +19,7 @@ import java.util.function.Predicate;
  *
  * <p>This is needed for C#, where it is not possible for a method such as {@link NodeInfo#iterateAxis(int, NodePredicate)}
  * to accept either a NodeTest object or a Predicate supplied as a lambda expression. To supply a predicate, it is
- * therefore necessary to wrap it in a {@code NodePredicate}.</p>
+ * therefore necessary to wrap it in a {@code NodeSelector}.</p>
  */
 
 public class NodeSelector extends NodeTest {

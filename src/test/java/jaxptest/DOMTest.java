@@ -1890,6 +1890,29 @@ public class DOMTest {
         }
     }
 
+    @Test
+    public void testBug6054() {
+        String xml = "<ns1:BaseProducts xmlns:ns1=\"http://Carmen.Population/Connector\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+                + "   xsi:schemaLocation=\"http://Carmen.Population/Connector ../../main/resources/xsd/as_2t_base_products.xsd\">\n"
+                + "   <ns1:header ns1:creationDate=\"2014-11-12T12:00:00\" ns1:knowledgeDate=\"2001-01-01\"/>\n"
+                + "   <ns1:baseProduct>\n"
+                + "      <ns1:bpr_ty>1111111111.000000</ns1:bpr_ty>\n"
+                + "   </ns1:baseProduct>  \n"
+                + "</ns1:BaseProducts>\n";
+        try {
+            Configuration config = new Configuration();
+            NodeInfo rootNode = config.buildDocumentTree(new StreamSource(new StringReader(xml))).getRootNode();
+            Document document = (Document) DocumentOverNodeInfo.wrap(rootNode);
+
+            Element documentElement1 = document.getDocumentElement();
+            NamedNodeMap attributes1 = documentElement1.getAttributes();
+            Node namedItem1 = attributes1.getNamedItem("xsi:schemaLocation");
+            assertEquals("http://Carmen.Population/Connector ../../main/resources/xsd/as_2t_base_products.xsd", namedItem1.getNodeValue());
+        } catch (XPathException e) {
+            fail(e);
+        }
+    }
+
 
 
 
