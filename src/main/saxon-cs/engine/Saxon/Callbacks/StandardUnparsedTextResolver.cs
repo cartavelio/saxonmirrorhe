@@ -14,20 +14,22 @@ using Exception = System.Exception;
 
 namespace Saxon.Callbacks {
     public class StandardUnparsedTextResolver {
-        private XmlResolver resolver;
+        private readonly Configuration config;
+        private CommonResourceResolver resolver;
         
-        public StandardUnparsedTextResolver() {
-            this.resolver = null;
+        public StandardUnparsedTextResolver(Configuration config) {
+            this.config = config;
+            this.resolver = config.getCommonResourceResolver();
         }
 
-        public StandardUnparsedTextResolver(XmlResolver xmlResolver) {
-            this.resolver = xmlResolver;
+        public StandardUnparsedTextResolver(Configuration config, XmlResolver xmlResolver) {
+            this.config = config;
+            this.resolver = new XmlResolverWrapper(xmlResolver);
         }
 
         public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
-            resolver ??= new StandardXmlResolver(config);
-            // Handle a URI using the data: URI scheme
             if (absoluteURI.Scheme == "data") {
+                // Handle a URI using the data: URI scheme
                 Saxon.Hej.lib.Resource resource;
                 try {
                     resource = DataURIScheme.decode(absoluteURI);
@@ -45,6 +47,29 @@ namespace Saxon.Callbacks {
                     return new StringReader(((UnparsedTextResource) resource).getContent());
                 }
             }
+            
+            if (resolver != null) {
+                StreamSource ss = resolver.DereferenceLocation(absoluteURI, absoluteURI.ToString(), null, null);
+                if (ss != null) {
+                    if (ss.getReader() != null) {
+                        return ss.getReader();
+                    }
+
+                    try {
+                        Stream stream = ss.getInputStream();
+                        if (encoding == null) {
+                            encoding = inferEncoding(stream);
+                        }
+                        if (encoding == "iso-646") {
+                            encoding = "us-ascii";
+                        }
+                        return new StreamReader(stream, Encoding.GetEncoding(encoding));
+                    }
+                    catch (Exception e) {
+                        throw new Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
+                    }
+                }
+            }
             if (absoluteURI.Scheme == "http" || absoluteURI.Scheme == "https") {
                 // TODO: this should also work for file: and ftp: - but then need to
                 // supply the encoding
@@ -57,21 +82,25 @@ namespace Saxon.Callbacks {
                     throw new Saxon.Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
                 }
             }
-
-            try {
-                Stream stream = (Stream)resolver.GetEntity(absoluteURI, "plain/text", typeof(Stream));
-                if (encoding == null) {
-                    encoding = inferEncoding(stream);
+            else {
+                try {
+                    using WebClient client = new ();
+                    Stream stream = client.OpenRead(absoluteURI);
+                    if (encoding == null) {
+                        encoding = inferEncoding(stream);
+                    }
+                    if (encoding == "iso-646") {
+                        encoding = "us-ascii";
+                    }
+                    return new StreamReader(stream, Encoding.GetEncoding(encoding));
                 }
-                if (encoding == "iso-646") {
-                    encoding = "us-ascii";
+                catch (System.Net.WebException e) {
+                    throw new Saxon.Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
                 }
-                return new StreamReader(stream, Encoding.GetEncoding(encoding));
             }
-            catch (Exception e) {
-                throw new Saxon.Hej.trans.XPathException("Failed to read unparsed text at " + absoluteURI, e);
 
-            }
+            return null;
+
         }
 
         protected string inferEncoding(Stream stream) {

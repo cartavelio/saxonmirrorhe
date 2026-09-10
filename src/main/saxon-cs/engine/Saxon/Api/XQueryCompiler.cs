@@ -29,7 +29,7 @@ namespace Saxon.Api {
         internal XQueryCompiler(Processor processor) {
             this.Processor = processor;
             Implementation = processor.JProcessor.newXQueryCompiler();
-            Implementation.setModuleURIResolver(new StandardModuleURIResolver(processor.XmlResolver));
+            Implementation.setModuleURIResolver(new StandardModuleURIResolver(processor.Implementation, processor.XmlResolver));
         }
 
         /// <summary>

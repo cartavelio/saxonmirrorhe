@@ -45,7 +45,8 @@ namespace Saxon.Api {
         internal XsltCompiler(Processor processor) {
             this.processor = processor;
             jXsltCompiler = processor.JProcessor.newXsltCompiler();
-            jXsltCompiler.setURIResolver(processor.Implementation.getURIResolver());
+            //jXsltCompiler.setURIResolver(processor.Implementation.getURIResolver());
+            jXsltCompiler.getUnderlyingCompilerInfo().setCommonResourceResolver(processor.Implementation.getCommonResourceResolver());
         }
 
         /// <summary>

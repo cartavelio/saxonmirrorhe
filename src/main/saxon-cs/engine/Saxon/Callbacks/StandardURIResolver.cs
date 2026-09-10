@@ -1,6 +1,7 @@
 using System;
 using System.Xml;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Xml.XPath;
 using Saxon.Ejava.lang;
@@ -12,7 +13,7 @@ using Saxon.Hej.resource;
 
 namespace Saxon.Callbacks {
     public class StandardURIResolver : Saxon.Hej.lib.RelativeURIResolver {
-        private readonly System.Xml.XmlResolver resolver;
+        private readonly CommonResourceResolver resolver;
         private Configuration config;
 
         public StandardURIResolver(Configuration config) {
@@ -22,7 +23,7 @@ namespace Saxon.Callbacks {
 
         public StandardURIResolver(Configuration config, XmlResolver resolver) {
             this.config = config;
-            this.resolver = resolver;
+            this.resolver = new XmlResolverWrapper(resolver);
         }
 
         public XmlResolver getXmlResolver() {
@@ -96,10 +97,6 @@ namespace Saxon.Callbacks {
 
         public Saxon.Ejavax.xml.transform.Source dereference(string uri) {
             try {
-                KnownResourceFinder.NamedInputStream known = KnownResourceFinder.fetchSystemId(uri, config);
-                if (known != null) {
-                    return new StreamSource(known.stream, uri);
-                }
 
                 Uri abs = new Uri(uri);
 
@@ -125,29 +122,19 @@ namespace Saxon.Callbacks {
                 }
                 else {
 
-                    System.Object obj = resolver.GetEntity(abs, null, Type.GetType("System.IO.Stream"));
-                    if ((obj is Stream stream)) {
-                        Saxon.Ejavax.xml.transform.stream.StreamSource source = new(stream);
-                        source.setSystemId(abs.ToString());
-                        Saxon.Hej.lib.AugmentedSource @as =
-                            Saxon.Hej.lib.AugmentedSource.makeAugmentedSource(source);
-                        @as.setPleaseCloseAfterUse(true);
-                        return @as;
-                    }
-                    else if ((obj is TextReader reader)) {
-                        Saxon.Ejavax.xml.transform.stream.StreamSource source = new(reader);
-                        source.setSystemId(abs.ToString());
-                        return source;
-                    }
-                    else if ((obj is Saxon.Ejavax.xml.transform.Source)) {
-                        return ((Saxon.Ejavax.xml.transform.Source) obj);
-                    }
-                    else if ((obj == null)) {
-                        throw new Saxon.Hej.trans.XPathException("XmlResolver returned null");
+                    StreamSource result = resolver.DereferenceLocation(abs, uri, null, null);
+                    if (result != null) {
+                        return result;
                     }
                     else {
-                        throw new Saxon.Hej.trans.XPathException(
-                            ("Unrecognized object returned by XmlResolver (type " + obj.GetType().Name));
+                        XmlUrlResolver resolver = new XmlUrlResolver();
+                        resolver.Credentials = CredentialCache.DefaultCredentials;
+                        object entity = resolver.GetEntity(abs, null, typeof(Stream));
+                        if (entity is Stream stream) {
+                            return new StreamSource(stream, uri);
+                        }
+
+                        return null;
                     }
                 }
             } 
