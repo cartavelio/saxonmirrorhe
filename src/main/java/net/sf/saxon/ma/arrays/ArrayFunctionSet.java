@@ -662,7 +662,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     //#if EE==true || PE==true
 
     /**
-     * Implementation of the proposed XP40 function array:members(array(*)) =&gt; parcel*
+     * Implementation of the proposed XP40 function array:members(array(*)) =&gt; record(value)*
      */
     public static class ArrayMembers extends SystemFunction {
 
