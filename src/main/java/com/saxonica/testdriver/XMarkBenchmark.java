@@ -242,6 +242,9 @@ public class XMarkBenchmark {
             builder.setSchemaValidator(schema.newValidator());
             compiler.setSchemaAware(true);
         }
+        if (useJson) {
+            compiler.setLanguageVersion("4.0");
+        }
 
         for (TreeModel model : models) {
             if (treeModel != null && !treeModel.getName().equals(model.getName())) {
