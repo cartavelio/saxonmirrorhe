@@ -217,7 +217,7 @@
             <p> Determines which files are selected (see below). </p>
           </td>
         </tr>
-        <!--<tr>
+        <tr>
           <td class="keyword">
             <p> content-type </p>
           </td>
@@ -240,8 +240,9 @@
             method <code>Configuration.registerMediaType()</code>. The set of file extensions that are
               recognized, and their mapping to media types, is also held in the <code>Configuration</code>, and can be changed using the
               method <code>Configuration.registerFileExtension()</code>.</p>
+            <p>Available from Saxon 10.1.</p>
           </td>
-        </tr>-->
+        </tr>
         <tr>
           <td class="keyword">
             <p> metadata </p>
