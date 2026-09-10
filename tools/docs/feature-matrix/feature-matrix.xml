@@ -676,9 +676,46 @@
   </feature>
   
   <feature class="Localization">
-    <shortName>Localization for sorting</shortName>
-    <details link="localization/unicode-collation-algorithm" name="Unicode Collation Algorithm"
-      subpages="has-subpages"/>
+    <shortName>Formatting numbers</shortName>
+    <details link="localization/number-formatting" name="Formatting Numbers"/>
+    <products>
+      <product level="Basic" J="HE" C="HE">
+        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
+          numbers as words. A further set of installable numberers are available to provide support for some
+          other European languages: Danish (da), German (de), French (fr), Belgium French (fr-BE), Italian
+          (it), Dutch (nl), Belgium Flemish (nl-BE), and Swedish (sv).</p></description>
+      </product>
+      <product level="Basic Adv" J="PE" C="PE">
+        <description><p>Full support for formatting numbers as words in different languages is provided using
+          the <a href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p></description>
+      </product>
+    </products>
+  </feature>
+  
+  <feature class="Localization">
+    <shortName>Formatting dates</shortName>
+    <details link="localization/date-formatting" name="Formatting Dates"/>
+    <products>
+      <product level="Basic" J="HE" C="HE">
+        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
+          dates as words.</p></description>
+      </product>
+      <product level="Basic Adv" J="PE" C="PE" CS="PE">
+        <description generic="true"><p>Full support for formatting dates as words in different languages is
+          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
+          relevant platform (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS).</p></description>
+        <alt-description J="PE" C="PE"><p>Full support for formatting dates as words in different languages is
+          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
+            library</a>.</p></alt-description>
+        <alt-description CS="PE"><p>Full support for formatting dates as words in different languages is
+          provided using the ICU4N library.</p></alt-description>
+      </product>
+    </products>
+  </feature>
+  
+  <feature class="Localization">
+    <shortName>Sorting and collations</shortName>
+    <details link="localization/sorting-and-collations" name="Sorting and Collations"/>
     <products>
       <product level="Basic" J="HE" C="HE">
         <description J="HE" C="HE"><p>Run-time localization support for sorting and comparison of strings,
@@ -687,8 +724,8 @@
       <product level="Basic Adv" J="PE" C="PE" CS="PE" JS="HE">
         <description generic="true"><p>Run-time localization support for sorting and comparison of strings, building on the
           capabilities of the <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
-          relevant platform for Saxon 11 products (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS), and for
-          SaxonJS using the <code>Intl.Collator</code> JavaScript API.</p></description>
+          relevant platform for Saxon 11 products (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS), and using
+          the <code>Intl.Collator</code> JavaScript API for SaxonJS.</p></description>
         <alt-description J="PE" C="PE"><p>Run-time localization support for sorting and comparison of strings,
           building on the capabilities of the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
             library</a>.</p></alt-description>
@@ -696,46 +733,6 @@
           building on the capabilities of the ICU4N library.</p></alt-description>
         <alt-description JS="HE"><p>Run-time localization support for sorting and comparison of strings,
           in the browser using <code>Intl.Collator</code>.</p></alt-description>
-      </product>
-    </products>
-  </feature>
-  
-  <feature class="Localization">
-    <shortName>Localization for formatting numbers</shortName>
-    <details link="localization/localizing-numbers-and-dates" name="Localizing numbers and dates"
-      subpages="has-subpages"/>
-    <products>
-      <product level="Basic" J="HE" C="HE">
-        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
-          numbers in words. A further set of installable numberers are available to provide support for some
-          other European languages: Danish (da), German (de), French (fr), Belgium French (fr-BE), Italian
-          (it), Dutch (nl), Belgium Flemish (nl-BE), and Swedish (sv).</p></description>
-      </product>
-      <product level="Basic Adv" J="PE" C="PE">
-        <description><p>Full support for formatting numbers in words in different languages is provided using
-          the <a href="http://site.icu-project.org/" class="bodylink">ICU4J library</a>.</p></description>
-      </product>
-    </products>
-  </feature>
-  
-  <feature class="Localization">
-    <shortName>Localization for formatting dates</shortName>
-    <details link="localization/localizing-numbers-and-dates" name="Localizing numbers and dates"
-      subpages="has-subpages"/>
-    <products>
-      <product level="Basic" J="HE" C="HE">
-        <description J="HE" C="HE"><p>By default, English is the only language supported for formatting
-          dates in words.</p></description>
-      </product>
-      <product level="Basic Adv" J="PE" C="PE" CS="PE">
-        <description generic="true"><p>Full support for formatting dates in words in different languages is
-          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU library</a> for the
-          relevant platform (ICU4J for SaxonJ and SaxonC, ICU4N for SaxonCS).</p></description>
-        <alt-description J="PE" C="PE"><p>Full support for formatting dates in words in different languages is
-          provided using the <a href="http://site.icu-project.org/" class="bodylink">ICU4J
-            library</a>.</p></alt-description>
-        <alt-description CS="PE"><p>Full support for formatting dates in words in different languages is
-          provided using the ICU4N library.</p></alt-description>
       </product>
     </products>
   </feature>
@@ -806,7 +803,7 @@
   </feature>
   
   <feature class="Interfaces">
-    <shortName>PHP Extension</shortName>
+    <shortName>PHP extension</shortName>
     <description>
       <p>Interface module that allows SaxonC to be invoked from PHP applications.</p>
     </description>
@@ -816,7 +813,7 @@
   </feature>
   
   <feature class="Interfaces">
-    <shortName>Python Extension</shortName>
+    <shortName>Python extension</shortName>
     <description>
       <p>Interface module that allows SaxonC to be invoked from Python applications.</p>
     </description>
