@@ -305,15 +305,6 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("members", 1, e -> e.populate(ArrayMembers::new, RecordType.VALUE_RECORD, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
-            // TODO: drop this, renamed array:items
-            register("values", 1, e -> {
-                return e.populate(ArrayItems::new, AnyItemType.INSTANCE, STAR, 0)
-                        .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
-            });
-
-
-
-
         }
         //#endif
     }
