@@ -12,6 +12,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.PushElaborator;
 import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.SourceDocument;
@@ -336,6 +337,12 @@ public class StreamInstr extends SourceDocument implements Pusher {
                 }
                 return null;
             };
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            PushEvaluator pusher = elaborateForPush();
+            return context -> new PushToPull(pusher, context).getIterator();
         }
     }
 
