@@ -1752,8 +1752,10 @@
          <method name="tanh"/>
          <method name="cosh"/>
       </class>
+      <class name="net.sf.saxon.value.EmptySequence">
+         <method name="getInstance"/>
+      </class>
    </xsl:variable>
-   
    
    <xsl:template match="*[@nodeType='MethodReferenceExpr'][scope/type/@RESOLVED_TYPE]" priority="15">
       <xsl:choose>
