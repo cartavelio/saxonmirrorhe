@@ -182,7 +182,6 @@ public class XdmValueForCpp {
      * Get the <code>XdmEmptySequence</code> which represents an empty sequence in the XDM Data Model.
      * @param thread - Graalvm runtime data structure for the thread
      * @return long value representing the XdmEmptySequence
-     * @throws SaxonApiException
      */
     @CEntryPoint(name = "j_getXdmEmptySequence")
     public static long getXdmEmptySequence(IsolateThread thread){
