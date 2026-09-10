@@ -11,6 +11,7 @@ using JDotNetDocumentWrapper = net.sf.saxon.dotnet.DotNetDocumentWrapper;
 using JDotNetObjectModel = net.sf.saxon.dotnet.DotNetObjectModel;
 using JNodeInfo = net.sf.saxon.om.NodeInfo;
 using JSequence = net.sf.saxon.om.Sequence;
+using JGroundedValue = net.sf.saxon.om.GroundedValue;
 using JPipelineConfiguration = net.sf.saxon.@event.PipelineConfiguration;
 using AugmentedSource = net.sf.saxon.lib.AugmentedSource;
 using NodeName = net.sf.saxon.om.NodeName;
@@ -1677,7 +1678,7 @@ namespace Saxon.Api
             return typeof(XdmValue).IsAssignableFrom(type);
         }
 
-        public override JSequence unwrapXdmValue(object obj)
+        public override JGroundedValue unwrapXdmValue(object obj)
         {
             return ((XdmValue)obj).Unwrap();
         }

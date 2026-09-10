@@ -7,6 +7,7 @@ using JPipelineConfiguration = net.sf.saxon.@event.PipelineConfiguration;
 using JReceiver = net.sf.saxon.@event.Receiver;
 using JProperties = java.util.Properties;
 using JCharSequence = java.lang.CharSequence;
+using JCodePoints = net.sf.saxon.str.CodePoints;
 using JXPathException = net.sf.saxon.trans.XPathException;
 using JCharacterMapIndex = net.sf.saxon.serialize.CharacterMapIndex;
 using JSchemaType = net.sf.saxon.type.SchemaType;
@@ -1160,7 +1161,7 @@ namespace Saxon.Api
             /// <param name="chars">Character data as input</param>
             /// <param name="location">Provides information such as line number and system ID</param>
             /// <param name="properties">Bit significant value. The following bits are defined</param>
-			public override void characters(JCharSequence chars, JLocation location, int properties)
+			public override void characters(JCodePoints chars, JLocation location, int properties)
             {
                 if (level == 0)
                 {
@@ -1177,7 +1178,7 @@ namespace Saxon.Api
             /// <param name="data">The data portion of the processing instruction</param>
             /// <param name="location">provides information about the PI</param>
             /// <param name="properties">Additional information about the PI</param>
-			public override void processingInstruction(String target, JCharSequence data, JLocation location, int properties)
+			public override void processingInstruction(String target, JCodePoints data, JLocation location, int properties)
             {
                 if (level == 0)
                 {
@@ -1193,7 +1194,7 @@ namespace Saxon.Api
             /// <param name="chars">The content of the comment</param>
             /// <param name="location">provides information such as line number and system ID</param>
             /// <param name="properties">Additional information about the comment</param>
-			public override void comment(JCharSequence chars, JLocation location, int properties)
+			public override void comment(JCodePoints chars, JLocation location, int properties)
             {
                 if (level == 0)
                 {
