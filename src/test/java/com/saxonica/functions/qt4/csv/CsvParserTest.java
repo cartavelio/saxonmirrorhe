@@ -59,7 +59,7 @@ public class CsvParserTest {
         @Test
         @DisplayName("rows are passed correctly to the CsvContentHandler")
         void rowsArePassed() throws XPathException {
-            subject = new CsvParser(TestXdmHelpers.stringValue("abc,def,ghi\r\n123,456,789"), options, handler);
+            subject = new CsvParser(TestXdmHelpers.stringValue("abc,def,ghi\n123,456,789"), options, handler);
 
             result = subject.parseInput();
 
@@ -73,7 +73,7 @@ public class CsvParserTest {
         @Test
         @DisplayName("rows and fields are passed correctly to the CsvContentHandler when there's only one column")
         void singleColumnCSV() throws XPathException {
-            subject = new CsvParser(TestXdmHelpers.stringValue("abc\r\n123"), options, handler);
+            subject = new CsvParser(TestXdmHelpers.stringValue("abc\n123"), options, handler);
 
             SequenceIterator result = subject.parseInput();
 
@@ -85,7 +85,7 @@ public class CsvParserTest {
         @Test
         @DisplayName("CSV strings with trailing record separator are processed correctly")
         void trailingRowSeparator() throws XPathException {
-            subject = new CsvParser(TestXdmHelpers.stringValue("abc\r\n123\r\n"), options, handler);
+            subject = new CsvParser(TestXdmHelpers.stringValue("abc\n123\n"), options, handler);
 
             result = subject.parseInput();
             expectedRows = makeRows(rows -> rows.row("abc").row("123"));
@@ -111,7 +111,7 @@ public class CsvParserTest {
         @Test
         @DisplayName("simple quoted fields are handled correctly")
         void quotedFieldsHandled() throws XPathException {
-            subject = new CsvParser(TestXdmHelpers.stringValue("\"abc\",\"def\",\"ghi\"\r\n\"123\",\"456\",\"789\"\r\n"), options, handler);
+            subject = new CsvParser(TestXdmHelpers.stringValue("\"abc\",\"def\",\"ghi\"\n\"123\",\"456\",\"789\"\n"), options, handler);
 
             result = subject.parseInput();
 
@@ -125,7 +125,7 @@ public class CsvParserTest {
         @Test
         @DisplayName("escaped quotes within quoted fields are handled")
         void escapedQuotes() throws XPathException {
-            subject = new CsvParser(TestXdmHelpers.stringValue("\"abc \"\"quote\"\" def\",\"ghi\"\r\n"), options, handler);
+            subject = new CsvParser(TestXdmHelpers.stringValue("\"abc \"\"quote\"\" def\",\"ghi\"\n"), options, handler);
 
             result = subject.parseInput();
 
@@ -139,7 +139,7 @@ public class CsvParserTest {
         void nonDefaultQuoteChar() throws XPathException {
             options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts -> opts.put("quote-character", "|"));
             handler = new CsvContentHandler(options);
-            subject = new CsvParser(TestXdmHelpers.stringValue("|abc ||quote|| def|,|ghi|\r\n"), options, handler);
+            subject = new CsvParser(TestXdmHelpers.stringValue("|abc ||quote|| def|,|ghi|\n"), options, handler);
 
             result = subject.parseInput();
 
@@ -168,42 +168,6 @@ public class CsvParserTest {
 
             assertThat(result, deepEquals(expectedRows));
         }
-
-        @Test
-        @DisplayName("Setting row delimiter to a sequence of strings (as with \\r\\n / \\n / \\r)")
-        void rowDelimiterSequence() throws XPathException {
-            Map<String, GroundedValue> opts = new HashMap<>();
-            opts.put("row-delimiter", TestXdmHelpers.simpleValueSequence("$", "£"));
-            options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts);
-
-            subject = new CsvParser(TestXdmHelpers.stringValue("abc,def$123,456£ghi,789"), options, handler);
-
-            result = subject.parseInput();
-            expectedRows = makeRows(rows -> {
-                rows.row("abc", "def").row("123", "456").row("ghi", "789");
-            });
-
-            assertThat(result, deepEquals(expectedRows));
-        }
-
-        @Test
-        @DisplayName("Setting row delimiter to a daft sequence of strings")
-        void rowDelimiterDaftSequence() throws XPathException {
-            Map<String, GroundedValue> opts = new HashMap<>();
-            opts.put("row-delimiter", TestXdmHelpers.simpleValueSequence("$$", "$"));
-            options = parsedOptionParameters(CsvToArrays.OPTION_DETAILS, opts);
-
-            subject = new CsvParser(TestXdmHelpers.stringValue("abc,def$123,456$$ghi,789"), options, handler);
-
-            result = subject.parseInput();
-
-            expectedRows = makeRows(rows -> {
-                rows.row("abc", "def").row("123", "456").row("ghi", "789");
-            });
-
-            assertThat(result, deepEquals(expectedRows));
-        }
-
 
         @Test
         @DisplayName("Setting field delimiter")

@@ -29,6 +29,7 @@ import static net.sf.saxon.test.matchers.MatchesThrownXPathException.throwsXPath
 class CsvToXmlTest {
     Configuration configuration = new Configuration();
     RetainedStaticContext retainedStaticContext = new RetainedStaticContext(configuration);
+    XmlFixtureBuilder xml = new XmlFixtureBuilder(configuration);
 
     MapItem options;
     Item expected;
@@ -65,11 +66,11 @@ class CsvToXmlTest {
     @DisplayName("everything should be wired up correctly")
     void everythingIsWiredUpCorrectly() throws XPathException {
         options = makeOptions(opts -> {
-            opts.put("column-names", BooleanValue.TRUE);
+            opts.put("header", BooleanValue.TRUE);
         });
-        expected = XmlFixtureBuilder.document(doc -> {
-            doc.defaultNs("http://www.w3.org/2005/xpath-functions");
-            doc.element("csv", csv -> {
+        expected = xml.element(builder -> {
+            builder.defaultNs("http://www.w3.org/2005/xpath-functions");
+            builder.element("csv", csv -> {
                 csv.element("columns", cols -> {
                     cols.element("column", el -> el.content("a")).element("column", el -> el.content("b"));
                 });
@@ -91,9 +92,7 @@ class CsvToXmlTest {
     @DisplayName("option parameter validation is validating things")
     void columnNamesMapsZeroErrors() {
         options = makeOptions(opts -> {
-            opts.put("column-names", FixtureBuilder.map(map -> {
-                map.put("First", 0);
-            }));
+            opts.put("select-columns", opts.sequence(0));
         });
 
         assertThat(() -> call_subject(args("", options)), throwsXPathException("FOCV0005"));

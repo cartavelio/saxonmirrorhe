@@ -27,7 +27,7 @@ class ParseCsvTest {
     Configuration configuration = new Configuration();
 
     public MapItem actual;
-    public MapItem expectedColumns;
+    public MapItem expected;
 
     public SystemFunction subject() throws XPathException {
         return XPath40FunctionSet.getInstance().makeFunction("parse-csv", 2);
@@ -52,21 +52,22 @@ class ParseCsvTest {
         options = makeOptions(opts -> {
             opts.put("column-names", BooleanValue.TRUE);
         });
-        expectedColumns = FixtureBuilder.map(cols -> {
-                cols.put("names", cols.map(names -> names.put("a", 1).put("b", 2)));
-                cols.put("fields", cols.sequence("a", "b"));
+        expected = FixtureBuilder.map(cols -> {
+                cols.put("column-index", cols.map(names -> names.put("a", 1).put("b", 2)));
+                cols.put("columns", cols.sequence("a", "b"));
+                cols.put("rows", cols.array("f1", "f2"));
             });
 
         actual = (MapItem) subject().call(ctxt(), args("a,b\nf1,f2", options)).head();
 
-        assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> r.row("f1", "f2"))));
+        assertThat(actual, matchesCsvRecord(expected));
     }
 
     @Test
     @DisplayName("option parameter validation is validating things")
     void columnNamesMapsZeroErrors() {
         options = makeOptions(opts -> {
-            opts.put("column-names", FixtureBuilder.map(map -> {
+            opts.put("column-index", FixtureBuilder.map(map -> {
                 map.put("First", 0);
             }));
         });

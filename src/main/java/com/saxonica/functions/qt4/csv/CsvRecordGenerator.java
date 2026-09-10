@@ -217,9 +217,4 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
         callable.setDescription("fn:parse-csv()?get");
         return new CallableFunction(2, callable, GETTER_TYPE);
     }
-
-    // Temporary to make unit tests compile
-    public final static MapItem EMPTY_COLUMNS_RECORD = null;
-
-
 }

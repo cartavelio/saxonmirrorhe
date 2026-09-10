@@ -1,7 +1,6 @@
 package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
@@ -15,13 +14,11 @@ import java.util.Map;
 
 import static com.saxonica.functions.qt4.csv.TestHelpers.makeRow;
 import static com.saxonica.functions.qt4.csv.TestHelpers.makeRows;
-import static net.sf.saxon.test.Assertions.*;
 import static net.sf.saxon.test.OptionsParameterHelper.defaultOptionParameters;
 import static net.sf.saxon.test.OptionsParameterHelper.parsedOptionParameters;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.SequenceIteratorIsDeepEqualTo.deepEquals;
 import static net.sf.saxon.test.matchers.SequenceIteratorIsEmptySequence.isEmptySequence;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class CsvContentHandlerTest {
     CsvContentHandler subject;
@@ -51,6 +48,7 @@ class CsvContentHandlerTest {
         subject = new CsvContentHandler(options);
 
         subject.appendField(u("abc"));
+        subject.finishRow(0);
 
         result = subject.getSequenceOfRows();
 
@@ -65,6 +63,7 @@ class CsvContentHandlerTest {
         subject.appendField(u("abc"));
         subject.finishRow(0);
         subject.appendField(u("123"));
+        subject.finishRow(0);
 
         result = subject.getSequenceOfRows();
 
@@ -88,6 +87,7 @@ class CsvContentHandlerTest {
         subject.appendField(u("\t  123"));
         subject.appendField(u("456\t  "));
         subject.appendField(u("  \t789   \t"));
+        subject.finishRow(0);
 
         result = subject.getSequenceOfRows();
 

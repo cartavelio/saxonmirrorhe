@@ -33,34 +33,10 @@ class CsvOptionsParameterValidatorTest {
         @Nested
         class PositiveIntegers {
             @Test
-            @DisplayName("column-names maps cannot use zero as a value")
-            void columnNamesMapsZeroErrors() throws XPathException {
+            @DisplayName("select-columns cannot be set to zero")
+            void selectColumnsZeroErrors() throws XPathException {
                 options = makeOptions(defaultOpts, opts -> {
-                    opts.put("column-names", FixtureBuilder.map(map -> {
-                        map.put("First", 0);
-                    }));
-                });
-
-                assertThat(() -> CsvOptionsParameterValidator.validate(options), throwsXPathException("FOCV0005"));
-            }
-
-            @Test
-            @DisplayName("column-names maps cannot use negative integers as a value")
-            void columnNamesMapsNegativeErrors() throws XPathException {
-                options = makeOptions(defaultOpts, opts -> {
-                    opts.put("column-names", FixtureBuilder.map(map -> {
-                        map.put("First", -1);
-                    }));
-                });
-
-                assertThat(() -> CsvOptionsParameterValidator.validate(options), throwsXPathException("FOCV0005"));
-            }
-
-            @Test
-            @DisplayName("number-of-columns cannot be set to zero")
-            void numberOfColumnsZeroErrors() throws XPathException {
-                options = makeOptions(defaultOpts, opts -> {
-                    opts.put("number-of-columns", 0);
+                    opts.put("select-columns", 0);
                 });
 
                 assertThat(() -> CsvOptionsParameterValidator.validate(options), throwsXPathException("FOCV0005"));
@@ -68,29 +44,9 @@ class CsvOptionsParameterValidatorTest {
 
             @Test
             @DisplayName("number-of-columns cannot be set to a negative integer")
-            void negativeNumberOfColumnsErrors() throws XPathException {
+            void negativeSelectColumnsErrors() throws XPathException {
                 options = makeOptions(defaultOpts, opts -> {
-                    opts.put("number-of-columns", -1);
-                });
-
-                assertThat(() -> CsvOptionsParameterValidator.validate(options), throwsXPathException("FOCV0005"));
-            }
-
-            @Test
-            @DisplayName("filter-columns cannot contain zero")
-            void filterColumnsZero() throws XPathException {
-                options = makeOptions(defaultOpts, opts -> {
-                    opts.put("filter-columns", 0);
-                });
-
-                assertThat(() -> CsvOptionsParameterValidator.validate(options), throwsXPathException("FOCV0005"));
-            }
-
-            @Test
-            @DisplayName("filter-columns cannot contain a negative integer")
-            void filterColumnsNegative() throws XPathException {
-                options = makeOptions(defaultOpts, opts -> {
-                    opts.put("filter-columns", -1);
+                    opts.put("select-columns", -1);
                 });
 
                 assertThat(() -> CsvOptionsParameterValidator.validate(options), throwsXPathException("FOCV0005"));

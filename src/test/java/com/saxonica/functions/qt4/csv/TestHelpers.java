@@ -1,8 +1,11 @@
 package com.saxonica.functions.qt4.csv;
 
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.test.xdmfixtures.DslLambda;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
+import net.sf.saxon.test.xdmfixtures.MapBuilder;
 import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
 
 import java.util.ArrayList;
@@ -56,6 +59,10 @@ public class TestHelpers {
         public List<List<String>> getValue() {
             return expectedRows;
         }
+    }
+
+    public static MapItem buildExpected(DslLambda<MapBuilder> definition) {
+        return FixtureBuilder.map(definition);
     }
 
     public static List<List<String>> expectedRows(Consumer<ExpectedRowMaker> definition) {

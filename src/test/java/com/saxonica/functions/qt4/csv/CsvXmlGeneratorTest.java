@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.saxonica.functions.qt4.csv.TestHelpers.*;
-import static com.saxonica.test.matchers.MatchesCsvRowRecord.callFieldFunction;
 import static net.sf.saxon.test.assertions.SaxonMatcherAssert.assertThat;
 import static net.sf.saxon.test.matchers.GroundedValueIsDeepEqualTo.deepEquals;
 import static org.hamcrest.core.Is.is;
@@ -32,6 +31,7 @@ class CsvXmlGeneratorTest {
 
     Configuration configuration = new Configuration();
     XPathContext context = new Controller(configuration).newXPathContext();
+    XmlFixtureBuilder xml = new XmlFixtureBuilder(configuration);
 
     CsvXmlGenerator subject() throws XPathException {
         if (subject == null) subject = new CsvXmlGenerator(options, context, "staticBaseUri");
@@ -39,9 +39,9 @@ class CsvXmlGeneratorTest {
     }
 
     Item csvDocFixture(DslLambda definition) throws XPathException {
-        return XmlFixtureBuilder.document(doc -> {
-            doc.defaultNs("http://www.w3.org/2005/xpath-functions");
-            doc.element("csv", definition);
+        return xml.element(builder -> {
+            builder.defaultNs("http://www.w3.org/2005/xpath-functions");
+            builder.element("csv", definition);
         });
     }
 
@@ -83,7 +83,7 @@ class CsvXmlGeneratorTest {
         class ColumnNameExtractionOn {
             @BeforeEach
             void addColumnNamesOption() {
-                options.put("column-names", BooleanValue.TRUE);
+                options.put("header", BooleanValue.TRUE);
             }
 
             @Test
@@ -125,7 +125,7 @@ class CsvXmlGeneratorTest {
             @Test
             @DisplayName("Supplying column names as a map produces the correct csv-record")
             void columnsNamesCanBeSupplied() throws XPathException {
-                options.put("column-names", FixtureBuilder.map(m -> m.put("Person", 1).put("Stadt", 2)));
+                options.put("header", FixtureBuilder.sequence("Person", "Stadt"));
                 expected = csvDocFixture(csv -> {
                     csv.element("columns", cols -> {
                         cols.element("column", "Person").element("column", "Stadt");
