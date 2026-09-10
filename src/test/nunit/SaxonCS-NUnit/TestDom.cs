@@ -1,14 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using NUnit.Framework;
 using Saxon.Api;
-using Saxon.Ejava.lang;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Hej.om;
 using Saxon.Hej.tree.util;
@@ -47,7 +44,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void testCopyNamespaces() {
             try {
-                String input = "<?xml version='1.0'?> \n" +
+                string input = "<?xml version='1.0'?> \n" +
                                "<XmlDocument xmlns='http://lost.namespace.com/' \n" +
                                "xmlns:xsi='http://www.namespacexsi.com' " +
                                "xsi:value='some-value'/>";
@@ -79,7 +76,7 @@ namespace SaxonCS_NUnit {
             // Bug 4683
             try {
                 
-                String xml = "<root>\n"
+                string xml = "<root>\n"
                              + "  <item/>\n"
                              + "  <item>\n"
                              + "    <foo id=\"foo1\"/>\n"
@@ -97,7 +94,7 @@ namespace SaxonCS_NUnit {
                 doc.Load(new StringReader(xml));
                 XdmNode xdmNode = builder.Wrap(doc);
 
-                String stylesheet =
+                string stylesheet =
                     "<xsl:transform version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
                     + "  xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" exclude-result-prefixes=\"#all\">\n"
                     + "\n"
@@ -130,8 +127,8 @@ namespace SaxonCS_NUnit {
         }
 
         /**
-     * Get the string value of a document node
-     */
+         * Get the string value of a document node
+         */
 
         [Test]
         public void testStringValueOfDocHE() {
@@ -141,7 +138,7 @@ namespace SaxonCS_NUnit {
 
         private void testStringValueOfDoc() {
             try {
-                String xml = "<!DOCTYPE test [\n" +
+                string xml = "<!DOCTYPE test [\n" +
                              " <!ENTITY omega 'theta'>\n" +
                              "]>\n" +
                              "<test>[&omega;]</test>";
@@ -153,7 +150,7 @@ namespace SaxonCS_NUnit {
                 doc.Load(new StringReader(xml));
                 XdmNode xdmNode = builder.Wrap(doc);
 
-                String stylesheet =
+                string stylesheet =
                     "<?xml version=\"1.0\"?> \n" +
                     "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "<xsl:template match='/'>\n" +
@@ -163,8 +160,8 @@ namespace SaxonCS_NUnit {
 
                 XsltExecutable templates = proc.NewXsltCompiler().Compile(new StringReader(stylesheet));
                 Xslt30Transformer transformer = templates.Load30();
-                StringWriter sw = new StringWriter();
-                transformer.ApplyTemplates(proc.NewDocumentBuilder().Wrap(doc), proc.NewSerializer(sw));
+                StringWriter sw = new ();
+                transformer.ApplyTemplates(xdmNode, proc.NewSerializer(sw));
                 //System.err.println(sw.ToString());
                 Assert.That(sw.ToString().Contains("<out>[theta]</out>"));
             }
@@ -174,8 +171,64 @@ namespace SaxonCS_NUnit {
         }
 
         /**
-     * Test calling an extension function when the stylesheet has stripped whitespace (virtually)
-     */
+         * Test names of wrapped DOM nodes (and ability to select them...)
+         */
+
+        [Test]
+        public void testNodeNames() {
+            string xml = "<root xmlns='http://default.ns/'>"
+                         + "  <?pi data?>"
+                         + "  <!-- comment -->"
+                         + "  <item/>"
+                         + "  <item>"
+                         + "    <x:foo xmlns:x='http://x.ns/' name='foo1' xml:id=\"foo1\"/>\n"
+                         + "  </item>"
+                         + "  <item></item>"
+                         + "  <item>"
+                         + "    <foo id=\"foo2\"/>"
+                         + "  </item>"
+                         + "  <textItem>text</textItem>"
+                         + "  <cdataItem><![CDATA[cdata]]></cdataItem>"
+                         + "</root>";
+
+            void Check(XdmNode node, string prefix, string uri, string local) {
+                Assert.AreEqual( prefix,node.NodeName == null ? "" : node.NodeName.Prefix);
+                Assert.AreEqual(local, node.NodeName == null ? "" : node.NodeName.LocalName);
+                Assert.AreEqual(uri, node.NodeName == null ? "" : node.NodeName.Uri);
+            }
+            
+            Processor proc = new();
+            DocumentBuilder builder = proc.NewDocumentBuilder();
+            XmlDocument doc = new();
+            doc.Load(new StringReader(xml));
+            XdmNode docNode = builder.Wrap(doc);
+            
+            Check(docNode, "", "", "");
+            XdmNode root = docNode.Select(Steps.Child("*")).First();
+            Check(root, "", "http://default.ns/", "root");
+            XdmNode comment = root.Select(Steps.Child(Predicates.IsComment())).First();
+            Check(comment, "", "", "");
+            XdmNode pi = root.Select(Steps.Child(Predicates.IsProcessingInstruction())).First();
+            Check(pi, "", "", "pi");
+            XdmNode item = root.Select(Steps.Child("item")).First();
+            Check(item, "", "http://default.ns/", "item");
+            XdmNode foo = root.Select(Steps.Descendant("foo")).First();
+            Check(foo, "x", "http://x.ns/", "foo");
+            XdmNode name = foo.Select(Steps.Attribute("name")).First();
+            Check(name, "", "", "name");
+            XdmNode xmlId = foo.Select(Steps.Attribute("id")).First();
+            Check(xmlId, "xml", NamespaceConstant.XML, "id");
+            XdmNode textItemElement = root.Select(Steps.Descendant("textItem")).First();
+            XdmNode textItem = textItemElement.Select(Steps.Child(Predicates.IsText())).First();
+            Check(textItem, "", "", "");
+            XdmNode cdataItem = root.Select(Steps.Descendant("cdataItem")).First()
+                .Select(Steps.Child(Predicates.IsText())).First();
+            Check(cdataItem, "", "", "");
+        }
+
+        /**
+         * Test calling an extension function when the stylesheet has stripped whitespace (virtually)
+         */
 
         [Test]
         public void testStripSpaceHE() {
@@ -226,9 +279,8 @@ namespace SaxonCS_NUnit {
 
                 XsltExecutable templates = proc.NewXsltCompiler().Compile(new StringReader(stylesheet));
                 Xslt30Transformer transformer = templates.Load30();
-                XdmNode source = proc.NewDocumentBuilder().Wrap(doc);
-                StringWriter sw = new StringWriter();
-                transformer.ApplyTemplates(source, proc.NewSerializer(sw));
+                StringWriter sw = new ();
+                transformer.ApplyTemplates(xdmNode, proc.NewSerializer(sw));
                 Console.Error.WriteLine(sw.ToString());
                 Assert.That(sw.ToString().Contains("[f] [f][e]"), "Extension function not called");
             }
@@ -238,7 +290,7 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        /**
+        /*
          * Method to be called from previous test
          */
 
@@ -250,7 +302,7 @@ namespace SaxonCS_NUnit {
         //     return sb.ToString();
         // }
 
-        /**
+        /*
          * Method to be called from previous test
          */
 
@@ -259,13 +311,13 @@ namespace SaxonCS_NUnit {
         // }
 
         /**
-     * Test Configuration.buildDocument given a DOMSource that wraps an XmlElement node
-     */
+         * Test Configuration.buildDocument given a DOMSource that wraps an XmlElement node
+         */
 
         [Test]
         public void testBuildFromDomElement() {
             try {
-                String xml = "<?xml version='1.0'?> \n" +
+                string xml = "<?xml version='1.0'?> \n" +
                              "<XmlDocument> <e> <f/><f/> </e> </XmlDocument>";
 
                 // Read an XML file to a DOM
@@ -286,8 +338,8 @@ namespace SaxonCS_NUnit {
         }
 
         /**
-     * Test that Saxon treats a text node with "null" content as if it had zero-length content
-     */
+         * Test that Saxon treats a text node with "null" content as if it had zero-length content
+         */
 
         [Test]
         public void testNullTextNodes() {
@@ -472,7 +524,7 @@ namespace SaxonCS_NUnit {
         //         XPathFactoryImpl xf = new net.sf.saxon.xpath.XPathFactoryImpl();
         //         xf.setConfiguration(config);
         //         XPath xp = xf.newXPath();
-        //         String result = xp.evaluate("count(.//text())", wrapper);
+        //         string result = xp.evaluate("count(.//text())", wrapper);
         //         Assert.AreEqual("1", result, "number of text nodes ");
         //     } catch (ParserConfigurationException | XPathException e) {
         //         Assert.Faile.getMessage());
@@ -512,7 +564,7 @@ namespace SaxonCS_NUnit {
         public void testXPathNodeList() {
             try {
                 Processor proc = new();
-                String xml = "<?xml version='1.0'?> \n" +
+                string xml = "<?xml version='1.0'?> \n" +
                              "<XmlDocument><e/><f/><g/></XmlDocument>";
                 XmlDocument doc = new();
                 doc.Load(new MemoryStream(new UTF8Encoding().GetBytes(xml)));
@@ -533,7 +585,7 @@ namespace SaxonCS_NUnit {
         // [Test]
         // public void testXPathNodeListFromDOMSource() {
         //     try {
-        //         String in = "<?xml version='1.0'?> \n" +
+        //         string in = "<?xml version='1.0'?> \n" +
         //                 "<XmlDocument><e/><f/><g/></XmlDocument>";
         //         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         //         factory.setNamespaceAware(true);
@@ -644,7 +696,7 @@ namespace SaxonCS_NUnit {
         // [Test]
         // public void testXPathNodeListFromJaxpExtensionFunction() {
         //     try {
-        //         String in = "<?xml version='1.0'?> \n" +
+        //         string in = "<?xml version='1.0'?> \n" +
         //                 "<books><book>fred</book><book>jane</book><book>anne</book><book>sue</book></books>";
         //         DocumentBuilderFactory factory =
         //                 DocumentBuilderFactory.newInstance();
@@ -673,17 +725,17 @@ namespace SaxonCS_NUnit {
         //     XPath xpath = new XPathEvaluator();
         //     xpath.setNamespaceContext(new NamespaceContext() {
         //         @Override
-        //         public String getNamespaceURI(String prefix) {
+        //         public string getNamespaceURI(string prefix) {
         //             return prefix.equals("ext") ? "http://extString" : null;
         //         }
         //
         //         @Override
-        //         public String getPrefix(String namespaceURI) {
+        //         public string getPrefix(string namespaceURI) {
         //             return null;
         //         }
         //
         //         @Override
-        //         public Iterator getPrefixes(String namespaceURI) {
+        //         public Iterator getPrefixes(string namespaceURI) {
         //             return null;
         //         }
         //     });
@@ -737,7 +789,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public void testTopLevelNonWhitespaceText() {
             // effect of adding top-level whitespace text node
-            String stylesheet =
+            string stylesheet =
                 "<?xml version=\"1.0\"?> \n" +
                 "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                 "<xsl:template match='/'>\n" +
@@ -842,17 +894,17 @@ namespace SaxonCS_NUnit {
         private void tryElementValidation(bool withPrefix, bool namespaceAware) {
 
             try {
-                String prefixXml = "<n0:bar xmlns:n0=\"http://bar\">\n" +
+                string prefixXml = "<n0:bar xmlns:n0=\"http://bar\">\n" +
                                    "    <foo xmlns=\"http://foo\"></foo>\n" +
                                    "</n0:bar>";
 
-                String noPrefixXml = "<bar xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                string noPrefixXml = "<bar xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
                                      " xsi:schemaLocation=\"http://bar bar.xsd\"\n" +
                                      " xmlns=\"http://bar\">\n" +
                                      "    <foo xmlns=\"http://foo\"></foo>\n" +
                                      "</bar>";
 
-                String barXsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                string barXsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                 "<schema \n" +
                                 "    xmlns:foo=\"http://foo\"\n" +
                                 "    xmlns:bar=\"http://bar\"\n" +
@@ -879,7 +931,7 @@ namespace SaxonCS_NUnit {
                                 "    \n" +
                                 "</schema>        ";
 
-                String fooXsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                string fooXsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                                 "<schema \n" +
                                 "    xmlns:foo=\"http://foo\"\n" +
                                 "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
@@ -1103,7 +1155,7 @@ namespace SaxonCS_NUnit {
         public void testNullNamespace() {
             try {
                 Processor proc = new Processor();
-                String xml =
+                string xml =
 
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                     "<root xmlns=\"abc\">" +
@@ -1113,7 +1165,7 @@ namespace SaxonCS_NUnit {
                     "</name>" +
                     "</root>";
 
-                String path =
+                string path =
                     "/*[local-name(.)=\"root\" and namespace-uri(.)=\"abc\"]" +
                     "/*[local-name(.)=\"name\" and namespace-uri(.)=\"\"]" +
                     "/*[local-name(.)=\"first\" and namespace-uri(.)=\"\"]/text()";
@@ -1148,7 +1200,7 @@ namespace SaxonCS_NUnit {
         public void testNullNamespaceNonNamespaceAware() {
             try {
                 Processor proc = new();
-                String xml =
+                string xml =
 
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                     "<root xmlns=\"abc\">" +
@@ -1158,7 +1210,7 @@ namespace SaxonCS_NUnit {
                     "</name>" +
                     "</root>";
 
-                String path =
+                string path =
                     "/*[local-name(.)=\"root\" and namespace-uri(.)=\"abc\"]" +
                     "/*[local-name(.)=\"name\" and namespace-uri(.)=\"\"]" +
                     "/*[local-name(.)=\"first\" and namespace-uri(.)=\"\"]/text()";
@@ -1254,7 +1306,7 @@ namespace SaxonCS_NUnit {
         public void testSpaceStrippedDomWithExtensionFunction() {
             // Bug 3142
             try {
-                String xml =
+                string xml =
 
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                     "<root xmlns=\"abc\">" +
@@ -1336,7 +1388,7 @@ namespace SaxonCS_NUnit {
             Xslt30Transformer transformer;
             Xslt30Transformer identityTransformer;
 
-            String xslt =
+            string xslt =
                 "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>\n" +
                 "  <xsl:template match='/'>\n" +
                 "    <xsl:variable name='node'>\n" +
@@ -1422,18 +1474,18 @@ namespace SaxonCS_NUnit {
         //         XmlDocument document = (DocumentOverNodeInfo) DocumentOverNodeInfo.wrap(node.getUnderlyingNode());
         //         XmlElement root = document.DocumentElement;
         //         XmlElement element0 = (XmlElement) root.ChildNodes().item(0);
-        //         Console.WriteLine(String.format("%s", element0.getNodeName()));
+        //         Console.WriteLine(string.format("%s", element0.getNodeName()));
         //         for (int i = 0; i < element0.Attributes.getLength(); i++) {
-        //             Console.WriteLine(String.format("element0 attribute[%d] %s=%s", i, element0.Attributes.item(i).getNodeName(), element0.Attributes.item(i).getNodeValue()));
+        //             Console.WriteLine(string.format("element0 attribute[%d] %s=%s", i, element0.Attributes.item(i).getNodeName(), element0.Attributes.item(i).getNodeValue()));
         //         }
         //         Console.WriteLine();
         //         XmlElement element1 = (XmlElement) root.ChildNodes[1];
-        //         Console.WriteLine(String.format("%s", element1.getNodeName()));
+        //         Console.WriteLine(string.format("%s", element1.getNodeName()));
         //         for (int i = 0; i < element1.Attributes.Count; i++) {
-        //             Console.WriteLine(String.format("element1 attribute[%d] %s=%s", i, element1.Attributes.item(i).getNodeName(), element1.Attributes.item(i).getNodeValue()));
+        //             Console.WriteLine(string.format("element1 attribute[%d] %s=%s", i, element1.Attributes.item(i).getNodeName(), element1.Attributes.item(i).getNodeValue()));
         //         }
         //         Console.WriteLine();
-        //         Console.WriteLine(String.format("treeModel=%s", documentBuilder.getTreeModel().getClass().getName()));
+        //         Console.WriteLine(string.format("treeModel=%s", documentBuilder.getTreeModel().getClass().getName()));
         //         Console.WriteLine("java -cp 'SaxonHE9-9-17J\\saxon9he.jar';. TEST");
         //         Console.WriteLine("ACTUAL OUTPUT ON MY PC");
         //         Console.WriteLine("element0");
@@ -1523,7 +1575,7 @@ namespace SaxonCS_NUnit {
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 tf.ApplyTemplates(builder.Wrap(builder.Wrap(doc), doc.DocumentElement), ser);
 
-                String transformed = writer.ToString();
+                string transformed = writer.ToString();
                 Console.WriteLine(writer.ToString());
 
                 XmlDocument doc2 = new();
