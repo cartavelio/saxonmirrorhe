@@ -305,7 +305,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             }
         }
         if (!isLicenseFound()) {
-            loadLicense();
+            try {
+                loadLicense();
+            } catch (Exception err) {
+                int reason = err instanceof LicenseException ? ((LicenseException) err).getReason() : LicenseException.CANNOT_READ;
+                String msg = err.getMessage() + ". A license is needed to use " + name;
+                throw new LicenseException(msg, reason);
+            }
         }
         reportIfMissingLicenseFeature(feature, name);
     }
