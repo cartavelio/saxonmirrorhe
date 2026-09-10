@@ -155,12 +155,13 @@
                   href="/starting/running">Running SaxonC</a>.</li>
          </ul>
 
-         <p>From SaxonC 12.4.2:</p>
+         <p>From SaxonC 12.5:</p>
          <ul>
             <li>The methods <code>getLineNumber()</code> and <code>getColumnNumber()</code> have been added to the
                <code>XdmNode</code> class in the C++, Python and PHP APIs.</li>
 
          </ul>
+
       </category>
       
       <category name="installation">
