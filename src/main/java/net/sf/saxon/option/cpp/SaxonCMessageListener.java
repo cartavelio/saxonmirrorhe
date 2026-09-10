@@ -77,7 +77,9 @@ public class SaxonCMessageListener implements MessageListener2 {
      * @return array of XdmNode objects
      */
     @CEntryPoint(name = "j_getXslMessages")
-    public CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc) {
+    public static CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle messageListnerRef) {
+        SaxonCMessageListener messageListener = SaxonCAPI.objectHandles.get(messageListnerRef);
+        List<XdmNode> xslMessages = messageListener.xslMessages;
         if(xslMessages == null) {
             return null;
         } else {
