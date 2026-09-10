@@ -263,7 +263,7 @@ public abstract class FunctionCall extends Expression {
                             arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
                         } else {
                             Supplier<Expression> defaultValue = fd.getDefaultValueExpression(i);
-                            if (defaultValue == null) {
+                            if (defaultValue == null || defaultValue.get() == null) {
                                 arg = Literal.makeEmptySequence();
                                 // This only happens if there's an error in the function definition
 //                                throw new XPathException("No value or default available for " + RoleDiagnostic.ordinal(i + 1) +
