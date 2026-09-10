@@ -14,7 +14,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.test.xdmfixtures.DslLambda;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
-import net.sf.saxon.test.xdmfixtures.MapBuilder;
+import net.sf.saxon.test.xdmfixtures.TestMapBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +53,7 @@ class CsvToArraysTest {
         return SequenceTool.fromItems(new StringValue(input), options);
     }
 
-    public MapItem makeOptions(DslLambda<MapBuilder> optionsBuilder) {
+    public MapItem makeOptions(DslLambda<TestMapBuilder> optionsBuilder) {
         return FixtureBuilder.map(optionsBuilder);
     }
 

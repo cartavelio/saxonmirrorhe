@@ -5,7 +5,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.test.xdmfixtures.DslLambda;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
-import net.sf.saxon.test.xdmfixtures.MapBuilder;
+import net.sf.saxon.test.xdmfixtures.TestMapBuilder;
 import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class TestHelpers {
         }
     }
 
-    public static MapItem buildExpected(DslLambda<MapBuilder> definition) {
+    public static MapItem buildExpected(DslLambda<TestMapBuilder> definition) {
         return FixtureBuilder.map(definition);
     }
 
