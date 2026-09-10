@@ -1,5 +1,6 @@
 package com.saxonica.functions.qt4;
 
+import com.saxonica.ee.schema.UserComplexType;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.ItemMapper;
 import net.sf.saxon.expr.ItemMappingIterator;
@@ -438,22 +439,24 @@ public class ElementsToMaps extends SystemFunction {
             // If the element is schema-validated, use schema information
             SchemaType type = element.getSchemaType();
             if (!(type == AnyType.getInstance() || type == Untyped.getInstance())) {
-                if (type instanceof SimpleType) {
+                if (type instanceof UserComplexType) {
+                    UserComplexType cType = (UserComplexType) type;
+                    ElementPlan layoutWith = cType.getPreferredJsonLayout(cc.schema, cc.disabledLayouts);
+                    return processElementWithLayout(
+                            element, cc, layoutWith.layout, "schema", layoutWith.childFingerprint);
+                } else if (type instanceof SimpleType) {
                     // Rule 7b
-                    if (!cc.disabledLayouts.contains(JsonLayout.EMPTY) && ((SimpleType)type).isZeroLength()) {
+
+                    if (!cc.disabledLayouts.contains(JsonLayout.EMPTY) && ((SimpleType) type).isZeroLength()) {
                         return makeEmptyElementContent(element, cc);
                     }
                     if (!cc.disabledLayouts.contains(JsonLayout.SIMPLE)) {
                         return makeSimpleElementContent(element, cc);
                     }
-                    return makeMixedElementContent(element, cc, false);
-                } else {
-                    // Rule 7c
-                    ComplexType cType = (ComplexType) type;
-                    ElementPlan layoutWith = cType.getPreferredJsonLayout(cc.schema, cc.disabledLayouts);
-                    return processElementWithLayout(
-                            element, cc, layoutWith.layout, "schema", layoutWith.childFingerprint);
                 }
+                // Rule 7c
+                return makeMixedElementContent(element, cc, false);
+
             } else {
                 int properties;
 
