@@ -13,11 +13,7 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 /**
  * Common declarations for BuildURI and ParseURI.
@@ -55,8 +51,42 @@ abstract public class URIFunctions extends SystemFunction {
     protected static final AtomicValue FRAGMENT = new StringValue("fragment");
     protected static final AtomicValue HIERARCHICAL = new StringValue("hierarchical");
 
-    protected String pathSeparator = "/";
-    protected String querySeparator = "&";
+    protected static final Set<Character> unescapedUriCharacters;
+    static {
+        HashSet<Character> chars = new HashSet<>();
+        for (char ch = 'A'; ch <= 'Z'; ch++) {
+            chars.add(ch);
+        }
+        for (char ch = 'a'; ch <= 'z'; ch++) {
+            chars.add(ch);
+        }
+        for (char ch = '0'; ch <= '9'; ch++) {
+            chars.add(ch);
+        }
+        chars.add('-');
+        chars.add('.');
+        chars.add('_');
+        chars.add('~');
+        chars.add('%');
+        chars.add('!');
+        chars.add('$');
+        chars.add('&');
+        chars.add('\'');
+        chars.add('(');
+        chars.add(')');
+        chars.add('*');
+        chars.add('+');
+        chars.add(',');
+        chars.add(';');
+        chars.add('=');
+        chars.add(':');
+        chars.add('@');
+
+        unescapedUriCharacters = Collections.unmodifiableSet(chars);
+    }
+
+    protected char pathSeparator = '/';
+    protected char querySeparator = '&';
     protected boolean allowDeprecatedFeatures = false;
     protected boolean omitDefaultPorts = false;
     protected boolean hierarchical = true;
@@ -79,10 +109,18 @@ abstract public class URIFunctions extends SystemFunction {
         if (getArity() == 2) {
             MapItem options = (MapItem) arguments[1].head();
             if (options.get(PATH_SEPARATOR) != null) {
-                pathSeparator = options.get(PATH_SEPARATOR).getStringValue();
+                String str = options.get(PATH_SEPARATOR).getStringValue();
+                if (str.length() != 1) {
+                    throw new IllegalArgumentException("Path separator must be a single character");
+                }
+                pathSeparator = str.charAt(0);
             }
             if (options.get(QUERY_SEPARATOR) != null) {
-                querySeparator = options.get(QUERY_SEPARATOR).getStringValue();
+                String str = options.get(QUERY_SEPARATOR).getStringValue();
+                if (str.length() != 1) {
+                    throw new IllegalArgumentException("Path separator must be a single character");
+                }
+                querySeparator = str.charAt(0);
             }
             allowDeprecatedFeatures = options.get(ALLOW_DEPRECATED_FEATURES) != null && options.get(ALLOW_DEPRECATED_FEATURES).effectiveBooleanValue();
             omitDefaultPorts = options.get(OMIT_DEFAULT_PORTS) != null && options.get(OMIT_DEFAULT_PORTS).effectiveBooleanValue();
@@ -95,32 +133,73 @@ abstract public class URIFunctions extends SystemFunction {
         StringBuilder output = new StringBuilder();
         for (int pos = 0; pos < input.length(); pos++) {
             char ch = input.charAt(pos);
-            if (ch == ' ') {
-                output.append("+");
-            } else if (ch == '/') {
-                output.append("%2F");
-            } else {
+            if (ch > 127 || unescapedUriCharacters.contains(ch)) {
                 output.append(ch);
+            } else {
+                output.append("%");
+                output.append(toTwoHexDigits(ch));
             }
         }
         return output.toString();
     }
 
-    protected String encodeOtherSegment(GroundedValue value) throws XPathException {
+    protected String encodeQueryPart(GroundedValue value) throws XPathException {
+        // Like encodePathSegment but allow '/' and '?' unencoded.
+        // Force '=' and '&' to be percent encoded.
         String input = value.getStringValue();
         StringBuilder output = new StringBuilder();
         for (int pos = 0; pos < input.length(); pos++) {
             char ch = input.charAt(pos);
-            if (ch == ' ') {
-                output.append("+");
-            } else if (// gen-delims
-                       (ch == ':' || ch == '/' || ch == '?' || ch == '#' || ch == '[' || ch == ']' || ch == '@')
-                       // sub-delims
-                        || (ch == '!' || ch == '$' || ch == '&' || ch == '\'' || ch == '"' || ch == '(' || ch == ')' || ch == '*'
-                            || ch == '+' || ch == ',' || ch == ';' || ch == '=')) {
-                output.append("%").append(toTwoHexDigits((int)ch));
-            } else {
+
+            if (ch == querySeparator) {
+                output.append("%");
+                output.append(toTwoHexDigits(querySeparator));
+                continue;
+            }
+
+            switch (ch) {
+                case '=':
+                    output.append("%3D");
+                    break;
+                case '&':
+                    output.append("%26");
+                    break;
+                case '/':
+                case '?':
+                    output.append(ch);
+                    break;
+                default:
+                    if (ch > 127 || unescapedUriCharacters.contains(ch)) {
+                        output.append(ch);
+                    } else {
+                        output.append("%");
+                        output.append(toTwoHexDigits(ch));
+                    }
+                    break;
+            }
+        }
+        return output.toString();
+    }
+
+    protected String encodeFragmentIdentifier(GroundedValue value) throws XPathException {
+        // Like encodePathSegment but allow '/' and '?' unencoded.
+        String input = value.getStringValue();
+        StringBuilder output = new StringBuilder();
+        for (int pos = 0; pos < input.length(); pos++) {
+            char ch = input.charAt(pos);
+            if (ch > 127 || unescapedUriCharacters.contains(ch)) {
                 output.append(ch);
+            } else {
+                switch (ch) {
+                    case '/':
+                    case '?':
+                        output.append(ch);
+                        break;
+                    default:
+                        output.append("%");
+                        output.append(toTwoHexDigits(ch));
+                        break;
+                }
             }
         }
         return output.toString();

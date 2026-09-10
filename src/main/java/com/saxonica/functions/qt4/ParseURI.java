@@ -177,7 +177,7 @@ public class ParseURI extends URIFunctions {
                     seg = "+" + seg.substring(1);
                 }
                 pathSegments = pathSegments.concatenate(new StringValue(seg));
-                uristr = uristr.substring(pos+pathSeparator.length());
+                uristr = uristr.substring(pos+1); // pathseparator is a single character
                 pos = uristr.indexOf(pathSeparator);
             }
             pathSegments = pathSegments.concatenate(new StringValue(DecodeFromURI.decode(uristr)));
@@ -191,7 +191,7 @@ public class ParseURI extends URIFunctions {
 
         if (query != null) {
             HashTrieMap querySegments = new HashTrieMap();
-            for (String str : query.split(querySeparator)) {
+            for (String str : query.split(""+querySeparator)) {
                 pos = str.indexOf("=");
                 final StringValue key;
                 final StringValue value;

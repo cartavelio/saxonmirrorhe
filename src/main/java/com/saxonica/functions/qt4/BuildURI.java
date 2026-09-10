@@ -1,7 +1,6 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
@@ -105,7 +104,7 @@ public class BuildURI extends URIFunctions {
         }
 
         if (parts.get(QUERY_PARAMETERS) != null) {
-            String sep = "?";
+            char sep = '?';
             for (KeyValuePair pair : ((MapItem) parts.get(QUERY_PARAMETERS)).keyValuePairs()) {
                 if (pair.key != null || pair.value != null) {
                     uri.append(sep);
@@ -116,15 +115,15 @@ public class BuildURI extends URIFunctions {
                                 if (idx > 0) {
                                     uri.append(sep);
                                 }
-                                uri.append(encodeOtherSegment(pair.key));
+                                uri.append(encodeQueryPart(pair.key));
                                 uri.append("=");
-                                uri.append(encodeOtherSegment(pair.value.itemAt(idx)));
+                                uri.append(encodeQueryPart(pair.value.itemAt(idx)));
                             }
                         } else {
-                            uri.append(encodeOtherSegment(pair.key));
+                            uri.append(encodeQueryPart(pair.key));
                         }
                     } else {
-                        uri.append(encodeOtherSegment(pair.value));
+                        uri.append(encodeQueryPart(pair.value));
                     }
                 }
             }
@@ -133,7 +132,7 @@ public class BuildURI extends URIFunctions {
         }
 
         if (parts.get(FRAGMENT) != null) {
-            uri.append("#").append(encodeOtherSegment(parts.get(FRAGMENT)));
+            uri.append("#").append(encodeFragmentIdentifier(parts.get(FRAGMENT)));
         }
 
         return new StringValue(uri.toString());
