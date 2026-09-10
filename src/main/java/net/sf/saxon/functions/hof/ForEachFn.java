@@ -7,10 +7,10 @@
 
 package net.sf.saxon.functions.hof;
 
-import com.saxonica.functions.qt4.Replicate;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.MappingIterator;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.instruct.AbstractBlockIterator;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
@@ -57,7 +57,7 @@ public class ForEachFn extends SystemFunction {
             case 0:
                 int count = Count.count(base);
                 GroundedValue val = function.call(context, new Sequence[]{}).materialize();
-                return new Replicate.RepeatingIterator(val, count, context);
+                return new RepeatingIterator(val, count, context);
             case 1:
                 return MappingIterator.map(base, item -> dynamicCall(function, context, item).iterate());
             case 2:
@@ -144,6 +144,21 @@ public class ForEachFn extends SystemFunction {
         }
 
 
+    }
+
+    public static class RepeatingIterator extends AbstractBlockIterator {
+
+        private final GroundedValue baseValue;
+
+        public RepeatingIterator(GroundedValue baseValue, int count, XPathContext context) {
+            super(count, context);
+            this.baseValue = baseValue;
+        }
+
+        @Override
+        public SequenceIterator getNthChildIterator(int n) {
+            return baseValue.iterate();
+        }
     }
 }
 

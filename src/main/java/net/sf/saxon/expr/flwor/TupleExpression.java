@@ -17,6 +17,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.AtomicValue;
@@ -93,6 +94,7 @@ public class TupleExpression extends Expression {
 
     /*@NotNull*/
     @Override
+    @CSharpReplaceBody(code="return Saxon.Hej.type.JavaExternalObjectType.of(typeof(Saxon.Hej.expr.flwor.FlworTuple<Saxon.Hej.om.Sequence>));")
     public ItemType getItemType() {
         return JavaExternalObjectType.of(FlworTuple.class);
     }
@@ -241,7 +243,7 @@ public class TupleExpression extends Expression {
      * @throws XPathException if any error occurs
      */
 
-    public void setCurrentTuple(XPathContext context, FlworTuple tuple) throws XPathException {
+    public void setCurrentTuple(XPathContext context, FlworTuple<Sequence> tuple) throws XPathException {
         Sequence[] members = tuple.getValues();
         int n = getSize();
         for (int i = 0; i < n; i++) {

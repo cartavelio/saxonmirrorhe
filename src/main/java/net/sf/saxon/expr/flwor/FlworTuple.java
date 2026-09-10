@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
 /**
@@ -23,14 +22,6 @@ public class FlworTuple<T extends Sequence> extends ObjectValue<T[]> {
     public T[] getValues() {
         return getObject();
     }
-
-    public AtomicValue[] getAtomicValues() {
-        Sequence[] val = getValues();
-        AtomicValue[] result = new AtomicValue[val.length];
-        for (int i=0; i<val.length; i++) {
-            result[i] = (AtomicValue)val[i];
-        }
-        return result;
-    }
+    
 }
 

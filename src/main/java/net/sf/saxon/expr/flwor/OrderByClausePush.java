@@ -9,7 +9,10 @@ package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.*;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.ItemToBeSorted;
+import net.sf.saxon.expr.sort.SortKeyDefinitionList;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 
@@ -89,7 +92,7 @@ public class OrderByClausePush extends TuplePush {
         }
 
         for (ItemToBeSorted itbs : tupleArray) {
-            tupleExpr.setCurrentTuple(context, (FlworTuple) itbs.value);
+            tupleExpr.setCurrentTuple(context, (FlworTuple<Sequence>) itbs.value);
             destination.processTuple(context);
         }
         destination.close();
