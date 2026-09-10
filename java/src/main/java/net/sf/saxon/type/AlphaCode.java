@@ -16,6 +16,7 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.*;
+import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -585,6 +586,9 @@ public class AlphaCode {
 //        return parser.parseType(null);
 //    }
 
+    private final static StringValue SV_O = new StringValue(new UnicodeChar('o'));
+    private final static StringValue SV_P = new StringValue(new UnicodeChar('p'));
+
     /**
      * Serialize the XDM map representation of an alphacode
      *
@@ -596,10 +600,10 @@ public class AlphaCode {
         // TODO: may need updating. Used when running the XX compiler under Saxon/J
         StringBuilder out = new StringBuilder();
 
-        StringValue indicator = (StringValue) map.get(StringValue.bmp("o"));
+        StringValue indicator = (StringValue) map.get(SV_O);
         out.append(indicator == null ? "1" : indicator.getStringValue());
 
-        StringValue alphaCode = (StringValue) map.get(StringValue.bmp("p"));
+        StringValue alphaCode = (StringValue) map.get(SV_P);
         out.append(alphaCode == null ? "" : alphaCode.getStringValue());
 
         out.append(" ");

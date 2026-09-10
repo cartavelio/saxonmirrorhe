@@ -28,6 +28,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
@@ -320,6 +321,7 @@ public class LookupAllExpression extends UnaryExpression {
         }
 
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (baseIterator.hasNext()) {
                 GroundedValue value = baseIterator.next();
@@ -346,6 +348,7 @@ public class LookupAllExpression extends UnaryExpression {
         }
 
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (baseIterator.hasNext()) {
                 KeyValuePair kvp = baseIterator.next();

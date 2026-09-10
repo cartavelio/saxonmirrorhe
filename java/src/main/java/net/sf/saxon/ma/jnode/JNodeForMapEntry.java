@@ -9,6 +9,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.value.AtomicValue;
@@ -81,6 +82,7 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
          * Get the next item in the sequence.
          */
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (pairs.hasNext()) {
                 KeyValuePair next = pairs.next();
@@ -126,6 +128,7 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
          * Get the next item in the sequence.
          */
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (pairs.hasNext()) {
                 KeyValuePair next = pairs.next();

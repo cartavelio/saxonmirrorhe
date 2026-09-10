@@ -705,11 +705,10 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                               boolean rejectDuplicates)
             throws XPathException {
         int opt = rejectDuplicates ? ReceiverOption.REJECT_DUPLICATES : ReceiverOption.NONE;
-        UnicodeString value = source.getUnicodeStringValue();
         Schema schema = instruction.getRetainedStaticContext().getImportedSchema();
         SimpleType annotation = validateAttribute(schema, source, schemaType, validation, context);
         try {
-            output.attribute(NameOfNode.makeName(source), annotation, value.toString(), instruction.getLocation(), opt);
+            output.attribute(NameOfNode.makeName(source), annotation, source.getStringValue(), instruction.getLocation(), opt);
         } catch (XPathException e) {
             if (instruction.getPackageData().getHostLanguage() == HostLanguage.XQUERY && e.hasErrorCode("XTTE0950")) {
                 e.setErrorCode("XQTY0086");
@@ -733,7 +732,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
 
     public static SimpleType validateAttribute(
             Schema schema, NodeInfo source, SimpleType schemaType, int validation, XPathContext context) throws XPathException {
-        UnicodeString value = source.getUnicodeStringValue();
+
         SimpleType annotation = BuiltInAtomicType.UNTYPED_ATOMIC;
         if (schemaType != null) {
             if (schemaType.isNamespaceSensitive()) {
@@ -742,6 +741,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 nsErr.setErrorCode("XTTE1545");
                 throw nsErr;
             }
+            UnicodeString value = source.getUnicodeStringValue();
             ValidationFailure valErr = schemaType.validateContent(
                     value, DummyNamespaceResolver.getInstance(), context.getConfiguration().getConversionRules());
             if (valErr != null) {
@@ -752,6 +752,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             }
             annotation = schemaType;
         } else if (validation == Validation.STRICT || validation == Validation.LAX) {
+            UnicodeString value = source.getUnicodeStringValue();
             try {
                 annotation = schema.validateAttribute(NameOfNode.makeName(source).getStructuredQName(), value, validation);
             } catch (ValidationException e) {

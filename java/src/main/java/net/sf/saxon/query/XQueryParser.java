@@ -30,10 +30,7 @@ import net.sf.saxon.serialize.CharacterMap;
 import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.serialize.SerializationParamsHandler;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
-import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.style.AttributeValueTemplate;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
@@ -2238,8 +2235,7 @@ public class XQueryParser extends XPathParser {
                     SortSpec spec = sortSpecList.get(i);
                     SortKeyDefinition key = new SortKeyDefinition(languageVersion);
                     key.setSortKey(sortSpecList.get(i).sortKey, false);
-                    String str = spec.ascending ? "ascending" : "descending";
-                    key.setOrder(new StringLiteral(BMPString.of(str)));
+                    key.setOrder(new StringLiteral(spec.ascending ? U_ASCENDING : U_DESCENDING));
                     key.setEmptyLeast(spec.emptyLeast);
 
                     if (spec.collation != null) {
@@ -2280,6 +2276,9 @@ public class XQueryParser extends XPathParser {
         return flwor;
 
     }
+
+    private final static UnicodeString U_ASCENDING = Latin1.of("ascending");
+    private final static UnicodeString U_DESCENDING = Latin1.of("descending");
 
     /**
      * Make a LetExpression. This returns an ordinary LetExpression if tracing is off, and an EagerLetExpression

@@ -42,7 +42,10 @@ public class GYearValue extends GDateValue {
         String date = base + "-01-01" + (tz == null ? "" : tz);
         g.typeLabel = BuiltInAtomicType.G_YEAR;
         setLexicalValue(g, BMPString.of(date), rules.isAllowYearZero());
-        return g.error == null ? new GYearValue(g) : g.error;
+        if (g.error != null) {
+            return g.error;
+        }
+        return new GYearValue(g);
     }
 
     public GYearValue(int year, int tz, boolean xsd10) {

@@ -7,10 +7,11 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 
@@ -179,6 +180,7 @@ public class RootJNode extends JNode {
          * Get the next item in the sequence.
          */
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public GNode next() {
             if (mapEntryIterator.hasNext()) {
                 KeyValuePair nextItem = mapEntryIterator.next();

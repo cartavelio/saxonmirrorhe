@@ -489,7 +489,7 @@ public class REMatcher {
                         int index = ++i;
                         ch = replacement.codePointAt(index);
                         if (ch == '\\' || ch == '$') {
-                            result = result.concat(BMPString.of("" + (char) ch));
+                            result = result.concat(new UnicodeChar(ch));
                         } else {
                             throw new RESyntaxException("Invalid escape '" + ch + "' in replacement string");
                         }

@@ -19,10 +19,12 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
-
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.Untyped;
@@ -369,6 +371,7 @@ public class ExpressionPresenter {
      * @throws XPathException if the namespace map contains unsuitable namespaces, for example namespace URIs containing
      * whitespace.
      */
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static String getNamespacesAsString(NamespaceMap sc, boolean includeXmlNamespace) throws XPathException {
         // Note that this will throw an UnsupportedOperationException if the context does
         // not allow namespace prefixes to be enumerated: that is, if it is a JAXP static context.

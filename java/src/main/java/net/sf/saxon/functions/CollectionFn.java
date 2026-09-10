@@ -22,6 +22,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.ObjectValue;
@@ -172,6 +173,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         //#endif
 
         @Override
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public Item next() {
             if (sources.hasNext()) {
                 return new ObjectValue<Resource>(sources.next(), Resource.class);

@@ -11,11 +11,14 @@ package net.sf.saxon.type;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.value.AtomicValue;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -289,7 +292,8 @@ public class UType {
      * Produce a string representation of a UType
      * @return the string representation
      */
-    
+
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public String toString() {
         Set<PrimitiveUType> components = decompose();
         if (components.isEmpty()) {
@@ -340,6 +344,7 @@ public class UType {
      * @return a corresponding ItemType
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public ItemType toItemType() {
         Set<PrimitiveUType> p = decompose();
         if (p.isEmpty()) {

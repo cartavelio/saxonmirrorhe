@@ -22,12 +22,14 @@ import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.Latin1;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.AtomicType;
@@ -61,18 +63,7 @@ public final class EvaluateInstr extends Expression {
     private Operand dynamicParamsOp;
     private NamespaceUri defaultXPathNamespace = null;
 
-    /**
-     * Set the retained static context
-     *
-     * @param rsc the static context to be retained
-     */
-    @Override
-    public void setRetainedStaticContext(RetainedStaticContext rsc) {
-        super.setRetainedStaticContext(rsc);
-    }
-
-
-
+    private final static StringValue SV_DEFAULT_COLLATION = new StringValue(Latin1.of("default-collation"));
     /**
      * Create an xsl:evaluate instruction
      *
@@ -443,6 +434,7 @@ public final class EvaluateInstr extends Expression {
 
                 // Create a cache key so the compiled expression can be reused
 
+                Instrumentation.count("Evaluate make cache key");
                 StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
                 fsb.append(baseUri);
                 fsb.append("##");
@@ -523,7 +515,7 @@ public final class EvaluateInstr extends Expression {
                     env.setFunctionLibrary(libraryList1);
                     env.setDecimalFormatManager(instr.getRetainedStaticContext().getDecimalFormatManager());
 
-                    GroundedValue defaultCollation = options.get(StringValue.bmp("default-collation"));
+                    GroundedValue defaultCollation = options.get(SV_DEFAULT_COLLATION);
                     if (defaultCollation != null) {
                         env.setDefaultCollationName(defaultCollation.head().getStringValue());
                     }
