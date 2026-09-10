@@ -52,8 +52,6 @@ com/saxonica/functions/extfn/EXPathArchive/Archive.class
 com/saxonica/functions/extfn/EXPathArchive/Entry.class
 com/saxonica/functions/extfn/EXPathBinaryFunctionSet.class
 com/saxonica/functions/extfn/EXPathFileFunctionSet.class
-com/saxonica/functions/extfn/Ending.class
-com/saxonica/functions/extfn/Ending.class
 com/saxonica/functions/extfn/EscapeNCName.class
 com/saxonica/functions/extfn/Eval.class
 com/saxonica/functions/extfn/Evaluate.class
@@ -61,13 +59,7 @@ com/saxonica/functions/extfn/ExpressionFn.class
 com/saxonica/functions/extfn/FunctionAnnotations.class
 com/saxonica/functions/extfn/GroupStarting.class
 com/saxonica/functions/extfn/HighestOrLowest.class
-com/saxonica/functions/extfn/InScopeNamespacesFn.class
-com/saxonica/functions/extfn/InScopeNamespacesFn.class
 com/saxonica/functions/extfn/Index.class
-com/saxonica/functions/extfn/IndexWhere.class
-com/saxonica/functions/extfn/IndexWhere.class
-com/saxonica/functions/extfn/IsNaN.class
-com/saxonica/functions/extfn/IsNaN.class
 com/saxonica/functions/extfn/KeyMap.class
 com/saxonica/functions/extfn/LastModified.class
 com/saxonica/functions/extfn/Leading.class
@@ -83,8 +75,6 @@ com/saxonica/functions/extfn/NewProcessingInstruction.class
 com/saxonica/functions/extfn/NewText.class
 com/saxonica/functions/extfn/ObjectMap.class
 com/saxonica/functions/extfn/Parse.class
-com/saxonica/functions/extfn/ParseHtml.class
-com/saxonica/functions/extfn/ParseHtml.class
 com/saxonica/functions/extfn/ParseXPath.class
 com/saxonica/functions/extfn/PedigreeFn.class
 com/saxonica/functions/extfn/QueryFn.class
@@ -94,8 +84,6 @@ com/saxonica/functions/extfn/SaxonDeepEqual.class
 com/saxonica/functions/extfn/SendMail.class
 com/saxonica/functions/extfn/Serialize.class
 com/saxonica/functions/extfn/Slice.class
-com/saxonica/functions/extfn/Starting.class
-com/saxonica/functions/extfn/Starting.class
 com/saxonica/functions/extfn/TimestampFn.class
 com/saxonica/functions/extfn/TransformFn.class
 com/saxonica/functions/extfn/UnescapeNCName.class
@@ -349,8 +337,6 @@ net/sf/saxon/expr/ContextOriginator.class
 net/sf/saxon/expr/ContextSwitchingExpression.class
 net/sf/saxon/expr/CurrentItemExpression.class
 net/sf/saxon/expr/DescendingRangeIterator.class
-net/sf/saxon/expr/DifferenceEnumeration.class
-net/sf/saxon/expr/DifferenceEnumeration.class
 net/sf/saxon/expr/EagerLetExpression.class
 net/sf/saxon/expr/EarlyEvaluationContext.class
 net/sf/saxon/expr/EmptyTextNodeRemover.class
@@ -374,8 +360,6 @@ net/sf/saxon/expr/HomogeneityChecker.class
 net/sf/saxon/expr/IdentityComparison.class
 net/sf/saxon/expr/InstanceOfExpression.class
 net/sf/saxon/expr/IntegerRangeTest.class
-net/sf/saxon/expr/IntersectionEnumeration.class
-net/sf/saxon/expr/IntersectionEnumeration.class
 net/sf/saxon/expr/IsLastExpression.class
 net/sf/saxon/expr/ItemChecker.class
 net/sf/saxon/expr/ItemCheckingIterator.class
@@ -408,8 +392,6 @@ net/sf/saxon/expr/OperandUsage.class
 net/sf/saxon/expr/OrExpression.class
 net/sf/saxon/expr/PJConverter.class
 net/sf/saxon/expr/PackageData.class
-net/sf/saxon/expr/PatternMatchExpression.class
-net/sf/saxon/expr/PatternMatchExpression.class
 net/sf/saxon/expr/PendingUpdateList.class
 net/sf/saxon/expr/PseudoExpression.class
 net/sf/saxon/expr/QuantifiedExpression.class
@@ -572,8 +554,6 @@ net/sf/saxon/expr/instruct/SimpleNodeConstructor.class
 net/sf/saxon/expr/instruct/SlotManager.class
 net/sf/saxon/expr/instruct/SourceDocument.class
 net/sf/saxon/expr/instruct/TailCall.class
-net/sf/saxon/expr/instruct/TailCallReturner.class
-net/sf/saxon/expr/instruct/TailCallReturner.class
 net/sf/saxon/expr/instruct/TemplateRule.class
 net/sf/saxon/expr/instruct/TerminationException.class
 net/sf/saxon/expr/instruct/TraceExpression.class
@@ -598,8 +578,6 @@ net/sf/saxon/expr/oper/OperandArray.class
 net/sf/saxon/expr/parser/
 net/sf/saxon/expr/parser/CodeInjector.class
 net/sf/saxon/expr/parser/ContextItemStaticInfo.class
-net/sf/saxon/expr/parser/Evaluator.class
-net/sf/saxon/expr/parser/Evaluator.class
 net/sf/saxon/expr/parser/Evaluators.class
 net/sf/saxon/expr/parser/ExpressionAction.class
 net/sf/saxon/expr/parser/ExpressionTool.class
@@ -699,8 +677,6 @@ net/sf/saxon/functions/BaseUri_1.class
 net/sf/saxon/functions/BooleanFn.class
 net/sf/saxon/functions/CallableFunction.class
 net/sf/saxon/functions/Ceiling.class
-net/sf/saxon/functions/CharactersFn.class
-net/sf/saxon/functions/CharactersFn.class
 net/sf/saxon/functions/CodepointEqual.class
 net/sf/saxon/functions/CodepointsToString.class
 net/sf/saxon/functions/CollatingFunctionFixed.class
@@ -773,8 +749,6 @@ net/sf/saxon/functions/MathFunctionSet.class
 net/sf/saxon/functions/Minimax.class
 net/sf/saxon/functions/Name_1.class
 net/sf/saxon/functions/NamespaceForPrefix.class
-net/sf/saxon/functions/NamespaceUri_1.class
-net/sf/saxon/functions/NamespaceUri_1.class
 net/sf/saxon/functions/Nilled_1.class
 net/sf/saxon/functions/NodeName_1.class
 net/sf/saxon/functions/NormalizeSpace_1.class
@@ -783,13 +757,9 @@ net/sf/saxon/functions/NotFn.class
 net/sf/saxon/functions/Number_1.class
 net/sf/saxon/functions/OptionsParameter.class
 net/sf/saxon/functions/Outermost.class
-net/sf/saxon/functions/ParcelFn.class
-net/sf/saxon/functions/ParcelFn.class
 net/sf/saxon/functions/ParseIetfDate.class
 net/sf/saxon/functions/ParseXml.class
 net/sf/saxon/functions/ParseXmlFragment.class
-net/sf/saxon/functions/Parts.class
-net/sf/saxon/functions/Parts.class
 net/sf/saxon/functions/Path_1.class
 net/sf/saxon/functions/PositionAndLast.class
 net/sf/saxon/functions/PushableFunction.class
@@ -839,8 +809,6 @@ net/sf/saxon/functions/TreatFn.class
 net/sf/saxon/functions/TypeAvailable.class
 net/sf/saxon/functions/URIQueryParameters.class
 net/sf/saxon/functions/Unordered.class
-net/sf/saxon/functions/UnparcelFn.class
-net/sf/saxon/functions/UnparcelFn.class
 net/sf/saxon/functions/UnparsedEntity.class
 net/sf/saxon/functions/UnparsedText.class
 net/sf/saxon/functions/UnparsedTextAvailable.class
@@ -882,8 +850,6 @@ net/sf/saxon/functions/registry/VendorFunctionSetHE.class
 net/sf/saxon/functions/registry/XPath20FunctionSet.class
 net/sf/saxon/functions/registry/XPath30FunctionSet.class
 net/sf/saxon/functions/registry/XPath31FunctionSet.class
-net/sf/saxon/functions/registry/XPath40FunctionSet.class
-net/sf/saxon/functions/registry/XPath40FunctionSet.class
 net/sf/saxon/functions/registry/XSLT30FunctionSet.class
 net/sf/saxon/gizmo/
 net/sf/saxon/gizmo/DefaultTalker.class
@@ -1021,16 +987,6 @@ net/sf/saxon/ma/map/RangeKey.class
 net/sf/saxon/ma/map/RecordTest.class
 net/sf/saxon/ma/map/SingleEntryMap.class
 net/sf/saxon/ma/map/TupleType.class
-net/sf/saxon/ma/parray/
-net/sf/saxon/ma/parray/
-net/sf/saxon/ma/parray/ImmList.class
-net/sf/saxon/ma/parray/ImmList.class
-net/sf/saxon/ma/parray/ImmList0.class
-net/sf/saxon/ma/parray/ImmList0.class
-net/sf/saxon/ma/parray/ImmList1.class
-net/sf/saxon/ma/parray/ImmList1.class
-net/sf/saxon/ma/parray/ImmList2.class
-net/sf/saxon/ma/parray/ImmList2.class
 net/sf/saxon/ma/trie/
 net/sf/saxon/ma/trie/ImmutableHashTrieMap.class
 net/sf/saxon/ma/trie/ImmutableList.class
@@ -1061,8 +1017,6 @@ net/sf/saxon/om/EnumSetTool.class
 net/sf/saxon/om/FingerprintedQName.class
 net/sf/saxon/om/FocusIterator.class
 net/sf/saxon/om/FocusTrackingIterator.class
-net/sf/saxon/om/Function.class
-net/sf/saxon/om/Function.class
 net/sf/saxon/om/GenericTreeInfo.class
 net/sf/saxon/om/Genre.class
 net/sf/saxon/om/GroundedValue.class
@@ -1527,8 +1481,6 @@ net/sf/saxon/style/XSLLocalParam.class
 net/sf/saxon/style/XSLLocalVariable.class
 net/sf/saxon/style/XSLMap.class
 net/sf/saxon/style/XSLMapEntry.class
-net/sf/saxon/style/XSLMatch.class
-net/sf/saxon/style/XSLMatch.class
 net/sf/saxon/style/XSLMatchingSubstring.class
 net/sf/saxon/style/XSLMerge.class
 net/sf/saxon/style/XSLMergeAction.class
@@ -1672,8 +1624,6 @@ net/sf/saxon/transpile/CSharpReplaceMethod.class
 net/sf/saxon/transpile/CSharpSimpleEnum.class
 net/sf/saxon/transpile/CSharpSuppressWarnings.class
 net/sf/saxon/transpile/CSharpTypeBounds.class
-net/sf/saxon/transpile/CollectionMaker.class
-net/sf/saxon/transpile/CollectionMaker.class
 net/sf/saxon/tree/
 net/sf/saxon/tree/AttributeLocation.class
 net/sf/saxon/tree/NamespaceNode.class
