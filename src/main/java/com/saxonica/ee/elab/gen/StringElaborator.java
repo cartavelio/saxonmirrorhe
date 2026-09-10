@@ -16,7 +16,7 @@ public abstract class StringElaborator extends Elaborator {
             if (value == null) {
                 return EmptyIterator.emptyIterator();
             } else {
-                return new SingletonIterator(StringValue.makeUStringValue(value));
+                return SingletonIterator.makeIterator(StringValue.makeUStringValue(value));
             }
         };
     }

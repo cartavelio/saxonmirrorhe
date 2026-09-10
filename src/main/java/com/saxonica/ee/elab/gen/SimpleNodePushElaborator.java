@@ -15,7 +15,7 @@ public abstract class SimpleNodePushElaborator extends Elaborator {
     @Override
     public PullEvaluator elaborateForPull() {
         ItemEvaluator itemEval = elaborateForItem();
-        return context -> new SingletonIterator(itemEval.eval(context));
+        return context -> SingletonIterator.makeIterator(itemEval.eval(context));
     }
 
     @Override

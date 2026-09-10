@@ -40,7 +40,7 @@ public class CompactStringValue implements AtomicSequence {
 
     @Override
     public AtomicIterator iterate() {
-        return new SingleAtomicIterator(head());
+        return SingleAtomicIterator.makeIterator(head());
     }
 
     @Override

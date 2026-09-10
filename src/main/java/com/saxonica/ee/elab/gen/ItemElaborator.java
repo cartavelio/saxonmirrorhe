@@ -10,7 +10,7 @@ public abstract class ItemElaborator extends Elaborator {
     @Override
     public PullEvaluator elaborateForPull() {
         ItemEvaluator ie = elaborateForItem();
-        return context -> new SingletonIterator(ie.eval(context));
+        return context -> SingletonIterator.makeIterator(ie.eval(context));
     }
 
     @Override

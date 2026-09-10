@@ -10,7 +10,7 @@ public abstract class BooleanElaborator extends Elaborator {
     @Override
     public PullEvaluator elaborateForPull() {
         BooleanEvaluator b = elaborateForBoolean();
-        return context -> new SingletonIterator(BooleanValue.get(b.eval(context)));
+        return context -> SingletonIterator.makeIterator(BooleanValue.get(b.eval(context)));
     }
 
     @Override
