@@ -107,7 +107,7 @@ namespace Saxon.Impl.Helpers
                     "secondary" => CompareOptions.IgnoreCase | CompareOptions.IgnoreWidth,
                     "tertiary" => CompareOptions.IgnoreWidth,
                     "identical" => 0,
-                    _ => throw new XPathException("strength must be primary, secondary, tertiary, or identical")
+                    _ => 0 // throw new XPathException("strength must be primary, secondary, tertiary, or identical")
                 };
                 this.ignoreCase = strengthAtt switch {
                     "primary" => true,
