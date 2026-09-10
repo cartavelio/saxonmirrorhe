@@ -8,7 +8,6 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.SameNameTest;
 import net.sf.saxon.trans.XPathException;
@@ -36,7 +35,7 @@ public class XSLGlobalContextItem extends XSLContextItem {
      */
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
-        SequenceIterator prior = iterateAxis(AxisInfo.PRECEDING_SIBLING, new SameNameTest(this));
+        SequenceIterator prior = iteratePrecedingSiblingAxis(new SameNameTest(this));
         if (prior.next() != null) {
             compileError("xsl:global-context-item must not appear twice within the same stylesheet module", "XTSE3087");
         }

@@ -814,7 +814,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
 
     private static void setLocalParamDetails(XSLTemplate source, NamedTemplate nt) {
-        SequenceIterator kids = source.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = source.iterateChildAxis(NodeKindTest.ELEMENT);
         List<NamedTemplate.LocalParamInfo> details = new ArrayList<>();
         SequenceTool.supply(kids, (ItemConsumer<? super Item>) child -> {
             if (child instanceof XSLLocalParam) {
@@ -1479,7 +1479,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
         }
         NodeInfo child;
-        SequenceIterator kids = element.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator kids = element.iterateChildAxis(null);
         while ((child = (NodeInfo)kids.next()) != null) {
             if (child instanceof StyleElement) {
                 registerImplicitModes((StyleElement) child, manager);

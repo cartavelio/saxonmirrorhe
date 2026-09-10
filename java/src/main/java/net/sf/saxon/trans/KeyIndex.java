@@ -377,7 +377,7 @@ public class KeyIndex {
         if (value == null) {
             return EmptyIterator.getInstance();
         } else if (value instanceof NodeInfo) {
-            return SingleNodeIterator.makeIterator((NodeInfo) value);
+            return SingletonIterator.makeIterator((NodeInfo) value);
         } else {
             List<NodeInfo> nodes = (List<NodeInfo>) value;
             return new ListIterator.Of<>(nodes);

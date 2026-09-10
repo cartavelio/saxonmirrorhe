@@ -100,7 +100,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
             Node node = getAttributes().getNamedItem(name);
             return node == null ? "" : node.getNodeValue();
         }
-        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = node.iterateAttributeAxis(null);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
@@ -130,7 +130,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
 
     @Override
     public Attr getAttributeNode(String name) {
-        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = node.iterateAttributeAxis(null);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
@@ -267,7 +267,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
     public Attr getAttributeNodeNS(String namespaceURI, String localName) {
         NamePool pool = node.getConfiguration().getNamePool();
         NameTest test = new NameTest(Type.ATTRIBUTE, NamespaceUri.of(namespaceURI), localName, pool);
-        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE, test);
+        SequenceIterator atts = node.iterateAttributeAxis(test);
         return (Attr) wrap((NodeInfo)atts.next());
     }
 
@@ -308,7 +308,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
             Node node = getAttributes().getNamedItem(name);
             return node != null;
         }
-        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = node.iterateAttributeAxis(null);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {

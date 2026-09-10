@@ -71,7 +71,7 @@ public class Error extends SystemFunction implements Callable {
             if (errorObject.getLength() == 1) {
                 Item root = errorObject.head();
                 if ((root instanceof NodeInfo) && ((NodeInfo) root).getNodeKind() == Type.DOCUMENT) {
-                    SequenceIterator iter = ((NodeInfo) root).iterateAxis(AxisInfo.CHILD,
+                    SequenceIterator iter = ((NodeInfo) root).iterateChildAxis(
                             new NameTest(Type.ELEMENT, NamespaceUri.NULL, "error", context.getConfiguration().getNamePool()));
                     NodeInfo errorElement = (NodeInfo)iter.next();
                     if (errorElement != null) {

@@ -9,9 +9,12 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntPredicateProxy;
+
+import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 /**
  * Iterate over the following axis starting at a given node.
@@ -35,19 +38,19 @@ final class FollowingIterator implements SequenceIterator {
      * @param doc                the containing TinyTree
      * @param node               the start node. If the actual start was an attribute or namespace node, this will
      *                           be the parent element of that attribute or namespace
-     * @param nodeTest           condition that all the returned nodes must satisfy
+     * @param predicate          condition that all the returned nodes must satisfy
      * @param includeDescendants true if descendants of the start node are to be included. This will
      *                           be false if the actual start was an element node, true if it was an attribute or namespace node
      *                           (since the children of their parent follow the attribute or namespace in document order).
      */
 
     public FollowingIterator(TinyTree doc, TinyNodeImpl node,
-                             NodeTest nodeTest, boolean includeDescendants) {
+                             NodePredicate predicate, boolean includeDescendants) {
         tree = doc;
-        test = nodeTest;
+        test = nodeTestFromPredicate(predicate);
         startNode = node;
         this.includeDescendants = includeDescendants;
-        this.matcher = nodeTest.getMatcher(doc);
+        this.matcher = test.getMatcher(doc);
     }
 
     /*@Nullable*/

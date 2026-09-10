@@ -9,7 +9,9 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -35,13 +37,13 @@ final class PrecedingIterator implements SequenceIterator {
     private final boolean matchesTextNodes;
 
     public PrecedingIterator(/*@NotNull*/ TinyTree doc, /*@NotNull*/ TinyNodeImpl node,
-                             NodeTest nodeTest, boolean includeAncestors) {
+                                          NodePredicate predicate, boolean includeAncestors) {
 
         this.includeAncestors = includeAncestors;
         tree = doc;
         current = node;
         nextAncestorDepth = doc.depth[node.nodeNr] - 1;
-        this.nodeTest = nodeTest;
+        this.nodeTest = Navigator.nodeTestFromPredicate(predicate);
         this.matcher = nodeTest.getMatcher(doc);
         matchesTextNodes = nodeTest.getUType().overlaps(UType.TEXT);
     }

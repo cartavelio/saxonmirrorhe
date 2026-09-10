@@ -572,11 +572,11 @@ public class Gizmo {
         typed = false;
         Set<String> names = new HashSet<>();
         NodeInfo element;
-        SequenceIterator allElements = currentDoc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+        SequenceIterator allElements = currentDoc.iterateDescendantAxis(NodeKindTest.ELEMENT);
         while ((element = (NodeInfo)allElements.next()) != null) {
             names.add(element.getLocalPart());
             NodeInfo att;
-            SequenceIterator allAtts = element.iterateAxis(AxisInfo.ATTRIBUTE);
+            SequenceIterator allAtts = element.iterateAttributeAxis(null);
             while ((att = (NodeInfo)allAtts.next()) != null) {
                 names.add("@" + att.getLocalPart());
             }
@@ -787,8 +787,8 @@ public class Gizmo {
 
                     for (NodeInfo att : replacementAtts) {
                         final NodeName attName = NameOfNode.makeName(att);
-                        NodeInfo existing = (NodeInfo)target.iterateAxis(AxisInfo.ATTRIBUTE,
-                                                               new NameTest(Type.ATTRIBUTE, attName, config.getNamePool())).next();
+                        NodeInfo existing = (NodeInfo)target.iterateAttributeAxis(
+                                new NameTest(Type.ATTRIBUTE, attName, config.getNamePool())).next();
                         if (existing != null) {
                             target.removeAttribute(existing);
                         }
@@ -826,7 +826,7 @@ public class Gizmo {
         out.close();
 
         NodeInfo root = builder.getCurrentRoot();
-        SequenceIterator top = root.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator top = root.iterateChildAxis(null);
         SequenceExtent extent = SequenceExtent.from(top);
         int len = extent.getLength();
         NodeInfo[] array = new NodeInfo[len];

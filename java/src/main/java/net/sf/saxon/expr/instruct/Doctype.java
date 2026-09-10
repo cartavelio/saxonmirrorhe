@@ -131,7 +131,7 @@ public class Doctype extends Instruction {
                 builder.close();
                 NodeInfo dtdRoot = builder.getCurrentRoot();
 
-                SequenceIterator children = dtdRoot.iterateAxis(AxisInfo.CHILD);
+                SequenceIterator children = dtdRoot.iterateChildAxis(null);
                 NodeInfo docType = (NodeInfo) children.next();
                 if (docType == null || !"doctype".equals(docType.getLocalPart())) {
                     throw new XPathException("saxon:doctype instruction must contain dtd:doctype")
@@ -156,7 +156,7 @@ public class Doctype extends Instruction {
                 }
 
                 boolean openSquare = false;
-                children = docType.iterateAxis(AxisInfo.CHILD);
+                children = docType.iterateChildAxis(null);
 
                 NodeInfo child = (NodeInfo) children.next();
                 if (child != null) {
@@ -188,7 +188,7 @@ public class Doctype extends Instruction {
                         }
                         write(output, "\n  <!ATTLIST " + elname + ' ');
 
-                        SequenceIterator attributes = child.iterateAxis(AxisInfo.CHILD);
+                        SequenceIterator attributes = child.iterateChildAxis(null);
                         while (true) {
                             NodeInfo attDef = (NodeInfo) attributes.next();
                             if (attDef == null) {

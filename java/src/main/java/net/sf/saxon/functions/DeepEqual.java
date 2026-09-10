@@ -612,18 +612,17 @@ public class DeepEqual extends CollatingFunctionFixed {
                     explain(reporter, reason, options, n1, n2);
                     return reason;
                 }
-                SequenceIterator a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
-                SequenceIterator a2 = n2.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator a1 = n1.iterateAttributeAxis(null);
+                SequenceIterator a2 = n2.iterateAttributeAxis(null);
                 if (!SequenceTool.sameLength(a1, a2)) {
                     final String reason = "elements have different number of attributes";
                     explain(reporter, reason, options, n1, n2);
                     return reason;
                 }
                 NodeInfo att1;
-                a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
+                a1 = n1.iterateAttributeAxis(null);
                 while ((att1 = ((NodeInfo)a1.next())) != null) {
-                    SequenceIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
-                                                         new SameNameTest(att1));
+                    SequenceIterator a2iter = n2.iterateAttributeAxis(new SameNameTest(att1));
                     NodeInfo att2 = (NodeInfo)a2iter.next();
 
                     if (att2 == null) {
@@ -720,8 +719,8 @@ public class DeepEqual extends CollatingFunctionFixed {
                 CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
-                SequenceIterator c1 = n1.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
-                SequenceIterator c2 = n2.iterateAxis(AxisInfo.CHILD, NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
+                SequenceIterator c1 = n1.iterateChildAxis(NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
+                SequenceIterator c2 = n2.iterateChildAxis(NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
 
                 c1 = mergeAdjacentTextNodes(c1);
                 c2 = mergeAdjacentTextNodes(c2);

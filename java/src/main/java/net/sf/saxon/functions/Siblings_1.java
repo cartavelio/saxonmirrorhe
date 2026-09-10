@@ -63,7 +63,7 @@ public class Siblings_1 extends SystemFunction {
         if (parent == null || node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
             return node;
         }
-        return new LazySequence(parent.iterateAxis(AxisInfo.CHILD));
+        return new LazySequence(parent.iterateChildAxis(null));
     }
 
 

@@ -139,7 +139,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
             // Optimisation - see bug 2929. Makes a vast difference especially if there are few attributes in the tree
             return ((TinyTree) doc).hasXmlSpacePreserveAttribute();
         } else {
-            SequenceIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+            SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(NodeKindTest.ELEMENT);
             NodeInfo node;
             while ((node = (NodeInfo)iter.next()) != null) {
                 String val = node.getAttributeValue(NamespaceUri.XML, "space");
@@ -161,7 +161,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
 
     private static boolean findAssertions(/*@NotNull*/ TreeInfo doc) {
         if (doc.isTyped()) {
-            SequenceIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+            SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(NodeKindTest.ELEMENT);
             while (true) {
                 NodeInfo node = (NodeInfo)iter.next();
                 if (node == null) {

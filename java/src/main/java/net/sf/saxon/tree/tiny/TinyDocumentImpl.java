@@ -12,8 +12,10 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
@@ -168,6 +170,30 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
     }
 
     /**
+     * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
+    }
+
+    /**
+     * Get an iterator over the preceding-sibling-or-self axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingSiblingOrSelfAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
+    }
+
+    /**
      * Get a character string that uniquely identifies this node
      *
      * @param buffer to contain an identifier based on the document number
@@ -263,7 +289,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
     @Override
     public SchemaType getSchemaType() {
-        SequenceIterator children = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator children = iterateChildAxis(NodeKindTest.ELEMENT);
         NodeInfo node = (NodeInfo)children.next();
         if (node == null || node.getSchemaType() == Untyped.getInstance()) {
             return Untyped.getInstance();

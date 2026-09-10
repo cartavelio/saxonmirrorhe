@@ -218,7 +218,7 @@ public class IndependentContext extends AbstractStaticContext
             return;
         }
 
-        SequenceIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
+        SequenceIterator iter = node.iterateNamespaceAxis(null);
         while (true) {
             NodeInfo ns = (NodeInfo)iter.next();
             if (ns == null) {

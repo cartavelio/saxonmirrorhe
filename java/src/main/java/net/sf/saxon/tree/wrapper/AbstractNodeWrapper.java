@@ -15,11 +15,12 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
+
+import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
@@ -270,108 +271,109 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     @CSharpModifiers(code = {"public", "virtual"})
     public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
-        NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
-        int nodeKind = getNodeKind();
-        switch (axisNumber) {
-            case AxisInfo.ANCESTOR:
-                if (nodeKind == Type.DOCUMENT) {
-                    return EmptyIterator.getInstance();
-                }
-                return new Navigator.AxisFilter(
-                        new Navigator.AncestorIterator(this, false),
-                        nodeTest);
-
-            case AxisInfo.ANCESTOR_OR_SELF:
-                if (nodeKind == Type.DOCUMENT) {
-                    return Navigator.filteredSingleton(this, nodeTest);
-                }
-                return new Navigator.AxisFilter(
-                        new Navigator.AncestorIterator(this, true),
-                        nodeTest);
-
-            case AxisInfo.ATTRIBUTE:
-                if (nodeKind != Type.ELEMENT) {
-                    return EmptyIterator.getInstance();
-                }
-                return iterateAttributes(nodeTest);
-
-            case AxisInfo.CHILD:
-                if (nodeKind == Type.ELEMENT || nodeKind == Type.DOCUMENT) {
-                    return iterateChildren(nodeTest);
-                } else {
-                    return EmptyIterator.getInstance();
-                }
-
-            case AxisInfo.DESCENDANT:
-                if (nodeKind == Type.ELEMENT || nodeKind == Type.DOCUMENT) {
-                    return iterateDescendants(nodeTest, false);
-                } else {
-                    return EmptyIterator.getInstance();
-                }
-
-            case AxisInfo.DESCENDANT_OR_SELF:
-                if (nodeKind == Type.ELEMENT || nodeKind == Type.DOCUMENT) {
-                    return iterateDescendants(nodeTest, true);
-                } else {
-                    return Navigator.filteredSingleton(this, nodeTest);
-                }
-
-            case AxisInfo.FOLLOWING:
-                return new Navigator.AxisFilter(
-                        new Navigator.FollowingIterator(this),
-                        nodeTest);
-
-            case AxisInfo.FOLLOWING_SIBLING:
-                switch (nodeKind) {
-                    case Type.DOCUMENT:
-                    case Type.ATTRIBUTE:
-                    case Type.NAMESPACE:
-                        return EmptyIterator.getInstance();
-                    default:
-                        return iterateSiblings(nodeTest, true);
-                }
-
-            case AxisInfo.NAMESPACE:
-                if (nodeKind != Type.ELEMENT) {
-                    return EmptyIterator.getInstance();
-                }
-                return NamespaceNode.makeIterator(this, nodeTest);
-
-            case AxisInfo.PARENT:
-                return Navigator.filteredSingleton(getParent(), nodeTest);
-
-            case AxisInfo.PRECEDING:
-                return new Navigator.AxisFilter(
-                        new Navigator.PrecedingIterator(this, false),
-                        nodeTest);
-
-            case AxisInfo.PRECEDING_SIBLING:
-                switch (nodeKind) {
-                    case Type.DOCUMENT:
-                    case Type.ATTRIBUTE:
-                    case Type.NAMESPACE:
-                        return EmptyIterator.getInstance();
-                    default:
-                        return iterateSiblings(nodeTest, false);
-                }
-
-            case AxisInfo.SELF:
-                return Navigator.filteredSingleton(this, nodeTest);
-
-            case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return new Navigator.AxisFilter(
-                        new Navigator.PrecedingIterator(this, true),
-                        nodeTest);
-
-            case AxisInfo.FOLLOWING_OR_SELF:
-            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-            case AxisInfo.PRECEDING_OR_SELF:
-            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
-
-            default:
-                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-        }
+//        NodeTest nodeTest = nodeTestFromPredicate(predicate);
+//        int nodeKind = getNodeKind();
+//        switch (axisNumber) {
+//            case AxisInfo.ANCESTOR:
+//                if (nodeKind == Type.DOCUMENT) {
+//                    return EmptyIterator.getInstance();
+//                }
+//                return new Navigator.AxisFilter(
+//                        new Navigator.AncestorIterator(this, false),
+//                        nodeTest);
+//
+//            case AxisInfo.ANCESTOR_OR_SELF:
+//                if (nodeKind == Type.DOCUMENT) {
+//                    return Navigator.filteredSingleton(this, nodeTest);
+//                }
+//                return new Navigator.AxisFilter(
+//                        new Navigator.AncestorIterator(this, true),
+//                        nodeTest);
+//
+//            case AxisInfo.ATTRIBUTE:
+//                if (nodeKind != Type.ELEMENT) {
+//                    return EmptyIterator.getInstance();
+//                }
+//                return iterateAttributes(nodeTest);
+//
+//            case AxisInfo.CHILD:
+//                if (nodeKind == Type.ELEMENT || nodeKind == Type.DOCUMENT) {
+//                    return iterateChildren(nodeTest);
+//                } else {
+//                    return EmptyIterator.getInstance();
+//                }
+//
+//            case AxisInfo.DESCENDANT:
+//                if (nodeKind == Type.ELEMENT || nodeKind == Type.DOCUMENT) {
+//                    return iterateDescendants(nodeTest, false);
+//                } else {
+//                    return EmptyIterator.getInstance();
+//                }
+//
+//            case AxisInfo.DESCENDANT_OR_SELF:
+//                if (nodeKind == Type.ELEMENT || nodeKind == Type.DOCUMENT) {
+//                    return iterateDescendants(nodeTest, true);
+//                } else {
+//                    return Navigator.filteredSingleton(this, nodeTest);
+//                }
+//
+//            case AxisInfo.FOLLOWING:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.FollowingIterator(this),
+//                        nodeTest);
+//
+//            case AxisInfo.FOLLOWING_SIBLING:
+//                switch (nodeKind) {
+//                    case Type.DOCUMENT:
+//                    case Type.ATTRIBUTE:
+//                    case Type.NAMESPACE:
+//                        return EmptyIterator.getInstance();
+//                    default:
+//                        return iterateSiblings(nodeTest, true);
+//                }
+//
+//            case AxisInfo.NAMESPACE:
+//                if (nodeKind != Type.ELEMENT) {
+//                    return EmptyIterator.getInstance();
+//                }
+//                return NamespaceNode.makeIterator(this, nodeTest);
+//
+//            case AxisInfo.PARENT:
+//                return Navigator.filteredSingleton(getParent(), nodeTest);
+//
+//            case AxisInfo.PRECEDING:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.PrecedingIterator(this, false),
+//                        nodeTest);
+//
+//            case AxisInfo.PRECEDING_SIBLING:
+//                switch (nodeKind) {
+//                    case Type.DOCUMENT:
+//                    case Type.ATTRIBUTE:
+//                    case Type.NAMESPACE:
+//                        return EmptyIterator.getInstance();
+//                    default:
+//                        return iterateSiblings(nodeTest, false);
+//                }
+//
+//            case AxisInfo.SELF:
+//                return Navigator.filteredSingleton(this, nodeTest);
+//
+//            case AxisInfo.PRECEDING_OR_ANCESTOR:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.PrecedingIterator(this, true),
+//                        nodeTest);
+//
+//            case AxisInfo.FOLLOWING_OR_SELF:
+//            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+//            case AxisInfo.PRECEDING_OR_SELF:
+//            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+//                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
+//
+//            default:
+//                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+//        }
+        return null;
     }
 
     /**
@@ -386,6 +388,18 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     protected abstract SequenceIterator iterateAttributes(NodeTest nodeTest);
 
     /**
+     * Get an iterator over the attribute axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
+        return iterateAttributes(nodeTestFromPredicate(predicate));
+    }
+
+    /**
      * Return an iterator over the children of this node.
      * This method is only called after checking that the node is an element or document.
      *
@@ -394,6 +408,18 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     protected abstract SequenceIterator iterateChildren(NodeTest nodeTest);
+
+    /**
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+        return iterateChildren(nodeTestFromPredicate(predicate));
+    }
 
     /**
      * Return an iterator over the siblings of this node.
@@ -405,6 +431,44 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     protected abstract SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards);
+
+    /**
+     * Get an iterator over the following-sibling axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
+        switch (getNodeKind()) {
+            case Type.DOCUMENT:
+            case Type.ATTRIBUTE:
+            case Type.NAMESPACE:
+                return EmptyIterator.getInstance();
+            default:
+                return iterateSiblings(nodeTestFromPredicate(predicate), true);
+        }
+    }
+
+    /**
+     * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+        switch (getNodeKind()) {
+            case Type.DOCUMENT:
+            case Type.ATTRIBUTE:
+            case Type.NAMESPACE:
+                return EmptyIterator.getInstance();
+            default:
+                return iterateSiblings(nodeTestFromPredicate(predicate), false);
+        }
+    }
 
     /**
      * Return an iterator over the descendants of this node.
@@ -424,7 +488,29 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
         return iter;
     }
 
+    /**
+     * Get an iterator over the descendant axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+        return iterateDescendants(nodeTestFromPredicate(predicate), false);
+    }
 
+    /**
+     * Get an iterator over the descendant axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
+        return iterateDescendants(nodeTestFromPredicate(predicate), true);
+    }
 
     /**
      * Get all namespace declarations and undeclarations defined on this element.
@@ -508,7 +594,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                return iterateAxis(AxisInfo.CHILD).next() != null;
+                return iterateChildAxis(null).next() != null;
             default:
                 return false;
         }

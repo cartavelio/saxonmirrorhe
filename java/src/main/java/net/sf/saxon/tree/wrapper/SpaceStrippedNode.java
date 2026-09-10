@@ -13,16 +13,15 @@ import net.sf.saxon.event.Stripper;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.Whitespace;
 
 
@@ -226,7 +225,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                SequenceIterator iter = iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.makeNodeKindTest(Type.TEXT));
+                SequenceIterator iter = iterateDescendantAxis(NodeKindTest.makeNodeKindTest(Type.TEXT));
                 UnicodeBuilder sb = new UnicodeBuilder();
                 NodeInfo it;
                 while ((it = (NodeInfo)iter.next()) != null) {
@@ -256,14 +255,15 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
 
     @Override
     public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-        if (nodeTest instanceof NodeTest &&
-                ((NodeTest)nodeTest).getUType().intersection(UType.TEXT) == UType.VOID ||
-                axisNumber == AxisInfo.ATTRIBUTE || axisNumber == AxisInfo.NAMESPACE) {
-            // iteration does not include text nodes, so no stripping needed
-            return new WrappingIterator(node.iterateAxis(axisNumber, nodeTest), this, getParentForAxis(axisNumber));
-        } else {
-            return new StrippingIterator(node.iterateAxis(axisNumber, nodeTest), (SpaceStrippedDocument) docWrapper, getParentForAxis(axisNumber));
-        }
+//        if (nodeTest instanceof NodeTest &&
+//                ((NodeTest)nodeTest).getUType().intersection(UType.TEXT) == UType.VOID ||
+//                axisNumber == AxisInfo.ATTRIBUTE || axisNumber == AxisInfo.NAMESPACE) {
+//            // iteration does not include text nodes, so no stripping needed
+//            return new WrappingIterator(node.iterateAxis(axisNumber, nodeTest), this, getParentForAxis(axisNumber));
+//        } else {
+//            return new StrippingIterator(node.iterateAxis(axisNumber, nodeTest), (SpaceStrippedDocument) docWrapper, getParentForAxis(axisNumber));
+//        }
+        return null;
     }
 
     /**
@@ -276,23 +276,247 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     /*@Nullable*/
     @Override
     public SequenceIterator iterateAxis(int axisNumber) {
-        switch (axisNumber) {
-            case AxisInfo.ATTRIBUTE:
-            case AxisInfo.NAMESPACE:
-                return new WrappingIterator(node.iterateAxis(axisNumber), this, this);
-            case AxisInfo.CHILD:
-                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, this);
-            case AxisInfo.FOLLOWING_SIBLING:
-            case AxisInfo.PRECEDING_SIBLING:
-                SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
-                if (parent == null) {
-                    return EmptyIterator.getInstance();
-                } else {
-                    return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, parent);
-                }
-            default:
-                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, null);
+//        switch (axisNumber) {
+//            case AxisInfo.ATTRIBUTE:
+//            case AxisInfo.NAMESPACE:
+//                return new WrappingIterator(node.iterateAxis(axisNumber), this, this);
+//            case AxisInfo.CHILD:
+//                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, this);
+//            case AxisInfo.FOLLOWING_SIBLING:
+//            case AxisInfo.PRECEDING_SIBLING:
+//                SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
+//                if (parent == null) {
+//                    return EmptyIterator.getInstance();
+//                } else {
+//                    return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, parent);
+//                }
+//            default:
+//                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, null);
+//        }
+        return null;
+    }
+
+    /**
+     * Get an iterator over the ancestor axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateAncestorAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the ancestor-or-self axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateAncestorOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the descendant axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateDescendantAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the descendant-or-self axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateDescendantOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the following axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateFollowingAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the following-or-self axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingOrSelfAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateFollowingOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the following-sibling axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
+        SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
+        if (parent == null) {
+            return EmptyIterator.getInstance();
+        } else {
+            return new StrippingIterator(node.iterateFollowingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
         }
+    }
+
+    /**
+     * Get an iterator over the following-sibling-or-self axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingSiblingOrSelfAxis(NodePredicate predicate) {
+        SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
+        if (parent == null) {
+            return Navigator.filteredSingleton(this, predicate);
+        } else {
+            return new StrippingIterator(node.iterateFollowingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
+        }
+    }
+
+    /**
+     * Get an iterator over the parent axis, starting at this node; returns zero or one nodes
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateParentAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateParentAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the preceding axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iteratePrecedingAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the preceding-or-self axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingOrSelfAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iteratePrecedingOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+        SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
+        if (parent == null) {
+            return EmptyIterator.getInstance();
+        } else {
+            return new StrippingIterator(node.iterateFollowingSiblingAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
+        }
+    }
+
+    /**
+     * Get an iterator over the preceding-sibling-or-self axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingSiblingOrSelfAxis(NodePredicate predicate) {
+        SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
+        if (parent == null) {
+            return Navigator.filteredSingleton(this, predicate);
+        } else {
+            return new StrippingIterator(node.iterateFollowingSiblingOrSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, parent);
+        }
+    }
+
+    /**
+     * Get an iterator over the self axis, starting at this node; there will be zero
+     * or one nodes.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateSelfAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateSelfAxis(predicate), (SpaceStrippedDocument) docWrapper, null);
+    }
+
+    /**
+     * Get an iterator over the attribute axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
+        return new WrappingIterator(node.iterateAttributeAxis(predicate), this, this);
+    }
+
+    /**
+     * Get an iterator over the namespace axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateNamespaceAxis(NodePredicate predicate) {
+        return new WrappingIterator(node.iterateNamespaceAxis(predicate), this, this);
+    }
+
+    /**
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+        return new StrippingIterator(node.iterateChildAxis(predicate), (SpaceStrippedDocument) docWrapper, this);
     }
 
     private SpaceStrippedNode getParentForAxis(int axisNumber) {

@@ -73,7 +73,7 @@ public class CaseVariants {
             throw new RuntimeException("Failed to build casevariants.xml", e);
         }
 
-        SequenceIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
+        SequenceIterator iter = doc.iterateDescendantAxis(new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
         while (true) {
             NodeInfo item = (NodeInfo)iter.next();
             if (item == null) {

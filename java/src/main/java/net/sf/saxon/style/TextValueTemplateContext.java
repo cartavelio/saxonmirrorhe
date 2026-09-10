@@ -10,7 +10,6 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.VariableReference;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
@@ -55,7 +54,7 @@ public class TextValueTemplateContext extends ExpressionContext {
 
         // first search for a local variable declaration
 
-        SequenceIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+        SequenceIterator preceding = curr.iteratePrecedingSiblingAxis(null);
         while ((curr = (NodeInfo)preceding.next()) != null) {
             if (curr instanceof XSLGeneralVariable) {
                 SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);

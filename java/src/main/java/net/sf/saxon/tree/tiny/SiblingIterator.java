@@ -11,6 +11,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AtomizedValueIterator;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -18,6 +19,8 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
+
+import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 /**
  * This class supports both the child:: and following-sibling:: axes, which are
@@ -45,19 +48,19 @@ final class SiblingIterator implements SequenceIterator, LookaheadIterator, Atom
      *
      * @param tree        The TinyTree containing the context node
      * @param node        The context node, the start point for the iteration
-     * @param nodeTest    Test that the selected nodes must satisfy, or null indicating
+     * @param predicate   est that the selected nodes must satisfy, or null indicating
      *                    that all nodes are selected
      * @param getChildren True if children of the context node are to be returned, false
      *                    if following siblings are required
      */
 
-    SiblingIterator(/*@NotNull*/ TinyTree tree, /*@NotNull*/ TinyNodeImpl node, NodeTest nodeTest, boolean getChildren) {
+    SiblingIterator(TinyTree tree, TinyNodeImpl node, NodePredicate predicate, boolean getChildren) {
         this.tree = tree;
-        test = nodeTest;
-        if (nodeTest == null) {
+        test = nodeTestFromPredicate(predicate);
+        if (test == null) {
             matcher = IntSetPredicate.ALWAYS_TRUE;
         } else {
-            matcher = nodeTest.getMatcher(tree);
+            matcher = test.getMatcher(tree);
         }
         if (getChildren) {          // child:: axis
             parentNode = node;
@@ -84,7 +87,7 @@ final class SiblingIterator implements SequenceIterator, LookaheadIterator, Atom
         }
 
         // check if this matches the conditions
-        if (nextNodeNr >= 0 && nodeTest != null) {
+        if (nextNodeNr >= 0 && test != null) {
             if (!matcher.test(nextNodeNr)) {
                 needToAdvance = true;
             }

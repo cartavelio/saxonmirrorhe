@@ -64,7 +64,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
 
         for (NodeInfo w : children(XSLWithParam.class::isInstance)) {
             XSLWithParam withParam = (XSLWithParam) w;
-            SequenceIterator formalParams = xslIterate.iterateAxis(AxisInfo.CHILD);
+            SequenceIterator formalParams = xslIterate.iterateChildAxis(null);
             boolean ok = false;
             NodeInfo param;
             while ((param = (NodeInfo)formalParams.next()) != null) {
@@ -106,7 +106,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
         // actual parameters of the xsl:next-iteration, add an implicit <xsl:with-param name="p" select="$p"/>
 
         if (xslIterate != null) {
-            SequenceIterator declaredParams = xslIterate.iterateAxis(AxisInfo.CHILD);
+            SequenceIterator declaredParams = xslIterate.iterateChildAxis(null);
             NodeInfo param;
             while ((param = (NodeInfo)declaredParams.next()) != null) {
                 if (param instanceof XSLLocalParam) {

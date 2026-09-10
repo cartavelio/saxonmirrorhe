@@ -23,7 +23,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingleNodeIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
@@ -138,7 +138,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
         } else if (_children instanceof NodeImpl) {
             NodeImpl child = (NodeImpl) _children;
             if (test == null || test == AnyXNodeTest.getInstance()) {
-                return SingleNodeIterator.makeIterator(child);
+                return SingletonIterator.makeIterator(child);
             } else {
                 return Navigator.filteredSingleton(child, test);
             }

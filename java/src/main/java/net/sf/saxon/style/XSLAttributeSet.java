@@ -321,7 +321,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
         }
 
         XSLAttribute node;
-        SequenceIterator iter = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator iter = iterateChildAxis(NodeKindTest.ELEMENT);
         while ((node = (XSLAttribute) iter.next()) != null) {
             Expression inst = node.compile(compilation, decl);
             inst.setRetainedStaticContext(makeRetainedStaticContext());

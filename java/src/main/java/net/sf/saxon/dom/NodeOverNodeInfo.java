@@ -263,7 +263,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getPreviousSibling() {
-        return wrap((NodeInfo)node.iterateAxis(AxisInfo.PRECEDING_SIBLING).next());
+        return wrap((NodeInfo)node.iteratePrecedingSiblingAxis(null).next());
     }
 
     /**
@@ -275,7 +275,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getNextSibling() {
-        return wrap((NodeInfo)node.iterateAxis(AxisInfo.FOLLOWING_SIBLING).next());
+        return wrap((NodeInfo)node.iterateFollowingSiblingAxis(null).next());
     }
 
     /**
@@ -286,7 +286,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getFirstChild() {
-        return wrap((NodeInfo)node.iterateAxis(AxisInfo.CHILD).next());
+        return wrap((NodeInfo)node.iterateChildAxis(null).next());
     }
 
     /**
@@ -297,7 +297,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getLastChild() {
-        SequenceIterator children = node.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator children = node.iterateChildAxis(null);
         NodeInfo last = null;
         while (true) {
             NodeInfo next = (NodeInfo)children.next();
@@ -645,7 +645,7 @@ public abstract class NodeOverNodeInfo implements Node {
         if (node.getNodeKind() == Type.DOCUMENT) {
             return null;
         } else if (node.getNodeKind() == Type.ELEMENT) {
-            SequenceIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
+            SequenceIterator iter = node.iterateNamespaceAxis(null);
             NodeInfo ns;
             while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getUnicodeStringValue().equals(namespaceURI)) {
@@ -684,7 +684,7 @@ public abstract class NodeOverNodeInfo implements Node {
         if (node.getNodeKind() == Type.DOCUMENT) {
             return null;
         } else if (node.getNodeKind() == Type.ELEMENT) {
-            SequenceIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
+            SequenceIterator iter = node.iterateNamespaceAxis(null);
             NodeInfo ns;
             while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getLocalPart().equals(prefix)) {

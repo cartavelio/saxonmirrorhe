@@ -557,7 +557,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         }
                     case Type.ATTRIBUTE:
                         ix = 0;
-                        SequenceIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
+                        SequenceIterator iter = parent.iterateAttributeAxis(null);
                         while (true) {
                             NodeInfo n = (NodeInfo)iter.next();
                             if (n == null || Navigator.haveSameName(this, n)) {
@@ -569,7 +569,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
                     case Type.NAMESPACE:
                         ix = 0;
-                        iter = parent.iterateAxis(AxisInfo.NAMESPACE);
+                        iter = parent.iterateNamespaceAxis(null);
                         while (true) {
                             NodeInfo n = (NodeInfo)iter.next();
                             if (n == null || Navigator.haveSameName(this, n)) {
@@ -640,7 +640,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     @Override
     public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         NameTest test = new NameTest(Type.ATTRIBUTE, uri, local, getNamePool());
-        SequenceIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
+        SequenceIterator iterator = iterateAttributeAxis(test);
         NodeInfo attribute = (NodeInfo)iterator.next();
         if (attribute == null) {
             return null;

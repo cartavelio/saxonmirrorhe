@@ -173,7 +173,7 @@ public class CatalogCollection extends AbstractResourceCollection {
         // Now return an iterator over the documents that it refers to
 
         SequenceIterator iter =
-                catalog.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                catalog.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT);
         NodeInfo top = (NodeInfo)iter.next();
         if (top == null || !("collection".equals(top.getLocalPart()) && top.getNamespaceUri() == NamespaceUri.NULL)) {
             String message;
@@ -203,7 +203,7 @@ public class CatalogCollection extends AbstractResourceCollection {
             }
         }
 
-        SequenceIterator documents = top.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator documents = top.iterateChildAxis(NodeKindTest.ELEMENT);
         List<String> result = new ArrayList<>();
         NodeInfo item;
         while ((item = (NodeInfo)documents.next()) != null) {

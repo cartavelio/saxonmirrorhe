@@ -398,18 +398,17 @@ public class SaxonDeepEqual extends SystemFunction {
                     explain(reporter, reason, flags, n1, n2);
                     return reason;
                 }
-                SequenceIterator a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
-                SequenceIterator a2 = n2.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator a1 = n1.iterateAttributeAxis(null);
+                SequenceIterator a2 = n2.iterateAttributeAxis(null);
                 if (!SequenceTool.sameLength(a1, a2)) {
                     final String reason = "elements have different number of attributes";
                     explain(reporter, reason, flags, n1, n2);
                     return reason;
                 }
                 NodeInfo att1;
-                a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
+                a1 = n1.iterateAttributeAxis(null);
                 while ((att1 = (NodeInfo)a1.next()) != null) {
-                    SequenceIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
-                                                         new SameNameTest(att1));
+                    SequenceIterator a2iter = n2.iterateAttributeAxis(new SameNameTest(att1));
                     NodeInfo att2 = (NodeInfo)a2iter.next();
 
                     if (att2 == null) {
@@ -498,8 +497,8 @@ public class SaxonDeepEqual extends SystemFunction {
                 CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
-                SequenceIterator c1 = n1.iterateAxis(AxisInfo.CHILD);
-                SequenceIterator c2 = n2.iterateAxis(AxisInfo.CHILD);
+                SequenceIterator c1 = n1.iterateChildAxis(null);
+                SequenceIterator c2 = n2.iterateChildAxis(null);
                 while (true) {
                     NodeInfo d1 = (NodeInfo)c1.next();
                     while (d1 != null && isIgnorable(d1, flags)) {

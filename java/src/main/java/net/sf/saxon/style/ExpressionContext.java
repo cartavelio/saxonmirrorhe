@@ -259,7 +259,7 @@ public class ExpressionContext implements StaticContext {
             if (comp != null) { // test variable-0118
                 // See tests variable-0118 and variable-0120
                 if (getPackageData().getHostLanguageVersion() < 40) {
-                    SequenceTool.supply(element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF), (ItemConsumer<? super Item>) parent -> {
+                    SequenceTool.supply(element.iterateAncestorOrSelfAxis(null), (ItemConsumer<? super Item>) parent -> {
                         if (parent instanceof XSLGlobalVariable && ((XSLGlobalVariable) parent).getVariableQName().equals(qName)) {
                             XPathException err = new XPathException("Variable $" + qName.getDisplayName() +
                                                                             " cannot be used within its own declaration", "XPST0008");
@@ -276,8 +276,8 @@ public class ExpressionContext implements StaticContext {
             }
             // it might be an implicit error variable in try/catch
             if (getXPathVersion() >= 30 && qName.hasURI(NamespaceUri.ERR)) {
-                SequenceIterator catchers = element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF,
-                                                            new NameTest(Type.ELEMENT, StandardNames.XSL_CATCH, element.getNamePool()));
+                SequenceIterator catchers = element.iterateAncestorOrSelfAxis(
+                           new NameTest(Type.ELEMENT, StandardNames.XSL_CATCH, element.getNamePool()));
                 StyleElement catcher = (StyleElement) catchers.next();
                 if (catcher != null) {
                     for (StructuredQName errorVariable : StandardNames.errorVariables) {

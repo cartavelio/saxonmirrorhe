@@ -15,7 +15,7 @@ import net.sf.saxon.pattern.NodeTest;
  * taking the union of the two axes would be very inefficient
  */
 
-final class PrecedingOrAncestorEnumeration extends TreeEnumeration {
+public class PrecedingOrAncestorEnumeration extends TreeEnumeration {
 
 
     public PrecedingOrAncestorEnumeration(NodeImpl node, NodeTest nodeTest) {

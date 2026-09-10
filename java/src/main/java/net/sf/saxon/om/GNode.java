@@ -1,10 +1,17 @@
 package net.sf.saxon.om;
 
-import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.tree.NamespaceNode;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.IncrementalIterator;
+import net.sf.saxon.tree.iter.PrependIterator;
+import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.Type;
 
 public interface GNode extends Item {
+
+    int getNodeKind();
     
     /**
      * Return an iteration over all the nodes reached by the given axis from this node
@@ -22,7 +29,8 @@ public interface GNode extends Item {
      */
 
     default SequenceIterator iterateAxis(int axisNumber) {
-        return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
+        //return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
+        return null;
     }
 
     /**
@@ -43,6 +51,204 @@ public interface GNode extends Item {
      * possible to supply a {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
      */
     SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate);
+
+    /**
+     * Get an iterator over the ancestor axis, starting at this node; the nodes will
+     * be in reverse document order.
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
+        IncrementalIterator iter = new IncrementalIterator(this, GNode::getParent);
+        return predicate == null ? iter : new Navigator.AxisFilter(iter, predicate);
+    }
+
+    /**
+     * Get an iterator over the ancestor-or-self axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
+        SequenceIterator ancestors = iterateAncestorAxis(predicate);
+        return Navigator.orSelf(this, ancestors, predicate);
+    }
+
+    /**
+     * Get an iterator over the attribute axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
+    }
+
+    /**
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    SequenceIterator iterateChildAxis(NodePredicate predicate);
+
+    /**
+     * Get an iterator over the descendant axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+        SequenceIterator desc = new Navigator.DescendantIterator(this, false, true);
+        return predicate == null ? new Navigator.AxisFilter(desc, predicate) : desc;
+    }
+
+    /**
+     * Get an iterator over the descendant-or-self axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
+        SequenceIterator desc = new Navigator.DescendantIterator(this, true, true);
+        return predicate != null ? new Navigator.AxisFilter(desc, predicate) : desc;
+    }
+
+    /**
+     * Get an iterator over the following axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
+        SequenceIterator foll = new Navigator.FollowingIterator(this);
+        return predicate != null ? new Navigator.AxisFilter(foll, predicate) : foll;
+    }
+
+    /**
+     * Get an iterator over the following-or-self axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateFollowingOrSelfAxis(NodePredicate predicate) {
+        SequenceIterator foll = iterateFollowingAxis(predicate);
+        return Navigator.orSelf(this, foll, predicate);
+    }
+
+    /**
+     * Get an iterator over the following-sibling axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate);
+
+
+    /**
+     * Get an iterator over the following-sibling-or-self axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateFollowingSiblingOrSelfAxis(NodePredicate predicate) {
+        SequenceIterator foll = iterateFollowingSiblingAxis(predicate);
+        return Navigator.orSelf(this, foll, predicate);
+    }
+
+    /**
+     * Get an iterator over the namespace axis, starting at this node; the nodes will
+     * be in reverse document order. The default implementation must be overridden
+     * for classes that implement element nodes.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateNamespaceAxis(NodePredicate predicate) {
+        if (getNodeKind() == Type.ELEMENT) {
+            return NamespaceNode.makeIterator((NodeInfo)this, predicate);
+        }
+        return EmptyIterator.getInstance();
+    }
+
+    /**
+     * Get an iterator over the parent axis, starting at this node; returns zero or one nodes
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateParentAxis(NodePredicate predicate) {
+        return Navigator.filteredSingleton(getParent(), predicate);
+    }
+
+    /**
+     * Get an iterator over the preceding axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
+        SequenceIterator prec = new Navigator.PrecedingIterator(this, false);
+        return predicate == null ? new Navigator.AxisFilter(prec, predicate) : prec;
+    }
+
+    /**
+     * Get an iterator over the preceding-or-self axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iteratePrecedingOrSelfAxis(NodePredicate predicate) {
+        SequenceIterator prec = iteratePrecedingAxis(predicate);
+        return predicate == null || predicate.test(this)
+                ? new PrependIterator(this, prec)
+                : prec;
+    }
+
+    /**
+     * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate);
+
+    /**
+     * Get an iterator over the preceding-sibling-or-self axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iteratePrecedingSiblingOrSelfAxis(NodePredicate predicate) {
+        SequenceIterator prec = iteratePrecedingSiblingAxis(predicate);
+        return predicate == null || predicate.test(this)
+                ? new PrependIterator(this, prec)
+                : prec;
+    }
+
+    /**
+     * Get an iterator over the self axis, starting at this node; there will be zero
+     * or one nodes.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    default SequenceIterator iterateSelfAxis(NodePredicate predicate) {
+        return Navigator.filteredSingleton(this, predicate);
+    }
 
     /**
      * Get the parent of this node

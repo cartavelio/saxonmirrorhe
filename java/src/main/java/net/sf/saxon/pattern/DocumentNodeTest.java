@@ -87,7 +87,7 @@ public class DocumentNodeTest extends NodeTest {
         if (!(node instanceof NodeInfo) || ((NodeInfo)node).getNodeKind() != Type.DOCUMENT) {
             return false;
         }
-        SequenceIterator iter = node.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator iter = node.iterateChildAxis(null);
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;
@@ -178,7 +178,7 @@ public class DocumentNodeTest extends NodeTest {
             return explanation;
         }
         NodeInfo node = (NodeInfo) item;
-        SequenceIterator iter = node.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator iter = node.iterateChildAxis(null);
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;

@@ -16,6 +16,7 @@ import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -314,7 +315,7 @@ public class XdmNode extends XdmItem {
      */
 
     public XdmSequenceIterator<XdmNode> axisIterator(Axis axis) {
-        SequenceIterator base = getUnderlyingNode().iterateAxis(axis.getAxisNumber());
+        SequenceIterator base = Navigator.iterateAxis(getUnderlyingNode(), axis.getAxisNumber(), null);
         return XdmSequenceIterator.ofNodes(base);
     }
 
@@ -353,7 +354,7 @@ public class XdmNode extends XdmItem {
         NodeInfo node = getUnderlyingNode();
         NameTest test = new NameTest(kind, name.getNamespaceUri(), name.getLocalName(),
                                      node.getConfiguration().getNamePool());
-        SequenceIterator base = node.iterateAxis(axis.getAxisNumber(), test);
+        SequenceIterator base = Navigator.iterateAxis(node, axis.getAxisNumber(), test);
         return XdmSequenceIterator.ofNodes(base);
     }
 

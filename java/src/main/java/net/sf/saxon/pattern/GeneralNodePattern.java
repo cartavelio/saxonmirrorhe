@@ -224,7 +224,7 @@ public final class GeneralNodePattern extends Pattern {
         if (precondition != null && !precondition.matches(item, context)) {
             return false;
         }
-        SequenceIterator anc = ((NodeInfo) item).iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+        SequenceIterator anc = ((NodeInfo) item).iterateAncestorOrSelfAxis(null);
         NodeInfo top = (NodeInfo)item;
         while (true) {
             NodeInfo a = (NodeInfo)anc.next();
@@ -267,7 +267,7 @@ public final class GeneralNodePattern extends Pattern {
         // equivalent expression
 
         if (anchor == null) {
-            SequenceIterator ancestors = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+            SequenceIterator ancestors = node.iterateAncestorOrSelfAxis(null);
             while (true) {
                 NodeInfo ancestor = (NodeInfo)ancestors.next();
                 if (ancestor == null) {

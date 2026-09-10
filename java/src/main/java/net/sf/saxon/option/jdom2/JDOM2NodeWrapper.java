@@ -408,13 +408,13 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 case Type.TEXT:
                 case Type.COMMENT:
                 case Type.PROCESSING_INSTRUCTION:
-                    iter = parent.iterateAxis(AxisInfo.CHILD);
+                    iter = parent.iterateChildAxis(null);
                     break;
                 case Type.ATTRIBUTE:
-                    iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
+                    iter = parent.iterateAttributeAxis(null);
                     break;
                 case Type.NAMESPACE:
-                    iter = parent.iterateAxis(AxisInfo.NAMESPACE);
+                    iter = parent.iterateNamespaceAxis(null);
                     break;
                 default:
                     index = 0;
@@ -504,7 +504,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         };
         SequenceIterator wrappedDescendants = new DescendantWrappingIterator<Content>(descendants, wrappingFunct);
         if (includeSelf && nodeTest.test(this)) {
-            wrappedDescendants = new PrependSequenceIterator(this, wrappedDescendants);
+            wrappedDescendants = new PrependIterator(this, wrappedDescendants);
         }
 
         if (nodeTest instanceof AnyXNodeTest || (nodeTest instanceof NodeKindTest && ((NodeKindTest) nodeTest).getNodeKind() == Type.ELEMENT)) {

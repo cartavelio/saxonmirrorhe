@@ -64,7 +64,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
                 case Type.ELEMENT: {
                     XPathContextMajor c2 = context.newContext();
                     c2.setOrigin(this);
-                    c2.trackFocus(node.iterateAxis(AxisInfo.ATTRIBUTE));
+                    c2.trackFocus(node.iterateAttributeAxis(null));
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508
                     TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, output, c2, locationId);
                     while (tc != null) {
@@ -75,7 +75,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
                 case Type.DOCUMENT: {
                     XPathContextMajor c2 = context.newContext();
                     c2.setOrigin(this);
-                    c2.trackFocus(node.iterateAxis(AxisInfo.CHILD));
+                    c2.trackFocus(node.iterateChildAxis(null));
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508
                     TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, output, c2, locationId);
                     while (tc != null) {

@@ -24,7 +24,6 @@ import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordType;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -357,7 +356,7 @@ public class LookupByValuePredicate extends UnaryExpression {
                     } else {
                         jNode = (JNode)item;
                     }
-                    SequenceIterator allNodes = jNode.iterateAxis(axis == -1 ? AxisInfo.CHILD : axis);
+                    SequenceIterator allNodes = jNode.iterateChildAxis(null);
                     SequenceIterator selectedNodes =
                             predicate == null
                                     ? allNodes

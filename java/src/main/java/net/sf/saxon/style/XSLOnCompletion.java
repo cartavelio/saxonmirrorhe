@@ -66,7 +66,7 @@ public class XSLOnCompletion extends StyleElement {
         if (!(parent instanceof XSLIterate)) {
             compileError("xsl:on-completion is not allowed as a child of " + parent.getDisplayName(), "XTSE0010");
         }
-        SequenceIterator iter = iterateAxis(AxisInfo.PRECEDING_SIBLING, NodeKindTest.ELEMENT);
+        SequenceIterator iter = iteratePrecedingSiblingAxis(NodeKindTest.ELEMENT);
         NodeInfo sib;
         while ((sib = (NodeInfo)iter.next()) != null) {
             if (!(sib instanceof XSLFallback || sib instanceof XSLLocalParam)) {
@@ -74,7 +74,7 @@ public class XSLOnCompletion extends StyleElement {
             }
         };
 
-        if (select != null && iterateAxis(AxisInfo.CHILD).next() != null) {
+        if (select != null && iterateChildAxis(null).next() != null) {
             compileError("An xsl:on-completion element with a select attribute must be empty", "XTSE3125");
         }
         select = typeCheck("select", select);

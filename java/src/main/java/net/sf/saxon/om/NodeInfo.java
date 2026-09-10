@@ -38,7 +38,8 @@ import javax.xml.transform.SourceLocator;
  * <p>The interface represented by this class is at a slightly higher level than the abstraction described
  * in the W3C data model specification, in that it includes support for the XPath axes, rather than exposing
  * the lower-level properties (such as "parent" and "children") directly. All navigation within trees,
- * except for a few convenience methods, is done by following the axes using the {@link #iterateAxis} method.
+ * except for a few convenience methods, is done by following the axes using methods such as {@link #iterateChildAxis},
+ * {@link #iterateAttributeAxis}, or {@link #iterateDescendantAxis}.
  * This allows different implementations of the XPath tree model to implement axis navigation in different ways.
  * Some implementations may choose to use the helper methods provided in class {@link net.sf.saxon.tree.util.Navigator}.</p>
  * <p>Note that the stability of this interface applies to classes that use the interface,
@@ -468,7 +469,7 @@ public interface NodeInfo extends GNode, Location
     default AttributeMap attributes() {
         AttributeMap atts = EmptyAttributeMap.getInstance();
         if (getNodeKind() == Type.ELEMENT) {
-            SequenceIterator iter = iterateAxis(AxisInfo.ATTRIBUTE);
+            SequenceIterator iter = iterateAttributeAxis(null);
             NodeInfo attr;
             while ((attr = ((NodeInfo)iter.next())) != null) {
                 atts = atts.put(new AttributeInfo(NameOfNode.makeName(attr), (SimpleType) attr.getSchemaType(),

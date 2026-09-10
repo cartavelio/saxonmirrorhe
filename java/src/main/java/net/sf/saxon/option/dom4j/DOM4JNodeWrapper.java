@@ -366,10 +366,10 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     throw new IllegalStateException("DOM4J node not linked to parent node");
                 }
                 case Type.ATTRIBUTE:
-                    iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
+                    iter = parent.iterateAttributeAxis(null);
                     break;
                 case Type.NAMESPACE:
-                    iter = parent.iterateAxis(AxisInfo.NAMESPACE);
+                    iter = parent.iterateNamespaceAxis(null);
                     break;
                 default:
                     index = 0;

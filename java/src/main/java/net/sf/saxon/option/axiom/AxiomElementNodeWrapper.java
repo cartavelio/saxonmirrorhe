@@ -14,7 +14,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingleNodeIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.SchemaType;
@@ -206,7 +206,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
             if (att == null) {
                 return EmptyIterator.getInstance();
             } else {
-                return SingleNodeIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
+                return SingletonIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
             }
         } else {
             return new AttributeAxisIterator(this, nodeTest);

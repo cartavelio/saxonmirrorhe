@@ -98,7 +98,7 @@ public class UnicodeBlocks {
             throw new RESyntaxException("Failed to process unicodeBlocks.xml: " + e.getMessage());
         }
 
-        SequenceIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT,
+        SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(
                                                           new NameTest(Type.ELEMENT, NamespaceUri.NULL, "block", config.getNamePool()));
         while (true) {
             NodeInfo item = (NodeInfo)iter.next();

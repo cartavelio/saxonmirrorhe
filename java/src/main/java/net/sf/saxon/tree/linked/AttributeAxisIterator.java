@@ -10,7 +10,7 @@ package net.sf.saxon.tree.linked;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 
 /**
@@ -20,7 +20,7 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 final class AttributeAxisIterator implements SequenceIterator, LookaheadIterator {
 
     private final ElementImpl element;
-    private final NodeTest nodeTest;
+    private final NodePredicate nodeTest;
     /*@Nullable*/ private NodeInfo nextNode;
     private int index;
     private final int length;
@@ -33,7 +33,7 @@ final class AttributeAxisIterator implements SequenceIterator, LookaheadIterator
      * @param nodeTest: condition to be applied to the names of the attributes selected
      */
 
-    AttributeAxisIterator(ElementImpl node, NodeTest nodeTest) {
+    AttributeAxisIterator(ElementImpl node, NodePredicate nodeTest) {
         this.element = node;
         this.nodeTest = nodeTest;
 

@@ -30,6 +30,7 @@ final class TinyCommentImpl extends TinyNodeImpl {
         super(tree, nodeNr);
     }
 
+
     /**
      * Get the XPath string value of the comment
      * @return the string value

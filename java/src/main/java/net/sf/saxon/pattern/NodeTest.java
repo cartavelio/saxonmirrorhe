@@ -33,7 +33,7 @@ import java.util.Set;
  * test (used, e.g. for "@comment()").
  * <p>As well as being used to support XSLT pattern matching, NodeTests act as predicates in
  * axis steps, and also act as item types for type matching.</p>
- * <p>For use in user-written application calling {@link NodeInfo#iterateAxis},
+ * <p>For use in user-written application calling the iterateAXIS methods in {@link NodeInfo},
  * it is possible to write a user-defined subclass of <code>NodeTest</code> that implements
  * a single method, {@link #matches(int, NodeName, SchemaType)}</p>
  */

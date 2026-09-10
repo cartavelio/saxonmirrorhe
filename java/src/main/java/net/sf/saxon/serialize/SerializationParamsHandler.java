@@ -75,7 +75,7 @@ public class SerializationParamsHandler {
         }
         restrictAttributes(node);
         Set<NodeName> nodeNames = new HashSet<>();
-        SequenceIterator kids = node.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = node.iterateChildAxis(NodeKindTest.ELEMENT);
         NodeInfo child;
         while ((child = (NodeInfo)kids.next()) != null) {
             if (!nodeNames.add(NameOfNode.makeName(child))) {
@@ -91,7 +91,7 @@ public class SerializationParamsHandler {
             }
             if (uri.isEmpty() && lname.equals("use-character-maps")) {
                 restrictAttributes(child);
-                SequenceIterator gKids = child.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                SequenceIterator gKids = child.iterateChildAxis(NodeKindTest.ELEMENT);
                 NodeInfo gChild;
                 IntHashMap<String> map = new IntHashMap<>();
                 while ((gChild = (NodeInfo)gKids.next()) != null) {

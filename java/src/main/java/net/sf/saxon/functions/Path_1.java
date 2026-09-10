@@ -120,7 +120,7 @@ public class Path_1 extends SystemFunction {
             return StringValue.makeStringValue("/");
         }
         StringBuilder fsb = new StringBuilder(256);
-        SequenceIterator iter = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+        SequenceIterator iter = node.iterateAncestorOrSelfAxis(null);
         NodeInfo n;
         boolean first = true;
         while ((n = (NodeInfo)iter.next()) != null) {

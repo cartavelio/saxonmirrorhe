@@ -22,7 +22,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.PrependSequenceIterator;
+import net.sf.saxon.tree.iter.PrependIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.Cardinality;
@@ -394,7 +394,7 @@ DynamicFunctionCall extends Expression {
                     }
                     // TODO: optimize for the case where all the called functions require the same coercions
 
-                    return new MappingIterator(new PrependSequenceIterator(first, fnIter), item -> {
+                    return new MappingIterator(new PrependIterator(first, fnIter), item -> {
                         FunctionItem fn = (FunctionItem) item;
                         FunctionItemType fit = fn.getFunctionItemType();
                         if (fn.getArity() != argEvaluators.length) {

@@ -50,7 +50,7 @@ public abstract class XSLBreakOrContinue extends StyleElement {
         boolean isLast = true;
         while (true) {
             if (!(inst instanceof XSLWhen)) {
-                SequenceIterator sibs = inst.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
+                SequenceIterator sibs = inst.iterateFollowingSiblingAxis(null);
                 while (true) {
                     NodeInfo sib = (NodeInfo)sibs.next();
                     if (sib == null) {

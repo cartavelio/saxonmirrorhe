@@ -18,7 +18,9 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
@@ -27,6 +29,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 
@@ -735,11 +738,7 @@ public final class AxisExpression extends Expression {
                     .asTypeError();
         }
         try {
-            if (test == null) {
-                return ((NodeInfo) item).iterateAxis(axis);
-            } else {
-                return ((NodeInfo) item).iterateAxis(axis, test);
-            }
+            return Navigator.iterateAxis(((NodeInfo)item), axis, test);
         } catch (ClassCastException cce) {
             throw new XPathException("The context item for axis step " + this + " is not a node")
                     .withErrorCode("XPTY0020")
@@ -767,11 +766,7 @@ public final class AxisExpression extends Expression {
      */
 
     public SequenceIterator iterate(GNode origin) {
-        if (test == null) {
-            return origin.iterateAxis(axis);
-        } else {
-            return origin.iterateAxis(axis, test);
-        }
+        return Navigator.iterateAxis(origin, axis, test);
     }
 
     /**
@@ -868,22 +863,22 @@ public final class AxisExpression extends Expression {
 
     public static class AxisExpressionElaborator extends PullElaborator {
 
-        private void reportDoesNotExist(Expression expression, XPathContext context) throws XPathException {
-            throw new XPathException("The context item for axis step " +
+        private void reportDoesNotExist(Expression expression, XPathContext context) {
+            throw new UncheckedXPathException(new XPathException("The context item for axis step " +
                                                             expression + " is absent")
                     .withErrorCode("XPDY0002")
                     .withXPathContext(context)
                     .withLocation(expression.getLocation())
-                    .asTypeError();
+                    .asTypeError());
         }
 
-        private void reportIsNotNode(Expression expression, XPathContext context) throws XPathException {
-            throw new XPathException("The context item for axis step " +
+        private void reportIsNotNode(Expression expression, XPathContext context) {
+            throw new UncheckedXPathException(new XPathException("The context item for axis step " +
                                                             expression + " is not a node")
                     .withErrorCode("XPTY0020")
                     .withXPathContext(context)
                     .withLocation(expression.getLocation())
-                    .asTypeError();
+                    .asTypeError());
         }
 
         @SuppressWarnings("DuplicatedCode")
@@ -896,31 +891,139 @@ public final class AxisExpression extends Expression {
             // that aren't needed because the condition cannot occur
             boolean checkContextItemExists = axisExpression.isContextPossiblyUndefined();
             boolean checkContextItemIsNode = axisExpression.getContextItemType().getGenre() != Genre.XNODE;
-            if (test == null || test instanceof AnyXNodeTest) {
-                return context -> {
-                    Item item = context.getContextItem();
-                    if (checkContextItemExists && item == null) {
-                        reportDoesNotExist(axisExpression, context);
-                    }
-                    if (checkContextItemIsNode && !(item instanceof NodeInfo)) {
-                        reportIsNotNode(axisExpression, context);
-                    }
-                    assert item != null;
-                    return ((NodeInfo)item).iterateAxis(axis);
-                };
-            } else {
-                return context -> {
-                    Item item = context.getContextItem();
-                    if (checkContextItemExists && item == null) {
-                        reportDoesNotExist(axisExpression, context);
-                    }
-                    if (checkContextItemIsNode && !(item instanceof NodeInfo)) {
-                        reportIsNotNode(axisExpression, context);
-                    }
-                    assert item != null;
-                    return ((NodeInfo) item).iterateAxis(axis, test);
-                };
+            BiConsumer<Item, XPathContext> checkOrigin = (origin, cxt) -> {
+                if (checkContextItemExists && origin == null) {
+                    reportDoesNotExist(axisExpression, cxt);
+                }
+                if (checkContextItemIsNode && !(origin instanceof GNode)) {
+                    reportIsNotNode(axisExpression, cxt);
+                }
+            };
+            switch (axis) {
+                case AxisInfo.ANCESTOR:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode)origin).iterateAncestorAxis(test);
+                    };
+
+                case AxisInfo.ANCESTOR_OR_SELF:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateAncestorOrSelfAxis(test);
+                    };
+
+                case AxisInfo.ATTRIBUTE:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateAttributeAxis(test);
+                    };
+
+                case AxisInfo.CHILD:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateChildAxis(test);
+                    };
+
+                case AxisInfo.DESCENDANT:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateDescendantAxis(test);
+                    };
+
+                case AxisInfo.DESCENDANT_OR_SELF:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateDescendantOrSelfAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateFollowingAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING_OR_SELF:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateFollowingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING_SIBLING:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateFollowingSiblingAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateFollowingSiblingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.NAMESPACE:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateNamespaceAxis(test);
+                    };
+
+                case AxisInfo.PARENT:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateParentAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iteratePrecedingAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING_OR_SELF:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iteratePrecedingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING_SIBLING:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iteratePrecedingSiblingAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iteratePrecedingSiblingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.SELF:
+                    return context -> {
+                        Item origin = context.getContextItem();
+                        checkOrigin.accept(origin, context);
+                        return ((GNode) origin).iterateSelfAxis(test);
+                    };
+
+                default:
+                    throw new IllegalArgumentException("Unknown axis number " + axis);
+
             }
+
         }
 
 

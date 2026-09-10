@@ -16,11 +16,11 @@ import net.sf.saxon.om.SequenceIterator;
  * to one that iterates over A-OR-SELF.
  */
 
-public class PrependSequenceIterator implements SequenceIterator {
+public class PrependIterator implements SequenceIterator {
     Item start;
     SequenceIterator base;
 
-    public PrependSequenceIterator(Item start, SequenceIterator base) {
+    public PrependIterator(Item start, SequenceIterator base) {
         this.start = start;
         this.base = base;
     }

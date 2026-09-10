@@ -9,7 +9,7 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.NodePredicate;
 
 /**
  * This class enumerates the ancestor:: or ancestor-or-self:: axes,
@@ -20,9 +20,9 @@ final public class AncestorIterator implements SequenceIterator {
 
     private final NodeInfo startNode;
     private NodeInfo current;
-    private final NodeTest test;
+    private final NodePredicate test;
 
-    public AncestorIterator(NodeInfo node, NodeTest nodeTest) {
+    public AncestorIterator(NodeInfo node, NodePredicate nodeTest) {
         test = nodeTest;
         startNode = node;
         current = startNode;

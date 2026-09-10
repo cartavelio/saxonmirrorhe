@@ -836,13 +836,13 @@ public class TestOutcome {
                     return false;
                 }
                 if (value.size() == 1 && value.itemAt(0) instanceof XdmNode && ((XdmNode) value.itemAt(0)).getNodeKind() == XdmNodeKind.DOCUMENT) {
-                    iter0 = ((XdmNode) value.itemAt(0)).getUnderlyingNode().iterateAxis(AxisInfo.CHILD);
+                    iter0 = ((XdmNode) value.itemAt(0)).getUnderlyingNode().iterateChildAxis(null);
                 } else {
                     iter0 = value.getUnderlyingValue().iterate();
                 }
                 GroundedValue val0 = SequenceTool.toGroundedValue(iter0);
                 SequenceIterator iter1 = expected.axisIterator(Axis.CHILD).next()
-                        .getUnderlyingValue().iterateAxis(AxisInfo.CHILD);
+                        .getUnderlyingValue().iterateChildAxis(null);
                 GroundedValue val1 = SequenceTool.toGroundedValue(iter1);
                 AtomicMatcher matcher = GenericAtomicComparer.getTransitiveAtomicMatcher(CodepointCollator.getInstance(), 0);
                 boolean success = SaxonDeepEqual.deepEqual(

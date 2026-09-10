@@ -83,7 +83,7 @@ public class JDOM2DocumentWrapper extends GenericTreeInfo implements ActiveSourc
     public NodeInfo selectID(String id, boolean getParent) {
         if (idIndex == null) {
             idIndex = new HashMap<String, Element>(100);
-            SequenceIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+            SequenceIterator iter = getRootNode().iterateDescendantAxis(NodeKindTest.ELEMENT);
             GNode node;
             while ((node = (GNode)iter.next()) != null) {
                 Element element = (Element) ((JDOM2NodeWrapper) node).node;

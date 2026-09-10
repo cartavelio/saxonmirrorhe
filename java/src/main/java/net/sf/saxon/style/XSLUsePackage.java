@@ -231,11 +231,11 @@ public class XSLUsePackage extends StyleElement {
 
     private Set<SymbolicName> getNamedOverrides() {
         Set<SymbolicName> overrides = new HashSet<>();
-        SequenceIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = iterateChildAxis(NodeKindTest.ELEMENT);
         NodeInfo override;
         while ((override = (NodeInfo)kids.next()) != null) {
             if (override instanceof XSLOverride) {
-                SequenceIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                SequenceIterator overridings = override.iterateChildAxis(NodeKindTest.ELEMENT);
                 NodeInfo overridingDeclaration;
                 while ((overridingDeclaration = (NodeInfo)overridings.next()) != null) {
                     if (overridingDeclaration instanceof StylesheetComponent) {
@@ -267,14 +267,14 @@ public class XSLUsePackage extends StyleElement {
             throws XPathException {
         StylesheetPackage thisPackage = module.getStylesheetPackage();
         RuleManager ruleManager = module.getRuleManager();
-        SequenceIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = iterateChildAxis(NodeKindTest.ELEMENT);
         Set<SymbolicName> overriddenModes = new HashSet<>();
 
         // Process all template rules within xsl:override elements
         NodeInfo override;
         while ((override = (NodeInfo)kids.next()) != null) {
             if (override instanceof XSLOverride) {
-                SequenceIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                SequenceIterator overridings = override.iterateChildAxis(NodeKindTest.ELEMENT);
                 NodeInfo overridingDeclaration;
                 while ((overridingDeclaration = (NodeInfo)overridings.next()) != null) {
                     if (overridingDeclaration instanceof XSLTemplate &&

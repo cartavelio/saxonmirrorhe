@@ -16,7 +16,6 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
 
@@ -453,78 +452,39 @@ public final class Orphan implements MutableNodeInfo {
     }
 
     /**
-     * Return an iteration over the nodes reached by the given axis from this node
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
      *
-     * @param axisNumber the axis to be searched, e.g. Axis.CHILD or Axis.ANCESTOR
-     * @return a SequenceIterator that scans the nodes reached by the axis in turn.
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
      */
-
-    /*@NotNull*/
     @Override
-    public SequenceIterator iterateAxis(int axisNumber) {
-        switch (axisNumber) {
-            case AxisInfo.ANCESTOR_OR_SELF:
-            case AxisInfo.DESCENDANT_OR_SELF:
-            case AxisInfo.SELF:
-            case AxisInfo.FOLLOWING_OR_SELF:
-            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-            case AxisInfo.PRECEDING_OR_SELF:
-            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-                return SingleNodeIterator.makeIterator(this);
-
-            case AxisInfo.ANCESTOR:
-            case AxisInfo.ATTRIBUTE:
-            case AxisInfo.CHILD:
-            case AxisInfo.DESCENDANT:
-            case AxisInfo.FOLLOWING:
-            case AxisInfo.FOLLOWING_SIBLING:
-            case AxisInfo.NAMESPACE:
-            case AxisInfo.PARENT:
-            case AxisInfo.PRECEDING:
-            case AxisInfo.PRECEDING_SIBLING:
-            case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.getInstance();
-            default:
-                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-        }
+    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
     }
 
+    /**
+     * Get an iterator over the following-sibling axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
+    }
 
     /**
-     * Return an iteration over the nodes reached by the given axis from this node
+     * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+     * be in reverse document order.
      *
-     * @param axisNumber the axis to be searched, e.g. Axis.CHILD or Axis.ANCESTOR
-     * @param nodeTest   A pattern to be matched by the returned nodes
-     * @return a SequenceIterator that scans the nodes reached by the axis in turn.
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
      */
-
-    /*@NotNull*/
     @Override
-    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-        switch (axisNumber) {
-            case AxisInfo.ANCESTOR_OR_SELF:
-            case AxisInfo.DESCENDANT_OR_SELF:
-            case AxisInfo.SELF:
-            case AxisInfo.FOLLOWING_OR_SELF:
-            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-            case AxisInfo.PRECEDING_OR_SELF:
-            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-                return Navigator.filteredSingleton(this, nodeTest);
-            case AxisInfo.ANCESTOR:
-            case AxisInfo.ATTRIBUTE:
-            case AxisInfo.CHILD:
-            case AxisInfo.DESCENDANT:
-            case AxisInfo.FOLLOWING:
-            case AxisInfo.FOLLOWING_SIBLING:
-            case AxisInfo.NAMESPACE:
-            case AxisInfo.PARENT:
-            case AxisInfo.PRECEDING:
-            case AxisInfo.PRECEDING_SIBLING:
-            case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.getInstance();
-            default:
-                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-        }
+    public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
     }
 
     /**
@@ -846,6 +806,12 @@ public final class Orphan implements MutableNodeInfo {
     @Override
     public Builder newBuilder() {
         throw new UnsupportedOperationException("Cannot create children for an Orphan node");
+    }
+
+
+    @Override
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
+        return null;
     }
 }
 

@@ -2082,7 +2082,7 @@ public abstract class StyleElement extends ElementImpl {
             vars.addAll(onEmpties);
             return compileSequenceConstructor(compilation, decl, new ListIterator.Of<>(vars), includeParams);
         } else {
-            return compileSequenceConstructor(compilation, decl, iterateAxis(AxisInfo.CHILD), includeParams);
+            return compileSequenceConstructor(compilation, decl, iterateChildAxis(null), includeParams);
         }
     }
 
@@ -2116,7 +2116,7 @@ public abstract class StyleElement extends ElementImpl {
                     compileContentValueTemplate((TextImpl) node, contents);
                 } else {
                     // handle literal text nodes by generating an xsl:value-of instruction, unless expand-text is enabled
-                    SequenceIterator lookahead = node.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
+                    SequenceIterator lookahead = node.iterateFollowingSiblingAxis(null);
                     NodeInfo sibling = (NodeInfo)lookahead.next();
                     if (!(sibling instanceof XSLLocalParam || sibling instanceof XSLSort
                                   || sibling instanceof XSLContextItem || sibling instanceof XSLOnCompletion)) {
@@ -2685,7 +2685,7 @@ public abstract class StyleElement extends ElementImpl {
                 // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
                 curr = curr.getParent();
             }
-            SequenceIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+            SequenceIterator preceding = curr.iteratePrecedingSiblingAxis(null);
             while (true) {
                 curr = (NodeInfo)preceding.next();
                 while (curr == null) {
@@ -2704,7 +2704,7 @@ public abstract class StyleElement extends ElementImpl {
                     if (curr.getParent() instanceof XSLModuleRoot) {
                         break;   // top level
                     }
-                    preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+                    preceding = curr.iteratePrecedingSiblingAxis(null);
                     curr = (NodeInfo)preceding.next();
                 }
                 if (curr.getParent() instanceof XSLModuleRoot) {

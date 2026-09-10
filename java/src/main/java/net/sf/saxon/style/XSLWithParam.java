@@ -44,7 +44,7 @@ public class XSLWithParam extends XSLGeneralVariable {
 
         // Check for duplicate parameter names
 
-        SequenceIterator iter = iterateAxis(AxisInfo.PRECEDING_SIBLING);
+        SequenceIterator iter = iteratePrecedingSiblingAxis(null);
         Item prev;
         while ((prev = iter.next()) != null) {
             if (prev instanceof XSLWithParam) {

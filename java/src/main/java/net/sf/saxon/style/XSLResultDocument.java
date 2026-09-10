@@ -239,7 +239,7 @@ public class XSLResultDocument extends StyleElement {
         // This is a dynamic error, but worth detecting statically.
         // In fact this is a bit of a fudge. If a function or variable is inlined, we sometimes don't detect
         // XTDE1480 at run-time. Doing this static check improves our chances, though it won't catch all cases.
-        SequenceIterator ai = iterateAxis(AxisInfo.ANCESTOR);
+        SequenceIterator ai = iterateAncestorAxis(null);
         NodeInfo node;
         while ((node = (NodeInfo)ai.next()) != null) {
             if (node instanceof XSLGeneralVariable || (node instanceof XSLFunction && !((XSLFunction) node).isUpdating())) {
@@ -269,7 +269,7 @@ public class XSLResultDocument extends StyleElement {
         if (formatExpression == null &&
                 globalProps.getProperty("method") == null &&
                 serializationAttributes.get(METHOD) == null) {
-            SequenceIterator kids = iterateAxis(AxisInfo.CHILD);
+            SequenceIterator kids = iterateChildAxis(null);
             NodeInfo first = (NodeInfo)kids.next();
             if (first instanceof LiteralResultElement) {
                 if (first.getNamespaceUri().equals(NamespaceUri.XHTML) && first.getLocalPart().equals("html")) {

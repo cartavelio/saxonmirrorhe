@@ -12,11 +12,10 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.*;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -25,14 +24,13 @@ import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An element node in the TinyTree that has no attributes or namespace declarations and that
  * has a single text node child. The element-and-text-node pair are represented by a single
  * entry in the node arrays, but materialize as two separate objects when turned into node
- * objects.
+ * objects. This object represents the element node; the nested class {@link TinyTextualElementText}
+ * represents the child text node
  */
 
 public class TinyTextualElement extends TinyElementImpl {
@@ -117,47 +115,15 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public SequenceIterator iterateAxis(int axisNumber) {
-        switch (axisNumber) {
-            case AxisInfo.ATTRIBUTE:
-                return EmptyIterator.getInstance();
-
-            case AxisInfo.CHILD:
-            case AxisInfo.DESCENDANT:
-                return SingleNodeIterator.makeIterator(getTextNode());
-
-            case AxisInfo.DESCENDANT_OR_SELF:
-                return new ArrayIterator.OfNodes<NodeInfo>(new NodeInfo[]{this, getTextNode()});
-
-            default:
-                return super.iterateAxis(axisNumber);
-        }
+    public SequenceIterator iterateChildAxis(NodePredicate nodeTest) {
+        return Navigator.filteredSingleton(getTextNode(), nodeTest);
     }
 
     @Override
-    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-        switch (axisNumber) {
-            case AxisInfo.ATTRIBUTE:
-                return EmptyIterator.getInstance();
-
-            case AxisInfo.CHILD:
-            case AxisInfo.DESCENDANT:
-                return Navigator.filteredSingleton(getTextNode(), nodeTest);
-
-            case AxisInfo.DESCENDANT_OR_SELF:
-                List<NodeInfo> list = new ArrayList<>(2);
-                if (nodeTest.test(this)) {
-                    list.add(this);
-                }
-                if (nodeTest.test(getTextNode())) {
-                    list.add(getTextNode());
-                }
-                return new ListIterator.Of<>(list);
-
-            default:
-                return super.iterateAxis(axisNumber, nodeTest);
-        }
+    public SequenceIterator iterateDescendantAxis(NodePredicate nodeTest) {
+        return Navigator.filteredSingleton(getTextNode(), nodeTest);
     }
+
 
     @Override
     public boolean isAncestorOrSelf(TinyNodeImpl d) {
@@ -400,7 +366,7 @@ public class TinyTextualElement extends TinyElementImpl {
          * @since 9.4
          */
         @Override
-        public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
+        public String getAttributeValue(NamespaceUri uri, String local) {
             return null;
         }
 
@@ -548,43 +514,96 @@ public class TinyTextualElement extends TinyElementImpl {
          * @return a AxisIterator that scans the nodes reached by the axis in turn.
          */
 
+
+
         /*@NotNull*/
         @Override
         public SequenceIterator iterateAxis(int axisNumber) {
-            switch (axisNumber) {
-                case AxisInfo.ANCESTOR:
-                    return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+//            switch (axisNumber) {
+//                case AxisInfo.ANCESTOR:
+//                    return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+//
+//                case AxisInfo.ANCESTOR_OR_SELF:
+//                    return new PrependIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF));
+//
+//                case AxisInfo.FOLLOWING:
+//                    return new Navigator.FollowingIterator(this);
+//
+//                case AxisInfo.PRECEDING:
+//                    return new Navigator.PrecedingIterator(this, false);
+//
+//                case AxisInfo.PARENT:
+//                    return SingletonIterator.makeIterator(getParent());
+//
+//                case AxisInfo.ATTRIBUTE:
+//                case AxisInfo.CHILD:
+//                case AxisInfo.DESCENDANT:
+//                case AxisInfo.FOLLOWING_SIBLING:
+//                case AxisInfo.NAMESPACE:
+//                case AxisInfo.PRECEDING_SIBLING:
+//                    return EmptyIterator.getInstance();
+//
+//                case AxisInfo.SELF:
+//                case AxisInfo.DESCENDANT_OR_SELF:
+//                    return SingletonIterator.makeIterator(this);
+//
+//                default:
+//                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+//            }
+            return null;
+        }
 
-                case AxisInfo.PRECEDING_OR_ANCESTOR:
-                    return new Navigator.PrecedingIterator(this, true);
+        @Override
+        public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
+            return element.iterateAncestorAxis(predicate);
+        }
 
-                case AxisInfo.ANCESTOR_OR_SELF:
-                    return new PrependSequenceIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF));
+        /**
+         * Get an iterator over the child axis, starting at this node; the nodes will
+         * be in document order.
+         *
+         * @param predicate a condition that the nodes must satisfy, or null
+         * @return the required iterator
+         */
+        @Override
+        public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+            return EmptyIterator.getInstance();
+        }
 
-                case AxisInfo.FOLLOWING:
-                    return new Navigator.FollowingIterator(this);
+        /**
+         * Get an iterator over the descendant axis, starting at this node; the nodes will
+         * be in document order.
+         *
+         * @param predicate a condition that the nodes must satisfy, or null
+         * @return the required iterator
+         */
+        @Override
+        public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+            return EmptyIterator.getInstance();
+        }
 
-                case AxisInfo.PRECEDING:
-                    return new Navigator.PrecedingIterator(this, false);
+        /**
+         * Get an iterator over the following-sibling axis, starting at this node; the nodes will
+         * be in document order.
+         *
+         * @param predicate a condition that the nodes must satisfy, or null
+         * @return the required iterator
+         */
+        @Override
+        public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
+            return EmptyIterator.getInstance();
+        }
 
-                case AxisInfo.PARENT:
-                    return SingleNodeIterator.makeIterator(getParent());
-
-                case AxisInfo.ATTRIBUTE:
-                case AxisInfo.CHILD:
-                case AxisInfo.DESCENDANT:
-                case AxisInfo.FOLLOWING_SIBLING:
-                case AxisInfo.NAMESPACE:
-                case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.getInstance();
-
-                case AxisInfo.SELF:
-                case AxisInfo.DESCENDANT_OR_SELF:
-                    return SingleNodeIterator.makeIterator(this);
-
-                default:
-                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-            }
+        /**
+         * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+         * be in reverse document order.
+         *
+         * @param predicate a condition that the nodes must satisfy, or null
+         * @return the required iterator
+         */
+        @Override
+        public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+            return EmptyIterator.getInstance();
         }
 
 
@@ -596,58 +615,62 @@ public class TinyTextualElement extends TinyElementImpl {
          * @return a AxisIterator that scans the nodes reached by the axis in turn.
          */
 
+        
+
+
         /*@NotNull*/
         @Override
         public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
-            NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
-            switch (axisNumber) {
-                case AxisInfo.ANCESTOR:
-                    return getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
-
-                case AxisInfo.PRECEDING_OR_ANCESTOR:
-                    return new Navigator.AxisFilter(
-                            new Navigator.PrecedingIterator(this, true),
-                            nodeTest);
-
-                case AxisInfo.ANCESTOR_OR_SELF:
-                    return new Navigator.AxisFilter(
-                            new PrependSequenceIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF)),
-                            nodeTest);
-
-                case AxisInfo.FOLLOWING:
-                    return new Navigator.AxisFilter(
-                            new Navigator.FollowingIterator(this),
-                            nodeTest);
-
-                case AxisInfo.PRECEDING:
-                    return new Navigator.AxisFilter(
-                            new Navigator.PrecedingIterator(this, false),
-                            nodeTest);
-
-                case AxisInfo.PARENT:
-                    return Navigator.filteredSingleton(getParent(), nodeTest);
-
-                case AxisInfo.ATTRIBUTE:
-                case AxisInfo.CHILD:
-                case AxisInfo.DESCENDANT:
-                case AxisInfo.FOLLOWING_SIBLING:
-                case AxisInfo.NAMESPACE:
-                case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.getInstance();
-
-                case AxisInfo.SELF:
-                case AxisInfo.DESCENDANT_OR_SELF:
-                    return Navigator.filteredSingleton(this, nodeTest);
-
-                case AxisInfo.FOLLOWING_OR_SELF:
-                case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-                case AxisInfo.PRECEDING_OR_SELF:
-                case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-                    return Navigator.orSelfIterator(this, axisNumber, nodeTest);
-
-                default:
-                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-            }
+//            NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
+//            switch (axisNumber) {
+//                case AxisInfo.ANCESTOR:
+//                    return getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
+//
+//                case AxisInfo.PRECEDING_OR_ANCESTOR:
+//                    return new Navigator.AxisFilter(
+//                            new Navigator.PrecedingIterator(this, true),
+//                            nodeTest);
+//
+//                case AxisInfo.ANCESTOR_OR_SELF:
+//                    return new Navigator.AxisFilter(
+//                            new PrependIterator(this, getParent().iterateAncestorOrSelfAxis(null)),
+//                            nodeTest);
+//
+//                case AxisInfo.FOLLOWING:
+//                    return new Navigator.AxisFilter(
+//                            new Navigator.FollowingIterator(this),
+//                            nodeTest);
+//
+//                case AxisInfo.PRECEDING:
+//                    return new Navigator.AxisFilter(
+//                            new Navigator.PrecedingIterator(this, false),
+//                            nodeTest);
+//
+//                case AxisInfo.PARENT:
+//                    return Navigator.filteredSingleton(getParent(), nodeTest);
+//
+//                case AxisInfo.ATTRIBUTE:
+//                case AxisInfo.CHILD:
+//                case AxisInfo.DESCENDANT:
+//                case AxisInfo.FOLLOWING_SIBLING:
+//                case AxisInfo.NAMESPACE:
+//                case AxisInfo.PRECEDING_SIBLING:
+//                    return EmptyIterator.getInstance();
+//
+//                case AxisInfo.SELF:
+//                case AxisInfo.DESCENDANT_OR_SELF:
+//                    return Navigator.filteredSingleton(this, nodeTest);
+//
+//                case AxisInfo.FOLLOWING_OR_SELF:
+//                case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+//                case AxisInfo.PRECEDING_OR_SELF:
+//                case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+//                    return Navigator.orSelfIterator(this, axisNumber, nodeTest);
+//
+//                default:
+//                    throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+//            }
+            return null;
         }
 
         /**

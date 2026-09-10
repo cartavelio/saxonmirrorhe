@@ -162,7 +162,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
         }
 
         // it must be a text node; allow it if all whitespace
-        SequenceTool.supply(iterateAxis(AxisInfo.PRECEDING_SIBLING), (ItemConsumer<? super Item>) node -> {
+        SequenceTool.supply(iteratePrecedingSiblingAxis(null), (ItemConsumer<? super Item>) node -> {
             if (node instanceof XSLLocalParam) {
                 if (name.equals(((XSLLocalParam) node).sourceBinding.getVariableQName())) {
                     compileError("The name of the parameter (" + name + ") is not unique", "XTSE0580");

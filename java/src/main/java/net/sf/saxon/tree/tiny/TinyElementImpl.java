@@ -14,11 +14,13 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -26,6 +28,8 @@ import net.sf.saxon.z.IntHashMap;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 
 /**
@@ -235,6 +239,21 @@ public class TinyElementImpl extends TinyParentNodeImpl {
             next = tree.next[next];
         }
         return nodeNr - next;
+    }
+
+    /**
+     * Get an iterator over the attribute axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
+        if (tree.alpha[nodeNr] < 0) {
+            return EmptyIterator.getInstance();
+        }
+        return new AttributeIterator(tree, nodeNr, nodeTestFromPredicate(predicate));
     }
 
     /**

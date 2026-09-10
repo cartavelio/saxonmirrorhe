@@ -11,8 +11,9 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.IncrementalIterator;
-import net.sf.saxon.tree.iter.SingleNodeIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 
 public abstract class JNode implements GNode {
@@ -38,6 +39,10 @@ public abstract class JNode implements GNode {
 
     @Override
     public abstract JNode getParent();
+
+    public int getNodeKind() {
+        return Type.JNODE;
+    }
 
     /**
      * Get the genre of this item (to distinguish the top-level categories of item,
@@ -86,14 +91,14 @@ public abstract class JNode implements GNode {
     public SequenceIterator iterateAxis(int axis) {
         switch (axis) {
             case AxisInfo.SELF:
-                return SingleNodeIterator.makeIterator(this);
+                return SingletonIterator.makeIterator(this);
             case AxisInfo.CHILD:
                 return getChildren();
             case AxisInfo.PARENT:
                 if (getParent() == null) {
                     return EmptyIterator.getInstance();
                 } else {
-                    return SingleNodeIterator.makeIterator(getParent());
+                    return SingletonIterator.makeIterator(getParent());
                 }
             case AxisInfo.ANCESTOR:
                 if (getParent() == null) {

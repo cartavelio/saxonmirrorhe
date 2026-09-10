@@ -262,7 +262,7 @@ public class FocusTrackingIterator
             return siblingMemory.mostRecentPosition;
         }
         SiblingMemory s = siblingMemory;
-        SequenceIterator prev = node.iterateAxis(AxisInfo.PRECEDING_SIBLING, nodeTest);
+        SequenceIterator prev = node.iteratePrecedingSiblingAxis(nodeTest);
         NodeInfo prior;
         int count = 1;
         while ((prior = (NodeInfo)prev.next()) != null) {

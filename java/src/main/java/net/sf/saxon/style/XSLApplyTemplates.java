@@ -104,7 +104,7 @@ public class XSLApplyTemplates extends StyleElement {
         // get the Mode object
         if (useCurrentMode) {
             // give a warning if we're not inside an xsl:template
-            if (iterateAxis(AxisInfo.ANCESTOR, new NameTest(Type.ELEMENT, StandardNames.XSL_TEMPLATE, getNamePool())).next() == null) {
+            if (iterateAncestorAxis(new NameTest(Type.ELEMENT, StandardNames.XSL_TEMPLATE, getNamePool())).next() == null) {
                 issueWarning("Specifying mode=\"#current\" when not inside an xsl:template serves no useful purpose",
                              SaxonErrorCode.SXWN9023);
             }

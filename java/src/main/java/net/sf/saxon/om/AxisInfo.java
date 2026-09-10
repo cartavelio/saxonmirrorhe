@@ -312,9 +312,9 @@ public final class AxisInfo {
                 return PRECEDING_SIBLING_OR_SELF;
             case "self":
                 return SELF;
-            case "preceding-or-ancestor":
-                return PRECEDING_OR_ANCESTOR;
-                // preceding-or-ancestor cannot be used in an XPath expression
+//            case "preceding-or-ancestor":
+//                return PRECEDING_OR_ANCESTOR;
+//                // preceding-or-ancestor cannot be used in an XPath expression
             default:
                 throw new XPathException("Unknown axis name: " + name);
         }

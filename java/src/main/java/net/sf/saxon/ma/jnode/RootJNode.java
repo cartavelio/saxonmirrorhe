@@ -7,6 +7,9 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodePredicate;
+import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 
@@ -47,6 +50,45 @@ public class RootJNode extends JNode {
         } else {
             return new JNodeArrayIterator(this);
         }
+    }
+
+    /**
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+        if (predicate == null) {
+            return getChildren();
+        }
+        return new Navigator.AxisFilter(getChildren(), predicate);
+    }
+
+    /**
+     * Get an iterator over the following-sibling axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
+    }
+
+    /**
+     * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+        return EmptyIterator.getInstance();
     }
 
     private static class JNodeMapIterator implements SequenceIterator {

@@ -9,8 +9,11 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.z.IntPredicateProxy;
+
+import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 /**
  * This class supports the preceding-sibling axis.
@@ -27,14 +30,14 @@ final class PrecedingSiblingIterator implements SequenceIterator {
     private final TinyNodeImpl parentNode;
     private final IntPredicateProxy matcher;
 
-    PrecedingSiblingIterator(TinyTree doc, /*@NotNull*/ TinyNodeImpl node, NodeTest nodeTest) {
+    PrecedingSiblingIterator(TinyTree doc, /*@NotNull*/ TinyNodeImpl node, NodePredicate predicate) {
         document = doc;
         document.ensurePriorIndex();
-        test = nodeTest;
+        test = nodeTestFromPredicate(predicate);
         startNode = node;
         nextNodeNr = node.nodeNr;
         parentNode = node.parent;   // doesn't matter if this is null (unknown)
-        this.matcher = nodeTest.getMatcher(doc);
+        this.matcher = test.getMatcher(doc);
     }
 
     /*@Nullable*/

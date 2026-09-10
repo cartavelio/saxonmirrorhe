@@ -15,9 +15,6 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
-import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.EmptyIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -144,7 +141,7 @@ public class VirtualCopy implements NodeInfo {
                 if (!ns.isEmpty()) {
                     nsMap = nsMap.put(getPrefix(), ns);
                 }
-                SequenceIterator iter = original.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator iter = original.iterateAttributeAxis(null);
                 NodeInfo att;
                 while ((att = (NodeInfo)iter.next()) != null) {
                     if (!att.getNamespaceUri().isEmpty()) {
@@ -447,49 +444,134 @@ public class VirtualCopy implements NodeInfo {
 
     @Override
     public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-        VirtualCopy newParent = null;
-        switch (axisNumber) {
-            case AxisInfo.CHILD:
-            case AxisInfo.ATTRIBUTE:
-                newParent = this;
-                break;
-            case AxisInfo.SELF:
-            case AxisInfo.PRECEDING_SIBLING:
-            case AxisInfo.FOLLOWING_SIBLING:
-                newParent = parent;
-                break;
-            // Ensure that the ancestor, ancestor-or-self, following, and preceding axes use an implementation
-            // that relies on getParent() to escape from the subtree
-            case AxisInfo.ANCESTOR:
-                return new Navigator.AxisFilter(
-                        new Navigator.AncestorIterator(this, false), nodeTest);
-            case AxisInfo.ANCESTOR_OR_SELF:
-                return new Navigator.AxisFilter(
-                        new Navigator.AncestorIterator(this, true), nodeTest);
-            case AxisInfo.NAMESPACE:
-                if (getNodeKind() != Type.ELEMENT) {
-                    return EmptyIterator.getInstance();
-                }
-                return NamespaceNode.makeIterator(this, nodeTest);
-            case AxisInfo.PARENT:
-                return Navigator.filteredSingleton(getParent(), nodeTest);
-            case AxisInfo.PRECEDING:
-                return new Navigator.AxisFilter(
-                        new Navigator.PrecedingIterator(this, false), nodeTest);
-            case AxisInfo.FOLLOWING:
-                return new Navigator.AxisFilter(
-                        new Navigator.FollowingIterator(this), nodeTest);
-            case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return new Navigator.AxisFilter(
-                        new Navigator.PrecedingIterator(this, true), nodeTest);
-            case AxisInfo.FOLLOWING_OR_SELF:
-            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-            case AxisInfo.PRECEDING_OR_SELF:
-            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
+//        VirtualCopy newParent = null;
+//        switch (axisNumber) {
+//            case AxisInfo.CHILD:
+//            case AxisInfo.ATTRIBUTE:
+//                newParent = this;
+//                break;
+//            case AxisInfo.SELF:
+//            case AxisInfo.PRECEDING_SIBLING:
+//            case AxisInfo.FOLLOWING_SIBLING:
+//                newParent = parent;
+//                break;
+//            // Ensure that the ancestor, ancestor-or-self, following, and preceding axes use an implementation
+//            // that relies on getParent() to escape from the subtree
+//            case AxisInfo.ANCESTOR:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.AncestorIterator(this, false), nodeTest);
+//            case AxisInfo.ANCESTOR_OR_SELF:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.AncestorIterator(this, true), nodeTest);
+//            case AxisInfo.NAMESPACE:
+//                if (getNodeKind() != Type.ELEMENT) {
+//                    return EmptyIterator.getInstance();
+//                }
+//                return NamespaceNode.makeIterator(this, nodeTest);
+//            case AxisInfo.PARENT:
+//                return Navigator.filteredSingleton(getParent(), nodeTest);
+//            case AxisInfo.PRECEDING:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.PrecedingIterator(this, false), nodeTest);
+//            case AxisInfo.FOLLOWING:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.FollowingIterator(this), nodeTest);
+//            case AxisInfo.PRECEDING_OR_ANCESTOR:
+//                return new Navigator.AxisFilter(
+//                        new Navigator.PrecedingIterator(this, true), nodeTest);
+//            case AxisInfo.FOLLOWING_OR_SELF:
+//            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+//            case AxisInfo.PRECEDING_OR_SELF:
+//            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+//                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
+//
+//        }
+//        return makeCopier(original.iterateAxis(axisNumber, nodeTest), newParent, !AxisInfo.isSubtreeAxis[axisNumber]);
+        return null;
+    }
 
-        }
-        return makeCopier(original.iterateAxis(axisNumber, nodeTest), newParent, !AxisInfo.isSubtreeAxis[axisNumber]);
+    /**
+     * Get an iterator over the attribute axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
+        return makeCopier(original.iterateAttributeAxis(predicate), this, false);
+    }
+
+    /**
+     * Get an iterator over the child axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
+        return makeCopier(original.iterateChildAxis(predicate), this, false);
+    }
+
+    /**
+     * Get an iterator over the descendant axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
+        return makeCopier(original.iterateDescendantAxis(predicate), null, false);
+    }
+
+    /**
+     * Get an iterator over the descendant-or-self axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
+        return makeCopier(original.iterateDescendantOrSelfAxis(predicate), null, false);
+    }
+
+    /**
+     * Get an iterator over the following-sibling axis, starting at this node; the nodes will
+     * be in document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
+        return makeCopier(original.iterateFollowingSiblingAxis(predicate), parent, true);
+    }
+
+    /**
+     * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
+     * be in reverse document order.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
+        return makeCopier(original.iteratePrecedingSiblingAxis(predicate), parent, true);
+    }
+
+    /**
+     * Get an iterator over the self axis, starting at this node; there will be zero
+     * or one nodes.
+     *
+     * @param predicate a condition that the nodes must satisfy, or null
+     * @return the required iterator
+     */
+    @Override
+    public SequenceIterator iterateSelfAxis(NodePredicate predicate) {
+        return makeCopier(original.iterateSelfAxis(predicate), parent, false);
     }
 
     /**

@@ -22,7 +22,7 @@ public final class XSLOnEmpty extends XSLSequence {
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
-        SequenceTool.supply(iterateAxis(AxisInfo.FOLLOWING_SIBLING), (ItemConsumer<? super Item>) next -> {
+        SequenceTool.supply(iterateFollowingSiblingAxis(null), (ItemConsumer<? super Item>) next -> {
             if (!(next instanceof XSLFallback || next instanceof XSLCatch)) {
                 compileError("xsl:on-empty must be the last instruction in the sequence constructor");
             }

@@ -11,7 +11,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Type;
@@ -1602,7 +1602,8 @@ public class XdmUtils {
     @CEntryPoint(name = "j_axisIterator")
     public static CLongPointer axisIterator(IsolateThread thread, SaxonCAPI.AllocatorFn alloc, ObjectHandle nodeRef, int axisNum) throws SaxonApiException {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
-        XdmSequenceIterator iter = XdmSequenceIterator.ofNodes(node.getUnderlyingNode().iterateAxis(axisNum));
+        XdmSequenceIterator iter = XdmSequenceIterator.ofNodes(
+                Navigator.iterateAxis(node.getUnderlyingNode(), axisNum, null));
 
         long[] childRefs = null;
         if(iter.hasNext()) {

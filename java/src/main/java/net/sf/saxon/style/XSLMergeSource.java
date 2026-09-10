@@ -217,7 +217,7 @@ public class XSLMergeSource extends StyleElement {
 
         if (sourceName == null) {
             try {
-                sourceName = "merge-source " + (Count.count(iterateAxis(AxisInfo.PRECEDING_SIBLING, NodeKindTest.ELEMENT)) + 1);
+                sourceName = "merge-source " + (Count.count(iteratePrecedingSiblingAxis(NodeKindTest.ELEMENT)) + 1);
             } catch (XPathException e) {
                 sourceName = "merge-source " + hashCode();
             }

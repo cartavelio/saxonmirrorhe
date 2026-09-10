@@ -17,7 +17,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.PrependSequenceIterator;
+import net.sf.saxon.tree.iter.PrependIterator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -633,7 +633,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
                if (cxt.getCurrentIterator().position() == 1) {
                    return getAction().iterate(cxt);
                } else {
-                   return new PrependSequenceIterator(separator, getAction().iterate(cxt));
+                   return new PrependIterator(separator, getAction().iterate(cxt));
                }
             };
             return new ContextMappingIterator(mapper, c2);
@@ -747,7 +747,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
                         if (cxt.getCurrentIterator().position() == 1) {
                             return action.iterate(cxt);
                         } else {
-                            return new PrependSequenceIterator(separator, action.iterate(cxt));
+                            return new PrependIterator(separator, action.iterate(cxt));
                         }
                     };
                     XPathContextMinor c2 = context.newMinorContext();

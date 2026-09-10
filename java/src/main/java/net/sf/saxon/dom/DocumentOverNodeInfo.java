@@ -7,7 +7,6 @@
 
 package net.sf.saxon.dom;
 
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.TreeInfo;
@@ -198,12 +197,12 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
             return null;
         }
         SequenceIterator children =
-                root.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                root.iterateChildAxis(NodeKindTest.ELEMENT);
         return (Element) wrap((NodeInfo)children.next());
     }
 
     protected static NodeList getElementsByTagName(NodeInfo node, String tagname) {
-        SequenceIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
+        SequenceIterator allElements = node.iterateDescendantAxis(null);
         List<Node> nodes = new ArrayList<>(100);
         while (true) {
             NodeInfo next = (NodeInfo)allElements.next();
@@ -293,7 +292,7 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
 
     public static NodeList getElementsByTagNameNS(NodeInfo node, String namespaceURI, String localName) {
         String ns = namespaceURI == null ? "" : namespaceURI;
-        SequenceIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
+        SequenceIterator allElements = node.iterateDescendantAxis(null);
         List<Node> nodes = new ArrayList<>(100);
         while (true) {
             NodeInfo next = (NodeInfo)allElements.next();

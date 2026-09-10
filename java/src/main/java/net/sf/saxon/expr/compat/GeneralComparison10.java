@@ -26,7 +26,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.PrependSequenceIterator;
+import net.sf.saxon.tree.iter.PrependIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
@@ -268,10 +268,10 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
             }
             // Reconstitute the original iterator
             if (i02 != null) {
-                iter0 = new PrependSequenceIterator(i02, iter0);
+                iter0 = new PrependIterator(i02, iter0);
             }
             if (i01 != null) {
-                iter0 = new PrependSequenceIterator(i01, iter0);
+                iter0 = new PrependIterator(i01, iter0);
             }
         }
 
@@ -292,10 +292,10 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
             }
             // Reconstitute the original iterator
             if (i12 != null) {
-                iter1 = new PrependSequenceIterator(i12, iter1);
+                iter1 = new PrependIterator(i12, iter1);
             }
             if (i11 != null) {
-                iter1 = new PrependSequenceIterator(i11, iter1);
+                iter1 = new PrependIterator(i11, iter1);
             }
         }
 
