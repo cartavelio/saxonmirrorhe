@@ -244,7 +244,6 @@ namespace TestDriver {
                     switch (value) {
                         case "namespace-axis":
                         case "higherOrderFunctions":
-                        case "binary":
                         case "moduleImport":
                             return !inverse;
                         case "schemaImport":
@@ -254,11 +253,11 @@ namespace TestDriver {
                             return makeSchemaAware(env, inverse);
                         case "staticTyping":
                             return inverse;
+                        case "binary":
+                        case "expath-file":
+                            return (edition.Equals("EE")) ^ inverse;
                         default: {
-                            if ("schema-location-hint".Equals(value)) {
-                                return (edition.Equals("EE")) ^ inverse;
-                            }
-                            else if ("info-dtd".Equals(value)) {
+                            if ("info-dtd".Equals(value)) {
                                 if (treeModel == "tiny" || treeModel == "linked" ||
                                     treeModel == "condensed") {
                                     return !inverse;
