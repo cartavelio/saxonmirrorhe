@@ -902,13 +902,15 @@ XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *s
 
 
     const char * SaxonProcessor::clarkNameToEQName(const char * name){
-        const char *result = j_clarkNameToEQName(SaxonProcessor::sxn_environ->thread, (char *)name);
+        allocFn fn = operator new;
+        const char *result = j_clarkNameToEQName(SaxonProcessor::sxn_environ->thread, (void *) fn, (char *)name);
         return result;
     }
 
 
     const char * SaxonProcessor::EQNameToClarkName(const char * name){
-            const char *result = j_EQNameToClarkName(SaxonProcessor::sxn_environ->thread, (char *)name);
+            allocFn fn = operator new;
+            const char *result = j_EQNameToClarkName(SaxonProcessor::sxn_environ->thread, (void *) fn, (char *)name);
             return result;
     }
 
