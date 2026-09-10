@@ -520,6 +520,14 @@
         
         <p>From 12.4, an extensible record test with no named fields is allowed: <code>record(*)</code>.</p>
         
+        <p>From 12.4, there has been a change to the <code>for member</code> construct. To do two nested iterations
+        over arrays <code>$A</code> and <code>$B</code>, you now need to write <code>for member $a in $A,
+        member $b in $B return ...</code>. Previously the second <code>member</code> was not needed, it was assumed to
+        apply to subsequent clauses.</p>
+        
+        <p>From 12.4, the XQuery syntax for declaring a type alias is <code>declare item-type XX as record(a,b)</code>
+            rather than <code>declare type XX = record(a,b)</code>.</p>
+        
         
         
         
