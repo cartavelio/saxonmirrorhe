@@ -7,14 +7,12 @@
 
 package net.sf.saxon.style;
 
-import com.saxonica.trans.XSLArray;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.DocumentInstr;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.XmlProcessingError;
@@ -510,7 +508,7 @@ public class SourceBinding {
                 boolean makeDocNode = true;
                 if (compilation.getCompilerInfo().getXsltVersion() >= 40) {
                     for (NodeInfo child : sourceElement.children()) {
-                        if (child instanceof XSLMap || child instanceof XSLArray || child instanceof XSLSelect) {
+                        if (child instanceof AutoDocumentInhibitor) {
                             makeDocNode = false;
                             break;
                         }
@@ -633,13 +631,14 @@ public class SourceBinding {
                         int count = 0;
                         for (NodeInfo child : sourceElement.children()) {
                             count++;
-                            if (child instanceof XSLMap) {
-                                atype = atype == null ? MapType.ANY_MAP_TYPE : ChoiceItemType.of(atype, MapType.ANY_MAP_TYPE);
-                            } else if (child instanceof XSLArray) {
-                                atype = atype == null ? MapType.ANY_MAP_TYPE : ChoiceItemType.of(atype, MapType.ANY_MAP_TYPE);
-                            } else if (child instanceof XSLSelect) {
-                                atype = AnyItemType.getInstance();
-                                break;
+                            if (child instanceof AutoDocumentInhibitor) {
+                                ItemType instructionType = ((AutoDocumentInhibitor) child).getItemType();
+                                atype = atype == null
+                                        ? instructionType
+                                        : ChoiceItemType.of(atype, instructionType);
+                                if (atype == AnyItemType.getInstance()) {
+                                    break;
+                                }
                             }
                         }
                         if (atype != null) {

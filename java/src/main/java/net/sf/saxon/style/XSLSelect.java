@@ -15,6 +15,8 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
@@ -26,10 +28,12 @@ import java.util.function.Supplier;
  * An xsl:select element in the stylesheet (XSLT 4.0).
  */
 
-public class XSLSelect extends StyleElement {
+public class XSLSelect extends StyleElement implements AutoDocumentInhibitor {
 
     private Expression select;
     private SequenceType requiredType;
+
+
 
     // TODO: xsl:fallback child not implemented
 
@@ -42,6 +46,16 @@ public class XSLSelect extends StyleElement {
     @Override
     public boolean isInstruction() {
         return true;
+    }
+
+    /**
+     * Get the type of the items returned by this instruction
+     *
+     * @return the static item type
+     */
+    @Override
+    public ItemType getItemType() {
+        return AnyItemType.getInstance();
     }
 
     /**

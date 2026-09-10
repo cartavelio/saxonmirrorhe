@@ -25,6 +25,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -35,7 +36,7 @@ import java.util.function.Supplier;
  * Handler for xsl:map instructions in an XSLT 3.0 or 4.0 stylesheet.
  */
 
-public class XSLMap extends StyleElement {
+public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
 
     private Expression select = null;
     private Expression onDuplicates = null;
@@ -49,7 +50,17 @@ public class XSLMap extends StyleElement {
     public boolean isInstruction() {
         return true;
     }
-    
+
+    /**
+     * Get the type of the items returned by this instruction
+     *
+     * @return the static item type
+     */
+    @Override
+    public ItemType getItemType() {
+        return MapType.ANY_MAP_TYPE;
+    }
+
     /**
      * Determine whether this type of element is allowed to contain a sequence constructor
      *
