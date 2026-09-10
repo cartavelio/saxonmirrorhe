@@ -835,6 +835,82 @@
     </table>
     
     
+    <h2 class="subtitle">B5 Apache Jakarta Blake3 hashing</h2>
+
+    <p>Saxon's implementation of BLAKE3, used to support the experimental XPath 4.0 <code>fn:hash</code>
+      function, is derived from the implementation in Apache Commons.</p>
+
+    <table border="1">
+      <tr>
+        <td>
+          <p>Origin</p>
+        </td>
+        <td>
+          <p>Apache. Adapted from the ISC-licensed O(1) Cryptography library by Matt Sicker 
+            and ported from the reference public domain implementation by Jack O'Connor.</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Description</p>
+        </td>
+        <td>
+          <p>BLAKE3 hashing algorithm</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Approximate LOC</p>
+        </td>
+        <td>
+          <p>560</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Saxon packages / modules</p>
+        </td>
+        <td>
+          <p>Package <code>com.saxonica.functions.qt4</code>, class <code>Blake3</code>. 
+            Used in both the Java and C# products.</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Modifications</p>
+        </td>
+        <td>
+          <p>Very minor modifications to enable transpilation of the source code to C#.</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Availability of source</p>
+        </td>
+        <td>
+          <p>https://commons.apache.org/proper/commons-codec/jacoco/org.apache.commons.codec.digest/Blake3.java.html</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Source version used</p>
+        </td>
+        <td>
+          <p>Snapshot taken on 2024-10-25</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>License</p>
+        </td>
+        <td>
+          <p>Apache License, version 2.0</p>
+        </td>
+      </tr>
+    </table>
+
+    
+    
 
 
   </section>

@@ -244,7 +244,12 @@
         
         <p>The new function <code>fn:graphemes</code> is implemented.</p>
         
+        <p>The new function <code>fn:hash</code> is implemented.</p>
+        
         <p>The new function <code>fn:function-annotations</code> is implemented.</p>
+        
+        <p>The new functions <code>fn:node-kind</code>, <code>fn:schema-type</code>, 
+            <code>fn:atomic-type-annotation</code>, <code>fn:node-type-annotation</code> are implemented.</p>
         
         <!--<p>The function <code>fn:codepoints-to-string</code> is now variadic: you can write
         <code>codepoints-to-string(13, 10)</code> instead of <code>codepoints-to-string((13, 10))</code>.</p>-->
