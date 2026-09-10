@@ -561,6 +561,10 @@ public final class SequenceType {
      */
 
     public boolean matches(GroundedValue value) {
+
+        if (this == SequenceType.ANY_SEQUENCE) {
+            return true;
+        }
         int count = 0;
 
         if (value instanceof Item it) {
