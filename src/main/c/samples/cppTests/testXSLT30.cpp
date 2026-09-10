@@ -1,4 +1,3 @@
-
 #include <sstream>
 #include <stdio.h>
 
@@ -247,6 +246,7 @@ void testApplyTemplates2a_Error(SaxonProcessor *processor,
     sresult->success++;
     cerr << "Error =" << e.what();
   }
+  delete input;
 }
 
 void testPackageExport(SaxonProcessor *processor, Xslt30Processor *trans,
@@ -646,9 +646,11 @@ void testTrackingOfValueReference(SaxonProcessor *processor,
       XdmValue *valuei = parMap[name1.str()];
       if (valuei != nullptr) {
         cout << name1.str();
+        const char * resulti = valuei->itemAt(0)->getStringValue();
         if (valuei->itemAt(0) != nullptr)
-          cout << "= " << valuei->itemAt(0)->getStringValue();
+          cout << "= " << resulti;
         cout << endl;
+        delete resulti;
 
       } else {
         sresult->failure++;
@@ -797,7 +799,11 @@ void testContext2NotRootNamedTemplate(SaxonProcessor *saxonproc,
 
   cerr << "result = " << resultStr << std::endl;
 
-  const char *result2Str = executable->callTemplateReturningString("main");
+  delete resultStr;
+  resultStr  = nullptr;
+
+  const char *result2Str = nullptr;
+  result2Str = executable->callTemplateReturningString("main");
   if (result2Str == nullptr) {
     if (executable->exceptionOccurred()) {
       SaxonApiException *exception = executable->getException();
@@ -846,6 +852,7 @@ void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
     }
     sresult->failure++;
     sresult->failureList.push_back("testXdmNodeOutput-0.0");
+    delete executable;
     return;
   }
   XdmItem *rootItem = rootValue->getHead();
@@ -864,16 +871,20 @@ void testXdmNodeOutput(Xslt30Processor *trans, sResultCount *sresult) {
   } else {
     cout << "Node is of kind:" << root->getNodeKind() << endl;
   }
-  const char *result = executable->callTemplateReturningString("go");
+  const char *result = nullptr;
+  result = executable->callTemplateReturningString("go");
   if (string(result).find(string("<a/>")) != std::string::npos) {
     sresult->success++;
-    delete result;
   } else {
     // TODO - this test case prints the XML declaration. Check if this correct
     sresult->failure++;
     cout << "testXdmNodeOutputAndString ======= FAIL========" << endl;
     sresult->failureList.push_back("testXdmNodeOutput");
   }
+  if(result != nullptr) {
+    delete result;
+  }
+  delete rootItem;
   delete rootValue;
   delete executable;
 }
@@ -1723,11 +1734,14 @@ void testCallFunction(SaxonProcessor *proc, Xslt30Processor *trans,
   try {
     v = executable->callFunctionReturningValue("{http://localhost/}add",
                                                valueArray, 2);
-
-    if (v != NULL && (v->getHead())->isAtomic() &&
-        ((XdmAtomicValue *)(v->getHead()))->getLongValue() == 5) {
+    XdmItem *head1 = v->getHead();
+    if (v != nullptr && head1 != nullptr && (head1)->isAtomic() &&
+        ((XdmAtomicValue *)(head1))->getLongValue() == 5) {
       sresult->success++;
+      delete head1;
+      head1 = nullptr;
       delete v;
+
     } else {
 
       cout << "testCallFunction ======= FAIL -1 ======" << endl;
@@ -1842,7 +1856,7 @@ void testResultDocumentAsMap(SaxonProcessor *proc, Xslt30Processor *trans,
     }
 
     delete result;
-
+    delete inputDoc;
     delete executable;
     return;
 
@@ -1893,6 +1907,7 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans,
           svalue = nullptr;
           sresult->success++;
         }
+        delete item1;
       } else {
         cout << "Error: testResolveUri item is nullptr " << endl;
         sresult->failure++;
@@ -1902,7 +1917,7 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans,
       delete value;
     }
 
-    delete executable;
+
 
   } catch (SaxonApiException &e) {
     sresult->failure++;
@@ -1912,6 +1927,7 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans,
       cout << "Error: " << message << endl;
     }
   }
+  delete executable;
 }
 
 void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans,
@@ -1937,14 +1953,20 @@ void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans,
   }
 
   executable->setGlobalContextItem(node);
-  if (node != nullptr && node->getChildCount() > 0) {
+  int childCount = node->getChildCount();
+  if (node != nullptr && childCount > 0) {
     XdmNode **eNodeL1 = node->getChildren();
-    std::cerr << "testContextNotRoot cp 0" << std::endl;
     if (eNodeL1 != nullptr) {
       XdmNode **eNodeChildren = eNodeL1[0]->getChildren();
       if (eNodeChildren != nullptr) {
+      int childCount2 = eNodeL1[0]->getChildCount();
         XdmNode *eNode = eNodeChildren[0];
-        cout << "Node content = " << eNode->toString() << endl;
+        const char * eNodeStr = nullptr;
+        eNodeStr = eNode->toString();
+        if (eNodeStr != nullptr) {
+            cout << "Node content = " << eNodeStr << endl;
+            delete eNodeStr;
+        }
         executable->setInitialMatchSelection(eNode);
         const char *result = executable->applyTemplatesReturningString();
 
@@ -1965,7 +1987,19 @@ void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans,
           sresult->success++;
           delete result;
         }
+      for(int i =0; i < childCount2; i++) {
+        delete eNodeChildren[i];
+        eNodeChildren[i] = nullptr;
       }
+      delete [] eNodeChildren;
+      eNodeChildren = nullptr;
+      }
+      for(int i =0; i < childCount; i++) {
+        delete eNodeL1[i];
+        eNodeL1[i] = nullptr;
+      }
+      delete [] eNodeL1;
+      eNodeL1 = nullptr;
     }
   } else {
     sresult->failure++;
@@ -2040,7 +2074,8 @@ void testContextNotRootNamedTemplateValue(SaxonProcessor *proc,
                                           sResultCount *sresult) {
   cout << endl << "Test: testContextNotRootNamedTemplateValue" << endl;
 
-  XdmNode *node = proc->parseXmlFromString("<doc><e>text</e></doc>");
+  XdmNode *node = nullptr;
+  node = proc->parseXmlFromString("<doc><e>text</e></doc>");
 
   if (node == nullptr) {
 
@@ -2048,10 +2083,10 @@ void testContextNotRootNamedTemplateValue(SaxonProcessor *proc,
     sresult->failureList.push_back("testContextNotRootNamedTemplateValue");
     return;
   }
-
+  XsltExecutable * executable = nullptr;
   try {
 
-    XsltExecutable *executable = trans->compileFromString(
+    executable = trans->compileFromString(
         "<xsl:stylesheet version='2.0' "
         "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:variable "
         "name='x' select='.'/><xsl:template "
@@ -2077,10 +2112,15 @@ void testContextNotRootNamedTemplateValue(SaxonProcessor *proc,
       sresult->failure++;
       sresult->failureList.push_back("testContextNotRootNamedTemplateValue");
     } else {
-
-      cout << "testContextNotRoot = " << result->getHead()->getStringValue()
+      XdmItem * item1 = result->getHead();
+      const char * item1Str =  item1->getStringValue();
+      cout << "testContextNotRoot = " << item1Str
            << endl;
       sresult->success++;
+      delete item1Str;
+      delete item1;
+      item1 = nullptr;
+      item1Str = nullptr;
       delete result;
       result = nullptr;
     }
@@ -2092,6 +2132,13 @@ void testContextNotRootNamedTemplateValue(SaxonProcessor *proc,
     cout << "Error: " << e.what() << endl;
     sresult->failure++;
     sresult->failureList.push_back("testContextNotRootNamedTemplateValue");
+    if(node != nullptr) {
+        delete node;
+    }
+    if(executable != nullptr) {
+        delete executable;
+    }
+
   }
 }
 
@@ -2295,7 +2342,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
   }
   const char *data = d11->toString();
 
-  if (data != NULL) {
+  if (data != nullptr) {
     cout << "d1 result=" << data << endl;
     delete data;
     data = nullptr;
@@ -2308,6 +2355,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
     delete stage4;
     delete stage5;
     delete d1;
+    delete d11;
     delete inn;
     delete trans;
     return;
@@ -2340,7 +2388,10 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
   } else {
     const char *data2 = d2->toString();
     cout << "d2 result=" << data2 << endl;
+    delete data2;
+    data2 = nullptr;
   }
+  delete d11;
   stage3->setProperty("!indent", "no");
   stage3->setInitialMatchSelection(d2);
   XdmValue *d3 = stage3->applyTemplatesReturningValue();
@@ -2368,7 +2419,6 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
     delete trans;
     return;
   }
-  cout << "after d2 result cp2" << endl;
   stage4->setProperty("!indent", "no");
   stage4->setInitialMatchSelection(d3);
   XdmValue *d4 = stage4->applyTemplatesReturningValue();
@@ -2471,12 +2521,14 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
   cout << endl << "Test: testCatalog" << endl;
   bool trace = false;
   proc->setcwd(cwd);
+  XsltExecutable *executable = nullptr;
+  Xslt30Processor *trans = nullptr;
   try {
     proc->setCatalog("data/catalog.xml");
 
-    Xslt30Processor *trans = proc->newXslt30Processor();
+    trans = proc->newXslt30Processor();
 
-    XsltExecutable *executable = trans->compileFromFile("data/example.xsl");
+    executable = trans->compileFromFile("data/example.xsl");
 
     executable->setInitialMatchSelectionAsFile("data/example.xml");
 
@@ -2489,15 +2541,15 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
     } else {
       sresult->failure++;
       sresult->failureList.push_back("testCatalog-1");
-      if (trans == nullptr) {
-        return tanrs;
-      }
-      return;
-    }
 
-    delete executable;
+    }
+    if (executable != nullptr) {
+        delete executable;
+    }
     executable = nullptr;
-    delete trans;
+    if (trans != nullptr) {
+        delete trans;
+    }
     trans = nullptr;
 
   } catch (SaxonApiException &e) {
@@ -2507,6 +2559,14 @@ void testCatalog(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) {
     }
     sresult->failure++;
     sresult->failureList.push_back("testCatalog");
+    if (executable != nullptr) {
+        delete executable;
+        executable = nullptr;
+    }
+
+    if (trans != nullptr) {
+        delete trans;
+    }
   }
 }
 

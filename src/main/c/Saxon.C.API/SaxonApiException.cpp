@@ -97,10 +97,10 @@ SaxonApiException::~SaxonApiException() throw() {
     ec_message.clear();
   }
   if (!errorCode.empty()) {
-    errorCode.empty();
+    errorCode.clear();
   }
   if (!systemId.empty()) {
-    systemId.empty();
+    systemId.clear();
   }
   if (!cppException) {
     j_clearException(SaxonProcessor::sxn_environ->thread);
