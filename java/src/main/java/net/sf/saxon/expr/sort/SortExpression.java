@@ -157,7 +157,8 @@ public class SortExpression extends Expression
             }
             if (sortKeyDef.isBackwardsCompatible()) {
                 sortKey = FirstItemExpression.makeFirstItemExpression(sortKey);
-            } else if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+            } else /*if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40 )*/ {
+                // TODO: allow composite sort keys in 4.0
                 Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0, "XTTE1020");
                 sortKey = tc.staticTypeCheck(sortKey, SequenceType.OPTIONAL_ATOMIC, role, visitor);
