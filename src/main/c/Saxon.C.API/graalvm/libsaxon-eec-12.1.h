@@ -78,6 +78,8 @@ long long int j_main_parseXmlFile(graal_isolatethread_t*, char*, void *, void *,
 
 char* j_getErrorMessage(graal_isolatethread_t*, void *);
 
+char* j_getErrorMessageInJavaMem(graal_isolatethread_t*);
+
 char* j_getCombinedStaticErrorMessages(graal_isolatethread_t*, void *);
 
 int j_getLineNumber(graal_isolatethread_t*);

@@ -78,6 +78,8 @@ typedef long long int (*j_main_parseXmlFile_fn_t)(graal_isolatethread_t*, char*,
 
 typedef char* (*j_getErrorMessage_fn_t)(graal_isolatethread_t*, void *);
 
+typedef char* (*j_getErrorMessageInJavaMem_fn_t)(graal_isolatethread_t*);
+
 typedef char* (*j_getCombinedStaticErrorMessages_fn_t)(graal_isolatethread_t*, void *);
 
 typedef int (*j_getLineNumber_fn_t)(graal_isolatethread_t*);
