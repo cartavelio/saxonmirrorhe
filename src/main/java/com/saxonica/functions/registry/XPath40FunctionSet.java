@@ -259,11 +259,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, predicate2, ONE, null));
 
         SpecificFunctionType valuePredicate = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
-                SequenceType.SINGLE_BOOLEAN);
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
         SpecificFunctionType valueAction = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
-                SequenceType.ANY_SEQUENCE);
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
         register("iterate-while", 3, e -> e.populate(IterateWhileFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
