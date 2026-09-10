@@ -501,38 +501,68 @@
                href="net.sf.saxon.s9api.Processor">Processor</a>, and then to be used for validating
             instances, or for schema-aware XSLT and XQuery processing.</p>
          
-         <p><b>TODO: changes for Saxon13</b></p>
+         <aside>
+            <p>The API has changed in Saxon 13, as a consequence of allowing multiple schemas
+            to be loaded independently into a single <code>Processor</code> (and its underlying
+            <code>Configuration</code>). Although some old classes and methods have been
+               retained, the changes are not 100% backwards compatible.</p>
+         </aside>
 
          <p>The main steps are:</p>
          <ol>
             <li>
                <p>Create a <code
-                  java="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</code> and call
-                  its <code java="net.sf.saxon.s9api.Processor#getSchemaManager">getSchemaManager()</code>
-                  method to get a <code java="net.sf.saxon.s9api.SchemaManager"
-                     >SchemaManager</code>.</p>
+                  java="net.sf.saxon.s9api.Processor">net.sf.saxon.s9api.Processor</code>.</p>
             </li>
             <li>
-               <p>If required, set options on the <code>SchemaManager</code> to control the way in
-                  which schema documents will be loaded.</p>
+               <p>Call the <code java="net.sf.saxon.s9api.Processor#newXsdCompiler">newSchemaCompiler()</code>
+                  method to get an <code java="net.sf.saxon.s9api.XsdCompiler"
+                     >XsdCompiler</code>.It is possible to get multiple schema compilers, or to use
+               a single schema compiler to compile multiple schemas.</p>
             </li>
             <li>
-               <p>Load a schema document by calling the <code
-                  java="net.sf.saxon.s9api.SchemaManager#load">load()</code> method, which takes a
-                  JAXP Source object as its argument. The resulting schema document is available to
+               <p>If required, set options on the <code>XsdCompiler</code> to control the way in
+                  which schema documents will be loaded. It is possible to set the XSD version
+               (to 1.0 or 1.1) and to provide user-written callbacks for reporting schema errors and
+               for URI resolution.</p>
+            </li>
+            <li>
+               <p>Construct an <code java="net.sf.saxon.s9api.XsdSchema">XsdSchema</code> object,
+                  representing a compiled schema, by calling one of the various <code>compile()</code>
+                  methods. The resulting schema document is available to
                   all applications run within the containing <code>Processor</code>.</p>
             </li>
             <li>
-               <p>To validate an instance document, call the <code
-                  java="net.sf.saxon.s9api.SchemaManager#newSchemaValidator">newSchemaValidator()</code>
-                  method on the <code>SchemaManager</code> object. This returns a <code
+               <p>To validate an instance document, first call the <code
+                  java="net.sf.saxon.s9api.XsdSchema#newValidator">newValidator()</code>
+                  method on the <code>XsdSchema</code> object. This returns a <code
                      java="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</code>.</p>
             </li>
             <li>
                <p>Set options on the <code>SchemaValidator</code> to control the way in which a
                   particular validation episode is performed, and then invoke its <code
                      java="net.sf.saxon.s9api.SchemaValidator#validate">validate()</code> method to
-                  validate an instance document.</p>
+                  validate an instance document. Options available include the ability to control
+               whether additional schema components can be referenced from the instance document
+               using <code>xsi:schemaLocation</code> attributes, and control over the reporting
+               of any validity errors encountered. It is also possible to set a <code>Destination</code>
+               for the validated document: this will be the original source document, augmented
+               with defaulted elements and attributes as defined in the schema, and with type
+               annotations indicating the types associated with each element and attribute. These
+               type annotations are particularly relevant when the instance document is then processed
+               using a schema-aware query or stylesheet.</p>
+            </li>
+            <li>
+               <p>It is possible to save a compiled schema in an SCM (schema component model) file
+               using the method <code java="net.sf.saxon.s9api.XsdSchema#exportComponents">exportComponents()</code>
+               on the <code>XsdSchema</code> object (typically supplying a <code>Serializer</code> as the
+               destination), and to import a previously-saved schema by calling
+               <code java="net.sf.saxon.s9api.XsdCompiler#importComponents">XsdCompiler.importComponents</code>.</p>
+            </li>
+            <li>
+               <p>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression,
+               it can be supplied to the relevant <code>XsltCompiler</code>, <code>XQueryCompiler</code>,
+               or <code>XPathCompiler</code> via its <code>useSchema()</code> method.</p>
             </li>
          </ol>
 
@@ -544,14 +574,13 @@
                class="javalink" href="net.sf.saxon.lib.Feature#MULTIPLE_SCHEMA_IMPORTS"
                >MULTIPLE_SCHEMA_IMPORTS</a>.</p>
 
-         <p>Although the API is defined in such a way that a <a class="javalink"
-               href="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</a> is created for a
-            particular <a class="javalink" href="net.sf.saxon.s9api.SchemaManager"
-            >SchemaManager</a>, in the Saxon implementation the schema components that are available
-            to the validator are not only the components within that schema, but all the components
-            that form part of any schema registered with the <code>Processor</code> (or indeed, with
-            the underlying <a class="javalink" href="net.sf.saxon.Configuration"
-            >Configuration</a>).</p>
+         <p>Unlike Saxon versions prior to Saxon 13, compiling a schema does not make it globally
+         available to all applications using a given <code>Processor</code>. Each compiled schema is
+         distinct and can be used individually without interfering with other schemas. However, all
+         the schemas used within a <code>Processor</code> must be <i>consistent</i>. Consistency
+         is defined in the version 4.0 language specifications: in simplified terms, it means that
+         the same name must not be used in different schemas to refer to different element or type
+         declarations.</p>
 
          <p>The <a class="javalink" href="net.sf.saxon.s9api.SchemaValidator">SchemaValidator</a>
             implements the <a class="javalink" href="net.sf.saxon.s9api.Destination">Destination</a>
@@ -730,61 +759,101 @@
    
    <section id="schema-dotnet" title="Validation from C#" class="csonly">
          <h1>Validation from C#</h1>
-         
-         
+      
          <p>The Saxon.Api interface allows schemas to be loaded into a <a class="cslink"
-            href="Saxon.Api.Processor">Processor</a>, and then to be used for validating
+               href="Saxon.Api.Processor">Processor</a>, and then to be used for validating
             instances, or for schema-aware XSLT and XQuery processing.</p>
          
+         <aside>
+            <p>The API has changed in Saxon 13, as a consequence of allowing multiple schemas
+            to be loaded independently into a single <code>Processor</code> (and its underlying
+            <code>Configuration</code>). Although some old classes and methods have been
+               retained, the changes are not 100% backwards compatible.</p>
+         </aside>
+
          <p>The main steps are:</p>
          <ol>
             <li>
-               <p>Create a <code cs="Saxon.Api.Processor">Processor</code> and use its <code
-                  cs="Saxon.Api.Processor#SchemaManager">Processor.SchemaManager</code>
-                  property to get a <code cs="Saxon.Api.SchemaManager">SchemaManager</code>.</p>
+               <p>Create a <code
+                  cs="Saxon.Api.Processor">Saxon.Api.Processor</code>.</p>
             </li>
             <li>
-               <p>If required, set options on the <code>SchemaManager</code> to control the way in 
-                  which schema documents will be loaded.</p>
+               <p>Call the <code cs="Saxon.Api.Processor#NewXsdCompiler">NewSchemaCompiler()</code>
+                  method to get a <code cs="Saxon.Api.XsdCompiler"
+                     >XsdCompiler</code>.It is possible to get multiple schema compilers, or to use
+               a single schema compiler to compile multiple schemas.</p>
             </li>
             <li>
-               <p>Load a schema document by calling one of the <code
-                  cs="Saxon.Api.SchemaManager#Compile">Compile()</code> methods, which allow the input
-                  to be supplied in a variety of forms (for example, a <code>Stream</code>, a <code>TextReader</code>,
-                  or a <code>Uri</code>). The resulting schema is available to
+               <p>If required, set options on the <code>XsdCompiler</code> to control the way in
+                  which schema documents will be loaded. It is possible to set the XSD version
+               (to 1.0 or 1.1) and to provide user-written callbacks for reporting schema errors and
+               for URI resolution.</p>
+            </li>
+            <li>
+               <p>Construct an <code cs="Saxon.Api.XsdSchema">XsdSchema</code> object,
+                  representing a compiled schema, by calling one of the various <code>Compile()</code>
+                  methods. The resulting schema document is available to
                   all applications run within the containing <code>Processor</code>.</p>
             </li>
             <li>
-               <p>To validate an instance document, call the <code
-                  cs="Saxon.Api.SchemaManager#NewSchemaValidator">NewSchemaValidator()</code> 
-                  method on the <code>SchemaManager</code> object. This
-                  returns a <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code>.</p>
+               <p>To validate an instance document, first call the <code
+                  cs="Saxon.Api.XsdSchema#NewValidator">NewValidator()</code>
+                  method on the <code>XsdSchema</code> object. This returns a <code
+                     cs="Saxon.Api.SchemaValidator">SchemaValidator</code>.</p>
             </li>
             <li>
                <p>Set options on the <code>SchemaValidator</code> to control the way in which a
-                  particular validation episode is performed, and then invoke one of its <code
-                     cs="Saxon.Api.SchemaValidator#Validate">Validate()</code> methods to
-                  validate an instance document.</p>
+                  particular validation episode is performed, and then invoke its <code
+                     cs="Saxon.Api.SchemaValidator#validate">validate()</code> method to
+                  validate an instance document. Options available include the ability to control
+               whether additional schema components can be referenced from the instance document
+               using <code>xsi:schemaLocation</code> attributes, and control over the reporting
+               of any validity errors encountered. It is also possible to set a <code>Destination</code>
+               for the validated document: this will be the original source document, augmented
+               with defaulted elements and attributes as defined in the schema, and with type
+               annotations indicating the types associated with each element and attribute. These
+               type annotations are particularly relevant when the instance document is then processed
+               using a schema-aware query or stylesheet.</p>
+            </li>
+            <li>
+               <p>It is possible to save a compiled schema in an SCM (schema component model) file
+               using the method <code cs="Saxon.Api.XsdSchema#exportComponents">exportComponents()</code>
+               on the <code>XsdSchema</code> object (typically supplying a <code>Serializer</code> as the
+               destination), and to import a previously-saved schema by calling
+               <code cs="Saxon.Api.XsdCompiler#importComponents">XsdCompiler.importComponents</code>.</p>
+            </li>
+            <li>
+               <p>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression,
+               it can be supplied to the relevant <code>XsltCompiler</code>, <code>XQueryCompiler</code>,
+               or <code>XPathCompiler</code> via its <code>useSchema()</code> method.</p>
             </li>
          </ol>
-         
+
          <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
-            attributes within the source documents will be loaded as necessary, unless the 
-            <code cs="Saxon.Api.SchemaValidator#UseXsiSchemaLocation">SchemaValidator.UseXsiSchemaLocation</code>
-            property is set to false. By default a target
+            attributes within the source documents will be loaded as necessary. By default a target
             namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
             no attempt to load multiple schemas for the same namespace and check them for
-            consistency. This behavior can be changed using the configuration option <a
-               class="feature" href="MULTIPLE_SCHEMA_IMPORTS"/>.</p>
-        
-         <p>Although the API is defined in such a way that a <code
-            cs="Saxon.Api.SchemaValidator">SchemaValidator</code> is created for a particular <code
-               cs="Saxon.Api.SchemaManager">SchemaManager</code>, in the Saxon implementation the
-            schema components that are available to the validator are not only the components within
-            that schema, but all the components that form part of any schema registered with the
-            <code>Processor</code> (or indeed, with the underlying <a class="javalink"
-               href="net.sf.saxon.Configuration">Configuration</a>).</p>
+            consistency. This behaviour can be changed using the configuration option <a
+               class="cslink" href="Saxon.Api.Feature#MULTIPLE_SCHEMA_IMPORTS"
+               >MULTIPLE_SCHEMA_IMPORTS</a>.</p>
+
+         <p>Unlike Saxon versions prior to Saxon 13, compiling a schema does not make it globally
+         available to all applications using a given <code>Processor</code>. Each compiled schema is
+         distinct and can be used individually without interfering with other schemas. However, all
+         the schemas used within a <code>Processor</code> must be <i>consistent</i>. Consistency
+         is defined in the version 4.0 language specifications: in simplified terms, it means that
+         the same name must not be used in different schemas to refer to different element or type
+         declarations.</p>
+
+         <p>The <a class="cslink" href="Saxon.Api.SchemaValidator">SchemaValidator</a>
+            implements the <a class="cslink" href="Saxon.Api.IDestination">IDestination</a>
+            interface, which means it can be used to receive input from any process that writes to a
+               <code>Destination</code>, for example an XSLT transformation or an XQuery query. The
+            result of validation can also be sent to any <code>Destination</code>, for example an
+            XSLT transformer.</p>
          
+      
+  
          
       
    </section>
@@ -1111,7 +1180,7 @@
                C#</a>).</p></li>
       </ul>
      
-      <p>Although you can load multiple schema documents into a single <code java="net.sf.saxon.Configuration">Configuration</code>, they
+      <p>Although you can load multiple schema documents into a single <code>XdmSchema</code>, they
       are assembled into a single schema (that is, a collection of schema definitions) which must be internally 
       consistent. For example, you cannot have
       two different definitions of the same type. This creates limitations: if you want to write a transformation
@@ -1214,6 +1283,10 @@
             <code>document('source.xml?validation=strict')</code> requests the loading of the file
             <code>source.xml</code> with strict validation.</p></li>
       </ul>
+      
+      <p>Within an application, a schema should only be compiled once into an <code>XdmSchema</code>
+      object. Compiling it once to validate a source document, and again to satisfy a schema import
+      in XSLT or XQuery, is likely to lead to errors (quite apart from being inefficient).</p>
 
 
       <p>The configuration property <a class="feature" href="VALIDATION_WARNINGS"/> 
