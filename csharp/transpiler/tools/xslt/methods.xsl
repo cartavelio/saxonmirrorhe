@@ -1325,9 +1325,9 @@
             <xsl:text>new System.Collections.Generic.Dictionary&lt;{f:renameGenericType($targetClass)}>()</xsl:text>
          </xsl:when>
          <xsl:when test="name/@identifier = 'singleton' and $targetClass">
-            <xsl:text>java.util.Collections.singleton&lt;{f:renameGenericType($targetClass)}>(</xsl:text>
+            <xsl:text>Enumerable.Repeat(</xsl:text>
             <xsl:apply-templates select="arguments" mode="xml-to-cs"/>
-            <xsl:text>)</xsl:text>
+            <xsl:text>, 1)</xsl:text>
          </xsl:when>
          <xsl:otherwise>
             <xsl:next-match/>
