@@ -441,17 +441,16 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <aside>If you want to use the same type aliases in multiple packages, define them in a module of their
             own, and include that module in each package using <code>xsl:include</code>.</aside>
 
-         <p>Type aliases can be used in XSLT match patterns (see <a class="bodylink"
-               href="/v4extensions/xslt-syntax-extensions/match-patterns"
-               >XSLT 4.0 extensions: Match patterns</a>). For example:</p>
+         <p>Type aliases can be used in XSLT 4.0 match patterns (see <a class="bodylink"
+            href="/xsl-elements/patterns/patterns-30"
+               >Patterns in XSLT 4.0</a>). For example:</p>
 
          <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></code></pre>
 
          <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
 
          <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
-        <code>.[. instance of T]</code>. The experimental syntax <code>~T</code> used in earlier releases
-      has been dropped.</p>
+        <code>.[. instance of T]</code>.</p>
 
          <p>In XQuery, type aliases can be declared in the query prolog. From Saxon 12.4, the syntax
             is <code>declare item-type QName as ItemType;</code>, for example: <code>declare
@@ -1317,136 +1316,14 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
          <ul/>
       </nav>
 
-      <section id="match-patterns" title="Match patterns">
-         <h1>Match patterns</h1>
-
-         <p>The syntax of match patterns is extended to make it easier to match maps and
-      arrays. As with the XPath syntax extensions, these extensions are available only if explicitly enabled. </p>
-
-         <p>In particular the syntax <code>ma-type predicate*</code> is allowed in a pattern, where <code>ma-type</code>
-      is any of:</p>
-
-         <ul>
-            <li>
-               <code>type(...)</code>
-            </li>
-            <li>
-               <code>atomic(...)</code> (deprecated)
-         </li>
-            <li>
-               <code>union(...)</code>
-            </li>
-            <li>
-               <code>record(...)</code>
-            </li>
-            <li>
-               <code>map(...)</code>
-            </li>
-            <li>
-               <code>array(...)</code>
-            </li>
-         </ul>
-
-         <p>For example if a <a class="bodylink" href="/v4extensions/new-types/type-aliases"
-               >type alias</a> has been declared:</p>
-
-         <pre><code class="language-xml">&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></code></pre>
-
-         <p>Then it can be used in a match pattern to match instances of the type, with or without predicates:</p>
-
-         <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></code></pre>
-
-         <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
-
-         <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
-      <code>.[. instance of type(T)]</code>.</p>
-
-         <aside>Note that from 12.2 the syntax for type patterns changes so that <code>match="type(T)"</code> may specify any 
-            item type as <code>T</code> (including, for example, an atomic type name: <code>match="type(xs:integer)"</code>).
-            The syntax <code>match="atomic(T)"</code> has now been dropped from the draft specification, and
-            <code>match="type(T)"</code> should be used instead. For now Saxon still allows <code>match="atomic(T)"</code>
-            but will produce a warning; it will be removed in a future Saxon release.</aside>
-
-         <p>Patterns for record types are particularly useful when JSON is processed using XSLT template rules. For example,
-         a JSON object such as the following: </p>
-
-         <pre><code class="language-json"><![CDATA[{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "age": 45,
-  "weight": 67
-}]]></code></pre>
-
-         <p>can be matched with a pattern such as <code>match="record(firstName, lastName, email, *)"</code>. Naming a few of the
-         properties that characterize the object is sufficient (but remember to make the record type extensible by including <code>", *</code>
-         at the end). There's generally no need to include all the properties, or to give their data types, because a test like this
-         is generally sufficient to be unambiguous. The order of properties, of course, is immaterial.</p>
-
-         <p>Predicates can be added as with any other pattern, for example <code>match="record(firstName, lastName, *)[?department='sales']"</code>.</p>
-
-         <p>The rules for calculating the default priority of these patterns are not yet stable; explicit priorities should be
-      used if there is any risk of ambiguity.</p>
-
-      </section>
-      <section id="ext-ins-call-template" title="Extension instructions calling templates">
-         <h1>Extension instructions calling named templates</h1>
-
-         <p>If the name of a named template uses a namespace listed in an <code>extension-element-prefixes</code>
-         attribute, then a call on the named template may be written as an extension instruction, as an alternative
-         to using <code>xsl:call-template</code>.</p>
-
-         <p>For example, if the template is declared as:</p>
-         <pre><code class="language-xml"><![CDATA[<xsl:template name="x:indent">
-  <xsl:param name="spaces" as="xs:integer"/>
-  <xsl:value-of select="'&#xa;' || string-join((1 to $spaces)!' ')"/>
-</xsl:template>]]></code></pre>
-
-         <p>Then it may be invoked by writing:</p>
-
-         <pre><code class="language-xml"><![CDATA[<x:indent spaces="4"/>]]></code></pre>
-
-         <p>which (assuming the presence of <code>extension-element-prefixes="x"</code>) is equivalent to:</p>
-
-         <pre><code class="language-xml"><![CDATA[<xsl:call-template name="x:indent">
-  <xsl:with-param name="spaces" select="4"/>
-</xsl:call-template>]]></code></pre>
-
-         <p>Attributes on the extension instruction are mapped to parameters declared in the named template.
-            The rules for passing parameters are as follows:</p>
-
-         <ul>
-            <li>If the parameter is declared with <code>as="xs:string"</code> then the attribute is interpreted 
-            as an attribute value template.</li>
-            <li>If the parameter is declared with <code>as="xs:boolean"</code> then the attribute is interpreted 
-               as an attribute value template, accepting the values "0", "false", or "no" for false, or
-            "1", "true", or "yes" for true.</li>
-            <li>In all other cases the value of the attribute is treated as an XPath expression, which must
-            evaluate to a value of the required type (after any conversion, using the function conversion rules).</li>
-
-         </ul>
-
-         <p>Parameters that may be omitted (and defaulted) in an <code>xsl:call-template</code> instruction
-         may similarly be omitted in the extension instruction.</p>
-
-         <p>The extension instruction must have no children other than <code>xsl:fallback</code>.</p>
-         <p>There is no way to supply tunnel parameters.</p>
-      </section>
-      <section id="iteration-maps-arrays" title="Iterating over maps and arrays">
-         <h1>Iterating over maps and arrays</h1>
-
-         <p>The experimental use of an <code>@map</code> or <code>@array</code> attribute in 
-            <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>
-            is dropped in Saxon 12.</p>
-
-         <p>Instead, to iterate over arrays, use <code>&lt;xsl:for-each select="array:members($array)"></code>.
-            To iterate over maps, use <code>&lt;xsl:for-each select="map:entries($map)"></code>.</p>
-
-
-      </section>
 
       <section id="creating-arrays" title="Creating arrays">
          <h1>Creating arrays</h1>
+         
+         <p>TODO FIXME: Move this info to xsl:array page, but update it: e.g. composite attribute is
+            no longer used.</p>
+         <p>TODO FIXME: the QT4 specifications are yet to settle on how array members are
+            represented: parcels or value records.</p>
 
          <p>The new <a class="bodylink code" href="/xsl-elements/array"
             >xsl:array</a> instruction can be used to
@@ -1473,34 +1350,6 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
                   those parcels to form the new array.</p>
             </li>
          </ul>
-      </section>
-      
-      <section id="enclosing-modes" title="Enclosing modes">
-         <h1>Enclosing modes</h1>
-         
-         <p>An <a class="bodylink code" href="/xsl-elements/mode">xsl:mode</a> declaration for a named mode
-            can contain template rules within the body of the 
-            <code>xsl:mode</code> declaration. This is known as an <em>enclosing mode</em>. Template rules
-         within the enclosing mode cannot have a <code>mode</code> attribute (they automatically belong to the enclosing
-         mode), and any <code>xsl:apply-templates</code> instructions within these template rules default their <code>mode</code>
-         attribute to the enclosing mode. Template rules within an enclosing mode cannot be overridden by template rules
-         outside it (in fact, template rules outside the enclosing mode cannot name that mode in their <code>mode</code>
-         attribute). Specifying <code>mode="#all"</code> on a template rule has no effect on enclosing modes.</p>
-         
-         <p>The purpose of enclosing modes is to make it easier to see at a glance what all the rules for a mode are,
-         and thus to make it easier to work out which rules will match which nodes in an input document.</p>
-         
-         <p>Template rules in an enclosing mode can in principle be overridden in another stylesheet package
-         (using <code>xsl:override</code>) but this has not yet been tested.</p>
-      </section>
-      
-      <section id="miscellaneous-xslt40" title="Miscellaneous extensions">
-         <h1>Miscellaneous extensions</h1>
-
-         <p>The <a class="bodylink code" href="/xsl-elements/matching-substring">xsl:matching-substring</a>
-            and <a class="bodylink code" href="/xsl-elements/non-matching-substring">xsl:non-matching-substring</a> elements within
-            <a class="bodylink code" href="/xsl-elements/analyze-string">xsl:analyze-string</a> may now take a
-            <code>select</code> attribute in place of a contained sequence constructor. (Implemented from Saxon 12.3)</p>
       </section>
    </section>
    

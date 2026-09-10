@@ -26,11 +26,12 @@
             href="/conformance/xslt30">XSLT 3.0 conformance</a>. The information here is designed to
         give a comprehensive summary of the features, but for the full specification, consult the
         official standard.</p>
-    
+
     <p>This section now includes all additions in the proposed <a
-        href="https://qt4cg.org/specifications/xslt-40/Overview.html" class="bodylink">XSLT 4.0
-        Specification</a> (dated XXXX), with information about the Saxon implementation. From Saxon
-        13, new 4.0 features are available in XSLT 4.0 stylesheets, and require Saxon-PE or Saxon-EE.</p>
+            href="https://qt4cg.org/specifications/xslt-40/Overview.html" class="bodylink">XSLT 4.0
+            Specification</a> (dated XXXX), with information about the Saxon implementation. From
+        Saxon 13, new 4.0 features are available in XSLT 4.0 stylesheets, and require Saxon-PE or
+        Saxon-EE.</p>
 
 
     <h3 class="subtitle">XSLT patterns</h3>
@@ -102,8 +103,8 @@
                     message to be output (to the Configuration's Logger) whenever the value of the
                     accumulator changes. The message includes the name of the accumulator, the path
                     of the node, and the new accumulator value. For details see <a
-                        class="bodylink                         code"
-                        href="/extensions/attributes/trace">saxon:trace</a>.</attribute>
+                        class="bodylink code" href="/extensions/attributes/trace"
+                    >saxon:trace</a>.</attribute>
             </attributes>
             <details>
                 <p>Accumulators are motivated by the need for streaming, but they can also be useful
@@ -185,13 +186,13 @@
                         >xsl:accumulator</a>.</p>
             </description>
             <attributes>
-                <attribute name="capture" use="optional"> New in XSLT 4.0. The value
-                    "yes|true|1" on a <code>phase="end"</code> rule for a streaming accumulator
-                    removes the requirement for the <code>select</code> attribute (or sequence
-                    constructor) to be motionless. Instead the expression has access to a snapshot
-                    of the streamed node (in the sense of the <code>fn:snapshot</code> function).
-                    For example, writing <code>select="($value, .)"</code> ensures that the value of
-                    the accumulator contains a sequence of snapshot copies of all the element nodes
+                <attribute name="capture" use="optional"> New in XSLT 4.0. The value "yes|true|1" on
+                    a <code>phase="end"</code> rule for a streaming accumulator removes the
+                    requirement for the <code>select</code> attribute (or sequence constructor) to
+                    be motionless. Instead the expression has access to a snapshot of the streamed
+                    node (in the sense of the <code>fn:snapshot</code> function). For example,
+                    writing <code>select="($value, .)"</code> ensures that the value of the
+                    accumulator contains a sequence of snapshot copies of all the element nodes
                     matched by the accumulator rule. For details see <a class="bodylink code"
                         href="/extensions/attributes/capture">saxon:capture</a>.</attribute>
                 <attribute name="match" use="mandatory"> Pattern defining the set of nodes to which
@@ -352,7 +353,8 @@
                 <attribute name="separator" use="optional">New in XSLT 4.0. The value is an
                     attribute value template. If present, a text node is formed from the effective
                     value of the attribute, and this text node is inserted into the result sequence
-                    after processing every item in the (sorted) input sequence other than the last.</attribute>
+                    after processing every item in the (sorted) input sequence other than the
+                    last.</attribute>
             </attributes>
             <details>
                 <p>If the <code>select</code> attribute is <i>omitted</i>, apply-templates causes
@@ -588,7 +590,7 @@
                     extension for <code>xsl:for-each</code> and <code>xsl:iterate</code> has been
                     dropped since Saxon 9.6, because it was found to cause problems when local
                     variables were used.</p>
-                
+
                 <p>The <code>separator</code> attribute is available from Saxon 13 for XSLT 4.0
                     stylesheets; it is available in Saxon 11 and 12 provided that syntax extensions
                     are enabled.</p>
@@ -604,17 +606,24 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>array</name>
             <description>
-                <p>New in XSLT 4.0. Constructs an array, whose content is established using the
-                    contained sequence constructor.</p>
+                <p>New in XSLT 4.0. Constructs an array, whose content is established using either
+                    the contained sequence constructor or the <code>select</code> attribute.</p>
             </description>
             <attributes>
-                <attribute name="for-each">FIXME:</attribute>
+                <attribute name="for-each">Can be used to provide an input sequence for evaluating
+                    the <code>select</code> attribute or sequence constructor.</attribute>
                 <attribute name="select" use="optional">The contents of the array may be given
                     either by an expression in the <code>select</code> attribute, or by expanding
                     the sequence constructor contained in the <code>xsl:array</code>
                     element.</attribute>
             </attributes>
             <details>
+                <p>TODO FIXME: composite attribute is no longer used</p>
+                <p>TODO FIXME: the QT4 specifications are yet to settle on how array members are
+                    represented: parcels or value records.</p>
+                <p>The content of an array is a sequence of sequences, which the XDM data model
+                    cannot represent directly. To work around this, the QT4 specifications represent
+                    the array members as ... TBC</p>
                 <p>If every member of the array is to be a singleton item, then it is simplest to
                     use the default value <code>composite="no"</code>. The setting
                         <code>composite="yes"</code> is needed if any of the members is to be an
@@ -640,12 +649,16 @@
 
             </details>
             <in-spec>xslt40</in-spec>
-
             <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
             <status>
-                <p>Available from Saxon 11; requires syntax extensions to be enabled. Also available
+                <p>The <code>xsl:array</code> instruction is available from Saxon 13 for XSLT 4.0
+                    stylesheets.</p>
+                <p>The instruction is available in Saxon 11 and 12 provided that syntax extensions
+                    are enabled, but note that specification and implementation changes were made
+                    between the Saxon 12 and 13 releases, so for accurate information it is best to
+                    refer to the specific documentation for those versions. (It was also available
                     in earlier releases under the synonym <a class="bodylink code"
-                        href="/extensions/instructions/array">saxon:array</a>.</p>
+                        href="/extensions/instructions/array">saxon:array</a>.)</p>
             </status>
             <see-also name="array-member" type="xsl-elements"/>
             <!--TODO <see-also name="parcel" type="functions"/>-->
@@ -957,6 +970,56 @@
                 <p>The context of the called template (for example the current node and current node
                     list) is the same as that for the calling template; however the variables
                     defined in the calling template are not accessible in the called template.</p>
+
+                <p>In XSLT 4.0, if the name of a named template uses a namespace listed in an
+                        <code>extension-element-prefixes</code> attribute, then a call on the named
+                    template may be written as an extension instruction, as an alternative to using
+                        <code>xsl:call-template</code>.</p>
+
+                <p>For example, if the template is declared as:</p>
+                <pre><code class="language-xml"><![CDATA[<xsl:template name="x:indent">
+  <xsl:param name="spaces" as="xs:integer"/>
+  <xsl:value-of select="'&#xa;' || string-join((1 to $spaces)!' ')"/>
+</xsl:template>]]></code></pre>
+
+                <p>Then it may be invoked by writing:</p>
+
+                <pre><code class="language-xml"><![CDATA[<x:indent spaces="4"/>]]></code></pre>
+
+                <p>which (assuming the presence of <code>extension-element-prefixes="x"</code>) is
+                    equivalent to:</p>
+
+                <pre><code class="language-xml"><![CDATA[<xsl:call-template name="x:indent">
+  <xsl:with-param name="spaces" select="4"/>
+</xsl:call-template>]]></code></pre>
+
+                <p>Attributes on the extension instruction are mapped to parameters declared in the
+                    named template. The rules for passing parameters are as follows:</p>
+
+                <ul>
+                    <li>If the parameter is declared with <code>as="xs:boolean"</code> then the
+                        attribute is interpreted as an attribute value template, accepting the
+                        values "0", "false", or "no" for false, or "1", "true", or "yes" for
+                        true.</li>
+                    <li>If the declared type is any other atomic or union type, with no occurrence
+                        indicator, then the attribute is interpreted as an attribute value
+                        template.</li>
+                    <li>In all other cases the value of the attribute is treated as an XPath
+                        expression, which must evaluate to a value of the required type (after any
+                        conversion, using the function conversion rules).</li>
+                </ul>
+
+                <p>Note also:</p>
+
+                <ul>
+                    <li>Parameters that may be omitted (and defaulted) in an
+                            <code>xsl:call-template</code> instruction may similarly be omitted in
+                        the extension instruction.</li>
+                    <li>The extension instruction must have no children other than
+                            <code>xsl:fallback</code>.</li>
+                    <li>There is no way to supply tunnel parameters.</li>
+                </ul>
+
             </details>
             <in-spec>xslt10</in-spec>
             <in-spec>xslt20</in-spec>
@@ -964,6 +1027,10 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
+                <p>The use of extension instructions to invoke named templates (as an alternative to
+                    using <code>xsl:call-template</code>) is available from Saxon 13 for XSLT 4.0
+                    stylesheets; it is available in Saxon 11 and 12 provided that syntax extensions
+                    are enabled.</p>
                 <p>Until 9.6, Saxon supported an alternative instruction
                         <code>saxon:call-template</code>, but this has now been dropped. This had
                     the same effect as <code>xsl:call-template</code>, except that it allowed
@@ -1130,7 +1197,7 @@
                 </example>
                 <example>
                     <p>An example using the new 4.0 <code>select</code> attribute for
-                        <code>xsl:when</code> and <code>xsl:otherwise</code>:</p>
+                            <code>xsl:when</code> and <code>xsl:otherwise</code>:</p>
                     <pre><code class="language-xml"><![CDATA[<xsl:choose>
   <xsl:when test="$day = 'Monday'" select="1"/>
   <xsl:when test="$day = 'Tuesday'" select="2"/>
@@ -1162,9 +1229,10 @@
                     incompatible with the required type, a compile-time error will be reported even
                     if the branch is never executed.</p>
                 <p>From Saxon 13, in a XSLT 4.0 stylesheet the <code>xsl:when</code> and
-                    <code>xsl:otherwise</code> elements are allowed to return a value using a
-                    <code>select</code> attribute in place of a contained sequence constructor. This
-                    is allowed in Saxon 10 to 12 provided that syntax extensions are enabled.</p>
+                        <code>xsl:otherwise</code> elements are allowed to return a value using a
+                        <code>select</code> attribute in place of a contained sequence constructor.
+                    This is allowed in Saxon 10 to 12 provided that syntax extensions are
+                    enabled.</p>
             </status>
             <see-also name="when" type="xsl-elements"/>
             <see-also name="otherwise" type="xsl-elements"/>
@@ -1709,19 +1777,23 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>field</name>
             <description>
-                <p>FIXME:</p>
+                <p>New in XSLT 4.0. Used with <a class="bodylink code" href="../record-type"
+                        >xsl:record-type</a> to declare a record type.</p>
             </description>
             <attributes>
-                <attribute name="name">FIXME:</attribute>
-                <attribute name="as">FIXME:</attribute>
-                <attribute name="required">FIXME:</attribute>
-                <attribute name="default">FIXME:</attribute>
+                <attribute name="name">The name of the field.</attribute>
+                <attribute name="as">Defines the required type of the field value. Defaults to
+                        <code>item()*</code>.</attribute>
+                <attribute name="required">Specifies whether the field is required. Defaults to
+                    "yes".</attribute>
+                <attribute name="default">Used to provide a default value for the field.</attribute>
             </attributes>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>EE_13</saxon-edition>
+            <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
             <status>
-                <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
+                <p>New in XSLT 4.0. Not yet implemented in Saxon.</p>
             </status>
+            <see-also name="record-type" type="xsl-elements"/>
         </xsl-element>
     </section>
 
@@ -1884,7 +1956,8 @@
                     matches a specified pattern. This is useful, for example, when matching an
                         <code>&lt;h2&gt;</code> element and its following <code>&lt;p&gt;</code>
                     elements.</attribute>
-                <attribute name="merge-when">New in XSLT 4.0. Not implemented in Saxon 13.</attribute>
+                <attribute name="merge-when">New in XSLT 4.0. Not implemented in Saxon
+                    13.</attribute>
                 <attribute name="select" use="mandatory">Expression to select
                     nodes/values.</attribute>
                 <attribute name="split-when">New in XSLT 4.0. Allows a new group to be started
@@ -1895,7 +1968,7 @@
                     next item. The expression returns false if the new item is to be added to the
                     end of the current group, or true if the current group is complete and the new
                     item is to become the first item in a new current group. For example
-                    <code>split-when="sum($group/@page-count) gt 100"</code> starts a new group
+                        <code>split-when="sum($group/@page-count) gt 100"</code> starts a new group
                     when the size of the current group passes some threshold.</attribute>
             </attributes>
             <details>
@@ -1907,14 +1980,14 @@
                     are extended by virtue of the fact that the pattern used in
                         <code>group-starting-with</code> or <code>group-ending-with</code> can now
                     match atomic values as well as nodes.</p>
-                
+
                 <p>In XSLT 4.0, two new ways of defining the grouping are introduced using the new
                     attributes <code>merge-when</code> and <code>split-when</code>. Only
-                    <code>split-when</code> is currently implemented in Saxon 13. This allows a new
-                    group to be started conditionally based on the contents of the current group so
-                    far. For example, <code>split-when="@date lt $group[last()]/@date</code> causes
-                    a new group to be started whenever the date on the current item is earlier than
-                    the date on the last item in the previous group.</p>
+                        <code>split-when</code> is currently implemented in Saxon 13. This allows a
+                    new group to be started conditionally based on the contents of the current group
+                    so far. For example, <code>split-when="@date lt $group[last()]/@date</code>
+                    causes a new group to be started whenever the date on the current item is
+                    earlier than the date on the last item in the previous group.</p>
 
             </details>
             <examples>
@@ -1940,9 +2013,10 @@
                 <p>The XSLT 4.0 <code>split-when</code> attribute is available from Saxon 13.
                     Streaming is not yet implemented for <code>split-when</code>. In Saxon 11 and
                     12, this attribute was available experimentally under the name
-                    <code>break-when</code> provided that syntax extensions were enabled; for now
-                    this is retained as a synonym, but will be removed in a later release.</p>
-                <p>The XSLT 4.0 <code>merge-when</code> attribute is not yet implemented in Saxon.</p>
+                        <code>break-when</code> provided that syntax extensions were enabled; for
+                    now this is retained as a synonym, but will be removed in a later release.</p>
+                <p>The XSLT 4.0 <code>merge-when</code> attribute is not yet implemented in
+                    Saxon.</p>
             </status>
             <see-also name="sort" type="xsl-elements"/>
             <see-also name="current-group" type="functions"/>
@@ -2142,16 +2216,16 @@
                         <code>xsl:if</code> element are expanded only if the expression is true.</p>
             </description>
             <attributes>
-                <attribute name="else" use="optional">New in XSLT 4.0. Defines the
-                    value to be returned if the <code>test</code> condition is false, as an
-                    alternative to returning an empty sequence.</attribute>
+                <attribute name="else" use="optional">New in XSLT 4.0. Defines the value to be
+                    returned if the <code>test</code> condition is false, as an alternative to
+                    returning an empty sequence.</attribute>
                 <attribute name="test" use="mandatory">The boolean expression to be tested. The full
                     syntax of boolean expressions is outlined in <a class="bodylink"
                         href="/expressions">XPath syntax</a>.</attribute>
-                <attribute name="then" use="optional">New in XSLT 4.0. Defines the
-                    value to be returned if the <code>test</code> condition is true, as an
-                    alternative to evaluating the sequence constructor. If the <code>then</code>
-                    attribute is present, the <code>xsl:if</code> element must be empty.</attribute>
+                <attribute name="then" use="optional">New in XSLT 4.0. Defines the value to be
+                    returned if the <code>test</code> condition is true, as an alternative to
+                    evaluating the sequence constructor. If the <code>then</code> attribute is
+                    present, the <code>xsl:if</code> element must be empty.</attribute>
             </attributes>
             <details>
                 <p>The new <code>then</code> and <code>else</code> attributes are available in XSLT
@@ -2188,8 +2262,8 @@
             <saxon-edition>ALL</saxon-edition>
             <status>
                 <p>The new attributes <code>then</code> and <code>else</code> are available from
-                    Saxon 13 for XSLT 4.0 stylesheets; they are available in Saxon 10 to 12
-                    provided that syntax extensions are enabled.</p>
+                    Saxon 13 for XSLT 4.0 stylesheets; they are available in Saxon 10 to 12 provided
+                    that syntax extensions are enabled.</p>
             </status>
             <see-also name="choose" type="xsl-elements"/>
         </xsl-element>
@@ -2344,18 +2418,12 @@
                 <p>New in XSLT 4.0. Used to declare a name (or alias) for an item type.</p>
             </description>
             <attributes>
-                <attribute name="as" use="mandatory">
-                    <p>The definition of the item type.</p>
-                </attribute>
-                <attribute name="name" use="mandatory">
-                    <p>A QName used to identify the item type uniquely within the stylesheet
-                        package.</p>
-                </attribute>
-                <attribute name="visibility" use="optional">
-                    <p>The visibility of the item type. Saxon only allows the value "private",
-                        which means the item type name is available only within the containing
-                        package.</p>
-                </attribute>
+                <attribute name="as" use="mandatory">The definition of the item type.</attribute>
+                <attribute name="name" use="mandatory">A QName used to identify the item type
+                    uniquely within the stylesheet package.</attribute>
+                <attribute name="visibility" use="optional">The visibility of the item type. Saxon
+                    only allows the value "private", which means the item type name is available
+                    only within the containing package.</attribute>
             </attributes>
             <details>
                 <p>The <code>xsl:item-type</code> element is always used at the top level of the
@@ -2374,22 +2442,22 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
             <status>
-                <p>The <code>xsl:item-type</code> declaration is available from Saxon 13 for XSLT 4.0
-                    stylesheets; it is available in Saxon 11 and 12 provided that syntax extensions
-                    are enabled. (It was also available in earlier releases under the synonym <a
-                        class="bodylink code"
-                        href="/extensions/instructions/item-type">saxon:item-type</a>.)</p>
-                <p>In the current implementation item type names must be unique
-                    within the stylesheet; import precedences for multiple declarations are not
-                    implemented, and item types are not visible in other stylesheet packages. The
-                    <code>visibility</code> attribute, if present, must have the value
-                    <code>"private"</code>.</p>
+                <p>The <code>xsl:item-type</code> declaration is available from Saxon 13 for XSLT
+                    4.0 stylesheets; it is available in Saxon 11 and 12 provided that syntax
+                    extensions are enabled. (It was also available in earlier releases under the
+                    synonym <a class="bodylink code" href="/extensions/instructions/item-type"
+                        >saxon:item-type</a>.)</p>
+                <p>In the current implementation item type names must be unique within the
+                    stylesheet; import precedences for multiple declarations are not implemented,
+                    and item types are not visible in other stylesheet packages. The
+                        <code>visibility</code> attribute, if present, must have the value
+                        <code>"private"</code>.</p>
                 <p>The syntax for type name references has been revised a couple of times. From
                     Saxon 13, as in the current 4.0 specifications, a named item type can be
                     referenced directly by name, for instance <code>as="typename"</code>. In Saxon
                     10, 11 and 12, the syntax for referring to type aliases was
-                    <code>type(typename)</code>; while earlier releases used the experimental syntax
-                    <code>~typename</code>.</p>
+                        <code>type(typename)</code>; while earlier releases used the experimental
+                    syntax <code>~typename</code>.</p>
                 <p>For more information, see <a class="bodylink"
                         href="/v4extensions/new-types/type-aliases">Type aliases</a>. FIXME: or
                     where is this information getting moved to???</p>
@@ -2580,15 +2648,15 @@
                 <p>Used to construct a new map.</p>
             </description>
             <attributes>
-                <attribute name="duplicates">New in XSLT 4.0. An expression which must
-                    evaluate to either one of the strings <code>"use-first"</code>,
-                    <code>"use-last"</code>, <code>"use-any"</code>, <code>"combine"</code>, or
-                    <code>"reject"</code>, or an arity-2 function. If the attribute is present, then when a
-                    duplicate key value is encountered, the function is called supplying the old and
-                    new values for the key, and the old value for the key is replaced with the
-                    result of the function call. For example, if the function is <code>fn($old,
-                        $new){$old, $new}</code> then the new value will be the
-                    sequence-concatenation of the duplicate entries. </attribute>
+                <attribute name="duplicates">New in XSLT 4.0. An expression which must evaluate to
+                    either one of the strings <code>"use-first"</code>, <code>"use-last"</code>,
+                        <code>"use-any"</code>, <code>"combine"</code>, or <code>"reject"</code>, or
+                    an arity-2 function. If the attribute is present, then when a duplicate key
+                    value is encountered, the function is called supplying the old and new values
+                    for the key, and the old value for the key is replaced with the result of the
+                    function call. For example, if the function is <code>fn($old, $new){$old,
+                        $new}</code> then the new value will be the sequence-concatenation of the
+                    duplicate entries. </attribute>
                 <attribute name="select">New in XSLT 4.0. Provides an alternative way of supplying
                     the input sequence for constructing the map; if present, the contained sequence
                     constructor must be empty.</attribute>
@@ -2639,8 +2707,8 @@
                     from Saxon 13 for XSLT 4.0 stylesheets. The 4.0 <code>duplicates</code>
                     attribute replaces <code>on-duplicates</code> which was defined in earlier
                     drafts, and which was based on the Saxon extension attribute
-                    <code>saxon:on-duplicates</code>, which were previously available in Saxon 10 to
-                    12, and are now dropped.</p>
+                        <code>saxon:on-duplicates</code>, which were previously available in Saxon
+                    10 to 12, and are now dropped.</p>
             </status>
             <see-also name="map-entry" type="xsl-elements"/>
         </xsl-element>
@@ -2674,6 +2742,11 @@
                         >xsl:analyze-string</a> element to indicate the default action to be taken
                     with substrings that match a regular expression.</p>
             </description>
+            <attributes>
+                <attribute name="select">New in XSLT 4.0. Provides an alternative way of supplying
+                    the processing action for matching segments; if present, the contained sequence
+                    constructor must be empty.</attribute>
+            </attributes>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
@@ -2985,8 +3058,13 @@
                 <p>Allows properties of a mode to be defined.</p>
             </description>
             <attributes>
-                <attribute name="as">FIXME:</attribute>
-                <attribute name="copy-namespaces">FIXME:</attribute>
+                <attribute name="as">New in XSLT 4.0. Declares the return type of all template rules
+                    in the mode.</attribute>
+                <attribute name="copy-namespaces">New in XSLT 4.0. If <code>on-no-match</code> is
+                        <code>shallow-copy</code>, <code>shallow-copy-all</code>, or
+                        <code>deep-copy</code>, then this attribute determines whether or not the
+                    built-in template rule copies unused namespace bindings. The default is
+                        <code>yes</code>.</attribute>
                 <attribute name="name" use="optional">Identifies the name of this mode; if omitted,
                     the element describes the properties of the unnamed mode.</attribute>
                 <attribute name="on-multiple-match" use="optional">Indicates what action is taken
@@ -3008,6 +3086,11 @@
                             <p><code>shallow-copy</code>: invoke the "identity template", which
                                 copies an element node and does apply-templates to its attributes
                                 and children</p>
+                        </li>
+                        <li>
+                            <p><code>shallow-copy-all</code>: new in XSLT 4.0, this is a variant of
+                                    <code>shallow-copy</code> which enables recursive descent
+                                processing of trees involving maps and arrays</p>
                         </li>
                         <li>
                             <p><code>deep-copy</code>: invoke <code>xsl:copy-of</code></p>
@@ -3058,7 +3141,28 @@
                         class="bodylink code" href="../apply-templates">xsl:apply-templates</a>.</p>
 
                 <p>The element always appears as a child of <code>xsl:stylesheet</code> (or
-                        <code>xsl:transform</code>), and it is empty (has no children).</p>
+                        <code>xsl:transform</code>), and in XSLT 3.0 it is empty (has no
+                    children).</p>
+
+                <p>In XSLT 4.0, an <code>xsl:mode</code> declaration for a named mode can contain
+                    template rules within the body of the <code>xsl:mode</code> declaration. This is
+                    known as an <em>enclosing mode</em>. Template rules within the enclosing mode
+                    cannot have a <code>mode</code> attribute (they automatically belong to the
+                    enclosing mode), and any <code>xsl:apply-templates</code> instructions within
+                    these template rules default their <code>mode</code> attribute to the enclosing
+                    mode. Template rules within an enclosing mode cannot be overridden by template
+                    rules outside it (in fact, template rules outside the enclosing mode cannot name
+                    that mode in their <code>mode</code> attribute). Specifying
+                        <code>mode="#all"</code> on a template rule has no effect on enclosing
+                    modes.</p>
+
+                <p>The purpose of enclosing modes is to make it easier to see at a glance what all
+                    the rules for a mode are, and thus to make it easier to work out which rules
+                    will match which nodes in an input document.</p>
+
+                <p>Template rules in an enclosing mode can in principle be overridden in another
+                    stylesheet package (using <code>xsl:override</code>) but this has not yet been
+                    tested.</p>
             </details>
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
@@ -3212,6 +3316,11 @@
                         >xsl:analyze-string</a> element to indicate the default action to be taken
                     with substrings that do not match a regular expression.</p>
             </description>
+            <attributes>
+                <attribute name="select">New in XSLT 4.0. Provides an alternative way of supplying
+                    the processing action for non-matching segments; if present, the contained
+                    sequence constructor must be empty.</attribute>
+            </attributes>
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
@@ -3725,8 +3834,8 @@
             <description>
                 <p>Used within an <a class="bodylink code" href="../choose">xsl:choose</a> element
                     to indicate the default action to be taken if none of the other choices matches.
-                    In XSLT 4.0, it may also appear within <a class="bodylink code"
-                        href="../switch">xsl:switch</a>.</p>
+                    In XSLT 4.0, it may also appear within <a class="bodylink code" href="../switch"
+                        >xsl:switch</a>.</p>
             </description>
             <attributes>
                 <attribute name="select" use="optional">New in XSLT 4.0. Provides an alternative way
@@ -3734,10 +3843,10 @@
                     must be empty.</attribute>
             </attributes>
             <details>
-                <p>The new <code>select</code> attribute is available in XSLT
-                    4.0. If the <code>then</code> attribute is present, the <code>xsl:if</code>
-                    instruction must be empty (have no children). Either attribute can be used
-                    independently; there is no requirement for both to be present.</p>
+                <p>The new <code>select</code> attribute is available in XSLT 4.0. If the
+                        <code>then</code> attribute is present, the <code>xsl:if</code> instruction
+                    must be empty (have no children). Either attribute can be used independently;
+                    there is no requirement for both to be present.</p>
                 <p>Note that forwards-compatibility mode in previous versions of XSLT does not
                     handle the <code>select</code> attribute particularly well. If an XSLT 3.0
                     processor encounters an <code>xsl:otherwise</code> instruction with a
@@ -4267,7 +4376,7 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>record</name>
             <description>
-                <p>FIXME:</p>
+                <p>New in XSLT 4.0. Used to construct a record map.</p>
             </description>
             <attributes>
                 <attribute name="xsl:as">FIXME:</attribute>
@@ -4285,19 +4394,23 @@
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>record-type</name>
             <description>
-                <p>FIXME:</p>
+                <p>New in XSLT 4.0. Used to declare a name for a record type.</p>
             </description>
             <attributes>
-                <attribute name="name">FIXME:</attribute>
+                <attribute name="name">A QName used to identify the record type uniquely within the
+                    stylesheet package.</attribute>
                 <attribute name="constructor">FIXME:</attribute>
-                <attribute name="extensible">FIXME:</attribute>
-                <attribute name="visibility">FIXME:</attribute>
+                <attribute name="extensible">Specifies whether the record type is extensible - which
+                    means that a map matching the record type may contain additional entries to
+                    those specified. Defaults to "no".</attribute>
+                <attribute name="visibility">The visibility of the record type.</attribute>
             </attributes>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>EE_13</saxon-edition>
+            <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
             <status>
-                <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
+                <p>New in XSLT 4.0. Not yet implemented in Saxon.</p>
             </status>
+            <see-also name="field" type="xsl-elements"/>
         </xsl-element>
     </section>
 
@@ -4786,9 +4899,9 @@
                     strips whitespace in elements declared as having element-only content; and
                         <code>#default</code> follows the rules in <a class="bodylink code"
                         href="/xsl-elements/strip-space">xsl:strip-space</a>/<a
-                        class="bodylink                             code"
-                        href="/xsl-elements/preserve-space">xsl:preserve-space</a> declarations. For
-                    details see <a class="bodylink code" href="/extensions/attributes/strip-space"
+                        class="bodylink code" href="/xsl-elements/preserve-space"
+                        >xsl:preserve-space</a> declarations. For details see <a
+                        class="bodylink code" href="/extensions/attributes/strip-space"
                         >saxon:strip-space</a>.</attribute>
                 <attribute name="saxon:xinclude" use="optional" data-type="boolean">Controls whether
                     XInclude processing takes place. For details see <a class="bodylink code"
@@ -5002,12 +5115,12 @@
                 <p>The <code>select</code> attribute contains an expression which must deliver a
                     single atomic value (it is atomized if necessary). This value is compared with
                     the values of the <code>test</code> conditions in each of the contained <a
-                        class="bodylink                     code" href="../when">xsl:when</a>
-                    elements in turn until the first match is found. If a match is found, that
-                        <code>xsl:when</code> element is evaluated; if no match is found, the <a
-                        class="bodylink code" href="../otherwise">xsl:otherwise</a> element is
-                    evaluated; if there is no <code>xsl:otherwise</code> element, the
-                        <code>xsl:switch</code> instruction returns an empty sequence.</p>
+                        class="bodylink code" href="../when">xsl:when</a> elements in turn until the
+                    first match is found. If a match is found, that <code>xsl:when</code> element is
+                    evaluated; if no match is found, the <a class="bodylink code"
+                        href="../otherwise">xsl:otherwise</a> element is evaluated; if there is no
+                        <code>xsl:otherwise</code> element, the <code>xsl:switch</code> instruction
+                    returns an empty sequence.</p>
 
                 <p>Unlike <a class="bodylink code" href="../choose">xsl:choose</a>, the test
                     condition in the <code>xsl:when</code> element is an expression that can
@@ -5724,17 +5837,16 @@
             <description>
                 <p>Used within an <a class="bodylink code" href="../choose">xsl:choose</a> element
                     to indicate one of a number of choices. In XSLT 4.0, it may also appear within
-                    <a class="bodylink code" href="../switch">xsl:switch</a>.</p>
+                        <a class="bodylink code" href="../switch">xsl:switch</a>.</p>
             </description>
             <attributes>
-                <attribute name="select" use="optional">New in XSLT 4.0. Provides an alternative way of
-                    supplying the return value when the <code>test</code> condition matches; if
+                <attribute name="select" use="optional">New in XSLT 4.0. Provides an alternative way
+                    of supplying the return value when the <code>test</code> condition matches; if
                     present, the contained sequence constructor must be empty.</attribute>
-                <attribute name="test" use="mandatory">If this is the first
-                        <code>xsl:when</code> element within the enclosing <code>xsl:choose</code>
-                    whose test condition matches the current element, the content of the
-                        <code>xsl:when</code> element is expanded, otherwise it is
-                    ignored.</attribute>
+                <attribute name="test" use="mandatory">If this is the first <code>xsl:when</code>
+                    element within the enclosing <code>xsl:choose</code> whose test condition
+                    matches the current element, the content of the <code>xsl:when</code> element is
+                    expanded, otherwise it is ignored.</attribute>
             </attributes>
             <details>
                 <p>Note that forwards-compatibility mode in previous versions of XSLT does not
@@ -6228,14 +6340,6 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
         <section id="patterns-30" title="Patterns in XSLT 3.0">
             <h1>Patterns in XSLT 3.0</h1>
 
-            <aside>
-                <p>Earlier drafts of XSLT 3.0 introduced a pattern syntax <code>~typename</code>:
-                    for example <code>~xs:integer</code> would match any integer. With experience
-                    this was found not to be very useful, and it has been dropped. The
-                        <code>~typename</code> syntax was supported in Saxon 9.5, but not since
-                    Saxon 9.6.</p>
-            </aside>
-
             <p>XSLT 3.0 introduces a new pattern syntax <code>.[expression]</code>: this matches any
                 item for which the effective boolean value of the expression (evaluated with that
                 item as the context item) is true. For example <code>.[. gt 0]</code> will match any
@@ -6278,6 +6382,74 @@ predicate        ::= '[' ( boolean-expression | numeric-expression ) ']'
                         only read the document once, so this is not an expensive operation.)</p>
                 </li>
             </ul>
+
+        </section>
+        <section id="patterns-40" title="Patterns in XSLT 4.0">
+            <h1>Patterns in XSLT 4.0</h1>
+
+            <p>In XSLT 4.0, the syntax of match patterns is extended to make it easier to match maps
+                and arrays. These extensions are available from Saxon 13 for XSLT 4.0 stylesheets;
+                and available in Saxon 11 and 12 provided that syntax extensions are enabled.</p>
+
+            <p>In particular the syntax <code>ma-type predicate*</code> is allowed in a pattern,
+                where <code>ma-type</code> is any of:</p>
+
+            <ul>
+                <li>
+                    <code>type(...)</code>
+                </li>
+                <li>
+                    <code>union(...)</code>
+                </li>
+                <li>
+                    <code>record(...)</code>
+                </li>
+                <li>
+                    <code>map(...)</code>
+                </li>
+                <li>
+                    <code>array(...)</code>
+                </li>
+            </ul>
+
+            <p>For example if an <a class="bodylink" href="/xsl-elements/item-type">named item
+                    type</a> has been declared:</p>
+
+            <pre><code class="language-xml">&lt;xsl:item-type name="cx:complex" type="record(r as xs:double, i as xs:double)"/></code></pre>
+
+            <p>Then it can be used in a match pattern to match instances of the type, with or
+                without predicates:</p>
+
+            <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]">{?r}&lt;/xsl:template></code></pre>
+
+            <pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)">{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template></code></pre>
+
+            <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an
+                abbreviation for <code>.[. instance of type(T)]</code>.</p>
+
+            <p>Patterns for record types are particularly useful when JSON is processed using XSLT
+                template rules. For example, a JSON object such as the following: </p>
+
+            <pre><code class="language-json"><![CDATA[{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "age": 45,
+  "weight": 67
+}]]></code></pre>
+
+            <p>can be matched with a pattern such as <code>match="record(firstName, lastName, email,
+                    *)"</code>. Naming a few of the properties that characterize the object is
+                sufficient (but remember to make the record type extensible by including <code>",
+                    *"</code> at the end). There's generally no need to include all the properties,
+                or to give their data types, because a test like this is generally sufficient to be
+                unambiguous. The order of properties, of course, is immaterial.</p>
+
+            <p>Predicates can be added as with any other pattern, for example
+                    <code>match="record(firstName, lastName, *)[?department='sales']"</code>.</p>
+
+            <p>The rules for calculating the default priority of these patterns are not yet stable;
+                explicit priorities should be used if there is any risk of ambiguity.</p>
 
         </section>
     </section>

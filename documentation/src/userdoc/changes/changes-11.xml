@@ -442,10 +442,7 @@
             <code>composite="no"</code>, the members of the array must be singletons, and are returned by the sequence constructor
             as a normal sequence of items.</p>
         
-        <p>The <code>saxon:for-each-member</code> instruction, introduced in Saxon 10, has been dropped. For
-            new alternative methods to interate over the members of an array, see <a class="bodylink"
-                href="/v4extensions/xslt-syntax-extensions/iteration-maps-arrays">Iterating over maps and
-                arrays</a>.</p>
+        <p>The <code>saxon:for-each-member</code> instruction, introduced in Saxon 10, has been dropped.</p>
         
  
         <h2>XPath Syntax Extensions</h2>
@@ -485,12 +482,9 @@
         <p>An extension instruction can be used to invoke a named template. For example, a template with name <code>x:error</code>
         with declared parameters <code>message</code> and <code>code</code> might be called using the instruction
         <code>&lt;x:error message="Intoxication detected" code="ABXZ9275"/></code>, in place of an <code>xsl:call-template</code>
-            instruction with multiple <code>xsl:with-param</code> children. For details, see 
-            <a class="bodylink" href="/v4extensions/xslt-syntax-extensions/ext-ins-call-template">Extension
-                instructions calling templates</a>.</p>
+            instruction with multiple <code>xsl:with-param</code> children.</p>
         
-        <p>The syntax of match patterns is extended to make it easier to match maps and arrays, see <a
-            class="bodylink" href="/v4extensions/xslt-syntax-extensions/match-patterns">Match patterns</a>.</p>
+        <p>The syntax of match patterns is extended to make it easier to match maps and arrays.</p>
         
         <p>A number of proposed new instructions are available:</p>
         
@@ -537,9 +531,7 @@
                         href="/xsl-elements/for-each">xsl:for-each</a>, <a class="bodylink code"
                             href="/xsl-elements/for-each-group">xsl:for-each-group</a>, and
                     <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a>, to allow these
-                    instructions to process maps and arrays as well as sequences. For more details see <a class="bodylink"
-                        href="/v4extensions/xslt-syntax-extensions/iteration-maps-arrays">Iterating over maps and
-                    arrays</a>.</p>
+                    instructions to process maps and arrays as well as sequences.</p>
             </li>
             <li>
                 <p>The <code>on-duplicates</code> attribute is now available on a <a class="bodylink code"

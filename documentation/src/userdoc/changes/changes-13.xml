@@ -485,7 +485,7 @@ TODO: rethink redefines and override
         <ul>
             <li><p>The ternary conditional expression <code>test ?? A !! B</code>.</p></li>
             <li><p>Record tests using the keyword "tuple" rather than "record".</p></li>
-            <!--<li><p>Item types of the form "atomic(X)"</p></li>-->
+            <li><p>Item types of the form "atomic(X)"</p></li>
             <li><p>Lambda expressions of the form <code>($a, $b) -> {$a + $b}</code></p></li>
             <li><p>The syntax <code>type(T)</code> is now allowed only in XSLT patterns, not
             as an item type in XPath expressions. T may be any item type, including the
@@ -523,7 +523,10 @@ TODO: rethink redefines and override
         </ul>
         
         <p>The <code>saxon:array</code> and <code>saxon:array-member</code> instructions are dropped
-        in favour of their XSLT 4.0 counterparts, <code>xsl:array</code> and <code>xsl:array-member</code>.</p>
+        in favour of their XSLT 4.0 counterparts, <code>xsl:array</code> and
+            <code>xsl:array-member</code>. Note that the XSLT 4.0 specification for
+            <code>xsl:array</code> has changed to drop the <code>composite</code> attribute, and add
+            the <code>for-each</code> attribute.</p>
         
         <p>The <code>xsl:map/saxon:on-duplicates</code> extension attribute is no longer supported, it is 
         replaced by the regular XSLT 4.0 attribute <code>xsl:map/duplicates.</code></p>
