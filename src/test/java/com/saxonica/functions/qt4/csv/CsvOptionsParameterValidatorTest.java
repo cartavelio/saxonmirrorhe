@@ -33,7 +33,7 @@ class CsvOptionsParameterValidatorTest {
         @Nested
         class PositiveIntegers {
             @Test
-            @DisplayName("select-columns cannot be set to zero")
+            @DisplayName("select-columns cannot be use a zero")
             void selectColumnsZeroErrors() throws XPathException {
                 options = makeOptions(defaultOpts, opts -> {
                     opts.put("select-columns", 0);
@@ -43,7 +43,7 @@ class CsvOptionsParameterValidatorTest {
             }
 
             @Test
-            @DisplayName("number-of-columns cannot be set to a negative integer")
+            @DisplayName("select-columns cannot be use a negative integer")
             void negativeSelectColumnsErrors() throws XPathException {
                 options = makeOptions(defaultOpts, opts -> {
                     opts.put("select-columns", -1);

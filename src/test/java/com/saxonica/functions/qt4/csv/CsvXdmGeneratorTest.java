@@ -5,6 +5,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.test.xdmfixtures.FixtureBuilder;
 import net.sf.saxon.trans.XPathException;
@@ -33,20 +34,11 @@ class CsvXdmGeneratorTest {
     CsvRecordGenerator subject;
     Map<String, GroundedValue> options = new HashMap<>();
     MapItem expected;
-    MapItem expectedColumns;
     MapItem actual;
 
     CsvRecordGenerator subject() throws XPathException {
         if (subject == null) subject = new CsvRecordGenerator(options);
         return subject;
-    }
-
-    public ArrayItem getFirstRow(MapItem csvRecord) {
-        return (ArrayItem) csvRecord.get(new StringValue("rows")).head();
-    }
-
-    public MapItem getRow(MapItem csvRecord, int rowNum) {
-        return (MapItem) csvRecord.get(new StringValue("rows")).itemAt(rowNum - 1);
     }
 
     @Test
@@ -151,223 +143,172 @@ class CsvXdmGeneratorTest {
         }
     }
 
-//    @Nested
-//    class FilteringColumns {
-//        SequenceIterator input = makeRowsIterator(r -> r.row("a", "b", "c", "d", "e").row("1", "2", "3", "4", "5"));
-//
-//        @Test
-//        @DisplayName("columns can be filtered in natural order (truncated)")
-//        void restrictColumnsInNaturalOrder() throws XPathException {
-//            options.put("filter-columns", SequenceBuilder.build(s -> s.append(1, 2, 3)));
-//
-//            actual = subject().fromRowSequence(input);
-//
-//            assertThat(getFirstRow(actual).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("a", "b", "c")));
-//            assertThat(getRow(actual, 2).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("1", "2", "3")));
-//        }
-//
-//        @Test
-//        @DisplayName("columns can be reordered")
-//        void reorderColumns() throws XPathException {
-//            options.put("filter-columns", SequenceBuilder.build(s -> s.append(2, 3, 1)));
-//
-//            actual = subject().fromRowSequence(input);
-//
-//            assertThat(getFirstRow(actual).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("b", "c", "a")));
-//            assertThat(getRow(actual, 2).get(string("fields")), deepEquals(TestXdmHelpers.simpleValueSequence("2", "3", "1")));
-//        }
-//
-//        @Test
-//        @DisplayName("csv-columns-record is properly tweaked when column extraction is on")
-//        void reorderedNamedColumns() throws XPathException {
-//            options.put("filter-columns", SequenceBuilder.build(s -> s.append(2, 3, 1)));
-//            options.put("column-names", BooleanValue.TRUE);
-//
-//            expected = FixtureBuilder.map(e -> {
-//                e.put("column-index", e.map(names -> {
-//                    names.put("b", 1);
-//                    names.put("c", 2);
-//                    names.put("a", 3);
-//                }));
-//                e.put("columns", e.sequence("b", "c", "a"));
-//            });
-//
-//            actual = subject().fromRowSequence(input);
-//
-//            assertThat(actual.get(string("columns")), deepEquals(expected));
-//        }
-//
-//        @Test
-//        @DisplayName("filter-columns does not reorder or filter column names if column-names was passed an explicit map")
-//        void filteringDoesNotAffectSuppliedNames() throws XPathException {
-//            options.put("filter-columns", FixtureBuilder.sequence(s -> s.append(2, 3, 1)));
-//            options.put("column-names", FixtureBuilder.map(m -> m.put("First", 1).put("Second", 2).put("Third", 3)));
-//
-//            expectedColumns = FixtureBuilder.map(cols -> {
-//                cols.put("names", cols.map(names -> {
-//                    names.put("First", 1)
-//                            .put("Second", 2)
-//                            .put("Third", 3);
-//                }));
-//                cols.put("fields", cols.sequence("First", "Second", "Third"));
-//            });
-//
-//
-//            actual = subject().fromRowSequence(input);
-//
-//            assertThat(actual, matchesCsvRecord(expectedColumns,
-//                    expectedRows(r -> r.row("b", "c", "a").row("2", "3", "1"))));
-//        }
-//    }
-//
-//    @Nested
-//    class NumberOfColumns {
-//        SequenceIterator input = makeRowsIterator(r -> r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4"));
-//
-//        @Nested
-//        class ExplictlySpecified {
-//            @Test
-//            @DisplayName("the number of columns can be truncated")
-//            void truncation() throws XPathException {
-//                options.put("number-of-columns", TestXdmHelpers.integerValue(3));
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
-//                    r.row("a", "b", "c").row("1", "2", "3");
-//                })));
-//            }
-//
-//
-//            @Test
-//            @DisplayName("the number of columns can be padded")
-//            void padding() throws XPathException {
-//                options.put("number-of-columns", TestXdmHelpers.integerValue(7));
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
-//                    r.row("a", "b", "c", "d", "e", "f", "").row("1", "2", "3", "4", "", "", "");
-//                })));
-//            }
-//
-//            @Test
-//            @DisplayName("some rows can be padded while other rows are truncated")
-//            void padAndTruncate() throws XPathException {
-//                options.put("number-of-columns", TestXdmHelpers.integerValue(5));
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
-//                    r.row("a", "b", "c", "d", "e").row("1", "2", "3", "4", "");
-//                })));
-//            }
-//
-//            @Test
-//            @DisplayName("setting the number of columns affects the extraction of column-names")
-//            void columnsNamesAlsoTruncated() throws XPathException {
-//                options.put("number-of-columns", TestXdmHelpers.integerValue(4));
-//                options.put("column-names", BooleanValue.TRUE);
-//
-//                expectedColumns = FixtureBuilder.map(cols -> {
-//                    cols.put("names", cols.map(names -> {
-//                        names.put("a", 1)
-//                                .put("b", 2)
-//                                .put("c", 3)
-//                                .put("d", 4);
-//                    }));
-//                    cols.put("fields", cols.sequence("a", "b", "c", "d"));
-//                });
-//
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> {
-//                    r.row("1", "2", "3", "4");
-//                })));
-//            }
-//
-//            @Test
-//            @DisplayName("setting the number of columns does not affect an explicit column-names map")
-//            void explicitColumnNamesUnaffected() throws XPathException {
-//                options.put("number-of-columns", TestXdmHelpers.integerValue(4));
-//                options.put("column-names", FixtureBuilder.map(names -> {
-//                    names.put("C1", 1).put("C2", 2)
-//                            .put("C3", 3).put("C4", 4)
-//                            .put("C5", 5);
-//                }));
-//
-//                expectedColumns = FixtureBuilder.map(cols -> {
-//                    cols.put("names", cols.map(names -> {
-//                        names.put("C1", 1).put("C2", 2)
-//                                .put("C3", 3).put("C4", 4)
-//                                .put("C5", 5);
-//                    }));
-//                    cols.put("fields", cols.sequence("C1", "C2", "C3", "C4", "C5"));
-//                });
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> {
-//                    r.row("a", "b", "c", "d").row("1", "2", "3", "4");
-//                })));
-//            }
-//        }
-//
-//        @Nested
-//        class FirstRow {
-//            @Test
-//            @DisplayName("following rows size is conformed to the first")
-//            void followingRowsAreConformed() throws XPathException {
-//                options.put("number-of-columns", string("first-row"));
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
-//                    r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4", "", "");
-//                })));
-//            }
-//
-//            @Test
-//            @DisplayName("the first row, extracted by column-names: true(), is also used as the first row for the number-of-columns")
-//            void columnsNamesRowIsFirst() throws XPathException {
-//                options.put("number-of-columns", string("first-row"));
-//                options.put("column-names", BooleanValue.TRUE);
-//
-//                expectedColumns = FixtureBuilder.map(cols -> {
-//                    cols.put("names", cols.map(names -> {
-//                        names.put("a", 1)
-//                                .put("b", 2)
-//                                .put("c", 3)
-//                                .put("d", 4)
-//                                .put("e", 5)
-//                                .put("f", 6);
-//                    }));
-//                    cols.put("fields", cols.sequence("a", "b", "c", "d", "e", "f"));
-//                });
-//
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(expectedColumns, expectedRows(r -> {
-//                    r.row("1", "2", "3", "4", "", "");
-//                })));
-//            }
-//        }
-//
-//        @Nested
-//        class All {
-//            @Test
-//            @DisplayName("rows return all their fields, no matter the size")
-//            void followingRowsAreConformed() throws XPathException {
-//                options.put("number-of-columns", string("all"));
-//
-//                actual = subject().fromRowSequence(input);
-//
-//                assertThat(actual, matchesCsvRecord(CsvRecordGenerator.EMPTY_COLUMNS_RECORD, expectedRows(r -> {
-//                    r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4");
-//                })));
-//            }
-//        }
-//    }
+    @Nested
+    class SelectingColumns {
+        SequenceIterator input = makeRowsIterator(r -> r.row("a", "b", "c", "d", "e", "f").row("1", "2", "3", "4"));
+
+        @Test
+        @DisplayName("columns can be selected in natural order (truncated)")
+        void restrictColumnsInNaturalOrder() throws XPathException {
+            options.put("select-columns", FixtureBuilder.sequence(1, 2, 3));
+
+            expected = FixtureBuilder.map(cols -> {
+                cols.put("column-index", cols.map());
+                cols.put("columns", cols.sequence());
+                cols.put("rows", cols.sequence(rows -> rows.append(cols.array("a", "b", "c")).append(cols.array("1", "2", "3"))));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+
+        @Test
+        @DisplayName("columns can be reordered")
+        void reorderColumns() throws XPathException {
+            options.put("select-columns", FixtureBuilder.sequence(2, 3, 1));
+
+            expected = FixtureBuilder.map(cols -> {
+                cols.put("column-index", cols.map());
+                cols.put("columns", cols.sequence());
+                cols.put("rows", cols.sequence(rows -> rows.append(cols.array("b", "c", "a")).append(cols.array("2", "3", "1"))));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+
+        @Test
+        @DisplayName("columns and columns-index are properly tweaked when column extraction is on")
+        void reorderedNamedColumns() throws XPathException {
+            options.put("select-columns", FixtureBuilder.sequence(2, 3, 1));
+            options.put("header", BooleanValue.TRUE);
+
+            expected = FixtureBuilder.map(e -> {
+                e.put("column-index", e.map(names -> {
+                    names.put("b", 1);
+                    names.put("c", 2);
+                    names.put("a", 3);
+                }));
+                e.put("columns", e.sequence("b", "c", "a"));
+                e.put("rows", e.sequence(rows -> rows.append(rows.array("2", "3", "1"))));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+
+        @Test
+        @DisplayName("select-columns does not reorder or filter column names if column-names were passed as an explicit sequence")
+        void filteringDoesNotAffectSuppliedNames() throws XPathException {
+            options.put("select-columns", FixtureBuilder.sequence(s -> s.append(2, 3, 1)));
+            options.put("header", FixtureBuilder.sequence("First", "Second", "Third"));
+
+            expected = FixtureBuilder.map(e -> {
+                e.put("column-index", e.map(names -> {
+                    names.put("First", 1)
+                            .put("Second", 2)
+                            .put("Third", 3);
+                }));
+                e.put("columns", e.sequence("First", "Second", "Third"));
+                e.put("rows", e.sequence(rows -> rows.append(rows.array("b", "c", "a"), rows.array("2", "3", "1"))));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+
+        @Test
+        @DisplayName("the number of columns can be padded")
+        void padding() throws XPathException {
+            options.put("select-columns", FixtureBuilder.sequence(1,2,3,4,5,6,7));
+
+            expected = FixtureBuilder.map(e -> {
+                e.put("column-index", e.map());
+                e.put("columns", e.sequence());
+                e.put("rows", e.sequence(rows -> {
+                    rows.append(
+                            e.array("a", "b", "c", "d", "e", "f", ""),
+                            e.array("1", "2", "3", "4", "", "", ""));
+                }));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+
+        @Test
+        @DisplayName("some rows can be padded while other rows are truncated")
+        void padAndTruncate() throws XPathException {
+            options.put("select-columns", FixtureBuilder.sequence(1,2,3,4,5));
+
+            expected = FixtureBuilder.map(e -> {
+                e.put("column-index", e.map());
+                e.put("columns", e.sequence());
+                e.put("rows", e.sequence(rows -> {
+                    rows.append(
+                            e.array("a", "b", "c", "d", "e"),
+                            e.array("1", "2", "3", "4", ""));
+                }));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+    }
+
+    @Nested
+    class TrimmingRows {
+        SequenceIterator input = makeRowsIterator(r -> r.row("a", "b", "c", "d").row("1", "2", "3").row("1", "2", "3", "4", "5"));
+
+        @Test
+        @DisplayName("following rows size is conformed to the first")
+        void followingRowsAreConformed() throws XPathException {
+            options.put("trim-rows", BooleanValue.TRUE);
+
+            expected = FixtureBuilder.map(e -> {
+                e.put("column-index", e.map());
+                e.put("columns", e.sequence());
+                e.put("rows", e.sequence(rows -> {
+                    rows.append(
+                            e.array("a", "b", "c", "d"),
+                            e.array("1", "2", "3", ""),
+                            e.array("1", "2", "3", "4"));
+                }));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+
+        @Test
+        @DisplayName("the first row, extracted by header: true(), is also used as the first row for trim-rows")
+        void columnsNamesRowIsFirst() throws XPathException {
+            options.put("trim-rows", BooleanValue.TRUE);
+            options.put("column-names", BooleanValue.TRUE);
+
+            expected = FixtureBuilder.map(e -> {
+                e.put("column-index", e.map(names -> {
+                    names.put("a", 1)
+                            .put("b", 2)
+                            .put("c", 3)
+                            .put("d", 4);
+                }));
+                e.put("columns", e.sequence("a", "b", "c", "d"));
+                e.put("rows", e.sequence(rows -> {
+                    rows.append(e.array("1", "2", "3", ""), e.array("1", "2", "3", "4"));
+                }));
+            });
+
+            actual = subject().fromRowSequence(input);
+
+            assertThat(actual, matchesCsvRecord(expected));
+        }
+    }
 }

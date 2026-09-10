@@ -50,7 +50,7 @@ class ParseCsvTest {
     @DisplayName("everything should be wired up correctly")
     void everythingIsWiredUpCorrectly() throws XPathException {
         options = makeOptions(opts -> {
-            opts.put("column-names", BooleanValue.TRUE);
+            opts.put("header", BooleanValue.TRUE);
         });
         expected = FixtureBuilder.map(cols -> {
                 cols.put("column-index", cols.map(names -> names.put("a", 1).put("b", 2)));
@@ -67,9 +67,7 @@ class ParseCsvTest {
     @DisplayName("option parameter validation is validating things")
     void columnNamesMapsZeroErrors() {
         options = makeOptions(opts -> {
-            opts.put("column-index", FixtureBuilder.map(map -> {
-                map.put("First", 0);
-            }));
+            opts.put("select-columns", opts.sequence(0));
         });
 
         assertThat(() -> subject().call(ctxt(), args("", options)), throwsXPathException("FOCV0005"));
