@@ -397,7 +397,7 @@ public class XQueryParser extends XPathParser {
         env.setXPathVersion(languageVersion);
         env.initializeFunctionLibraries();
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-                .withAcceptEQName(true, languageVersion)
+                .withAcceptEQName(true)
                 .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
 
         setQNameParser(qp);
@@ -461,7 +461,7 @@ public class XQueryParser extends XPathParser {
         t.languageLevel = languageVersion;
         t.isXQuery = true;
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-                .withAcceptEQName(true, languageVersion)
+                .withAcceptEQName(true)
                 .withUnescaper(new Unescaper(config.getValidCharacterChecker()));
         setQNameParser(qp);
         try {
@@ -1849,14 +1849,18 @@ public class XQueryParser extends XPathParser {
             if (isReservedFunctionName(fName, languageVersion)) {
                 grumble("The name '" + fName + "' is reserved: it cannot be used as an unprefixed function name");
             }
-            uri = env.getDefaultFunctionNamespace();
-            qName = new StructuredQName("", uri, fName);
+            if (true || languageVersion < 40) {     // TODO
+                uri = env.getDefaultFunctionNamespace();
+            } else {
+                uri = NamespaceUri.NULL;
+            }
+            qName = new StructuredQName("", NamespaceUri.NULL, fName);
         } else {
             qName = makeStructuredQName(fName, NamespaceUri.NULL);
             uri = qName.getNamespaceUri();
         }
 
-        if (uri.isEmpty()) {
+        if (uri.isEmpty() /*&& languageVersion < 40 */) {
             grumble("The function must be in a namespace", "XQST0060");
         }
 
@@ -2236,7 +2240,7 @@ public class XQueryParser extends XPathParser {
                 SortKeyDefinition[] keys = new SortKeyDefinition[sortSpecList.size()];
                 for (int i = 0; i < keys.length; i++) {
                     SortSpec spec = sortSpecList.get(i);
-                    SortKeyDefinition key = new SortKeyDefinition(languageVersion);
+                    SortKeyDefinition key = new SortKeyDefinition();
                     key.setSortKey(sortSpecList.get(i).sortKey, false);
                     String str = spec.ascending ? "ascending" : "descending";
                     key.setOrder(new StringLiteral(BMPString.of(str)));
@@ -3315,6 +3319,10 @@ public class XQueryParser extends XPathParser {
                     makeStructuredQName(typeName, env.getDefaultElementNamespace()));
             if (requiredType == null) {
                 grumble("Unknown schema type " + typeName, "XQST0104");
+            }
+            if (requiredType == Untyped.getInstance()) {
+                mode = Validation.STRIP;
+                requiredType = null;
             }
             expect(Token.LCURLY);
         } else if (t.currentToken == Token.LCURLY) {
