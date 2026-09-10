@@ -118,9 +118,9 @@
       <reason>Currently restricting default value of a user function parameter to be a literal or "."</reason>
    </exception>
    
-   <exception test-set="prod-Recordtest" test-case="RecordTest-010" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-18"/>
-      <reason>Coercion on fields of record test not yet implemented</reason>
+   <exception test-set="prod-Lookup" test-case="Lookup-413" run="false" report="n/a">
+      <created by="Michael Kay" on="2024-12-02"/>
+      <reason>Declare context value not yet implemented</reason>
    </exception>
    
    <exception test-set="prod-ContextValueDecl"  run="false" report="n/a">
@@ -139,13 +139,13 @@
       <reason>Fixed default namespace declaration not yet implemented</reason>
    </exception>
    
-   <exception test-set="prod-VersionDecl" test-case="version_declaration-015
+   <!--<exception test-set="prod-VersionDecl" test-case="version_declaration-015
       version_declaration-016" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-20"/>
       <reason>Leading zeroes in version numbers not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="misc-BuiltInKeywords" test-case="
+   <!--<exception test-set="misc-BuiltInKeywords" test-case="
       Keywords-fn-char-1
       Keywords-fn-remove-1
       " run="false" report="n/a">
@@ -158,7 +158,7 @@
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Generated test case contains incorrect syntax</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="misc-HtmlTestSuite" test-case="
       html-test-1050
@@ -173,14 +173,7 @@
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Wrong results from validator.nu? Needs checking.</reason>
    </exception>
-   
-   <!--<exception test-set="fn-format-number" test-case="
-      numberformat-40-87 numberformat-40-88
-      " run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Third argument as xs:QName not yet implemented</reason>
-   </exception>
-   -->
+ 
    <exception test-set="fn-message" run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Function fn:message not yet implemented</reason>
@@ -188,21 +181,7 @@
    
   
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-fn-json-001
-      fo-test-fn-json-002
-      fo-test-fn-json-003
-      fo-test-fn-json-004
-      fo-test-fn-json-005
-      fo-test-fn-json-006
-      fo-test-fn-json-007
-      fo-test-fn-json-008
-      fo-test-fn-json-009
-      " 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Implementation is ahead of the spec</reason>
-   </exception>-->
+ 
    
  
    <exception test-set="app-spec-examples" 
