@@ -31,12 +31,13 @@ import net.sf.saxon.z.IntUniversalSet;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import static net.sf.saxon.type.Affinity.DISJOINT;
-import static net.sf.saxon.type.Affinity.SUBSUMES;
-import static net.sf.saxon.type.Affinity.SUBSUMED_BY;
 import static net.sf.saxon.type.Affinity.OVERLAPS;
 import static net.sf.saxon.type.Affinity.SAME_TYPE;
+import static net.sf.saxon.type.Affinity.SUBSUMED_BY;
+import static net.sf.saxon.type.Affinity.SUBSUMES;
 
 /**
  * This class exists to provide answers to questions about the type hierarchy. Because
@@ -80,14 +81,17 @@ public class TypeHierarchy {
      *
      * @param value        a value to be converted
      * @param requiredType the required type
-     * @param role identifies the value to be converted in error messages
+     * @param roleSupplier identifies the value to be converted in error messages
      * @param locator identifies the location for error messages
      * @return the converted value
      * @throws net.sf.saxon.trans.XPathException
      *          if the value cannot be converted to the required type
      */
 
-    public GroundedValue applyFunctionConversionRules(Sequence value, SequenceType requiredType, final RoleDiagnostic role, Location locator)
+    public GroundedValue applyFunctionConversionRules(Sequence value,
+                                                      SequenceType requiredType,
+                                                      Supplier<RoleDiagnostic> roleSupplier,
+                                                      Location locator)
             throws XPathException {
 
         try {
@@ -109,6 +113,7 @@ public class TypeHierarchy {
                     try {
                         iterator = Atomizer.getAtomizingIterator(iterator, false);
                     } catch (XPathException e) {
+                        RoleDiagnostic role = roleSupplier.get();
                         ValidationFailure vf = new ValidationFailure(
                                 "Failed to atomize the " + role.getMessage() + ": " + e.getMessage());
                         vf.setErrorCode("XPTY0117");
@@ -126,6 +131,7 @@ public class TypeHierarchy {
                     if (nsSensitive) {
                         converter = ItemMapper.of(item -> {
                             if (item instanceof AtomicValue && ((AtomicValue)item).isUntypedAtomic()) {
+                                RoleDiagnostic role = roleSupplier.get();
                                 ValidationFailure vf = new ValidationFailure(
                                         "Failed to convert the " + role.getMessage() + ": " +
                                         "Implicit conversion of untypedAtomic value to " + requiredItemType +
@@ -173,7 +179,7 @@ public class TypeHierarchy {
                                     (NumericValue)item, BuiltInAtomicType.DOUBLE, config.getConversionRules()).asAtomic();
                         } else {
                             throw new XPathException(
-                                    "Failed to convert the " + role.getMessage() + ": " +
+                                    "Failed to convert the " + roleSupplier.get().getMessage() + ": " +
                                     "Cannot promote non-numeric value to xs:double", "XPTY0004");
                         }
                     });
@@ -181,6 +187,7 @@ public class TypeHierarchy {
                 } else if (requiredItemType.equals(BuiltInAtomicType.FLOAT)) {
                     ItemMappingFunction promoter = ItemMapper.of(item -> {
                         if (item instanceof DoubleValue) {
+                            RoleDiagnostic role = roleSupplier.get();
                             throw new XPathException(
                                     "Failed to convert the " + role.getMessage() + ": " +
                                     "Cannot promote xs:double value to xs:float", "XPTY0004");
@@ -188,6 +195,7 @@ public class TypeHierarchy {
                             return (FloatValue) Converter.convert(
                                     (NumericValue)item, BuiltInAtomicType.FLOAT, config.getConversionRules()).asAtomic();
                         } else {
+                            RoleDiagnostic role = roleSupplier.get();
                             throw new XPathException(
                                     "Failed to convert the " + role.getMessage() + ": " +
                                     "Cannot promote non-numeric value to xs:float", "XPTY0004");
@@ -221,12 +229,12 @@ public class TypeHierarchy {
 
             if (!(relation == SAME_TYPE || relation == SUBSUMED_BY)) {
                 ItemTypeCheckingFunction itemChecker =
-                        new ItemTypeCheckingFunction(requiredItemType, role, locator, config);
+                        new ItemTypeCheckingFunction(requiredItemType, roleSupplier, locator, config);
                 iterator = new ItemMappingIterator(iterator, itemChecker, true);
             }
 
             if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
-                iterator = new CardinalityCheckingIterator(iterator, requiredType.getCardinality(), role, locator);
+                iterator = new CardinalityCheckingIterator(iterator, requiredType.getCardinality(), roleSupplier, locator);
             }
 
             return SequenceTool.toGroundedValue(iterator);

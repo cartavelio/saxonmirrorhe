@@ -14,6 +14,8 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * An ItemType representing the type of a function item (subclasses are used for maps and arrays)
  */
@@ -74,7 +76,7 @@ public interface FunctionItemType extends ItemType {
      * @throws XPathException if an error is detected
      */
 
-    Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
+    Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
             throws XPathException;
 
     /**

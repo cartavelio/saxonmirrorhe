@@ -16,6 +16,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.TwoItemIterator;
 import net.sf.saxon.value.Cardinality;
 
+import java.util.function.Supplier;
+
 /**
  * CardinalityCheckingIterator returns the items in an underlying sequence
  * unchanged, but checks that the number of items conforms to the required
@@ -39,31 +41,33 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
      *
      * @param base                the base iterator
      * @param requiredCardinality the required Cardinality
-     * @param role information for use if a failure occurs
+     * @param roleSupplier information for use if a failure occurs
      * @param locator the location in the source stylesheet or query
      * @throws XPathException if a failure is detected
      */
 
     public CardinalityCheckingIterator(SequenceIterator base, int requiredCardinality,
-                                       RoleDiagnostic role, Location locator)
+                                       Supplier<RoleDiagnostic> roleSupplier, Location locator)
             throws XPathException {
         this.base = base;
         this.locator = locator;
         try {
             first = base.next();
             if (first == null) {
+                RoleDiagnostic role = roleSupplier.get();
                 if (!Cardinality.allowsZero(requiredCardinality)) {
                     typeError("An empty sequence is not allowed as the " +
                             role.getMessage(), role.getErrorCode());
                 }
             } else {
                 if (requiredCardinality == StaticProperty.EMPTY) {
+                    RoleDiagnostic role = roleSupplier.get();
                     typeError("The only value allowed for the " +
                             role.getMessage() + " is an empty sequence", role.getErrorCode());
                 }
                 second = base.next();
                 if (second != null && !Cardinality.allowsMany(requiredCardinality)) {
-                    Item[] leaders = new Item[]{first, second};
+                    RoleDiagnostic role = roleSupplier.get();
                     typeError("A sequence of more than one item is not allowed as the " +
                             role.getMessage() + CardinalityChecker.depictSequenceStart(new TwoItemIterator(first, second), 2),
                             role.getErrorCode());
@@ -72,6 +76,25 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
         } catch (UncheckedXPathException e) {
             throw e.getXPathException();
         }
+    }
+
+    /**
+     * Construct an CardinalityCheckingIterator that will return the same items as the base sequence,
+     * checking how many there are.
+     *
+     * <p>This constructor is called from bytecode. There seem to be problems generating bytecode
+     * for the constructor that accepts a {@code Supplier<RoleDiagnostic>}</p>
+     *
+     * @param base                the base iterator
+     * @param requiredCardinality the required Cardinality
+     * @param roleDiagnostic        information for use if a failure occurs
+     * @param locator             the location in the source stylesheet or query
+     * @throws XPathException if a failure is detected
+     */
+
+    public CardinalityCheckingIterator(SequenceIterator base, int requiredCardinality,
+                                       RoleDiagnostic roleDiagnostic, Location locator) throws XPathException {
+        this(base, requiredCardinality, () -> roleDiagnostic, locator);
     }
 
     @Override

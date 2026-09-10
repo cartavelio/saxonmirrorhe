@@ -16,6 +16,8 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * An ItemType representing the type function(*). Subtypes represent function items with more specific
  * type signatures.
@@ -245,7 +247,7 @@ public class AnyFunctionType implements FunctionItemType {
      */
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
             throws XPathException {
         return new ItemChecker(exp, this, role);
     }

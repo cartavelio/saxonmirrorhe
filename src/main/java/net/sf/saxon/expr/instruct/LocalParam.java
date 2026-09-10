@@ -20,6 +20,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * The compiled form of an xsl:param element within a template in an XSLT stylesheet.
  * <p>The xsl:param element in XSLT has mandatory attribute name and optional attribute select. It can also
@@ -313,8 +315,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     public void checkAgainstRequiredType(ExpressionVisitor visitor)
             throws XPathException {
         // Note, in some cases we are doing this twice.
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, variableQName.getDisplayName(), 0);
-        //role.setSourceLocator(this);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, variableQName.getDisplayName(), 0);
         SequenceType r = requiredType;
         Expression select = getSelectExpression();
         if (r != null && select != null) {

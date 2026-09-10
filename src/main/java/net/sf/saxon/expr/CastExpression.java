@@ -20,6 +20,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 
 /**
  * Cast Expression: implements "cast as data-type ( expression )". It also allows an internal
@@ -55,7 +57,7 @@ public class CastExpression extends CastingExpression implements Callable {
 
         Configuration config = visitor.getConfiguration();
         final TypeHierarchy th = config.getTypeHierarchy();
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.TYPE_OP, "cast as", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.TYPE_OP, "cast as", 0);
         ItemType sourceItemType;
 
         TypeChecker tc = config.getTypeChecker(false);

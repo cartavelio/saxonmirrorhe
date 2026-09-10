@@ -24,6 +24,7 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 
 /**
@@ -154,12 +155,10 @@ public class XSLApplyTemplates extends StyleElement {
 
         if (select == null) {
             Expression here = new ContextItemExpression();
-            RoleDiagnostic role =
-                    new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "", 0);
-            role.setErrorCode("XTTE0510");
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.CONTEXT_ITEM, "", 0, "XTTE0510");
             here = new ItemChecker(here, AnyNodeTest.getInstance(), role);
             select = new SimpleStepExpression(here, new AxisExpression(AxisInfo.CHILD, null));
-            //select = new AxisExpression(AxisInfo.CHILD, null);
             select.setLocation(allocateLocation());
             select.setRetainedStaticContext(makeRetainedStaticContext());
         }

@@ -31,6 +31,7 @@ import net.sf.saxon.value.Whitespace;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Handler for xsl:key elements in stylesheet. <br>
@@ -184,9 +185,8 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
                 compileError("An xsl:key element with a @use attribute must be empty", "XTSE1205");
             }
             try {
-                RoleDiagnostic role =
+                Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:key/use", 0);
-                //role.setSourceLocator(new ExpressionLocation(this));
                 use = config.getTypeChecker(false).staticTypeCheck(
                         use,
                         SequenceType.ATOMIC_SEQUENCE,
@@ -272,9 +272,8 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
             }
 
             try {
-                RoleDiagnostic role =
+                Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:key/use", 0);
-                //role.setSourceLocator(new ExpressionLocation(this));
                 use = config.getTypeChecker(false).staticTypeCheck(
                         use,
                         SequenceType.ATOMIC_SEQUENCE,

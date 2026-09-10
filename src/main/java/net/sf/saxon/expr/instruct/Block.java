@@ -24,6 +24,7 @@ import net.sf.saxon.value.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -258,7 +259,7 @@ public class Block extends Instruction {
      *
      * @param req                 the required type
      * @param backwardsCompatible true if backwards compatibility mode applies
-     * @param role                the role of the expression in relation to the required type
+     * @param roleSupplier                the role of the expression in relation to the required type
      * @param visitor             an expression visitor
      * @return the expression after type checking (perhaps augmented with dynamic type checking code)
      * @throws XPathException if failures occur, for example if the static type of one branch of the conditional
@@ -268,13 +269,13 @@ public class Block extends Instruction {
     @Override
     public Expression staticTypeCheck(SequenceType req,
                                       boolean backwardsCompatible,
-                                      RoleDiagnostic role, ExpressionVisitor visitor)
+                                      Supplier<RoleDiagnostic> roleSupplier, ExpressionVisitor visitor)
             throws XPathException {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(backwardsCompatible);
         if (backwardsCompatible && !Cardinality.allowsMany(req.getCardinality())) {
             Expression first = FirstItemExpression.makeFirstItemExpression(this);
-            return tc.staticTypeCheck(first, req, role, visitor);
+            return tc.staticTypeCheck(first, req, roleSupplier, visitor);
         }
         Expression[] checked = new Expression[operanda.length];
         SequenceType subReq = req;
@@ -282,7 +283,7 @@ public class Block extends Instruction {
             subReq = SequenceType.makeSequenceType(req.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
         }
         for (int i=0; i<operanda.length; i++) {
-            checked[i] = tc.staticTypeCheck(operanda[i].getChildExpression(), subReq, role, visitor);
+            checked[i] = tc.staticTypeCheck(operanda[i].getChildExpression(), subReq, roleSupplier, visitor);
         }
         Block b2 = new Block(checked);
         ExpressionTool.copyLocationInfo(this, b2);
@@ -292,15 +293,17 @@ public class Block extends Instruction {
         int suppliedCard = b2.getCardinality();
         if (!Cardinality.subsumes(req.getCardinality(), suppliedCard)) {
             if ((reqCard & suppliedCard) == 0) {
+                RoleDiagnostic role = roleSupplier.get();
                 XPathException err = new XPathException(
                         "The required cardinality of the " + role.getMessage() +
                                 " is " + Cardinality.describe(reqCard) +
-                                ", but the supplied cardinality is " + Cardinality.describe(suppliedCard), role.getErrorCode(), getLocation());
+                                ", but the supplied cardinality is " +
+                                Cardinality.describe(suppliedCard), role.getErrorCode(), getLocation());
                 err.setIsTypeError(true);
                 err.setFailingExpression(this);
                 throw err;
             } else {
-                return CardinalityChecker.makeCardinalityChecker(b2, reqCard, role);
+                return CardinalityChecker.makeCardinalityChecker(b2, reqCard, roleSupplier);
             }
         }
         return b2;

@@ -21,6 +21,8 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
+import java.util.function.Supplier;
+
 
 /**
  * An AtomicSequenceConverter is an expression that performs a cast (or other supplied conversion)
@@ -33,7 +35,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
 
     protected PlainType requiredItemType;
     protected Converter converter;
-    private RoleDiagnostic roleDiagnostic; // may be null
+    private Supplier<RoleDiagnostic> roleSupplier; // may be null
 
 
     /**
@@ -138,15 +140,13 @@ public class AtomicSequenceConverter extends UnaryExpression {
      * Set a RoleDiagnostic, used to give more precise error information if the conversion
      * fails
      *
-     * @param role the RoleDiagnostic, which gives more precise error information
+     * @param roleSupplier provides more precise error information, in particular the error code
+     *                     to be used.
      */
 
-    public void setRoleDiagnostic(RoleDiagnostic role) {
-        // TODO: pragmatic kludge in the run-up to 9.9. If the role says error=XPTY0004, ignore it, because
-        // in XQuery the cast failure should be FORG0001. We only use the error code in XSLT paths where it
-        // might be something like XTTE0780
-        if (role != null && !"XPTY0004".equals(role.getErrorCode())) {
-            this.roleDiagnostic = role;
+    public void setRoleDiagnostic(Supplier<RoleDiagnostic> roleSupplier) {
+        if (roleSupplier != null) {
+            this.roleSupplier = roleSupplier;
         }
     }
 
@@ -157,8 +157,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
      * @return the RoleDiagnostic, or null if none has been set
      */
 
-    public RoleDiagnostic getRoleDiagnostic() {
-        return this.roleDiagnostic;
+    public Supplier<RoleDiagnostic> getRoleSupplier() {
+        return this.roleSupplier;
     }
 
 
@@ -302,7 +302,7 @@ public class AtomicSequenceConverter extends UnaryExpression {
         AtomicSequenceConverter atomicConverter = new AtomicSequenceConverter(getBaseExpression().copy(rebindings), requiredItemType);
         ExpressionTool.copyLocationInfo(this, atomicConverter);
         atomicConverter.setConverter(converter);
-        atomicConverter.setRoleDiagnostic(getRoleDiagnostic());
+        atomicConverter.setRoleDiagnostic(getRoleSupplier());
         return atomicConverter;
     }
 
@@ -324,8 +324,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
         } else {
             AtomicSequenceMappingFunction mapper = new AtomicSequenceMappingFunction();
             mapper.setConverter(conv);
-            if (roleDiagnostic != null) {
-                mapper.setErrorCode(roleDiagnostic.getErrorCode());
+            if (roleSupplier != null) {
+                mapper.setErrorCode(roleSupplier.get().getErrorCode());
             }
             return new ItemMappingIterator(base, mapper, true);
         }
@@ -386,9 +386,9 @@ public class AtomicSequenceConverter extends UnaryExpression {
         }
         Converter conv = getConverterDynamically(context);
         ConversionResult result = conv.convert(item);
-        if (result instanceof ValidationFailure && roleDiagnostic != null) {
+        if (result instanceof ValidationFailure && roleSupplier != null) {
             // TODO: use more of the information in the roleDiagnostic to form the error message
-            ((ValidationFailure)result).setErrorCode(roleDiagnostic.getErrorCode());
+            ((ValidationFailure)result).setErrorCode(roleSupplier.get().getErrorCode());
         }
         return result.asAtomic();
     }
@@ -465,8 +465,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
         if (converter instanceof Converter.PromoterToDouble || converter instanceof Converter.PromoterToFloat) {
             destination.emitAttribute("flags", "p");
         }
-        if (getRoleDiagnostic() != null) {
-            destination.emitAttribute("diag", getRoleDiagnostic().save());
+        if (getRoleSupplier() != null) {
+            destination.emitAttribute("diag", getRoleSupplier().get().save());
         }
         getBaseExpression().export(destination);
         destination.endElement();

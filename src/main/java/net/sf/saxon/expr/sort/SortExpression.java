@@ -18,6 +18,8 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * Expression equivalent to the imaginary syntax
  * expr sortby (sort-key)+
@@ -207,9 +209,8 @@ public class SortExpression extends Expression
             if (sortKeyDef.isBackwardsCompatible()) {
                 sortKey = FirstItemExpression.makeFirstItemExpression(sortKey);
             } else {
-                RoleDiagnostic role =
-                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0);
-                role.setErrorCode("XTTE1020");
+                Supplier<RoleDiagnostic> role = () ->
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0, "XTTE1020");
                 sortKey = tc.staticTypeCheck(sortKey, SequenceType.OPTIONAL_ATOMIC, role, visitor);
                 //sortKey = CardinalityChecker.makeCardinalityChecker(sortKey, StaticProperty.ALLOWS_ZERO_OR_ONE, role);
             }

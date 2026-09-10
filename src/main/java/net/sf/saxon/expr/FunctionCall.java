@@ -19,6 +19,7 @@ import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Collections;
+import java.util.function.Supplier;
 
 /**
  * Abstract superclass for calls to system-defined and user-defined functions
@@ -213,7 +214,7 @@ public abstract class FunctionCall extends Expression {
         SequenceType[] argTypes = target.getFunctionItemType().getArgumentTypes();
         if (target.isSequenceVariadic() && getArity() == 1) {
             String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, 0);
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, 0);
             setArg(0, tc.staticTypeCheck(
                     getArg(0),
                     new SequenceType(argTypes[0].getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE),
@@ -221,8 +222,11 @@ public abstract class FunctionCall extends Expression {
         } else {
             int n = target.getArity();
             for (int i = 0; i < n; i++) {
-                String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, i);
+                final int pos = i;
+                Supplier<RoleDiagnostic> role = () -> {
+                    String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
+                    return new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, pos);
+                };
                 setArg(i, tc.staticTypeCheck(
                         getArg(i),
                         argTypes[i],

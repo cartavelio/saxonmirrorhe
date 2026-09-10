@@ -40,6 +40,7 @@ import javax.xml.transform.OutputKeys;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 /**
  * Implementation of fn:serialize() as defined in XPath 3.1
@@ -200,8 +201,8 @@ public class Serialize extends SystemFunction implements Callable {
             if (key instanceof StringValue) {
                 String keyName = key.getStringValue();
                 if (isParamName(keyName)) {
-                    RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
-                    role.setErrorCode("XPTY0004");
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0, "XPTY0004");
                     //If any serialization error occurs, including the detection of an invalid value for a serialization
                     // parameter, this results in the fn:serialize call failing with a dynamic error.
                     Sequence converted = th.applyFunctionConversionRules(
@@ -215,7 +216,8 @@ public class Serialize extends SystemFunction implements Callable {
                     // Capture Saxon serialization parameters
                     String keyName = ((QNameValue) key).getLocalName();
                     if (isParamNameSaxon(keyName)) {
-                        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
+                        Supplier<RoleDiagnostic> role =
+                                () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
                         Sequence converted = th.applyFunctionConversionRules(
                                 map.get(key), requiredTypesSaxon.get(keyName), role, Loc.NONE);
                         result = result.addEntry(key, converted.materialize());

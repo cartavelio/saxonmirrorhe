@@ -193,8 +193,11 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
                             if (staticArgs[i] instanceof StringLiteral) {
                                 a2[i] = staticArgs[i];
                             } else {
-                                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "concat", i);
-                                a2[i] = CardinalityChecker.makeCardinalityChecker(staticArgs[i], StaticProperty.ALLOWS_ZERO_OR_ONE, role);
+                                final int pos = i;
+                                Supplier<RoleDiagnostic> role =
+                                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "concat", pos);
+                                a2[i] = CardinalityChecker.makeCardinalityChecker(
+                                        staticArgs[i], StaticProperty.ALLOWS_ZERO_OR_ONE, role);
                                 a2[i].setRetainedStaticContext(env.makeRetainedStaticContext());
                             }
                         }

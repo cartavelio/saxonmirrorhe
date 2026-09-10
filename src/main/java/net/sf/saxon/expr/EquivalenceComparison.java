@@ -20,6 +20,8 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 
 /**
  * Class to handle equivalence comparisons of singletons. This only handles equality comparison.
@@ -80,10 +82,10 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
         SequenceType atomicType = SequenceType.OPTIONAL_ATOMIC;
         TypeChecker tc = config.getTypeChecker(false);
 
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "eq", 0);
+        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "eq", 0);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "eq", 1);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "eq", 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
 
         if (getLhsExpression() != oldOp0) {

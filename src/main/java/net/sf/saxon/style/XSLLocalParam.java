@@ -18,6 +18,7 @@ import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.EnumSet;
+import java.util.function.Supplier;
 
 /**
  * An xsl:param element representing a local parameter (template or function parameter) in the stylesheet. <br>
@@ -179,9 +180,8 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 SuppliedParameterReference pref = new SuppliedParameterReference(slot);
                 pref.setRetainedStaticContext(makeRetainedStaticContext());
                 pref.setLocation(allocateLocation());
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.PARAM, name.getDisplayName(), 0);
-                //role.setSourceLocator(new ExpressionLocation(this));
-                role.setErrorCode("XTTE0590");
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.PARAM, name.getDisplayName(), 0, "XTTE0590");
                 conversion = exec.getConfiguration().getTypeChecker(false).staticTypeCheck(
                         pref,
                         declaredType,

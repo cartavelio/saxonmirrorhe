@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 /**
  * Saxon implementation of the JAXP Transformer interface.
@@ -193,7 +194,8 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
             }
 
             if (required != null && !required.matches(converted, config.getTypeHierarchy())) {
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.toString(), -1);
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, qName.toString(), -1);
                 converted = config.getTypeHierarchy().applyFunctionConversionRules(
                         converted, required, role, Loc.NONE);
             }

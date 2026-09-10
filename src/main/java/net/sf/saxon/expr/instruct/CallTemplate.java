@@ -17,13 +17,13 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 /**
  * Instruction representing an xsl:call-template element in the stylesheet.
@@ -244,12 +244,15 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(backwards);
         for (int p = 0; p < actualParams.length; p++) {
             WithParam wp = actualParams[p];
-            //int id = wp.getParameterId();
             NamedTemplate.LocalParamInfo lp = template.getLocalParamInfo(wp.getVariableQName());
             if (lp != null) {
+                final int pos = p;
                 SequenceType req = lp.requiredType;
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.PARAM, wp.getVariableQName().getDisplayName(), p);
-                role.setErrorCode("XTTE0590");
+                Supplier<RoleDiagnostic> role = () -> {
+                    RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.PARAM, wp.getVariableQName().getDisplayName(), pos);
+                    role0.setErrorCode("XTTE0590");
+                    return role0;
+                };
                 Expression select = tc.staticTypeCheck(
                         wp.getSelectExpression(), req, role, visitor);
                 wp.setSelectExpression(this, select);

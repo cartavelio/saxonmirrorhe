@@ -23,6 +23,7 @@ import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Comparator;
+import java.util.function.Supplier;
 
 
 /**
@@ -96,7 +97,7 @@ public class DocumentSorter extends UnaryExpression {
         if (th.relationship(getBaseExpression().getItemType(), AnyNodeTest.getInstance()) == Affinity.DISJOINT) {
             return getBaseExpression();
         }
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "document-order sorter", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.MISC, "document-order sorter", 0);
         Expression operand = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(
                 getBaseExpression(), SequenceType.NODE_SEQUENCE, role, visitor);
         setBaseExpression(operand);

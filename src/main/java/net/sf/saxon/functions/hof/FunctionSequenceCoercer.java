@@ -22,6 +22,8 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 
 /**
  * An FunctionSequenceCoercer is an expression that performs function coercion on a sequence of function items:
@@ -33,7 +35,7 @@ import net.sf.saxon.value.SequenceType;
 public final class FunctionSequenceCoercer extends UnaryExpression {
 
     private final SpecificFunctionType requiredItemType;
-    private final RoleDiagnostic role;
+    private final Supplier<RoleDiagnostic> roleSupplier;
 
     /**
      * Constructor
@@ -43,10 +45,10 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
      */
 
     public FunctionSequenceCoercer(Expression sequence, SpecificFunctionType requiredItemType,
-                                   RoleDiagnostic role) {
+                                   Supplier<RoleDiagnostic> role) {
         super(sequence);
         this.requiredItemType = requiredItemType;
-        this.role = role;
+        this.roleSupplier = role;
         ExpressionTool.copyLocationInfo(sequence, this);
     }
 
@@ -110,7 +112,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        FunctionSequenceCoercer fsc2 = new FunctionSequenceCoercer(getBaseExpression().copy(rebindings), requiredItemType, role);
+        FunctionSequenceCoercer fsc2 = new FunctionSequenceCoercer(getBaseExpression().copy(rebindings), requiredItemType, roleSupplier);
         ExpressionTool.copyLocationInfo(this, fsc2);
         return fsc2;
     }
@@ -153,7 +155,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         }
         if (!(item instanceof Function)) {
             UType itemType = UType.getUType(item);
-            throw new XPathException(role.composeErrorMessage(requiredItemType, itemType), "XPTY0004");
+            throw new XPathException(roleSupplier.get().composeErrorMessage(requiredItemType, itemType), "XPTY0004");
         }
         try {
             checkAnnotations((Function)item, requiredItemType, context.getConfiguration());
@@ -191,8 +193,8 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
     /**
      * @return the role locator
      */
-    public RoleDiagnostic getRole() {
-        return role;
+    public RoleDiagnostic getRoleSupplier() {
+        return roleSupplier.get();
     }
 
     /**
@@ -225,7 +227,7 @@ public final class FunctionSequenceCoercer extends UnaryExpression {
         destination.startElement("fnCoercer", this);
         SequenceType st = SequenceType.makeSequenceType(requiredItemType, StaticProperty.EXACTLY_ONE);
         destination.emitAttribute("to", st.toAlphaCode());
-        destination.emitAttribute("diag", role.save());
+        destination.emitAttribute("diag", roleSupplier.get().save());
         getBaseExpression().export(destination);
         destination.endElement();
     }

@@ -77,6 +77,13 @@ public class RoleDiagnostic {
         this.operand = operand;
     }
 
+    public RoleDiagnostic(int kind, String operation, int operand, String errorCode) {
+        this.kind = kind;
+        this.operation = operation;
+        this.operand = operand;
+        this.errorCode = errorCode;
+    }
+
     /**
      * Set the error code to be produced if a type error is detected
      *

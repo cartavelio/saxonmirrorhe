@@ -35,6 +35,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * An <code>Xslt30Transformer</code> represents a compiled and loaded stylesheet ready for execution.
@@ -575,7 +576,9 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
             net.sf.saxon.value.SequenceType type = params[i].getRequiredType();
             vr[i] = arguments[i].getUnderlyingValue();
             if (!type.matches(vr[i], config.getTypeHierarchy())) {
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), i);
+                final int pos = i;
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, uf.getFunctionName().getDisplayName(), pos);
                 Sequence converted = config.getTypeHierarchy().applyFunctionConversionRules(vr[i], type, role, Loc.NONE);
                 vr[i] = converted.materialize();
             }

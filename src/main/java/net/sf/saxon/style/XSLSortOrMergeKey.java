@@ -26,6 +26,7 @@ import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.Supplier;
 
 public abstract class XSLSortOrMergeKey extends StyleElement {
 
@@ -102,11 +103,10 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
 
         if (select != null) {
             try {
-                RoleDiagnostic role =
+                Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, getDisplayName() + "//select", 0);
                 select = getConfiguration().getTypeChecker(false).staticTypeCheck(select,
-                        SequenceType.ATOMIC_SEQUENCE,
-                                                                                  role, makeExpressionVisitor());
+                        SequenceType.ATOMIC_SEQUENCE, role, makeExpressionVisitor());
             } catch (XPathException err) {
                 compileError(err);
             }

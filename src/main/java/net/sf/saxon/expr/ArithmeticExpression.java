@@ -17,6 +17,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 /**
  * Arithmetic Expression: an expression using one of the operators
  * plus, minus, multiply, div, idiv, mod. Note that this code does not handle backwards
@@ -106,7 +108,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
         SequenceType atomicType = SequenceType.OPTIONAL_ATOMIC;
 
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+        Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
         //role0.setSourceLocator(this);
         setLhsExpression(tc.staticTypeCheck(getLhsExpression(), atomicType, role0, visitor));
         final ItemType itemType0 = getLhsExpression().getItemType();
@@ -126,8 +128,7 @@ public class ArithmeticExpression extends BinaryExpression {
 
         // System.err.println("First operand"); operand0.display(10);
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
-        //role1.setSourceLocator(this);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
         final ItemType itemType1 = getRhsExpression().getItemType();
         if (itemType1 instanceof ErrorType) {

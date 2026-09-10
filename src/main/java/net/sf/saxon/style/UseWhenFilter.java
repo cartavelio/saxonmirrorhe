@@ -45,6 +45,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 /**
  * This is a filter inserted into the input pipeline for processing stylesheet modules, whose
@@ -432,8 +433,8 @@ public class UseWhenFilter extends ProxyReceiver {
                                                e.getErrorCodeLocalPart(), attLoc);
                 }
             }
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0);
-            role.setErrorCode("XTDE0050");
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0, "XTDE0050");
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
             Sequence seq = th.applyFunctionConversionRules(value, requiredType, role, attLoc);
             value = seq.materialize();

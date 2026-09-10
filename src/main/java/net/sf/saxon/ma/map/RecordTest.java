@@ -26,6 +26,7 @@ import net.sf.saxon.value.StringValue;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * An instance of this class represents a specific record item type, for example
@@ -524,7 +525,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
             throws XPathException {
         return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
     }

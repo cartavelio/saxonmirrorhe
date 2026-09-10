@@ -17,6 +17,8 @@ import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * Negate Expression: implements the unary minus operator.
  * This expression is initially created as an ArithmeticExpression (or in backwards
@@ -67,7 +69,7 @@ public class NegateExpression extends UnaryExpression {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.UNARY_EXPR, "-", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.UNARY_EXPR, "-", 0);
         Expression operand = visitor.getConfiguration().getTypeChecker(backwardsCompatible).staticTypeCheck(
                 getBaseExpression(), SequenceType.OPTIONAL_NUMERIC,
                 role, visitor);

@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * A compiled global variable in a stylesheet or query. <br>
@@ -460,7 +461,7 @@ public class GlobalVariable extends Actor
                 throw new XPathException(
                         "Initializing expression for global variable must not be an updating expression", "XUST0001");
             }
-            RoleDiagnostic role = new RoleDiagnostic(
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(
                     RoleDiagnostic.VARIABLE, getVariableQName().getDisplayName(), 0);
             ContextItemStaticInfo cit = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), true);
             Expression value2 = TypeChecker.strictTypeCheck(

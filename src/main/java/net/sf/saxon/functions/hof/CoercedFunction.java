@@ -26,6 +26,8 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * A function item obtained by coercing a supplied function; this adds a wrapper to perform dynamic
  * type checking of the arguments in any call, and type checking of the result.
@@ -168,7 +170,9 @@ public class CoercedFunction extends AbstractFunction {
             if (argTypes[i].matches(gVal, th)) {
                 targetArgs[i] = gVal;
             } else {
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, targetFunction.getDescription(), i);
+                final int pos = i;
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, targetFunction.getDescription(), pos);
                 targetArgs[i] = th.applyFunctionConversionRules(gVal, argTypes[i], role, Loc.NONE);
             }
         }
@@ -176,7 +180,8 @@ public class CoercedFunction extends AbstractFunction {
         if (req.getResultType().matches(rawResult, th)) {
             return rawResult;
         } else {
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, targetFunction.getDescription(), 0);
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, targetFunction.getDescription(), 0);
             return th.applyFunctionConversionRules(rawResult, req.getResultType(), role, Loc.NONE);
         }
     }

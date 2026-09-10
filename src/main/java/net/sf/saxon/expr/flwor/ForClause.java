@@ -22,6 +22,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.FOR;
 
@@ -156,7 +157,8 @@ public class ForClause extends Clause {
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         SequenceType decl = rangeVariable.getRequiredType();
         if (allowsEmpty && !Cardinality.allowsZero(decl.getCardinality())) {
-            RoleDiagnostic emptyRole = new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+            Supplier<RoleDiagnostic> emptyRole =
+                    () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
             Expression checker =
                     CardinalityChecker.makeCardinalityChecker(
                             getSequence(), StaticProperty.ALLOWS_ONE_OR_MORE, emptyRole);
@@ -164,7 +166,8 @@ public class ForClause extends Clause {
         }
         SequenceType sequenceType = SequenceType.makeSequenceType(
                 decl.getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
         setSequence(
                 TypeChecker.strictTypeCheck(
                         getSequence(), sequenceType, role, visitor.getStaticContext()));

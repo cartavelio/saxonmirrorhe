@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 
 /**
@@ -285,12 +286,12 @@ public class VennExpression extends BinaryExpression {
         getRhs().typeCheck(visitor, contextInfo);
 
         if (!(getLhsExpression() instanceof Pattern)) {
-            final RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
+            Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 0);
             setLhsExpression(tc.staticTypeCheck(getLhsExpression(), SequenceType.NODE_SEQUENCE, role0, visitor));
         }
 
         if (!(getRhsExpression() instanceof Pattern)) {
-            final RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+            Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
             setRhsExpression(tc.staticTypeCheck(getRhsExpression(), SequenceType.NODE_SEQUENCE, role1, visitor));
         }
 

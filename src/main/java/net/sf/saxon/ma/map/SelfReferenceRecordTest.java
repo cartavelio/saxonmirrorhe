@@ -16,6 +16,8 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * An instance of this class represents a self-reference within a record type, that is the ".."
  * construct in a record test such as <code>record(data as xs:string, next? as ..)</code>.
@@ -234,7 +236,7 @@ public class SelfReferenceRecordTest extends AnyFunctionType implements TupleTyp
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role)
             throws XPathException {
         return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role);
     }

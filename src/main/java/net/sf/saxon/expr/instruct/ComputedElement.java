@@ -25,6 +25,8 @@ import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 
 /**
  * An instruction representing an xsl:element element in an XSLT stylesheet,
@@ -151,11 +153,11 @@ public class ComputedElement extends ElementCreator {
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "element/name", 0);
         if (allowNameAsQName) {
             // Can only happen in XQuery
-            setNameExp(config.getTypeChecker(false).staticTypeCheck(getNameExp(),
-                                                                                SequenceType.SINGLE_ATOMIC, role, visitor));
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "element/name", 0);
+            setNameExp(config.getTypeChecker(false).staticTypeCheck(
+                    getNameExp(), SequenceType.SINGLE_ATOMIC, role, visitor));
             ItemType supplied = getNameExp().getItemType();
             if (th.relationship(supplied, BuiltInAtomicType.STRING) == Affinity.DISJOINT &&
                     th.relationship(supplied, BuiltInAtomicType.UNTYPED_ATOMIC) == Affinity.DISJOINT &&

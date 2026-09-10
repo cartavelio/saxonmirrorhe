@@ -23,6 +23,8 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
+import java.util.function.Supplier;
+
 /**
  * A SingletonAtomizer combines the functions of an Atomizer and a CardinalityChecker: it is used to
  * atomize a sequence of nodes, checking that the result of the atomization contains zero or one atomic
@@ -33,7 +35,7 @@ import net.sf.saxon.value.Cardinality;
 public final class SingletonAtomizer extends UnaryExpression {
 
     private final boolean allowEmpty;
-    private final RoleDiagnostic roleDiagnostic;
+    private final Supplier<RoleDiagnostic> roleSupplier;
 
     /**
      * Constructor
@@ -43,10 +45,10 @@ public final class SingletonAtomizer extends UnaryExpression {
      * @param allowEmpty true if the result sequence is allowed to be empty.
      */
 
-    public SingletonAtomizer(Expression sequence, RoleDiagnostic role, boolean allowEmpty) {
+    public SingletonAtomizer(Expression sequence, Supplier<RoleDiagnostic> role, boolean allowEmpty) {
         super(sequence);
         this.allowEmpty = allowEmpty;
-        this.roleDiagnostic = role;
+        this.roleSupplier = role;
     }
 
     @Override
@@ -91,7 +93,8 @@ public final class SingletonAtomizer extends UnaryExpression {
         ExpressionTool.resetStaticProperties(this);
         if (Literal.isEmptySequence(operand)) {
             if (!allowEmpty) {
-                typeError("An empty sequence is not allowed as the " + roleDiagnostic.getMessage(), roleDiagnostic.getErrorCode(), null);
+                RoleDiagnostic role = roleSupplier.get();
+                typeError("An empty sequence is not allowed as the " + role.getMessage(), role.getErrorCode(), null);
             }
             return operand;
         }
@@ -157,7 +160,7 @@ public final class SingletonAtomizer extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Expression e2 = new SingletonAtomizer(getBaseExpression().copy(rebindings), roleDiagnostic, allowEmpty);
+        Expression e2 = new SingletonAtomizer(getBaseExpression().copy(rebindings), roleSupplier, allowEmpty);
         ExpressionTool.copyLocationInfo(this, e2);
         return e2;
     }
@@ -194,7 +197,7 @@ public final class SingletonAtomizer extends UnaryExpression {
      */
 
     public RoleDiagnostic getRole() {
-        return roleDiagnostic;
+        return roleSupplier.get();
     }
 
 
@@ -231,10 +234,11 @@ public final class SingletonAtomizer extends UnaryExpression {
             } catch (TerminationException | Error.UserDefinedXPathException e) {
                 throw e;
             } catch (XPathException e) {
-                if (roleDiagnostic == null) {
+                if (roleSupplier == null) {
                     throw e;
                 } else {
-                    String message = e.getMessage() + ". Failed while atomizing the " + roleDiagnostic.getMessage();
+                    RoleDiagnostic role = roleSupplier.get();
+                    String message = e.getMessage() + ". Failed while atomizing the " + role.getMessage();
                     XPathException e2 = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
                     e2.setXPathContext(context);
                     e2.maybeSetLocation(getLocation());
@@ -243,18 +247,20 @@ public final class SingletonAtomizer extends UnaryExpression {
             }
             found += seq.getLength();
             if (found > 1) {
+                RoleDiagnostic role = roleSupplier.get();
                 typeError(
                         "A sequence of more than one item is not allowed as the " +
-                                roleDiagnostic.getMessage() + CardinalityChecker.depictSequenceStart(getBaseExpression().iterate(context), 3),
-                        roleDiagnostic.getErrorCode(), context);
+                                role.getMessage() + CardinalityChecker.depictSequenceStart(getBaseExpression().iterate(context), 3),
+                        role.getErrorCode(), context);
             }
             if (found == 1) {
                 result = seq.head();
             }
         }
         if (found == 0 && !allowEmpty) {
+            RoleDiagnostic role = roleSupplier.get();
             typeError("An empty sequence is not allowed as the " +
-                    roleDiagnostic.getMessage(), roleDiagnostic.getErrorCode(), null);
+                    role.getMessage(), role.getErrorCode(), null);
         }
         return result;
     }

@@ -29,6 +29,7 @@ import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.Supplier;
 
 /**
  * Handler for xsl:for-each-group elements in stylesheet. This is a new instruction
@@ -208,7 +209,7 @@ public final class XSLForEachGroup extends StyleElement {
         if (groupBy != null) {
             groupBy = typeCheck("group-by", groupBy);
             try {
-                RoleDiagnostic role =
+                Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/group-by", 0);
                 groupBy = tc.staticTypeCheck(groupBy, SequenceType.ATOMIC_SEQUENCE, role, visitor);
             } catch (XPathException err) {
@@ -217,9 +218,8 @@ public final class XSLForEachGroup extends StyleElement {
         } else if (groupAdjacent != null) {
             groupAdjacent = typeCheck("group-adjacent", groupAdjacent);
             try {
-                RoleDiagnostic role =
-                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/group-adjacent", 0);
-                role.setErrorCode("XTTE1100");
+                Supplier<RoleDiagnostic> role = () ->
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/group-adjacent", 0, "XTTE1100");
                 groupAdjacent = tc.staticTypeCheck(groupAdjacent,
                         composite ? SequenceType.ATOMIC_SEQUENCE : SequenceType.SINGLE_ATOMIC,
                                                    role, visitor);
@@ -231,9 +231,8 @@ public final class XSLForEachGroup extends StyleElement {
             try {
                 SpecificFunctionType breakWhenType = new SpecificFunctionType(
                         new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM}, SequenceType.SINGLE_BOOLEAN);
-                RoleDiagnostic role =
-                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0);
-                role.setErrorCode("XTTE1100");
+                Supplier<RoleDiagnostic> role = () ->
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0, "XTTE1100");
                 breakWhen = tc.staticTypeCheck(breakWhen,
                                                    SequenceType.makeSequenceType(breakWhenType, StaticProperty.EXACTLY_ONE),
                                                    role, visitor);
@@ -247,9 +246,8 @@ public final class XSLForEachGroup extends StyleElement {
 
         if ((starting != null || ending != null) && visitor.getStaticContext().getXPathVersion() < 30) {
             try {
-                RoleDiagnostic role =
-                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/select", 0);
-                role.setErrorCode("XTTE1120");
+                Supplier<RoleDiagnostic> role = () ->
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/select", 0, "XTTE1120");
                 select = tc.staticTypeCheck(select, SequenceType.NODE_SEQUENCE, role, visitor);
             } catch (XPathException err) {
                 String prefix = starting != null ?

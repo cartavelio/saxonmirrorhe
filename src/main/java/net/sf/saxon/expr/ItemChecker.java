@@ -26,6 +26,7 @@ import net.sf.saxon.value.IntegerValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 
 /**
@@ -36,20 +37,20 @@ import java.util.function.Consumer;
 public final class ItemChecker extends UnaryExpression {
 
     private final ItemType requiredItemType;
-    private final RoleDiagnostic role;
+    private final Supplier<RoleDiagnostic> roleSupplier;
 
     /**
      * Constructor
      *
      * @param sequence the expression whose value we are checking
      * @param itemType the required type of the items in the sequence
-     * @param role     information used in constructing an error message
+     * @param roleSupplier     information used in constructing an error message
      */
 
-    public ItemChecker(Expression sequence, ItemType itemType, RoleDiagnostic role) {
+    public ItemChecker(Expression sequence, ItemType itemType, Supplier<RoleDiagnostic> roleSupplier) {
         super(sequence);
         requiredItemType = itemType;
-        this.role = role;
+        this.roleSupplier = roleSupplier;
         //adoptChildExpression(sequence);
     }
 
@@ -75,7 +76,7 @@ public final class ItemChecker extends UnaryExpression {
      */
 
     public RoleDiagnostic getRoleLocator() {
-        return role;
+        return roleSupplier.get();
     }
 
     /**
@@ -110,7 +111,7 @@ public final class ItemChecker extends UnaryExpression {
             Block block = (Block)operand;
             List<Expression> checkedOperands = new ArrayList<>();
             for (Operand o : block.operands()) {
-                ItemChecker checkedOp = new ItemChecker(o.getChildExpression(), requiredItemType, role);
+                ItemChecker checkedOp = new ItemChecker(o.getChildExpression(), requiredItemType, roleSupplier);
                 checkedOperands.add(checkedOp);
             }
             Block newBlock = new Block(checkedOperands.toArray(new Expression[0]));
@@ -135,6 +136,7 @@ public final class ItemChecker extends UnaryExpression {
                 return operand;
             } else if (Cardinality.allowsZero(card)) {
                 if (!(operand instanceof Literal)) {
+                    RoleDiagnostic role = roleSupplier.get();
                     String message = role.composeErrorMessage(
                             requiredItemType, operand, th);
                     visitor.getStaticContext().issueWarning(
@@ -142,6 +144,7 @@ public final class ItemChecker extends UnaryExpression {
                                                                     message, getLocation());
                 }
             } else {
+                RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, operand, th);
                 XPathException err = new XPathException(message);
                 err.setErrorCode(role.getErrorCode());
@@ -243,6 +246,7 @@ public final class ItemChecker extends UnaryExpression {
             } else if (requiredItemType.getUType().subsumes(UType.STRING) && BuiltInAtomicType.ANY_URI.matches(item, th)) {
                 // OK, no action
             } else {
+                RoleDiagnostic role = roleSupplier.get();
                 String message = role.composeErrorMessage(requiredItemType, item, th);
                 String errorCode = role.getErrorCode();
                 XPathException te = new XPathException(message, errorCode);
@@ -277,6 +281,7 @@ public final class ItemChecker extends UnaryExpression {
                 (BuiltInAtomicType.ANY_URI.matches(item, th) || BuiltInAtomicType.UNTYPED_ATOMIC.matches(item, th))) {
             return item;
         } else {
+            RoleDiagnostic role = roleSupplier.get();
             String message = role.composeErrorMessage(requiredItemType, item, th);
             String errorCode = role.getErrorCode();
             if ("XPDY0050".equals(errorCode)) {
@@ -306,7 +311,7 @@ public final class ItemChecker extends UnaryExpression {
         }
         if ((next.getImplementationMethod() & PROCESS_METHOD) != 0 && !(requiredItemType instanceof DocumentNodeTest)) {
             TypeCheckingFilter filter = new TypeCheckingFilter(output);
-            filter.setRequiredType(requiredItemType, card, role, getLocation());
+            filter.setRequiredType(requiredItemType, card, roleSupplier.get(), getLocation());
             next.process(filter, context);
             filter.finalCheck();
         } else {
@@ -325,7 +330,7 @@ public final class ItemChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        ItemChecker exp = new ItemChecker(getBaseExpression().copy(rebindings), requiredItemType, role);
+        ItemChecker exp = new ItemChecker(getBaseExpression().copy(rebindings), requiredItemType, roleSupplier);
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -401,7 +406,7 @@ public final class ItemChecker extends UnaryExpression {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("treat", this);
         out.emitAttribute("as", AlphaCode.fromItemType(requiredItemType));
-        out.emitAttribute("diag", role.save());
+        out.emitAttribute("diag", roleSupplier.get().save());
         getBaseExpression().export(out);
         out.endElement();
     }

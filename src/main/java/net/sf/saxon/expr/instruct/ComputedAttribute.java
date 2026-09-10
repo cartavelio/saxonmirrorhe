@@ -23,6 +23,8 @@ import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
+import java.util.function.Supplier;
+
 /**
  * An instruction derived from an xsl:attribute element in stylesheet, or from
  * an attribute constructor in XQuery, in cases where the attribute name is not known
@@ -183,14 +185,14 @@ public final class ComputedAttribute extends AttributeCreator {
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         nameOp.typeCheck(visitor, contextItemType);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "attribute/name", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "attribute/name", 0);
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
 
         if (allowNameAsQName) {
             // Can only happen in XQuery
-            setNameExp(config.getTypeChecker(false).staticTypeCheck(getNameExp(),
-                                                                                        SequenceType.SINGLE_ATOMIC, role, visitor));
+            setNameExp(config.getTypeChecker(false).staticTypeCheck(
+                    getNameExp(), SequenceType.SINGLE_ATOMIC, role, visitor));
             ItemType nameItemType = getNameExp().getItemType();
             boolean maybeString = th.relationship(nameItemType, BuiltInAtomicType.STRING) != Affinity.DISJOINT ||
                     th.relationship(nameItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT;

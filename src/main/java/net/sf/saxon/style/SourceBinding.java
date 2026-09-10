@@ -35,6 +35,7 @@ import net.sf.saxon.value.Whitespace;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static net.sf.saxon.style.SourceBinding.BindingProperty.SELECT;
 
@@ -415,10 +416,12 @@ public class SourceBinding {
                             category = RoleDiagnostic.PARAM;
                             errorCode = "XTTE0590";
                         }
-                        RoleDiagnostic role = new RoleDiagnostic(category, name.getDisplayName(), 0);
-                        //role.setSourceLocator(new ExpressionLocation(this));
-                        role.setErrorCode(errorCode);
-                        select = sourceElement.getConfiguration().getTypeChecker(false).staticTypeCheck(select, required, role, sourceElement.makeExpressionVisitor());
+                        final int selectedCategory = category;
+                        final String selectedErrorCode = errorCode;
+                        Supplier<RoleDiagnostic> role =
+                                () -> new RoleDiagnostic(selectedCategory, name.getDisplayName(), 0, selectedErrorCode);
+                        select = sourceElement.getConfiguration().getTypeChecker(false).staticTypeCheck(
+                                select, required, role, sourceElement.makeExpressionVisitor());
                     } else {
                         // do the check later
                     }
@@ -525,9 +528,8 @@ public class SourceBinding {
                     select = Literal.makeEmptySequence();
                 }
                 try {
-                    RoleDiagnostic role =
-                            new RoleDiagnostic(RoleDiagnostic.VARIABLE, name.getDisplayName(), 0);
-                    role.setErrorCode("XTTE0570");
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, name.getDisplayName(), 0, "XTTE0570");
                     select = select.simplify();
                     select = sourceElement.getConfiguration().getTypeChecker(false).staticTypeCheck(
                             select, declaredType, role, sourceElement.makeExpressionVisitor());

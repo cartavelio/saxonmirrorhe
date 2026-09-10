@@ -24,6 +24,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * A NodeSetPattern is a pattern based on an expression that is evaluated to return a set of nodes;
  * a node matches the pattern if it is a member of this node-set.
@@ -86,7 +88,8 @@ public class NodeSetPattern extends Pattern {
     @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         selectionOp.setChildExpression(getSelectionExpression().typeCheck(visitor, contextItemType));
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MATCH_PATTERN, getSelectionExpression().toString(), 0);
+        Supplier<RoleDiagnostic> role =
+                () ->  new RoleDiagnostic(RoleDiagnostic.MATCH_PATTERN, getSelectionExpression().toString(), 0);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
         Expression checked = getSelectionExpression();
         try {

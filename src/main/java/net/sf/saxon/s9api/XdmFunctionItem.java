@@ -19,6 +19,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.TypeHierarchy;
 
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -170,7 +171,9 @@ public class XdmFunctionItem extends XdmItem {
                 net.sf.saxon.value.SequenceType required = type.getArgumentTypes()[i];
                 GroundedValue val = arguments[i].getUnderlyingValue();
                 if (!required.matches(val, th)) {
-                    RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", i);
+                    final int pos = i;
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", pos);
                     val = th.applyFunctionConversionRules(val, required, role, Loc.NONE);
                 }
                 argVals[i] = val;
@@ -185,7 +188,8 @@ public class XdmFunctionItem extends XdmItem {
             if (!fi.isTrustedResultType()) {
                 net.sf.saxon.value.SequenceType required = type.getResultType();
                 if (!required.matches(groundedResult, th)) {
-                    RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
                     groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);
                 }
             }

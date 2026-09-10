@@ -43,6 +43,7 @@ import net.sf.saxon.z.IntIterator;
 
 import java.net.URI;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Interface supported by an XPath expression. This includes both compile-time
@@ -563,7 +564,7 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
      *
      * @param req                 the required type
      * @param backwardsCompatible true if backwards compatibility mode applies
-     * @param role                the role of the expression in relation to the required type
+     * @param roleSupplier                the role of the expression in relation to the required type
      * @param visitor             an expression visitor
      * @return the expression after type checking (perhaps augmented with dynamic type checking code)
      * @throws XPathException if failures occur, for example if the static type of one branch of the conditional
@@ -572,7 +573,7 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
 
     public Expression staticTypeCheck(SequenceType req,
                                       boolean backwardsCompatible,
-                                      RoleDiagnostic role, ExpressionVisitor visitor)
+                                      Supplier<RoleDiagnostic> roleSupplier, ExpressionVisitor visitor)
             throws XPathException {
         throw new UnsupportedOperationException("staticTypeCheck");
     }

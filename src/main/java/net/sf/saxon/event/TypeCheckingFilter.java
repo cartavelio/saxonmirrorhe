@@ -41,7 +41,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
 
     private ItemType itemType;
     private int cardinality;
-    private RoleDiagnostic role;
+    private RoleDiagnostic roleDiagnostic;
     private Location locator;
     private int count = 0;
     private int level = 0;
@@ -55,10 +55,10 @@ public class TypeCheckingFilter extends ProxyOutputter {
         typeHierarchy = getConfiguration().getTypeHierarchy();
     }
 
-    public void setRequiredType(ItemType type, int cardinality, RoleDiagnostic role, Location locator) {
+    public void setRequiredType(ItemType type, int cardinality, RoleDiagnostic roleDiagnostic, Location locator) {
         itemType = type;
         this.cardinality = cardinality;
-        this.role = role;
+        this.roleDiagnostic = roleDiagnostic;
         this.locator = locator;
     }
 
@@ -249,8 +249,8 @@ public class TypeCheckingFilter extends ProxyOutputter {
     public void finalCheck() throws XPathException {
         if (count == 0 && !Cardinality.allowsZero(cardinality)) {
             XPathException err = new XPathException("An empty sequence is not allowed as the " +
-                                                            role.getMessage());
-            String errorCode = role.getErrorCode();
+                                                            roleDiagnostic.getMessage());
+            String errorCode = roleDiagnostic.getErrorCode();
             err.setErrorCode(errorCode);
             if (!"XPDY0050".equals(errorCode)) {
                 err.setIsTypeError(true);
@@ -342,11 +342,11 @@ public class TypeCheckingFilter extends ProxyOutputter {
     private void throwTypeError(ItemType suppliedType, Item item, Location locationId) throws XPathException {
         String message;
         if (item == null) {
-            message = role.composeErrorMessage(itemType, suppliedType);
+            message = roleDiagnostic.composeErrorMessage(itemType, suppliedType);
         } else {
-            message = role.composeErrorMessage(itemType, item, typeHierarchy);
+            message = roleDiagnostic.composeErrorMessage(itemType, item, typeHierarchy);
         }
-        String errorCode = role.getErrorCode();
+        String errorCode = roleDiagnostic.getErrorCode();
         XPathException err = new XPathException(message);
         err.setErrorCode(errorCode);
         if (!"XPDY0050".equals(errorCode)) {
@@ -363,8 +363,8 @@ public class TypeCheckingFilter extends ProxyOutputter {
     private void checkAllowsMany(Location locationId) throws XPathException {
         if (!Cardinality.allowsMany(cardinality)) {
             XPathException err = new XPathException("A sequence of more than one item is not allowed as the " +
-                    role.getMessage());
-            String errorCode = role.getErrorCode();
+                                                            roleDiagnostic.getMessage());
+            String errorCode = roleDiagnostic.getErrorCode();
             err.setErrorCode(errorCode);
             if (!"XPDY0050".equals(errorCode)) {
                 err.setIsTypeError(true);

@@ -30,6 +30,8 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
 
+import java.util.function.Supplier;
+
 
 /**
  * An Atomizer is an expression corresponding essentially to the fn:data() function: it
@@ -41,7 +43,7 @@ public final class Atomizer extends UnaryExpression {
     private boolean untyped = false;       //set to true if it is known that the nodes being atomized will be untyped
     private boolean singleValued = false; // set to true if all atomized nodes will atomize to a single atomic value
     private ItemType operandItemType = null;
-    private RoleDiagnostic roleDiagnostic = null;
+    private Supplier<RoleDiagnostic> roleSupplier = null;
 
     /**
      * Constructor
@@ -50,9 +52,9 @@ public final class Atomizer extends UnaryExpression {
      * @param role (may be null) additional information for use in diagnostics
      */
 
-    public Atomizer(Expression sequence, RoleDiagnostic role) {
+    public Atomizer(Expression sequence, Supplier<RoleDiagnostic> role) {
         super(sequence);
-        this.roleDiagnostic = role;
+        this.roleSupplier = role;
         sequence.setFlattened(true);
     }
 
@@ -60,15 +62,15 @@ public final class Atomizer extends UnaryExpression {
      * Make an atomizer with a given operand
      *
      * @param sequence the operand
-     * @param role (may be null) additional information for diagnostics
+     * @param roleSupplier (may be null) additional information for diagnostics
      * @return an Atomizer that atomizes the given operand, or another expression that returns the same result
      */
 
-    public static Expression makeAtomizer(Expression sequence, RoleDiagnostic role) {
+    public static Expression makeAtomizer(Expression sequence, Supplier<RoleDiagnostic> roleSupplier) {
         if (sequence instanceof Literal && ((Literal) sequence).getGroundedValue() instanceof AtomicSequence) {
             return sequence;
         } else {
-            return new Atomizer(sequence, role);
+            return new Atomizer(sequence, roleSupplier);
         }
     }
 
@@ -96,10 +98,6 @@ public final class Atomizer extends UnaryExpression {
             operandItemType = getBaseExpression().getItemType();
         }
         return operandItemType;
-    }
-
-    public void setRoleDiagnostic(RoleDiagnostic role) {
-        this.roleDiagnostic = role;
     }
 
     /**
@@ -219,10 +217,10 @@ public final class Atomizer extends UnaryExpression {
      */
 
     private String expandMessage(String message) {
-        if (roleDiagnostic == null) {
+        if (roleSupplier == null) {
             return message;
         } else {
-            return message + ". Found while atomizing the " + roleDiagnostic.getMessage();
+            return message + ". Found while atomizing the " + roleSupplier.get().getMessage();
         }
     }
 
@@ -262,7 +260,7 @@ public final class Atomizer extends UnaryExpression {
             if (operand instanceof LetExpression || operand instanceof ForExpression) {
                 // replace data(let $x := y return z) by (let $x := y return data(z))
                 Expression action = ((Assignation) operand).getAction();
-                ((Assignation) operand).setAction(new Atomizer(action, roleDiagnostic));
+                ((Assignation) operand).setAction(new Atomizer(action, roleSupplier));
                 return operand.optimize(visitor, contextInfo);
             }
             if (operand instanceof Choose) {
@@ -276,7 +274,7 @@ public final class Atomizer extends UnaryExpression {
                 Operand[] children = ((Block) operand).getOperanda();
                 Expression[] atomizedChildren = new Expression[children.length];
                 for (int i = 0; i < children.length; i++) {
-                    atomizedChildren[i] = new Atomizer(children[i].getChildExpression(), roleDiagnostic);
+                    atomizedChildren[i] = new Atomizer(children[i].getChildExpression(), roleSupplier);
                 }
                 Block newBlock = new Block(atomizedChildren);
                 return newBlock.typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
@@ -360,7 +358,7 @@ public final class Atomizer extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        Atomizer copy = new Atomizer(getBaseExpression().copy(rebindings), roleDiagnostic);
+        Atomizer copy = new Atomizer(getBaseExpression().copy(rebindings), roleSupplier);
         copy.untyped = untyped;
         copy.singleValued = singleValued;
         ExpressionTool.copyLocationInfo(this, copy);
@@ -385,7 +383,7 @@ public final class Atomizer extends UnaryExpression {
         } catch (TerminationException | Error.UserDefinedXPathException e) {
             throw e;
         } catch (XPathException e) {
-            if (roleDiagnostic == null) {
+            if (roleSupplier == null) {
                 throw e;
             } else {
                 String message = expandMessage(e.getMessage());
@@ -624,8 +622,8 @@ public final class Atomizer extends UnaryExpression {
 
     @Override
     protected void emitExtraAttributes(ExpressionPresenter out) {
-        if (roleDiagnostic != null) {
-            out.emitAttribute("diag", roleDiagnostic.save());
+        if (roleSupplier != null) {
+            out.emitAttribute("diag", roleSupplier.get().save());
         }
     }
 }

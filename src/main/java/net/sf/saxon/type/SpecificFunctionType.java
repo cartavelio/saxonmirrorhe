@@ -28,6 +28,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * An instance of this class represents a specific function item type, for example
@@ -459,8 +460,7 @@ public class SpecificFunctionType extends AnyFunctionType {
     }
 
     @Override
-    public Expression makeFunctionSequenceCoercer(Expression exp, RoleDiagnostic role)
-            throws XPathException {
+    public Expression makeFunctionSequenceCoercer(Expression exp, Supplier<RoleDiagnostic> role) {
         return new FunctionSequenceCoercer(exp, this, role);
     }
 

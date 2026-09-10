@@ -16,6 +16,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.LET;
 
@@ -136,7 +137,8 @@ public class LetClause extends Clause {
 
     @Override
     public void typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, rangeVariable.getVariableQName().getDisplayName(), 0);
         setSequence(TypeChecker.strictTypeCheck(
                 getSequence(), rangeVariable.getRequiredType(), role, visitor.getStaticContext()));
         evaluator = ExpressionTool.lazyEvaluator(getSequence(), true);

@@ -31,6 +31,7 @@ import net.sf.saxon.value.SequenceType;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * This object represents the compiled form of a user-written function
@@ -581,10 +582,10 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
             ContextItemStaticInfo info = ContextItemStaticInfo.ABSENT;
             exp2 = exp.typeCheck(visitor, info);
             if (resultType != null) {
-                RoleDiagnostic role =
+                Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT,
-                                           functionName == null ? "" : functionName.getDisplayName() + "#" + getArity(), 0);
-                role.setErrorCode(getPackageData().isXSLT() && getFunctionName() != null ? "XTTE0780" : "XPTY0004");
+                                           functionName == null ? "" : functionName.getDisplayName() + "#" + getArity(), 0,
+                                           getPackageData().isXSLT() && getFunctionName() != null ? "XTTE0780" : "XPTY0004");
                 exp2 = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(exp2, resultType, role, visitor);
             }
         } catch (XPathException err) {

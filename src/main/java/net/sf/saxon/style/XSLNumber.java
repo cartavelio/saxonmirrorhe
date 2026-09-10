@@ -22,6 +22,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
+import java.util.function.Supplier;
+
 /**
  * An xsl:number element in the stylesheet. <br>
  */
@@ -220,9 +222,9 @@ public class XSLNumber extends StyleElement {
 
         if (select != null) {
             try {
-                RoleDiagnostic role =
-                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:number/select", 0);
-                role.setErrorCode(errorCode);
+                final String errorCode1 = errorCode;
+                Supplier<RoleDiagnostic> role = () ->
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:number/select", 0, errorCode1);
                 select = getConfiguration().getTypeChecker(false).staticTypeCheck(select,
                         SequenceType.SINGLE_NODE,
                                                                                   role, makeExpressionVisitor());

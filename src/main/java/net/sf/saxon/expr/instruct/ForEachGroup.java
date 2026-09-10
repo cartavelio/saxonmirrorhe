@@ -29,6 +29,7 @@ import net.sf.saxon.value.StringValue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.function.Supplier;
 
 
 /**
@@ -279,9 +280,8 @@ public class ForEachGroup extends Instruction
                 if (sk.isBackwardsCompatible()) {
                     sortKey = FirstItemExpression.makeFirstItemExpression(sortKey);
                 } else {
-                    RoleDiagnostic role =
-                            new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0);
-                    role.setErrorCode("XTTE1020");
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:sort/select", 0, "XTTE1020");
                     sortKey = CardinalityChecker.makeCardinalityChecker(sortKey, StaticProperty.ALLOWS_ZERO_OR_ONE, role);
                 }
                 sk.setSortKey(sortKey, true);
