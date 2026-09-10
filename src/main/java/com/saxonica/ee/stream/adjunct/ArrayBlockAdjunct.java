@@ -20,7 +20,8 @@ import java.util.List;
 
 
 /**
- * Generate streaming code for a Block, that is a sequence of expressions or instructions
+ * Generate streaming code for a SquareArrayConstructor, that is a sequence of expressions or instructions
+ * used to establish the content of an XDM array
  */
 public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker {
 

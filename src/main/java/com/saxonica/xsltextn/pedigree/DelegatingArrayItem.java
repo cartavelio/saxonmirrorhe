@@ -48,6 +48,11 @@ public abstract class DelegatingArrayItem extends AbstractArrayItem {
     }
 
     @Override
+    public ArrayItem append(GroundedValue newMember) {
+        return base.append(newMember);
+    }
+
+    @Override
     public ArrayItem concat(ArrayItem other) {
         return base.concat(other);
     }
