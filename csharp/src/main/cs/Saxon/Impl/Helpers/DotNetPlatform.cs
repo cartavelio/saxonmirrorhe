@@ -99,6 +99,10 @@ namespace Saxon.Impl.Helpers {
         public string getPlatformSuffix() {
             return "CS";
         }
+        
+        public bool isWindows() {
+            return System.OperatingSystem.IsWindows();
+        }
 
         public bool hasICUCollator() {
             return true;

@@ -72,6 +72,12 @@ public interface Platform {
     String getPlatformSuffix();
 
     /**
+     * Ask if we are running on Windows
+     */
+
+    boolean isWindows();
+
+    /**
      * Get the default DynamicLoader for the platform
      * @return the default DynamicLoader
      */

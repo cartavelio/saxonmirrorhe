@@ -242,6 +242,14 @@ public class JavaPlatform implements Platform {
     }
 
     /**
+     * Ask if we are running on Windows
+     */
+    @Override
+    public boolean isWindows() {
+        return System.getProperty("os.name").startsWith("Windows");
+    }
+
+    /**
      * Get the default DynamicLoader for the platform
      *
      * @return the default DynamicLoader
