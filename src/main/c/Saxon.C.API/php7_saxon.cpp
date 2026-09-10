@@ -3474,8 +3474,7 @@ PHP_MINFO_FUNCTION(saxon)
 {
     php_info_print_table_start();
     php_info_print_table_header(2, "saxonc", "enabled");
-    php_info_print_table_row(2, "SaxonC EXT version", "1.3");
-    php_info_print_table_row(2, "Saxon", "10.4");
+    php_info_print_table_row(2, "SaxonC EXT version", "11.3");
     php_info_print_table_row(2, "Excelsior JET", "15.3 MP1");
     php_info_print_table_end();
     DISPLAY_INI_ENTRIES();
