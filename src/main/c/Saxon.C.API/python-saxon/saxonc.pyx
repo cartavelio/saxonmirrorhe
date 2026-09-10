@@ -2181,16 +2181,17 @@ cdef class PyXsltExecutable:
 
         self.thisxptr.applyTemplatesReturningFile(c_outputfile)
 
-     def call_template_returning_value(self, str template_name=None, str base_output_uri=None):
+     def call_template_returning_value(self, str template_name=None, **kwds):
         """
-        call_template_returning_value(self, str template_name, base_output_uri)
+        call_template_returning_value(self, str template_name, **kwds)
         Invoke a transformation by calling a named template and return the result as a PyXdmValue. This method does not
         set the global context item for the transformation; if that is required, it can be done separately using the
         set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            base_output_uri (str):  Is used for resolving relative URIs in the href attribute of the xsl:result-document instruction.
-            Accept None if no base_output_uri
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
+                base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
@@ -2213,10 +2214,12 @@ cdef class PyXsltExecutable:
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
-        if base_output_uri is not None:
+        for key, value in kwds.items():
+          if isinstance(value, str):
+            if key == "base_output_uri":
               '''c_base_output_uri = make_c_str(value)'''
-              py_string_string = base_output_uri.encode('utf-8') if base_output_uri is not None else None
-              c_base_output_uri = py_string_string if base_output_uri is not None else ""
+              py_string_string = value.encode('utf-8') if value is not None else None
+              c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
         c_templateName = make_c_str(template_name)
@@ -2258,16 +2261,17 @@ cdef class PyXsltExecutable:
             val = PyXdmValue()
             val.thisvptr = xdmValue
             return val
-     def call_template_returning_string(self, str template_name=None, str base_output_uri=None):
+     def call_template_returning_string(self, str template_name=None, **kwds):
         """
-        call_template_returning_string(self, str template_name, str base_output_uri)
+        call_template_returning_string(self, str template_name, **kwds)
         Invoke a transformation by calling a named template and return the result as a string. This method does not
         set the global context item for the transformation; if that is required, it can be done separately using the
         set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            base_output_uri (str): Is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction. Accept None if no base_output_uri
+            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
+                base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
@@ -2292,10 +2296,12 @@ cdef class PyXsltExecutable:
         py_template_name_str = None
         py_stylesheet_string = None
         cdef const char* c_string = NULL
-        if base_output_uri is not None:
+        for key, value in kwds.items():
+          if isinstance(value, str):
+            if key == "base_output_uri":
               '''c_base_output_uri = make_c_str(value)'''
-              py_string_string = base_output_uri.encode('utf-8') if base_output_uri is not None else None
-              c_base_output_uri = py_string_string if base_output_uri is not None else ""
+              py_string_string = value.encode('utf-8') if value is not None else None
+              c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
 
         c_templateName = make_c_str(template_name)
@@ -2310,8 +2316,9 @@ cdef class PyXsltExecutable:
         for the transformation; if that is required, it can be done separately using the set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            **kwds: Possible keyword arguments: output_file (str), and base_output_uri (str) which is used for
-            resolving relative URIs in the href attribute of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str), and
+                base_output_uri (str) which is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction.
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.call_template_returning_file("main", output_file="result.xml")
@@ -2337,6 +2344,7 @@ cdef class PyXsltExecutable:
         py_output_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
+
             if key == "base_output_uri":
               '''c_base_output_uri = make_c_str(value)'''
               py_string_string = value.encode('utf-8') if value is not None else None
