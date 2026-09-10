@@ -5015,19 +5015,28 @@ public class XPathParser {
         nextToken();
 
         if (env instanceof QueryModule qm) {
+            if (NameChecker.isValidNCName(fname) && isReservedFunctionName(fname, languageVersion)) {
+                grumble("The unprefixed function name '" + fname + "' is reserved");
+            }
             // In XQuery, defer binding till the end, to cope with forwards references
             return new DraftFunctionReference(fname, qm, arity);
         }
 
         StructuredQName functionName = null;
 
-        if (isAllowXPath40Syntax() && NameChecker.isValidNCName(fname)) {
-            // In 4.0, try first for a reference to a no-namespace function, then
-            // for a reference to a function in the default function namespace
-            SymbolicName.F symbolicName = new SymbolicName.F(
-                    new StructuredQName("", NamespaceUri.NULL, fname), arity);
-            if (env.getFunctionLibrary().getFunctionItem(symbolicName, env) != null) {
-                functionName = symbolicName.getComponentName();
+        if (NameChecker.isValidNCName(fname)) {
+            // Function name is unprefixed
+            if (isReservedFunctionName(fname, languageVersion)) {
+                grumble("The unprefixed function name '" + fname + "' is reserved");
+            }
+            if (isAllowXPath40Syntax()) {
+                // In 4.0, try first for a reference to a no-namespace function, then
+                // for a reference to a function in the default function namespace
+                SymbolicName.F symbolicName = new SymbolicName.F(
+                        new StructuredQName("", NamespaceUri.NULL, fname), arity);
+                if (env.getFunctionLibrary().getFunctionItem(symbolicName, env) != null) {
+                    functionName = symbolicName.getComponentName();
+                }
             }
         }
 
