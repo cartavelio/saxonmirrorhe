@@ -99,7 +99,7 @@
 			<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-atomic-comparisons">Atomic Comparisons: An Overview (Non-Normative)</a></p></li>
 		</ul>
 		
-		
+		<p>A number of new item types were introduced in XPath 4.0 but they</p>
 
 		<p>None of these new types introduce new kinds of value; they only provide new ways of constraining the value space.</p>
 
