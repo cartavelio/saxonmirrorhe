@@ -14,8 +14,8 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.trans.*;
 
 import java.util.List;
@@ -76,12 +76,12 @@ public class XSLExpose extends XSLAcceptExpose {
 
         for (ComponentTest test : getExplicitComponentTests()) {
             QNameTest nameTest = test.getQNameTest();
-            if (nameTest instanceof NameTest) {
-                StructuredQName qName = ((NameTest) nameTest).getMatchingNodeName();
+            if (nameTest instanceof SpecificQNameTest) {
+                StructuredQName qName = ((SpecificQNameTest) nameTest).getStructuredQName();
                 int kind = test.getComponentKind();
                 SymbolicName sName = kind == StandardNames.XSL_FUNCTION ?
-                    new SymbolicName.F(((NameTest) nameTest).getMatchingNodeName(), test.getArity()) :
-                    new SymbolicName(kind, ((NameTest) nameTest).getMatchingNodeName());
+                    new SymbolicName.F(qName, test.getArity()) :
+                    new SymbolicName(kind, qName);
                 boolean found = false;
                 switch(kind) {
                     case StandardNames.XSL_TEMPLATE: {
@@ -131,7 +131,7 @@ public class XSLExpose extends XSLAcceptExpose {
                         if (test.getArity() == -1) {
                             // This will match any function of the required name, regardless of arity
                             for (int i = 0; i <= pack.getMaxFunctionArity(); i++) {
-                                sName = new SymbolicName.F(((NameTest) nameTest).getMatchingNodeName(), i);
+                                sName = new SymbolicName.F(qName, i);
                                 Component fn = pack.getComponent(sName);
                                 if (fn != null) {
                                     found = true;
