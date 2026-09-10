@@ -2476,9 +2476,9 @@ public class Configuration implements SourceResolver {
      * running from a Java application.</p>
      * <p>The name of the method is poorly chosen, since many of the progress messages that
      * are output have little to do with timing or instrumentation.</p>
-     * <p>If enabled, the relevant messages will be sent either to the destination set using
-     * {@link #setLogger(Logger)} or to the destination set using {@link #setStandardErrorOutput(PrintStream)},
-     * depending on the message.</p>
+     * <p>If enabled, the relevant messages will be sent to the destination set
+     * using {@link #setLogger(Logger)} (which might have been called implicitly by setting
+     * {@link Feature#STANDARD_ERROR_OUTPUT_FILE}).</p>
      *
      * @param timing true if these messages are to be output.
      */
