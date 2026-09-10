@@ -259,7 +259,7 @@ public class QueryModule implements StaticContext {
             qp.setCodeInjector(new XQueryTraceCodeInjector());
         }
         QNameParser qnp = new QNameParser(module.getLiveNamespaceResolver())
-            .withAcceptEQName(importer.getXPathVersion() >= 30)
+            .withAcceptEQName(importer.getXPathVersion() >= 30, importer.getXPathVersion())
             .withUnescaper(new XQueryParser.Unescaper(config.getValidCharacterChecker()));
         qp.setQNameParser(qnp);
 

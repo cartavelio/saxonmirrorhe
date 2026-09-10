@@ -397,7 +397,7 @@ public class XQueryParser extends XPathParser {
         env.setXPathVersion(languageVersion);
         env.initializeFunctionLibraries();
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-                .withAcceptEQName(true)
+                .withAcceptEQName(true, languageVersion)
                 .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
 
         setQNameParser(qp);
@@ -461,7 +461,7 @@ public class XQueryParser extends XPathParser {
         t.languageLevel = languageVersion;
         t.isXQuery = true;
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-                .withAcceptEQName(true)
+                .withAcceptEQName(true, languageVersion)
                 .withUnescaper(new Unescaper(config.getValidCharacterChecker()));
         setQNameParser(qp);
         try {

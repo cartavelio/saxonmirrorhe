@@ -656,7 +656,7 @@ public class ConfigurationReader implements Receiver {
         if (name == null) {
             error("withParam", "name", null, null);
         }
-        QNameParser qp = new QNameParser(nsMap).withAcceptEQName(true);
+        QNameParser qp = new QNameParser(nsMap).withAcceptEQName(true, 40);
         StructuredQName qName = null;
         try {
             qName = qp.parse(name, NamespaceUri.NULL);

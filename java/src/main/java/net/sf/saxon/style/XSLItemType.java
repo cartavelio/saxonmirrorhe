@@ -116,7 +116,7 @@ public class XSLItemType extends StyleElement {
             XPathParser parser =
                     getConfiguration().newExpressionParser("XP", false, env);
             QNameParser qp = new QNameParser(env.getNamespaceResolver())
-                    .withAcceptEQName(true)
+                    .withAcceptEQName(true, env.getXPathVersion())
                     .withErrorOnBadSyntax("XPST0003")
                     .withErrorOnUnresolvedPrefix("XPST0081");
             parser.setQNameParser(qp);

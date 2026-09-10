@@ -109,7 +109,7 @@ public class Compilation {
         referencedModes.add(Mode.UNNAMED_MODE_NAME);
 
         qNameParser = new QNameParser(null)
-                .withAcceptEQName(true)
+                .withAcceptEQName(true, info.getXsltVersion())
                 .withErrorOnBadSyntax("XTSE0020")
                 .withErrorOnUnresolvedPrefix("XTSE0280");
 

@@ -949,7 +949,7 @@ public abstract class StyleElement extends ElementImpl {
         XPathParser parser =
                 getConfiguration().newExpressionParser("XP", false, staticContext);
         QNameParser qp = new QNameParser(staticContext.getNamespaceResolver())
-                .withAcceptEQName(staticContext.getXPathVersion() >= 30)
+                .withAcceptEQName(staticContext.getXPathVersion() >= 30, staticContext.getXPathVersion())
                 .withErrorOnBadSyntax("XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
 
@@ -969,7 +969,7 @@ public abstract class StyleElement extends ElementImpl {
         XPathParser parser =
                 getConfiguration().newExpressionParser("XP", false, env);
         QNameParser qp = new QNameParser(env.getNamespaceResolver())
-                .withAcceptEQName(true)
+                .withAcceptEQName(true, getEffectiveVersion())
                 .withErrorOnBadSyntax("XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
         parser.setQNameParser(qp);

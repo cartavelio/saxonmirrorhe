@@ -57,7 +57,7 @@ public class FunctionAvailable extends SystemFunction {
             boolean b = false;
 
             QNameParser qp = new QNameParser(getRetainedStaticContext())
-                    .withAcceptEQName(true)
+                    .withAcceptEQName(true, env.getXPathVersion())
                     .withErrorOnBadSyntax("XTDE1400")
                     .withErrorOnUnresolvedPrefix("XTDE1400");
 

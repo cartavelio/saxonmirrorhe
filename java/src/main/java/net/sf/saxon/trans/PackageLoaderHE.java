@@ -113,7 +113,7 @@ public class PackageLoaderHE implements IPackageLoader {
         underriding = new ExecutableFunctionLibrary(config);
         try {
             parser = config.newExpressionParser("XP", false, new IndependentContext(config));
-            QNameParser qNameParser = new QNameParser(null).withAcceptEQName(true);
+            QNameParser qNameParser = new QNameParser(null).withAcceptEQName(true, 40);
             parser.setQNameParser(qNameParser);
         } catch (XPathException e) {
             throw new AssertionError(e);

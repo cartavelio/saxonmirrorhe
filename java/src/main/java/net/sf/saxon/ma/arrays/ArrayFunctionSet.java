@@ -259,6 +259,14 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR, null)
                     .arg(1, ArraySortBy.sortKeyRecord, STAR, null));
 
+            SpecificFunctionType comparator = new SpecificFunctionType(
+                    SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE,
+                    SequenceType.SINGLE_INTEGER);
+
+            register("sort-with", 2, e -> e.populate(ArraySortWith::new, AnyItemType.getInstance(), STAR, LATE)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, comparator, PLUS, null));
+
             register("split", 1, 1, e -> e.populate(ArraySplit::new, ArrayItemType.ANY_ARRAY_TYPE, STAR, 0)
                              .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
@@ -1014,6 +1022,49 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 members.add(parcel.getU(valueRecordKey));
             }
             return new SimpleArrayItem(members);
+        }
+    }
+
+    public static class ArraySortWith extends SystemFunction {
+
+        /**
+         * Evaluate the expression
+         *
+         * @param context   the dynamic evaluation context
+         * @param arguments the values of the arguments, supplied as SequenceIterators
+         * @return the result of the evaluation, in the form of a SequenceIterator
+         * @throws XPathException if a dynamic error occurs during the evaluation of the expression
+         */
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            ArrayItem input = (ArrayItem)arguments[0].head();
+            ArrayList<GroundedValue> inputList = new ArrayList<>();
+            for (GroundedValue v : input.members()) {
+                inputList.add(v);
+            }
+            GroundedValue comparatorFunctions = arguments[1].materialize();
+            try {
+                inputList.sort((a, b) -> {
+                    Sequence[] comparands = new Sequence[]{a, b};
+                    for (GroundedValue comp : comparatorFunctions.asIterable()) {
+                        try {
+                            // call the user-supplied comparator function
+                            Sequence result = ((FunctionItem) comp).call(context, comparands);
+                            // convert xs:integer result to Java int
+                            int c = Long.signum(((IntegerValue) result.head()).longValue());
+                            if (c != 0) {
+                                return c;
+                            }
+                        } catch (XPathException e) {
+                            throw new UncheckedXPathException(e);
+                        }
+                    }
+                    return 0;
+                });
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
+            return new SimpleArrayItem(inputList);
         }
     }
 

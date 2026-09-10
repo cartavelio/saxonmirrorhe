@@ -125,7 +125,7 @@ public class PatternParser extends XPathParser {
             if (qNameParser == null) {
                 qNameParser = new QNameParser(env.getNamespaceResolver());
                 if (languageVersion >= 30) {
-                    qNameParser = qNameParser.withAcceptEQName(true);
+                    qNameParser = qNameParser.withAcceptEQName(true, languageVersion);
                 }
             }
             language = ParsedLanguage.XSLT_PATTERN;

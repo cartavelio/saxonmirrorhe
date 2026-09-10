@@ -606,7 +606,7 @@ public class XPathParser {
         if (exp == null) {
 
             qNameParser = new QNameParser(env.getNamespaceResolver())
-                .withAcceptEQName(allowXPath30Syntax)
+                .withAcceptEQName(allowXPath30Syntax, languageVersion)
                 .withErrorOnBadSyntax(language == ParsedLanguage.XSLT_PATTERN ? "XTSE0340" : "XPST0003")
                 .withErrorOnUnresolvedPrefix("XPST0081");
 
@@ -689,7 +689,7 @@ public class XPathParser {
         if (qNameParser == null) {
             qNameParser = new QNameParser(env.getNamespaceResolver());
             if (languageVersion >= 30) {
-                qNameParser = qNameParser.withAcceptEQName(true);
+                qNameParser = qNameParser.withAcceptEQName(true, languageVersion);
             }
         }
         language = ParsedLanguage.SEQUENCE_TYPE;
@@ -3417,7 +3417,7 @@ public class XPathParser {
 
         } else if (token == Token.HASH && isAllowXPath40Syntax()) {
             StructuredQName qn = parseEQName();
-            return Literal.makeLiteral(new QNameValue(qn,BuiltInAtomicType.QNAME));
+            return Literal.makeLiteral(new QNameValue(qn, BuiltInAtomicType.QNAME));
 
         } else if (token instanceof Token.StringTemplate) {
             checkLanguageVersion40("a string template");

@@ -832,7 +832,9 @@ public final class Tokenizer {
                         boolean isStar = false;
                         while (inputOffset < inputLength) {
                             char c2 = input.charAt(inputOffset);
-                            if (c2 > 0x80 || Character.isLetterOrDigit(c2) || c2 == '_' || c2 == '.' || c2 == '-') {
+                            if (c2 > 0x80 || Character.isLetterOrDigit(c2) || c2 == '_' || c2 == '.' || c2 == '-'
+                                || (languageLevel >= 40 && c2 == ':' && inputOffset+1 < inputLength
+                                            && NameChecker.isNCNameStartChar(input.charAt(inputOffset + 1)))) {
                                 inputOffset++;
                             } else if (c2 == '*' && (start == inputOffset)) {
                                 inputOffset++;
