@@ -12,7 +12,6 @@ namespace SaxonCS_NUnit
         public static string NUNIT_DATA_DIR = repo + "src/test/nunit/testdata/";
 		public static string DATA_DIR = repo + "src/test/testdata/";
         public static string SANDPIT_DIR = DATA_DIR + "sandpit/";
-        public static string DATA_DIR2 = "file:///C:/work/repositories/hg/saxon-development.core/tests/junit/testdata/";
         public static string XMARK_DIR = repo + "src/test/xmark/";
         public static string RESOURCES_DIR = NUNIT_DATA_DIR;
         public static string XSLT3TS_DIR =  qt4cg + "xslt40-test/tests/";

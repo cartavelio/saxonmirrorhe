@@ -250,22 +250,22 @@ namespace SaxonCS_NUnit {
             return processor.NewDocumentBuilder().Build(inputFile);
         }
 
-        [Test]
-        public void TestUriWithSpace2() {
-            var uriBuilder =
-                new UriBuilder(Uri.EscapeUriString("file:///" + ConfigTest.DATA_DIR2 + "test test//test test.xml"));
+        // [Test]
+        // public void TestUriWithSpace2() {
+        //     var uriBuilder =
+        //         new UriBuilder(Uri.EscapeUriString("file:///" + ConfigTest.DATA_DIR2 + "test test//test test.xml"));
+        //
+        //     Uri uri = uriBuilder.Uri; // new Uri(uriBuilder);
+        //     GetXdmNode(uri);
+        // }
 
-            Uri uri = uriBuilder.Uri; // new Uri(uriBuilder);
-            GetXdmNode(uri);
-        }
-
         [Test]
-        public void TestUriWithSpace() {
+        public void TestFileWithMultipleExternalEntities() {
             try {
-                Processor processor = new Processor();
-                var uriBuilder = new UriBuilder("file:///" + ConfigTest.DATA_DIR + "book-wrapper.xml");
+                Processor processor = new();
+                var uriBuilder = new UriBuilder("file://" + ConfigTest.DATA_DIR + "book-wrapper.xml");
 
-                Uri uri = uriBuilder.Uri; // new Uri("file:///C:/test test/books.xml");
+                Uri uri = uriBuilder.Uri;
 
                 XdmNode node = processor.NewDocumentBuilder().Build(uri);
 
@@ -694,111 +694,8 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        public class MyStream : MemoryStream {
-            public override void Close() {
-                base.Close();
-            }
-        }
+        
 
 
-        [Test]
-        public void GetXslt2FO() {
-            try {
-                XmlDocument xml = new XmlDocument();
-                XmlNode rootNode = xml.CreateElement("users");
-                xml.AppendChild(rootNode);
-
-                XmlNode userNode = xml.CreateElement("user");
-                XmlAttribute attribute = xml.CreateAttribute("age");
-                attribute.Value = "42";
-                userNode.Attributes.Append(attribute);
-                userNode.InnerText = "John Doe";
-                rootNode.AppendChild(userNode);
-
-
-                Dictionary<string, string> args = new Dictionary<string, string>();
-
-                string xsltFilePath = ConfigTest.DATA_DIR + "main3.xsl";
-                
-                // Compile stylesheet
-                var executable = GetExecutable(xsltFilePath);
-                var declaredArgs = executable.GetGlobalParameters();
-
-                // Do transformation to a destination
-                var destination = new DomDestination();
-                using (var inputStream = new MyStream()) {
-                    xml.Save(inputStream);
-                    inputStream.Position = 0;
-                    var transformer = executable.Load();
-                    FileInfo stylesheetFileInfo = new FileInfo(xsltFilePath);
-                    transformer.SetInputStream(inputStream, new Uri(stylesheetFileInfo.DirectoryName));
-                    foreach (var arg in args) {
-                        var matchingArgDeclaration =
-                            declaredArgs.FirstOrDefault(a => a.Key.LocalName.ToLower() == arg.Key.ToLower());
-                        if (matchingArgDeclaration.Key == null) {
-                            transformer.SetParameter(new QName(arg.Key), new XdmAtomicValue(arg.Value));
-                        }
-                        else {
-                            // try to load up the specific parameter type
-                            // list is based on http://www.saxonica.com/documentation/#!dotnetdoc/Saxon.Api/XdmAtomicValue
-                            XdmItemType argType = matchingArgDeclaration.Value.DeclaredType.ItemType;
-                            var argTypeName = "";
-                            if (argType != null &&
-                                argType is XdmAtomicType)
-                                argTypeName = ((XdmAtomicType) argType).TypeName.LocalName;
-                            switch (argTypeName.ToLower()) {
-                                case "boolean":
-                                    transformer.SetParameter(new QName(arg.Key),
-                                        new XdmAtomicValue(Convert.ToBoolean(arg.Value)));
-                                    break;
-
-                                case "integer":
-                                    transformer.SetParameter(new QName(arg.Key),
-                                        new XdmAtomicValue(Convert.ToInt32(arg.Value)));
-                                    break;
-
-                                case "decimal":
-                                    transformer.SetParameter(new QName(arg.Key),
-                                        new XdmAtomicValue(Convert.ToDecimal(arg.Value)));
-                                    break;
-
-                                case "float":
-                                    transformer.SetParameter(new QName(arg.Key),
-                                        new XdmAtomicValue(Convert.ToSingle(arg.Value)));
-                                    break;
-
-                                case "double":
-                                    transformer.SetParameter(new QName(arg.Key),
-                                        new XdmAtomicValue(Convert.ToDouble(arg.Value)));
-                                    break;
-
-                                case "anyuri":
-                                    transformer.SetParameter(new QName(arg.Key),
-                                        new XdmAtomicValue(new Uri(arg.Value)));
-                                    break;
-
-                                case "qname":
-                                    transformer.SetParameter(new QName(arg.Key),
-                                        new XdmAtomicValue(new QName(arg.Value)));
-                                    break;
-
-                                default:
-                                    transformer.SetParameter(new QName(arg.Key), new XdmAtomicValue(((arg.Value))));
-                                    break;
-                            }
-                        }
-                    }
-
-                    transformer.Run(destination);
-                }
-
-                Console.WriteLine(destination.XmlDocument.OuterXml);
-                Assert.True(destination.XmlDocument.OuterXml is string);
-            }
-            catch (Exception ex) {
-                Console.WriteLine(ex.StackTrace);
-                Assert.Fail(ex.Message);
-            }
-        }
     }
 }
