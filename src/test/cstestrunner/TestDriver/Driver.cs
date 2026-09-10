@@ -15,10 +15,10 @@ using TestRunner;
 
 namespace TestDriver {
     public abstract class Driver {
-        protected string resultsDir = null;
-        public ResultsDocument resultsDoc;
+        protected string resultsDir = null!;
+        protected ResultsDocument resultsDoc = null!;
         protected int successes = 0;
-        protected int total = 200000;
+        protected readonly int total = 200000;
         protected int failures = 0;
         protected int notrun = 0;
         protected int wrongErrorResults = 0;
@@ -26,20 +26,20 @@ namespace TestDriver {
         protected bool saveResults = false;
         protected string treeModel = "tiny";
         protected bool debug = false;
-        protected Regex testPattern = null;
-        protected string requestedTestSet = null;
-        protected string testSuiteDir;
-        protected string reportFilename = null;
-        protected Processor driverProc = new Processor(true);
+        private Regex testPattern = null!;
+        private string requestedTestSet = null!;
+        protected string testSuiteDir = null!;
+        protected string reportFilename = null!;
+        protected readonly Processor driverProc = new Processor(true);
         protected Serializer driverSerializer;
         protected Spec requestedSpec;
-        protected Dictionary<string, XdmNode> exceptionsMap = new Dictionary<string, XdmNode>();
-        protected Dictionary<string, Environment> globalEnvironments = new Dictionary<string, Environment>();
-        protected Dictionary<string, Environment> localEnvironments = new Dictionary<string, Environment>();
-        protected Dictionary<string, string> optimizationAssertions = new Dictionary<string, string>();
-        protected List<string> failingTestCases = new List<string>();
-        protected Dictionary<string, int> failuresPerTestSet = new Dictionary<string, int>();
-        public Dictionary<Uri, string> queryModules = new Dictionary<Uri, string>();
+        protected readonly Dictionary<string, XdmNode> exceptionsMap = new();
+        protected readonly Dictionary<string, Environment> globalEnvironments = new();
+        protected readonly Dictionary<string, Environment> localEnvironments = new();
+        protected readonly Dictionary<string, string> optimizationAssertions = new();
+        private readonly List<string> failingTestCases = new();
+        private readonly Dictionary<string, int> failuresPerTestSet = new();
+        public readonly Dictionary<Uri, string> queryModules = new();
         protected IFeedbackListener feedback = new DefaultFeedbackListener();
         protected bool useXslt30Transformer = true; // Temporary for controlling test processor
         protected bool strict = false;
@@ -52,7 +52,7 @@ namespace TestDriver {
         public bool schemaAware = false;
 
 
-        static HashSet<string> unsharedEnvironments = new HashSet<string>();
+        static readonly HashSet<string> unsharedEnvironments = new();
         protected bool export = false;
         private string exceptionsFileName = "exceptions.xml";
 
@@ -66,7 +66,7 @@ namespace TestDriver {
             }
 
 
-            public void Message(String message, bool popup) {
+            public void Message(string message, bool popup) {
                 try {
                     Console.WriteLine(message);
                     //Trace.WriteLine(message);
@@ -113,7 +113,6 @@ namespace TestDriver {
         }
 
         public static void Main(string[] args) {
-            experiment();
             
             string language = "XQ";
             foreach (string a in args)
@@ -379,7 +378,7 @@ namespace TestDriver {
             QName testSet = new QName("", "test-set");
             QName testCase = new QName("", "test-case");
             QName run = new QName("", "run");
-            QName edition = new QName("", "edition");
+            QName editionAtt = new QName("", "edition");
             string saxonEdition = driverProc.Edition;
             Uri exceptionsFile = null;
             try {
@@ -403,7 +402,7 @@ namespace TestDriver {
                     }
 
                     string runVal = entry.GetAttributeValue(run);
-                    string editionVal = entry.GetAttributeValue(edition);
+                    string editionVal = entry.GetAttributeValue(editionAtt);
                     runVal ??= "false";
                     editionVal ??= saxonEdition;
 
@@ -631,21 +630,17 @@ namespace TestDriver {
             writeTestSetEndElement();
         }
 
-        public bool SkipBecauseSlow(string testSet) {
+        private bool SkipBecauseSlow(string testSet) {
             return testSet == "unicode-90";
         }
 
         protected abstract void runTestCase(XdmNode testCase, XPathCompiler catalogXpc);
 
-        //public void setTestDriverForm(TestDriverForm gui) {
-        //    guiForm = gui;
-        //}
-
         public void println(string data) {
             feedback.Message(data, false);
         }
 
-        public void printResults(string resultsFileStr) {
+        private void printResults(string resultsFileStr) {
             feedback.Message(
                 successes + " successes, " + failures + " failures, " + wrongErrorResults + " incorrect ErrorCode, " +
                 notrun + " not run", false);
@@ -662,28 +657,8 @@ namespace TestDriver {
                 }
             }
         }
-
-        public void printError(string error, string message) {
-            /*if (guiForm != null)
-            {
-                guiForm.errorPopup(error);
-                System.err.println(error + message);
-            }
-            else
-            {*/
-            feedback.Message(error + message, true);
-            //}
-        }
-
-        public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
         
-        public static void experiment() {
-            //Console.WriteLine("LittleEndian? " + BitConverter.IsLittleEndian);
-            // double d = 1e100 / 3;
-            // Console.WriteLine(d);
-            // BigDecimal dec = BigDecimal.FromDouble(d, false);
-            // Console.WriteLine((double)dec);
-        }
+        public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
 
     }
     
