@@ -3,9 +3,14 @@ package com.saxonica.ee.trans;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Sink;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.JSONEmitter;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeChar;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -35,14 +40,14 @@ public class ExpressionPresenterToJson extends ProxyReceiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
         if (pending) {
-            out.writeKey("C");
+            out.writeKey(new UnicodeChar('C'));
             out.startArray(false);
         }
         out.startMap(false);
-        out.writeKey("N");
+        out.writeKey(new UnicodeChar('N'));
         out.writeAtomicValue(new StringValue(elemName.getLocalPart()));
         for (AttributeInfo att : attributes) {
-            out.writeKey(att.getNodeName().getLocalPart());
+            out.writeKey(StringView.of(att.getNodeName().getLocalPart()));
             out.writeAtomicValue(new StringValue(att.getValue()));
         }
         pending = true;
@@ -67,8 +72,8 @@ public class ExpressionPresenterToJson extends ProxyReceiver {
     @Override
     public void processingInstruction(String target, UnicodeString data, Location locationId, int properties) throws XPathException {
         // Used to output the checksum
-        out.writeKey(target);
-        out.writeAtomicValue(new StringValue(data.tidy()));
+        out.writeKey(StringView.of(target));
+        out.writeAtomicValue(new StringValue(data));
     }
 
     /**
