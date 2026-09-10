@@ -1231,10 +1231,6 @@ def jarClasses(String release) {
         exclude "com/saxonica/config/EnterpriseXPathFactory.class"
         exclude "com/saxonica/config/StreamingTransformerFactory.class"
         exclude "com/saxonica/ee"
-        exclude "com/saxonica/expr/CastToList.class"
-        exclude "com/saxonica/expr/CastToUnion.class"
-        exclude "com/saxonica/expr/CastableToList.class"
-        exclude "com/saxonica/expr/CastableToUnion.class"
       }
     } else if (release == "ee") {
       from ("${buildDir}/classes/${release}j") {
