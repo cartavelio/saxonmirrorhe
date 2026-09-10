@@ -77,7 +77,7 @@ namespace Saxon.Impl.Dom {
             _currentNode.Normalize();
             _currentNode = _currentNode.ParentNode;
         }
-        public void characters(Saxon.Hej.str.CodePoints chars, Saxon.Hej.s9api.Location locationId, int properties) {
+        public void characters(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
             try {
                 XmlText text = _document.CreateTextNode(chars.ToString());
                 _currentNode.AppendChild(text);
@@ -88,7 +88,7 @@ namespace Saxon.Impl.Dom {
                 throw new Saxon.Hej.trans.XPathException(err);
             }
         }
-        public void processingInstruction(string target, Saxon.Hej.str.CodePoints data, Saxon.Hej.s9api.Location locationId, int properties) {
+        public void processingInstruction(string target, Saxon.Hej.str.UnicodeString data, Saxon.Hej.s9api.Location locationId, int properties) {
             try {
                 XmlProcessingInstruction pi = _document.CreateProcessingInstruction(target, data.ToString());
                 _currentNode.AppendChild(pi);
@@ -96,7 +96,7 @@ namespace Saxon.Impl.Dom {
                 throw new Saxon.Hej.trans.XPathException(err);
             }
         }
-        public void comment(Saxon.Hej.str.CodePoints chars, Saxon.Hej.s9api.Location locationId, int properties) {
+        public void comment(Saxon.Hej.str.UnicodeString chars, Saxon.Hej.s9api.Location locationId, int properties) {
             try {
                 XmlComment comment = _document.CreateComment(chars.ToString());
                 _currentNode.AppendChild(comment);

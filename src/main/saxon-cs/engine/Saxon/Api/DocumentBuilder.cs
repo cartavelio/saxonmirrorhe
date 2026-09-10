@@ -39,7 +39,7 @@ namespace Saxon.Api {
             this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
-            this.xmlResolver = new StandardXmlResolver();
+            this.xmlResolver = new StandardXmlResolver(this.config);
         }
 
         /// <summary>
@@ -158,6 +158,9 @@ namespace Saxon.Api {
         /// <remarks>
         /// <para>By default, whitespace text nodes appearing in element-only content
         /// are stripped, and all other whitespace text nodes are retained.</para>
+        /// <para>If DTD or schema validation is applied, the only permitted setting
+        /// is <c>WhitespacePolicy#IGNORABLE</c>. Any other value results
+        /// in an exception from the <c>Build()</c> method.</para>
         /// </remarks>
 
         public WhitespacePolicy WhitespacePolicy {
@@ -313,7 +316,10 @@ namespace Saxon.Api {
 
                 XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
                 DotNetPullProvider dotNetPullProvider = new (parser);
-                dotNetPullProvider.WhitespacePolicy = WhitespacePolicy;
+                if (WhitespacePolicy == WhitespacePolicy.StripIgnorable) {
+                    dotNetPullProvider.IgnoreIgnorableWhitespace = true;
+                }
+
                 source = new PullSource(dotNetPullProvider);
                 source.setSystemId(baseUri.ToString());
             }
@@ -381,7 +387,6 @@ namespace Saxon.Api {
 
                 XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
                 DotNetPullProvider dotNetPullProvider = new (parser);
-                dotNetPullProvider.WhitespacePolicy = WhitespacePolicy;
                 source = new PullSource(dotNetPullProvider);
                 source.setSystemId(baseUri.ToString());
             }
@@ -408,6 +413,9 @@ namespace Saxon.Api {
         /// set to <c>None</c>). The constructor for <c>XmlValidatingReader</c> is obsolete in .NET 2.0,
         /// but the same effect can be achieved by using the <c>Create</c> method of <c>XmlReader</c> with
         /// appropriate <c>XmlReaderSettings</c>.</para>
+        /// <para>The base URI of the resulting document is taken from the <c>BaseURI</c> property
+        /// of the <c>XmlReader</c> if this is non-null and non-empty; otherwise it is taken from the
+        /// <c>BaseUri</c> property of this <c>DocumentBuilder</c>.</para>
         /// <para>Conformance with the W3C specifications requires that the <c>Normalization</c> property
         /// of an <c>XmlTextReader</c> should be set to <c>true</c>. However, Saxon does not insist
         /// on this.</para>
@@ -431,7 +439,11 @@ namespace Saxon.Api {
             pp.setPipelineConfiguration(config.makePipelineConfiguration());
             // pp = new PullTracer(pp);  /* diagnostics */
             Source source = new PullSource(pp);
-            source.setSystemId(reader.BaseURI);
+            String documentBaseUri = reader.BaseURI;
+            if (string.IsNullOrEmpty(documentBaseUri)) {
+                documentBaseUri = this.BaseUri.ToString();
+            }
+            source.setSystemId(documentBaseUri);
             ParseOptions options = new ParseOptions(config.getParseOptions());
 
             source = augmentSource(source, options);

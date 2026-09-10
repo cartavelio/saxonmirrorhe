@@ -10,7 +10,7 @@ using XdmDestination = Saxon.Hej.s9api.XdmDestination;
 
 namespace Saxon.Impl.Parallel {
     public class Validation {
-        public static void ValidateMultiple(Processor processor, IEnumerable<Source> sources,
+        internal static void ValidateMultiple(Processor processor, IEnumerable<Source> sources,
                     InvalidityHandler invalidityHandler, SchemaValidatorImpl.ReportList reportDocs) {
             System.Threading.Tasks.Parallel.ForEach(sources, source => {
             //foreach (Source source in sources) {

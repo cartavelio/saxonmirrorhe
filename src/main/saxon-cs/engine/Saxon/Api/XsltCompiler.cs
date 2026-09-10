@@ -115,7 +115,7 @@ namespace Saxon.Api {
                         return standardUriResolver.getXmlResolver();
                     }
                     else {
-                        xmlResolver = new StandardXmlResolver();
+                        xmlResolver = new StandardXmlResolver(processor.Implementation);
                         return xmlResolver;
                     }
                 }

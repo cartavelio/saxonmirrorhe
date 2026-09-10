@@ -13,7 +13,7 @@ namespace Saxon.Impl.Helpers {
             if (className == "Saxon.Hej.serialize.MessageEmitter") {
                 return typeof(Saxon.Hej.serialize.MessageEmitter);
             }
-            throw new NotImplementedException();
+            throw new NotImplementedException("Cannot load class " + className);
         }
 
         public object getInstance(string className, ClassLoader classLoader) {
@@ -26,7 +26,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public Stream getResourceAsStream(string name) {
-            throw new NotImplementedException();
+            throw new NotImplementedException("cannot load resource " + name);
         }
     }
 }

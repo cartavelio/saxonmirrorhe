@@ -5,6 +5,7 @@ using Saxon.Hej.ma.arrays;
 using Saxon.Hej.ma.map;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.s9api;
 using Saxon.Hej.type;
 
 namespace Saxon.Api {
@@ -24,10 +25,15 @@ namespace Saxon.Api {
             this.underlyingType = underlyingType;
         }
         
+        // Construct an XdmItemType wrapping an ItemType. Because no Configuration is available,
+        // not all types can be constructed precisely, so in some cases the result is an approximation.
+        // For a more accurate type, use the method that accepts the Configuration as a second argument.
         internal static XdmItemType MakeXdmItemType(Saxon.Hej.type.ItemType type) {
-            if (type is AtomicType atomicType) {
+            if (type is BuiltInAtomicType builtInAtomicType) {
                 return XdmAtomicType.BuiltInAtomicType(
-                        QName.FromStructuredQName(atomicType.getStructuredQName()));
+                    QName.FromStructuredQName(builtInAtomicType.getStructuredQName()));
+            } else if (type is AtomicType atomicType) {
+                return new XdmAtomicType(atomicType);
             }
             else if (type is ErrorType) {
                 return XdmAnyNodeType.Instance; // TODO: need to represent this properly
@@ -56,6 +62,16 @@ namespace Saxon.Api {
             else {
                 return null;
             }
+        }
+
+        internal static XdmItemType MakeXdmItemType(Saxon.Hej.type.ItemType type, Saxon.Hej.Configuration config) {
+            if (type is BuiltInAtomicType builtInAtomicType) {
+                return XdmAtomicType.BuiltInAtomicType(
+                    QName.FromStructuredQName(builtInAtomicType.getStructuredQName()));
+            } else if (type is AtomicType atomicType) {
+                return new XdmAtomicType(atomicType);
+            }
+            return new ConstructedItemType(type, config);
         }
 
         internal ItemType Unwrap() {

@@ -17,11 +17,22 @@ using System.Collections.Generic;
 namespace Saxon.Impl.Helpers {
     
     public class DotNetPlatform : Saxon.Hej.Platform {
+        private string resourceLocation;
+        
         public DotNetPlatform() {
+            // Establish the prefix to use for loading resources. There must be a better way, but this works.
+            System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
+            var resourceNames = ass.GetManifestResourceNames();
+            foreach (string name in resourceNames) {
+                if (name.EndsWith("casevariants.xml")) {
+                    resourceLocation = name.Replace("casevariants.xml", "");
+                    break;
+                }
+            }
         }
 
         public void initialize(Saxon.Hej.Configuration config) {
-            config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver()));
+            config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver(config)));
             config.setCollectionFinder((cxt, uri) => 
                 new Saxon.Hej.resource.StandardCollectionFinder().findCollection(cxt, uri));
         }
@@ -323,7 +334,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public Saxon.Hej.lib.ModuleURIResolver makeStandardModuleURIResolver(Saxon.Hej.Configuration config) {
-            return new StandardModuleURIResolver(new StandardXmlResolver());
+            return new StandardModuleURIResolver(new StandardXmlResolver(config));
         }
 
         public IDynamicLoader getDefaultDynamicLoader() {
@@ -336,8 +347,7 @@ namespace Saxon.Impl.Helpers {
             // foreach (string name in resourceNames) {
             //     Console.WriteLine("Resource: " + name);
             // }
-            // TODO: project name hard-coded here, but will change?
-            return ass.GetManifestResourceStream(@"SaxonCS3.resources.Saxon.Hej.data." + filename.Replace('/', '.'));
+            return ass.GetManifestResourceStream(resourceLocation + filename.Replace('/', '.'));
         }
 
         public ActiveSource resolveSource(Source source, Configuration config) {

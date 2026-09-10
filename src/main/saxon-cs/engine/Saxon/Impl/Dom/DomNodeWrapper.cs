@@ -404,7 +404,7 @@ namespace Saxon.Impl.Dom {
             }
         }
 
-        public NamespaceMap getAllNamespaces() {
+        public override NamespaceMap getAllNamespaces() {
             if (getNodeKind() == Saxon.Hej.type.Type.ELEMENT) {
                 if (inScopeNamespaces != null) {
                     return inScopeNamespaces;
