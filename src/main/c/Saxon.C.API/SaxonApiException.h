@@ -2,7 +2,7 @@
 #define SAXON_API_EXCEPTION_H
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2021 Saxonica Limited.
+// Copyright (c) 2022 Saxonica Limited.
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -75,17 +75,26 @@ public:
      */
 	const char * getErrorCode();
 
-
+    /**
+     * Get the line number associated with the exception, if known.
+     * @return the line number (typically of a line in a stylesheet, query, or schema, but
+     * in the case of validation errors it may be a line in a source document); or -1 if not known
+     */
 	int getLineNumber();
 
+
+    /**
+     * Returns the detail message string as a char array of the throwable, if there is one
+     * @return the detail message string of this <tt>Throwable</tt> instance
+     *         (which may be <tt>null</tt>).
+     */
+	const char * getMessage();
 
     /**
      * Returns the detail message string of the throwable, if there is one
      * @return the detail message string of this <tt>Throwable</tt> instance
      *         (which may be <tt>null</tt>).
      */
-	const char * getMessage();
-
 	std::string getMessageStr();
 
 	/**
