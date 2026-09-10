@@ -1,13 +1,17 @@
 package nativetests;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.type.Schema;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -19,12 +23,15 @@ public class FnSchemaTest {
     public void testSchema() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
-            config.setSchemaValidationMode(Validation.STRICT);
+            Schema schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:non-match>(</fn:non-match><fn:match>(banana)</fn:match><fn:non-match>)</fn:non-match>" +
                     "</fn:analyze-string-result>";
-            config.buildDocumentTree(new StreamSource(new StringReader(instance)));
+            ParseOptions parseOptions = new ParseOptions()
+                    .withSchema(schema)
+                    .withSchemaValidationMode(Validation.STRICT);
+            TreeInfo tree = config.buildDocumentTree(new StreamSource(new StringReader(instance)), parseOptions);
+            assertTrue(tree.isTyped());
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -35,12 +42,15 @@ public class FnSchemaTest {
     public void testSchema2() {
         try {
             EnterpriseConfiguration config = new EnterpriseConfiguration();
-            config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
-            config.setSchemaValidationMode(Validation.STRICT);
+            Schema schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
             String instance = "<fn:analyze-string-result xmlns:fn=\"http://www.w3.org/2005/xpath-functions\">" +
                     "<fn:match><fn:group nr=\"1\">b<fn:group nr=\"2\"/></fn:group></fn:match>" +
                     "<fn:non-match>anana</fn:non-match></fn:analyze-string-result>";
-            config.buildDocumentTree(new StreamSource(new StringReader(instance)));
+            ParseOptions parseOptions = new ParseOptions()
+                    .withSchema(schema)
+                    .withSchemaValidationMode(Validation.STRICT);
+            TreeInfo tree = config.buildDocumentTree(new StreamSource(new StringReader(instance)), parseOptions);
+            assertTrue(tree.isTyped());
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
