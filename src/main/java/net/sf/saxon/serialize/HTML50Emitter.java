@@ -88,6 +88,9 @@ public class HTML50Emitter extends HTMLEmitter {
             if (systemId == null && publicId == null) {
                 if (name.getLocalPart().equalsIgnoreCase("html")) {
                     writer.writeAscii(DOCTYPE);
+                    if ("yes".equals(outputProperties.getProperty("indent", "yes"))) {
+                        writer.writeAscii(NEWLINE);
+                    }
                 }
             } else {
                 super.writeDocType(name, displayName, systemId, publicId);
@@ -100,6 +103,7 @@ public class HTML50Emitter extends HTMLEmitter {
 
     @CSharpModifiers(code={"private", "readonly", "static", "new"})
     private final static byte[] DOCTYPE = StringConstants.bytes("<!DOCTYPE HTML>");
+    private final static byte[] NEWLINE = StringConstants.bytes("\n");
 
     @Override
     protected boolean writeDocTypeWithNullSystemId() {
