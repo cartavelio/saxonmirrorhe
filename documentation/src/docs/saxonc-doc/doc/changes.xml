@@ -8,19 +8,23 @@
    </categories>
 
 
-   <release number="13" date="2023-01-12">
+   <release number="13" date="2026-05-27">
    <h2 class="subtitle">Changes between releases 12 and 13</h2>
 
    <category name="main">
-      <li>
-         <p>SaxonC is now compiled to a native executable using GraalVM Native Image (Community Edition version 25.0.1).</p>
-         <p>User extension function now supported in the following host languages: C++, Python and PHP.</p>
-      </li>
+      <ul>
+         <li>SaxonC is now compiled to a native executable using GraalVM Native Image (Community
+            Edition version 25.0.1).</li>
+         <li>User extension function now supported in the following host languages: C++, Python and
+            PHP.</li>
+      </ul>
    </category>
    <category name="api">
       <p>From SaxonC 13.0:</p>
-      <li>User extension function</li>
-      <li>Schema API</li>
+      <ul>
+         <li>User extension function</li>
+         <li>Schema API</li>
+      </ul>
 
    </category>
    </release>
