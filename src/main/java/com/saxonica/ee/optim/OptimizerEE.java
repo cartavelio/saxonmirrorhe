@@ -86,7 +86,8 @@ public class OptimizerEE extends Optimizer {
         Expression lhs = vc.getLhsExpression();
         Expression rhs = vc.getRhsExpression();
         int operator = vc.getOperator();
-        AtomicComparer comparer = vc.getAtomicComparer();
+        boolean isCodepointCollation =
+                vc.getRetainedStaticContext().getDefaultCollationName().equals(NamespaceConstant.CODEPOINT_COLLATION_URI);
 
         Expression e1 = super.optimizeValueComparison(vc, visitor, contextInfo);
         if (e1 != null && e1 != vc) {
@@ -189,7 +190,7 @@ public class OptimizerEE extends Optimizer {
                 rhs instanceof Literal &&
                 ((Literal) rhs).getGroundedValue() instanceof StringValue &&
                 ((StringValue) ((Literal) rhs).getGroundedValue()).isEmpty() &&
-                comparer instanceof CodepointCollatingComparer) {
+                isCodepointCollation) {
 
             switch (vc.getOperator()) {
                 case Token.FNE:
@@ -214,7 +215,7 @@ public class OptimizerEE extends Optimizer {
                 lhs instanceof Literal &&
                 ((Literal) lhs).getGroundedValue() instanceof StringValue &&
                 ((StringValue) ((Literal) lhs).getGroundedValue()).isEmpty() &&
-                comparer instanceof CodepointCollatingComparer) {
+                isCodepointCollation) {
 
             switch (vc.getOperator()) {
                 case Token.FNE:
@@ -234,7 +235,7 @@ public class OptimizerEE extends Optimizer {
         if (value1 instanceof StringValue &&
                 lhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
-                comparer instanceof CodepointCollatingComparer &&
+                isCodepointCollation &&
                 isStringLike(lhs.getItemType())) {
             return new CompareToStringConstant(lhs, vc.getOperator(), ((StringValue) value1).getUnicodeStringValue());
         }
@@ -242,7 +243,7 @@ public class OptimizerEE extends Optimizer {
         if (value0 instanceof StringValue &&
                 rhs.getCardinality() == StaticProperty.EXACTLY_ONE &&
                 vc.getResultWhenEmpty() != BooleanValue.TRUE &&
-                comparer instanceof CodepointCollatingComparer &&
+                isCodepointCollation &&
                 isStringLike(rhs.getItemType())) {
             return new CompareToStringConstant(rhs, Token.inverse(vc.getOperator()), ((StringValue) value0).getUnicodeStringValue());
         }
@@ -458,8 +459,7 @@ public class OptimizerEE extends Optimizer {
             boolean many0 = Cardinality.expectsMany(p0);
             boolean many1 = Cardinality.expectsMany(p1);
             if (many0 || many1) {
-                if (gc.getAtomicComparer().getCollator() == null ||
-                        gc.getAtomicComparer().getCollator() == CodepointCollator.getInstance()) {
+                if (gc.getStringCollator() == CodepointCollator.getInstance()) {
                     // Optimize a test of the form ($X = (1, 7, 9, 10, 16, ....)) where the RHS is a constant list
                     if (p1 instanceof Literal && ((Literal) p1).getGroundedValue().getLength() > 8) {
                         Expression mapTest = makeMapTest(visitor, p0, (Literal) p1, contextItemType);
@@ -1673,7 +1673,8 @@ public class OptimizerEE extends Optimizer {
         if (!Literal.isAtomic(rhs)) {
             return false;
         }
-        if (((ComparisonExpression) condition).getAtomicComparer() instanceof UntypedNumericComparer) {
+        if (((ComparisonExpression) condition).getAtomicComparer() instanceof UntypedNumericComparer ||
+                (condition instanceof ValueComparison && ((ValueComparison)condition).convertsUntypedToOther())) {
             // Bug 4738, 5000
             UntypedSequenceConverter usc = new UntypedSequenceConverter(lhs.copy(new RebindingMap()), BuiltInAtomicType.DOUBLE);
             Converter conv = usc.allocateConverter(getConfiguration(), true);

@@ -48,7 +48,7 @@ public class EqualityPatternOptimizer extends PatternOptimizer {
         Expression exp = ((PatternWithPredicate) pattern).getPredicate();
 
         Expression lhs = ((ComparisonExpression) exp).getLhsExpression();
-        StringCollator collator = ((ComparisonExpression) exp).getAtomicComparer().getCollator();
+        StringCollator collator = ((ComparisonExpression) exp).getStringCollator();
         GeneralComparisonOperand chic = new GeneralComparisonOperand(collator, lhs);
         chic = (GeneralComparisonOperand) allocateCharacteristic(characteristics, chic);
         AtomicMatchKey key = collator.getCollationKey(

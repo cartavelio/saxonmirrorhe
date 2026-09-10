@@ -49,7 +49,7 @@ public class GeneralComparisonEqualityFeed extends AtomicItemFeed {
         super(expr, result, context);
         this.watchManager = watchManager;
         final GeneralComparison gc = (GeneralComparison) getExpression();
-        collator = gc.getAtomicComparer().getCollator();
+        collator = gc.getStringCollator();
         pullOperand = pushedArg==0 ? gc.getRhsExpression() : gc.getLhsExpression();
         implicitTimezone = context.getImplicitTimezone();
     }

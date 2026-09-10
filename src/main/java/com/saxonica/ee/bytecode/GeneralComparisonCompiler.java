@@ -66,7 +66,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             compiler.compileToPrimitive(arg0, String.class, new OnEmpty.UnwindAndJump(unwindStack, returnFalse));
             unwindStack.add(String.class);
             compiler.compileToPrimitive(arg1, String.class, new OnEmpty.UnwindAndJump(unwindStack, returnFalse));
-            if (comparison.getAtomicComparer() instanceof CodepointCollatingComparer) {
+            if (comparison.getStringCollator() instanceof CodepointCollator) {
                 switch (comparison.getSingletonOperator()) {
                     case Token.FEQ:
                         ga.invokeInstanceMethod(Object.class, "equals", Object.class);
@@ -86,7 +86,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                         ga.goTo(returnFalse);
                 }
             } else {
-                allocateStatic(compiler, comparison.getAtomicComparer().getCollator());
+                allocateStatic(compiler, comparison.getStringCollator());
                 ga.dupX2();
                 ga.pop();
                 ga.invokeInstanceMethod(StringCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);
@@ -532,7 +532,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
                     throw new IllegalStateException("unknown operator");
 
             }
-        } else if (comparison.getAtomicComparer() instanceof CodepointCollatingComparer) {
+        } else if (comparison.getStringCollator() instanceof CodepointCollator) {
             switch (op) {
                 case Token.FEQ:
                 case Token.FNE:
