@@ -18,6 +18,7 @@ import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.map.MapConstructor;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.RecordType;
 import net.sf.saxon.om.*;
@@ -1976,7 +1977,10 @@ public class XQueryParser extends XPathParser {
 
     protected void parseItemTypeDeclaration(AnnotationList annotations) throws XPathException {
         String name = readName();
-        StructuredQName typeName = makeStructuredQName(name, NamespaceUri.NULL);
+        StructuredQName typeName = makeStructuredQName(name, env.getDefaultElementNamespace());
+        if (isReservedInQuery(typeName.getNamespaceUri())) {
+            grumble("Cannot declare item type in a reserved namespace", "XQST0045");
+        }
         readKeyword("as");
         ItemType typeDef = parseItemType();
         SchemaType st = env.getImportedSchema().getSchemaType(typeName);
@@ -1985,6 +1989,41 @@ public class XQueryParser extends XPathParser {
                             + typeName.getEQName(), "XQST0146");
         }
         ((QueryModule)env).declareItemType(typeName, typeDef, !annotations.includes(Annotation.PRIVATE));
+        if (typeDef instanceof RecordType recordType) {
+            XQueryFunction func = makeConstructorFunctionForRecordType(typeName, recordType);
+            func.setAnnotations(annotations);
+            ((QueryModule) env).declareFunction(func);
+        }
+    }
+
+    private XQueryFunction makeConstructorFunctionForRecordType(StructuredQName name, RecordType recordType) throws XPathException {
+        XQueryFunction f = new XQueryFunction();
+        f.setFunctionName(name);
+        f.setResultType(SequenceType.one(recordType));
+        f.setStaticContext((QueryModule) env);
+        f.setLocation(makeLocation());
+        List<Expression> entries = new ArrayList<>(recordType.getSize());
+        for (String fieldName : recordType.getFieldNames()) {
+            SequenceType fieldType = recordType.getFieldType(fieldName);
+            UserFunctionParameter param = new UserFunctionParameter();
+            param.setRequiredType(fieldType);
+            StructuredQName paramName;
+            if (NameChecker.isValidNCName(fieldName)) {
+                paramName = new StructuredQName("", "", fieldName);
+            } else {
+                paramName = new StructuredQName("ff", NamespaceUri.SAXON_GENERATED_VARIABLE, "ff" + System.identityHashCode(fieldName));
+            }
+            param.setVariableQName(paramName);
+            f.addParameter(param);
+
+            VariableReference var = new LocalVariableReference(param);
+            Expression entry = MapFunctionSet.getInstance(languageVersion)
+                    .makeFunction("entry", 2).makeFunctionCall(new StringLiteral(fieldName), var);
+            entries.add(entry);
+
+        }
+        f.setBody(new MapConstructor(entries));
+        return f;
     }
 
     protected void parseRecordTypeDeclaration(AnnotationList annotations) throws XPathException {
@@ -1993,9 +2032,7 @@ public class XQueryParser extends XPathParser {
         readToken(Token.LPAREN);
 
         List<String> fieldNames = new ArrayList<>(6);
-        List<String> optionalFieldNames = new ArrayList<>(6);
         List<SequenceType> fieldTypes = new ArrayList<>(6);
-        boolean extensible = false;
         RecordType recordTest = new RecordType();
         while (true) {
             if (t.currentToken instanceof Token.NameToken) {
@@ -2010,7 +2047,7 @@ public class XQueryParser extends XPathParser {
                 name = "dummy";
             }
             if (fieldNames.contains(name)) {
-                grumble("Duplicate field name (" + name + ")");
+                grumble("Duplicate field name (" + name + ")", "XPST0021");
                 name = "dummy";
             }
             fieldNames.add(name);

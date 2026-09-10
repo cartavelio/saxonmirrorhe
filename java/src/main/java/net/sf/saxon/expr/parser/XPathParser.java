@@ -2324,7 +2324,7 @@ public class XPathParser {
                     name = "dummy";
                 }
                 if (fieldNames.contains(name)) {
-                    p.grumble("Duplicate field name (" + name + ")");
+                    p.grumble("Duplicate field name (" + name + ")", "XPST0021");
                     name = "dummy";
                 }
                 fieldNames.add(name);
