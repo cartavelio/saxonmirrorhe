@@ -172,7 +172,7 @@ public class CoercedFunction extends AbstractFunction {
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         SpecificFunctionType req = requiredType;
         SequenceType[] argTypes = targetFunction.getFunctionItemType().getArgumentTypes();
-        int suppliedArity = argTypes.length;
+        int suppliedArity = Math.min(args.length, argTypes.length);
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Sequence[] targetArgs = new Sequence[suppliedArity];
         for (int i = 0; i < suppliedArity; i++) {
@@ -186,6 +186,7 @@ public class CoercedFunction extends AbstractFunction {
                 targetArgs[i] = th.applyFunctionConversionRules(gVal, argTypes[i], role, Loc.NONE);
             }
         }
+        // TODO: don't materialize the result if static type checking tells us the result will be OK
         GroundedValue rawResult = targetFunction.call(context, targetArgs).materialize();
         if (req.getResultType().matches(rawResult, th)) {
             return rawResult;
