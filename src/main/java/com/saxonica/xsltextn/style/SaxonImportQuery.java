@@ -10,10 +10,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.query.*;
 import net.sf.saxon.style.*;
-import net.sf.saxon.trans.CompilerInfo;
-import net.sf.saxon.trans.SaxonErrorCode;
-import net.sf.saxon.trans.Visibility;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.*;
 import net.sf.saxon.value.Whitespace;
 
 
@@ -101,19 +98,24 @@ public class SaxonImportQuery extends StyleElement {
 
             // Now import the functions
 
-            for (XQueryFunction def : importedModule.getGlobalFunctionLibrary().getFunctionDefinitions()) {
+            //for (XQueryFunction def : importedModule.getGlobalFunctionLibrary().getFunctionDefinitions()) {
+            importedModule.getGlobalFunctionLibrary().processAllFunctions(def -> {
                 // don't import functions transitively
                 if (def.getFunctionName().hasURI(moduleURI) && !def.isPrivate()) {
-                    top1.declareXQueryFunction(def);
-                    UserFunction fn = def.getUserFunction();
-                    StylesheetPackage pack = top1.getStylesheetPackage();
-                    Component component = fn.makeDeclaringComponent(Visibility.PRIVATE, pack);
-                    if (fn.getPackageData() == null) {
-                        fn.setPackageData(pack);
+                    try {
+                        top1.declareXQueryFunction(def);
+                        UserFunction fn = def.getUserFunction();
+                        StylesheetPackage pack = top1.getStylesheetPackage();
+                        Component component = fn.makeDeclaringComponent(Visibility.PRIVATE, pack);
+                        if (fn.getPackageData() == null) {
+                            fn.setPackageData(pack);
+                        }
+                        pack.getComponentIndex().put(def.getIdentificationKey(), component);
+                    } catch (XPathException e) {
+                        throw new UncheckedXPathException(e);
                     }
-                    pack.getComponentIndex().put(def.getIdentificationKey(), component);
                 }
-            }
+            });
         } catch (XPathException err) {
             compileError(err);
         }

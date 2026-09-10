@@ -2,6 +2,7 @@ package com.saxonica.expr;
 
 import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.*;
 import net.sf.saxon.trans.XPathException;
 
@@ -24,9 +25,16 @@ public class QueryLibraryImpl extends QueryLibrary {
     public void link(QueryModule importer) throws XPathException {
         // Import the global functions and variables from this library to the importing module
         XQueryFunctionLibrary lib = getGlobalFunctionLibrary();
-        for (XQueryFunction fn : lib.getFunctionDefinitions()) {
-            importer.getTopLevelModule().getGlobalFunctionLibrary().declareFunction(fn);
+        QueryModule top = importer.getTopLevelModule();
+        XQueryFunctionLibrary topLib = top.getGlobalFunctionLibrary();
+
+        for (NamespaceUri ns : lib.getNamespaces()) {
+           topLib.addFunctions(ns, lib.getFunctionsForNamespace(ns));
         }
+//        for (XQueryFunction fn : lib.getFunctionDefinitions()) {
+//            importer.getTopLevelModule().getGlobalFunctionLibrary().declareFunction(fn);
+//        }
+
         for (GlobalVariable libvar : getImportedGlobalVariables()) {
             // Need to create a copy of the variable, because its slot number will be different for each query
             // that the variable is used in
