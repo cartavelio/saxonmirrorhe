@@ -405,127 +405,170 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
 ]]></code></pre>
    </section>
 
-   <section id="samples_python" title="Python samples">
-      <h1>Python samples</h1>
-     
-     <p>The <a
-       href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"><code>pypi</code></a>
-       directory in the SaxonC download contains Python code samples
-       for running XSLT, XQuery, XPath and Schema Validation, providing various examples of the use of the
-       SaxonC Python API.</p>
-     
-     <p>For a step by step guide to building your own Python application for XML processing with SaxonC see the
-       following sections in the main Saxon documentation:</p>
-     
-     <ul>
-       <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/python-api-transformation"
-         >XSLT transformations from a Python application</a></li>
-       <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/python-api-query"
-         >XQuery from a Python application</a></li>
-       <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/python-api-xpath"
-         >XPath from a Python application</a></li>
-       <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/python-api-validation"
-         >Validation from Python</a></li>
-     </ul>
-     
-     <h3 class="subtitle">Running the samples</h3>
+  <section id="samples_python" title="Python samples">
+    <h1>Python samples</h1>
 
-       <p>The <a
-         href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"><code>pypi</code></a>
-         directory in the SaxonC download includes the 
-         unit test files <code>test_saxonc.py</code> and <code>test_saxon_schema.py</code>, which
-         contain a collection of Python unit test cases to be run with the pytest framework. The
-         pyunit tests can be run with the following command:</p>
+    <p>The <a
+        href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"
+          ><code>pypi</code></a> directory in the SaxonC download contains
+      Python code samples for running XSLT, XQuery, XPath and Schema Validation,
+      providing various examples of the use of the SaxonC Python API.</p>
 
-           <kbd>cd pypi</kbd>
-           <kbd>pytest test_saxonc.py</kbd>
+    <p>For a step by step guide to building your own Python application for XML
+      processing with SaxonC see the following sections in the main Saxon
+      documentation:</p>
 
+    <ul>
+      <li>
+        <a target="_blank"
+          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/python-api-transformation"
+          >XSLT transformations from a Python application</a>
+      </li>
+      <li>
+        <a target="_blank"
+          href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/python-api-query"
+          >XQuery from a Python application</a>
+      </li>
+      <li>
+        <a target="_blank"
+          href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/python-api-xpath"
+          >XPath from a Python application</a>
+      </li>
+      <li>
+        <a target="_blank"
+          href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/python-api-validation"
+          >Validation from Python</a>
+      </li>
+    </ul>
 
-     <p>In the <code>pypi/testsuite_driver</code> directory, you will also find the test driver for running
-       the W3C test suite for XSLT 3.0 against SaxonC. The test suite itself is on GitHub: repository
-       <code>w3c/xslt30-test</code>. The test suite driver can be run as follows:</p>
+    <h3 class="subtitle">Running the samples</h3>
+
+    <p>The <a
+        href="https://github.com/Saxonica/saxonc-resources/tree/main/samples/python"
+          ><code>python</code></a> directory in the SaxonC download includes the
+      unit test files, including <code>test_saxonc.py</code> and
+        <code>test_saxon_schema.py</code>, which contain a collection of Python
+      unit test cases to be run with the pytest framework. The pyunit tests can
+      be run with the following command:</p>
+
+    <kbd>cd python</kbd>
+    <kbd>pytest --data-dir=../samples/data</kbd>
+
+    <p>You will require a <code>pytest.ini</code> file to configure pytest. If
+      one isn't present in the <code>python</code> directory, you can create a
+      file named <code>pytest.ini</code> and add the following content:</p>
+
+    <pre><code><![CDATA[[pytest]
+testpaths = test
+pythonpath = test/saxon_import
+norecursedirs = test/saxon_import
+addopts = --import-mode=importlib]]></code></pre>
+    <p>In the <code>python/testsuite_driver</code> directory, you will also find
+      the test driver for running the W3C test suite for XSLT 3.0 against
+      SaxonC. The test suite itself is on GitHub: repository
+        <code>w3c/xslt30-test</code>. The test suite driver must be told what
+      edition of SaxonC to import, using the <code>SAXONC_EDITION</code>
+      environment variable. It can be run as follows (for SaxonC-HE):</p>
+
+    <kbd>cd testsuite_driver</kbd>
+    <kbd>SAXONC_EDITION=he python3 xslt30_test_suite_driver.py [TEST SUITE DIR]
+      -o [RESULTS OUTPUT DIR]</kbd>
+
+    <p>The test driver also provides options for running individual test cases
+      or test sets:</p>
+    <kbd>SAXONC_EDITION=he python3 xslt30_test_suite_driver.py -t &lt;test-case>
+      -s &lt;testset> -o &lt;resultdir></kbd>
+
+    <aside>
+      <p><b>SaxonC &lt;= 12.5</b></p>
+
+      <p>In these earlier releases the edition of SaxonC being used is hardcoded
+        into the testsuite driver, so it's not necessary to set the
+          <code>SAXONC_EDITION</code> environment variable:</p>
 
       <kbd>cd testsuite_driver</kbd>
-      <kbd>python3 xslt30_test_suite_driver.py [TEST SUITE DIR] -o [RESULTS OUTPUT DIR]</kbd>
+      <kbd>python3 xslt30_test_suite_driver.py [TEST SUITE DIR] -o [RESULTS OUTPUT
+        DIR]</kbd>
 
-      <p>The test driver also provides options for running individual test cases or test sets:</p>
-     <kbd>python3 xslt30_test_suite_driver.py -t &lt;test-case> -s &lt;testset> -o &lt;resultdir></kbd>
-     
-     
-     <h3 class="subtitle">Example code</h3>
+      <p>The test driver also provides options for running individual test cases
+        or test sets:</p>
+      <kbd>python3 xslt30_test_suite_driver.py -t &lt;test-case> -s &lt;testset>
+        -o &lt;resultdir></kbd>
+    </aside>
 
-      <p>To help get started with SaxonC and Python, the <code>pypi/samples</code>
-         directory also includes some python example scripts: <code>saxon_example.py</code>,
-            <code>saxon_example2.py</code> and <code>saxon_example3.py</code>.</p>
+    <h3 class="subtitle">Example code</h3>
 
-      <p>Example 1: Python script using the SaxonC-HE API with a simple stylesheet test.xsl:</p>
+    <p>To help get started with SaxonC and Python, the <code>pypi/samples</code>
+      directory also includes some python example scripts:
+        <code>saxon_example.py</code>, <code>saxon_example2.py</code> and
+        <code>saxon_example3.py</code>.</p>
 
-     <pre><code class="language-python"><![CDATA[from saxonche import *
+    <p>Example 1: Python script using the SaxonC-HE API with a simple stylesheet
+      test.xsl:</p>
 
-with PySaxonProcessor(license=False) as proc:
+    <pre><code class="language-python"><![CDATA[from saxonche import *
 
-  print(proc.version)
-  try:
-      xsltproc = proc.new_xslt30_processor()
-      document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
-      executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
+proc = PySaxonProcessor(license=False)
 
-      print(document)
-
-      output = executable.transform_to_string(xdm_node=document)
-      print(output)
-  except PySaxonApiError as err:
-              print('Error during function call', err)
-      
-
-
-  print('Example 2 \n')
-  xml = """\
-    <out>
-      <person>text1</person>
-      <person>text2</person>
-      <person>text3</person>
-    </out>"""
-  xp = proc.new_xpath_processor()
-  node = proc.parse_xml(xml_text=xml)
-  print('test 1\n node='+node.string_value)
-  xp.set_context(xdm_item=node)
-  item = xp.evaluate_single('//person[1]')
-  if isinstance(item,saxonc.PyXdmNode):
-    print(item.string_value)
-    ]]></code></pre>
-     
-     <p>Example 2: Python script using PyXsltExecutable (with SaxonC-HE):</p>
-     
-     <pre><code class="language-python"><![CDATA[from saxonche import *
-
-with PySaxonProcessor(license=False) as proc:
-
-  print(proc.version)
+print(proc.version)
+try:
   xsltproc = proc.new_xslt30_processor()
+  document = proc.parse_xml(xml_text="<out><person>text1</person><person>text2</person><person>text3</person></out>")
   executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
-  executable.set_result_as_raw_value(True)
-  executable.set_initial_match_selection(file_name="cat.xml")
-  xdm_atomic_value = proc.make_integer_value(5)
-  value1= proc.make_string_value("text")
 
-  executable.set_parameter("param",value1)
-  executable.set_parameter("param2",xdm_atomic_value)
-  result = executable.apply_templates_returning_string()
-  print(result)
-    ]]></code></pre>
-     
-     <p>Example 3: Parsing XML from a file:</p>
-     
-     <pre><code class="language-python"><![CDATA[  builder = saxonproc.new_document_builder()
-  node = builder.parse_xml(xml_file_name='books.xml')
-  ]]></code></pre>
-     
-     <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
-     
-   </section>
+  print(document)
+
+  output = executable.transform_to_string(xdm_node=document)
+  print(output)
+except PySaxonApiError as err:
+          print('Error during function call', err)
+
+
+
+print('Example 2 \n')
+xml = """\
+<out>
+  <person>text1</person>
+  <person>text2</person>
+  <person>text3</person>
+</out>"""
+xp = proc.new_xpath_processor()
+node = proc.parse_xml(xml_text=xml)
+print('test 1\n node='+node.string_value)
+xp.set_context(xdm_item=node)
+item = xp.evaluate_single('//person[1]')
+if isinstance(item,saxonc.PyXdmNode):
+print(item.string_value)
+]]></code></pre>
+
+    <p>Example 2: Python script using PyXsltExecutable (with SaxonC-HE):</p>
+
+    <pre><code class="language-python"><![CDATA[from saxonche import *
+
+proc = PySaxonProcessor(license=False)
+
+print(proc.version)
+xsltproc = proc.new_xslt30_processor()
+executable = xsltproc.compile_stylesheet(stylesheet_file="test.xsl")
+executable.set_result_as_raw_value(True)
+executable.set_initial_match_selection(file_name="cat.xml")
+xdm_atomic_value = proc.make_integer_value(5)
+value1= proc.make_string_value("text")
+
+executable.set_parameter("param",value1)
+executable.set_parameter("param2",xdm_atomic_value)
+result = executable.apply_templates_returning_string()
+print(result)
+]]></code></pre>
+
+    <p>Example 3: Parsing XML from a file:</p>
+
+    <pre><code class="language-python"><![CDATA[  builder = saxonproc.new_document_builder()
+node = builder.parse_xml(xml_file_name='books.xml')
+]]></code></pre>
+
+    <p>For an example of exception handling, see <a href="/technical/debugging"
+        >Debugging</a>.</p>
+
+  </section>
 </article>
