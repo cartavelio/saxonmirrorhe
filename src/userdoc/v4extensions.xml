@@ -1588,6 +1588,15 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
       <p>From 12.3, some of the constructs in a FLWOR <code>window</code> clause become optional, for example it is no longer
          necessary to say <code>when true()</code>.</p>
    </section>
+      
+      <section id="serialization40-extensions" title="Serialization 4.0 extensions">
+         <head>Serialization 4.0 extensions</head>
+         
+         <p>From Saxon 12.3, a new serialization parameter <code>escape-solidus</code> is available. The XSLT and XQuery
+            syntax for this requires 4.0 to be available, but it can be used in API calls and from the command line 
+            without enabling 4.0. The default is <code>yes</code>; if the parameter is set to <code>no</code>,
+            the JSON serialization method outputs <code>"/"</code> as <code>"/"</code>, not as <code>"\/"</code>.</p>
+      </section>
 
 
 
