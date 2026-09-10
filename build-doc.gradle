@@ -765,8 +765,9 @@ task copy_html_documentation(
 }
 
 task copy_base_css(
-        type: Copy,
-        description: "Copy base CSS for HTML documentation"
+  type: Copy,
+  dependsOn: ["gen_contents_ref"],
+  description: "Copy base CSS for HTML documentation"
 ) {
   into "${buildDir}/website"
   from "${projectDir}/src/viewer_appJS/saxon-base.css"
@@ -944,7 +945,7 @@ task saxonc_api_doc(
   description: "Build the SaxonC API documentation for website"
 ) {
   inputs.files fileTree(dir: "${buildDir}/doc_pypi/documentation")
-  inputs.file "${buildDir}/doc_pypi/saxonc.html"
+  inputs.file "${buildDir}/doc_pypi/saxoncee.html"
   outputs.files fileTree("${buildDir}/saxonc-doc")
 
   doLast {
@@ -956,7 +957,11 @@ task saxonc_api_doc(
   doLast {
     copy {
       into "${buildDir}/saxonc-doc/doc${saxonMajorVersion}/html"
-      from "${buildDir}/doc_pypi/saxonc.html"
+      from "${buildDir}/doc_pypi"
+      include "saxoncee.html"
+      rename {
+        "saxonc.html"
+      }
     }
   }
 }
@@ -998,7 +1003,7 @@ task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
 
 task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
   inputs.files fileTree(dir: "${buildDir}/doc_pypi", exclude: "*.html")
-  outputs.file "${buildDir}/doc_pypi/saxonc.html"
+  outputs.file "${buildDir}/doc_pypi/saxoncee.html"
 
   doLast {
     exec {
@@ -1017,7 +1022,7 @@ task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
   doLast {
     exec {
       workingDir "${buildDir}/doc_pypi"
-      commandLine pydocex, '-w', 'saxonc'
+      commandLine pydocex, '-w', 'saxoncee'
     }
   }
 }
