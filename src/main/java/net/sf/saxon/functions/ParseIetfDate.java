@@ -10,7 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
@@ -33,12 +33,12 @@ public class ParseIetfDate extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringItem stringValue = (StringItem) arguments[0].head();
         if (stringValue == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
-        return new ZeroOrOne(parse(stringValue.getStringValue(), context));
+        return SequenceTool.itemOrEmpty(parse(stringValue.getStringValue(), context));
     }
 
     private final String[] dayNames = new String[]{

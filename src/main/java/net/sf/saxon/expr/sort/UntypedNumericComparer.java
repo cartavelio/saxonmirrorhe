@@ -26,7 +26,7 @@ public class UntypedNumericComparer implements AtomicComparer {
 
     private ConversionRules rules = ConversionRules.DEFAULT;
 
-    private static final double[][] bounds = {
+    private static final double[][] bounds = new double[][] {
             {1, 0e0, 0e1, 0e2, 0e3, 0e4, 0e5, 0e6, 0e7, 0e8, 0e9, 0e10},
             {1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10},
             {1, 2e0, 2e1, 2e2, 2e3, 2e4, 2e5, 2e6, 2e7, 2e8, 2e9, 2e10},

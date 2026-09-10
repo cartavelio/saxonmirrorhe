@@ -148,7 +148,7 @@ public class XSLIterate extends StyleElement {
             }
         }
         LocalParamBlock paramBlock = new LocalParamBlock(compiledParams);
-        Expression action = compileSequenceConstructor(exec, decl, new ListIterator<>(nonFinallyChildren), false);
+        Expression action = compileSequenceConstructor(exec, decl, new ListIterator(nonFinallyChildren), false);
         if (action == null) {
             // body of xsl:iterate is empty: it's a no-op.
             return Literal.makeEmptySequence();

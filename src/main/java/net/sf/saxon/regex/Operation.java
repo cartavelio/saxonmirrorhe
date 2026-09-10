@@ -21,7 +21,6 @@ import net.sf.saxon.z.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
-import java.util.function.IntPredicate;
 
 /**
  * Represents an operation or instruction in the regular expression program. The class Operation
@@ -505,13 +504,13 @@ public abstract class Operation {
      */
 
     public static class OpCharClass extends Operation {
-        private final IntPredicate predicate;
+        private final IntPredicateProxy predicate;
 
-        OpCharClass(IntPredicate predicate) {
+        OpCharClass(IntPredicateProxy predicate) {
             this.predicate = predicate;
         }
 
-        public IntPredicate getPredicate() {
+        public IntPredicateProxy getPredicate() {
             return predicate;
         }
 

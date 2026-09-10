@@ -10,13 +10,12 @@ package net.sf.saxon.regex;
 //import net.sf.saxon.expr.regexj.Matcher;
 //import net.sf.saxon.expr.regexj.Pattern;
 
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.value.StringItem;
 
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -153,7 +152,7 @@ public class JavaRegularExpression implements RegularExpression {
      */
 
     @Override
-    public AtomicIterator<StringItem> tokenize(UnicodeString input) {
+    public AtomicIterator tokenize(UnicodeString input) {
         if (input.isEmpty()) {
             return EmptyIterator.ofAtomic();
         }

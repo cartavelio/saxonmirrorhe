@@ -154,7 +154,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     }
                     if (validation == Validation.STRICT && component instanceof FixedElement) {
                         SchemaDeclaration decl = env.getConfiguration().getElementDeclaration(
-                                ((FixedElement) component).getElementName().getFingerprint());
+                                ((FixedElement) component).getFixedElementName().getFingerprint());
                         if (decl != null) {
                             ((FixedElement) component).getContentExpression().
                                     checkPermittedContents(decl.getType(), true);
@@ -350,7 +350,7 @@ public class DocumentInstr extends ParentNodeConstructor {
             out.emitAttribute("text", constantText.toString());
         }
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
-            out.emitAttribute("validation", Validation.toString(getValidationAction()));
+            out.emitAttribute("validation", Validation.describe(getValidationAction()));
         }
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {

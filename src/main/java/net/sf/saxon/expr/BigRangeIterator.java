@@ -25,7 +25,7 @@ import java.util.EnumSet;
  * where the integers may exceed the range of a Long
  */
 
-public class BigRangeIterator extends RangeIterator implements AtomicIterator<IntegerValue>, LastPositionFinder, LookaheadIterator {
+public class BigRangeIterator extends RangeIterator implements AtomicIterator, LastPositionFinder, LookaheadIterator {
 
     BigInteger start;
     BigInteger step;

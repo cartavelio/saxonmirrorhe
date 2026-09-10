@@ -14,6 +14,7 @@ import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.trace.ContextStackFrame;
 import net.sf.saxon.trace.ContextStackIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -541,7 +542,7 @@ public class XPathContextMinor implements XPathContext {
      */
 
     @Override
-    public Iterator iterateStackFrames() {
+    public Iterator<ContextStackFrame> iterateStackFrames() {
         return new ContextStackIterator(this);
     }
 

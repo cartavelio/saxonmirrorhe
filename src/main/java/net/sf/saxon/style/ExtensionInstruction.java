@@ -33,7 +33,7 @@ public abstract class ExtensionInstruction extends StyleElement {
      */
 
     @Override
-    public final boolean mayContainFallback() {
+    protected final boolean mayContainFallback() {
         return true;
     }
 

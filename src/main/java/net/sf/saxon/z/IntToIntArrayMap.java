@@ -104,7 +104,7 @@ public class IntToIntArrayMap implements IntToIntMap {
     /*@NotNull*/
     @Override
     public IntIterator keyIterator() {
-        return new KeyIterator();
+        return new KeyIterator(this);
     }
 
     /**
@@ -171,23 +171,24 @@ public class IntToIntArrayMap implements IntToIntMap {
         return used;
     }
 
-    private class KeyIterator implements IntIterator {
+    private static class KeyIterator implements IntIterator {
 
+        private IntToIntArrayMap map;
         private int i = 0;
-        private static final long serialVersionUID = 1720894017771245276L;
 
-        public KeyIterator() {
+        public KeyIterator(IntToIntArrayMap map) {
+            this.map = map;
             i = 0;
         }
 
         @Override
         public boolean hasNext() {
-            return i < used;
+            return i < map.used;
         }
 
         @Override
         public int next() {
-            return keys[i++];
+            return map.keys[i++];
         }
     }
 }

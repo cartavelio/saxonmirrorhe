@@ -345,9 +345,9 @@ public class Executable {
         if (systemId.equals(topModule.getSystemId())) {
             return topModule;
         }
-        Iterator miter = getQueryLibraryModules();
+        Iterator<QueryModule> miter = getQueryLibraryModules();
         while (miter.hasNext()) {
-            QueryModule sqc = (QueryModule) miter.next();
+            QueryModule sqc = miter.next();
             String uri = sqc.getSystemId();
             if (uri != null && uri.equals(systemId)) {
                 return sqc;
@@ -362,9 +362,9 @@ public class Executable {
      * @return an iterator whose returned items are instances of {@link QueryModule}
      */
 
-    public Iterator getQueryLibraryModules() {
+    public Iterator<QueryModule> getQueryLibraryModules() {
         if (queryLibraryModules == null) {
-            return Collections.EMPTY_LIST.iterator();
+            return Collections.emptyIterator();
         } else {
             List<QueryModule> modules = new ArrayList<>();
             for (List<QueryModule> queryModules : queryLibraryModules.values()) {

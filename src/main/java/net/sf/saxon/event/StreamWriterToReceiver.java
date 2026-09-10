@@ -19,6 +19,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Untyped;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
@@ -88,7 +89,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
      * The Checker used for testing valid characters
      */
 
-    private final IntPredicate charChecker;
+    private final IntPredicateProxy charChecker;
 
     /**
      * Flag to indicate whether names etc are to be checked for well-formedness

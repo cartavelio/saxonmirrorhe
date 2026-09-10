@@ -343,7 +343,7 @@ public abstract class AtomicValue
      * @return the value converted to a string according to the rules for the primitive type
      */
 
-    protected abstract UnicodeString getPrimitiveStringValue();
+    public abstract UnicodeString getPrimitiveStringValue();
 
 
     /**
@@ -477,8 +477,8 @@ public abstract class AtomicValue
      * @return an iterator over all the items
      */
     @Override
-    public SingleAtomicIterator<? extends AtomicValue> iterate() {
-        return new SingleAtomicIterator<>(this);
+    public SingleAtomicIterator iterate() {
+        return new SingleAtomicIterator(this);
     }
 
 

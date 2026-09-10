@@ -56,7 +56,7 @@ public final class RuleManager {
         Component c = unnamedMode.makeDeclaringComponent(Visibility.PRIVATE, stylesheetPackage);
         c.setVisibility(Visibility.PRIVATE, VisibilityProvenance.DEFAULTED);
         this.stylesheetPackage.addComponent(c);
-        this.modes = new HashMap<>(5);
+        this.modes = new HashMap<StructuredQName, Mode>(5);
     }
 
     /**

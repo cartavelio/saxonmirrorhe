@@ -7,7 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
-import net.sf.saxon.annotate.CSharp;
+import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;

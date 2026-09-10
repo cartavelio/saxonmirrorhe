@@ -16,6 +16,7 @@ import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -23,7 +24,6 @@ import java.net.URI;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.UnmappableCharacterException;
-import java.util.function.IntPredicate;
 
 
 /**
@@ -59,7 +59,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
             throws XPathException {
 
         final Configuration config = context.getConfiguration();
-        IntPredicate checker = config.getValidCharacterChecker();
+        IntPredicateProxy checker = config.getValidCharacterChecker();
 
         // Use the URI machinery to validate and resolve the URIs
 
@@ -143,7 +143,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file contains illegal characters
      */
 
-    public static UnicodeString readFile(IntPredicate checker, Reader reader) throws IOException, XPathException {
+    public static UnicodeString readFile(IntPredicateProxy checker, Reader reader) throws IOException, XPathException {
         UnicodeBuilder buffer = new UnicodeBuilder();
         readFile(checker, reader, new UniStringConsumer() {
             @Override
@@ -164,7 +164,7 @@ public abstract class UnparsedTextFunction extends SystemFunction {
      * @throws XPathException if the file contains illegal characters
      */
 
-    public static void readFile(IntPredicate checker, Reader reader, UniStringConsumer output) throws IOException, XPathException {
+    public static void readFile(IntPredicateProxy checker, Reader reader, UniStringConsumer output) throws IOException, XPathException {
         char[] buffer = new char[2048];
         boolean first = true;
         int actual;

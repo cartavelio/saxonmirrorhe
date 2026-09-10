@@ -221,7 +221,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
     @Override
     public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator<>(groups.get(position - 1));
+        return new ListIterator(groups.get(position - 1));
     }
 
     /**
@@ -230,7 +230,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      * @return the contents of the current group
      */
 
-    public List getCurrentGroup() {
+    public List<Item> getCurrentGroup() {
         return groups.get(position - 1);
     }
 
@@ -302,7 +302,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
         @Override
         public SequenceIterator iterateCurrentGroup()  {
-            return new ListIterator<>(currentGroup);
+            return new ListIterator(currentGroup);
         }
 
         @Override

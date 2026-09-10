@@ -10,7 +10,9 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.StringItem;
@@ -36,11 +38,11 @@ public class Compare extends CollatingFunctionFixed {
     }
 
     @Override
-    public Int64Value call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringItem arg0 = (StringItem) arguments[0].head();
         StringItem arg1 = (StringItem) arguments[1].head();
         GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
-        return compare(arg0, arg1, comparer);
+        return SequenceTool.itemOrEmpty(compare(arg0, arg1, comparer));
     }
 
 }

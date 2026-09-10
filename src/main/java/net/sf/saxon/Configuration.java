@@ -55,6 +55,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
 import org.xml.sax.*;
 import org.xml.sax.ext.DefaultHandler2;
@@ -75,7 +76,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 
@@ -1141,7 +1141,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * the version of XML (1.0 or 1.1) selected by this configuration
      */
 
-    public IntPredicate getValidCharacterChecker() {
+    public IntPredicateProxy getValidCharacterChecker() {
         if (xmlVersion == XML10) {
             return XMLCharacterData::isValid10;
         } else {
@@ -5172,7 +5172,7 @@ public class Configuration implements SourceResolver, NotationSet {
                 return (T) Integer.valueOf(getSchemaValidationMode());
 
             case FeatureCode.SCHEMA_VALIDATION_MODE:
-                return (T) Validation.toString(getSchemaValidationMode());
+                return (T) Validation.describe(getSchemaValidationMode());
 
             case FeatureCode.SERIALIZER_FACTORY_CLASS:
                 return (T) getSerializerFactory().getClass().getName();

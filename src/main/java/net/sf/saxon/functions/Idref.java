@@ -71,14 +71,14 @@ public class Idref extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrMore<NodeInfo> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo start = arguments.length == 1 ? getContextNode(context) : (NodeInfo) arguments[1].head();
         NodeInfo arg2 = start.getRoot();
         if (arg2.getNodeKind() != Type.DOCUMENT) {
             throw new XPathException("In the idref() function," +
                     " the tree being searched must be one whose root is a document node", "FODC0001", context);
         }
-        return new ZeroOrMore<>(getIdrefMultiple(arg2.getTreeInfo(), arguments[0].iterate(), context));
+        return new LazySequence(getIdrefMultiple(arg2.getTreeInfo(), arguments[0].iterate(), context));
     }
 
     private static class IdrefMappingFunction implements MappingFunction {

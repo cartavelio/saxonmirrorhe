@@ -12,10 +12,10 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 
 import net.sf.saxon.type.*;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.LinkedList;
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 
 /**
  * An MultipleNodeKindTest is a nodetest that matches nodes belonging to any subset of possible
@@ -96,7 +96,7 @@ public final class MultipleNodeKindTest extends NodeTest {
     }
 
     @Override
-    public IntPredicate getMatcher(final NodeVectorTree tree) {
+    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
         return nodeNr -> {
             int nodeKind = nodeKindArray[nodeNr] & 0x0f;

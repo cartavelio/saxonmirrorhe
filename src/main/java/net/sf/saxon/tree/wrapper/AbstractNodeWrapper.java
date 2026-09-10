@@ -21,6 +21,8 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
 
+import java.util.function.Predicate;
+
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
  * <p>This implementation of the NodeInfo interface contains common code used by many "wrapper" implementations
@@ -264,12 +266,13 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * be provided in a subclass.</p>
      *
      * @param axisNumber the axis to be used
-     * @param nodeTest   A pattern to be matched by the returned nodes
+     * @param predicate   A pattern to be matched by the returned nodes
      * @return a SequenceIterator that scans the nodes reached by the axis in turn.
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+        NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         int nodeKind = getNodeKind();
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:

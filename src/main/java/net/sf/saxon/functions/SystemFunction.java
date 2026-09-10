@@ -20,10 +20,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.*;
 
 import java.util.Arrays;
 import java.util.Properties;

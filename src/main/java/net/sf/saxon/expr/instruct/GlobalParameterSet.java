@@ -44,7 +44,8 @@ public class GlobalParameterSet {
      */
 
     public GlobalParameterSet(GlobalParameterSet parameterSet) {
-        this.params = new HashMap<>(parameterSet.params);
+        // Type parameters needed for C#
+        this.params = new HashMap<StructuredQName, GroundedValue>(parameterSet.params);
     }
 
     /**

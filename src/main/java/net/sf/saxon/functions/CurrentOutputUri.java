@@ -12,7 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
 
@@ -69,8 +69,8 @@ public class CurrentOutputUri extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne<AnyURIValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return new ZeroOrOne<>(evaluateItem(context));
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        return SequenceTool.itemOrEmpty(evaluateItem(context));
     }
 
 }

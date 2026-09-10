@@ -47,8 +47,8 @@ public class DifferenceEnumeration implements SequenceIterator {
 
         // move to the first node in each input nodeset
 
-        nextNode1 = next(p1);
-        nextNode2 = next(p2);
+        nextNode1 = nextNode(p1);
+        nextNode2 = nextNode(p2);
     }
 
     /**
@@ -60,7 +60,7 @@ public class DifferenceEnumeration implements SequenceIterator {
      * @throws XPathException if a failure occurs reading the input
      */
 
-    private NodeInfo next(SequenceIterator iter) throws XPathException {
+    private NodeInfo nextNode(SequenceIterator iter) throws XPathException {
         return (NodeInfo)iter.next();
         // rely on type-checking to prevent a ClassCastException
     }
@@ -86,14 +86,14 @@ public class DifferenceEnumeration implements SequenceIterator {
                 return deliver();
 
             } else if (c > 0) {                       // p1 is higher
-                nextNode2 = next(p2);
+                nextNode2 = nextNode(p2);
                 if (nextNode2 == null) {
                     return deliver();
                 }
 
             } else {                                // keys are equal
-                nextNode2 = next(p2);
-                nextNode1 = next(p1);
+                nextNode2 = nextNode(p2);
+                nextNode1 = nextNode(p1);
             }
         }
     }
@@ -107,7 +107,7 @@ public class DifferenceEnumeration implements SequenceIterator {
      */
     private NodeInfo deliver() throws XPathException {
         NodeInfo current = nextNode1;
-        nextNode1 = next(p1);
+        nextNode1 = nextNode(p1);
         return current;
     }
 

@@ -24,10 +24,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.QNameValue;
-import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.*;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -145,10 +142,10 @@ public class Doc_2 extends SystemFunction implements Callable {
      * @throws XPathException if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne<NodeInfo> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue hrefVal = (AtomicValue) arguments[0].head();
         if (hrefVal == null) {
-            return ZeroOrOne.empty();
+            return EmptySequence.getInstance();
         }
         String href = hrefVal.getStringValue();
         Item param = arguments[1].head();
@@ -167,7 +164,7 @@ public class Doc_2 extends SystemFunction implements Callable {
                     item.getTreeInfo(), parseOptions.getApplicableAccumulators()
             );
         }
-        return new ZeroOrOne<>(item);
+        return item;
     }
 
     private TreeInfo fetch(String href, ParseOptions options, XPathContext context) throws XPathException {

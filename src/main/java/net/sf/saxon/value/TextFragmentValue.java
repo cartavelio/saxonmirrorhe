@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -28,6 +27,7 @@ import net.sf.saxon.type.Untyped;
 import javax.xml.transform.SourceLocator;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.function.Predicate;
 
 /**
  * This class represents a temporary tree whose root document node owns a single text node. <BR>
@@ -433,7 +433,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
     /*@NotNull*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
             case AxisInfo.ATTRIBUTE:
@@ -907,7 +907,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
         /*@NotNull*/
         @Override
-        public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
+        public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
                 case AxisInfo.PARENT:

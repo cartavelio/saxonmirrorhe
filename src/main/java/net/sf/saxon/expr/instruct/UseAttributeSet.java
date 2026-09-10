@@ -104,7 +104,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
         } else if (targets.size() == 1) {
             return targets.get(0);
         } else {
-            return new Block(targets.toArray(new Expression[0]));
+            return new Block(targets.toArray(new UseAttributeSet[0]));
         }
     }
 
@@ -411,7 +411,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
 
     @Override
     protected int computeHashCode() {
-        return 0x86423719 ^ targetName.hashCode();
+        return 0x56423719 ^ targetName.hashCode();
     }
 
 

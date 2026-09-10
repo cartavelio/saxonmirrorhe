@@ -236,7 +236,7 @@ public class Parts extends SystemFunction implements Callable {
                      for (byte b : ((HexBinaryValue)a).getBinaryValue()) {
                          result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
                      }
-                     return new ListIterator<>(result);
+                     return new ListIterator(result);
                  }
         );
 
@@ -246,7 +246,7 @@ public class Parts extends SystemFunction implements Callable {
                      for (byte b : ((Base64BinaryValue) a).getBinaryValue()) {
                          result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
                      }
-                     return new ListIterator<>(result);
+                     return new ListIterator(result);
                  }
         );
 

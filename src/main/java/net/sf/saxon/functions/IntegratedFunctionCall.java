@@ -93,7 +93,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
      */
 
     @Override
-    public void checkArguments(/*@NotNull*/ ExpressionVisitor visitor) throws XPathException {
+    protected void checkArguments(/*@NotNull*/ ExpressionVisitor visitor) throws XPathException {
         ExtensionFunctionDefinition definition = function.getDefinition();
         checkArgumentCount(definition.getMinimumNumberOfArguments(), definition.getMaximumNumberOfArguments());
         final int args = getArity();

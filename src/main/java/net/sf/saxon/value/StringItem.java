@@ -207,9 +207,9 @@ public class StringItem extends AtomicValue {
      */
 
     /*@NotNull*/
-    public synchronized AtomicIterator<Int64Value> iterateCharacters() {
-        return new AtomicIterator<Int64Value>() {
-            IntIterator cp = codePoints();
+    public synchronized AtomicIterator iterateCharacters() {
+        return new AtomicIterator() {
+            final IntIterator cp = codePoints();
             @Override
             public Int64Value next() {
                 return cp.hasNext() ? new Int64Value(cp.next()) : null;
@@ -409,7 +409,7 @@ public class StringItem extends AtomicValue {
      */
 
 
-    public final static class CharacterIterator implements AtomicIterator<Int64Value> {
+    public final static class CharacterIterator implements AtomicIterator {
 
         int inpos = 0;        // 0-based index of the current Java char
         private final CharSequence value;

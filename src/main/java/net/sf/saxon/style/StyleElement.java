@@ -591,7 +591,7 @@ public abstract class StyleElement extends ElementImpl {
      * prepareAttributes (provided in the subclass) and traps any exceptions
      */
 
-    final void processAttributes() {
+    protected final void processAttributes() {
         prepareAttributes();
     }
 
@@ -813,11 +813,23 @@ public abstract class StyleElement extends ElementImpl {
 
     }
 
-    static boolean isYes(String s) {
+    /**
+     * Ask whether an attribute is "yes" or one of its accepted synonyms
+     * @param s the value to be tested. Whitespace should be trimmed by the caller
+     * @return true if the value is "yes", "true", or "1"
+     */
+    public static boolean isYes(String s) {
         return "yes".equals(s) || "true".equals(s) || "1".equals(s);
     }
 
-    static boolean isNo(String s) {
+    /**
+     * Ask whether an attribute is "no" or one of its accepted synonyms
+     *
+     * @param s the value to be tested. Whitespace should be trimmed by the caller
+     * @return true if the value is "no", "false", or "0"
+     */
+
+    public static boolean isNo(String s) {
         return "no".equals(s) || "false".equals(s) || "0".equals(s);
     }
 
@@ -1995,7 +2007,7 @@ public abstract class StyleElement extends ElementImpl {
             }
             vars.addAll(others);
             vars.addAll(onEmpties);
-            return compileSequenceConstructor(compilation, decl, new ListIterator<>(vars), includeParams);
+            return compileSequenceConstructor(compilation, decl, new ListIterator(vars), includeParams);
         } else {
             return compileSequenceConstructor(compilation, decl, iterateAxis(AxisInfo.CHILD), includeParams);
         }
@@ -2160,7 +2172,7 @@ public abstract class StyleElement extends ElementImpl {
      * @return a wrapper instruction that performs the tracing (if activated at run-time)
      */
 
-    static Expression makeTraceInstruction(StyleElement source, Expression child) {
+    protected static Expression makeTraceInstruction(StyleElement source, Expression child) {
         if (child instanceof TraceExpression && !(source instanceof StylesheetComponent)) {
             return child;
             // this can happen, for example, after optimizing a compile-time xsl:if

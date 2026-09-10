@@ -15,7 +15,7 @@ import net.sf.saxon.value.AtomicValue;
  * is a SequenceIterator that returns atomic values and throws no checked exceptions.
  */
 
-public interface AtomicIterator<T extends AtomicValue> extends UnfailingIterator {
+public interface AtomicIterator extends UnfailingIterator {
 
     /**
      * Get the next atomic value in the sequence. <BR>
@@ -24,7 +24,7 @@ public interface AtomicIterator<T extends AtomicValue> extends UnfailingIterator
      */
 
     @Override
-    T next();
+    AtomicValue next();
 
 
 }

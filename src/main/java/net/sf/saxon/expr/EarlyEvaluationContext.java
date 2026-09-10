@@ -14,6 +14,7 @@ import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
+import net.sf.saxon.trace.ContextStackFrame;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -396,8 +397,8 @@ public class EarlyEvaluationContext implements XPathContext {
      */
 
     @Override
-    public Iterator iterateStackFrames() {
-        return Collections.EMPTY_LIST.iterator();
+    public Iterator<ContextStackFrame> iterateStackFrames() {
+        return Collections.emptyIterator();
     }
 
     /**

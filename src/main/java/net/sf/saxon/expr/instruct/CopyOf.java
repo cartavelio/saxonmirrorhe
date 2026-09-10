@@ -303,7 +303,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     }
                     if (e != Affinity.DISJOINT || a != Affinity.DISJOINT) {
                         // it might be an element or attribute
-                        return in instanceof NodeTest ? AnyNodeTest.getInstance() : AnyItemType.getInstance();
+                        if (in instanceof NodeTest) {
+                            return AnyNodeTest.getInstance();
+                        } else {
+                            return AnyItemType.getInstance();
+                        }
                     } else {
                         // it can't be an element or attribute, so stripping type annotations can't affect it
                         return in;
@@ -430,7 +434,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("copyOf", this);
         if (validation != Validation.SKIP) {
-            out.emitAttribute("validation", Validation.toString(validation));
+            out.emitAttribute("validation", Validation.describe(validation));
         }
         if (schemaType != null) {
             out.emitAttribute("type", schemaType.getStructuredQName());
@@ -751,7 +755,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
      * @throws XPathException if a failure occurs
      */
 
-    static void copyAttribute(NodeInfo source,
+    public static void copyAttribute(NodeInfo source,
                               SimpleType schemaType,
                               int validation,
                               Instruction instruction,

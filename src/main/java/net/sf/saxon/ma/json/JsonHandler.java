@@ -9,16 +9,18 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Map;
-import java.util.function.IntPredicate;
 
 /**
  * Default handler class for accepting the result from parsing JSON strings
@@ -26,7 +28,7 @@ import java.util.function.IntPredicate;
 public class JsonHandler {
 
     public boolean escape;
-    protected IntPredicate charChecker;
+    protected IntPredicateProxy charChecker;
     private XPathContext context;
 
     private Function fallbackFunction = null;
@@ -150,7 +152,7 @@ public class JsonHandler {
      */
     protected void handleInvalidCharacters(StringBuilder buffer) throws XPathException {
         //if (checkSurrogates && !liberal) {
-            IntPredicate charChecker = context.getConfiguration().getValidCharacterChecker();
+            IntPredicateProxy charChecker = context.getConfiguration().getValidCharacterChecker();
             for (int i = 0; i < buffer.length(); i++) {
                 char ch = buffer.charAt(i);
                 if (UTF16CharacterSet.isHighSurrogate(ch)) {

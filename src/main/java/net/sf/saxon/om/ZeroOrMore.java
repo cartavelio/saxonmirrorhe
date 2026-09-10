@@ -54,8 +54,8 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
     }
 
     @Override
-    public ListIterator<T> iterate() {
-        return new ListIterator<>(content);
+    public ListIterator iterate() {
+        return new ListIterator(content);
     }
 
     @Override

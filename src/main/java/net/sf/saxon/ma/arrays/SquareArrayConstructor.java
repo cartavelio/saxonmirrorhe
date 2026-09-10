@@ -126,7 +126,7 @@ public class SquareArrayConstructor extends Expression {
 
     @Override
     protected int computeHashCode() {
-        int h = 0x878b92a0;
+        int h = 0x778b92a0;
         for (Operand o : operands()) {
             h ^= o.getChildExpression().hashCode();
         }

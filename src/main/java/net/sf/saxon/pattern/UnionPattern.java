@@ -132,7 +132,7 @@ public class UnionPattern extends VennPattern {
 
     @Override
     protected int computeHashCode() {
-        return 0x9bd723a6 ^ p1.hashCode() ^ p2.hashCode();
+        return 0x3bd723a6 ^ p1.hashCode() ^ p2.hashCode();
     }
 
     /**

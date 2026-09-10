@@ -18,7 +18,7 @@ import net.sf.saxon.value.StringItem;
  * a string using a regular expression
  */
 
-public class DotNetTokenIterator implements AtomicIterator<StringItem> {
+public class DotNetTokenIterator implements AtomicIterator {
 
     private final String input;
     private final Regex pattern;

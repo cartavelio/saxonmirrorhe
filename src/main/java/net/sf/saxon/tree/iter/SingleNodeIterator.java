@@ -8,8 +8,10 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.*;
-import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 
 import java.util.EnumSet;
 
@@ -105,12 +107,12 @@ public class SingleNodeIterator implements AxisIterator,
     /*@NotNull*/
     @Override
     public GroundedValue materialize() {
-        return new ZeroOrOne<>(item);
+        return SequenceTool.itemOrEmpty(item);
     }
 
     @Override
     public GroundedValue getResidue() {
-        return item==null ? EmptySequence.getInstance() : new One<>(item);
+        return SequenceTool.itemOrEmpty(item);
     }
 
     /**

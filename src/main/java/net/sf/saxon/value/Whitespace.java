@@ -476,7 +476,7 @@ public class Whitespace {
      * An iterator that splits a string on whitespace boundaries, corresponding to the XPath 3.1 function tokenize#1
      */
 
-    public static class Tokenizer implements AtomicIterator<StringItem> {
+    public static class Tokenizer implements AtomicIterator {
 
         private final UnicodeString input;
         private long position;

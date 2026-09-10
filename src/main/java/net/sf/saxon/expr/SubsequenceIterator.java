@@ -71,9 +71,9 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
      * @throws XPathException if a dynamic error occurs
      */
 
-    public static <T extends Item> SequenceIterator make(SequenceIterator base, int min, int max) throws XPathException {
+    public static SequenceIterator make(SequenceIterator base, int min, int max) throws XPathException {
         if (base instanceof ArrayIterator) {
-            return ((ArrayIterator<T>) base).makeSliceIterator(min, max);
+            return ((ArrayIterator<?>) base).makeSliceIterator(min, max);
         } else if (max == Integer.MAX_VALUE) {
             return TailIterator.make(base, min);
         } else if (base.getProperties().contains(SequenceIteratorProperty.GROUNDED) && min > 4) {

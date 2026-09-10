@@ -89,7 +89,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
 
     @Override
     public SequenceIterator iterateCurrentGroup() {
-        return new ListIterator<>(currentMembers);
+        return new ListIterator(currentMembers);
     }
 
     @Override

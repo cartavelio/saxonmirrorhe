@@ -35,7 +35,7 @@ public enum EmptyAtomicSequence implements AtomicSequence {
     }
 
     @Override
-    public AtomicIterator<AtomicValue> iterate() {
+    public AtomicIterator iterate() {
         return EmptyIterator.ofAtomic();
     }
 

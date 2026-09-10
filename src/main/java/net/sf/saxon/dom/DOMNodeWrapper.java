@@ -42,7 +42,7 @@ import java.util.EnumSet;
  */
 
 @SuppressWarnings({"SynchronizeOnNonFinalField"})
-public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode, SteppingNode<DOMNodeWrapper> {
+public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode, SteppingNode {
 
     protected Node node;
     protected short nodeKind;
@@ -908,9 +908,9 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    public DOMNodeWrapper getSuccessorElement(DOMNodeWrapper anchor, String uri, String local) {
+    public SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local) {
         synchronized (docWrapper.docNode) {
-            Node stop = anchor == null ? null : anchor.node;
+            Node stop = anchor == null ? null : ((DOMNodeWrapper)anchor).node;
             Node next = node;
             do {
                 next = getSuccessorNode(next, stop);

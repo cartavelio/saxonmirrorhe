@@ -18,13 +18,14 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
 import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.UntypedAtomicValue;
+
+import java.util.function.Predicate;
 
 
 /**
@@ -35,7 +36,7 @@ import net.sf.saxon.value.UntypedAtomicValue;
  */
 
 public abstract class NodeImpl
-        implements MutableNodeInfo, SteppingNode<NodeImpl>, SiblingCountingNode, Location {
+        implements MutableNodeInfo, SteppingNode, SiblingCountingNode, Location {
 
     /*@Nullable*/ private ParentNodeImpl parent;
     private int index; // Set to -1 when the node is deleted
@@ -521,13 +522,13 @@ public abstract class NodeImpl
      * Return an enumeration over the nodes reached by the given axis from this node
      *
      * @param axisNumber The axis to be iterated over
-     * @param nodeTest   A pattern to be matched by the returned nodes
+     * @param predicate   A pattern to be matched by the returned nodes
      * @return an AxisIterator that scans the nodes reached by the axis in turn.
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodeTest nodeTest) {
-
+    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+        NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
                 return new AncestorEnumeration(this, nodeTest, false);
@@ -554,13 +555,13 @@ public abstract class NodeImpl
                         ((NameTest)nodeTest).getPrimitiveType() == Type.ELEMENT) {
                     return ((DocumentImpl) this).getAllElements(((NameTest)nodeTest).getFingerprint());
                 } else if (hasChildNodes()) {
-                    return new SteppingNavigator.DescendantAxisIterator<>(this, false, nodeTest);
+                    return new SteppingNavigator.DescendantAxisIterator(this, false, nodeTest);
                 } else {
                     return EmptyIterator.ofNodes();
                 }
 
             case AxisInfo.DESCENDANT_OR_SELF:
-                return new SteppingNavigator.DescendantAxisIterator<>(this, true, nodeTest);
+                return new SteppingNavigator.DescendantAxisIterator(this, true, nodeTest);
 
             case AxisInfo.FOLLOWING:
                 return new FollowingEnumeration(this, nodeTest);
@@ -690,12 +691,12 @@ public abstract class NodeImpl
     }
 
     @Override
-    public NodeImpl getSuccessorElement(NodeImpl anchor, String uri, String local) {
-        NodeImpl next = getNextInDocument(anchor);
+    public NodeImpl getSuccessorElement(SteppingNode anchor, String uri, String local) {
+        NodeImpl next = getNextInDocument((NodeImpl)anchor);
         while (next != null && !(next.getNodeKind() == Type.ELEMENT &&
                                          (uri == null || uri.equals(next.getURI())) &&
                                          (local == null || local.equals(next.getLocalPart())))) {
-            next = next.getNextInDocument(anchor);
+            next = next.getNextInDocument((NodeImpl)anchor);
         }
         return next;
     }

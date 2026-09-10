@@ -223,7 +223,7 @@ public abstract class VennPattern extends Pattern {
 
     @Override
     protected int computeHashCode() {
-        return 0x9bd723a6 ^ p1.hashCode() ^ p2.hashCode();
+        return 0x6bd723a6 ^ p1.hashCode() ^ p2.hashCode();
     }
 
     /**

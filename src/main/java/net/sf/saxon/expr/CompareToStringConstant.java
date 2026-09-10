@@ -100,7 +100,7 @@ public class CompareToStringConstant extends CompareToConstant {
 
     @Override
     protected int computeHashCode() {
-        int h = 0x884b12a0;
+        int h = 0x484b12a0;
         return h + getLhsExpression().hashCode() ^ comparand.hashCode();
     }
 

@@ -18,12 +18,12 @@ import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
 
 import java.io.Reader;
 import java.net.URI;
 import java.util.Map;
-import java.util.function.IntPredicate;
 
 /**
  * Implements the json-to-xml function defined in XSLT 3.0.
@@ -50,7 +50,7 @@ public class JsonDoc extends SystemFunction  {
         String href = arg0.getStringValue();
 
         final Configuration config = context.getConfiguration();
-        IntPredicate checker = IntSetPredicate.ALWAYS_TRUE; // allow non-XML characters - bug 3911
+        IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE; // allow non-XML characters - bug 3911
 
         // Use the URI machinery to validate and resolve the URIs
 

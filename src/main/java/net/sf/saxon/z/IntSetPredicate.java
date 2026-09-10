@@ -7,13 +7,11 @@
 
 package net.sf.saxon.z;
 
-import java.util.function.IntPredicate;
-
 /**
  * An implementation of IntPredicate that tests whether a given integer is a member
  * of some IntSet
  */
-public class IntSetPredicate implements IntPredicate {
+public class IntSetPredicate implements IntPredicateProxy {
 
     private final IntSet set;
 
@@ -34,32 +32,7 @@ public class IntSetPredicate implements IntPredicate {
     public boolean test(int value) {
         return set.contains(value);
     }
-
-    /**
-     * Returns a composed predicate that represents a short-circuiting logical
-     * OR of this predicate and another.  When evaluating the composed
-     * predicate, if this predicate is {@code true}, then the {@code other}
-     * predicate is not evaluated.
-     * <p>
-     * <p>Any exceptions thrown during evaluation of either predicate are relayed
-     * to the caller; if evaluation of this predicate throws an exception, the
-     * {@code other} predicate will not be evaluated.
-     *
-     * @param other a predicate that will be logically-ORed with this
-     *              predicate
-     * @return a composed predicate that represents the short-circuiting logical
-     * OR of this predicate and the {@code other} predicate
-     * @throws NullPointerException if other is null
-     */
-    @Override
-    public IntPredicate or(IntPredicate other) {
-        if (other instanceof IntSetPredicate) {
-            return new IntSetPredicate(set.union(((IntSetPredicate)other).set));
-        } else {
-            return IntPredicate.super.or(other);
-        }
-    }
-
+    
     /**
      * Get the underlying IntSet
      *
@@ -82,12 +55,12 @@ public class IntSetPredicate implements IntPredicate {
      * Convenience predicate that always matches
      */
 
-    public final static IntPredicate ALWAYS_TRUE = i -> true;
+    public final static IntPredicateProxy ALWAYS_TRUE = new IntPredicateLambda(i -> true);
 
     /**
      * Convenience predicate that never matches
      */
 
-    public final static IntPredicate ALWAYS_FALSE = i -> false;
+    public final static IntPredicateProxy ALWAYS_FALSE = new IntPredicateLambda(i -> false);
 
 }

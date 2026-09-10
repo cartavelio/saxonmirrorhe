@@ -824,6 +824,7 @@ public abstract class AbstractNumberer implements Numberer {
                     break;
                 default:
                     s = "A.M.";
+                    break;
             }
         } else if (minutes == 12 * 60 && maxWidth >= 8 && "gb".equals(country)) {
             s = "Noon";
@@ -838,6 +839,7 @@ public abstract class AbstractNumberer implements Numberer {
                     break;
                 default:
                     s = "P.M.";
+                    break;
             }
         }
         return s;

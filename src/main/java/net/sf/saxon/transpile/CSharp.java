@@ -1,4 +1,4 @@
-package net.sf.saxon.annotate;
+package net.sf.saxon.transpile;
 
 /**
  * This class contains dummy methods which, if called, have no effect; but calls

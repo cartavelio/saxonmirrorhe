@@ -88,7 +88,9 @@ public class SnapshotFn extends SystemFunction {
 
     public static List<NodeInfo> makeAncestorList(NodeInfo origin) {
         List<NodeInfo> ancestors = new ArrayList<>(20);
-        origin.iterateAxis(AxisInfo.ANCESTOR).forEachNode(ancestors::add);
+        for (Item item : origin.iterateAxis(AxisInfo.ANCESTOR)) {
+            ancestors.add((NodeInfo)item);
+        }
         return ancestors;
     }
 

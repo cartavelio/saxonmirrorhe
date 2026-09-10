@@ -178,10 +178,15 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
     @Override
     public FunctionLibrary copy() {
         FunctionLibraryList fll = new FunctionLibraryList();
-        fll.libraryList = new ArrayList<>(libraryList.size());
+        fll.libraryList = emptyFunctionLibraryList(libraryList.size());
         for (int i = 0; i < libraryList.size(); i++) {
             fll.libraryList.add(libraryList.get(i).copy());
         }
         return fll;
+    }
+
+    private static ArrayList<FunctionLibrary> emptyFunctionLibraryList(int allocated) {
+        // Separate method for C# type inference
+        return new ArrayList<>(allocated);
     }
 }

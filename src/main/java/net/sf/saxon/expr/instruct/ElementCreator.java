@@ -315,7 +315,12 @@ public abstract class ElementCreator extends ParentNodeConstructor {
         try {
 
             NodeName elemName = getElementName(context, copiedNode);
-            SchemaType typeCode = getValidationAction() == Validation.PRESERVE ? AnyType.getInstance() : Untyped.getInstance();
+            SchemaType typeCode;
+            if (getValidationAction() == Validation.PRESERVE) {
+                typeCode = AnyType.getInstance();
+            } else {
+                typeCode = Untyped.getInstance();
+            }
 
             Receiver elemOut = out;
             if (!preservingTypes) {
@@ -366,7 +371,7 @@ public abstract class ElementCreator extends ParentNodeConstructor {
 
     void exportValidationAndType(ExpressionPresenter out) {
         if (getValidationAction() != Validation.SKIP && getValidationAction() != Validation.BY_TYPE) {
-            out.emitAttribute("validation", Validation.toString(getValidationAction()));
+            out.emitAttribute("validation", Validation.describe(getValidationAction()));
         }
         if (getValidationAction() == Validation.BY_TYPE) {
             SchemaType type = getSchemaType();

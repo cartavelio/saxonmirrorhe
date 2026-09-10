@@ -12,10 +12,8 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.One;
-import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringItem;
 
@@ -40,8 +38,8 @@ public class GenerateId_1 extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne resultWhenEmpty() {
-        return One.string("");
+    public Sequence resultWhenEmpty() {
+        return StringItem.EMPTY_STRING;
     }
 
     @Override

@@ -32,15 +32,13 @@ import java.util.ListIterator;
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
  * <p>This is the implementation of the NodeInfo interface used as a wrapper for DOM4J nodes.</p>
- *
- * @author Michael H. Kay
  */
 
 // History: this started life as the NodeWrapper for JDOM nodes; it was then modified by the
 // Orbeon team to act as a wrapper for DOM4J nodes, and was shipped with the Orbeon product;
 // it has now been absorbed back into Saxon.
 
-public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode, SteppingNode<DOM4JNodeWrapper> {
+public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode, SteppingNode {
 
     protected Node node;
     protected short nodeKind;
@@ -538,11 +536,11 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     @Override
     protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         if (includeSelf) {
-            return new SteppingNavigator.DescendantAxisIterator<>(this, true, nodeTest);
+            return new SteppingNavigator.DescendantAxisIterator(this, true, nodeTest);
 
         } else {
             if (hasChildNodes()) {
-                return new SteppingNavigator.DescendantAxisIterator<>(this, false, nodeTest);
+                return new SteppingNavigator.DescendantAxisIterator(this, false, nodeTest);
             } else {
                 return EmptyIterator.ofNodes();
             }
@@ -659,8 +657,8 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    public DOM4JNodeWrapper getSuccessorElement(DOM4JNodeWrapper anchor, String uri, String local) {
-        Node stop = anchor == null ? null : anchor.node;
+    public SteppingNode getSuccessorElement(SteppingNode anchor, String uri, String local) {
+        Node stop = anchor == null ? null : ((DOM4JNodeWrapper)anchor).node;
         Node next = node;
         do {
             next = getFollowingNode(next, stop, (DOM4JNodeWrapper) treeInfo.getRootNode());

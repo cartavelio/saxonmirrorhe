@@ -16,11 +16,9 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringItem;
-import net.sf.saxon.z.IntExceptPredicate;
-import net.sf.saxon.z.IntSet;
+import net.sf.saxon.z.*;
 
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 /**
  * A CombinedNodeTest combines two node tests using one of the operators
@@ -110,14 +108,14 @@ public class CombinedNodeTest extends NodeTest {
     }
 
     @Override
-    public IntPredicate getMatcher(NodeVectorTree tree) {
+    public IntPredicateProxy getMatcher(NodeVectorTree tree) {
         switch (operator) {
             case Token.UNION:
-                return nodetest1.getMatcher(tree).or(nodetest2.getMatcher(tree));
+                return IntUnionPredicate.makeUnion(nodetest1.getMatcher(tree), (nodetest2.getMatcher(tree)));
             case Token.INTERSECT:
-                return nodetest1.getMatcher(tree).and(nodetest2.getMatcher(tree));
+                return IntIntersectionPredicate.makeIntersection(nodetest1.getMatcher(tree), (nodetest2.getMatcher(tree)));
             case Token.EXCEPT:
-                return new IntExceptPredicate(nodetest1.getMatcher(tree), nodetest2.getMatcher(tree));
+                return IntExceptPredicate.makeDifference(nodetest1.getMatcher(tree), nodetest2.getMatcher(tree));
             default:
                 throw new IllegalArgumentException("Unknown operator in Combined Node Test");
         }

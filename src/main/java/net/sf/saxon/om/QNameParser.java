@@ -126,7 +126,7 @@ public class QNameParser {
     public StructuredQName parse(String lexicalName, String defaultNS) throws XPathException {
         lexicalName = Whitespace.trim(lexicalName).toString();
         if (acceptEQName && lexicalName.length() >= 4 &&
-                lexicalName.codePointAt(0) == 'Q' && lexicalName.codePointAt(1) == '{') {
+                lexicalName.charAt(0) == 'Q' && lexicalName.charAt(1) == '{') {
             int endBrace = lexicalName.indexOf('}');
             if (endBrace < 0) {
                 throw new XPathException("Invalid EQName: closing brace not found", errorOnBadSyntax);

@@ -9,9 +9,10 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.tree.jiter.WrappingJavaIterator;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
  * is a SequenceIterator that throws no checked exceptions.
  */
 
-public interface UnfailingIterator extends SequenceIterator {
+public interface UnfailingIterator extends SequenceIterator, Iterable<Item> {
 
     /**
      * Get the next item in the sequence.
@@ -44,16 +45,9 @@ public interface UnfailingIterator extends SequenceIterator {
         }
     }
 
-    /**
-     * Create a list containing all the items returned by the iterator.
-     * This method consumes the iterator.
-     * @return a list containing all the (remaining) items returned by the iterator
-     */
-    default List<Item> toList() {
-        List<Item> list = new ArrayList<>();
-        forEach(list::add);
-        return list;
+    @NotNull
+    default Iterator<Item> iterator() {
+        return new WrappingJavaIterator<Item>(this);
     }
-
 }
 

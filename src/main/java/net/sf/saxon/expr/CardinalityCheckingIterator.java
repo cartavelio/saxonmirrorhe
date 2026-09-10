@@ -7,12 +7,12 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ArrayIterator;
+import net.sf.saxon.tree.iter.TwoItemIterator;
 import net.sf.saxon.value.Cardinality;
 
 /**
@@ -63,7 +63,7 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
             if (second != null && !Cardinality.allowsMany(requiredCardinality)) {
                 Item[] leaders = new Item[]{first, second};
                 typeError("A sequence of more than one item is not allowed as the " +
-                        role.getMessage() + CardinalityChecker.depictSequenceStart(new ArrayIterator<>(leaders), 2),
+                        role.getMessage() + CardinalityChecker.depictSequenceStart(new TwoItemIterator(first, second), 2),
                         role.getErrorCode());
             }
         }

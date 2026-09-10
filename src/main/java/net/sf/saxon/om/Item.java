@@ -133,8 +133,8 @@ public interface Item extends GroundedValue {
      * @return an iterator over all the items
      */
     @Override
-    default SingletonIterator<? extends Item> iterate() {
-        return new SingletonIterator<>(this);
+    default SingletonIterator iterate() {
+        return new SingletonIterator(this);
     }
 
     /**

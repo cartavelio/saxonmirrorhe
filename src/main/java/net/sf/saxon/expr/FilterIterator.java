@@ -177,7 +177,7 @@ public class FilterIterator implements SequenceIterator {
 
         @Override
         protected boolean matches() throws XPathException {
-            return filter.effectiveBooleanValue(filterContext);
+            return this.filter.effectiveBooleanValue(this.filterContext);
         }
 
     }

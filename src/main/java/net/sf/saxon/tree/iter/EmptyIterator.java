@@ -9,10 +9,12 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
 import java.util.EnumSet;
+import java.util.function.Consumer;
 
 /**
  * EmptyIterator: an iterator over an empty sequence. Since such an iterator has no state,
@@ -138,6 +140,16 @@ public class EmptyIterator implements SequenceIterator,
         return false;
     }
 
+    @Override
+    public void forEachOrFail(ItemConsumer<? super Item> consumer) throws XPathException {
+        // No action
+    }
+
+    @Override
+    public void forEach(Consumer<? super Item> consumer) {
+        // No action
+    }
+
     /**
      * Static method to get an empty AxisIterator
      */
@@ -150,8 +162,8 @@ public class EmptyIterator implements SequenceIterator,
      * Static method to get an empty AtomicIterator
      */
 
-    public static <T extends AtomicValue> AtomicIterator<T> ofAtomic() {
-        return (AtomicIterator<T>)OfAtomic.THE_INSTANCE;
+    public static AtomicIterator ofAtomic() {
+        return OfAtomic.THE_INSTANCE;
     }
 
     /**
@@ -177,7 +189,7 @@ public class EmptyIterator implements SequenceIterator,
      * An empty iterator for use where a sequence of atomic values is required
      */
 
-    private static class OfAtomic<T extends AtomicValue> implements AtomicIterator<T> {
+    private static class OfAtomic implements AtomicIterator {
 
         public final static OfAtomic THE_INSTANCE = new OfAtomic();
 
@@ -187,7 +199,7 @@ public class EmptyIterator implements SequenceIterator,
          * @return the next item. For the EmptyIterator this is always null.
          */
         @Override
-        public T next() {
+        public AtomicValue next() {
             return null;
         }
 

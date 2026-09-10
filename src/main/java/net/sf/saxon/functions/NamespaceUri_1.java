@@ -10,8 +10,6 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.One;
-import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
@@ -29,8 +27,8 @@ public class NamespaceUri_1 extends ScalarSystemFunction {
     }
 
     @Override
-    public ZeroOrOne resultWhenEmpty() {
-        return new One(new AnyURIValue(""));
+    public AnyURIValue resultWhenEmpty() {
+        return new AnyURIValue("");
     }
 
     @Override

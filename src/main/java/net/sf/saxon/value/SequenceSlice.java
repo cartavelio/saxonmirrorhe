@@ -131,8 +131,8 @@ public class SequenceSlice implements GroundedValue {
 
     /*@NotNull*/
     @Override
-    public ListIterator<? extends Item> iterate() {
-        return new ListIterator<>(value.subList(offset, offset+length));
+    public ListIterator iterate() {
+        return new ListIterator(value.subList(offset, offset+length));
     }
     
     /**

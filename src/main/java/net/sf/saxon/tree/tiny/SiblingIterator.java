@@ -17,10 +17,10 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
 
 import java.util.EnumSet;
-import java.util.function.IntPredicate;
 
 /**
  * This class supports both the child:: and following-sibling:: axes, which are
@@ -43,7 +43,7 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
     private final TinyNodeImpl parentNode;
     private final boolean getChildren;
     private boolean needToAdvance = false;
-    private final IntPredicate matcher;
+    private final IntPredicateProxy matcher;
 
     /**
      * Return an enumeration over children or siblings of the context node
@@ -56,11 +56,14 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
      *                    if following siblings are required
      */
 
-    SiblingIterator(/*@NotNull*/ TinyTree tree, /*@NotNull*/ TinyNodeImpl node,
-                                 NodeTest nodeTest, boolean getChildren) {
+    SiblingIterator(/*@NotNull*/ TinyTree tree, /*@NotNull*/ TinyNodeImpl node, NodeTest nodeTest, boolean getChildren) {
         this.tree = tree;
         test = nodeTest;
-        matcher = nodeTest instanceof NodeTest ? ((NodeTest)nodeTest).getMatcher(tree): IntSetPredicate.ALWAYS_TRUE;
+        if (nodeTest == null) {
+            matcher = IntSetPredicate.ALWAYS_TRUE;
+        } else {
+            matcher = nodeTest.getMatcher(tree);
+        }
         startNode = node;
         this.getChildren = getChildren;
         if (getChildren) {          // child:: axis
