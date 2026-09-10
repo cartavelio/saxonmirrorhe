@@ -4658,7 +4658,7 @@ public class XPathParser {
                     if (fc instanceof UserFunctionCall ufc) {
                         UserFunction uf = ufc.getFunction();
                         Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
-                        if (def != null) {
+                        if (def != null && def.get() != null) {
                             fc.setArg(i, def.get().copy(new RebindingMap()));
                             // Otherwise, no action: it's a forward reference that will be resolved later
                         }

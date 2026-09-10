@@ -165,23 +165,6 @@ public final class LocalParam extends Instruction implements LocalBinding {
         referenceCount = refCount;
     }
 
-//    /**
-//     * Get the evaluation mode of the variable
-//     *
-//     * @return the evaluation mode (a constant in {@link ExpressionTool}
-//     */
-//
-//    public int getEvaluationMode() {
-//        if (evaluationMode == ExpressionTool.UNDECIDED) {
-//            if (referenceCount == FilterExpression.FILTERED) {
-//                evaluationMode = ExpressionTool.MAKE_INDEXED_VARIABLE;
-//            } else {
-//                evaluationMode = ExpressionTool.lazyEvaluationMode(getSelectExpression());
-//            }
-//        }
-//        return evaluationMode;
-//    }
-
     /**
      * Get the cardinality of the result of this instruction. An xsl:variable instruction returns nothing, so the
      * type is empty.
@@ -256,20 +239,6 @@ public final class LocalParam extends Instruction implements LocalBinding {
         return this;
     }
 
-
-    public void computeEvaluationMode() {
-//        if (getSelectExpression() != null) {
-//            if (referenceCount == FilterExpression.FILTERED) {
-//                final Optimizer optimizer = getConfiguration().obtainOptimizer();
-//                PullEvaluator pullEval = Elaborator.makeElaborator(getSelectExpression()).elaborateForPull();
-//                evaluator =  context -> optimizer.makeIndexedValue(pullEval.iterate(context));
-//            } else {
-//                evaluator = Elaborator.makeElaborator(getSelectExpression()).lazily(referenceCount > 1);
-//            }
-//        }
-    }
-
-
     /**
      * Copy an expression. This makes a deep copy.
      * @param rebindings a mutable list of (old binding, new binding) pairs
@@ -322,41 +291,6 @@ public final class LocalParam extends Instruction implements LocalBinding {
             select = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(select, requiredType, role, visitor);
         }
     }
-//
-//    /**
-//     * Evaluate the variable. That is,
-//     * get the value of the select expression if present or the content
-//     * of the element otherwise, either as a tree or as a sequence
-//     *
-//     * @param context the XPath dynamic context
-//     * @return the result of evaluating the variable
-//     * @throws net.sf.saxon.trans.XPathException
-//     *          if evaluation of the select expression fails
-//     *          with a dynamic error
-//     */
-
-//    public Sequence getSelectValue(XPathContext context) throws XPathException {
-//        Expression select = getSelectExpression();
-//        if (select == null) {
-//            throw new AssertionError("Internal error: No select expression");
-//            // The value of the variable is a sequence of nodes and/or atomic values
-//        } else if (select instanceof Literal) {
-//            // fast path for common case
-//            return ((Literal)select).getGroundedValue();
-//        } else {
-//            // There is a select attribute: do a lazy evaluation of the expression,
-//            // which will already contain any code to force conversion to the required type.
-//            int savedOutputState = context.getTemporaryOutputState();
-//            context.setTemporaryOutputState(StandardNames.XSL_WITH_PARAM);
-//            Sequence result;
-//            if (evaluator == null) {
-//                evaluator = Elaborator.makeElaborator(select).lazily(true);
-//            }
-//            result = evaluator.evaluate(context);
-//            context.setTemporaryOutputState(savedOutputState);
-//            return result;
-//        }
-//    }
 
     /**
      * Get the slot number allocated to this variable
