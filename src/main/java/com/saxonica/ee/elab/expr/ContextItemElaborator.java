@@ -1,6 +1,7 @@
 package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.XPathContext;
@@ -27,5 +28,9 @@ public class ContextItemElaborator extends ItemElaborator {
         }
     }
 
+    @Override
+    public PullEvaluator elaborateForPull() {
+        return super.elaborateForPull();
+    }
 }
 

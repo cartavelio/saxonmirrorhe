@@ -2,6 +2,7 @@ package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.*;
 import com.saxonica.ee.elab.gen.PullElaborator;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -27,12 +28,16 @@ public class LiteralElaborator extends PullElaborator {
     public PushEvaluator elaborateForPush() {
         GroundedValue value = ((Literal) getExpression()).getGroundedValue();
         if (value instanceof Item) {
-            return (out, context) -> out.append((Item)value);
+            return (out, context) -> {
+                out.append((Item)value);
+                return null;
+            };
         } else {
             return (out, context) -> {
                 for (Item item : value.asIterable()) {
                      out.append(item);
                 }
+                return null;
             };
         }
     }

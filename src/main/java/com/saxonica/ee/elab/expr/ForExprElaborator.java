@@ -4,9 +4,8 @@ import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
-import net.sf.saxon.expr.ForExpression;
-import net.sf.saxon.expr.ItemMappingIterator;
-import net.sf.saxon.expr.MappingIterator;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.Cardinality;
@@ -57,8 +56,10 @@ public class ForExprElaborator extends PullElaborator {
             Item item;
             while ((item = base.next()) != null) {
                 context.setLocalVariable(slot, item);
-                actionEval.process(out, context);
+                TailCall tc = actionEval.process(out, context);
+                Expression.dispatchTailCall(tc);
             }
+            return null;
         };
     }
 }

@@ -4,6 +4,7 @@ import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.Atomizer;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;

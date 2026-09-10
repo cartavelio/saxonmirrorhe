@@ -5,6 +5,7 @@ import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.AtomicSequenceConverter;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.value.AtomicValue;
 
 /**
  * Elaborator for an AtomicSequenceConverter (including an UntypedAtomicConverter, which is
@@ -25,8 +26,11 @@ public class AtomicSequenceConverterElaborator extends PullElaborator {
     @Override
     public ItemEvaluator elaborateForItem() {
         final AtomicSequenceConverter expr = (AtomicSequenceConverter) getExpression();
-        //noinspection Convert2MethodRef
-        return context -> expr.evaluateItem(context);
+        final ItemEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForItem();
+        return context -> {
+            AtomicValue base = (AtomicValue)baseEval.eval(context);
+            return expr.convertItem(base, context);
+        };
     }
 }
 

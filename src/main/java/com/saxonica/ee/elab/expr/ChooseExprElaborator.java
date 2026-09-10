@@ -68,10 +68,10 @@ public class ChooseExprElaborator extends PullElaborator {
         return (out, context) -> {
             for (int i = 0; i < count; i++) {
                 if (conditions[i].eval(context)) {
-                    actions[i].process(out, context);
-                    break;
+                    return actions[i].process(out, context);
                 }
             }
+            return null;
         };
     }
 }

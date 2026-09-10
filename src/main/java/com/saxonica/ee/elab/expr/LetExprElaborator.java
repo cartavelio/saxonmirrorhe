@@ -4,6 +4,7 @@ import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.LetExpression;
 import net.sf.saxon.expr.parser.Evaluator;
 import net.sf.saxon.om.Sequence;
@@ -41,7 +42,7 @@ public class LetExprElaborator extends PullElaborator {
         return (out, context) -> {
             Sequence value = selectEval.eval(context);
             context.setLocalVariable(slot, value);
-            actionPush.process(out, context);
+            return actionPush.process(out, context);
         };
     }
 

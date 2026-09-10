@@ -4,6 +4,7 @@ import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.CardinalityChecker;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.Expression;
 
 /**

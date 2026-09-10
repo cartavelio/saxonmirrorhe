@@ -31,6 +31,7 @@ public class LocalVariableReferenceElaborator extends PullElaborator {
             while ((it = value.next()) != null) {
                 out.append(it);
             }
+            return null;
         };
     }
 

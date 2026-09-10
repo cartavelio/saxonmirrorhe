@@ -2,6 +2,7 @@ package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;

@@ -6,6 +6,7 @@ import com.saxonica.ee.elab.eval.PushEvaluator;
 import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.PullElaborator;
 import com.saxonica.ee.optim.SwitchExpression;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.value.AtomicValue;
@@ -81,14 +82,14 @@ public class SwitchExprElaborator extends PullElaborator {
         return (out, context) -> {
             AtomicValue subjectValue = (AtomicValue) subjectEvaluator.eval(context);
             if (subjectValue == null) {
-                otherwiseEvaluator.process(out, context);
+                return otherwiseEvaluator.process(out, context);
             }
             AtomicMatchKey key = subjectValue.getXPathMatchKey(expr.getCollation(), context.getImplicitTimezone());
             int selection = expr.getIndex(key);
             if (selection == -1) {
-                otherwiseEvaluator.process(out, context);
+                return otherwiseEvaluator.process(out, context);
             } else {
-                actionEvaluators.get(selection).process(out, context);
+                return actionEvaluators.get(selection).process(out, context);
             }
         };
     }

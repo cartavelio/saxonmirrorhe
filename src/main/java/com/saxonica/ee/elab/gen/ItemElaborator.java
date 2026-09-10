@@ -16,7 +16,13 @@ public abstract class ItemElaborator extends Elaborator {
     @Override
     public PushEvaluator elaborateForPush() {
         ItemEvaluator ie = elaborateForItem();
-        return (out, context) -> out.append(ie.eval(context));
+        return (out, context) -> {
+            Item it = ie.eval(context);
+            if (it != null) {
+                out.append(it);
+            }
+            return null;
+        };
     }
 
     @Override

@@ -29,7 +29,7 @@ public class FallbackElaborator extends Elaborator {
     }
 
     public PushEvaluator elaborateForPush() {
-        return (out, context) -> getExpression().process(out, context);
+        return (out, context) -> getExpression().processLeavingTail(out, context);
     }
 
     public ItemEvaluator elaborateForItem() {

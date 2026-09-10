@@ -7,6 +7,7 @@ import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.AbstractBlockIterator;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 
@@ -51,9 +52,14 @@ public class BlockElaborator extends PullElaborator {
             actions[i] = makeElaborator(operanda[i].getChildExpression()).elaborateForPush();
         }
         return (out, context) -> {
+            TailCall tail = null;
             for (int i = 0; i < size; i++) {
-                actions[i].process(out, context);
+                while (tail != null) {
+                    tail = tail.processLeavingTail();
+                }
+                tail = actions[i].process(out, context);
             }
+            return tail;
         };
     }
 }

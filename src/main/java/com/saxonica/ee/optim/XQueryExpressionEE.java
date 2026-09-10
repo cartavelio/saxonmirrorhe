@@ -16,6 +16,7 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.Optimizer;
 import net.sf.saxon.expr.parser.PathMap;
@@ -173,7 +174,8 @@ public class XQueryExpressionEE extends XQueryExpression {
             if (pusher == null) {
                 pusher = Elaborator.makeElaborator(expression).elaborateForPush();
             }
-            pusher.process(dest, context);
+            TailCall tc = pusher.process(dest, context);
+            Expression.dispatchTailCall(tc);
         } else {
             super.processQuery(dest, context);
         }

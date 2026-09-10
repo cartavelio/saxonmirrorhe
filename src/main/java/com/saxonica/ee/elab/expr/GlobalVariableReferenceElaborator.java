@@ -29,6 +29,7 @@ public class GlobalVariableReferenceElaborator extends PullElaborator {
             while ((it = value.next()) != null) {
                 out.append(it);
             }
+            return null;
         };
     }
 

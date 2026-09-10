@@ -1,6 +1,8 @@
 package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
+import net.sf.saxon.expr.ContextMappingIterator;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -24,7 +26,13 @@ public abstract class StringElaborator extends Elaborator {
     @Override
     public PushEvaluator elaborateForPush() {
         ItemEvaluator ie = elaborateForItem();
-        return (out, context) -> out.append(ie.eval(context));
+        return (out, context) -> {
+            Item it = ie.eval(context);
+            if (it != null) {
+                out.append(it);
+            }
+            return null;
+        };
     }
 
     @Override

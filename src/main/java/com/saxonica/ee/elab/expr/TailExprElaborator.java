@@ -2,6 +2,7 @@ package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.TailExpression;
 import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.om.SequenceIterator;

@@ -1,6 +1,7 @@
 package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
+import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -16,12 +17,13 @@ public abstract class BooleanElaborator extends Elaborator {
 
     @Override
     public PushEvaluator elaborateForPush() {
-        ItemEvaluator b = elaborateForItem();
+        ItemEvaluator ie = elaborateForItem();
         return (out, context) -> {
-            Item it = b.eval(context);
+            Item it = ie.eval(context);
             if (it != null) {
                 out.append(it);
             }
+            return null;
         };
     }
 

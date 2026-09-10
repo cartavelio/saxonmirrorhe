@@ -4,6 +4,7 @@ import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.ArithmeticExpression;
 import net.sf.saxon.expr.Calculator;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
@@ -30,7 +31,12 @@ public class ArithmeticElaborator extends ItemElaborator {
             if (nullable1 && v1 == null) {
                 return null;
             }
-            return calc.compute(v0, v1, context);
+            try {
+                return calc.compute(v0, v1, context);
+            } catch (XPathException e) {
+                e.maybeSetLocation(exp.getLocation());
+                throw e;
+            }
         };
     }
 

@@ -19,6 +19,7 @@ public abstract class PullElaborator extends Elaborator {
             while ((it = iter.next()) != null) {
                 out.append(it);
             }
+            return null;
         };
     }
 

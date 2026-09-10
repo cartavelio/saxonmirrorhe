@@ -3,10 +3,8 @@ package com.saxonica.ee.elab.expr;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
 import com.saxonica.ee.elab.gen.PullElaborator;
-import net.sf.saxon.expr.ContextMappingFunction;
-import net.sf.saxon.expr.ContextMappingIterator;
-import net.sf.saxon.expr.SlashExpression;
-import net.sf.saxon.expr.XPathContextMinor;
+import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.FocusIterator;
 
 /**
@@ -38,9 +36,12 @@ public class SlashExprElaborator extends PullElaborator {
         return (out, context) -> {
             XPathContextMinor c2 = context.newMinorContext();
             FocusIterator iter = c2.trackFocus(select.eval(context));
+            TailCall tc = null;
             while (iter.next() != null) {
-                action.process(out, c2);
+                Expression.dispatchTailCall(tc);
+                tc = action.process(out, c2);
             }
+            return tc;
         };
 
     }

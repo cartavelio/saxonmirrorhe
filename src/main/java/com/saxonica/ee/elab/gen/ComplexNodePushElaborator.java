@@ -6,6 +6,8 @@ import com.saxonica.ee.elab.eval.PushEvaluator;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.SequenceCollector;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -21,7 +23,8 @@ public abstract class ComplexNodePushElaborator extends FallbackElaborator {
                 throw new NoDynamicContextException("No controller available");
             }
             SequenceCollector seq = controller.allocateSequenceOutputter(1);
-            pushEval.process(new ComplexContentOutputter(seq), context);
+            TailCall tc = pushEval.process(new ComplexContentOutputter(seq), context);
+            Expression.dispatchTailCall(tc);
             seq.close();
             SequenceIterator result = seq.iterate();
             seq.reset();
@@ -38,7 +41,8 @@ public abstract class ComplexNodePushElaborator extends FallbackElaborator {
                 throw new NoDynamicContextException("No controller available");
             }
             SequenceCollector seq = controller.allocateSequenceOutputter(1);
-            pushEval.process(new ComplexContentOutputter(seq), context);
+            TailCall tc = pushEval.process(new ComplexContentOutputter(seq), context);
+            Expression.dispatchTailCall(tc);
             seq.close();
             Item result = seq.getFirstItem();
             seq.reset();

@@ -7,7 +7,6 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.CallTemplate;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.expr.instruct.NamedTemplate;
-import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
@@ -59,10 +58,7 @@ public class CallTemplateElaborator extends PullElaborator {
             c2.setCurrentMergeGroupIterator(null);
 
             try {
-                TailCall tc = t.expand(out, c2);
-                while (tc != null) {
-                    tc = tc.processLeavingTail();
-                }
+                return t.expand(out, c2);
             } catch (StackOverflowError e) {
                 XPathException err = new XPathException.StackOverflow(
                         "Too many nested template or function calls. The stylesheet may be looping.",
