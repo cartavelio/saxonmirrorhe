@@ -21,7 +21,7 @@ namespace Saxon.Api.Support {
                 schemaJ.combine(((Saxon.Api.Support.XsdSchemaEE)other).schemaJ));
         }
 
-        public Saxon.Hej.type.Schema UnderlyingSchema => schemaJ.getUnderlyingSchema();
+        internal override Saxon.Hej.type.Schema UnderlyingSchema => schemaJ.getUnderlyingSchema();
 
         public override void ExportComponents(IDestination destination) {
             schemaJ.exportComponents(destination.UnderlyingDestination);

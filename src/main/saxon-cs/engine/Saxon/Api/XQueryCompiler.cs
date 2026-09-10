@@ -22,6 +22,7 @@ namespace Saxon.Api {
     public class XQueryCompiler {
         private XQueryResolver _moduleResolver;
         private ErrorReporter _errorReporter;
+        private XsdSchema _usedSchema;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
@@ -100,6 +101,32 @@ namespace Saxon.Api {
         public bool SchemaAware {
             get => Implementation.isSchemaAware();
             set => Implementation.setSchemaAware(value);
+        }
+        
+        /// <summary>The <c>XsdSchema</c> to be used with this <c>XQueryCompiler</c>.</summary>
+        /// <remarks>
+        /// <para>If this property is set, then any <c>import schema</c> declaration
+        /// for a target namespace that is present in the supplied schema is satisfied
+        /// by schema components in this schema; the location hints
+        /// on the declaration are ignored.</para>
+        /// <para>
+        /// However, this does not make <c>import schema</c> declarations redundant;
+        /// they are still needed in order to permit reference to schema components by name (that is,
+        /// to make the names of element and attribute declarations and schema types visible in the
+        /// static context).</para>
+        /// <para>When validation is invoked within the XQuery code (using a validate expression),
+        /// all the schema components supplied in this schema are available for use during the validation
+        /// episode, whether or not they have been imported into the static context by means of an
+        /// <c>import schema</c> declaration.
+        /// </remarks>
+
+        public XsdSchema Schema {
+            get => _usedSchema;
+            set { 
+                SchemaAware = true;
+                Implementation.getUnderlyingStaticContext().preLoadSchema(value.UnderlyingSchema);
+                _usedSchema = value;
+            }
         }
 
         /// <summary>

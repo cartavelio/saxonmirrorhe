@@ -26,6 +26,7 @@ namespace Saxon.Api {
     [Serializable]
     public class XPathCompiler {
         private Processor processor;
+        private XsdSchema _usedSchema;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
@@ -136,10 +137,18 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="uri">The namespace URI whose declarations and type definitions are to
         /// be made available for use within the XPath expression.</param>
-        public void ImportSchemaNamespace(String uri) {
-            Implementation.importSchemaNamespace(uri);
+        
+        public XsdSchema Schema {
+            get => _usedSchema;
+            set {
+                if (value != null) {
+                    SchemaAware = true;
+                    Implementation.getUnderlyingStaticContext().getPackageData()
+                        .setImportedSchema(value.UnderlyingSchema);
+                    _usedSchema = value;
+                }
+            }
         }
-
 
         /// <summary>
         /// Escape hatch to the <c>Saxon.Hej.s9api.XPathCompiler</c> object in the underlying Java implementation

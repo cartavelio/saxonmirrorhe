@@ -6,5 +6,8 @@ namespace Saxon.Api {
         public abstract XsdSchema Combine(XsdSchema other);
 
         public abstract void ExportComponents(IDestination destination);
+
+        internal abstract Saxon.Hej.type.Schema UnderlyingSchema { get; }
     }
+
 }

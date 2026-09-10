@@ -39,6 +39,7 @@ namespace Saxon.Api {
         private JXsltCompiler jXsltCompiler;
         private ResourceResolver resourceResolver;
         private ErrorReporter _errorReporter;
+        private XsdSchema _usedSchema;
 
         // internal constructor: the public interface is a factory method
         // on the Processor object
@@ -123,6 +124,44 @@ namespace Saxon.Api {
             get => jXsltCompiler.isSchemaAware();
             set => jXsltCompiler.setSchemaAware(value);
         }
+
+        /// <summary>The <c>XsdSchema</c> to be used with this <c>XsltCompiler</c>.</summary>
+        /// <remarks>
+        /// <para>If this property is set, then any <c>xsl:import-schema</c> declaration
+        /// for a target namespace that is present in the supplied schema (other than an
+        /// <c>xsl:import-schema</c> with an inline <c>xs:schema</c>) is satisfied
+        /// by schema components in this schema; the <c>schema-location</c> attribute
+        /// on the declaration is ignored.</para>
+        /// <para>
+        /// However, this does not make <code>xsl:import-schema</code> declarations redundant;
+        /// they are still needed in order to permit reference to schema components by name (that is,
+        /// to make the names of element and attribute declarations and schema types visible in the
+        /// static context).</para>
+        /// <para>When validation is invoked within the XSLT code (using a validation or type attribute),
+        /// all the schema components supplied in this schema are available for use during the validation
+        /// episode, whether or not they have been imported into the static context by means of an
+        /// <c>xsl:import-schema</c> declaration.
+        /// </remarks>
+
+        public XsdSchema Schema {
+            get => _usedSchema;
+            set { 
+                SchemaAware = true;
+                jXsltCompiler.getUnderlyingCompilerInfo().preLoadSchema(value.UnderlyingSchema);
+                _usedSchema = value;
+            }
+        }
+
+        public void UseSchema(XsdSchema schema) {
+            SchemaAware = true;
+            jXsltCompiler.getUnderlyingCompilerInfo().preLoadSchema(schema.UnderlyingSchema);
+            _usedSchema = schema;
+        }
+
+        public XsdSchema GetUsedSchema() {
+            return _usedSchema;
+        }
+
 
 
         /// <summary>
