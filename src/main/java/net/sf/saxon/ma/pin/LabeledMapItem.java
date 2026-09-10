@@ -97,8 +97,9 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
         List<Item> labeledItems = new ArrayList<>();
         int position = 0;
         for (Item item : value.asIterable()) {
+            Item subject = item;
             if (item instanceof LabeledItem) {
-                item = ((LabeledItem) item).getSubject();
+                subject = ((LabeledItem) item).getSubject();
             }
             // Tricky because the new item and the label both reference each other
             ShapedMap label = new ShapedMap(LabelTool.NAVIGATION_LABEL_SHAPE,
@@ -107,7 +108,7 @@ public class LabeledMapItem extends DelegatingMapItem implements LabeledItem {
                                             Int64Value.makeIntegerValue(++position),
                                             EmptySequence.getInstance(),
                                             EmptySequence.getInstance());
-            final Item labeledItem = LabelTool.addLabel(item, label);
+            final Item labeledItem = LabelTool.addLabel(subject, label);
             labeledItems.add(labeledItem);
             label.initialPut(3, makeAncestorsFunction(labeledItem));
             label.initialPut(4, makePathFunction(labeledItem));

@@ -1,13 +1,12 @@
 package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.functions.hof.CoercedFunction;
+import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
-
-import static net.sf.saxon.functions.hof.FunctionSequenceCoercer.checkAnnotations;
 
 /**
  * Coercion plan for use when the required item type is xs:hexBinary
@@ -39,9 +38,9 @@ public class FunctionItemCoercionPlan extends CoercionPlan {
         boolean is40 = version >= 40;
         Sequence value = request.value;
         if (value instanceof FunctionItem) {
-            checkAnnotations((FunctionItem) value,
-                             (FunctionItemType) request.requiredType.getPrimaryType(),
-                             request.config);
+            FunctionSequenceCoercer.checkAnnotations((FunctionItem) value,
+                                                     (FunctionItemType) request.requiredType.getPrimaryType(),
+                                                     request.config);
             return new CoercedFunction((FunctionItem) value, (SpecificFunctionType) request.requiredType.getPrimaryType(), is40, is40);
         } else {
             return value;

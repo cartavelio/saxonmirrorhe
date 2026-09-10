@@ -5,6 +5,8 @@ using Saxon.Hej.expr;
 using Saxon.Hej.expr.parser;
 using Saxon.Hej.om;
 using Saxon.Hej.type;
+using Saxon.Hej.type.coercion;
+using Saxon.Hej.value;
 
 namespace Saxon.Api {
     /// <summary inherits="XdmItem">
@@ -68,7 +70,7 @@ namespace Saxon.Api {
         public XdmValue Invoke(XdmValue[] arguments, Processor processor) {
             try {
                 TypeHierarchy th = processor.Implementation.getTypeHierarchy();
-                CoercionRules coercionRules = CoercionRules.forVersion(31);
+                CoercionRules coercionRules = CoercionRules.forVersion(processor.Implementation, 31);
                 FunctionItem fi = (FunctionItem)value;
                 FunctionItemType type = fi.getFunctionItemType();
                 Sequence[] args = new Sequence[arguments.Length];
@@ -80,7 +82,8 @@ namespace Saxon.Api {
                         int pos = i;
                         Supplier<RoleDiagnostic> role =
                             () => new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", pos);
-                        val = coercionRules.coerce(val, required, processor.Implementation, role, Loc.NONE);
+                        val = coercionRules.coerce(val, required, SequenceType.ANY_SEQUENCE, 
+                                    processor.Implementation, role, Loc.NONE).materialize();
                     }
                     args[i] = val;
                 }
@@ -97,7 +100,8 @@ namespace Saxon.Api {
                     if (!required.matches(groundedResult, th)) {
                         Supplier<RoleDiagnostic> role =
                             () => new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
-                        groundedResult = coercionRules.coerce(groundedResult, required, processor.Implementation, role, Loc.NONE);
+                        groundedResult = coercionRules.coerce(groundedResult, required, 
+                            SequenceType.ANY_SEQUENCE, processor.Implementation, role, Loc.NONE).materialize();
                     }
                 }
                 return Wrap(groundedResult);

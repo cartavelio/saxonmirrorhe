@@ -51,11 +51,11 @@ import java.util.*;
 @CSharpInjectMembers(code={""
         + "public static Saxon.Hej.value.DateTimeValue fromDateTime(System.DateTime dt) {"
         + "    Saxon.Hej.value.DateTimeValue dtv = new (dt.Year, (byte)dt.Month, (byte)dt.Day, (byte)dt.Hour, (byte)dt.Minute, (byte)dt.Second, dt.Millisecond * 1000000, 0);"
-        + "    return (Saxon.Hej.value.DateTimeValue)dtv.copyAsSubType(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);"
+        + "    return (Saxon.Hej.value.DateTimeValue)dtv.withMetadata(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);"
         + "}"
         + " public static Saxon.Hej.value.DateTimeValue fromDateTimeOffset(System.DateTimeOffset dt) {"
         + "    Saxon.Hej.value.DateTimeValue dtv = new (dt.Year, (byte)dt.Month, (byte)dt.Day, (byte)dt.Hour, (byte)dt.Minute, (byte)dt.Second, dt.Millisecond * 1000000, (int)dt.Offset.TotalMinutes);"
-        + "    return (Saxon.Hej.value.DateTimeValue)dtv.copyAsSubType(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);"
+        + "    return (Saxon.Hej.value.DateTimeValue)dtv.withMetadata(Saxon.Hej.type.BuiltInAtomicType.DATE_TIME_STAMP);"
         + "}"
 })
 

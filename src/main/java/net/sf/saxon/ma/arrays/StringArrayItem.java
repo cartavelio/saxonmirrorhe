@@ -33,8 +33,9 @@ public class StringArrayItem extends AbstractArrayItem {
      * Static constant value representing an empty array
      */
 
+
     public static final StringArrayItem EMPTY_ARRAY =
-            new StringArrayItem(new ArrayList<>());
+            new StringArrayItem(new UnicodeString[0]);
 
     private final UnicodeString[] _members;
 

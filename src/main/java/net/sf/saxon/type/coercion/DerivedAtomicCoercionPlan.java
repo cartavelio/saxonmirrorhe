@@ -18,7 +18,7 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
     @Override
     public ItemMappingFunction getTypeSpecificPromoter(CoercionRequest request, UType atomizedType) {
         AtomicType req = (AtomicType) request.requiredType.getPrimaryType();
-        AtomicType prim = req.getPrimitiveItemType();
+        AtomicType prim = (AtomicType) req.getPrimitiveItemType();
         ConversionRules rules = request.config.getConversionRules();
         TypeHierarchy th = request.config.getTypeHierarchy();
         return ItemMapper.of(item -> {
