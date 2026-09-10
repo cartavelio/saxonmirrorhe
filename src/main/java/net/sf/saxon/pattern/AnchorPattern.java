@@ -15,6 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 
@@ -34,6 +35,7 @@ public class AnchorPattern extends Pattern {
 
     private static final AnchorPattern THE_INSTANCE = new AnchorPattern();
 
+    @CSharpModifiers(code = {"public", "static", "new"})
     public static AnchorPattern getInstance() {
         return THE_INSTANCE;
     }

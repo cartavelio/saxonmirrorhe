@@ -14,6 +14,7 @@ import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaType;
 
 import javax.xml.transform.OutputKeys;
@@ -94,6 +95,7 @@ public class HTML50Emitter extends HTMLEmitter {
 
     }
 
+    @CSharpModifiers(code={"private", "readonly", "static", "new"})
     private final static byte[] DOCTYPE = StringConstants.bytes("<!DOCTYPE HTML>");
 
     @Override

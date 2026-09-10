@@ -25,6 +25,7 @@ import java.util.List;
 
 public interface UnfailingPullProvider extends PullProvider {
 
+    //#if CSHARP==false
     @Override
     PullEvent next() throws XPathException;
 
@@ -60,6 +61,6 @@ public interface UnfailingPullProvider extends PullProvider {
 
     @Override
     List<UnparsedEntity> getUnparsedEntities();
-
+    //#endif
 }
 

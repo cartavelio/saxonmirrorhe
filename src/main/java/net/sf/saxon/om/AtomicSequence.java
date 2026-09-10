@@ -20,7 +20,7 @@ import net.sf.saxon.value.AtomicValue;
  */
 
 public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
-
+    
     /**
      * Get the first item in the sequence
      * @return the first item in the sequence, or null if the sequence is empty
@@ -55,29 +55,6 @@ public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
     int getLength();
 
     /**
-     * Get the canonical lexical representation as defined in XML Schema. This is not always the same
-     * as the result of casting to a string according to the XPath rules.
-     *
-     * @return the canonical lexical representation if defined in XML Schema; otherwise, the result
-     *         of casting to string according to the XPath 2.0 rules
-     */
-
-    UnicodeString getCanonicalLexicalRepresentation();
-
-//    /**
-//     * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
-//     * The default implementation is written to compare sequences of atomic values.
-//     * This method is overridden for AtomicValue and its subclasses.
-//     * <p>In the case of data types that are partially ordered, the returned Comparable extends the standard
-//     * semantics of the compareTo() method by returning the value {@link SequenceTool#INDETERMINATE_ORDERING} when there
-//     * is no defined order relationship between two given values.</p>
-//     *
-//     * @return a Comparable that follows XML Schema comparison rules
-//     */
-//
-//    SchemaComparable getSchemaComparable();
-
-    /**
      * Get a string representation of the sequence. The is the space-separated concatenation of the result of
      * casting each of the items in the sequence to xs:string
      *
@@ -87,6 +64,18 @@ public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
 
     @Override
     UnicodeString getUnicodeStringValue();
+
+    /**
+     * Get the canonical lexical representation as defined in XML Schema. This is not always the same
+     * as the result of casting to a string according to the XPath rules.
+     *
+     * @return the canonical lexical representation if defined in XML Schema; otherwise, the result
+     *         of casting to string according to the XPath 2.0 rules
+     */
+
+    UnicodeString getCanonicalLexicalRepresentation();
+
+
 
 }
 

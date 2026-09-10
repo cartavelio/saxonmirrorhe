@@ -58,6 +58,7 @@ public interface RelativeURIResolver extends URIResolver {
     Source dereference(String uri)
             throws TransformerException;
 
+    //#if CSHARP==false
     /**
      * Called by the processor when it encounters
      * an xsl:include, xsl:import, or document() function.
@@ -79,7 +80,7 @@ public interface RelativeURIResolver extends URIResolver {
     @Override
     Source resolve(String href, String base)
             throws TransformerException;
-
+    //#endif
 
 }
 

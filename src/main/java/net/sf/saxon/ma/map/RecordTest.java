@@ -15,6 +15,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -272,6 +273,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      * @return the string representation as an instance of the XPath ItemType construct
      */
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public String toExportString() {
         return makeString(SequenceType::toExportString);
     }
@@ -475,6 +477,7 @@ public class RecordTest extends AnyFunctionType implements TupleType {
      * @param th the type hierarchy cache
      */
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         if (item instanceof MapItem) {
             for (Map.Entry<String, SequenceType> entry : fieldTypes.entrySet()) {

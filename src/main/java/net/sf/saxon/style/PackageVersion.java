@@ -23,9 +23,6 @@ public class PackageVersion implements Comparable<PackageVersion> {
     public List<Integer> parts;
     public String suffix;
 
-    /**
-     *
-     */
     public static PackageVersion ZERO = new PackageVersion(new int[]{0});
     public static PackageVersion ONE = new PackageVersion(new int[]{1});
     public static PackageVersion MAX_VALUE = new PackageVersion(new int[]{Integer.MAX_VALUE});
@@ -107,6 +104,22 @@ public class PackageVersion implements Comparable<PackageVersion> {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     * @return a hash code value for this object.
+     */
+    @Override
+    public int hashCode() {
+        int h = 772211;
+        for (int p : parts) {
+            h = (h<<3) ^ p;
+        }
+        if (suffix != null) {
+            h = (h << 3) ^ suffix.hashCode();
+        }
+        return h;
     }
 
     /**
