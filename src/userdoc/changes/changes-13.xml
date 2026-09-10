@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<release number="12" date="2023-01-12" xmlns="http://www.saxonica.com/ns/doc/changes">
+<release number="13" date="2024-01-12" xmlns="http://www.saxonica.com/ns/doc/changes">
     
     <category name="installation">
         
@@ -99,15 +99,19 @@
         <p>The second <code>$position</code> argument is available on function callbacks made by the functions
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
         
+        <p>The functions <code>starts-with-sequence</code>, <code>ends-with-sequence</code>, <code>contains-sequence</code>
+            are renamed <code>starts-with-subsequence</code>, <code>ends-with-subsequence</code>, <code>contains-subsequence</code>.</p>
+        
         <p>The functions <code>deep-equal</code>, <code>distinct-values</code>,  
             <code>duplicate-values</code>, <code>all-equal</code>, <code>all-different</code>, 
-            <code>starts-with-sequence</code>, <code>ends-with-sequence</code>, <code>contains-sequence</code>, 
+            <code>starts-with-subsequence</code>, <code>ends-with-subsequence</code>, <code>contains-subsequence</code>, 
             now use transitive equality semantics: this means that numeric values of different types (for example 
             <code>xs:double</code> and <code>xs:decimal</code> are compared by converting both values to
             decimals, not to doubles.</p>
         
-        TODO: starts-with-sequence etc - not tested and probably not working. Static method DeepEqual.deepEquals() takes 
-        a client-supplied AtomicValue comparer.
+        <p>The function <code>map:values</code> is implemented.</p>
+        
+        <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
         <h2>Dropped experimental features</h2>
         
