@@ -1434,7 +1434,8 @@ cdef class PyXslt30Processor:
         Args:
             **kwds: Required keyword arguments: source_file (str) and stylesheet_file (str).
                 Possible argument: base_output_uri (str) which is used for resolving relative URIs in the href
-                attribute of the xsl:result-document instruction.
+                attribute of the xsl:result-document instruction. Also accept the keyword 'encoding' (str) to
+                specify the encoding of the output string. This must be the same used in the transformation. If not specified then the platform default encoding is used.
         Example:
             result = xsltproc.transform_to_string(source_file="cat.xml", stylesheet_file="test1.xsl")
         Raises:
@@ -1446,7 +1447,7 @@ cdef class PyXslt30Processor:
         cdef py_value = None
         cdef py_value2 = None
         if len(kwds) == 0:
-            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file, stylesheet_file, base_output_uri)")
+            raise Warning("Warning: transform_to_string should only contain the following keyword arguments: (source_file, stylesheet_file, base_output_uri, encoding)")
 
         if "source_file" in kwds:
             py_value2 = kwds["source_file"]
@@ -2105,6 +2106,8 @@ cdef class PyXsltExecutable:
             **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode);
                 and base_output_uri (str) which is used for resolving relative URIs
                 in the href attribute of the xsl:result-document instruction.
+                Also accept the keyword 'encoding' (str) to specify the encoding of the output string.
+                This must be the same used in the transformation. If not specified then the platform default encoding is used.
         Raises:
             PySaxonApiError: Error raised in the event of a dynamic error
 
@@ -2424,7 +2427,9 @@ cdef class PyXsltExecutable:
         Args:
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue) can be used to supply
                 the initial match selection; and base_output_uri (str) which is used for resolving relative URIs
-                in the href attribute of the xsl:result-document instruction.
+                in the href attribute of the xsl:result-document instruction.  Also accept the keyword 'encoding' (str) to
+                specify the encoding of the output string. This must be the same used in the transformation.
+                If not specified then the platform default encoding is used.
         Returns:
             str: Result of the transformation as a str value
         Raises:
@@ -2642,6 +2647,7 @@ cdef class PyXsltExecutable:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: base_output_uri (str) which is used for resolving relative URIs in
                 the href attribute of the xsl:result-document instruction. encoding (str) set the encoding of the output string.
+                 This must be the same used in the transformation. If not specified then the platform default encoding is used.
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Raises:
@@ -2814,7 +2820,8 @@ cdef class PyXsltExecutable:
 			function_name (str): The name of the function to invoke, in clark notation {uri}local
 			args (list[PyXdmValue]): Pointer array of PyXdmValue objects - the values of the arguments to be supplied
 			    to the function.
-            **kwds: Possible keyword arguments: base_output_uri (str), encoding (str)
+            **kwds: Possible keyword arguments: base_output_uri (str), encoding (str) of the output string. If not supplied the default platform encoding is used.
+            This must match the encoding used by the transformation.
         Returns:
             str: Result of the transformation as a str value
         Raises:
@@ -3234,8 +3241,8 @@ cdef class PyXQueryProcessor:
         run_query_to_file(self, **kwds)
         Execute a query with the result saved to file.
         Args:
-            **kwds: Required keyword argument: output_file_name (str) to specify the output file.
-                Possible arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to supply
+            **kwds: Possible arguments: output_file_name (str) to specify the output file, if omitted then the output file name needs to be supplied as a property.
+                input_file_name (str) or input_xdm_item (PyXdmItem) can be used to supply
                 the input; query_file (str) or query_text (str) can be used to supply the query;
                 lang (str) can be used to specify which version of XQuery should be used, options: '3.1' or '4.0'
         Raises:
@@ -3256,8 +3263,7 @@ cdef class PyXQueryProcessor:
           self.set_context(xdm_item=(kwds["input_xdm_item"]))
         if "output_file_name" in kwds:
           self.set_output_file(kwds["output_file_name"])
-        else:
-          raise Exception("Error: output_file_name required in method run_query_to_file")
+
         if "query_file" in kwds:
           self.set_query_file(kwds["query_file"])
         elif "query_text" in kwds:
@@ -3948,7 +3954,6 @@ cdef class PySchemaValidator:
         Returns:
             PyXdmNode: The Validation report result from the Schema validator
         Raises:
-            Exception: Error if incorrect keyword used, option available: file_name|xdm_node|xml_text
             PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
             that prevented validation from taking place (such as failure to read or parse the input document)
         """
@@ -4686,6 +4691,8 @@ cdef class PyXdmNode(PyXdmItem):
         """
         __str__(self)
         The string value of the node as returned by the toString method
+        Args:
+              encoding (str): the encoding to be used to get the string value. Can be omitted or set as None to use the system default
         Returns:
             str: String value of this node
         """
