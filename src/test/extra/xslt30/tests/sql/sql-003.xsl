@@ -9,12 +9,12 @@
 	xmlns:saxon="http://saxon.sf.net/"
  	extension-element-prefixes="saxon sql">
 
-<xsl:output method="xml" indent="yes"></xsl:output>
+  <xsl:output method="xml" indent="yes"></xsl:output>
 
-    <xsl:param name="database" select="'jdbc:mysql://localhost/saxontest'"/>  
-    <xsl:param name="user" select="'jwl'"/>
-    <xsl:param name="password" select="'john'"/>
-    <xsl:param name="driver" select="'com.mysql.jdbc.Driver'"/>
+  <xsl:param name="driver" select="'org.postgresql.Driver'"/>
+  <xsl:param name="database" select="'jdbc:postgresql://localhost/sample'"/>  
+  <xsl:param name="user" select="'testeditor'"/>
+  <xsl:param name="password" select="'sekrit'"/>
 
 <xsl:template name="main" match="/">
     <xsl:if test="not(element-available('sql:connect'))">
