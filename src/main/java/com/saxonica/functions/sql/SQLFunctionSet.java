@@ -59,11 +59,11 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
                 String result = rs.getString(col);
                 //System.err.println("Column " + col + " getColumnName()=" + metaData.getColumnName(col) + " getColumnLabel()=" + metaData.getColumnLabel(col));
                 String sqlName = metaData.getColumnName(col);
-                if (map.containsStringKey(sqlName)) {
+                if (map.contains(sqlName)) {
                     int suffix = 1;
                     String baseName = sqlName;
                     sqlName = baseName + suffix;
-                    while (map.containsStringKey(sqlName)) {
+                    while (map.contains(sqlName)) {
                         sqlName = baseName + (++suffix);
                     }
                 }

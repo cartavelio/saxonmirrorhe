@@ -1,8 +1,10 @@
 package com.saxonica.xsltextn.style;
 
-import com.saxonica.xsltextn.instruct.DeepUpdate;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.ContextItemExpression;
+import net.sf.saxon.expr.DeepUpdate2;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.style.Compilation;
@@ -77,7 +79,8 @@ public class SaxonDeepUpdate extends ExtensionInstruction {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        return new DeepUpdate(root, select, action);
+        return new ForEach(root,
+                           new DeepUpdate2(-1, new ContextItemExpression(), select, action));
     }
 
 
