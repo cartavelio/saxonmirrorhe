@@ -58,15 +58,15 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         o.addAllowedOption("base-uri", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("comments", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("debug", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        o.addAllowedOption("false-on-error", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        //o.addAllowedOption("false-on-error", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("id-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("idrefs-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("in-scope-namespaces", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("namespace-prefixes", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("nilled-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        //o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("ordered", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
-        o.addAllowedOption("preserve-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        //o.addAllowedOption("preserve-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("processing-instructions", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("text-boundaries", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("timezones", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -78,6 +78,9 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         o.setAllowedValues("normalization-form", "FOJS0005", "NFC", "NFD", "NFKC", "NFKD");
 
         o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.getInstance());
+
+        o.addAllowedOption("whitespace", SequenceType.OPTIONAL_STRING, new StringValue("preserve"));
+        o.setAllowedValues("whitespace", "FOJS0005", "preserve", "strip", "normalize");
 
         OPTION_DETAILS = o;
     }
@@ -116,6 +119,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public String normalizationForm = null;
         public boolean nilledSignificant = false;
         public boolean normalizeSpace = false;
+        public boolean stripSpace = false;
         public boolean processingInstructionsSignificant = false;
         public boolean textBoundariesSignificant = true;
         public boolean timezonesSignificant = false;
@@ -124,16 +128,15 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public boolean typedValuesSignificant = true;
         public Set<StructuredQName> unorderedElements = Collections.emptySet();
         public boolean orderedTopLevel = true;
-        public boolean preserveSpace = true;
         public String collationName;
         public StringCollator stringCollator;
         public BiFunction<AtomicValue, AtomicValue, Boolean> comparer;
 
 
         private static final String[] booleanOptions = new String[]{
-                "base-uri", "comments", "debug", "false-on-error", "id-property", "idrefs-property",
+                "base-uri", "comments", "debug", "id-property", "idrefs-property",
                 "in-scope-namespaces", "namespace-prefixes", "nilled-property", "normalize-space",
-                "ordered", "preserve-space", "processing-instructions", "text-boundaries", "timezones",
+                "ordered", "processing-instructions", "text-boundaries", "timezones",
                 "type-annotations", "type-variety", "typed-values"};
 
 
@@ -145,6 +148,11 @@ public class DeepEqual40 extends CollatingFunctionFixed {
             GroundedValue normForm = map.get(new StringValue("normalization-form"));
             if (normForm != null) {
                 normalizationForm = normForm.getStringValue();
+            }
+            GroundedValue whitespace = map.get(new StringValue("whitespace"));
+            if (whitespace != null) {
+                stripSpace = whitespace.getStringValue().equals("strip");
+                normalizeSpace = whitespace.getStringValue().equals("normalize");
             }
             GroundedValue listedElements = map.get(new StringValue("unordered-elements"));
             if (listedElements != null) {
@@ -160,12 +168,8 @@ public class DeepEqual40 extends CollatingFunctionFixed {
             if (stringCollator == null) {
                 throw new XPathException("Unknown collation " + collationName, "FOCH0002");
             }
-            //try {
-                comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
-                                .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
-//            } catch (NoDynamicContextException e) {
-//                throw new XPathException(e);
-//            }
+            comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
+                            .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
 
             if (normalizeSpace || normalizationForm != null) {
                 final BiFunction<AtomicValue, AtomicValue, Boolean> baseComparer = comparer;
@@ -211,9 +215,6 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     case "debug":
                         debug = booleanValue;
                         return;
-                    case "false-on-error":
-                        falseOnError = booleanValue;
-                        return;
                     case "id-property":
                         idSignificant = booleanValue;
                         return;
@@ -234,9 +235,6 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                         return;
                     case "ordered":
                         orderedTopLevel = booleanValue;
-                        return;
-                    case "preserve-space":
-                        preserveSpace = booleanValue;
                         return;
                     case "processing-instructions":
                         processingInstructionsSignificant = booleanValue;
@@ -364,10 +362,6 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                 }
             }
             return true;
-//            options.orderedTopLevel = true;
-//            return equalExistential(
-//                    makeList(op1),
-//                    makeList(op2), context, options);
         }
 
         boolean result = true;
@@ -447,6 +441,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                         reason = "comparing an atomic value to a node at position " + pos1;
                         break;
                     } else {
+                        // Compare two atomic values
                         AtomicValue av1 = (AtomicValue) item1;
                         AtomicValue av2 = (AtomicValue) item2;
                         if (av1.isNaN() && av2.isNaN()) {
@@ -917,8 +912,20 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         } else if (kind == Type.PROCESSING_INSTRUCTION) {
             return !options.processingInstructionsSignificant;
         } else if (kind == Type.TEXT) {
-            return (!options.preserveSpace) &&
-                    Whitespace.isAllWhite(node.getUnicodeStringValue());
+            return (options.stripSpace || options.normalizeSpace) &&
+                    Whitespace.isAllWhite(node.getUnicodeStringValue()) &&
+                    !isWithinXmlSpacePreserve(node);
+        }
+        return false;
+    }
+
+    private static boolean isWithinXmlSpacePreserve(NodeInfo node) {
+        while (node != null) {
+            String att = node.getAttributeValue(NamespaceUri.XML, "space");
+            if (att != null) {
+                return Whitespace.normalize(att).equals("preserve");
+            }
+            node = node.getParent();
         }
         return false;
     }
@@ -926,10 +933,10 @@ public class DeepEqual40 extends CollatingFunctionFixed {
     private static void explain(ErrorReporter reporter, String message, DeepEqualOptions options, NodeInfo n1, NodeInfo n2) {
         if (options.debug) {
             reporter.report(new XmlProcessingIncident("deep-equal() " +
-                                                              (n1 != null && n2 != null ?
-                                                                       "comparing " + Navigator.getPath(n1) + " to " + Navigator.getPath(n2) + ": " :
-                                                                       ": ") +
-                                                              message).asWarning());
+                              (n1 != null && n2 != null ?
+                                       "comparing " + Navigator.getPath(n1) + " to " + Navigator.getPath(n2) + ": " :
+                                       ": ") +
+                              message).asWarning());
         }
     }
 

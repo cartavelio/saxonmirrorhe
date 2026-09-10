@@ -235,6 +235,7 @@ public class ParamKeywords {
         fnParamNames.put("string-length", "value");
         fnParamNames.put("string-to-codepoints", "value");
         fnParamNames.put("subsequence", "input|start|length");
+        fnParamNames.put("subsequence-where", "input|from|to");
         fnParamNames.put("substring", "value|start|length");
         fnParamNames.put("substring-after", "value|substring|collation");
         fnParamNames.put("substring-before", "value|substring|collation");

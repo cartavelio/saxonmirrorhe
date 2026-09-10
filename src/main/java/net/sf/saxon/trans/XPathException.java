@@ -129,7 +129,7 @@ public class XPathException extends TransformerException {
      */
 
     private static void breakPoint() {
-//        System.err.println("Error!!");
+        System.err.println("Error!!");
         assert true;
     }
 
