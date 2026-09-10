@@ -128,6 +128,10 @@ public class JLine2Talker implements Talker {
                                 translated = cwd + separator() + translated;
                             }
 
+                            if (File.separator.equals("\\")) {
+                                translated = translated.replace('/', '\\');
+                            }
+
                             File file = new File(translated);
                             final File dir;
 
