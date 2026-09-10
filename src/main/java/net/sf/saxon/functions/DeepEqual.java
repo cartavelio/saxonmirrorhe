@@ -459,40 +459,44 @@ public class DeepEqual extends CollatingFunctionFixed {
             case Type.TEXT:
             case Type.COMMENT:
                 boolean vr = comparer.comparesEqual((AtomicValue) n1.atomize(), (AtomicValue) n2.atomize());
-                if (!vr && ((flags & WARNING_IF_FALSE) != 0)) {
-                    String v1 = n1.getStringValue();
-                    String v2 = n2.getStringValue();
-                    String message = "";
-                    if (v1.length() != v2.length()) {
-                        message = "lengths (" + v1.length() + "," + v2.length() + ")";
-                    }
-                    if (v1.length() < 10 && v2.length() < 10) {
-                        message = " (\"" + v1 + "\" vs \"" + v2 + "\")";
-                    } else {
-                        int min = Math.min(v1.length(), v2.length());
-
-                        if (v1.substring(0, min).equals(v2.substring(0, min))) {
-                            message += " different at char " + min + "(\"" +
-                                StringTool.diagnosticDisplay((v1.length() > v2.length() ? v1 : v2).substring(min)) + "\")";
-                        } else if (v1.charAt(0) != v2.charAt(0)) {
-                            message += " different at start " + "(\"" +
-                                v1.substring(0, Math.min(v1.length(), 10)) + "\", \"" +
-                                v2.substring(0, Math.min(v2.length(), 10)) + "\")";
+                if (!vr) {
+                    if ((flags & WARNING_IF_FALSE) != 0) {
+                        String v1 = n1.getStringValue();
+                        String v2 = n2.getStringValue();
+                        String message = "";
+                        if (v1.length() != v2.length()) {
+                            message = "lengths (" + v1.length() + "," + v2.length() + ")";
+                        }
+                        if (v1.length() < 10 && v2.length() < 10) {
+                            message = " (\"" + v1 + "\" vs \"" + v2 + "\")";
                         } else {
-                            for (int i = 1; i < min; i++) {
-                                if (!v1.substring(0, i).equals(v2.substring(0, i))) {
-                                    message += " different at char " + (i - 1) + "(\"" +
-                                        v1.substring(i - 1, Math.min(v1.length(), i + 10)) + "\", \"" +
-                                        v2.substring(i - 1, Math.min(v2.length(), i + 10)) + "\")";
-                                    break;
+                            int min = Math.min(v1.length(), v2.length());
+
+                            if (v1.substring(0, min).equals(v2.substring(0, min))) {
+                                message += " different at char " + min + "(\"" +
+                                        StringTool.diagnosticDisplay((v1.length() > v2.length() ? v1 : v2).substring(min)) + "\")";
+                            } else if (v1.charAt(0) != v2.charAt(0)) {
+                                message += " different at start " + "(\"" +
+                                        v1.substring(0, Math.min(v1.length(), 10)) + "\", \"" +
+                                        v2.substring(0, Math.min(v2.length(), 10)) + "\")";
+                            } else {
+                                for (int i = 1; i < min; i++) {
+                                    if (!v1.substring(0, i).equals(v2.substring(0, i))) {
+                                        message += " different at char " + (i - 1) + "(\"" +
+                                                v1.substring(i - 1, Math.min(v1.length(), i + 10)) + "\", \"" +
+                                                v2.substring(i - 1, Math.min(v2.length(), i + 10)) + "\")";
+                                        break;
+                                    }
                                 }
                             }
                         }
+                        explain(reporter, Type.displayTypeName(n1) + " values differ (" +
+                                Navigator.getPath(n1) + ", " + Navigator.getPath(n2) + "): " +
+                                message, flags, n1, n2);
+                        return message;
+                    } else {
+                        return "atomized values differ";
                     }
-                    explain(reporter, Type.displayTypeName(n1) + " values differ (" +
-                            Navigator.getPath(n1) + ", " + Navigator.getPath(n2) + "): " +
-                            message, flags, n1, n2);
-                    return message;
                 }
                 return null;
 
