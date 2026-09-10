@@ -11,6 +11,8 @@ package net.sf.saxon.type;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.z.IntHashSet;
 
+import java.util.Set;
+
 
 /**
  * A complex type as defined in XML Schema: either a user-defined complex type, or xs:anyType, or xs:untyped.
@@ -265,8 +267,11 @@ public interface ComplexType extends SchemaType {
 
     /**
      * Decide what kind of layout to use when formatting an element of this type using the
-     * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
+     * elements-to-maps function. The result is a layout name, such as "record", "list", "mixed", "sequence"
+     *
+     * @param schema          the schema containing this type (needed to expand the content model)
+     * @param disabledLayouts layouts that cannot be used because they have been disabled
      */
-    String getPreferredJsonLayout(Schema schema);
+    String getPreferredJsonLayout(Schema schema, Set<String> disabledLayouts);
 }
 

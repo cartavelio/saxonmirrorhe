@@ -15,6 +15,8 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashSet;
 
+import java.util.Set;
+
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 
 /**
@@ -645,7 +647,7 @@ public enum Untyped implements ComplexType {
      * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
      */
     @Override
-    public String getPreferredJsonLayout(Schema schema) {
+    public String getPreferredJsonLayout(Schema schema, Set<String> disabledLayouts) {
         return "mixed";
     }
 

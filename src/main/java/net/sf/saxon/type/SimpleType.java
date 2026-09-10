@@ -129,5 +129,15 @@ public interface SimpleType extends SchemaType, HyperType {
 
     UnicodeString postprocess(UnicodeString input) throws ValidationException;
 
+    /**
+     * Ask whether this type only allows zero-length content
+     * @return true if this is a list type with a length or maxLength of zero, or an atomic type
+     * that restricts the content to be empty
+     */
+
+    default boolean isZeroLength() {
+        return false;
+    }
+
 }
 
