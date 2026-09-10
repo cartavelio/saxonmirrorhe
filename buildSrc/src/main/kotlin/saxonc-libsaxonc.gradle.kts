@@ -18,7 +18,7 @@ val saxonBuild = the<SaxonBuildExtension>()
 extension.package_name.convention(extension.edition.map { "SaxonC${it.uppercase()}" })
 extension.package_file_name.convention(extension.package_name.map { name ->
     val (os, arch) = saxonBuild.targetHost.get()
-    "${name}-${os}-${arch}-${saxonBuild.version.get().replace('.', '-')}"
+    "${name}-${os}-${arch}-${saxonBuild.hyphenatedVersion.get()}"
 })
 val saxonCCoreCMakePackageBucket by configurations.dependencyScope("saxonCCoreCMakePackageBucket")
 val saxonCCoreCMakePackageDir by configurations.resolvable("saxonCCoreCMakePackageDir") {
@@ -366,15 +366,15 @@ val exportHeaderTask = tasks.register("combined_export_header") {
 val sourceZipTask = tasks.register<Zip>("source_release_zip") {
     archiveBaseName = extension.package_name
     archiveAppendix = "source"
-    archiveVersion = saxonBuild.version
+    archiveVersion = saxonBuild.hyphenatedVersion
 
-    val topLevelDir = extension.package_name.map { name -> "${name}-${saxonBuild.version.get()}" }
+    val topLevelDir = extension.package_name.map { name -> "${name}-source-${saxonBuild.hyphenatedVersion.get()}" }
     into(topLevelDir)
 
     // C/C++/Java Sources
     from(layout.projectDirectory.dir("../src")) {
         into("src/main/c")
-        exclude("**/*.c.in")
+        exclude("**/*.c.in", "**/Gizmo.c")
     }
     from(saxonCCoreJavaSrcDir.elements.map { it.first() }) {
         into("src/main/java")

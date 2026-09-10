@@ -10,6 +10,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Nested
 import org.gradle.internal.os.OperatingSystem
 import java.io.BufferedReader
@@ -47,6 +48,12 @@ interface SaxonBuildExtension {
     abstract val dotnet: Property<String>
     abstract val dotnetversion: Property<String>
     abstract val macosx_min_version: Property<String>
+
+    val hyphenatedVersion: Provider<String?>
+        get() = version.map { version -> version.replace('.', '-') }
+
+    val hyphenatedPublishVersion: Provider<String?>
+        get() = publishVersion.map { version -> version.replace('.', '-') }
 
     fun findJar(configuration: Configuration, jarname: String): String {
         val jar = configuration.getFiles()
