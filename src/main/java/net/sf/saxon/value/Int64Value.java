@@ -10,7 +10,6 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -40,8 +39,13 @@ public final class Int64Value extends IntegerValue {
      * IntegerValue representing the value +1
      */
     public static final Int64Value PLUS_ONE = new Int64Value(+1);
+
     /**
-     * IntegerValue representing the maximum value for a long
+     * IntegerValue representing the maximum value for a 32-bit int
+     */
+    public static final Int64Value MAX_INT = new Int64Value(Integer.MAX_VALUE);
+    /**
+     * IntegerValue representing the maximum value for a 64-bit int
      */
     public static final Int64Value MAX_LONG = new Int64Value(Long.MAX_VALUE);
     /**
