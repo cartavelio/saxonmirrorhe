@@ -287,7 +287,8 @@ EndGlobal
             processor.</Description>
             <PackageReleaseNotes>SaxonCS-{$EDITION} conforms with the latest W3C
             specifications, XSLT 3.0, XQuery 3.1, and XPath 3.1. It aims to have
-            feature parity with our open source Saxon-HE product.</PackageReleaseNotes>
+            feature parity with our open source Saxon-HE product, subject to constraints
+            such as limitations in the Microsoft XML parser.</PackageReleaseNotes>
   </xsl:when>
   <xsl:otherwise>
     <xsl:message terminate="yes">Unrecognized edition: {$EDITION}</xsl:message>
