@@ -913,6 +913,24 @@ task graal_eec_jar(
 
     doLast {
       copy {
+        from "${projectDir}/src/main/c/pypi/python_saxon"
+        into "${buildDir}/${edition}c_pypi"
+        include "test_saxonc.py"
+      }
+    }
+
+    doLast {
+      copy {
+        from "${projectDir}/src/main/c/pypi/python_saxon"
+        into "${buildDir}/${edition}c_pypi/samples"
+        include "saxon_example.py"
+        include "saxon_example2.py"
+        include "saxon_example3.py"
+      }
+    }
+
+    doLast {
+      copy {
         from "${projectDir}/src/main/c/Saxon.C.API"
         into "${buildDir}/${edition}c_pypi/Saxon.C.API"
         include "SaxonProcessor.cpp"
