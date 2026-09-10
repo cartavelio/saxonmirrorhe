@@ -1,7 +1,15 @@
 using System;
+using System.IO.Packaging;
+using System.Reflection;
+using System.Text;
+using org.nineml.coffeefilter;
+using org.nineml.coffeefilter.documents;
 using Saxon.Hej;
+using Saxon.Hej.expr;
 using Saxon.Hej.expr.instruct;
+using Saxon.Hej.sapling;
 using Saxon.Impl.Overrides;
+using AttributeCollection = System.ComponentModel.AttributeCollection;
 using Version = System.Version;
 
 namespace Saxon.Cmd {
@@ -10,7 +18,8 @@ namespace Saxon.Cmd {
             if (args.Length == 0) {
                 Console.Error.WriteLine("Subcommand missing (query, transform, validate, help, ...)");
             }
-            else {
+            else
+            {
                 string subCommand = args[0];
                 string[] tail = new string[args.Length - 1];
                 Array.Copy(args, 1, tail, 0, tail.Length);

@@ -1,22 +1,23 @@
+using System.IO.Packaging;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Primitives;
 using Saxon.Ejava.net;
 using Saxon.Hej.str;
 using Saxon.Hej.z;
 using Sys = System;
 namespace Saxon.Impl.Helpers {
     public class UriUtils {
-        public static bool IsOpaque(System.Uri uri) {
+        public static bool IsOpaque(Sys.Uri uri) {
             // Javadoc: An opaque URI is an absolute URI whose scheme-specific part does not begin with a slash character ('/').
             //Sys.Console.Error.WriteLine("Uri.ISOpaque " + uri + " local path " + uri.LocalPath);
             return uri.IsAbsoluteUri && !(uri.LocalPath.StartsWith("/") || uri.LocalPath.StartsWith("\\") || uri.IsFile || uri.IsUnc);
         }
-        public static System.Uri Normalize(System.Uri uri) {
+        public static Sys.Uri Normalize(Sys.Uri uri) {
             return uri;
         }
 
-        public static string GetQuery(System.Uri uri) {
+        public static string GetQuery(Sys.Uri uri) {
             string q = uri.Query;
             if (q.StartsWith("?")) {
                 q = q[1..];
@@ -24,11 +25,11 @@ namespace Saxon.Impl.Helpers {
             if (q == "") {
                 return null;
             } else {
-                return System.Uri.UnescapeDataString(q);
+                return Sys.Uri.UnescapeDataString(q);
             }
         }
         
-        public static string GetFragment(System.Uri uri) {
+        public static string GetFragment(Sys.Uri uri) {
             string q = uri.Fragment;
             if (q.StartsWith("#")) {
                 q = q[1..];
@@ -36,13 +37,23 @@ namespace Saxon.Impl.Helpers {
             if (q == "") {
                 return null;
             } else {
-                return System.Uri.UnescapeDataString(q);
+                return Sys.Uri.UnescapeDataString(q);
             }
         }
 
-        public static System.Uri Build(string scheme,
-                string userInfo, string host, int port,
-                string path, string query, string fragment) {
+        public static Sys.Uri Build(string scheme, string host, string path, string? fragid) {
+            Sys.UriBuilder builder = new Sys.UriBuilder(scheme, host);
+            builder.Path = path;
+            if (fragid != null)
+            {
+                builder.Fragment = fragid;
+            }
+            return builder.Uri;
+        }
+        
+        public static Sys.Uri Build(string scheme,
+            string userInfo, string host, int port,
+            string path, string query, string fragment) {
             Sys.UriBuilder builder = new Sys.UriBuilder(scheme, host, port, path);
             builder.UserName = userInfo;
             builder.Query = query;
@@ -50,7 +61,7 @@ namespace Saxon.Impl.Helpers {
             return builder.Uri;
         }
         
-        public static Saxon.Ejava.net.URL ToURL(System.Uri uri) {
+        public static URL ToURL(Sys.Uri uri) {
             return new URL(uri);
         }
 
@@ -128,7 +139,7 @@ namespace Saxon.Impl.Helpers {
             return false;
         }
 
-        public static string EscapeFilePath(System.Uri s) {
+        public static string EscapeFilePath(Sys.Uri s) {
             StringBuilder builder = new();
             bool first = true;
             string input = s.ToString();
@@ -139,7 +150,7 @@ namespace Saxon.Impl.Helpers {
                 } else {
                     builder.Append('/');
                 }
-                builder.Append(System.Uri.EscapeDataString(part));
+                builder.Append(Sys.Uri.EscapeDataString(part));
             }
 
             return input.Substring(0, colon+1) + builder.ToString();
@@ -167,6 +178,25 @@ namespace Saxon.Impl.Helpers {
             }
 
             return sb.ToString();
+        }
+        
+        public static Sys.Uri ResourcePackUri(string path)
+        {
+            var uribuilder = new StringBuilder();
+            uribuilder.Append("application:///");
+
+            var asm = Assembly.GetExecutingAssembly();
+            var name = asm.GetName();
+            uribuilder.Append(name.Name);
+            if (name.Version != null)
+            {
+                uribuilder.Append(";").Append(name.Version);
+            }
+            uribuilder.Append(";component");
+            
+            var packBase = new Sys.Uri(uribuilder.ToString(), Sys.UriKind.Absolute);
+            var packPath = new Sys.Uri(path, Sys.UriKind.Relative);
+            return PackUriHelper.Create(packBase, packPath);
         }
     }
 }

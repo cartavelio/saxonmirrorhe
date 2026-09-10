@@ -387,8 +387,9 @@ namespace Saxon.Api {
         /// Get the element children of this node
         /// </summary>
         /// <returns> an <c>Iterable</c> containing all nodes on the child axis.</returns>
-        public IEnumerable<XdmNode> Children() {
-            return new SequenceEnumerable<XdmNode>(() => ((NodeInfo) value).iterateChildAxis(null));
+        public IEnumerable<XdmNode> Children()
+        {
+            return new SequenceEnumerable<XdmNode>(() => ((NodeInfo) value).iterateChildAxis(AnyGNode.TEST));
         }
 
         /// <summary>

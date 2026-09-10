@@ -37,9 +37,24 @@ namespace Saxon.Ejava.lang
             {
                 return SysIO.Path.DirectorySeparatorChar.ToString();
             }
+            else if (name == "os.name")
+            {
+                return Sys.Environment.OSVersion.VersionString;
+            }
             return Sys.Environment.GetEnvironmentVariable(name);
         }
 
+        public static string getProperty(string name, string defaultValue)
+        {
+            var value = getProperty(name);
+            if (value == null)
+            {
+                return defaultValue;
+            }
+
+            return value;
+        }
+        
         public static Saxon.Ejava.util.Properties getProperties() {
             return new Saxon.Ejava.util.Properties();
         }

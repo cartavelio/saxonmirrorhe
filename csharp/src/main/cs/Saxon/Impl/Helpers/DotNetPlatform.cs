@@ -1,53 +1,59 @@
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Impl.Helpers;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Xml;
-using SysCollGen = System.Collections.Generic;
+using Saxon.Callbacks;
 using Saxon.Ejava.lang;
+using Saxon.Ejava.net;
+using Saxon.Ejava.util;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
+using Saxon.Hej.expr;
+using Saxon.Hej.expr.parser;
+using Saxon.Hej.expr.sort;
 using Saxon.Hej.lib;
-using Saxon.Hej.pull;
-using Saxon.Callbacks;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
-using AngleSharp.Dom;
-using Saxon.Ejava.net;
-using XmlResolver.Features;
 using Saxon.Hej.om;
+using Saxon.Hej.pull;
+using Saxon.Hej.regex;
+using Saxon.Hej.resource;
+using Saxon.Hej.str;
 using Saxon.Hej.trans;
 using Saxon.Hej.type;
-using Type = System.Type;
-
+using Saxon.Impl.Overrides;
+using Exception = System.Exception;
 
 namespace Saxon.Impl.Helpers {
     
-    public class DotNetPlatform : Saxon.Hej.Platform {
-        private string resourceLocation;
+    public class DotNetPlatform : Platform {
+        private readonly string resourceLocation;
+        private readonly string resourceRootLocation;
         
         public DotNetPlatform() {
             // Allow access to all known encodings
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             // Establish the prefix to use for loading resources. There must be a better way, but this works.
-            System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
+            Assembly ass = Assembly.GetExecutingAssembly();
             var resourceNames = ass.GetManifestResourceNames();
             foreach (string name in resourceNames) {
                 if (name.EndsWith("casevariants.xml")) {
                     resourceLocation = name.Replace("casevariants.xml", "");
+                    resourceRootLocation = resourceLocation.Substring(0, resourceLocation.Length - "/net/sf/saxon/data/".Length);
                     break;
                 }
             }
         }
 
-        public void initialize(Saxon.Hej.Configuration config) {
+        public void initialize(Configuration config) {
             //config.setURIResolver(new StandardURIResolver(config, new StandardXmlResolver(config)));
             config.setCollectionFinder((cxt, uri) => 
-                new Saxon.Hej.resource.StandardCollectionFinder().findCollection(cxt, uri));
+                new StandardCollectionFinder().findCollection(cxt, uri));
             //config.setUnparsedTextURIResolver(new StandardUnparsedTextResolver(config).resolve);
-            config.setLocalizerFactory(new Saxon.Impl.Overrides.DotNetLocalizerFactory(config));
+            config.setLocalizerFactory(new DotNetLocalizerFactory(config));
         }
         
 
@@ -71,7 +77,7 @@ namespace Saxon.Impl.Helpers {
                 return "US";
             }
             else {
-                return new System.Globalization.RegionInfo(culture.Name).TwoLetterISORegionName;
+                return new RegionInfo(culture.Name).TwoLetterISORegionName;
             }
         }
 
@@ -101,7 +107,7 @@ namespace Saxon.Impl.Helpers {
         }
         
         public bool isWindows() {
-            return System.OperatingSystem.IsWindows();
+            return OperatingSystem.IsWindows();
         }
 
         public bool hasICUCollator() {
@@ -112,29 +118,29 @@ namespace Saxon.Impl.Helpers {
             return false;
         }
 
-        public Saxon.Hej.lib.StringCollator makeCollation(Saxon.Hej.Configuration config,
-                    Saxon.Ejava.util.Properties props, string uri) {
+        public StringCollator makeCollation(Configuration config,
+                    Properties props, string uri) {
             return DotNetCollationFactory.makeCollation(config, uri, props);
         }
 
-        public bool canReturnCollationKeys(Saxon.Hej.lib.StringCollator collation) {
+        public bool canReturnCollationKeys(StringCollator collation) {
             return true;
             //return collation is DotNetComparator || collation is Saxon.Hej.expr.sort.CodepointCollator;
         }
 
-        public Saxon.Hej.expr.sort.AtomicMatchKey getCollationKey(
-                Saxon.Hej.expr.sort.SimpleCollation namedCollation, string value) {
+        public AtomicMatchKey getCollationKey(
+                SimpleCollation namedCollation, string value) {
             // DotNetComparator c = (DotNetComparator) namedCollation.getComparator();
             // return c.getCollationKey(value);
             throw new NotImplementedException(); 
         }
 
-        public Saxon.Hej.lib.StringCollator makeUcaCollator(string uri, Saxon.Hej.Configuration config) {
+        public StringCollator makeUcaCollator(string uri, Configuration config) {
             return DotNetCollationFactory.makeCollation(config, uri, null);
         }
 
-        public Saxon.Hej.regex.RegularExpression compileRegularExpression(Saxon.Hej.Configuration config,
-            Saxon.Hej.str.UnicodeString regex, string flags, string hostLanguage, IList<string> warnings) {
+        public RegularExpression compileRegularExpression(Configuration config,
+            UnicodeString regex, string flags, string hostLanguage, IList<string> warnings) {
             var useJava = false;
             var useDotNet = false;
             var useSaxon = false;
@@ -157,28 +163,28 @@ namespace Saxon.Impl.Helpers {
 
             if (useJava) {
                 flags = flags.Substring(0, semi);
-                return new Saxon.Hej.regex.JavaRegularExpression(regex, flags);
+                return new JavaRegularExpression(regex, flags);
             }
             else {
                 if (useDotNet) {
                     flags = flags.Substring(0, semi);
-                    return new Saxon.Hej.regex.JavaRegularExpression(regex, flags);
+                    return new JavaRegularExpression(regex, flags);
                 }
                 else {
-                    return new Saxon.Hej.regex.ARegularExpression(regex, flags, hostLanguage, warnings, config);
+                    return new ARegularExpression(regex, flags, hostLanguage, warnings, config);
                 }
             }
         }
 
-        public Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, NamespaceUri uri,
+        public ExternalObjectType getExternalObjectType(Configuration config, NamespaceUri uri,
                     string localName) {
             // if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.DOT_NET_TYPE))
             //     return new DotNetExternalObjectType(System.Type.GetType(localName), config);
             // else
-                throw new Saxon.Ejava.lang.IllegalArgumentException("Type is not in .NET namespace");
+                throw new IllegalArgumentException("Type is not in .NET namespace");
         }
 
-        public string getInstallationDirectory(string edition, Saxon.Hej.Configuration config) {
+        public string getInstallationDirectory(string edition, Configuration config) {
             // RegistryKey[] bases = {Registry.LocalMachine, Registry.CurrentUser};
             // string[] paths = {"Software\\Saxonica\\Saxon", "Software\\Wow6432Node\\Saxonica\\Saxon"};
             // foreach (RegistryKey @base in bases)
@@ -196,22 +202,22 @@ namespace Saxon.Impl.Helpers {
             return null;
         }
 
-        public void registerAllBuiltInObjectModels(Saxon.Hej.Configuration config) {
+        public void registerAllBuiltInObjectModels(Configuration config) {
         }
 
-        public void setDefaultSAXParserFactory(Saxon.Hej.Configuration config) {
+        public void setDefaultSAXParserFactory(Configuration config) {
             // var editionCode = "he";
             // Saxon.Ejava.lang.System.setProperty("Saxon.Ejavax.xml.parsers.SAXParserFactory",
             //     "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon9" + editionCode + ", Version=" +
             //     Saxon.Hej.Version.getProductVersion() + ", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
         }
 
-        public bool JAXPStaticContextCheck(Saxon.Hej.expr.parser.RetainedStaticContext retainedStaticContext,
-            Saxon.Hej.expr.StaticContext sc) {
+        public bool JAXPStaticContextCheck(RetainedStaticContext retainedStaticContext,
+            StaticContext sc) {
             return false;
         }
 
-        public Saxon.Hej.lib.ModuleURIResolver makeStandardModuleURIResolver(Saxon.Hej.Configuration config) {
+        public ModuleURIResolver makeStandardModuleURIResolver(Configuration config) {
             return new StandardModuleURIResolver(config);
         }
 
@@ -220,7 +226,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public void showEmbeddedResources() {
-            System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
+            Assembly ass = Assembly.GetExecutingAssembly();
             var resourceNames = ass.GetManifestResourceNames();
             foreach (string name in resourceNames) {
                 Console.WriteLine("Resource: " + name);
@@ -228,7 +234,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public Stream locateResource(string filename, IList<string> messages) {
-            System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
+            Assembly ass = Assembly.GetExecutingAssembly();
             Stream firstAttempt = ass.GetManifestResourceStream(resourceLocation + filename);
             if (firstAttempt != null) {
                 //Console.Error.WriteLine("First attempt at " + filename + " worked");
@@ -251,6 +257,38 @@ namespace Saxon.Impl.Helpers {
             // see bug 5122. The second attempt is unnecessary if the Rider project has the embedded resources added
             // manually, but it does no harm so we'll keep the code:
             Stream secondAttempt = ass.GetManifestResourceStream(resourceLocation + filename.Replace('/', '.'));
+            if (secondAttempt != null) {
+                //Console.Error.WriteLine("Second attempt at " + filename + " worked");
+                return secondAttempt;
+            }
+
+            return null;
+        }
+
+        public Stream locateResourcePath(string path, IList<string> messages) {
+            Assembly ass = Assembly.GetExecutingAssembly();
+            Stream firstAttempt = ass.GetManifestResourceStream(resourceRootLocation + path);
+            if (firstAttempt != null) {
+                //Console.Error.WriteLine("First attempt at " + filename + " worked");
+                return firstAttempt;
+            }
+
+            if (OperatingSystem.IsWindows() && path.Contains("/")) {
+                // On Windows, if the filename contains a "/", it won't find the file.
+                // the filename has to use "\" as the separator.
+                string bspath = path.Replace("/", "\\");
+                firstAttempt = ass.GetManifestResourceStream(resourceRootLocation + bspath);
+                if (firstAttempt != null) {
+                    //Console.Error.WriteLine("First attempt at " + filename + " worked");
+                    return firstAttempt;
+                }
+            }
+            
+            // The second attempt is needed if the embedded resources have a logical name containing a "." rather than a "/"
+            // for the directory separator. This happens with embedded resources added to the project automatically by Rider:
+            // see bug 5122. The second attempt is unnecessary if the Rider project has the embedded resources added
+            // manually, but it does no harm so we'll keep the code:
+            Stream secondAttempt = ass.GetManifestResourceStream(resourceRootLocation + path.Replace('/', '.'));
             if (secondAttempt != null) {
                 //Console.Error.WriteLine("Second attempt at " + filename + " worked");
                 return secondAttempt;
@@ -309,7 +347,7 @@ namespace Saxon.Impl.Helpers {
                     try {
                         stream = new URL(new Uri(sysId)).openStream();
                     }
-                    catch (System.Exception e) {
+                    catch (Exception e) {
                         throw new XPathException("Unable to retrieve URI " + sysId);
                     }
                     xmlReader = XmlReader.Create(stream, settings,source.getSystemId());
@@ -332,7 +370,7 @@ namespace Saxon.Impl.Helpers {
             return null;
         }
         
-        public static System.Xml.XmlResolver getXmlResolverFromResourceResolver(Saxon.Hej.lib.JJ_ResourceResolver resourceResolver) {
+        public static System.Xml.XmlResolver getXmlResolverFromResourceResolver(JJ_ResourceResolver resourceResolver) {
             if (resourceResolver is CatalogResourceResolver catalogResolver) {
                 return catalogResolver.GetEntityResolver().GetXmlResolver();
             }
@@ -340,8 +378,6 @@ namespace Saxon.Impl.Helpers {
             return new XmlResolverWrappingResourceResolver(resourceResolver);
         }
     }
-    
-    
 
     public class TracingXmlResolver : XmlUrlResolver {
         private readonly Uri baseUri;

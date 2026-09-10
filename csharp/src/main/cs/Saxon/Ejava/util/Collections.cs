@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using Saxon.Eej.ee.schema;
 using SysCollGen = System.Collections.Generic;
 namespace Saxon.Ejava.util
 {
@@ -42,7 +44,28 @@ namespace Saxon.Ejava.util
                 c.add(extra);
             }
         }
-        
+
+        public static ImmutableHashSet<T> unmodifiableSet<T>(Collection<T> c)
+        {
+            var theset = ImmutableHashSet<T>.Empty;
+            foreach (T item in c)
+            {
+                theset = theset.Add(item);
+            }
+            return theset;
+        }
+
+        public static ImmutableDictionary<K,V> unmodifiableMap<K,V>(SysCollGen.Dictionary<K,V> c)
+        {
+            var dict = ImmutableDictionary<K,V>.Empty;
+            foreach (var item in c)
+            {
+                dict = dict.Add(item.Key, item.Value);
+            }
+            return dict;
+        }
+
+
         public static bool disjoint<T>(SysCollGen.ISet<T> a, SysCollGen.ISet<T> b)
         // More restrictive than the JDK method, but adequate for our purposes
         {

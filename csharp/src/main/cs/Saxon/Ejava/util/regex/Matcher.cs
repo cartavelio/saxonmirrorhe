@@ -17,9 +17,15 @@ namespace Saxon.Ejava.util.regex {
             this.regex = regex;
             this.input = input;
         }
+
         public bool matches() {
             latestMatch = regex.Match(input, 0);
             return latestMatch.Success && latestMatch.Length == input.Length;
+        }
+
+        public bool lookingAt() {
+            latestMatch = regex.Match(input, 0);
+            return latestMatch.Success;
         }
 
         public bool find() {

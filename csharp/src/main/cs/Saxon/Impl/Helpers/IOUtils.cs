@@ -1,4 +1,5 @@
 using System;
+using System.IO.Compression;
 using System.Text;
 using Saxon.Ejava.lang;
 
@@ -29,6 +30,12 @@ namespace Saxon.Impl.Helpers {
                 bytes = binaryReader.ReadBytes((int)stream.Length);
             }
             return bytes;
+        }
+        
+        public static string gzipInput(System.IO.Stream stream) {
+            var decompressor = new GZipStream(stream, CompressionMode.Decompress);
+            var reader = new System.IO.StreamReader(decompressor);
+            return reader.ReadToEnd();
         }
     }
 }

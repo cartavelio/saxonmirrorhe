@@ -38,6 +38,11 @@ namespace Saxon.Ejava.net {
             return uri;
         }
 
+        public override string ToString()
+        {
+            return uri.ToString();
+        }
+
         public System.IO.Stream openStream() {
             // This is heavily based on code borrowed from xmlresolvercs/XmlResolver/ResourceAccess.cs 
             switch (uri.Scheme) {
