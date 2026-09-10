@@ -167,10 +167,10 @@ public class PriorityTests {
     
     @Test
     public void testPriority020() {
-        testPriority("jnode(*, *)[?x = 2]", 0.5);
-        testPriority("jnode(*, *)", -1);
+        testPriority("jnode(*)[?x = 2]", 0.5);
+        testPriority("jnode(*)", -1);
         testPriority("jnode(*, item()*)", -1);
-        testPriority("jnode('xxx', *)", 0);
+        testPriority("jnode('xxx')", 0);
         testPriority("jnode('xxx', item()*)", 0);
         testPriority("jnode(*, xs:integer)", 0);
         testPriority("jnode('xxx', xs:integer)", 0.25);
@@ -184,12 +184,12 @@ public class PriorityTests {
 
     @Test
     public void testPriority021() {
-        testPriority("array(*)[?x = 2]", 0.5);
-        testPriority("array(*)", 0);
-        testPriority("array(xs:integer)", 0);
-        testPriority("map(*)[?x = 2]", 0.5);
-        testPriority("map(*)", 0);
-        testPriority("map(xs:integer, xs:boolean)", 0);
+        testPriority("~array(*)[?x = 2]", 0.5);
+        testPriority("~array(*)", 0);
+        testPriority("~array(xs:integer)", 0);
+        testPriority("~map(*)[?x = 2]", 0.5);
+        testPriority("~map(*)", 0);
+        testPriority("~map(xs:integer, xs:boolean)", 0);
     }
 
     @Test
