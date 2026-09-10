@@ -1,7 +1,7 @@
 package net.sf.saxon.test.xdmfixtures;
 
 import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 
@@ -15,7 +15,7 @@ public class MapBuilder implements BuilderDsl {
     }
 
     public static MapItem empty() {
-        return new HashTrieMap();
+        return EmptyMap.getInstance();
     }
 
     @Override
