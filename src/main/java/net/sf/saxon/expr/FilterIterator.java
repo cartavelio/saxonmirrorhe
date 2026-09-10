@@ -150,40 +150,5 @@ public class FilterIterator implements SequenceIterator {
         base.close();
     }
 
-
-    /**
-     * Subclass to handle the common special case where it is statically known
-     * that the filter cannot return a numeric value
-     */
-
-    public static final class NonNumeric extends FilterIterator {
-
-        /**
-         * Create a CompiledFilterIterator for the situation where it is known that the filter
-         * expression will never evaluate to a number value. For this case we can simply
-         * use the effective boolean value of the predicate
-         *
-         * @param base    iterator over the sequence to be filtered
-         * @param filter  the filter expression
-         * @param context the current context (for evaluating the filter expression as a whole).
-         *                A new context will be created to evaluate the predicate.
-         */
-
-        public NonNumeric(SequenceIterator base, Expression filter,
-                          XPathContext context) {
-            super(base, filter, context);
-        }
-
-        /**
-         * Determine whether the context item matches the filter predicate
-         */
-
-        @Override
-        protected boolean matches() throws XPathException {
-            return this.filter.effectiveBooleanValue(this.filterContext);
-        }
-
-    }
-
 }
 
