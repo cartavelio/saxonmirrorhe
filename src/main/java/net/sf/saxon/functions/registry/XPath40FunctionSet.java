@@ -196,7 +196,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("parcel", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("parse-html", 1, e -> e.populate(ParseHtml::new, NodeKindTest.DOCUMENT, ONE, 0)
+        register("parse-html", 1, e -> e.populate(ParseHtml::new, NodeKindTest.DOCUMENT, ONE, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
