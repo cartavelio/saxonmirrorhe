@@ -333,8 +333,7 @@ public final class GNodeSequenceConverter extends UnaryExpression {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        out.startElement("treat", this);
-        out.emitAttribute("as", AlphaCode.fromItemType(AnyGNodeType.getInstance()));
+        out.startElement("coerceToGNode", this);
         out.emitAttribute("diag", roleSupplier.get().save());
         getBaseExpression().export(out);
         out.endElement();

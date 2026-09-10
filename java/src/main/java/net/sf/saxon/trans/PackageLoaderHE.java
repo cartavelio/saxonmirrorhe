@@ -7,6 +7,7 @@
 
 package net.sf.saxon.trans;
 
+import com.saxonica.trans.XSLRecord;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CheckSumFilter;
 import net.sf.saxon.event.FilterFactory;
@@ -69,6 +70,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.GNodeSequenceConverter;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.NamedXNodeType;
@@ -710,15 +712,24 @@ public class PackageLoaderHE implements IPackageLoader {
                 NamedXNodeType.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "arg", config));
         NodeInfo argElement;
         int slot = 0;
+        int optionalArgs = 0;
         while ((argElement = (NodeInfo) argIterator.next()) != null) {
             UserFunctionParameter arg = new UserFunctionParameter();
             arg.setVariableQName(getQNameAttribute(argElement, "name"));
             arg.setRequiredType(parseAlphaCode(argElement, "as"));
             arg.setSlotNumber(slot++);
+            Expression dflt = getFirstChildExpression(argElement);
+            if (dflt != null) {
+                arg.setDefaultValueExpression(() -> dflt);
+                optionalArgs++;
+            }
             params.add(arg);
             localBindings.push(arg);
         }
         function.setParameterDefinitions(params.toArray(new UserFunctionParameter[0]));
+        if (optionalArgs > 0) {
+            function.setMinimumArity(params.size() - optionalArgs);
+        }
         if (streaming) {
             params.get(0).setFunctionStreamability(function.getDeclaredStreamability());
         }
@@ -1881,6 +1892,7 @@ public class PackageLoaderHE implements IPackageLoader {
             CallableFunction fn = switch (tag) {
                 case "onDuplicatesFail" -> XPathParser.mapConstructorDuplicatesAction;
                 case "xslMapOnDuplicates" -> XSLMap.mapConstructorDuplicatesAction;
+                case "mapConstructorDuplicatesAction" -> XSLRecord.mapConstructorDuplicatesAction;
                 default -> throw new IllegalStateException("Unknown tag: " + tag);
             };
             return Literal.makeLiteral(fn);
@@ -2009,6 +2021,13 @@ public class PackageLoaderHE implements IPackageLoader {
                 throw new AssertionError();
             }
             return Literal.makeLiteral(coercedFn);
+        });
+
+        eMap.put("coerceToGNode", (loader, element) -> {
+            Expression body = loader.getFirstChildExpression(element);
+            String savedRole = element.getAttributeValue(NamespaceUri.NULL, "diag");
+            Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(savedRole);
+            return new GNodeSequenceConverter(body, role);
         });
 
 
@@ -2521,7 +2540,7 @@ public class PackageLoaderHE implements IPackageLoader {
             return new IdentityComparison(lhs, OperatorSymbol.FOLLOWS, rhs);
         });
 
-        eMap.put("followsOrIs", (loader, element) -> {
+        eMap.put("follows-or-is", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             return new IdentityComparison(lhs, OperatorSymbol.FOLLOWS_OR_IS, rhs);
@@ -3193,7 +3212,7 @@ public class PackageLoaderHE implements IPackageLoader {
             return new IdentityComparison(lhs, OperatorSymbol.PRECEDES, rhs);
         });
 
-        eMap.put("precedesOrIs", (loader, element) -> {
+        eMap.put("precedes-or-is", (loader, element) -> {
             Expression lhs = loader.getFirstChildExpression(element);
             Expression rhs = loader.getSecondChildExpression(element);
             return new IdentityComparison(lhs, OperatorSymbol.PRECEDES_OR_IS, rhs);

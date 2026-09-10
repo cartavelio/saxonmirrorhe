@@ -11,10 +11,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.registry.FunctionDefinition;
@@ -871,6 +868,10 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
             presenter.startElement("arg");
             presenter.emitAttribute("name", p.getVariableQName());
             presenter.emitAttribute("as", p.getRequiredType().toAlphaCode());
+            Supplier<Expression> def = p.getDefaultValueExpression();
+            if (def != null && def.get() != null) {
+                def.get().export(presenter);
+            }
             presenter.endElement();
         }
         presenter.setChildRole("body");

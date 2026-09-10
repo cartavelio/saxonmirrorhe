@@ -1030,7 +1030,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
     private boolean isExportable(String testName) {
         // there are so few exceptions that we hard-code them
         return !(testName.equals("load-xquery-module-004")      // static variable calling fn:load-xquery-module
-                         || testName.equals("transform-004"));  // static variable calling fn:transform
+                         || testName.equals("transform-004")    // static variable calling fn:transform
+                         || testName.equals("try-044")          // format of stack trace after error
+                         || testName.equals("try-046"));        // format of stack trace after error
     }
 
     protected XsltExecutable exportStylesheet(String testName, String testSetName, XsltCompiler compiler, XsltExecutable sheet, Source styleSource) throws SaxonApiException {

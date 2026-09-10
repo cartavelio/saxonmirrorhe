@@ -45,7 +45,7 @@ public class AtomicSortComparer implements AtomicComparer {
      *                 time, this should be a SimpleCollation so that it can be cloned at run-time.
      * @param itemType the primitive item type of the values to be compared
      * @param specVersion the XPath language version
-     * @param context  Dynamic context (may be an EarlyEvaluationContext)
+     * @param context  Dynamic context (this may be an EarlyEvaluationContext)
      * @return a suitable AtomicComparer
      */
 

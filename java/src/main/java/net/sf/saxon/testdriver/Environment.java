@@ -258,6 +258,9 @@ public class Environment implements ResourceResolver {
         if (needsLicense && "EE".equals(driver.driverProc.getSaxonEdition()) /*xpc.isSchemaAware()*/) {
             XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
             environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
+            if (environment.xsdSchema != null) {
+                environment.xsltCompiler.setSchemaAware(true);
+            }
         }
 
         // set up the sandpit, if there is one
@@ -324,7 +327,7 @@ public class Environment implements ResourceResolver {
             String fileName = stylesheet.attribute("file");
             Source styleSource = new StreamSource(env.getBaseURI().resolve(fileName).toString());
             try {
-                if (driver.export) {
+                if (driver.export && !environment.schemaAware) {  // TODO: remove this condition
                     if (driver.runWithJS) {
                         String sourceFile = env.getBaseURI().resolve(fileName).toString();
                         environment.exportedStylesheet = driver.exportStylesheet(environment.xsltCompiler, sourceFile);

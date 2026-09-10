@@ -658,13 +658,13 @@ public class ExpressionPresenter {
         for (int i = 0; i < in.length(); i++) {
             char c = in.charAt(i);
             if (c == '\\') {
-                c = in.charAt(i++);
+                c = in.charAt(++i);
                 switch (c) {
                     case '\'':
                     case '\\':
                     case '/':
                     case '"':
-                        sb.append("'");
+                        sb.append(c);
                         break;
                     case 'b':
                         sb.append("\b");

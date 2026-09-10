@@ -45,8 +45,8 @@ public class CallableFunction extends AbstractFunction {
         this.type = type;
     }
 
-    public CallableFunction withDescription(String decription) {
-        this.description = decription;
+    public CallableFunction withDescription(String description) {
+        this.description = description;
         return this;
     }
 
